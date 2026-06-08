@@ -27,6 +27,9 @@ const VALID_ROLES = new Set([
   "viewer",
 ]);
 
+// Donos do sistema: sempre admin ativos, nunca podem ser bloqueados/removidos.
+const OWNER_EMAILS = new Set(["gabrielkomercial@gmail.com"]);
+
 type WorkflowMember = {
   id: string;
   email: string;
@@ -90,6 +93,38 @@ async function getContext(request: Request) {
         .select("*")
         .single();
       member = updated.data ?? member;
+    }
+  }
+
+  // Proteção de dono: garante sempre admin ativo (nunca trava o fundador para fora).
+  if (OWNER_EMAILS.has(email)) {
+    if (member) {
+      if (!member.active || member.role !== "admin" || !member.user_id) {
+        const fixed = await db
+          .from("workflowark_members")
+          .update({ active: true, role: "admin", user_id: user.id })
+          .eq("id", member.id)
+          .select("*")
+          .single();
+        member = fixed.data ?? { ...member, active: true, role: "admin" };
+      }
+    } else {
+      const up = await db
+        .from("workflowark_members")
+        .upsert(
+          {
+            email,
+            user_id: user.id,
+            full_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? "Gabriel Andrade",
+            role: "admin",
+            active: true,
+            created_by: user.id,
+          },
+          { onConflict: "email" },
+        )
+        .select("*")
+        .single();
+      member = up.data;
     }
   }
 
