@@ -31,15 +31,31 @@ export const Route = createFileRoute("/api/auth/signup")({
           user_metadata: { full_name },
         });
 
+        let user = created?.user;
+
         if (cErr) {
           const msg = String(cErr.message ?? "");
           if (/already|exist|registered|duplicate/i.test(msg)) {
-            return json({ error: "Este e-mail já tem uma conta. Use \"Entrar\"." }, { status: 409 });
+            // Pode ser uma conta "presa" (criada antes, nunca confirmada). Tenta consertar.
+            const { data: list } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+            const found = (list?.users ?? []).find(
+              (u: any) => String(u.email ?? "").toLowerCase() === email,
+            );
+            if (found && !found.email_confirmed_at) {
+              // Conta nunca confirmada: confirma e redefine a senha informada agora.
+              const { data: upd } = await db.auth.admin.updateUserById(found.id, {
+                password,
+                email_confirm: true,
+                user_metadata: { full_name },
+              });
+              user = upd?.user ?? found;
+            } else {
+              return json({ error: "Este e-mail já tem uma conta. Use \"Entrar\"." }, { status: 409 });
+            }
+          } else {
+            return json({ error: "Não foi possível criar a conta. Tente novamente." }, { status: 500 });
           }
-          return json({ error: "Não foi possível criar a conta. Tente novamente." }, { status: 500 });
         }
-
-        const user = created?.user;
 
         // Primeiro usuário do sistema vira admin ativo; os demais ficam pendentes de liberação pelo gestor.
         const { count } = await db

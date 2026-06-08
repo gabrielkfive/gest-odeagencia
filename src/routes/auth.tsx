@@ -121,10 +121,10 @@ function AuthPage() {
           <span className="ax-logo-sub">CONTENT</span>
         </div>
         <h1 className="ax-h1">
-          Seja bem-vindo ao quartel-general da <span className="hl">maior agência de marketing gastronômico do Brasil</span>.
+          Seja bem-vindo ao centro de comando da <span className="hl">maior agência de marketing do Brasil</span>.
         </h1>
         <p className="ax-quote">
-          Trabalhar na ARK não é brincadeira. É método, ritmo e resultado — todo santo dia.
+          Trabalhar na ARK não é brincadeira. É método, ritmo e resultado, todo santo dia.
         </p>
         <div className="ax-badges">
           <span>15+ clientes ativos</span>
