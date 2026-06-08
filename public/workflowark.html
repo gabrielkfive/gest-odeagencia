@@ -467,10 +467,10 @@ table.t tr.high{background:var(--yel-bg)}
     </nav>
 
     <div class="side-foot">
-      <div class="av">G</div>
+      <div class="av" id="side-av">·</div>
       <div class="info">
-        <div class="nm">Gabriel Andrade</div>
-        <div class="rl">CEO · admin</div>
+        <div class="nm" id="side-nm">Carregando…</div>
+        <div class="rl" id="side-rl">—</div>
       </div>
       <div class="ico" title="Configurações" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
       <div class="ico" title="Sair" onclick="window.parent.postMessage({type:'wfa-sair'},'*')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
@@ -485,7 +485,7 @@ table.t tr.high{background:var(--yel-bg)}
       </div>
       <div class="tb-right">
         <div class="tb-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar..."></div>
-        <span class="tb-pill">Junho · 2026</span>
+        <span class="tb-pill" id="tb-month">Junho · 2026</span>
         <button class="tb-btn" onclick="openNovaTarefa()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova tarefa</button>
       </div>
     </div>
@@ -1393,7 +1393,7 @@ function applyCloudState(remote){
   state.regua=JSON.parse(localStorage.getItem('wfa-regua')||'{}');
   const jornada=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
   if(jornada&&typeof jornada==='object')SPRINTS.forEach(sp=>{sp.clis=jornada[sp.n]||[];});
-  renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();
+  renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();
   if(typeof renderCrm==='function')renderCrm();
   if(typeof renderAgenda==='function')renderAgenda();
   if(typeof renderComercialMes==='function')renderComercialMes();
@@ -1820,6 +1820,48 @@ function iniciarAutoSync(){
   </div>
 </div>
 
+<!-- =================== CONFIGURAÇÕES =================== -->
+<div class="modal-bg" id="modal-settings">
+  <div class="modal" style="max-width:660px">
+    <style>
+      .set-row{display:grid;grid-template-columns:1.4fr .95fr auto auto;gap:7px;align-items:center;margin-bottom:9px}
+      .set-row .set-em{grid-column:1/-1;font-size:9.5px;color:var(--mute);font-family:var(--mono);margin-top:-5px}
+      .set-act{font-size:11px;color:var(--mute);display:flex;align-items:center;gap:4px;white-space:nowrap}
+      .set-sect-t{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);font-family:var(--mono)}
+    </style>
+    <div class="modal-head">
+      <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>Configurações</h3>
+      <span class="x" onclick="closeModal('modal-settings')">✕</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Seu nome de exibição</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="set-myname" list="set-people" placeholder="Ex: Gabriel Andrade" style="flex:1">
+          <button class="tb-btn" onclick="salvarMeuNome()">Salvar nome</button>
+        </div>
+        <datalist id="set-people"></datalist>
+        <p class="muted" style="font-size:10.5px;margin-top:6px">Use o mesmo nome que aparece nas tarefas (campo "responsável") para o "Meu Dia" reconhecer as suas atividades.</p>
+      </div>
+
+      <div id="set-team-wrap" style="display:none;margin-top:20px;border-top:1px solid var(--line);padding-top:16px">
+        <div class="set-sect-t" style="margin-bottom:10px">Equipe · acessos <span style="color:var(--yel-d)">(admin)</span></div>
+        <div id="set-team-list"></div>
+        <p class="muted" style="font-size:10.5px;margin-top:8px">Edite o nome e o papel de cada conta. O nome liga a conta às tarefas no "Meu Dia". Desmarcar "ativo" bloqueia o acesso da pessoa.</p>
+      </div>
+
+      <div style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px">
+        <div class="set-sect-t" style="margin-bottom:10px">Dados de demonstração</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="icobtn" onclick="popularExemplos()">+ Popular tarefas de exemplo</button>
+          <button class="icobtn" style="color:var(--red)" onclick="removerExemplos()">Remover exemplos</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="icobtn" onclick="closeModal('modal-settings')">Fechar</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
 <script>
@@ -2164,6 +2206,101 @@ function renderMeuDia(){
       </div>`).join(''):'<div class="md-empty" style="color:#a8a8a4">Sem tarefas atribuídas ainda.</div>';
   }else if(wrap){wrap.style.display='none';}
 }
+
+/* ============ IDENTIDADE / MÊS ============ */
+const ROLE_LABEL={admin:'CEO · Admin',gestor:'Gestor',financeiro:'Financeiro',operacao:'Operação',comercial:'Comercial',marketing:'Marketing',viewer:'Visualização'};
+const MD_PEOPLE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Maria Luiza','Bruno','Saulo','Henrique','Nicolas','Luckas Gomes','Giuseppe','Márcio','Kaique'];
+function renderIdentity(){
+  const m=WFA_MEMBER;
+  const nm=m&&m.full_name?m.full_name:(m&&m.email?m.email.split('@')[0]:'Sem nome');
+  const rl=m?(ROLE_LABEL[m.role]||m.role||'Membro'):'—';
+  const av=document.getElementById('side-av');if(av)av.textContent=mdInitial(nm);
+  const n=document.getElementById('side-nm');if(n)n.textContent=nm;
+  const r=document.getElementById('side-rl');if(r)r.textContent=rl;
+}
+function renderMonthPill(){
+  const el=document.getElementById('tb-month');if(!el)return;
+  const d=new Date();const mes=d.toLocaleDateString('pt-BR',{month:'long'});
+  el.textContent=mes.charAt(0).toUpperCase()+mes.slice(1)+' · '+d.getFullYear();
+}
+
+/* ============ CONFIGURAÇÕES ============ */
+function openSettings(){
+  const dl=document.getElementById('set-people');
+  if(dl)dl.innerHTML=MD_PEOPLE.map(n=>`<option value="${mdEsc(n)}">`).join('');
+  const inp=document.getElementById('set-myname');
+  if(inp)inp.value=(WFA_MEMBER&&WFA_MEMBER.full_name)?WFA_MEMBER.full_name:'';
+  renderSettingsTeam();
+  document.getElementById('modal-settings').classList.add('open');
+}
+function renderSettingsTeam(){
+  const wrap=document.getElementById('set-team-wrap');
+  const isAdmin=WFA_MEMBER&&WFA_MEMBER.role==='admin';
+  if(!isAdmin){if(wrap)wrap.style.display='none';return;}
+  wrap.style.display='';
+  const roles=['admin','gestor','comercial','operacao','marketing','financeiro','viewer'];
+  const list=document.getElementById('set-team-list');
+  list.innerHTML=(WFA_MEMBERS||[]).map(m=>`
+    <div class="set-row" data-id="${mdEsc(m.id)}">
+      <input class="form-input set-nm" value="${mdEsc(m.full_name||'')}" placeholder="Nome" list="set-people">
+      <select class="form-select set-rl">${roles.map(r=>`<option value="${r}" ${m.role===r?'selected':''}>${ROLE_LABEL[r]||r}</option>`).join('')}</select>
+      <label class="set-act"><input type="checkbox" class="set-ac" ${m.active?'checked':''}> ativo</label>
+      <button class="icobtn" onclick="salvarMembro('${mdEsc(m.id)}')">Salvar</button>
+      <div class="set-em">${mdEsc(m.email||'')}</div>
+    </div>`).join('')||'<p class="muted" style="font-size:11px">Nenhum membro cadastrado ainda.</p>';
+}
+async function salvarMeuNome(){
+  const inp=document.getElementById('set-myname');const nome=(inp.value||'').trim();
+  if(!nome){toast('Informe um nome');return;}
+  try{
+    await cloudCall('save',{action:'set-my-name',full_name:nome});
+    if(WFA_MEMBER)WFA_MEMBER.full_name=nome;
+    renderIdentity();renderMeuDia();
+    toast('✓ Nome salvo');
+  }catch(e){toast('⚠ '+(e.message||'Erro ao salvar nome'));}
+}
+async function salvarMembro(id){
+  const row=document.querySelector('.set-row[data-id="'+id+'"]');if(!row)return;
+  const full_name=row.querySelector('.set-nm').value.trim();
+  const role=row.querySelector('.set-rl').value;
+  const active=row.querySelector('.set-ac').checked;
+  try{
+    await cloudCall('save',{action:'update-member',id,full_name,role,active});
+    const m=(WFA_MEMBERS||[]).find(x=>x.id===id);if(m){m.full_name=full_name;m.role=role;m.active=active;}
+    if(WFA_MEMBER&&WFA_MEMBER.id===id){WFA_MEMBER.full_name=full_name;WFA_MEMBER.role=role;renderIdentity();}
+    renderMeuDia();
+    toast('✓ Membro atualizado');
+  }catch(e){toast('⚠ '+(e.message||'Erro ao atualizar'));}
+}
+
+/* ============ TAREFAS DE EXEMPLO ============ */
+function popularExemplos(){
+  const base=new Date();
+  const d=off=>new Date(base.getTime()+off*86400000).toISOString().split('T')[0];
+  const ex=[
+    {title:'Aprovar planejamento de junho · Vivenda',funcao:'Account Manager',clienteId:'vivenda',resp:'Gabriel Andrade',data:d(0),prio:'alta',status:'andamento'},
+    {title:'Fechar proposta comercial · lead REGIONAL',funcao:'Account Manager',clienteId:'',resp:'Gabriel Andrade',data:d(0),prio:'alta',status:'backlog'},
+    {title:'Revisar caixa e repasses do mês',funcao:'Account Manager',clienteId:'',resp:'Gabriel Andrade',data:d(2),prio:'media',status:'backlog'},
+    {title:'Reunião mensal Cachu',funcao:'Account Manager',clienteId:'cachu',resp:'Lucas Rosi',data:d(-1),prio:'alta',status:'andamento'},
+    {title:'Otimização de campanha · ROAS baixo',funcao:'Gestor de Tráfego',clienteId:'fercon',resp:'Danilo de Lima',data:d(-2),prio:'alta',status:'andamento'},
+    {title:'Onboarding novo cliente · acessos',funcao:'Gestor de Tráfego',clienteId:'',resp:'Danilo de Lima',data:d(1),prio:'media',status:'backlog'},
+    {title:'Kit criativo inicial',funcao:'Designer',clienteId:'lunnas',resp:'Maria Luiza',data:d(0),prio:'media',status:'backlog'},
+    {title:'Roteiro de captação 25/06',funcao:'Captação',clienteId:'vivenda',resp:'Bruno',data:d(3),prio:'baixa',status:'backlog'},
+    {title:'Prospecção de rotas · 5 diagnósticos',funcao:'Account Manager',clienteId:'',resp:'Saulo',data:d(-1),prio:'alta',status:'andamento'},
+    {title:'Editar vídeos da semana',funcao:'Editor',clienteId:'',resp:'Luckas Gomes',data:d(0),prio:'media',status:'aprovacao'},
+  ];
+  let n=0;ex.forEach((e,i)=>{state.tarefas.push(Object.assign({id:'ex-'+Date.now()+'-'+i,sprintN:null,criadaEm:new Date().toISOString(),_ex:true},e));n++;});
+  saveTarefas();renderMeuDia();
+  toast('✓ '+n+' tarefas de exemplo adicionadas');
+}
+function removerExemplos(){
+  const before=state.tarefas.length;
+  state.tarefas=state.tarefas.filter(t=>!t._ex&&!String(t.id||'').startsWith('ex-'));
+  const removed=before-state.tarefas.length;
+  saveTarefas();renderMeuDia();
+  toast(removed?('✓ '+removed+' exemplos removidos'):'Nenhum exemplo para remover');
+}
+
 function renderTarefas(){
   ['backlog','andamento','aprovacao','concluido'].forEach(st=>{
     const list=document.querySelector(`[data-list="${st}"]`);if(!list)return;
@@ -2311,8 +2448,8 @@ if(state.tarefas.length===0){
 }
 
 /* Meu Dia: render inicial + auto-atualização a cada minuto */
-try{renderMeuDia();}catch(e){console.warn('renderMeuDia',e);}
-setInterval(()=>{try{renderMeuDia();}catch(e){}},60000);
+try{renderMonthPill();renderIdentity();renderMeuDia();}catch(e){console.warn('renderMeuDia',e);}
+setInterval(()=>{try{renderMonthPill();renderMeuDia();}catch(e){}},60000);
 
 /* ============ HELPERS ============ */
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}

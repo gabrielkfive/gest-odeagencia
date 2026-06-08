@@ -194,9 +194,21 @@ export const Route = createFileRoute("/api/workflowark/state")({
           const patch: Record<string, unknown> = {};
           if (VALID_ROLES.has(String(body.role))) patch.role = String(body.role);
           if (typeof body.active === "boolean") patch.active = body.id === ctx.member.id ? true : body.active;
+          if (typeof body.full_name === "string") patch.full_name = body.full_name.trim() || null;
           const { error } = await ctx.db.from("workflowark_members").update(patch).eq("id", id);
           if (error) return json({ error: "Não foi possível atualizar o acesso." }, { status: 500 });
           return json({ ok: true });
+        }
+
+        if (action === "set-my-name") {
+          const full_name = String(body.full_name ?? "").trim();
+          if (!full_name) return json({ error: "Informe um nome." }, { status: 400 });
+          const { error } = await ctx.db
+            .from("workflowark_members")
+            .update({ full_name })
+            .eq("id", ctx.member.id);
+          if (error) return json({ error: "Não foi possível salvar o nome." }, { status: 500 });
+          return json({ ok: true, full_name });
         }
 
         return json({ error: "Ação inválida" }, { status: 400 });
