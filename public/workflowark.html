@@ -1393,7 +1393,7 @@ function applyCloudState(remote){
   state.regua=JSON.parse(localStorage.getItem('wfa-regua')||'{}');
   const jornada=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
   if(jornada&&typeof jornada==='object')SPRINTS.forEach(sp=>{sp.clis=jornada[sp.n]||[];});
-  renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();
+  renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();
   if(typeof renderCrm==='function')renderCrm();
   if(typeof renderAgenda==='function')renderAgenda();
   if(typeof renderComercialMes==='function')renderComercialMes();
@@ -1824,38 +1824,71 @@ function iniciarAutoSync(){
 <div class="modal-bg" id="modal-settings">
   <div class="modal" style="max-width:660px">
     <style>
-      .set-row{display:grid;grid-template-columns:1.4fr .95fr auto auto;gap:7px;align-items:center;margin-bottom:9px}
-      .set-row .set-em{grid-column:1/-1;font-size:9.5px;color:var(--mute);font-family:var(--mono);margin-top:-5px}
+      .set-tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 0 16px;flex-wrap:wrap}
+      .set-tab{background:none;border:none;padding:8px 13px;font-size:12.5px;font-weight:600;color:var(--mute);cursor:pointer;border-bottom:2px solid transparent;border-radius:0;font-family:var(--sans)}
+      .set-tab:hover{color:var(--ink)}
+      .set-tab.active{color:var(--ink);border-bottom-color:var(--yel)}
+      .set-pane{display:none}.set-pane.active{display:block}
+      .set-row{display:grid;grid-template-columns:1.3fr .85fr auto auto auto;gap:7px;align-items:center;margin-bottom:9px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 10px}
+      .set-row .set-em{grid-column:1/-1;font-size:9.5px;color:var(--mute);font-family:var(--mono);margin-top:-3px}
       .set-act{font-size:11px;color:var(--mute);display:flex;align-items:center;gap:4px;white-space:nowrap}
       .set-sect-t{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);font-family:var(--mono)}
+      .set-accbtn{font-size:10.5px;color:var(--yel-d);background:#fff;border:1px solid var(--line);border-radius:6px;padding:5px 8px;cursor:pointer;font-weight:700;white-space:nowrap}
+      .set-acc{grid-column:1/-1;background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:4px;display:none}
+      .set-row.open .set-acc{display:block}
+      .set-acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:4px 10px;margin-top:7px}
+      .set-acc-grid label{font-size:11px;color:var(--txt);display:flex;align-items:center;gap:5px;cursor:pointer}
+      .set-merow{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:14px}
+      .set-meta-line{font-size:11px;color:var(--mute);font-family:var(--mono);margin-top:4px}
     </style>
     <div class="modal-head">
       <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>Configurações</h3>
       <span class="x" onclick="closeModal('modal-settings')">✕</span>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Seu nome de exibição</label>
-        <div style="display:flex;gap:8px">
-          <input class="form-input" id="set-myname" list="set-people" placeholder="Ex: Gabriel Andrade" style="flex:1">
-          <button class="tb-btn" onclick="salvarMeuNome()">Salvar nome</button>
+      <div class="set-tabs">
+        <button class="set-tab active" data-st="perfil" onclick="setTab('perfil')">Perfil</button>
+        <button class="set-tab" data-st="equipe" id="set-tab-equipe" onclick="setTab('equipe')" style="display:none">Equipe &amp; Acessos</button>
+        <button class="set-tab" data-st="conta" onclick="setTab('conta')">Conta</button>
+      </div>
+
+      <!-- PERFIL -->
+      <div class="set-pane active" data-stp="perfil">
+        <div class="set-merow">
+          <div id="set-me-nm" style="font-size:14px;font-weight:700;color:var(--ink)">—</div>
+          <div class="set-meta-line" id="set-me-meta">—</div>
         </div>
-        <datalist id="set-people"></datalist>
-        <p class="muted" style="font-size:10.5px;margin-top:6px">Use o mesmo nome que aparece nas tarefas (campo "responsável") para o "Meu Dia" reconhecer as suas atividades.</p>
+        <div class="form-group">
+          <label class="form-label">Seu nome de exibição</label>
+          <div style="display:flex;gap:8px">
+            <input class="form-input" id="set-myname" list="set-people" placeholder="Ex: Gabriel Andrade" style="flex:1">
+            <button class="tb-btn" onclick="salvarMeuNome()">Salvar nome</button>
+          </div>
+          <datalist id="set-people"></datalist>
+          <p class="muted" style="font-size:10.5px;margin-top:6px">Use o mesmo nome que aparece nas tarefas (campo "responsável") para o "Meu Dia" reconhecer as suas atividades.</p>
+        </div>
       </div>
 
-      <div id="set-team-wrap" style="display:none;margin-top:20px;border-top:1px solid var(--line);padding-top:16px">
-        <div class="set-sect-t" style="margin-bottom:10px">Equipe · acessos <span style="color:var(--yel-d)">(admin)</span></div>
+      <!-- EQUIPE & ACESSOS (admin) -->
+      <div class="set-pane" data-stp="equipe">
+        <div class="set-sect-t" style="margin-bottom:4px">Membros da equipe</div>
+        <p class="muted" style="font-size:10.5px;margin-bottom:13px">Defina o <strong>nome</strong>, o <strong>papel</strong> e <strong>quais abas</strong> cada pessoa enxerga (botão "Abas"). Desmarcar "ativo" bloqueia o acesso.</p>
         <div id="set-team-list"></div>
-        <p class="muted" style="font-size:10.5px;margin-top:8px">Edite o nome e o papel de cada conta. O nome liga a conta às tarefas no "Meu Dia". Desmarcar "ativo" bloqueia o acesso da pessoa.</p>
       </div>
 
-      <div style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px">
-        <div class="set-sect-t" style="margin-bottom:10px">Dados de demonstração</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <!-- CONTA -->
+      <div class="set-pane" data-stp="conta">
+        <div class="set-sect-t" style="margin-bottom:9px">Sincronização &amp; sessão</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+          <button class="icobtn" onclick="try{sincronizarAgora()}catch(e){}">↻ Sincronizar agora</button>
+          <button class="icobtn" style="color:var(--red)" onclick="window.parent.postMessage({type:'wfa-sair'},'*')">Sair da conta</button>
+        </div>
+        <div class="set-sect-t" style="margin-bottom:9px">Dados de demonstração</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
           <button class="icobtn" onclick="popularExemplos()">+ Popular tarefas de exemplo</button>
           <button class="icobtn" style="color:var(--red)" onclick="removerExemplos()">Remover exemplos</button>
         </div>
+        <div class="set-meta-line">WorkFlowArk · ARK Content · v3</div>
       </div>
     </div>
     <div class="modal-foot"><button class="icobtn" onclick="closeModal('modal-settings')">Fechar</button></div>
@@ -2210,6 +2243,49 @@ function renderMeuDia(){
 /* ============ IDENTIDADE / MÊS ============ */
 const ROLE_LABEL={admin:'CEO · Admin',gestor:'Gestor',financeiro:'Financeiro',operacao:'Operação',comercial:'Comercial',marketing:'Marketing',viewer:'Visualização'};
 const MD_PEOPLE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Maria Luiza','Bruno','Saulo','Henrique','Nicolas','Luckas Gomes','Giuseppe','Márcio','Kaique'];
+
+/* ============ CONTROLE DE ACESSO (RBAC) ============ */
+const NAV_CATALOG=[
+  {k:'dashboard',l:'Meu Dia'},{k:'reunioes',l:'Reuniões · Agenda'},
+  {k:'lista-clientes',l:'Lista de Clientes'},{k:'jornada',l:'Jornada · Sprints'},{k:'regua',l:'Régua dos 15'},
+  {k:'tarefas',l:'Tarefas'},{k:'demandas',l:'Demandas'},{k:'rotinas',l:'Rotinas'},
+  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'comercial',l:'Comercial'},
+  {k:'crm',l:'CRM · Pipeline'},
+  {k:'organograma',l:'Organograma'},{k:'pops',l:'POPs por Função'},{k:'processos',l:'Processos'},
+  {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},
+];
+const _ALL_NAV=NAV_CATALOG.map(s=>s.k);
+const _BASE_NAV=['dashboard','reunioes','agenda','organograma','pops','processos','meumes'];
+const ROLE_ACCESS={
+  admin:_ALL_NAV, gestor:_ALL_NAV,
+  comercial:_BASE_NAV.concat(['comercial','crm','lista-clientes','jornada','regua','tarefas']),
+  operacao:_BASE_NAV.concat(['tarefas','rotinas','demandas','lista-clientes','jornada','regua','campanhas','okrs']),
+  marketing:_BASE_NAV.concat(['tarefas','demandas','lista-clientes','campanhas']),
+  financeiro:_BASE_NAV.concat(['financeiro','campanhas']),
+  viewer:_BASE_NAV,
+};
+function roleAccessList(role){return ROLE_ACCESS[role]||ROLE_ACCESS.viewer;}
+function memberAccess(m){
+  const acc={};
+  if(!m){_ALL_NAV.forEach(k=>acc[k]=true);return acc;}
+  const allow=roleAccessList(m.role);
+  _ALL_NAV.forEach(k=>acc[k]=allow.includes(k));
+  const ov=m.permissions&&m.permissions.nav;
+  if(ov&&typeof ov==='object')Object.keys(ov).forEach(k=>{if(k in acc)acc[k]=!!ov[k];});
+  if(m.role==='admin')_ALL_NAV.forEach(k=>acc[k]=true);
+  return acc;
+}
+function applyAccess(){
+  const acc=memberAccess(WFA_MEMBER);
+  document.querySelectorAll('[data-nav]').forEach(el=>{const k=el.dataset.nav;if(!(k in acc))return;el.style.display=acc[k]===false?'none':'';});
+  document.querySelectorAll('.subnav').forEach(sub=>{
+    const anyVis=[...sub.querySelectorAll('[data-nav]')].some(el=>el.style.display!=='none');
+    const parent=sub.previousElementSibling;
+    if(parent&&parent.hasAttribute('data-toggle'))parent.style.display=anyVis?'':'none';
+  });
+  const ap=document.querySelector('.page.active');
+  if(ap){const id=ap.id.replace('page-','');if(acc[id]===false){const d=document.querySelector('[data-nav="dashboard"]');d&&d.click();}}
+}
 function renderIdentity(){
   const m=WFA_MEMBER;
   const nm=m&&m.full_name?m.full_name:(m&&m.email?m.email.split('@')[0]:'Sem nome');
@@ -2225,29 +2301,51 @@ function renderMonthPill(){
 }
 
 /* ============ CONFIGURAÇÕES ============ */
+function setTab(name){
+  document.querySelectorAll('#modal-settings .set-tab').forEach(b=>b.classList.toggle('active',b.dataset.st===name));
+  document.querySelectorAll('#modal-settings .set-pane').forEach(p=>p.classList.toggle('active',p.dataset.stp===name));
+}
 function openSettings(){
   const dl=document.getElementById('set-people');
   if(dl)dl.innerHTML=MD_PEOPLE.map(n=>`<option value="${mdEsc(n)}">`).join('');
   const inp=document.getElementById('set-myname');
   if(inp)inp.value=(WFA_MEMBER&&WFA_MEMBER.full_name)?WFA_MEMBER.full_name:'';
+  const m=WFA_MEMBER;
+  const nmEl=document.getElementById('set-me-nm');if(nmEl)nmEl.textContent=m&&m.full_name?m.full_name:'Sem nome definido';
+  const meta=document.getElementById('set-me-meta');if(meta)meta.textContent=(m?(ROLE_LABEL[m.role]||m.role||'Membro'):'—')+(m&&m.email?' · '+m.email:'');
+  setTab('perfil');
   renderSettingsTeam();
   document.getElementById('modal-settings').classList.add('open');
 }
 function renderSettingsTeam(){
-  const wrap=document.getElementById('set-team-wrap');
   const isAdmin=WFA_MEMBER&&WFA_MEMBER.role==='admin';
-  if(!isAdmin){if(wrap)wrap.style.display='none';return;}
-  wrap.style.display='';
+  const tabBtn=document.getElementById('set-tab-equipe');
+  if(tabBtn)tabBtn.style.display=isAdmin?'':'none';
+  if(!isAdmin)return;
   const roles=['admin','gestor','comercial','operacao','marketing','financeiro','viewer'];
   const list=document.getElementById('set-team-list');
-  list.innerHTML=(WFA_MEMBERS||[]).map(m=>`
-    <div class="set-row" data-id="${mdEsc(m.id)}">
+  list.innerHTML=(WFA_MEMBERS||[]).map(m=>{
+    const acc=memberAccess(m);
+    const checks=NAV_CATALOG.map(s=>`<label><input type="checkbox" class="acc-ck" data-k="${s.k}" ${acc[s.k]?'checked':''} ${m.role==='admin'?'disabled':''}> ${mdEsc(s.l)}</label>`).join('');
+    return `<div class="set-row" data-id="${mdEsc(m.id)}">
       <input class="form-input set-nm" value="${mdEsc(m.full_name||'')}" placeholder="Nome" list="set-people">
-      <select class="form-select set-rl">${roles.map(r=>`<option value="${r}" ${m.role===r?'selected':''}>${ROLE_LABEL[r]||r}</option>`).join('')}</select>
+      <select class="form-select set-rl" onchange="onRoleChange('${mdEsc(m.id)}')">${roles.map(r=>`<option value="${r}" ${m.role===r?'selected':''}>${ROLE_LABEL[r]||r}</option>`).join('')}</select>
       <label class="set-act"><input type="checkbox" class="set-ac" ${m.active?'checked':''}> ativo</label>
+      <button class="set-accbtn" type="button" onclick="toggleAcc('${mdEsc(m.id)}')">Abas ▾</button>
       <button class="icobtn" onclick="salvarMembro('${mdEsc(m.id)}')">Salvar</button>
       <div class="set-em">${mdEsc(m.email||'')}</div>
-    </div>`).join('')||'<p class="muted" style="font-size:11px">Nenhum membro cadastrado ainda.</p>';
+      <div class="set-acc">
+        <div style="font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Abas visíveis ${m.role==='admin'?'· admin vê tudo':''}</div>
+        <div class="set-acc-grid">${checks}</div>
+      </div>
+    </div>`;
+  }).join('')||'<p class="muted" style="font-size:11px">Nenhum membro cadastrado ainda.</p>';
+}
+function toggleAcc(id){const r=document.querySelector('.set-row[data-id="'+id+'"]');if(r)r.classList.toggle('open');}
+function onRoleChange(id){
+  const r=document.querySelector('.set-row[data-id="'+id+'"]');if(!r)return;
+  const role=r.querySelector('.set-rl').value;const allow=roleAccessList(role);
+  r.querySelectorAll('.acc-ck').forEach(ck=>{ck.checked=role==='admin'?true:allow.includes(ck.dataset.k);ck.disabled=(role==='admin');});
 }
 async function salvarMeuNome(){
   const inp=document.getElementById('set-myname');const nome=(inp.value||'').trim();
@@ -2264,10 +2362,12 @@ async function salvarMembro(id){
   const full_name=row.querySelector('.set-nm').value.trim();
   const role=row.querySelector('.set-rl').value;
   const active=row.querySelector('.set-ac').checked;
+  const nav={};row.querySelectorAll('.acc-ck').forEach(ck=>{nav[ck.dataset.k]=ck.checked;});
+  const permissions={nav};
   try{
-    await cloudCall('save',{action:'update-member',id,full_name,role,active});
-    const m=(WFA_MEMBERS||[]).find(x=>x.id===id);if(m){m.full_name=full_name;m.role=role;m.active=active;}
-    if(WFA_MEMBER&&WFA_MEMBER.id===id){WFA_MEMBER.full_name=full_name;WFA_MEMBER.role=role;renderIdentity();}
+    await cloudCall('save',{action:'update-member',id,full_name,role,active,permissions});
+    const m=(WFA_MEMBERS||[]).find(x=>x.id===id);if(m){m.full_name=full_name;m.role=role;m.active=active;m.permissions=permissions;}
+    if(WFA_MEMBER&&WFA_MEMBER.id===id){WFA_MEMBER.full_name=full_name;WFA_MEMBER.role=role;WFA_MEMBER.permissions=permissions;renderIdentity();applyAccess();}
     renderMeuDia();
     toast('✓ Membro atualizado');
   }catch(e){toast('⚠ '+(e.message||'Erro ao atualizar'));}
@@ -2448,7 +2548,7 @@ if(state.tarefas.length===0){
 }
 
 /* Meu Dia: render inicial + auto-atualização a cada minuto */
-try{renderMonthPill();renderIdentity();renderMeuDia();}catch(e){console.warn('renderMeuDia',e);}
+try{renderMonthPill();renderIdentity();renderMeuDia();applyAccess();}catch(e){console.warn('renderMeuDia',e);}
 setInterval(()=>{try{renderMonthPill();renderMeuDia();}catch(e){}},60000);
 
 /* ============ HELPERS ============ */

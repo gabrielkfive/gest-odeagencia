@@ -195,6 +195,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           if (VALID_ROLES.has(String(body.role))) patch.role = String(body.role);
           if (typeof body.active === "boolean") patch.active = body.id === ctx.member.id ? true : body.active;
           if (typeof body.full_name === "string") patch.full_name = body.full_name.trim() || null;
+          if (body.permissions && typeof body.permissions === "object") patch.permissions = body.permissions;
           const { error } = await ctx.db.from("workflowark_members").update(patch).eq("id", id);
           if (error) return json({ error: "Não foi possível atualizar o acesso." }, { status: 500 });
           return json({ ok: true });
