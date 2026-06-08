@@ -11,4 +11,12 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    build: {
+      rollupOptions: {
+        // Provided by the Cloudflare Workers runtime; keep as a runtime import.
+        external: ["cloudflare:workers"],
+      },
+    },
+  },
 });

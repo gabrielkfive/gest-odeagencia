@@ -3,11 +3,23 @@
 // Use this for admin operations in server functions and server routes only.
 // For user-authenticated queries (with RLS), use the auth middleware instead.
 import { createClient } from '@supabase/supabase-js';
+import { env as cfEnv } from 'cloudflare:workers';
 import type { Database } from './types';
 
+function readEnv(name: string): string | undefined {
+  // 1) Cloudflare Workers native env binding (vars + secrets) — reliable in production,
+  //    independent of whether process.env was populated by the runtime.
+  const fromCf = (cfEnv as Record<string, string | undefined>)?.[name];
+  if (fromCf) return fromCf;
+  // 2) Standard Node/process env — fallback for local dev.
+  const fromProcess = typeof process !== 'undefined' ? process.env?.[name] : undefined;
+  if (fromProcess) return fromProcess;
+  return undefined;
+}
+
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const SUPABASE_URL = readEnv("SUPABASE_URL");
+  const SUPABASE_SERVICE_ROLE_KEY = readEnv("SUPABASE_SERVICE_ROLE_KEY");
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [

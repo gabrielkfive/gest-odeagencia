@@ -24,6 +24,9 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Backups locais (cópias da versão funcionando)
+_BACKUP*/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
