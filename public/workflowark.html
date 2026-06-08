@@ -1829,7 +1829,7 @@ function iniciarAutoSync(){
       .set-tab:hover{color:var(--ink)}
       .set-tab.active{color:var(--ink);border-bottom-color:var(--yel)}
       .set-pane{display:none}.set-pane.active{display:block}
-      .set-row{display:grid;grid-template-columns:1.3fr .85fr auto auto auto;gap:7px;align-items:center;margin-bottom:9px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 10px}
+      .set-row{display:grid;grid-template-columns:1.25fr .8fr auto auto auto auto;gap:7px;align-items:center;margin-bottom:9px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 10px}
       .set-row .set-em{grid-column:1/-1;font-size:9.5px;color:var(--mute);font-family:var(--mono);margin-top:-3px}
       .set-act{font-size:11px;color:var(--mute);display:flex;align-items:center;gap:4px;white-space:nowrap}
       .set-sect-t{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);font-family:var(--mono)}
@@ -2333,6 +2333,7 @@ function renderSettingsTeam(){
       <label class="set-act"><input type="checkbox" class="set-ac" ${m.active?'checked':''}> ativo</label>
       <button class="set-accbtn" type="button" onclick="toggleAcc('${mdEsc(m.id)}')">Abas ▾</button>
       <button class="icobtn" onclick="salvarMembro('${mdEsc(m.id)}')">Salvar</button>
+      <button class="set-accbtn" type="button" title="Remover membro" style="color:var(--red);border-color:#f3b4b4" onclick="removerMembro('${mdEsc(m.id)}')">✕</button>
       <div class="set-em">${mdEsc(m.email||'')}</div>
       <div class="set-acc">
         <div style="font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Abas visíveis ${m.role==='admin'?'· admin vê tudo':''}</div>
@@ -2371,6 +2372,15 @@ async function salvarMembro(id){
     renderMeuDia();
     toast('✓ Membro atualizado');
   }catch(e){toast('⚠ '+(e.message||'Erro ao atualizar'));}
+}
+async function removerMembro(id){
+  if(!confirm('Remover este membro? A conta de acesso dele também será apagada.'))return;
+  try{
+    await cloudCall('save',{action:'remove-member',id});
+    WFA_MEMBERS=(WFA_MEMBERS||[]).filter(x=>x.id!==id);
+    renderSettingsTeam();renderMeuDia();
+    toast('✓ Membro removido');
+  }catch(e){toast('⚠ '+(e.message||'Erro ao remover'));}
 }
 
 /* ============ TAREFAS DE EXEMPLO ============ */

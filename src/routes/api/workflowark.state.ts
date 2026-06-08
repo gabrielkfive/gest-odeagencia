@@ -109,8 +109,30 @@ async function getContext(request: Request) {
     member = created.data;
   }
 
+  // Usuário autenticado sem cadastro: registra como pendente (inativo) para o gestor liberar.
+  if (!member) {
+    const created = await db
+      .from("workflowark_members")
+      .insert({
+        email,
+        user_id: user.id,
+        full_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+        role: "viewer",
+        active: false,
+        created_by: user.id,
+      })
+      .select("*")
+      .single();
+    member = created.data;
+  }
+
   if (!member || !member.active) {
-    return { error: json({ error: "Seu e-mail ainda não foi liberado no WorkFlowArk." }, { status: 403 }) };
+    return {
+      error: json(
+        { error: "Sua conta foi criada e está aguardando liberação do gestor.", pending: true },
+        { status: 403 },
+      ),
+    };
   }
 
   return { db, user, member: member as WorkflowMember, isAdmin: member.role === "admin" };
@@ -198,6 +220,23 @@ export const Route = createFileRoute("/api/workflowark/state")({
           if (body.permissions && typeof body.permissions === "object") patch.permissions = body.permissions;
           const { error } = await ctx.db.from("workflowark_members").update(patch).eq("id", id);
           if (error) return json({ error: "Não foi possível atualizar o acesso." }, { status: 500 });
+          return json({ ok: true });
+        }
+
+        if (action === "remove-member") {
+          if (!ctx.isAdmin) return json({ error: "Apenas admin pode remover acessos." }, { status: 403 });
+          const id = String(body.id ?? "");
+          if (id === ctx.member.id) return json({ error: "Você não pode remover a si mesmo." }, { status: 400 });
+          const { data: m } = await ctx.db
+            .from("workflowark_members")
+            .select("user_id")
+            .eq("id", id)
+            .maybeSingle();
+          const { error } = await ctx.db.from("workflowark_members").delete().eq("id", id);
+          if (error) return json({ error: "Não foi possível remover o membro." }, { status: 500 });
+          if (m?.user_id) {
+            try { await ctx.db.auth.admin.deleteUser(m.user_id); } catch { /* ignore */ }
+          }
           return json({ ok: true });
         }
 
