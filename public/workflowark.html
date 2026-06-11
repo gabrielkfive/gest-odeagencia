@@ -1356,7 +1356,7 @@ table.t tr.high{background:var(--yel-bg)}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -1472,6 +1472,7 @@ function applyCloudState(remote){
   state.planilha=JSON.parse(localStorage.getItem('wfa-planilha')||'null');
   state.whatsapp=JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}');
   state.notificacoes=JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]');
+  state.planejamento=JSON.parse(localStorage.getItem('wfa-planejamento')||'{}');
   state.gcal=JSON.parse(localStorage.getItem('wfa-gcal')||'{}');
   const jornada=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
   if(jornada&&typeof jornada==='object')SPRINTS.forEach(sp=>{sp.clis=jornada[sp.n]||[];});
@@ -2478,6 +2479,7 @@ let state = {
   planilha: JSON.parse(localStorage.getItem('wfa-planilha')||'null'),
   whatsapp: JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}'),
   notificacoes: JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]'),
+  planejamento: JSON.parse(localStorage.getItem('wfa-planejamento')||'{}'),
   gcal: JSON.parse(localStorage.getItem('wfa-gcal')||'{}'),
   currentSprint: null,
   currentCliente: null,
@@ -2506,6 +2508,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(sub) sub.previousElementSibling?.classList.add('active');
     document.getElementById('page-'+p)?.classList.add('active');
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
+    if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
     document.querySelector('.view').scrollTo(0,0);
@@ -3588,6 +3591,35 @@ async function rotGerar(){
 function rotCopiar(){const t=document.getElementById('rot-out').textContent||'';navigator.clipboard?.writeText(t).then(()=>toast('Roteiros copiados'),()=>toast('Não consegui copiar'));}
 /* ============ PLANEJAMENTO DE CONTEÚDO ============ */
 let _planIdeias=[];let _planCliente='';let _planView='cal';
+// Plano concreto da Vivenda (cronograma da Copa + produtos) — carrega de exemplo se nao houver plano salvo.
+const PLAN_SEED_VIVENDA={cliente:'Farmácia Vivenda',periodo:'Junho 2026 · Copa + novos produtos',ideias:[
+  {data:'2026-06-11',dia:'Qui 11/06',formato:'Reels',tema:'Série Copa · Vídeo 1 (cinematográfico)',produto:'Campanha Copa',angulo:'Abertura épica da campanha: conecta a Vivenda ao espírito de torcida e bem-estar. Tom cinematográfico, gancho nos 3s.',legenda:'A Copa começou — e a Vivenda tá junto. 🇧🇷'},
+  {data:'2026-06-12',dia:'Sex 12/06',formato:'Reels',tema:'Vídeo com influenciador · Copa',produto:'Campanha Copa',angulo:'Influenciador local entra no clima de Copa com a Vivenda — prova social, leve e real.',legenda:'Quem entende de bem-estar já tá no clima. 👀'},
+  {data:'2026-06-13',dia:'Sáb 13/06',formato:'Foto',tema:'Dia de jogo do Brasil',produto:'Campanha Copa',angulo:'Post temático de torcida no dia do jogo — marca presente, próxima do bairro.',legenda:'Hoje é dia de Brasil! 💛💚 Bora torcer com saúde.'},
+  {data:'2026-06-15',dia:'Seg 15/06',formato:'Reels',tema:'Série Copa · Vídeo 2 (reforços)',produto:'Campanha Copa',angulo:'Os reforços entram em campo: influenciadores Leila, Renan e Esté pela Vivenda. Energia e prova social.',legenda:'Os reforços chegaram. 🔥'},
+  {data:'2026-06-16',dia:'Ter 16/06',formato:'Reels',tema:'Creme de Ureia 10% · a hidratação que resolve',produto:'Creme de Ureia 10%',angulo:'Clima seco de Brasília + super promoção (estoque girando = urgência). Mostra textura/antes-e-depois. "Menos promessa, mais acompanhamento".',legenda:'Pele de Brasília pede ureia 10%. E tá em promoção. 👀'},
+  {data:'2026-06-18',dia:'Qui 18/06',formato:'Reels',tema:'NAC · aquela ajuda na época de Copa',produto:'NAC',angulo:'Influenciadora, bem-humorado e leve: NAC como apoio antioxidante/fígado nessa época de comemorar. SEM prometer milagre.',legenda:'Comemorou demais? O NAC dá aquela força. 🍻➡️💪'},
+  {data:'2026-06-20',dia:'Sáb 20/06',formato:'Carrossel',tema:'Cafeína Vivenda · pra render mais',produto:'Cafeína',angulo:'Manual de bolso sobre performance/treino pro público fitness de Brasília. Autoridade acessível.',legenda:'Seu treino merece um up. ☕'},
+  {data:'',dia:'Semana que vem',formato:'Foto',tema:'Captação na Farmácia Vivenda (bastidores)',produto:'Novos produtos',angulo:'Gravar na farmácia os novos produtos (creme de ureia, NAC, cafeína), mostrando laboratório e diferenciais. Vira matéria-prima da semana.',legenda:'Tem coisa boa sendo gravada. 🎥'},
+]};
+function planKey(n){const s=String(n||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');if(s.includes('vivenda'))return 'vivenda';return s.replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'cliente';}
+function planSalvar(cliente,periodo,ideias){
+  state.planejamento=state.planejamento||{};
+  state.planejamento[planKey(cliente)]={cliente,periodo,ideias,updatedAt:Date.now()};
+  try{localStorage.setItem('wfa-planejamento',JSON.stringify(state.planejamento));}catch(e){}
+}
+function planOpen(){
+  if(_planIdeias.length)return; // ja tem algo na tela
+  const saved=state.planejamento||{};
+  let pick=saved.vivenda;
+  if(!pick){const ks=Object.keys(saved);if(ks.length)pick=ks.map(k=>saved[k]).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];}
+  if(!pick)pick=PLAN_SEED_VIVENDA;
+  const ci=document.getElementById('pl-cliente'),pi=document.getElementById('pl-periodo');
+  if(ci&&!ci.value)ci.value=pick.cliente||'';
+  if(pi&&!pi.value)pi.value=pick.periodo||'';
+  _planIdeias=pick.ideias||[];_planCliente=pick.cliente||'';
+  if(_planIdeias.length){const v=document.getElementById('pl-views');if(v)v.style.display='flex';const e=document.getElementById('pl-empty');if(e)e.style.display='none';planRender();}
+}
 async function planGerar(){
   const cliente=(document.getElementById('pl-cliente').value||'').trim();
   const periodo=(document.getElementById('pl-periodo').value||'este mês').trim();
@@ -3601,6 +3633,7 @@ async function planGerar(){
     const ideias=(r&&r.ideias)||[];
     if(!ideias.length){if(empty){empty.style.display='';empty.textContent='Não consegui montar agora. Tenta de novo dando mais detalhes do período/foco.';}if(st)st.textContent='';return;}
     _planIdeias=ideias;_planCliente=cliente;
+    planSalvar(cliente,periodo,ideias);
     document.getElementById('pl-views').style.display='flex';
     if(empty)empty.style.display='none';
     planRender();
