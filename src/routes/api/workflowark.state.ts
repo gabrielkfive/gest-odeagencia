@@ -343,6 +343,43 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        if (action === "agente-planejamento") {
+          const cliente = String(body.cliente ?? "").trim();
+          const periodo = String(body.periodo ?? "este mês").trim();
+          const foco = String(body.foco ?? "").trim();
+          const qtd = Math.min(Math.max(parseInt(String(body.qtd ?? "8"), 10) || 8, 3), 16);
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const key = zapiEnv("ANTHROPIC_API_KEY");
+          if (!key) return json({ error: "IA não configurada." }, { status: 500 });
+          const { clienteBrief } = await import("@/integrations/clientes");
+          const brief = clienteBrief(cliente);
+          const sys = [
+            "Você é o PLANEJADOR DE CONTEÚDO sênior da ARK Content (agência de marketing em Brasília). Monta o calendário de conteúdo de redes sociais (Instagram/TikTok) de um cliente — pensando como dono de agência: realista, vendedor, conectado ao momento do cliente. NÃO genérico.",
+            "Cada ideia deve ter um ÂNGULO/gancho específico (não 'poste sobre o produto X', e sim a abordagem que para o scroll). Varie formatos (Reels, Carrossel, Story, Foto). Conecte com datas/contexto quando fizer sentido.",
+            "Responda SOMENTE com um JSON válido (nada fora dele): um objeto {\"ideias\":[...]}. Cada ideia: {\"dia\":\"ex: Seg 16/06 ou 'Semana 1'\",\"formato\":\"Reels|Carrossel|Story|Foto\",\"tema\":\"título curto e específico\",\"produto\":\"produto/serviço foco ou ''\",\"angulo\":\"o gancho/abordagem em 1 frase\",\"legenda\":\"primeira linha da legenda, no tom da marca\"}.",
+            brief ? "CONTEXTO REAL DO CLIENTE (use de verdade — pessoas, produtos, tom, plano):\n" + brief : "",
+          ].filter(Boolean).join("\n");
+          const user = `Cliente: ${cliente || "(varejo genérico)"} · Período: ${periodo}${foco ? " · Foco especial: " + foco : ""}\nMonte ${qtd} ideias de conteúdo para o período, em JSON.`;
+          try {
+            const r = await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+              body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3000, system: sys, messages: [{ role: "user", content: user }] }),
+            });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            let raw: string = data?.content?.[0]?.text || "";
+            raw = raw.replace(/```json|```/g, "").trim();
+            const m = raw.match(/\{[\s\S]*\}/);
+            let ideias: any[] = [];
+            if (m) { try { ideias = JSON.parse(m[0])?.ideias || []; } catch { ideias = []; } }
+            if (!Array.isArray(ideias)) ideias = [];
+            return json({ ideias, text: raw });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao montar o planejamento." }, { status: 502 });
+          }
+        }
+
         if (action === "agente-vivenda") {
           const prompt = String(body.prompt ?? "").trim();
           if (!prompt) return json({ error: "Escreva o que você quer pedir ao agente." }, { status: 400 });
