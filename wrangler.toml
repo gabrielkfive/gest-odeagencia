@@ -17,3 +17,7 @@ VITE_SUPABASE_PROJECT_ID = "fxfnonozzekxnxddxsnh"
 
 # SUPABASE_SERVICE_ROLE_KEY é um segredo — será configurado via:
 # wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+
+# Cloudflare Workers AI — transcrição de áudio do WhatsApp (Whisper)
+[ai]
+binding = "AI"

@@ -16,6 +16,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiIaRouteImport } from './routes/api/ia'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
+import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowark.sheet'
+import { Route as ApiWorkflowarkAiCheckRouteImport } from './routes/api/workflowark.ai-check'
+import { Route as ApiAuthSignupRouteImport } from './routes/api/auth.signup'
+import { Route as ApiWorkflowarkWhatsappWebhookRouteImport } from './routes/api/workflowark.whatsapp.webhook'
+import { Route as ApiWorkflowarkWhatsappSendRouteImport } from './routes/api/workflowark.whatsapp.send'
 
 const SistemaRoute = SistemaRouteImport.update({
   id: '/sistema',
@@ -51,6 +56,33 @@ const ApiWorkflowarkStateRoute = ApiWorkflowarkStateRouteImport.update({
   path: '/api/workflowark/state',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWorkflowarkSheetRoute = ApiWorkflowarkSheetRouteImport.update({
+  id: '/api/workflowark/sheet',
+  path: '/api/workflowark/sheet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWorkflowarkAiCheckRoute = ApiWorkflowarkAiCheckRouteImport.update({
+  id: '/api/workflowark/ai-check',
+  path: '/api/workflowark/ai-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSignupRoute = ApiAuthSignupRouteImport.update({
+  id: '/api/auth/signup',
+  path: '/api/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWorkflowarkWhatsappWebhookRoute =
+  ApiWorkflowarkWhatsappWebhookRouteImport.update({
+    id: '/api/workflowark/whatsapp/webhook',
+    path: '/api/workflowark/whatsapp/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiWorkflowarkWhatsappSendRoute =
+  ApiWorkflowarkWhatsappSendRouteImport.update({
+    id: '/api/workflowark/whatsapp/send',
+    path: '/api/workflowark/whatsapp/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -58,7 +90,12 @@ export interface FileRoutesByFullPath {
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
+  '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
+  '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
+  '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
+  '/api/workflowark/whatsapp/webhook': typeof ApiWorkflowarkWhatsappWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -66,7 +103,12 @@ export interface FileRoutesByTo {
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
+  '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
+  '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
+  '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
+  '/api/workflowark/whatsapp/webhook': typeof ApiWorkflowarkWhatsappWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -76,7 +118,12 @@ export interface FileRoutesById {
   '/sistema': typeof SistemaRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
+  '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
+  '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
+  '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
+  '/api/workflowark/whatsapp/webhook': typeof ApiWorkflowarkWhatsappWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,9 +133,25 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/app'
     | '/api/ia'
+    | '/api/auth/signup'
+    | '/api/workflowark/ai-check'
+    | '/api/workflowark/sheet'
     | '/api/workflowark/state'
+    | '/api/workflowark/whatsapp/send'
+    | '/api/workflowark/whatsapp/webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/sistema' | '/app' | '/api/ia' | '/api/workflowark/state'
+  to:
+    | '/'
+    | '/auth'
+    | '/sistema'
+    | '/app'
+    | '/api/ia'
+    | '/api/auth/signup'
+    | '/api/workflowark/ai-check'
+    | '/api/workflowark/sheet'
+    | '/api/workflowark/state'
+    | '/api/workflowark/whatsapp/send'
+    | '/api/workflowark/whatsapp/webhook'
   id:
     | '__root__'
     | '/'
@@ -97,7 +160,12 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/_authenticated/app'
     | '/api/ia'
+    | '/api/auth/signup'
+    | '/api/workflowark/ai-check'
+    | '/api/workflowark/sheet'
     | '/api/workflowark/state'
+    | '/api/workflowark/whatsapp/send'
+    | '/api/workflowark/whatsapp/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,7 +174,12 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   SistemaRoute: typeof SistemaRoute
   ApiIaRoute: typeof ApiIaRoute
+  ApiAuthSignupRoute: typeof ApiAuthSignupRoute
+  ApiWorkflowarkAiCheckRoute: typeof ApiWorkflowarkAiCheckRoute
+  ApiWorkflowarkSheetRoute: typeof ApiWorkflowarkSheetRoute
   ApiWorkflowarkStateRoute: typeof ApiWorkflowarkStateRoute
+  ApiWorkflowarkWhatsappSendRoute: typeof ApiWorkflowarkWhatsappSendRoute
+  ApiWorkflowarkWhatsappWebhookRoute: typeof ApiWorkflowarkWhatsappWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -160,6 +233,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWorkflowarkStateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/workflowark/sheet': {
+      id: '/api/workflowark/sheet'
+      path: '/api/workflowark/sheet'
+      fullPath: '/api/workflowark/sheet'
+      preLoaderRoute: typeof ApiWorkflowarkSheetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/ai-check': {
+      id: '/api/workflowark/ai-check'
+      path: '/api/workflowark/ai-check'
+      fullPath: '/api/workflowark/ai-check'
+      preLoaderRoute: typeof ApiWorkflowarkAiCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/signup': {
+      id: '/api/auth/signup'
+      path: '/api/auth/signup'
+      fullPath: '/api/auth/signup'
+      preLoaderRoute: typeof ApiAuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/whatsapp/webhook': {
+      id: '/api/workflowark/whatsapp/webhook'
+      path: '/api/workflowark/whatsapp/webhook'
+      fullPath: '/api/workflowark/whatsapp/webhook'
+      preLoaderRoute: typeof ApiWorkflowarkWhatsappWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/whatsapp/send': {
+      id: '/api/workflowark/whatsapp/send'
+      path: '/api/workflowark/whatsapp/send'
+      fullPath: '/api/workflowark/whatsapp/send'
+      preLoaderRoute: typeof ApiWorkflowarkWhatsappSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -180,7 +288,12 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   SistemaRoute: SistemaRoute,
   ApiIaRoute: ApiIaRoute,
+  ApiAuthSignupRoute: ApiAuthSignupRoute,
+  ApiWorkflowarkAiCheckRoute: ApiWorkflowarkAiCheckRoute,
+  ApiWorkflowarkSheetRoute: ApiWorkflowarkSheetRoute,
   ApiWorkflowarkStateRoute: ApiWorkflowarkStateRoute,
+  ApiWorkflowarkWhatsappSendRoute: ApiWorkflowarkWhatsappSendRoute,
+  ApiWorkflowarkWhatsappWebhookRoute: ApiWorkflowarkWhatsappWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -37,9 +37,15 @@ npm run build
 - `src/routes/api/` — endpoints do servidor
 
 ## Banco de dados (Supabase)
-- Projeto: anoxryufucvyerqhzixq.supabase.co
-- Tabelas: `workflowark_members`, `workflowark_state`
-- Auth: email/senha + Google OAuth
+- Projeto: fxfnonozzekxnxddxsnh.supabase.co
+- Tabelas: `workflowark_members`, `workflowark_state` (RLS travado: tudo passa pelo servidor via service_role)
+- Auth: email/senha (exige confirmação de e-mail) + Google OAuth
+
+## Produção
+- Domínio: https://workflowark.arkcontent.workers.dev
+- Deploy: `npm run build` depois `npx wrangler deploy`
+- IMPORTANTE: o servidor lê SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY via `cloudflare:workers` (ver `src/integrations/supabase/client.server.ts`). `process.env` fica vazio nesse runtime.
+- A interface principal é `public/workflowark.html` (carregada em iframe pelo app React em `/app`, que repassa o token via postMessage)
 
 ## Prioridade atual
 Colocar o software rodando em um domínio acessível pela equipe da ARK Content.

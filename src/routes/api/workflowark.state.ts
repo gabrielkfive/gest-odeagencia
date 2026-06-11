@@ -15,6 +15,9 @@ const STATE_KEYS = new Set([
   "wfa-crm",
   "wfa-agenda-events",
   "wfa-comercial",
+  "wfa-cobranca",
+  "wfa-acerto",
+  "wfa-planilha",
 ]);
 
 const VALID_ROLES = new Set([
@@ -273,6 +276,111 @@ export const Route = createFileRoute("/api/workflowark/state")({
             try { await ctx.db.auth.admin.deleteUser(m.user_id); } catch { /* ignore */ }
           }
           return json({ ok: true });
+        }
+
+        if (action === "upload-file") {
+          const filename = String(body.filename ?? "arquivo").replace(/[^\w.\-]+/g, "_").slice(0, 90);
+          const contentType = String(body.contentType ?? "application/octet-stream");
+          const b64 = String(body.dataBase64 ?? "");
+          if (!b64) return json({ error: "Nenhum arquivo recebido." }, { status: 400 });
+          try {
+            const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+            const bucket = "arquivos";
+            await (ctx.db as any).storage.createBucket(bucket, { public: true }).catch(() => {});
+            const path = `${Date.now()}-${filename}`;
+            const { error } = await (ctx.db as any).storage.from(bucket).upload(path, bin, { contentType, upsert: true });
+            if (error) return json({ error: error.message || "Falha no upload" }, { status: 500 });
+            const { data: pub } = (ctx.db as any).storage.from(bucket).getPublicUrl(path);
+            return json({ ok: true, url: pub?.publicUrl, filename });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha no upload" }, { status: 500 });
+          }
+        }
+
+        if (action === "agente-roteirista") {
+          const tema = String(body.tema ?? body.prompt ?? "").trim();
+          if (!tema) return json({ error: "Diga o tema/assunto do vídeo." }, { status: 400 });
+          const cliente = String(body.cliente ?? "").trim();
+          const plataforma = String(body.plataforma ?? "Instagram Reels").trim();
+          const qtd = Math.min(Math.max(parseInt(String(body.qtd ?? "3"), 10) || 3, 1), 8);
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const key = zapiEnv("ANTHROPIC_API_KEY");
+          if (!key) return json({ error: "IA não configurada." }, { status: 500 });
+          const sys = [
+            "Você é um ROTEIRISTA VIRAL sênior da ARK Content (agência de marketing gastronômico/varejo em Brasília). NÃO escreve como IA robótica — escreve como gente que entende de algoritmo e de scroll. Cria roteiros de vídeo curto que param o scroll, retêm e convertem (cliente entrando na loja / chamando no WhatsApp).",
+            "REGRAS DE OURO:",
+            "- GANCHO: máx 2 linhas (lido em ~3s). NUNCA comece com 'Olá pessoal', 'Hoje eu vou te mostrar', 'Nesse vídeo'. Primeiro frame é conflito, pergunta ou afirmação chocante. Padrões que funcionam: 'X pessoas fazem Y errado', 'Ninguém te conta que Z', 'Parei de X e aconteceu Y'.",
+            "- Cada bloco com micro-gancho (a pessoa decide a cada 3s se fica). Frases curtas, uma ideia por frase, linguagem do cotidiano ('melhorar' não 'otimizar').",
+            "- Entregue valor real (no mínimo 3 pontos) ANTES do CTA. CTA ÚNICO e integrado à última entrega (nunca solto tipo 'me segue').",
+            "- Indique (Texto na tela: \"...\"), [CORTE], (mostra ...). Instagram Reels: o espectador decide em ~7s, ritmo rápido.",
+            "Para CADA roteiro entregue NESTE formato (não mostre raciocínio):",
+            "TÍTULO: ...",
+            "GANCHO: ...",
+            "BLOCO 1 — [nome]: ... (Visual: ...)",
+            "BLOCO 2 — [nome]: ...",
+            "CTA: ...",
+            "LEGENDA: ... (+ 3 hashtags)",
+            "POR QUE FUNCIONA: ...",
+            "Separe cada roteiro com uma linha '———'. Não faça perguntas — assuma os melhores defaults e entregue pronto pra gravar.",
+          ].join("\n");
+          const user = `Cliente: ${cliente || "(varejo gastronômico genérico)"} · Plataforma: ${plataforma} · Tema/assunto: ${tema}\nGere ${qtd} roteiro(s) de vídeo curto, prontos pra gravar.`;
+          try {
+            const r = await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+              body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3000, system: sys, messages: [{ role: "user", content: user }] }),
+            });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            return json({ text: data?.content?.[0]?.text || "(sem resposta)" });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao gerar roteiros." }, { status: 502 });
+          }
+        }
+
+        if (action === "agente-vivenda") {
+          const prompt = String(body.prompt ?? "").trim();
+          if (!prompt) return json({ error: "Escreva o que você quer pedir ao agente." }, { status: 400 });
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const key = zapiEnv("ANTHROPIC_API_KEY");
+          if (!key) return json({ error: "IA não configurada (sem ANTHROPIC_API_KEY)." }, { status: 500 });
+          // contexto vivo: puxa dados da Vivenda já salvos no sistema (plano de Junho, etc.)
+          let contexto = "";
+          try {
+            const { data: rows } = await ctx.db.from("workflowark_state").select("key,data").in("key", ["wfa-inline-edits", "wfa-tarefas"]);
+            const inline = (rows || []).find((r: any) => r.key === "wfa-inline-edits")?.data || {};
+            const viv = Object.fromEntries(Object.entries(inline).filter(([k]) => String(k).startsWith("viv_")));
+            const tarefas = ((rows || []).find((r: any) => r.key === "wfa-tarefas")?.data || []) as any[];
+            const tViv = tarefas.filter((t) => /viv/i.test(t?.clienteId || "") || /vivenda/i.test(t?.title || "")).slice(0, 15).map((t) => `- ${t.title} (${t.resp || "?"}, ${t.data || "?"})`).join("\n");
+            contexto = `\n\nDADOS ATUAIS DA VIVENDA NO SISTEMA:\nCampos do plano (preenchidos): ${JSON.stringify(viv)}\nTarefas da Vivenda:\n${tViv || "(nenhuma)"}`;
+          } catch { /* segue sem contexto extra */ }
+          const sys = `Você é o ESTRATEGISTA da ARK Content dedicado à FARMÁCIA VIVENDA — o cliente prioritário (empresa da família do dono, Plano X). É uma farmácia em Brasília com posicionamento de BEM-ESTAR (saúde, cuidado, proximidade com o bairro). NÃO invente dados nem campanhas genéricas/inviáveis: seja específico, realista e aplicável a uma farmácia de bairro. Pense como dono de agência brasileiro: direto, prático, com foco em vender (gente entrando na farmácia / WhatsApp), respeitando o orçamento. Quando faltar informação real (resultados de tráfego, nº de produções, histórico), DIGA o que você precisa em vez de chutar. Entregue em tópicos curtos e acionáveis.${contexto}`;
+          try {
+            const r = await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+              body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1600, system: sys, messages: [{ role: "user", content: prompt }] }),
+            });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            return json({ text: data?.content?.[0]?.text || "(sem resposta)" });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao consultar o agente." }, { status: 502 });
+          }
+        }
+
+        if (action === "send-whatsapp") {
+          const phone = String(body.phone ?? "").replace(/\D/g, "");
+          const message = String(body.message ?? "").trim();
+          if (!phone || !message) return json({ error: "Telefone e mensagem são obrigatórios." }, { status: 400 });
+          try {
+            const { zapiSendText, appendWhatsapp } = await import("@/integrations/zapi.server");
+            await zapiSendText(phone, message);
+            await appendWhatsapp(ctx.db as any, { phone, dir: "out", text: message });
+            return json({ ok: true });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao enviar pelo WhatsApp." }, { status: 502 });
+          }
         }
 
         if (action === "set-my-name") {

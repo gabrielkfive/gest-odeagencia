@@ -436,6 +436,35 @@ table.t tr.high{background:var(--yel-bg)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
           <span>Financeiro</span>
         </div>
+        <div class="subitem" data-nav="cobranca">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Cobranças</span>
+        </div>
+        <div class="subitem" data-nav="acerto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <span>Acerto · Pagamentos</span>
+        </div>
+        <div class="subitem" data-nav="whatsapp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.6-.8L3 21l1.9-5.4A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>
+          <span>WhatsApp</span>
+        </div>
+        <div class="subitem" data-nav="notificacoes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span>Notificações</span>
+          <span class="badge" id="notif-badge" style="display:none">0</span>
+        </div>
+        <div class="subitem" data-nav="cliente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.8 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg>
+          <span>Área do Cliente</span>
+        </div>
+        <div class="subitem" data-nav="roteirista">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          <span>🎬 Roteirista</span>
+        </div>
+        <div class="subitem" data-nav="drive">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span>Drive</span>
+        </div>
         <div class="subitem" data-nav="comercial">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           <span>Comercial</span>
@@ -485,6 +514,14 @@ table.t tr.high{background:var(--yel-bg)}
       </div>
       <div class="tb-right">
         <div class="tb-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar..."></div>
+        <button class="tb-btn" data-nav="whatsapp" title="WhatsApp" style="position:relative;padding:7px 9px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.6-.8L3 21l1.9-5.4A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>
+          <span id="wpp-badge-top" style="display:none;position:absolute;top:-4px;right:-4px;background:#25D366;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:10px;align-items:center;justify-content:center;padding:0 3px">0</span>
+        </button>
+        <button class="tb-btn" data-nav="notificacoes" title="Notificações" style="position:relative;padding:7px 9px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span id="notif-badge-top" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red,#e5484d);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:10px;align-items:center;justify-content:center;padding:0 3px">0</span>
+        </button>
         <span class="tb-pill" id="tb-month">Junho · 2026</span>
         <button class="tb-btn" onclick="openNovaTarefa()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova tarefa</button>
       </div>
@@ -559,7 +596,7 @@ table.t tr.high{background:var(--yel-bg)}
               <span class="md-count">Google</span>
             </div>
             <div class="md-agwrap">
-              <iframe src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
+              <iframe id="md-agenda-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
             </div>
           </div>
         </div>
@@ -1176,7 +1213,7 @@ table.t tr.high{background:var(--yel-bg)}
       <div class="page" id="page-reunioes">
         <div class="page-head"><div class="page-title"><h1>Reuniões · Google Agenda</h1><p>Agenda integrada da ARK Content · todas as reuniões e compromissos em tempo real.</p></div></div>
         <div id="gcal-wrap" style="height:calc(100vh - 140px);background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden">
-          <iframe src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo" style="border:0;width:100%;height:100%" frameborder="0" scrolling="no"></iframe>
+          <iframe id="gcal-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo" style="border:0;width:100%;height:100%" frameborder="0" scrolling="no"></iframe>
         </div>
       </div>
 
@@ -1287,7 +1324,7 @@ table.t tr.high{background:var(--yel-bg)}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -1296,6 +1333,13 @@ let WFA_CLOUD_READY = false;
 let WFA_CLOUD_MUTED = false;
 let WFA_MEMBER = null;
 let WFA_MEMBERS = [];
+// Declarados cedo para evitar erro de inicialização (usados no init e no sync):
+let WPP_ACTIVE=null;
+const DEFAULT_CALENDARS = {
+  'gabriel andrade':'gabrielkomercial@gmail.com',
+  'danilo de lima':'danilodelima.distribuidoracopa@gmail.com',
+  'lucas rosi':'luccascalta@gmail.com',
+};
 const WFA_FILTROS = {busca:'',prio:'',resp:'',cli:'',data:''};
 function aplicarFiltros(){
   WFA_FILTROS.busca=(document.getElementById('filt-busca').value||'').toLowerCase();
@@ -1391,9 +1435,15 @@ function applyCloudState(remote){
   WFA_CLOUD_MUTED=false;
   state.tarefas=JSON.parse(localStorage.getItem('wfa-tarefas')||'[]');
   state.regua=JSON.parse(localStorage.getItem('wfa-regua')||'{}');
+  state.cobranca=JSON.parse(localStorage.getItem('wfa-cobranca')||'{}');
+  state.acerto=JSON.parse(localStorage.getItem('wfa-acerto')||'{}');
+  state.planilha=JSON.parse(localStorage.getItem('wfa-planilha')||'null');
+  state.whatsapp=JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}');
+  state.notificacoes=JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]');
+  state.gcal=JSON.parse(localStorage.getItem('wfa-gcal')||'{}');
   const jornada=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
   if(jornada&&typeof jornada==='object')SPRINTS.forEach(sp=>{sp.clis=jornada[sp.n]||[];});
-  renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();
+  renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function')renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function')renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
   if(typeof renderCrm==='function')renderCrm();
   if(typeof renderAgenda==='function')renderAgenda();
   if(typeof renderComercialMes==='function')renderComercialMes();
@@ -1474,12 +1524,280 @@ function iniciarAutoSync(){
         </script>
       </div>
 
+      <!-- =================== COBRANÇAS =================== -->
+      <div class="page" id="page-cobranca">
+        <div class="page-head">
+          <div class="page-title"><h1>Cobranças do mês</h1><p id="cob-sub">Mensalidades ARK · vencimento puxado para o último dia útil · clique em "Abrir no WhatsApp" para enviar</p></div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span id="cob-resumo" style="font-size:12px;color:var(--mute)"></span>
+          </div>
+        </div>
+        <div id="cob-wrap"></div>
+      </div>
+
+      <!-- =================== ACERTO · PAGAMENTOS =================== -->
+      <div class="page" id="page-acerto">
+        <div class="page-head">
+          <div class="page-title"><h1>Acerto do mês</h1><p>Quem você precisa pagar e como · copie o Pix e marque como pago · <strong>visível só para você (admin)</strong></p></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="tb-btn" onclick="acertoSeedFromFin(true)">⤵ Trazer do Financeiro (dia 10)</button>
+            <span id="acerto-resumo" style="font-size:12px;color:var(--mute)"></span>
+          </div>
+        </div>
+        <div id="acerto-wrap"></div>
+      </div>
+
+      <!-- =================== WHATSAPP (Z-API) =================== -->
+      <div class="page" id="page-whatsapp">
+        <div class="page-head">
+          <div class="page-title"><h1>WhatsApp</h1><p id="wpp-sub">Conversas via Z-API · responda direto daqui · <strong>visível só para você (admin)</strong></p></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="tb-btn" onclick="sincronizarAgora&&sincronizarAgora()">↻ Atualizar</button>
+            <span id="wpp-status" style="font-size:12px;color:var(--mute)"></span>
+          </div>
+        </div>
+        <div id="wpp-wrap"></div>
+      </div>
+
+      <!-- =================== NOTIFICAÇÕES (assistente) =================== -->
+      <div class="page" id="page-notificacoes">
+        <div class="page-head">
+          <div class="page-title"><h1>Notificações</h1><p>O assistente avisa aqui o que chega e o que ele já preparou (tarefas criadas a partir do WhatsApp).</p></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="tb-btn" onclick="sincronizarAgora&&sincronizarAgora()">↻ Atualizar</button>
+            <button class="tb-btn" onclick="marcarNotifLidas()">Marcar todas como lidas</button>
+          </div>
+        </div>
+        <div id="notif-wrap"></div>
+      </div>
+
+      <!-- =================== DRIVE =================== -->
+      <div class="page" id="page-drive">
+        <style>
+          #page-drive .dz-crumbs{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--mute);margin-bottom:18px;flex-wrap:wrap}
+          #page-drive .dz-crumbs b{color:var(--ink);cursor:pointer}#page-drive .dz-crumbs span{cursor:pointer}#page-drive .dz-crumbs span:hover{color:var(--ink)}
+          #page-drive .dz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+          #page-drive .dz-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;cursor:pointer;transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column;gap:10px}
+          #page-drive .dz-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,0,0,.08);border-color:var(--yel)}
+          #page-drive .dz-ico{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--yel-bg,#fff7d6)}
+          #page-drive .dz-card.doc .dz-ico{background:#111;color:var(--yel)}
+          #page-drive .dz-nm{font-weight:700;font-size:14px}#page-drive .dz-meta{font-size:11.5px;color:var(--mute)}
+          /* documento de roteiros */
+          .rot-doc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+          .rot-num{font-size:19px;font-weight:800;letter-spacing:-.01em}
+          .rot-num .q{color:var(--yel-d,#b38600)}
+          .rot-meta{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);margin:6px 0 10px}
+          .rot-ctx{font-size:13.5px;color:var(--txt);background:var(--yel-bg,#fff7d6);border-left:3px solid var(--yel);border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:14px}
+          table.rot-tab{width:100%;border-collapse:collapse;font-size:13px}
+          table.rot-tab th{background:#111;color:#fff;text-align:left;padding:8px 11px;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+          table.rot-tab th:first-child{border-radius:8px 0 0 0;width:42px}table.rot-tab th:last-child{border-radius:0 8px 0 0}
+          table.rot-tab td{border:1px solid var(--line);padding:9px 11px;vertical-align:top;line-height:1.5}
+          table.rot-tab td:first-child{text-align:center;font-weight:800;color:var(--yel-d,#b38600);background:#fafafa}
+          table.rot-tab .fala{font-weight:600;color:var(--ink)}
+          .rot-cta{margin-top:10px;font-size:13px;font-weight:700;color:#111;background:var(--yel,#ffd400);display:inline-block;padding:6px 12px;border-radius:8px}
+          .rot-leg{margin-top:10px;font-size:12.5px;color:var(--mute);font-style:italic}
+          .dz-doc-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+          .dz-doc-head h2{font-size:24px;font-weight:800;letter-spacing:-.02em}
+        </style>
+        <div class="page-head">
+          <div class="page-title"><h1>Drive</h1><p>Arquivos e documentos da ARK por cliente · tudo num lugar só.</p></div>
+          <div><label class="tb-btn" style="cursor:pointer">📎 Enviar arquivo<input type="file" style="display:none" onchange="arquivoUpload(this)"></label></div>
+        </div>
+        <div class="dz-crumbs" id="dz-crumbs"></div>
+        <div id="dz-body"></div>
+        <div class="arq-out" style="margin-top:14px;font-size:13px"></div>
+      </div>
+
+      <!-- =================== ROTEIRISTA (agente IA) =================== -->
+      <div class="page" id="page-roteirista">
+        <div class="page-head"><div class="page-title"><h1>🎬 Roteirista</h1><p>Seu roteirista de IA · gera roteiros de Reels prontos pra gravar (método viral). Diga o tema e o cliente.</p></div></div>
+        <div class="card" style="padding:16px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="grid-column:1/-1"><label class="form-label" style="font-size:11px">Tema / assunto do vídeo</label><textarea id="rot-tema" class="form-input" style="min-height:64px" placeholder="Ex: por que comprar genérico não é furada · combo de inverno · dica do farmacêutico sobre gripe..."></textarea></div>
+          <div><label class="form-label" style="font-size:11px">Cliente</label><input id="rot-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda"></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px">
+            <div><label class="form-label" style="font-size:11px">Plataforma</label><select id="rot-plat" class="form-select"><option>Instagram Reels</option><option>TikTok</option><option>YouTube Shorts</option></select></div>
+            <div><label class="form-label" style="font-size:11px">Qtd</label><input id="rot-qtd" class="form-input" type="number" value="3" min="1" max="8"></div>
+          </div>
+          <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
+            <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="rotGerar()">🎬 Gerar roteiros</button>
+            <button class="tb-btn" onclick="rotCopiar()">⧉ Copiar</button>
+            <span id="rot-status" style="font-size:12px;color:var(--mute)"></span>
+          </div>
+        </div>
+        <div id="rot-out" class="card" style="padding:18px;white-space:pre-wrap;font-size:13.5px;line-height:1.65;min-height:120px;color:var(--ink)">Os roteiros aparecem aqui. 🎬</div>
+      </div>
+
+      <!-- =================== ÁREA DO CLIENTE · VIVENDA (estilo Apple) =================== -->
+      <div class="page" id="page-cliente" style="padding:0">
+        <style>
+          #page-cliente{--cl-ink:#0a0a0a;--cl-yel:#FFC700;--cl-soft:#f5f5f7;--cl-mut:#86868b}
+          .cli-wrap{font-family:'Inter',sans-serif;color:var(--cl-ink);background:#fff}
+          .cli-sec{padding:84px 40px;max-width:1100px;margin:0 auto;opacity:0;transform:translateY(26px);animation:cliUp .9s cubic-bezier(.16,1,.3,1) forwards}
+          .cli-sec:nth-child(2){animation-delay:.05s}.cli-sec:nth-child(3){animation-delay:.1s}.cli-sec:nth-child(4){animation-delay:.15s}
+          @keyframes cliUp{to{opacity:1;transform:none}}
+          .cli-hero{background:radial-gradient(ellipse 70% 60% at 70% 20%,rgba(255,199,0,.10),transparent 60%),#0a0a0a;color:#fff;padding:120px 40px 110px;text-align:center;max-width:none}
+          .cli-kick{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--cl-yel);margin-bottom:26px}
+          .cli-h1{font-size:clamp(46px,8vw,104px);font-weight:900;letter-spacing:-.045em;line-height:.92;margin:0}
+          .cli-h1 em{font-style:normal;color:var(--cl-yel)}
+          .cli-lead{font-size:clamp(17px,2.2vw,23px);color:#d2d2d7;max-width:640px;margin:30px auto 0;line-height:1.5;font-weight:400}
+          .cli-eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#a17500;margin-bottom:14px}
+          .cli-h2{font-size:clamp(32px,4.6vw,56px);font-weight:800;letter-spacing:-.035em;line-height:1.02;margin:0 0 16px}
+          .cli-sub{font-size:17px;color:var(--cl-mut);max-width:560px;line-height:1.6}
+          .cli-grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:40px}
+          .cli-card{background:var(--cl-soft);border-radius:26px;padding:38px 34px;transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s}
+          .cli-card:hover{transform:translateY(-6px);box-shadow:0 30px 60px rgba(0,0,0,.1)}
+          .cli-card.dark{background:#0a0a0a;color:#fff}
+          .cli-card.yel{background:var(--cl-yel);color:#0a0a0a}
+          .cli-emoji{font-size:42px;display:block;margin-bottom:18px}
+          .cli-card h3{font-size:27px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+          .cli-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;opacity:.7}
+          .cli-ed{display:block;margin-top:16px;font-size:15px;line-height:1.6;outline:none;border-radius:10px;transition:background .2s;min-height:22px}
+          .cli-ed:hover{background:rgba(0,0,0,.04)}.cli-card.dark .cli-ed:hover,.cli-card.yel .cli-ed:hover{background:rgba(255,255,255,.12)}
+          .cli-ed:empty:before{content:attr(data-ph);color:var(--cl-mut)}
+          .cli-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e8e8ed;border-radius:24px;overflow:hidden;margin-top:36px}
+          .cli-stat{background:#fff;padding:34px 22px;text-align:center}
+          .cli-stat .v{font-size:50px;font-weight:900;letter-spacing:-.04em;line-height:1;color:#0a0a0a}
+          .cli-stat .l{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cl-mut);margin-top:10px}
+          .cli-pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px}
+          .cli-pill{border:1px solid #d2d2d7;border-radius:100px;padding:8px 17px;font-size:13px;font-weight:500}
+          .cli-foot{background:#0a0a0a;color:#86868b;text-align:center;padding:60px 40px;max-width:none}
+          .cli-foot .mk{display:inline-flex;align-items:center;gap:10px;color:#fff;font-family:'JetBrains Mono',monospace;letter-spacing:.2em;font-size:12px}
+          @media(max-width:760px){.cli-grid2,.cli-stats{grid-template-columns:1fr}.cli-sec{padding:60px 22px}}
+        </style>
+        <div class="cli-wrap">
+          <section class="cli-hero">
+            <div class="cli-kick">ARK Content · Planejamento Estratégico</div>
+            <h1 class="cli-h1">Farmácia <em>Vivenda</em></h1>
+            <p class="cli-lead">Junho 2026 · Saúde, bem-estar e proximidade — transformando presença digital em gente entrando na farmácia.</p>
+            <div class="cli-pills" style="justify-content:center">
+              <span class="cli-pill" style="border-color:rgba(255,255,255,.25);color:#fff">Plano X</span>
+              <span class="cli-pill" style="border-color:rgba(255,255,255,.25);color:#fff">Posicionamento: Bem-Estar</span>
+              <span class="cli-pill" style="border-color:rgba(255,255,255,.25);color:#fff">Account: Lucas Rosi</span>
+            </div>
+          </section>
+
+          <section class="cli-sec">
+            <div class="cli-eyebrow">O mês em foco</div>
+            <h2 class="cli-h2">Duas datas que<br>movem Junho.</h2>
+            <p class="cli-sub">Construído pela ARK pra Vivenda — campanhas pensadas pra vender de verdade, não só postar bonito.</p>
+            <div class="cli-grid2">
+              <div class="cli-card dark">
+                <span class="cli-emoji">🏆</span>
+                <span class="cli-tag" style="color:var(--cl-yel)">Campanha 01</span>
+                <h3>Copa do Mundo</h3>
+                <span class="cli-ed" contenteditable="true" data-com-key="viv_copa_obj" data-ph="Objetivo (a definir com base no real da Vivenda)…"></span>
+                <span class="cli-ed" contenteditable="true" data-com-key="viv_copa_acoes" data-ph="Ações (a definir)…"></span>
+              </div>
+              <div class="cli-card yel">
+                <span class="cli-emoji">🎉</span>
+                <span class="cli-tag">Campanha 02</span>
+                <h3>Festa Junina</h3>
+                <span class="cli-ed" contenteditable="true" data-com-key="viv_festa_obj" data-ph="Objetivo (a definir com base no real da Vivenda)…"></span>
+                <span class="cli-ed" contenteditable="true" data-com-key="viv_festa_acoes" data-ph="Ações (a definir)…"></span>
+              </div>
+            </div>
+          </section>
+
+          <section class="cli-sec">
+            <div class="cli-eyebrow">Estratégia</div>
+            <h2 class="cli-h2">Pilares de conteúdo.</h2>
+            <div class="cli-grid2">
+              <div class="cli-card"><h3 style="font-size:21px">💚 Conexão & Bem-estar</h3><span class="cli-ed" contenteditable="true" data-com-key="viv_pilar1" data-ph="Como a Vivenda cuida das pessoas…"></span></div>
+              <div class="cli-card"><h3 style="font-size:21px">🛒 Oferta & Conversão</h3><span class="cli-ed" contenteditable="true" data-com-key="viv_pilar2" data-ph="Promoções e produtos que giram caixa…"></span></div>
+              <div class="cli-card"><h3 style="font-size:21px">🏅 Autoridade</h3><span class="cli-ed" contenteditable="true" data-com-key="viv_pilar3" data-ph="Dicas de saúde, farmacêutico de confiança…"></span></div>
+              <div class="cli-card"><h3 style="font-size:21px">🔥 Sazonal (Copa/Junina)</h3><span class="cli-ed" contenteditable="true" data-com-key="viv_pilar4" data-ph="Conteúdo do momento, trends do mês…"></span></div>
+            </div>
+          </section>
+
+          <section class="cli-sec">
+            <div class="cli-eyebrow">Entregas do mês · Plano X</div>
+            <h2 class="cli-h2">O que a ARK entrega.</h2>
+            <div class="cli-stats">
+              <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_ent_capt">3</div><div class="l">Captações</div></div>
+              <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_ent_videos">20</div><div class="l">Vídeos editados</div></div>
+              <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_ent_artes">8</div><div class="l">Artes / posts</div></div>
+              <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_ent_camp">2</div><div class="l">Campanhas de tráfego</div></div>
+            </div>
+            <div class="cli-pills">
+              <span class="cli-pill">Captação presencial</span><span class="cli-pill">Roteiro estratégico</span><span class="cli-pill">Social Media</span><span class="cli-pill">Google + Meta Ads</span><span class="cli-pill">Relatório mensal</span>
+            </div>
+          </section>
+
+          <section class="cli-sec">
+            <div class="cli-eyebrow">Acompanhamento</div>
+            <h2 class="cli-h2">Resultados de Junho.</h2>
+            <p class="cli-sub">Atualizado pela ARK ao longo do mês. (Em breve: integração com o Meta Ads pra acompanhar campanhas em tempo real.)</p>
+            <div class="cli-card" style="margin-top:28px">
+              <span class="cli-ed" contenteditable="true" data-com-key="viv_resultados" data-ph="Anote aqui os resultados do mês (alcance, leads, vendas, destaques)…" style="font-size:16px"></span>
+            </div>
+          </section>
+
+          <section class="cli-sec">
+            <div class="cli-eyebrow">Produções deste mês</div>
+            <h2 class="cli-h2">O que a ARK produziu.</h2>
+            <p class="cli-sub">Preencha com o que foi entregue no mês (clique e edite — salva sozinho).</p>
+            <div class="cli-stats">
+              <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_prod_revista">1</div><div class="l">Revista</div></div>
+              <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_prod_videos">—</div><div class="l">Vídeos</div></div>
+              <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_prod_artes">—</div><div class="l">Artes</div></div>
+              <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_prod_captacoes">—</div><div class="l">Captações</div></div>
+            </div>
+          </section>
+
+          <section class="cli-sec">
+            <div class="cli-eyebrow">Galeria · Vivenda</div>
+            <h2 class="cli-h2">As imagens da marca.</h2>
+            <p class="cli-sub">Cole os links das imagens (Drive público, Instagram, etc.) — elas aparecem aqui. Em breve: upload direto.</p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:28px">
+              <label style="cursor:pointer"><div id="vimg1" style="aspect-ratio:1;border-radius:20px;background:var(--cl-soft) center/cover no-repeat;border:1px dashed #d2d2d7;display:flex;align-items:center;justify-content:center;color:#86868b;font-size:13px">+ enviar imagem</div><input type="file" accept="image/*" style="display:none" onchange="vivGalImg(this,'vimg1')"></label>
+              <label style="cursor:pointer"><div id="vimg2" style="aspect-ratio:1;border-radius:20px;background:var(--cl-soft) center/cover no-repeat;border:1px dashed #d2d2d7;display:flex;align-items:center;justify-content:center;color:#86868b;font-size:13px">+ enviar imagem</div><input type="file" accept="image/*" style="display:none" onchange="vivGalImg(this,'vimg2')"></label>
+              <label style="cursor:pointer"><div id="vimg3" style="aspect-ratio:1;border-radius:20px;background:var(--cl-soft) center/cover no-repeat;border:1px dashed #d2d2d7;display:flex;align-items:center;justify-content:center;color:#86868b;font-size:13px">+ enviar imagem</div><input type="file" accept="image/*" style="display:none" onchange="vivGalImg(this,'vimg3')"></label>
+            </div>
+            <div class="cli-card" style="margin-top:22px">
+              <h3 style="font-size:18px">📎 Enviar arquivo — PDF, imagem ou doc</h3>
+              <p style="font-size:13px;color:var(--cl-mut);margin:6px 0 12px">Sobe qualquer arquivo e gera um link pra usar e compartilhar.</p>
+              <label class="tb-btn" style="cursor:pointer;background:#0a0a0a;color:#fff;border-color:#0a0a0a;font-weight:700">Escolher arquivo<input type="file" style="display:none" onchange="arquivoUpload(this)"></label>
+              <div class="arq-out" style="margin-top:14px;font-size:13.5px"></div>
+            </div>
+          </section>
+
+          <footer class="cli-foot">
+            <div class="mk"><span style="width:8px;height:8px;border-radius:50%;background:var(--cl-yel)"></span>ARK CONTENT · 2026</div>
+            <p style="margin-top:14px;font-size:13px">Planejamento estratégico exclusivo · Farmácia Vivenda</p>
+          </footer>
+        </div>
+      </div>
+
       <!-- =================== FINANCEIRO (Sheets embed) =================== -->
       <div class="page" id="page-financeiro">
-        <div class="page-head"><div class="page-title"><h1>Financeiro · Google Sheets</h1><p>Planilha financeira da ARK Content · atualiza automaticamente com as entradas da planilha.</p></div></div>
-        <div id="fin-wrap" style="height:calc(100vh - 140px);background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden">
-          <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml?widget=true&headers=false" style="border:0;width:100%;height:100%" frameborder="0"></iframe>
+        <div class="page-head">
+          <div class="page-title"><h1>Financeiro</h1><p id="fin-sub">Visão do mês · puxado direto da sua planilha do Google · você mexe só na planilha e aqui reflete.</p></div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="tb-btn" onclick="renderFin(true)">↻ Atualizar</button>
+            <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml" target="_blank" rel="noopener" class="tb-btn" style="text-decoration:none">↗ Abrir planilha</a>
+          </div>
         </div>
+        <!-- MINHA PLANILHA (editável, salva na nuvem) -->
+        <div id="plan-wrap" style="margin-bottom:16px"></div>
+
+        <details style="margin-bottom:8px">
+          <summary style="cursor:pointer;font-size:12.5px;color:var(--mute);font-weight:600;padding:6px 0">📊 Resumo automático da planilha do Google (por mês)</summary>
+          <div style="padding-top:12px">
+            <div id="fin-monthbar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+              <span style="font-size:11px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Mês</span>
+              <select id="fin-month" class="form-select" style="width:auto;min-width:230px;font-weight:600" onchange="renderFin(true)"></select>
+              <button class="tb-btn" onclick="renderFin(true)">↻ Atualizar</button>
+            </div>
+            <div id="fin-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px"></div>
+            <div id="fin-tables" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:16px"></div>
+            <details style="margin-bottom:8px">
+              <summary style="cursor:pointer;font-size:12px;color:var(--mute);font-weight:600;padding:4px 0">Ver a planilha completa do Google</summary>
+              <div id="fin-wrap" style="height:60vh;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px">
+                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml?widget=true&headers=false" style="border:0;width:100%;height:100%" frameborder="0"></iframe>
+              </div>
+            </details>
+          </div>
+        </details>
       </div>
 
       <!-- =================== PROCESSOS POR ÁREA =================== -->
@@ -1883,6 +2201,16 @@ function iniciarAutoSync(){
           <button class="icobtn" onclick="try{sincronizarAgora()}catch(e){}">↻ Sincronizar agora</button>
           <button class="icobtn" style="color:var(--red)" onclick="window.parent.postMessage({type:'wfa-sair'},'*')">Sair da conta</button>
         </div>
+        <div class="set-sect-t" style="margin-bottom:9px">Migração de dados</div>
+        <p class="muted" style="font-size:10.5px;margin-bottom:9px">Traga tudo de outra versão (clientes nos sprints, tarefas, jornada, financeiro…). Exporte de um lado e importe no outro.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px">
+          <button class="tb-btn" onclick="exportarDados()">⬇ Exportar meus dados</button>
+        </div>
+        <textarea id="set-import" class="form-input" rows="3" placeholder="Cole aqui os dados exportados da outra versão e clique em Importar" style="font-family:var(--mono);font-size:11px;margin-bottom:8px"></textarea>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+          <button class="tb-btn" onclick="importarDados()">⬆ Importar dados</button>
+        </div>
+
         <div class="set-sect-t" style="margin-bottom:9px">Dados de demonstração</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
           <button class="icobtn" onclick="popularExemplos()">+ Popular tarefas de exemplo</button>
@@ -1968,12 +2296,20 @@ function saveJornada(){
 let state = {
   tarefas: JSON.parse(localStorage.getItem('wfa-tarefas')||'[]'),
   regua: JSON.parse(localStorage.getItem('wfa-regua')||'{}'),
+  cobranca: JSON.parse(localStorage.getItem('wfa-cobranca')||'{}'),
+  acerto: JSON.parse(localStorage.getItem('wfa-acerto')||'{}'),
+  planilha: JSON.parse(localStorage.getItem('wfa-planilha')||'null'),
+  whatsapp: JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}'),
+  notificacoes: JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]'),
+  gcal: JSON.parse(localStorage.getItem('wfa-gcal')||'{}'),
   currentSprint: null,
   currentCliente: null,
 };
 
 function saveTarefas(){localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));renderTarefas();renderSprints();updateBadges();}
 function saveRegua(){localStorage.setItem('wfa-regua',JSON.stringify(state.regua));}
+function saveGcal(){localStorage.setItem('wfa-gcal',JSON.stringify(state.gcal||{}));}
+function saveCobranca(){localStorage.setItem('wfa-cobranca',JSON.stringify(state.cobranca));}
 
 function toast(msg){
   document.getElementById('toast-msg').textContent=msg;
@@ -1992,6 +2328,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     const sub=el.closest('.subnav');
     if(sub) sub.previousElementSibling?.classList.add('active');
     document.getElementById('page-'+p)?.classList.add('active');
+    if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
     document.querySelector('.view').scrollTo(0,0);
@@ -2071,6 +2408,243 @@ function cliCard(c){
 function goRegua(id){
   document.querySelector('[data-nav="regua"]').click();
   setTimeout(()=>{const row=document.querySelector(`[data-regua-row="${id}"]`);if(row){row.scrollIntoView({block:'center'});row.style.background='var(--yel-bg)';setTimeout(()=>row.style.background='',1200);}},120);
+}
+
+/* ============ COBRANÇAS ============ */
+const COB_RESP_DEFAULT={vivenda:'Gabriel',fonseca:'Gabriel',bellavita:'Gabriel',vaca:'Gabriel',shopping:'Danilo',sasse:'Danilo'};
+const COB_RESPONSAVEIS=['Gabriel','Danilo'];
+const COB_MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+function cobMesKey(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function cobClientes(){return CLIENTES.filter(c=>c.tipo==='ARK'&&c.valor>0&&c.status!=='churn');}
+function cobData(c){const cur=state.cobranca[c.id]||{};return Object.assign({resp:COB_RESP_DEFAULT[c.id]||'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},cur);}
+
+/* Vencimento: dia 10; se cair no fim de semana, puxa para a sexta anterior (dia 9 sáb, dia 8 dom) */
+function cobVencimento(ref){
+  ref=ref||new Date();
+  let d=new Date(ref.getFullYear(),ref.getMonth(),10);
+  const dow=d.getDay();
+  if(dow===6)d=new Date(ref.getFullYear(),ref.getMonth(),9);      // sábado -> sexta (9)
+  else if(dow===0)d=new Date(ref.getFullYear(),ref.getMonth(),8); // domingo -> sexta (8)
+  return d;
+}
+function cobBRL(v){return 'R$ '+Number(v).toLocaleString('pt-BR');}
+function cobDigits(s){let d=String(s||'').replace(/\D/g,'');if(d&&!d.startsWith('55')&&d.length>=10&&d.length<=11)d='55'+d;return d;}
+
+function cobMensagem(c,data,venc){
+  const mes=COB_MESES[venc.getMonth()];
+  const vt=venc.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  let m=`Olá! Tudo bem? 😊\n\nPassando para lembrar da mensalidade da ARK Content referente a ${mes}, no valor de ${cobBRL(c.valor)} (vencimento ${vt}).`;
+  if(data.pix)m+=`\n\nPara facilitar, segue a chave Pix: ${data.pix}`;
+  m+=`\n\nAssim que efetuar, é só me enviar o comprovante. Qualquer dúvida estou à disposição. Obrigado! 🙏`;
+  return m;
+}
+
+function renderCobranca(){
+  const wrap=document.getElementById('cob-wrap');if(!wrap)return;
+  const venc=cobVencimento();
+  const mesKey=cobMesKey();
+  const vencTxt=venc.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  const sub=document.getElementById('cob-sub');if(sub)sub.textContent=`Vencimento deste mês: ${vencTxt} · clique em "Abrir no WhatsApp" para enviar`;
+
+  const clientes=cobClientes();
+  let totalReceber=0,jaCobradas=0;
+  clientes.forEach(c=>{const d=cobData(c);if(d.cobradoMes===mesKey)jaCobradas++;else totalReceber+=c.valor;});
+  const resumo=document.getElementById('cob-resumo');
+  if(resumo)resumo.textContent=`${clientes.length} clientes · ${cobBRL(totalReceber)} a receber · ${jaCobradas} já cobradas`;
+
+  // agrupar por responsável
+  const grupos={};COB_RESPONSAVEIS.forEach(r=>grupos[r]=[]);grupos['']=[];
+  clientes.forEach(c=>{const d=cobData(c);(grupos[d.resp]!==undefined?grupos[d.resp]:grupos['']).push(c);});
+
+  const ordem=[...COB_RESPONSAVEIS,''];
+  wrap.innerHTML=ordem.filter(r=>grupos[r].length).map(r=>{
+    const titulo=r?`Cobranças de ${r}`:'⚠️ Sem responsável definido';
+    const cards=grupos[r].map(c=>cobCard(c,venc,mesKey)).join('');
+    return `<div style="margin-bottom:20px">
+      <div style="font-size:13px;font-weight:700;color:var(--txt);margin:0 0 10px 2px">${titulo} <span style="color:var(--mute);font-weight:500">· ${grupos[r].length}</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px">${cards}</div>
+    </div>`;
+  }).join('')||'<div style="color:var(--mute);font-size:13px;padding:20px">Nenhum cliente de mensalidade ativo.</div>';
+}
+
+function cobCard(c,venc,mesKey){
+  const d=cobData(c);
+  const cobrado=d.cobradoMes===mesKey;
+  const seguro=!!(d.whatsapp&&d.resp&&d.feitas>=1);
+  const badge=cobrado
+    ?`<span style="background:#e7f7ec;color:#1a7f3c;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">✅ Cobrado este mês</span>`
+    :seguro
+      ?`<span style="background:#e7f7ec;color:#1a7f3c;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">🟢 Recorrente</span>`
+      :`<span style="background:var(--yel-bg,#fff7d6);color:#8a6d00;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">🟡 Revisar</span>`;
+  const msg=cobMensagem(c,d,venc);
+  const dig=cobDigits(d.whatsapp);
+  const waLink=dig?`https://wa.me/${dig}?text=${encodeURIComponent(msg)}`:'';
+  const respOpts=`<option value="">— quem cobra?</option>`+COB_RESPONSAVEIS.map(r=>`<option value="${r}"${d.resp===r?' selected':''}>${r}</option>`).join('');
+  return `<div class="card" style="padding:14px;opacity:${cobrado?'0.7':'1'}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+      <div><div style="font-weight:700;font-size:14px">${c.nm}</div><div style="font-size:12px;color:var(--mute)">${cobBRL(c.valor)}/mês · ${c.plano}</div></div>
+      ${badge}
+    </div>
+    <div style="display:grid;gap:7px;margin-bottom:10px">
+      <select onchange="setCob('${c.id}','resp',this.value)" class="form-select" style="font-size:12px;padding:6px 8px">${respOpts}</select>
+      <input value="${(d.whatsapp||'').replace(/"/g,'&quot;')}" onchange="setCob('${c.id}','whatsapp',this.value)" class="form-input" style="font-size:12px;padding:6px 8px" placeholder="WhatsApp (ex: 11 99999-9999)">
+      <input value="${(d.pix||'').replace(/"/g,'&quot;')}" onchange="setCob('${c.id}','pix',this.value)" class="form-input" style="font-size:12px;padding:6px 8px" placeholder="Chave Pix (opcional)">
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${waLink
+        ?`<a href="${waLink}" target="_blank" rel="noopener" class="tb-btn" style="text-decoration:none;background:#25D366;color:#fff;border-color:#25D366">📲 Abrir no WhatsApp</a>`
+        :`<button class="tb-btn" disabled style="opacity:.5;cursor:not-allowed" title="Cadastre o WhatsApp acima">📲 Abrir no WhatsApp</button>`}
+      <button class="tb-btn" onclick="cobCopiar('${c.id}')">Copiar mensagem</button>
+      ${cobrado
+        ?`<button class="tb-btn" onclick="cobToggle('${c.id}',false)">Desmarcar</button>`
+        :`<button class="tb-btn" onclick="cobToggle('${c.id}',true)" style="background:var(--yel,#ffd400);border-color:var(--yel,#ffd400)">Marcar como cobrado</button>`}
+    </div>
+  </div>`;
+}
+
+function setCob(id,field,value){
+  if(!state.cobranca[id])state.cobranca[id]={};
+  state.cobranca[id][field]=value;
+  saveCobranca();renderCobranca();
+}
+function cobToggle(id,on){
+  if(!state.cobranca[id])state.cobranca[id]=Object.assign({resp:COB_RESP_DEFAULT[id]||'',whatsapp:'',pix:'',feitas:0},state.cobranca[id]||{});
+  const d=state.cobranca[id];
+  if(on){d.cobradoMes=cobMesKey();d.feitas=(d.feitas||0)+1;toast('Marcado como cobrado ✓');}
+  else{d.cobradoMes='';d.feitas=Math.max(0,(d.feitas||1)-1);}
+  saveCobranca();renderCobranca();
+}
+function cobCopiar(id){
+  const c=CLIENTES.find(x=>x.id===id);if(!c)return;
+  const msg=cobMensagem(c,cobData(c),cobVencimento());
+  navigator.clipboard?.writeText(msg).then(()=>toast('Mensagem copiada'),()=>toast('Não consegui copiar'));
+}
+
+/* ============ ACERTO · PAGAMENTOS (espelho da cobrança) ============ */
+const ACERTO_CATEGORIAS=[
+  {k:'equipe',l:'Equipe fixa'},
+  {k:'freela',l:'Freelancers'},
+  {k:'fornecedor',l:'Fornecedores / ferramentas'},
+  {k:'socio',l:'Sócios'},
+];
+// A lista vem do Financeiro (Time & despesas a pagar). Sem base fixa.
+const ACERTO_ITENS=[];
+function saveAcerto(){localStorage.setItem('wfa-acerto',JSON.stringify(state.acerto||{}));}
+function acertoData(id){const cur=(state.acerto||{})[id]||{};return Object.assign({valor:'',pix:'',dia:'',obs:'',fixo:false,pagoMes:'',feitas:0},cur);}
+function acertoTodosItens(){
+  const base=ACERTO_ITENS.map(it=>({...it}));
+  const extras=Object.entries(state.acerto||{})
+    .filter(([id,d])=>d&&d.custom)
+    .map(([id,d])=>({id,nome:d.nome||'(sem nome)',cat:d.cat||'fornecedor',fixo:!!d.fixo,custom:true}));
+  return base.concat(extras);
+}
+function renderAcerto(){
+  const wrap=document.getElementById('acerto-wrap');if(!wrap)return;
+  const mesKey=cobMesKey();
+  const itens=acertoTodosItens();
+  let totalMes=0,pagos=0,pendentes=0;
+  itens.forEach(it=>{const d=acertoData(it.id);const v=Number(d.valor)||0;totalMes+=v;if(d.pagoMes===mesKey)pagos++;else if(v>0)pendentes++;});
+  const resumo=document.getElementById('acerto-resumo');
+  if(resumo)resumo.textContent=`${itens.length} pagamentos · ${cobBRL(totalMes)} no mês · ${pagos} pagos · ${pendentes} a pagar`;
+  wrap.innerHTML=ACERTO_CATEGORIAS.map(cat=>{
+    const lista=itens.filter(it=>it.cat===cat.k);
+    const cards=lista.map(it=>acertoCard(it,mesKey)).join('');
+    return `<div style="margin-bottom:22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px">
+        <div style="font-size:13px;font-weight:700;color:var(--txt)">${cat.l} <span style="color:var(--mute);font-weight:500">· ${lista.length}</span></div>
+        <button class="tb-btn" onclick="acertoAdd('${cat.k}')">+ Adicionar</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards||'<div style="color:var(--mute);font-size:12px;padding:8px">Ninguém aqui ainda · clique em "+ Adicionar".</div>'}</div>
+    </div>`;
+  }).join('');
+}
+function acertoCard(it,mesKey){
+  const d=acertoData(it.id);
+  const pago=d.pagoMes===mesKey;
+  const v=Number(d.valor)||0;
+  const badge=pago
+    ?`<span style="background:#e7f7ec;color:#1a7f3c;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">✅ Pago este mês</span>`
+    :v>0
+      ?`<span style="background:var(--yel-bg,#fff7d6);color:#8a6d00;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">🟡 A pagar</span>`
+      :`<span style="background:#eef0f2;color:#666;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">sem valor</span>`;
+  const sub=[it.fixo?'fixo/mês':'por demanda',d.dia?('dia '+mdEsc(d.dia)):''].filter(Boolean).join(' · ');
+  const rm=it.custom?`<button class="tb-btn" style="color:var(--red);border-color:#f3b4b4" onclick="acertoRemove('${it.id}')">Remover</button>`:'';
+  return `<div class="card" style="padding:14px;opacity:${pago?'0.7':'1'}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+      <div><div style="font-weight:700;font-size:14px">${mdEsc(it.nome)}</div><div style="font-size:12px;color:var(--mute)">${v>0?cobBRL(v):'R$ —'}${sub?' · '+sub:''}</div></div>
+      ${badge}
+    </div>
+    <div style="display:grid;gap:7px;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+        <input value="${mdEsc(d.valor)}" onchange="setAcerto('${it.id}','valor',this.value)" class="form-input" style="font-size:12px;padding:6px 8px" placeholder="Valor (R$)" inputmode="decimal">
+        <input value="${mdEsc(d.dia)}" onchange="setAcerto('${it.id}','dia',this.value)" class="form-input" style="font-size:12px;padding:6px 8px" placeholder="Dia (ex: 5)" inputmode="numeric">
+      </div>
+      <input value="${mdEsc(d.pix)}" onchange="setAcerto('${it.id}','pix',this.value)" class="form-input" style="font-size:12px;padding:6px 8px" placeholder="Chave Pix">
+      <input value="${mdEsc(d.obs)}" onchange="setAcerto('${it.id}','obs',this.value)" class="form-input" style="font-size:12px;padding:6px 8px" placeholder="Observação (opcional)">
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${d.pix
+        ?`<button class="tb-btn" onclick="acertoCopiarPix('${it.id}')">Copiar Pix</button>`
+        :`<button class="tb-btn" disabled style="opacity:.5;cursor:not-allowed" title="Cadastre a chave Pix">Copiar Pix</button>`}
+      ${pago
+        ?`<button class="tb-btn" onclick="acertoToggle('${it.id}',false)">Desmarcar</button>`
+        :`<button class="tb-btn" onclick="acertoToggle('${it.id}',true)" style="background:var(--yel,#ffd400);border-color:var(--yel,#ffd400)">Marcar como pago</button>`}
+      ${rm}
+    </div>
+  </div>`;
+}
+function setAcerto(id,field,value){
+  if(!state.acerto)state.acerto={};
+  if(!state.acerto[id])state.acerto[id]={};
+  state.acerto[id][field]=value;
+  saveAcerto();renderAcerto();
+}
+function acertoToggle(id,on){
+  if(!state.acerto)state.acerto={};
+  if(!state.acerto[id])state.acerto[id]={};
+  const d=state.acerto[id];
+  if(on){d.pagoMes=cobMesKey();d.feitas=(d.feitas||0)+1;toast('Marcado como pago ✓');}
+  else{d.pagoMes='';d.feitas=Math.max(0,(d.feitas||1)-1);}
+  saveAcerto();renderAcerto();
+}
+function acertoCopiarPix(id){
+  const d=acertoData(id);if(!d.pix)return;
+  navigator.clipboard?.writeText(d.pix).then(()=>toast('Pix copiado'),()=>toast('Não consegui copiar'));
+}
+function acertoAdd(cat){
+  const nome=prompt('Nome de quem você vai pagar:');if(!nome||!nome.trim())return;
+  if(!state.acerto)state.acerto={};
+  const id='ac-'+Date.now();
+  state.acerto[id]={custom:true,nome:nome.trim(),cat:cat||'fornecedor',fixo:false,valor:'',pix:'',dia:'',obs:'',pagoMes:''};
+  saveAcerto();renderAcerto();toast('Adicionado ✓');
+}
+function acertoRemove(id){
+  if(!confirm('Remover este pagamento da lista?'))return;
+  if(state.acerto&&state.acerto[id]){delete state.acerto[id];saveAcerto();renderAcerto();toast('Removido');}
+}
+function acertoClassify(nome){
+  const s=String(nome||'').toLowerCase();
+  if(/ceo|cco|coo|cmo|s[oó]cio|comiss/.test(s))return 'socio';
+  if(/simples|cart[aã]o|contabil|imposto|nacional|taxa|tarifa|aluguel|ferramenta|assinatura/.test(s))return 'fornecedor';
+  return 'equipe';
+}
+// Traz a lista "a pagar" da Minha Planilha (Financeiro) para a aba Acerto, com vencimento dia 10.
+function acertoSeedFromFin(force){
+  if(typeof planEnsure==='function')planEnsure();
+  const m=(typeof planActive==='function')?planActive():null;
+  if(!state.acerto)state.acerto={};
+  if(!force&&state.acerto.__seeded)return;
+  let n=0;
+  ((m&&m.pagar)||[]).forEach(x=>{
+    if(!x.nome&&!x.valor)return;
+    const id='fin-'+(normName(x.nome).replace(/\s+/g,'-')||('x'+(n)));
+    const prev=state.acerto[id]||{};
+    state.acerto[id]=Object.assign({custom:true,fixo:true,cat:acertoClassify(x.nome),pix:'',obs:'',pagoMes:''},prev,{nome:x.nome,valor:String(x.valor||''),dia:'10'});
+    n++;
+  });
+  if(n){state.acerto.__seeded=true;saveAcerto();renderAcerto();if(force)toast(n+' pagamentos trazidos do Financeiro (dia 10) ✓');}
+  else if(force)toast('Nada para trazer · preencha a planilha primeiro');
 }
 
 /* ============ JORNADA SPRINTS ============ */
@@ -2173,6 +2747,7 @@ function mdTaskRow(kind,t){
 }
 function renderMeuDia(){
   if(!document.getElementById('page-dashboard'))return;
+  if(typeof applyCalendars==='function')applyCalendars();
   const today=new Date().toISOString().split('T')[0];
   const tasks=(state.tarefas||[]);
   const myName=WFA_MEMBER&&WFA_MEMBER.full_name?WFA_MEMBER.full_name:null;
@@ -2249,7 +2824,7 @@ const NAV_CATALOG=[
   {k:'dashboard',l:'Meu Dia'},{k:'reunioes',l:'Reuniões · Agenda'},
   {k:'lista-clientes',l:'Lista de Clientes'},{k:'jornada',l:'Jornada · Sprints'},{k:'regua',l:'Régua dos 15'},
   {k:'tarefas',l:'Tarefas'},{k:'demandas',l:'Demandas'},{k:'rotinas',l:'Rotinas'},
-  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'comercial',l:'Comercial'},
+  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},
   {k:'crm',l:'CRM · Pipeline'},
   {k:'organograma',l:'Organograma'},{k:'pops',l:'POPs por Função'},{k:'processos',l:'Processos'},
   {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},
@@ -2261,7 +2836,7 @@ const ROLE_ACCESS={
   comercial:_BASE_NAV.concat(['comercial','crm','lista-clientes','jornada','regua','tarefas']),
   operacao:_BASE_NAV.concat(['tarefas','rotinas','demandas','lista-clientes','jornada','regua','campanhas','okrs']),
   marketing:_BASE_NAV.concat(['tarefas','demandas','lista-clientes','campanhas']),
-  financeiro:_BASE_NAV.concat(['financeiro','campanhas']),
+  financeiro:_BASE_NAV.concat(['financeiro','cobranca','campanhas']),
   viewer:_BASE_NAV,
 };
 function roleAccessList(role){return ROLE_ACCESS[role]||ROLE_ACCESS.viewer;}
@@ -2273,6 +2848,10 @@ function memberAccess(m){
   const ov=m.permissions&&m.permissions.nav;
   if(ov&&typeof ov==='object')Object.keys(ov).forEach(k=>{if(k in acc)acc[k]=!!ov[k];});
   if(m.role==='admin')_ALL_NAV.forEach(k=>acc[k]=true);
+  // Acerto · Pagamentos e WhatsApp são sensíveis: só admin por padrão; admin pode liberar manualmente por membro.
+  if(m.role!=='admin')acc.acerto=!!(ov&&typeof ov==='object'&&ov.acerto===true);
+  if(m.role!=='admin')acc.whatsapp=!!(ov&&typeof ov==='object'&&ov.whatsapp===true);
+  if(m.role!=='admin')acc.notificacoes=!!(ov&&typeof ov==='object'&&ov.notificacoes===true);
   return acc;
 }
 function applyAccess(){
@@ -2335,6 +2914,10 @@ function renderSettingsTeam(){
       <button class="icobtn" onclick="salvarMembro('${mdEsc(m.id)}')">Salvar</button>
       <button class="set-accbtn" type="button" title="Remover membro" style="color:var(--red);border-color:#f3b4b4" onclick="removerMembro('${mdEsc(m.id)}')">✕</button>
       <div class="set-em">${mdEsc(m.email||'')}</div>
+      <div style="grid-column:1/-1;display:flex;gap:6px;align-items:center;margin-top:2px">
+        <span style="font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">📅 Agenda Google</span>
+        <input class="form-input set-cal" value="${mdEsc(calForMember(m))}" placeholder="Cole o código iframe da agenda OU o e-mail da agenda" style="flex:1;font-size:11px">
+      </div>
       <div class="set-acc">
         <div style="font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Abas visíveis ${m.role==='admin'?'· admin vê tudo':''}</div>
         <div class="set-acc-grid">${checks}</div>
@@ -2369,6 +2952,11 @@ async function salvarMembro(id){
     await cloudCall('save',{action:'update-member',id,full_name,role,active,permissions});
     const m=(WFA_MEMBERS||[]).find(x=>x.id===id);if(m){m.full_name=full_name;m.role=role;m.active=active;m.permissions=permissions;}
     if(WFA_MEMBER&&WFA_MEMBER.id===id){WFA_MEMBER.full_name=full_name;WFA_MEMBER.role=role;WFA_MEMBER.permissions=permissions;renderIdentity();applyAccess();}
+    // Agenda Google do membro (guardada na nuvem em wfa-gcal, controlada só pelo admin)
+    const calRaw=(row.querySelector('.set-cal')?.value||'').trim();
+    if(!state.gcal)state.gcal={};
+    if(calRaw)state.gcal[id]=extractCalSrc(calRaw);else delete state.gcal[id];
+    saveGcal();applyCalendars();
     renderMeuDia();
     toast('✓ Membro atualizado');
   }catch(e){toast('⚠ '+(e.message||'Erro ao atualizar'));}
@@ -2409,6 +2997,40 @@ function removerExemplos(){
   const removed=before-state.tarefas.length;
   saveTarefas();renderMeuDia();
   toast(removed?('✓ '+removed+' exemplos removidos'):'Nenhum exemplo para remover');
+}
+
+/* ============ MIGRAÇÃO DE DADOS (exportar/importar) ============ */
+function exportarDados(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&(k.startsWith('wfa-')||k.startsWith('wfa-ckl-')))data[k]=localStorage.getItem(k);}
+  const json=JSON.stringify(data);
+  try{navigator.clipboard&&navigator.clipboard.writeText(json);}catch(e){}
+  try{
+    const blob=new Blob([json],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='workflowark-dados-'+new Date().toISOString().split('T')[0]+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+  }catch(e){}
+  const ta=document.getElementById('set-import');if(ta)ta.value=json;
+  toast('✓ Dados exportados (copiados, baixados e colados no campo abaixo)');
+}
+async function importarDados(){
+  const ta=document.getElementById('set-import');const raw=(ta&&ta.value||'').trim();
+  if(!raw){toast('Cole os dados exportados primeiro');return;}
+  let data;try{data=JSON.parse(raw);}catch(e){toast('⚠ Dados inválidos (JSON)');return;}
+  if(!data||typeof data!=='object'){toast('⚠ Formato inválido');return;}
+  const remote={};let n=0;
+  Object.entries(data).forEach(([k,v])=>{
+    if(!(String(k).startsWith('wfa-')))return;
+    remote[k]=(typeof v==='string'?parseCloudValue(v):v);n++;
+  });
+  if(!n){toast('⚠ Nenhum dado do WorkFlowArk encontrado');return;}
+  applyCloudState(remote);
+  // também aplica checklists de POPs (wfa-ckl-*), que não entram no applyCloudState
+  Object.entries(data).forEach(([k,v])=>{if(String(k).startsWith('wfa-ckl-'))WFA_LS_SET(k,typeof v==='string'?v:JSON.stringify(v));});
+  try{await cloudCall('save',{action:'save-many',entries:collectLocalCloudState()});}catch(e){}
+  renderMeuDia();
+  toast('✓ '+n+' blocos importados e sincronizados');
 }
 
 function renderTarefas(){
@@ -2545,6 +3167,11 @@ renderClientes();
 renderSprints();
 renderTarefas();
 renderRegua();
+renderCobranca();
+renderAcerto();
+renderPlanilha();
+renderWhatsapp();
+renderNotificacoes();
 updateBadges();
 
 // se vazio, semear duas tarefas de exemplo
@@ -2640,12 +3267,601 @@ function delTaskFromModal(){
 }
 
 /* Agenda e financeiro agora são iframes hardcoded — funções mantidas como stub para compatibilidade */
-function renderGcal(){}
-function renderFin(){}
-function saveGcal(){toast('Agenda integrada diretamente.');}
-function clearGcal(){}
-function saveFin(){toast('Planilha integrada diretamente.');}
-function clearFin(){}
+/* ============ AGENDA GOOGLE (por pessoa) ============ */
+// (DEFAULT_CALENDARS foi movido para o topo do script p/ evitar erro de inicialização)
+function normName(s){return String(s||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
+// Aceita o e-mail da agenda OU o código iframe inteiro (extrai o src=).
+function extractCalSrc(input){
+  if(!input)return '';
+  const s=String(input).trim();
+  const m=s.match(/[?&]src=([^&"'\s>]+)/i);
+  if(m){try{return decodeURIComponent(m[1]);}catch(e){return m[1];}}
+  return s;
+}
+// Valor guardado/mostrado para um membro (cadastro do admin ou padrão pelo nome).
+function calForMember(m){
+  if(!m)return '';
+  const g=state.gcal||{};
+  if(g[m.id])return g[m.id];
+  const nn=normName(m.full_name);
+  if(nn&&DEFAULT_CALENDARS[nn])return DEFAULT_CALENDARS[nn];
+  return '';
+}
+// Agenda do usuário logado.
+function currentUserCalSrc(){
+  const m=WFA_MEMBER;
+  if(!m)return DEFAULT_CALENDARS['gabriel andrade']||'';
+  const g=state.gcal||{};
+  if(g[m.id])return extractCalSrc(g[m.id]);
+  if(m.email&&g[m.email])return extractCalSrc(g[m.email]);
+  const nn=normName(m.full_name);
+  if(nn&&g[nn])return extractCalSrc(g[nn]);
+  if(nn&&DEFAULT_CALENDARS[nn])return DEFAULT_CALENDARS[nn];
+  return '';
+}
+function calEmbedUrl(src,mini){
+  const enc=encodeURIComponent(src);
+  const base='https://calendar.google.com/calendar/embed?src='+enc+'&ctz=America%2FSao_Paulo';
+  return mini?base+'&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1':base;
+}
+function applyCalendars(){
+  const src=currentUserCalSrc();
+  const md=document.getElementById('md-agenda-iframe');
+  const pg=document.getElementById('gcal-iframe');
+  if(!src)return; // sem agenda definida: mantém o que estiver
+  if(md){const u=calEmbedUrl(src,true);if(md.getAttribute('src')!==u)md.setAttribute('src',u);}
+  if(pg){const u=calEmbedUrl(src,false);if(pg.getAttribute('src')!==u)pg.setAttribute('src',u);}
+}
+function renderGcal(){applyCalendars();}
+/* ============ WHATSAPP (Z-API) ============ */
+function wppOpen(phone){WPP_ACTIVE=phone;renderWhatsapp();}
+function renderWhatsapp(){
+  const wrap=document.getElementById('wpp-wrap');if(!wrap)return;
+  const conv=(state.whatsapp&&state.whatsapp.conversas)||{};
+  const list=Object.values(conv).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  const status=document.getElementById('wpp-status');
+  if(status)status.textContent=list.length?(list.length+' conversa(s)'):'';
+  const naoLidasWpp=list.reduce((s,c)=>s+(c.unread||0),0);
+  const wbTop=document.getElementById('wpp-badge-top');
+  if(wbTop){wbTop.textContent=naoLidasWpp>99?'99+':naoLidasWpp;wbTop.style.display=naoLidasWpp?'flex':'none';}
+  const webhookUrl=location.origin+'/api/workflowark/whatsapp/webhook';
+  if(!list.length){
+    wrap.innerHTML=`<div class="card" style="padding:24px;font-size:13.5px;color:var(--txt);line-height:1.6">
+      <strong>Ainda não há conversas.</strong> Quando a Z-API estiver conectada e chegar uma mensagem, ela aparece aqui.<br><br>
+      <span style="color:var(--mute)">No painel da Z-API, configure o <strong>webhook "Ao receber"</strong> apontando para este endereço:</span><br>
+      <code style="display:inline-block;margin-top:6px;background:#f4f4f4;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12px">${webhookUrl}</code>
+    </div>`;return;
+  }
+  if(!WPP_ACTIVE||!conv[WPP_ACTIVE])WPP_ACTIVE=list[0].phone;
+  const active=conv[WPP_ACTIVE];
+  const items=list.map(c=>{
+    const last=c.msgs&&c.msgs[c.msgs.length-1];
+    const lastTxt=last?((last.dir==='out'?'Você: ':'')+(last.text||'')):'';
+    return `<button onclick="wppOpen('${c.phone}')" style="display:block;width:100%;text-align:left;border:none;border-bottom:1px solid var(--line);background:${c.phone===WPP_ACTIVE?'var(--yel-bg,#fff7d6)':'#fff'};padding:10px 12px;cursor:pointer">
+      <div style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span style="font-weight:700;font-size:13px">${mdEsc(c.nome||c.phone)}</span>${c.unread?`<span style="background:#25D366;color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:1px 7px">${c.unread}</span>`:''}</div>
+      <div style="font-size:11.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mdEsc(lastTxt).slice(0,64)}</div>
+    </button>`;
+  }).join('');
+  const msgs=(active.msgs||[]).map(m=>{
+    const out=m.dir==='out';
+    return `<div style="display:flex;justify-content:${out?'flex-end':'flex-start'};margin:4px 0">
+      <div style="max-width:72%;background:${out?'var(--yel,#ffd400)':'#fff'};color:${out?'#111':'var(--ink,#111)'};border:1px solid ${out?'var(--yel,#ffd400)':'var(--line)'};border-radius:12px;padding:7px 11px;font-size:13px;box-shadow:0 1px 1px rgba(0,0,0,.05)">${mdEsc(m.text)}<div style="font-size:9.5px;color:${out?'rgba(0,0,0,.45)':'var(--mute)'};text-align:right;margin-top:3px">${m.ts?new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}</div></div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=`<div style="display:grid;grid-template-columns:260px 1fr;gap:14px;height:calc(100vh - 220px)">
+    <div class="card" style="padding:0;overflow:auto">${items}</div>
+    <div class="card" style="padding:0;display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:12px 14px;background:#111;color:#fff;font-weight:700;display:flex;align-items:center;gap:8px"><span style="width:30px;height:30px;border-radius:50%;background:var(--yel,#ffd400);color:#111;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">${mdEsc((active.nome||active.phone||'?').trim().charAt(0).toUpperCase())}</span>${mdEsc(active.nome||active.phone)} <span style="color:var(--yel,#ffd400);font-weight:600;font-size:12px">· ${mdEsc(active.phone)}</span></div>
+      <div id="wpp-msgs" style="flex:1;overflow:auto;padding:14px;background:#f6f6f4">${msgs}</div>
+      ${active.sugestao?`<div style="padding:9px 12px;border-top:1px solid var(--line);background:var(--yel-bg,#fff7d6)">
+        <div style="font-size:10.5px;font-weight:800;color:#8a6d00;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">✨ Sugestão da IA</div>
+        <div style="font-size:12.5px;color:var(--ink,#111);margin-bottom:7px">${mdEsc(active.sugestao)}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="wppEnviarSugestao()">✓ Aprovar e enviar</button>
+          <button class="tb-btn" onclick="wppEditarSugestao()">✎ Editar</button>
+          <button class="tb-btn" onclick="wppDescartarSugestao()">Descartar</button>
+        </div>
+      </div>`:''}
+      <div style="display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:#fff">
+        <input id="wpp-input" class="form-input" placeholder="Escreva uma mensagem..." style="flex:1" onkeydown="if(event.key==='Enter')wppSend()">
+        <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="wppSend()">Enviar</button>
+      </div>
+    </div>
+  </div>`;
+  const mb=document.getElementById('wpp-msgs');if(mb)mb.scrollTop=mb.scrollHeight;
+  if(active.unread)active.unread=0;
+}
+/* ============ NOTIFICAÇÕES (assistente) ============ */
+function notifReadSet(){try{return new Set(JSON.parse(localStorage.getItem('wfa-notif-read')||'[]'));}catch(e){return new Set();}}
+function notifSaveRead(set){try{WFA_LS_SET('wfa-notif-read',JSON.stringify([...set]));}catch(e){}}
+function renderNotificacoes(){
+  const arr=(state.notificacoes&&Array.isArray(state.notificacoes))?state.notificacoes:[];
+  const read=notifReadSet();
+  const naoLidas=arr.filter(n=>!read.has(n.id)).length;
+  const badge=document.getElementById('notif-badge');
+  if(badge){badge.textContent=naoLidas;badge.style.display=naoLidas?'':'none';}
+  const badgeTop=document.getElementById('notif-badge-top');
+  if(badgeTop){badgeTop.textContent=naoLidas>99?'99+':naoLidas;badgeTop.style.display=naoLidas?'flex':'none';}
+  const wrap=document.getElementById('notif-wrap');if(!wrap)return;
+  if(!arr.length){wrap.innerHTML='<div class="card" style="padding:24px;color:var(--mute)">Nada por aqui ainda. Quando chegar mensagem no WhatsApp, o assistente cria a tarefa e te avisa aqui.</div>';return;}
+  wrap.innerHTML=arr.map(n=>{
+    const nova=!read.has(n.id);
+    const dt=n.ts?new Date(n.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    return `<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid ${nova?'var(--yel,#ffd400)':'var(--line)'};display:flex;justify-content:space-between;gap:10px;align-items:center">
+      <div><div style="font-size:13px;font-weight:${nova?'700':'500'}">${mdEsc(n.texto||'')}</div><div style="font-size:11px;color:var(--mute);margin-top:3px">${dt}${n.tarefaId?' · tarefa criada':''}</div></div>
+      ${nova?`<button class="tb-btn" onclick="marcarNotifLida('${n.id}')">ok</button>`:''}
+    </div>`;
+  }).join('');
+}
+function marcarNotifLida(id){const s=notifReadSet();s.add(id);notifSaveRead(s);renderNotificacoes();}
+function marcarNotifLidas(){const s=notifReadSet();(state.notificacoes||[]).forEach(n=>s.add(n.id));notifSaveRead(s);renderNotificacoes();toast('Notificações marcadas como lidas');}
+async function rotGerar(){
+  const tema=(document.getElementById('rot-tema').value||'').trim();
+  const out=document.getElementById('rot-out');const st=document.getElementById('rot-status');
+  if(!tema){if(st)st.textContent='Escreva o tema do vídeo.';return;}
+  const cliente=document.getElementById('rot-cliente').value||'';
+  const plataforma=document.getElementById('rot-plat').value||'Instagram Reels';
+  const qtd=document.getElementById('rot-qtd').value||'3';
+  if(st)st.textContent='🎬 Roteirizando...';if(out)out.textContent='Gerando roteiros com o método viral...';
+  try{
+    const r=await cloudCall('save',{action:'agente-roteirista',tema,cliente,plataforma,qtd});
+    if(out)out.textContent=(r&&r.text)||'(sem resposta)';if(st)st.textContent='Pronto ✓';
+  }catch(e){if(out)out.textContent='⚠ '+(e.message||'Falha ao gerar');if(st)st.textContent='';}
+}
+function rotCopiar(){const t=document.getElementById('rot-out').textContent||'';navigator.clipboard?.writeText(t).then(()=>toast('Roteiros copiados'),()=>toast('Não consegui copiar'));}
+async function wfaUploadFile(file){
+  const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(file);});
+  return cloudCall('save',{action:'upload-file',filename:file.name,contentType:file.type||'application/octet-stream',dataBase64:b64});
+}
+async function vivGalImg(input,imgId){
+  const f=input.files&&input.files[0];if(!f)return;const el=document.getElementById(imgId);if(el)el.textContent='enviando…';
+  try{const r=await wfaUploadFile(f);if(r&&r.url&&el){el.style.backgroundImage='url('+r.url+')';el.textContent='';toast('Imagem enviada ✓');}}
+  catch(e){toast('⚠ '+(e.message||'Falha no upload'));if(el)el.textContent='+ enviar imagem';}
+}
+async function arquivoUpload(input){
+  const f=input.files&&input.files[0];if(!f)return;const pg=document.querySelector('.page.active');const out=(pg&&pg.querySelector('.arq-out'))||document.querySelector('.arq-out');if(out)out.textContent='📤 Enviando '+f.name+'…';
+  try{const r=await wfaUploadFile(f);if(r&&r.url){const isImg=/^image\//.test(f.type||'');if(out)out.innerHTML='✅ <strong>'+f.name.replace(/[<>]/g,'')+'</strong> · <a href="'+r.url+'" target="_blank" style="color:#0a7;font-weight:600">abrir</a> &nbsp; <button class="tb-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.dataset.u);toast(\'Link copiado\')" data-u="'+r.url+'">copiar link</button>'+(isImg?'<div style="margin-top:10px"><img src="'+r.url+'" style="max-width:260px;border-radius:14px"></div>':'');}else if(out)out.textContent='⚠ Falha no upload';}
+  catch(e){if(out)out.textContent='⚠ '+(e.message||'Falha no upload');}
+}
+/* ============ DRIVE + ROTEIROS VIVENDA ============ */
+const ROTEIROS_VIVENDA=[
+ {n:'01',titulo:'O Brasil joga e seu coração dispara',meta:'Reels Institucional/Educativo · ~45s · Estreia da Copa · BLOCO COPA',ctx:'Ansiedade e pressão na torcida — gancho de saúde real (calmante natural manipulado).',cenas:[
+  ['Torcida vibrando, mãos na cabeça. Cortes secos, câmera rápida.','(OFF) "Tem gente que sofre mais na arquibancada do que o jogador em campo."','Energia alta. Sem texto na tela ainda.'],
+  ['Close no peito ofegante / relógio batendo forte.','(OFF) "Coração disparado, pressão subindo, mão gelada — todo jogo é assim com você?"','Identificação. Lettering: "todo jogo?".'],
+  ['Farmacêutico na bancada, pesando ativo com precisão.','(OFF) "A Vivenda manipula calmantes naturais, na dose certa pro seu caso."','Ambiente técnico = confiança.'],
+  ['Cliente assistindo o jogo tranquilo, sorrindo.','(OFF) "Pra você torcer com emoção. E com saúde."','Resolução leve.'],
+  ['Logo Vivenda, fundo verde.','(OFF) "Vivenda. Sua farmácia de manipulação."','CTA visual entra aqui.'],
+ ],cta:'Manda COPA no WhatsApp e fala com o farmacêutico.',leg:'Torcer faz bem. Passar mal, não. 💚⚽ #copa #bemestar #vivenda'},
+
+ {n:'02',titulo:'Maratona de jogos sem desabar',meta:'Reels Educativo · ~40s · 1a semana de Copa · BLOCO COPA',ctx:'Energia e imunidade pra aguentar rotina somada aos jogos (composto manipulado).',cenas:[
+  ['Pessoa jogada no sofá depois do jogo, exausta.','(OFF) "Jogo de manhã, trabalho, jogo de novo. E você terminando a semana no zero."','Dor real do mês.'],
+  ['Cortes: xícara de café vazia, olheiras no espelho.','(OFF) "Cafeína demais não é energia. É dívida que o corpo cobra depois."','Tira a culpa.'],
+  ['Manipulação de complexo vitamínico, etiqueta personalizada.','(OFF) "A gente monta um composto de energia e imunidade pro SEU corpo. Não um genérico de prateleira."','Diferencial técnico.'],
+  ['Pessoa disposta no dia seguinte, no trabalho e no jogo.','(OFF) "Pra você viver a Copa inteira de pé."','Transformação.'],
+ ],cta:'Comenta ENERGIA que a gente te explica.',leg:'Aguenta a Copa inteira. ⚡ #imunidade #energia #copa #vivenda'},
+
+ {n:'03',titulo:'Kit Torcedor Saudável',meta:'Reels Produto/Conversão · ~30s · Antes do 1o jogo do Brasil · BLOCO COPA',ctx:'Combo manipulado (energia + digestão + hidratação) — oferta concreta.',cenas:[
+  ['Kit sendo montado à mão, laço, embalagem cuidadosa.','(OFF) "Criamos o Kit Torcedor: energia, digestão e hidratação na medida certa."','Appetite appeal do produto.'],
+  ['Close na etiqueta com o nome do ativo / do cliente.','(OFF) "Manipulado com o mesmo rigor das nossas fórmulas. Feito pra você."','Reforço de segurança técnica.'],
+  ['Kit entregue, cliente sorrindo.','(OFF) "Porque torcer também é se cuidar."','Humanização + CTA.'],
+ ],cta:'Garanta o seu: manda KIT no WhatsApp.',leg:'O kit que todo torcedor devia ter. ⚽💊 #kit #copa #vivenda'},
+
+ {n:'04',titulo:'Dormir depois do jogo das 22h',meta:'Reels Educativo · ~40s · Meio da Copa · BLOCO COPA',ctx:'Sono (fórmula do sono manipulada) — jogos tarde da noite.',cenas:[
+  ['Tela do celular 1h da manhã, olhos abertos no escuro.','(OFF) "Jogo emocionante. E agora o sono simplesmente não vem."','Identificação.'],
+  ['Pessoa apagando no trabalho no dia seguinte.','(OFF) "Dormir mal vira bola de neve: humor, imunidade, produtividade."','Consequência real.'],
+  ['Farmacêutico ajustando fórmula do sono.','(OFF) "A gente ajusta a fórmula do sono pro seu ritmo. Sem te deixar grogue no outro dia."','Autoridade.'],
+  ['Pessoa dormindo tranquila.','(OFF) "Curtiu o jogo? Agora descanse de verdade."','Resolução.'],
+ ],cta:'Fala com o farmacêutico no WhatsApp.',leg:'Curtiu o jogo? Agora durma bem. 🌙 #sono #bemestar #copa'},
+
+ {n:'05',titulo:'Petisco de jogo que não te derruba',meta:'Reels Prova Social/UGC · ~30s · Durante a Copa · BLOCO COPA',ctx:'Digestivo manipulado. Gravação natural de celular (cliente/representante).',cenas:[
+  ['Cliente em selfie/vlog, ambiente de casa.','(FALA) "Todo jogo é petisco, fritura, cerveja. E meu estômago reclamando depois."','Estilo celular, espontâneo.'],
+  ['Mostra o produto manipulado na mão.','(FALA) "A Vivenda me indicou um digestivo na medida certa. Mudou minha Copa."','Reação genuína.'],
+  ['Pessoa de boa assistindo o próximo jogo.','(FALA) "Agora aproveito o jogo, e o estômago fica quieto."','Prova social.'],
+ ],cta:'Salva esse vídeo e marca seu parceiro de jogo.',leg:'Aproveita o jogo, o estômago a gente cuida. ⚽ #digestao #copa #vivenda'},
+
+ {n:'06',titulo:'Presenteie saúde',meta:'Reels Institucional/Cosméticos · ~45s · Dia dos Namorados 12/06',ctx:'Dermocosmético manipulado como presente que cuida.',cenas:[
+  ['Casal, presente genérico (perfume) deixado de lado.','(OFF) "Mais uma vez o perfume repetido?"','Provocação leve, bom humor.'],
+  ['Linha de dermocosméticos da Vivenda, embalagem bonita.','(OFF) "Que tal presentear cuidado de verdade? Skincare manipulado pro tipo de pele de quem você ama."','Posicionamento Bem-Estar.'],
+  ['Presente sendo entregue, sorriso.','(OFF) "Um presente que diz: eu quero te ver bem."','Emoção.'],
+ ],cta:'Monta o presente: chama no WhatsApp.',leg:'Amor também é cuidar da pele de quem você ama. 💝 #diadosnamorados #cosmeticos #vivenda'},
+
+ {n:'07',titulo:'Depois do arraiá',meta:'Reels Educativo · ~35s · Festa Junina',ctx:'Digestivo manipulado para os excessos das festas juninas.',cenas:[
+  ['Mesa farta de quitutes juninos.','(OFF) "Quentão, pé de moleque, paçoca, pamonha. E amanhã a azia chega."','Bom humor.'],
+  ['Pessoa com a mão na barriga, desconforto.','(OFF) "Festa junina é uma vez no ano. O mal-estar não precisa ser."','Identificação.'],
+  ['Manipulação do digestivo personalizado.','(OFF) "A gente tem a fórmula certa pra você aproveitar o arraiá inteiro."','Solução.'],
+ ],cta:'Manda ARRAIA no WhatsApp.',leg:'Aproveita o forró sem pagar o preço. 🌽 #festajunina #digestao #vivenda'},
+
+ {n:'08',titulo:'O remédio que não foi feito pra você',meta:'Reels Educativo/Autoridade · ~45s · Evergreen',ctx:'Manipulação x industrializado.',cenas:[
+  ['Prateleira de farmácia lotada de caixas iguais.','(OFF) "Você paga caro por um remédio igual pra milhões de pessoas diferentes."','Gancho de contradição.'],
+  ['Farmacêutico manipulando, dose exata.','(OFF) "Manipulado é o contrário: a dose certa, pro seu corpo, pra sua necessidade."','Diferencial.'],
+  ['Atendimento no balcão, conversa real.','(OFF) "Por isso a gente conversa antes. Não é vender caixa, é resolver."','Confiança.'],
+ ],cta:'Manda FORMULA no WhatsApp e o farmacêutico te orienta.',leg:'Remédio bom é o que é seu. 💊 #manipulacao #vivenda'},
+
+ {n:'09',titulo:'O que ninguém vê antes do seu remédio ficar pronto',meta:'Reels Bastidor/Confiança · ~40s · Evergreen',ctx:'Processo de manipulação = segurança e cuidado.',cenas:[
+  ['Porta da sala de manipulação se abrindo, jaleco.','(OFF) "O que ninguém vê antes do seu remédio ficar pronto."','Abertura curiosa.'],
+  ['Close na balança de precisão pesando o ativo. [CORTE]','(OFF) "Pesagem exata."','Detalhe técnico.'],
+  ['Farmacêutico conferindo a fórmula (dupla checagem). [CORTE]','(OFF) "Conferência dupla."','Segurança.'],
+  ['Embalagem com o nome do cliente na etiqueta.','(OFF) "Com o seu nome. Não é produção em massa. É pra você."','Personalização.'],
+ ],cta:'Salva esse vídeo e venha conhecer a Vivenda.',leg:'Por trás de cada fórmula, gente cuidando de gente. 🤍 #bastidores #manipulacao'},
+
+ {n:'10',titulo:'Pele ressecada no inverno?',meta:'Reels Cosméticos/Educativo · ~40s · Evergreen de inverno',ctx:'Dermocosmético manipulado para o frio.',cenas:[
+  ['Close em pele descamando / lábio rachado.','(OFF) "O frio chegou e sua pele virou um deserto."','Identificação visual.'],
+  ['Pessoa testando vários cremes sem resultado.','(OFF) "Creme genérico não trata o SEU tipo de pele."','Tira a culpa.'],
+  ['Manipulação de dermocosmético, ativo certo.','(OFF) "A gente formula o ativo certo, na concentração certa, pro seu objetivo."','Diferencial.'],
+ ],cta:'Comenta PELE que a gente te monta a rotina.',leg:'Inverno sem ressecar. ❄️✨ #skincare #inverno #vivendacosmeticos'},
+
+ {n:'11',titulo:'Imunidade não se compra no chute',meta:'Reels Educativo · ~40s · Evergreen Bem-Estar',ctx:'Suplementação personalizada com base no que o corpo precisa.',cenas:[
+  ['Gaveta cheia de potes de vitamina aleatórios.','(OFF) "Tomando vitamina sem saber o que falta no seu corpo?"','Gancho.'],
+  ['Pessoa cansada, sem energia.','(OFF) "Isso é jogar dinheiro fora. E continuar do mesmo jeito."','Consequência.'],
+  ['Farmacêutico analisando exame do cliente.','(OFF) "A gente parte do que você sente e do seu exame pra montar a fórmula certa."','Autoridade consultiva.'],
+ ],cta:'Traga sua dúvida (ou seu exame) no WhatsApp.',leg:'Imunidade de verdade é personalizada. ⚡ #imunidade #bemestar #vivenda'},
+
+ {n:'12',titulo:'Farmácia que te conhece pelo nome',meta:'Reels Institucional · ~45s · Evergreen',ctx:'Atendimento humano como diferencial.',cenas:[
+  ['Senha de papel amassada no chão / fila enorme.','(OFF) "Farmácia que te chama por número é fila. Não é farmácia."','Gancho provocativo.'],
+  ['Atendente cumprimentando cliente pelo nome, com sorriso.','(OFF) "Aqui a gente lembra do seu nome e do seu tratamento."','Diferencial humano.'],
+  ['Cliente tirando dúvida com farmacêutico de verdade.','(OFF) "Dúvida de remédio? Você fala com gente. Não com um totem."','Contraste.'],
+  ['Logo Vivenda.','(OFF) "Porque cuidar de saúde é pessoal."','Fechamento.'],
+ ],cta:'Vem pra Vivenda. E marca quem precisa ouvir isso.',leg:'Aqui você tem nome, não número. 🤍 #atendimento #vivenda'},
+];
+function renderRoteirosVivenda(){
+  return ROTEIROS_VIVENDA.map(r=>`<div class="rot-doc"><div class="rot-num"><span class="q">#${r.n}</span> · "${mdEsc(r.titulo)}"</div><div class="rot-meta">${mdEsc(r.meta)}</div><div class="rot-ctx"><strong>Contexto:</strong> ${mdEsc(r.ctx)}</div><table class="rot-tab"><thead><tr><th>Cena</th><th>Visual / Take</th><th>Fala / Locução</th><th>Observações</th></tr></thead><tbody>${r.cenas.map((c,i)=>`<tr><td>${i+1}</td><td>${mdEsc(c[0])}</td><td class="fala">${mdEsc(c[1])}</td><td>${mdEsc(c[2])}</td></tr>`).join('')}</tbody></table><div class="rot-cta">🎯 ${mdEsc(r.cta)}</div><div class="rot-leg">Legenda: ${mdEsc(r.leg)}</div></div>`).join('');
+}
+const DRIVE={'Farmácia Vivenda':{ico:'💊',pastas:{
+  'Roteiros Vivenda':{ico:'🎬',tipo:'doc',meta:'12 roteiros · Junho 2026'},
+  'Planejamentos':{ico:'📑',tipo:'vazio'},
+  'Artes':{ico:'🎨',tipo:'vazio'},
+  'Vídeos':{ico:'🎞️',tipo:'vazio'},
+}}};
+let DRIVE_PATH=[];
+function driveGo(i){DRIVE_PATH=DRIVE_PATH.slice(0,i);renderDrive();}
+function driveOpen(name){DRIVE_PATH.push(name);renderDrive();}
+function driveCopiarRoteiros(){const t=document.getElementById('dz-body');navigator.clipboard?.writeText(t?t.innerText:'').then(()=>toast('Roteiros copiados'),()=>toast('Não consegui copiar'));}
+function renderDrive(){
+  const body=document.getElementById('dz-body');const cr=document.getElementById('dz-crumbs');if(!body)return;
+  let crumbs=`<b onclick="driveGo(0)">📂 Drive</b>`;
+  DRIVE_PATH.forEach((p,i)=>{crumbs+=` <span style="color:var(--mute-2)">/</span> <span onclick="driveGo(${i+1})">${mdEsc(p)}</span>`;});
+  if(cr)cr.innerHTML=crumbs;
+  if(DRIVE_PATH.length===0){
+    body.innerHTML=`<div class="dz-grid">${Object.entries(DRIVE).map(([nm,c])=>`<div class="dz-card" onclick="driveOpen('${nm.replace(/'/g,"")}')"><div class="dz-ico">${c.ico}</div><div class="dz-nm">${mdEsc(nm)}</div><div class="dz-meta">${Object.keys(c.pastas).length} pastas</div></div>`).join('')}</div>`;return;
+  }
+  const cli=DRIVE[DRIVE_PATH[0]];if(!cli){body.innerHTML='';return;}
+  if(DRIVE_PATH.length===1){
+    body.innerHTML=`<div class="dz-grid">${Object.entries(cli.pastas).map(([nm,p])=>`<div class="dz-card ${p.tipo==='doc'?'doc':''}" onclick="driveOpen('${nm.replace(/'/g,"")}')"><div class="dz-ico">${p.ico}</div><div class="dz-nm">${mdEsc(nm)}</div><div class="dz-meta">${p.tipo==='doc'?(p.meta||'documento'):'pasta'}</div></div>`).join('')}</div>`;return;
+  }
+  if(DRIVE_PATH[1]==='Roteiros Vivenda'){
+    body.innerHTML=`<div class="dz-doc-head"><h2>🎬 Roteiros Vivenda — Junho 2026</h2><button class="tb-btn" onclick="driveCopiarRoteiros()">⧉ Copiar tudo</button></div>${renderRoteirosVivenda()}`;
+  }else{
+    body.innerHTML=`<div class="card" style="padding:24px;color:var(--mute)">Pasta vazia por enquanto. Use "📎 Enviar arquivo" lá em cima pra subir documentos aqui.</div>`;
+  }
+}
+async function vivAgente(){
+  const inp=document.getElementById('viv-ag-input');const out=document.getElementById('viv-ag-out');
+  const p=(inp&&inp.value||'').trim();if(!p)return;
+  if(out)out.textContent='🤔 O agente da Vivenda está pensando...';
+  try{
+    const r=await cloudCall('save',{action:'agente-vivenda',prompt:p});
+    if(out)out.textContent=(r&&r.text)||'(sem resposta)';
+  }catch(e){if(out)out.textContent='⚠ '+(e.message||'Não consegui consultar o agente');}
+}
+function wppConvAtiva(){return state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[WPP_ACTIVE];}
+function wppEnviarSugestao(){const c=wppConvAtiva();if(!c||!c.sugestao)return;const inp=document.getElementById('wpp-input');if(inp)inp.value=c.sugestao;c.sugestao='';wppSend();}
+function wppEditarSugestao(){const c=wppConvAtiva();if(!c)return;const s=c.sugestao||'';c.sugestao='';renderWhatsapp();const inp=document.getElementById('wpp-input');if(inp){inp.value=s;inp.focus();}}
+function wppDescartarSugestao(){const c=wppConvAtiva();if(c)c.sugestao='';renderWhatsapp();}
+async function wppSend(){
+  const inp=document.getElementById('wpp-input');const msg=(inp&&inp.value||'').trim();if(!msg||!WPP_ACTIVE)return;
+  inp.value='';
+  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[WPP_ACTIVE];
+  if(c){c.msgs=c.msgs||[];c.msgs.push({dir:'out',text:msg,ts:Date.now()});c.updatedAt=Date.now();renderWhatsapp();}
+  try{
+    await cloudCall('save',{action:'send-whatsapp',phone:WPP_ACTIVE,message:msg});
+    toast('Enviado ✓');
+  }catch(e){toast('⚠ '+(e.message||'Não consegui enviar'));}
+}
+/* ============ FINANCEIRO · lê a planilha do Google ============ */
+let FIN_CACHE=null;
+// Parser de CSV simples que respeita campos entre aspas (ex: "R$ 2.000,00").
+function finParseCSV(text){
+  const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(q){
+      if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}
+      else cur+=ch;
+    }else{
+      if(ch==='"')q=true;
+      else if(ch===','){row.push(cur);cur='';}
+      else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur='';}
+      else if(ch==='\r'){/* ignora */}
+      else cur+=ch;
+    }
+  }
+  if(cur!==''||row.length){row.push(cur);rows.push(row);}
+  return rows;
+}
+function finBRL(v){return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function finNum(s){
+  if(s==null)return 0;
+  let t=String(s).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');
+  const n=parseFloat(t);return isNaN(n)?0:n;
+}
+function finIsTotal(s){return /total/i.test(String(s||''));}
+function finParse(rows){
+  const receitas=[],pagar=[];let resultadoMes=null,resultadoPct='',caixa=null;
+  rows.forEach(r=>{
+    const cspOrLabel=(r[0]||'').trim();
+    const nomeR=(r[1]||'').trim(), valR=(r[2]||'').trim(), custoR=(r[3]||'').trim();
+    const nomeP=(r[4]||'').trim(), valP=(r[5]||'').trim();
+    // Receitas (clientes): col B nome, C valor, D custo — ignora cabeçalho e total
+    if(nomeR&&!/^nome$/i.test(nomeR)&&!finIsTotal(nomeR)&&!/resultado|caixa/i.test(nomeR)&&(valR||custoR)){
+      const valor=finNum(valR), custo=finNum(custoR);
+      if(valor>0||custo>0)receitas.push({csp:cspOrLabel,nome:nomeR,valor,custo});
+    }
+    // A Pagar (colaboradores/despesas): col E nome, F valor
+    if(nomeP&&!/^nome$/i.test(nomeP)&&!finIsTotal(nomeP)&&valP){
+      const valor=finNum(valP);
+      pagar.push({nome:nomeP,valor});
+    }
+    // Resultado / Caixa (col B rótulo, C valor, D %)
+    if(/resultado do m[eê]s/i.test(nomeR)){resultadoMes=finNum(valR);resultadoPct=(custoR||'').trim();}
+    if(/^caixa$/i.test(nomeR))caixa=finNum(valR);
+  });
+  return {receitas,pagar,resultadoMes,resultadoPct,caixa};
+}
+function finKpiCard(cls,label,val,sub){return `<div class="kpi ${cls}"><div class="l">${mdEsc(label)}</div><div class="v" style="font-size:19px">${mdEsc(val)}</div><div class="d">${mdEsc(sub||'')}</div></div>`;}
+function finRender(d){
+  const totRec=d.receitas.reduce((s,x)=>s+x.valor,0);
+  const totCusto=d.receitas.reduce((s,x)=>s+x.custo,0);
+  const totPagar=d.pagar.reduce((s,x)=>s+x.valor,0);
+  const resultado=d.resultadoMes!=null?d.resultadoMes:(totRec-totPagar);
+  const pct=d.resultadoPct||(totRec>0?Math.round(resultado/totRec*100)+'%':'');
+  const kpis=document.getElementById('fin-kpis');
+  if(kpis)kpis.innerHTML=[
+    finKpiCard('green','A receber',finBRL(totRec),d.receitas.length+' clientes'),
+    finKpiCard('red','A pagar',finBRL(totPagar),d.pagar.length+' acertos'),
+    finKpiCard(resultado>=0?'yel':'red','Resultado do mês',finBRL(resultado),pct?('margem '+pct):''),
+    finKpiCard('dk','Caixa',d.caixa!=null?finBRL(d.caixa):'—','saldo atual'),
+  ].join('');
+  const recRows=d.receitas.map((x,i)=>{
+    const margem=x.valor>0?Math.round((1-x.custo/x.valor)*100):0;
+    const bg=i%2?'background:#fafafa':'';
+    const cor=margem>=40?'#1a7f3c':margem>=20?'#b36200':'#c0392b';
+    return `<tr style="${bg}"><td style="padding:7px 10px;font-weight:600">${mdEsc(x.nome)}</td><td style="padding:7px 10px;text-align:right;font-variant-numeric:tabular-nums">${finBRL(x.valor)}</td><td style="padding:7px 10px;text-align:right;color:var(--mute);font-variant-numeric:tabular-nums">${finBRL(x.custo)}</td><td style="padding:7px 10px;text-align:right;font-weight:700;color:${cor}">${margem}%</td></tr>`;
+  }).join('');
+  const pagRows=d.pagar.map((x,i)=>{const bg=i%2?'background:#fafafa':'';return `<tr style="${bg}"><td style="padding:7px 10px;font-weight:600">${mdEsc(x.nome)}</td><td style="padding:7px 10px;text-align:right;font-variant-numeric:tabular-nums">${finBRL(x.valor)}</td></tr>`;}).join('');
+  const th='style="text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);padding:8px 10px;border-bottom:1px solid var(--line)"';
+  const thr='style="text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);padding:8px 10px;border-bottom:1px solid var(--line)"';
+  const ft='style="padding:9px 10px;font-weight:800;border-top:2px solid var(--ink,#111)"';
+  const ftr='style="padding:9px 10px;text-align:right;font-weight:800;border-top:2px solid var(--ink,#111);font-variant-numeric:tabular-nums"';
+  const tables=document.getElementById('fin-tables');
+  if(tables)tables.innerHTML=`
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="font-weight:700;font-size:13px;padding:13px 14px;background:#eafaef;border-bottom:1px solid var(--line)">💚 A receber · Clientes <span style="color:var(--mute);font-weight:500">· ${d.receitas.length}</span></div>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+        <thead><tr><th ${th}>Cliente</th><th ${thr}>Valor</th><th ${thr}>Custo</th><th ${thr}>Margem</th></tr></thead>
+        <tbody>${recRows||'<tr><td colspan="4" style="padding:14px;color:var(--mute)">Sem dados neste mês</td></tr>'}</tbody>
+        <tfoot><tr><td ${ft}>Total</td><td ${ftr}>${finBRL(totRec)}</td><td ${ftr}>${finBRL(totCusto)}</td><td style="border-top:2px solid var(--ink,#111)"></td></tr></tfoot>
+      </table>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="font-weight:700;font-size:13px;padding:13px 14px;background:var(--yel-bg,#fff7d6);border-bottom:1px solid var(--line)">🟡 A acertar · Equipe & despesas <span style="color:var(--mute);font-weight:500">· ${d.pagar.length}</span></div>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+        <thead><tr><th ${th}>Quem / o quê</th><th ${thr}>Valor</th></tr></thead>
+        <tbody>${pagRows||'<tr><td colspan="2" style="padding:14px;color:var(--mute)">Sem dados neste mês</td></tr>'}</tbody>
+        <tfoot><tr><td ${ft}>Total</td><td ${ftr}>${finBRL(totPagar)}</td></tr></tfoot>
+      </table>
+    </div>`;
+}
+let FIN_SHEETS=null;          // lista de abas {gid,name}
+const FIN_CSV_CACHE={};       // csv por gid
+function finPopulateMonths(){
+  const sel=document.getElementById('fin-month');if(!sel||!FIN_SHEETS||!FIN_SHEETS.length)return;
+  if(sel.options.length)return;
+  sel.innerHTML=FIN_SHEETS.map(s=>`<option value="${s.gid}">${mdEsc(s.name.replace(/^Previs[ãa]o\s*/i,''))}</option>`).join('');
+  const mesAtual=new Date().toLocaleDateString('pt-BR',{month:'long'}).toLowerCase();
+  const norm=t=>String(t||'').toLowerCase();
+  const pick=FIN_SHEETS.find(s=>norm(s.name).includes(mesAtual)&&norm(s.name).includes('ark'))
+        ||FIN_SHEETS.find(s=>norm(s.name).includes(mesAtual))
+        ||FIN_SHEETS[FIN_SHEETS.length-1];
+  if(pick)sel.value=pick.gid;
+}
+async function renderFin(force){
+  if(!document.getElementById('fin-tables')&&!document.getElementById('fin-kpis'))return;
+  const sub=document.getElementById('fin-sub');
+  try{
+    if(!FIN_SHEETS){
+      const lr=await fetch('/api/workflowark/sheet?list=1');
+      const lj=await lr.json().catch(()=>({}));
+      FIN_SHEETS=(lj.sheets&&lj.sheets.length)?lj.sheets:[];
+      finPopulateMonths();
+    }
+    const sel=document.getElementById('fin-month');
+    const gid=sel&&sel.value?sel.value:'';
+    if(force&&sub)sub.textContent='Atualizando da planilha...';
+    let csv=FIN_CSV_CACHE[gid];
+    if(!csv||force){
+      const resp=await fetch('/api/workflowark/sheet'+(gid?('?gid='+encodeURIComponent(gid)):''),{cache:force?'reload':'default'});
+      if(!resp.ok)throw new Error('falha');
+      csv=await resp.text();FIN_CSV_CACHE[gid]=csv;
+    }
+    finRender(finParse(finParseCSV(csv)));
+    if(sub)sub.textContent='Puxado direto da sua planilha do Google · mexa só na planilha que aqui reflete.';
+  }catch(e){
+    if(sub)sub.textContent='⚠ Não consegui ler a planilha agora. Veja a planilha completa abaixo ou clique em Atualizar.';
+  }
+}
+
+/* ============ MINHA PLANILHA (estilo Excel: Clientes | Time) ============ */
+function savePlanilha(){localStorage.setItem('wfa-planilha',JSON.stringify(state.planilha||{}));}
+let PLAN_SAVE_T=null;
+function planSaveSoon(){clearTimeout(PLAN_SAVE_T);PLAN_SAVE_T=setTimeout(savePlanilha,600);}
+function planNum(s){if(s==null)return null;let t=String(s).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');if(t===''||isNaN(parseFloat(t)))return null;return parseFloat(t);}
+function planFmt(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});}
+function planNovoMes(nome,base){
+  const id='pm'+Date.now()+Math.floor(Math.random()*999);
+  if(base)return {id,nome:nome||'Novo mês',receitas:base.receitas.map(x=>({...x})),pagar:base.pagar.map(x=>({...x}))};
+  return {id,nome:nome||'Novo mês',receitas:[{nome:'',valor:0,custo:0}],pagar:[{nome:'',valor:0}]};
+}
+// migra formato antigo {cols,rows} -> {receitas,pagar}
+function planMigra(m){
+  if(m.receitas&&m.pagar)return m;
+  const rec=[],pag=[];const cols=m.cols||[];const ci=rx=>cols.findIndex(c=>new RegExp(rx,'i').test(c));
+  const jCat=ci('categor'),jVal=ci('valor'),jCusto=ci('custo');
+  (m.rows||[]).forEach(r=>{
+    const nome=(r[0]||'').trim();const cat=(jCat>=0?r[jCat]:'')||'';
+    const valor=planNum(jVal>=0?r[jVal]:r[2])||0;const custo=planNum(jCusto>=0?r[jCusto]:'')||0;
+    if(!nome&&!valor)return;
+    if(/pag/i.test(cat))pag.push({nome,valor});else rec.push({nome,valor,custo});
+  });
+  return {id:m.id,nome:m.nome,receitas:rec.length?rec:[{nome:'',valor:0,custo:0}],pagar:pag.length?pag:[{nome:'',valor:0}]};
+}
+function planEnsure(){
+  if(!state.planilha||typeof state.planilha!=='object'||!Array.isArray(state.planilha.meses)||!state.planilha.meses.length){
+    const seeded=state.planilha&&state.planilha.seeded;
+    const m=planNovoMes(new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}));
+    state.planilha={ativo:m.id,meses:[m],seeded:seeded};
+  }
+  state.planilha.meses=state.planilha.meses.map(planMigra);
+  if(!state.planilha.ativo||!state.planilha.meses.find(x=>x.id===state.planilha.ativo))
+    state.planilha.ativo=state.planilha.meses[0].id;
+}
+function planActive(){planEnsure();return state.planilha.meses.find(x=>x.id===state.planilha.ativo)||state.planilha.meses[0];}
+function planSums(m){
+  const tRec=m.receitas.reduce((s,x)=>s+(planNum(x.valor)||0),0);
+  const tCusto=m.receitas.reduce((s,x)=>s+(planNum(x.custo)||0),0);
+  const tPag=m.pagar.reduce((s,x)=>s+(planNum(x.valor)||0),0);
+  return {tRec,tCusto,tPag,resultado:tRec-tPag};
+}
+function planMargem(x){const v=planNum(x.valor);return v?Math.round((1-(planNum(x.custo)||0)/v)*100):0;}
+function planMargemCor(mg){return mg>=40?'#1a7f3c':mg>=20?'#b36200':'#c0392b';}
+function planSummaryHTML(m){
+  const s=planSums(m);
+  return [finKpiCard('green','A receber',finBRL(s.tRec),m.receitas.length+' clientes'),
+    finKpiCard('red','A pagar',finBRL(s.tPag),m.pagar.length+' itens'),
+    finKpiCard(s.resultado>=0?'yel':'red','Resultado',finBRL(s.resultado),s.tRec>0?('margem '+Math.round(s.resultado/s.tRec*100)+'%'):'')].join('');
+}
+function renderPlanilha(){
+  const wrap=document.getElementById('plan-wrap');if(!wrap)return;
+  planEnsure();const m=planActive();const s=planSums(m);
+  const tabs=state.planilha.meses.map(x=>`<button class="tb-btn" style="${x.id===state.planilha.ativo?'background:var(--yel,#ffd400);border-color:var(--yel,#ffd400);font-weight:700':''}" onclick="planSetActive('${x.id}')">${mdEsc(x.nome)}</button>`).join('');
+  const ce='contenteditable="true" style="outline:none;padding:6px 9px;border:1px solid var(--line)"';
+  const ceR='contenteditable="true" style="outline:none;padding:6px 9px;border:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums"';
+  const th='style="padding:7px 9px;border:1px solid var(--line);background:#f6f6f4;text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#555"';
+  const thr='style="padding:7px 9px;border:1px solid var(--line);background:#f6f6f4;text-align:right;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#555"';
+  const ft='style="padding:8px 9px;border:1px solid var(--line);font-weight:800;border-top:2px solid var(--ink,#111)"';
+  const ftr='style="padding:8px 9px;border:1px solid var(--line);text-align:right;font-weight:800;border-top:2px solid var(--ink,#111);font-variant-numeric:tabular-nums"';
+  const recRows=m.receitas.map((x,i)=>{const mg=planMargem(x);return `<tr>
+      <td ${ce} oninput="planLiveRec(${i},'nome',this.textContent)">${mdEsc(x.nome||'')}</td>
+      <td ${ceR} oninput="planLiveRec(${i},'valor',this.textContent)">${x.valor?planFmt(x.valor):''}</td>
+      <td ${ceR} oninput="planLiveRec(${i},'custo',this.textContent)">${x.custo?planFmt(x.custo):''}</td>
+      <td id="planmar-${i}" style="padding:6px 9px;border:1px solid var(--line);text-align:right;font-weight:700;color:${planMargemCor(mg)}">${planNum(x.valor)?mg+'%':''}</td>
+      <td style="border:1px solid var(--line);text-align:center;width:24px"><span onclick="planDelRec(${i})" title="apagar" style="cursor:pointer;color:var(--mute)">×</span></td>
+    </tr>`;}).join('');
+  const pagRows=m.pagar.map((x,i)=>`<tr>
+      <td ${ce} oninput="planLivePag(${i},'nome',this.textContent)">${mdEsc(x.nome||'')}</td>
+      <td ${ceR} oninput="planLivePag(${i},'valor',this.textContent)">${x.valor?planFmt(x.valor):''}</td>
+      <td style="border:1px solid var(--line);text-align:center;width:24px"><span onclick="planDelPag(${i})" title="apagar" style="cursor:pointer;color:var(--mute)">×</span></td>
+    </tr>`).join('');
+  wrap.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <strong style="font-size:15px">📊 Minha Planilha</strong>
+      <span style="font-size:11px;color:var(--mute)">edite clicando nas células · salva sozinho na nuvem</span>
+      <div style="flex:1"></div>
+      <button class="tb-btn" onclick="planImportGoogle()">⤵ Importar do Google</button>
+      <button class="tb-btn" onclick="planExportCSV()">⬇ Exportar CSV</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+      ${tabs}
+      <button class="tb-btn" title="copiar mês atual para um novo" onclick="planAddMes(true)">+ Novo mês (copiar)</button>
+      <button class="tb-btn" title="mês em branco" onclick="planAddMes(false)">+ Branco</button>
+      <span style="width:1px;height:20px;background:var(--line)"></span>
+      <button class="tb-btn" title="renomear mês" onclick="planRenameMes()">✎ Renomear</button>
+      <button class="tb-btn" style="color:var(--red)" title="apagar mês" onclick="planDelMes()">🗑</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px">
+      <div class="card" style="padding:0;overflow:auto">
+        <div style="font-weight:700;font-size:13px;padding:11px 12px;background:#eafaef;border-bottom:1px solid var(--line)">💚 Clientes · a receber <span style="color:var(--mute);font-weight:500">· ${m.receitas.length}</span></div>
+        <table style="border-collapse:collapse;font-size:12.5px;width:100%">
+          <thead><tr><th ${th}>Cliente</th><th ${thr}>Valor</th><th ${thr}>Custo</th><th ${thr}>Margem</th><th ${th}></th></tr></thead>
+          <tbody>${recRows}</tbody>
+          <tfoot><tr><td ${ft}>TOTAL</td><td ${ftr} id="plan-rectot">${planFmt(s.tRec)}</td><td ${ftr} id="plan-custot">${planFmt(s.tCusto)}</td><td ${ft}></td><td ${ft}></td></tr></tfoot>
+        </table>
+        <div style="padding:8px 10px"><button class="tb-btn" onclick="planAddRec()">+ Cliente</button></div>
+      </div>
+      <div class="card" style="padding:0;overflow:auto">
+        <div style="font-weight:700;font-size:13px;padding:11px 12px;background:var(--yel-bg,#fff7d6);border-bottom:1px solid var(--line)">🟡 Time & despesas · a pagar <span style="color:var(--mute);font-weight:500">· ${m.pagar.length}</span></div>
+        <table style="border-collapse:collapse;font-size:12.5px;width:100%">
+          <thead><tr><th ${th}>Quem / o quê</th><th ${thr}>Valor</th><th ${th}></th></tr></thead>
+          <tbody>${pagRows}</tbody>
+          <tfoot><tr><td ${ft}>TOTAL</td><td ${ftr} id="plan-pagtot">${planFmt(s.tPag)}</td><td ${ft}></td></tr></tfoot>
+        </table>
+        <div style="padding:8px 10px"><button class="tb-btn" onclick="planAddPag()">+ Pagamento</button></div>
+      </div>
+    </div>
+    <div id="plan-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px">${planSummaryHTML(m)}</div>`;
+}
+function planRefreshSummary(){
+  const m=planActive();const s=planSums(m);
+  m.receitas.forEach((x,i)=>{const el=document.getElementById('planmar-'+i);if(el){const mg=planMargem(x);el.textContent=planNum(x.valor)?mg+'%':'';el.style.color=planMargemCor(mg);}});
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('plan-rectot',planFmt(s.tRec));set('plan-custot',planFmt(s.tCusto));set('plan-pagtot',planFmt(s.tPag));
+  const sum=document.getElementById('plan-summary');if(sum)sum.innerHTML=planSummaryHTML(m);
+}
+function planLiveRec(i,f,v){const m=planActive();if(!m.receitas[i])return;m.receitas[i][f]=(f==='nome')?String(v||''):(planNum(v)||0);planSaveSoon();planRefreshSummary();}
+function planLivePag(i,f,v){const m=planActive();if(!m.pagar[i])return;m.pagar[i][f]=(f==='nome')?String(v||''):(planNum(v)||0);planSaveSoon();planRefreshSummary();}
+function planSetActive(id){planEnsure();state.planilha.ativo=id;savePlanilha();renderPlanilha();}
+function planAddRec(){planActive().receitas.push({nome:'',valor:0,custo:0});savePlanilha();renderPlanilha();}
+function planAddPag(){planActive().pagar.push({nome:'',valor:0});savePlanilha();renderPlanilha();}
+function planDelRec(i){const m=planActive();m.receitas.splice(i,1);if(!m.receitas.length)m.receitas.push({nome:'',valor:0,custo:0});savePlanilha();renderPlanilha();}
+function planDelPag(i){const m=planActive();m.pagar.splice(i,1);if(!m.pagar.length)m.pagar.push({nome:'',valor:0});savePlanilha();renderPlanilha();}
+function planAddMes(copiar){const m=planActive();const nome=prompt('Nome do novo mês:',copiar?(m.nome+' (cópia)'):'Novo mês');if(nome===null)return;const novo=planNovoMes(nome.trim()||'Novo mês',copiar?m:null);state.planilha.meses.push(novo);state.planilha.ativo=novo.id;savePlanilha();renderPlanilha();toast('Mês criado ✓');}
+function planRenameMes(){const m=planActive();const nome=prompt('Renomear mês:',m.nome);if(nome===null)return;m.nome=nome.trim()||m.nome;savePlanilha();renderPlanilha();}
+function planDelMes(){planEnsure();if(!confirm('Apagar o mês "'+planActive().nome+'"?'))return;state.planilha.meses=state.planilha.meses.filter(x=>x.id!==state.planilha.ativo);if(!state.planilha.meses.length){const m=planNovoMes(new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}));state.planilha.meses=[m];}state.planilha.ativo=state.planilha.meses[0].id;savePlanilha();renderPlanilha();toast('Mês apagado');}
+function planExportCSV(){
+  const m=planActive();const esc=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const lines=[['Clientes (a receber)','Valor','Custo','','Time & despesas (a pagar)','Valor'].map(esc).join(',')];
+  const n=Math.max(m.receitas.length,m.pagar.length);
+  for(let i=0;i<n;i++){const r=m.receitas[i],p=m.pagar[i];lines.push([r?r.nome:'',r?r.valor:'',r?r.custo:'','',p?p.nome:'',p?p.valor:''].map(esc).join(','));}
+  const s=planSums(m);lines.push(['TOTAL',s.tRec,s.tCusto,'','TOTAL',s.tPag].map(esc).join(','));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='planilha-'+(m.nome||'mes').replace(/\s+/g,'-')+'.csv';document.body.appendChild(a);a.click();a.remove();toast('CSV exportado');
+}
+async function planFillFromGoogle(m,gid){
+  const resp=await fetch('/api/workflowark/sheet'+(gid?('?gid='+encodeURIComponent(gid)):''),{cache:'reload'});
+  if(!resp.ok)throw new Error('falha');
+  const d=finParse(finParseCSV(await resp.text()));
+  m.receitas=d.receitas.map(x=>({nome:x.nome,valor:x.valor,custo:x.custo}));
+  m.pagar=d.pagar.map(x=>({nome:x.nome,valor:x.valor}));
+  if(!m.receitas.length)m.receitas=[{nome:'',valor:0,custo:0}];
+  if(!m.pagar.length)m.pagar=[{nome:'',valor:0}];
+}
+async function planImportGoogle(){
+  if(!confirm('Importar os dados do mês selecionado no "Resumo do Google" para este mês? (substitui o conteúdo atual)'))return;
+  try{const sel=document.getElementById('fin-month');const gid=sel&&sel.value?sel.value:'';await planFillFromGoogle(planActive(),gid);state.planilha.seeded=true;savePlanilha();renderPlanilha();toast('Importado do Google ✓');}
+  catch(e){toast('⚠ Não consegui importar agora');}
+}
+// Na primeira vez, já nasce preenchida com os dados do mês atual do Google.
+let PLAN_SEEDING=false;
+function planHasData(){planEnsure();return state.planilha.meses.some(m=>m.receitas.some(x=>x.nome||x.valor)||m.pagar.some(x=>x.nome||x.valor));}
+async function planAutoSeed(){
+  planEnsure();
+  if(PLAN_SEEDING||state.planilha.seeded)return;
+  if(planHasData()){state.planilha.seeded=true;savePlanilha();if(typeof acertoSeedFromFin==='function')acertoSeedFromFin();return;}
+  PLAN_SEEDING=true;
+  try{
+    if(!FIN_SHEETS){const lr=await fetch('/api/workflowark/sheet?list=1');const lj=await lr.json().catch(()=>({}));FIN_SHEETS=(lj.sheets&&lj.sheets.length)?lj.sheets:[];finPopulateMonths();}
+    const sel=document.getElementById('fin-month');
+    let gid=sel&&sel.value?sel.value:'';
+    let nomeMes=sel&&sel.selectedOptions[0]?sel.selectedOptions[0].textContent.trim():'';
+    if(!gid&&FIN_SHEETS&&FIN_SHEETS.length){
+      const mesAtual=new Date().toLocaleDateString('pt-BR',{month:'long'}).toLowerCase();const norm=t=>String(t||'').toLowerCase();
+      const pick=FIN_SHEETS.find(s=>norm(s.name).includes(mesAtual)&&norm(s.name).includes('ark'))||FIN_SHEETS.find(s=>norm(s.name).includes(mesAtual))||FIN_SHEETS[FIN_SHEETS.length-1];
+      if(pick){gid=pick.gid;nomeMes=pick.name.replace(/^Previs[ãa]o\s*/i,'');}
+    }
+    const m=planActive();await planFillFromGoogle(m,gid);if(nomeMes)m.nome=nomeMes;
+    state.planilha.seeded=true;savePlanilha();renderPlanilha();
+    if(typeof acertoSeedFromFin==='function')acertoSeedFromFin();
+  }catch(e){/* deixa em branco; tenta de novo no próximo load */}
+  finally{PLAN_SEEDING=false;}
+}
 
 /* ============ DEMANDAS ============ */
 function loadDemandas(){return JSON.parse(localStorage.getItem('wfa-demandas')||'[]');}
