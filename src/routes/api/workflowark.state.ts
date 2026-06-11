@@ -323,12 +323,17 @@ export const Route = createFileRoute("/api/workflowark/state")({
             "POR QUE FUNCIONA: ...",
             "Separe cada roteiro com uma linha '———'. Não faça perguntas — assuma os melhores defaults e entregue pronto pra gravar.",
           ].join("\n");
+          const { clienteBrief } = await import("@/integrations/clientes");
+          const brief = clienteBrief(cliente);
+          const sysFull = brief
+            ? sys + "\n\nCONTEXTO REAL DO CLIENTE (use de verdade — pessoas, produtos, tom e plano; NADA genérico):\n" + brief
+            : sys;
           const user = `Cliente: ${cliente || "(varejo gastronômico genérico)"} · Plataforma: ${plataforma} · Tema/assunto: ${tema}\nGere ${qtd} roteiro(s) de vídeo curto, prontos pra gravar.`;
           try {
             const r = await fetch("https://api.anthropic.com/v1/messages", {
               method: "POST",
               headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-              body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3000, system: sys, messages: [{ role: "user", content: user }] }),
+              body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3000, system: sysFull, messages: [{ role: "user", content: user }] }),
             });
             const data: any = await r.json().catch(() => ({}));
             if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
@@ -354,7 +359,9 @@ export const Route = createFileRoute("/api/workflowark/state")({
             const tViv = tarefas.filter((t) => /viv/i.test(t?.clienteId || "") || /vivenda/i.test(t?.title || "")).slice(0, 15).map((t) => `- ${t.title} (${t.resp || "?"}, ${t.data || "?"})`).join("\n");
             contexto = `\n\nDADOS ATUAIS DA VIVENDA NO SISTEMA:\nCampos do plano (preenchidos): ${JSON.stringify(viv)}\nTarefas da Vivenda:\n${tViv || "(nenhuma)"}`;
           } catch { /* segue sem contexto extra */ }
-          const sys = `Você é o ESTRATEGISTA da ARK Content dedicado à FARMÁCIA VIVENDA — o cliente prioritário (empresa da família do dono, Plano X). É uma farmácia em Brasília com posicionamento de BEM-ESTAR (saúde, cuidado, proximidade com o bairro). NÃO invente dados nem campanhas genéricas/inviáveis: seja específico, realista e aplicável a uma farmácia de bairro. Pense como dono de agência brasileiro: direto, prático, com foco em vender (gente entrando na farmácia / WhatsApp), respeitando o orçamento. Quando faltar informação real (resultados de tráfego, nº de produções, histórico), DIGA o que você precisa em vez de chutar. Entregue em tópicos curtos e acionáveis.${contexto}`;
+          const { clienteBrief } = await import("@/integrations/clientes");
+          const brief = clienteBrief("vivenda");
+          const sys = `Você é o ESTRATEGISTA da ARK Content dedicado à FARMÁCIA VIVENDA — o cliente prioritário (empresa da família do dono, Plano X). NÃO invente dados nem campanhas genéricas/inviáveis: seja específico, realista e aplicável. Pense como dono de agência brasileiro: direto, prático, com foco em vender (gente entrando na farmácia / WhatsApp), respeitando o orçamento. Quando faltar informação real (resultados de tráfego, nº de produções, histórico), DIGA o que você precisa em vez de chutar. Entregue em tópicos curtos e acionáveis.\n\nCONTEXTO REAL DO CLIENTE (use sempre — pessoas/decisores, posicionamento, produtos, plano):\n${brief}${contexto}`;
           try {
             const r = await fetch("https://api.anthropic.com/v1/messages", {
               method: "POST",
