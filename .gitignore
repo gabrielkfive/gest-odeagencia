@@ -1,6 +1,8 @@
 # Environment variables (secrets)
 .env
 .env.*
+# ...mas o MODELO (sem segredos) pode subir, pra guiar setup em outras maquinas
+!.env.example
 
 # Logs
 logs
