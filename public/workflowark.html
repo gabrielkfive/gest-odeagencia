@@ -1765,6 +1765,24 @@ function iniciarAutoSync(){
           #page-planejamento .pl-ang{font-size:12.5px;color:var(--txt);line-height:1.5}
           #page-planejamento .pl-leg{font-size:12px;color:var(--mute);font-style:italic;border-left:2px solid var(--line);padding-left:8px}
           #page-planejamento .pl-acts{display:flex;gap:6px;margin-top:4px}
+          #page-planejamento .plc{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+          #page-planejamento .plc-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+          #page-planejamento .plc-title{font-weight:800;font-size:15px;text-transform:capitalize}
+          #page-planejamento .plc-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+          #page-planejamento .plc-dow{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);text-align:center;padding:8px 0;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+          #page-planejamento .plc-dow:nth-child(7){border-right:none}
+          #page-planejamento .plc-cell{min-height:98px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:4px}
+          #page-planejamento .plc-cell:nth-child(7n){border-right:none}
+          #page-planejamento .plc-num{font-size:11px;color:var(--mute);font-weight:600;align-self:flex-start}
+          #page-planejamento .plc-cell.today .plc-num{background:var(--yel,#ffd400);color:#111;border-radius:6px;padding:1px 6px}
+          #page-planejamento .plc-cell.muted{background:#fafafa}
+          #page-planejamento .plc-chip{font-size:10.5px;line-height:1.25;padding:4px 6px;border-radius:7px;cursor:pointer;background:var(--yel-bg,#fff7d6);border-left:3px solid var(--yel,#ffd400);color:#111;font-weight:600;overflow:hidden}
+          #page-planejamento .plc-chip:hover{filter:brightness(.96)}
+          #page-planejamento .plc-chip .f{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.03em;color:var(--mute);font-weight:700}
+          #page-planejamento .plc-chip.carrossel{background:#eef4ff;border-left-color:#4a90ff}
+          #page-planejamento .plc-chip.story{background:#f6eeff;border-left-color:#9b5cff}
+          #page-planejamento .plc-chip.foto{background:#e9f9ef;border-left-color:#19b36b}
+          #page-planejamento .pl-vbtn.on{background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700}
         </style>
         <div class="page-head"><div class="page-title"><h1>🗓️ Planejamento de Conteúdo</h1><p>Monta o calendário do mês por cliente · cada ideia vira roteiro num clique (usa o cérebro do cliente).</p></div></div>
         <div class="card" style="padding:16px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -1777,7 +1795,12 @@ function iniciarAutoSync(){
             <span id="pl-status" style="font-size:12px;color:var(--mute)"></span>
           </div>
         </div>
-        <div id="pl-out" class="pl-grid"></div>
+        <div id="pl-views" style="display:none;gap:6px;margin-bottom:12px">
+          <button class="tb-btn pl-vbtn on" id="pl-view-cal" onclick="planSetView('cal')">🗓️ Calendário</button>
+          <button class="tb-btn pl-vbtn" id="pl-view-list" onclick="planSetView('list')">☰ Lista</button>
+        </div>
+        <div id="pl-cal"></div>
+        <div id="pl-out" class="pl-grid" style="display:none"></div>
         <div id="pl-empty" class="card" style="padding:18px;font-size:13.5px;color:var(--mute)">O calendário de conteúdo aparece aqui. 🗓️ Diga o cliente e o período.</div>
       </div>
 
@@ -3564,31 +3587,74 @@ async function rotGerar(){
 }
 function rotCopiar(){const t=document.getElementById('rot-out').textContent||'';navigator.clipboard?.writeText(t).then(()=>toast('Roteiros copiados'),()=>toast('Não consegui copiar'));}
 /* ============ PLANEJAMENTO DE CONTEÚDO ============ */
-let _planIdeias=[];let _planCliente='';
+let _planIdeias=[];let _planCliente='';let _planView='cal';
 async function planGerar(){
   const cliente=(document.getElementById('pl-cliente').value||'').trim();
   const periodo=(document.getElementById('pl-periodo').value||'este mês').trim();
   const foco=(document.getElementById('pl-foco').value||'').trim();
   const qtd=document.getElementById('pl-qtd').value||'8';
-  const st=document.getElementById('pl-status');const out=document.getElementById('pl-out');const empty=document.getElementById('pl-empty');
-  if(st)st.textContent='🗓️ Montando o planejamento...';if(empty)empty.style.display='none';if(out)out.innerHTML='';
+  const st=document.getElementById('pl-status');const empty=document.getElementById('pl-empty');
+  if(st)st.textContent='🗓️ Montando o planejamento...';if(empty)empty.style.display='none';
+  document.getElementById('pl-cal').innerHTML='';document.getElementById('pl-out').innerHTML='';
   try{
     const r=await cloudCall('save',{action:'agente-planejamento',cliente,periodo,foco,qtd});
     const ideias=(r&&r.ideias)||[];
     if(!ideias.length){if(empty){empty.style.display='';empty.textContent='Não consegui montar agora. Tenta de novo dando mais detalhes do período/foco.';}if(st)st.textContent='';return;}
     _planIdeias=ideias;_planCliente=cliente;
-    out.innerHTML=ideias.map((i,idx)=>{
-      const tema=mdEsc(i.tema||'');const ang=mdEsc(i.angulo||'');const leg=mdEsc(i.legenda||'');const dia=mdEsc(i.dia||'');const fmt=mdEsc(i.formato||'');const prod=mdEsc(i.produto||'');
-      return `<div class="pl-card">
-        <div class="pl-top">${dia?`<span class="pl-dia">${dia}</span>`:''}${fmt?`<span class="pl-fmt">${fmt}</span>`:''}${prod?`<span class="pl-fmt">${prod}</span>`:''}</div>
-        <div class="pl-tema">${tema}</div>
-        ${ang?`<div class="pl-ang">${ang}</div>`:''}
-        ${leg?`<div class="pl-leg">“${leg}”</div>`:''}
-        <div class="pl-acts"><button class="tb-btn" onclick="planParaRoteirista(${idx})">🎬 Roteirizar</button></div>
-      </div>`;
-    }).join('');
+    document.getElementById('pl-views').style.display='flex';
+    if(empty)empty.style.display='none';
+    planRender();
     if(st)st.textContent='Pronto ✓ '+ideias.length+' ideias';
   }catch(e){if(empty){empty.style.display='';empty.textContent='⚠ '+(e.message||'Falha ao montar');}if(st)st.textContent='';}
+}
+function planSetView(v){_planView=v;planRender();}
+function planRender(){
+  const cal=document.getElementById('pl-cal');const list=document.getElementById('pl-out');
+  const bCal=document.getElementById('pl-view-cal');const bList=document.getElementById('pl-view-list');
+  if(bCal)bCal.classList.toggle('on',_planView==='cal');if(bList)bList.classList.toggle('on',_planView==='list');
+  if(_planView==='cal'){cal.style.display='';list.style.display='none';planRenderCalendar();}
+  else{cal.style.display='none';list.style.display='grid';planRenderLista();}
+}
+function planFmtClass(f){const s=(f||'').toLowerCase();if(s.includes('carro'))return 'carrossel';if(s.includes('stor'))return 'story';if(s.includes('foto'))return 'foto';return 'reels';}
+function planParseDate(s){const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);if(!m)return null;const d=new Date(+m[1],+m[2]-1,+m[3]);return isNaN(d.getTime())?null:d;}
+function planCardHtml(i,idx){
+  const tema=mdEsc(i.tema||'');const ang=mdEsc(i.angulo||'');const leg=mdEsc(i.legenda||'');const dia=mdEsc(i.dia||'');const fmt=mdEsc(i.formato||'');const prod=mdEsc(i.produto||'');
+  return `<div class="pl-card"><div class="pl-top">${dia?`<span class="pl-dia">${dia}</span>`:''}${fmt?`<span class="pl-fmt">${fmt}</span>`:''}${prod?`<span class="pl-fmt">${prod}</span>`:''}</div><div class="pl-tema">${tema}</div>${ang?`<div class="pl-ang">${ang}</div>`:''}${leg?`<div class="pl-leg">“${leg}”</div>`:''}<div class="pl-acts"><button class="tb-btn" onclick="planParaRoteirista(${idx})">🎬 Roteirizar</button></div></div>`;
+}
+function planRenderLista(){document.getElementById('pl-out').innerHTML=_planIdeias.map((i,idx)=>planCardHtml(i,idx)).join('');}
+function planRenderCalendar(){
+  const cal=document.getElementById('pl-cal');
+  const all=_planIdeias.map((i,idx)=>({i,idx,d:planParseDate(i.data)}));
+  const dated=all.filter(x=>x.d);const undated=all.filter(x=>!x.d);
+  const ref=dated.length?dated.slice().sort((a,b)=>a.d-b.d)[0].d:new Date();
+  const year=ref.getFullYear(),month=ref.getMonth();
+  const first=new Date(year,month,1);const startDow=first.getDay();const days=new Date(year,month+1,0).getDate();
+  const today=new Date();today.setHours(0,0,0,0);
+  const monthName=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const byDay={};dated.forEach(x=>{if(x.d.getMonth()===month&&x.d.getFullYear()===year){(byDay[x.d.getDate()]=byDay[x.d.getDate()]||[]).push(x);}});
+  let cells='';
+  for(let b=0;b<startDow;b++)cells+='<div class="plc-cell muted"></div>';
+  for(let day=1;day<=days;day++){
+    const dd=new Date(year,month,day);const isToday=dd.getTime()===today.getTime();
+    const items=(byDay[day]||[]).map(x=>`<div class="plc-chip ${planFmtClass(x.i.formato)}" onclick="planDetalhe(${x.idx})" title="${mdEsc(x.i.tema||'')}"><span class="f">${mdEsc(x.i.formato||'')}</span>${mdEsc((x.i.tema||'').slice(0,44))}</div>`).join('');
+    cells+=`<div class="plc-cell${isToday?' today':''}"><span class="plc-num">${day}</span>${items}</div>`;
+  }
+  let html=`<div class="plc"><div class="plc-head"><div class="plc-title">${monthName}</div><div style="font-size:12px;color:var(--mute)">${dated.length} agendados</div></div><div class="plc-grid">${dows.map(d=>`<div class="plc-dow">${d}</div>`).join('')}${cells}</div></div>`;
+  if(undated.length){html+=`<div style="margin-top:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--mute);margin:0 4px 8px">📌 Sem data definida</div><div class="pl-grid">`+undated.map(x=>planCardHtml(x.i,x.idx)).join('')+`</div></div>`;}
+  cal.innerHTML=html;
+}
+function planDetalhe(idx){
+  const i=_planIdeias[idx];if(!i)return;
+  let ov=document.getElementById('pl-modal');
+  if(!ov){ov=document.createElement('div');ov.id='pl-modal';ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';ov.onclick=e=>{if(e.target===ov)ov.remove();};document.body.appendChild(ov);}
+  ov.innerHTML=`<div style="background:#fff;border-radius:18px;max-width:440px;width:100%;padding:22px;box-shadow:0 30px 70px rgba(0,0,0,.3)">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">${i.dia?`<span class="pl-dia">${mdEsc(i.dia)}</span>`:''}${i.formato?`<span class="pl-fmt">${mdEsc(i.formato)}</span>`:''}${i.produto?`<span class="pl-fmt">${mdEsc(i.produto)}</span>`:''}</div>
+    <div style="font-weight:800;font-size:18px;letter-spacing:-.01em;margin-bottom:8px">${mdEsc(i.tema||'')}</div>
+    ${i.angulo?`<div style="font-size:13.5px;color:var(--txt);line-height:1.55;margin-bottom:10px">${mdEsc(i.angulo)}</div>`:''}
+    ${i.legenda?`<div style="font-size:13px;color:var(--mute);font-style:italic;border-left:2px solid var(--line);padding-left:10px;margin-bottom:16px">“${mdEsc(i.legenda)}”</div>`:''}
+    <div style="display:flex;gap:8px"><button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="planParaRoteirista(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">🎬 Roteirizar</button><button class="tb-btn" onclick="var m=document.getElementById('pl-modal');m&&m.remove()">Fechar</button></div>
+  </div>`;
 }
 function planParaRoteirista(idx){
   const i=_planIdeias[idx];if(!i)return;

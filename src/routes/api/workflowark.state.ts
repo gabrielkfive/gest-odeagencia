@@ -356,10 +356,12 @@ export const Route = createFileRoute("/api/workflowark/state")({
           const sys = [
             "Você é o PLANEJADOR DE CONTEÚDO sênior da ARK Content (agência de marketing em Brasília). Monta o calendário de conteúdo de redes sociais (Instagram/TikTok) de um cliente — pensando como dono de agência: realista, vendedor, conectado ao momento do cliente. NÃO genérico.",
             "Cada ideia deve ter um ÂNGULO/gancho específico (não 'poste sobre o produto X', e sim a abordagem que para o scroll). Varie formatos (Reels, Carrossel, Story, Foto). Conecte com datas/contexto quando fizer sentido.",
-            "Responda SOMENTE com um JSON válido (nada fora dele): um objeto {\"ideias\":[...]}. Cada ideia: {\"dia\":\"ex: Seg 16/06 ou 'Semana 1'\",\"formato\":\"Reels|Carrossel|Story|Foto\",\"tema\":\"título curto e específico\",\"produto\":\"produto/serviço foco ou ''\",\"angulo\":\"o gancho/abordagem em 1 frase\",\"legenda\":\"primeira linha da legenda, no tom da marca\"}.",
+            "Distribua as ideias em DATAS CONCRETAS dentro do período (campo data em YYYY-MM-DD). Use o ano corrente se não for dito. Evite domingos para posts pesados, espalhe ao longo das semanas. Se uma ideia não tiver dia específico, deixe data:''.",
+            "Responda SOMENTE com um JSON válido (nada fora dele): um objeto {\"ideias\":[...]}. Cada ideia: {\"data\":\"YYYY-MM-DD ou ''\",\"dia\":\"rótulo curto ex: Seg 16/06\",\"formato\":\"Reels|Carrossel|Story|Foto\",\"tema\":\"título curto e específico\",\"produto\":\"produto/serviço foco ou ''\",\"angulo\":\"o gancho/abordagem em 1 frase\",\"legenda\":\"primeira linha da legenda, no tom da marca\"}.",
             brief ? "CONTEXTO REAL DO CLIENTE (use de verdade — pessoas, produtos, tom, plano):\n" + brief : "",
           ].filter(Boolean).join("\n");
-          const user = `Cliente: ${cliente || "(varejo genérico)"} · Período: ${periodo}${foco ? " · Foco especial: " + foco : ""}\nMonte ${qtd} ideias de conteúdo para o período, em JSON.`;
+          const hoje = new Date().toISOString().split("T")[0];
+          const user = `Hoje é ${hoje}. Cliente: ${cliente || "(varejo genérico)"} · Período: ${periodo}${foco ? " · Foco especial: " + foco : ""}\nMonte ${qtd} ideias de conteúdo para o período, com datas concretas, em JSON.`;
           try {
             const r = await fetch("https://api.anthropic.com/v1/messages", {
               method: "POST",
