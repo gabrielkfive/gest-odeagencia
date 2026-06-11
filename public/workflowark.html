@@ -395,6 +395,10 @@ table.t tr.high{background:var(--yel-bg)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
           <span>Régua dos 15</span>
         </div>
+        <div class="subitem" data-nav="comercial">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span>Comercial</span>
+        </div>
       </div>
 
       <div class="navitem" data-toggle="atividades-menu">
@@ -432,6 +436,14 @@ table.t tr.high{background:var(--yel-bg)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
           <span>Campanhas</span>
         </div>
+      </div>
+
+      <div class="navitem" data-toggle="fin-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        <span>💰 Financeiro</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="subnav" id="fin-menu">
         <div class="subitem" data-nav="financeiro">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
           <span>Financeiro</span>
@@ -444,30 +456,46 @@ table.t tr.high{background:var(--yel-bg)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           <span>Acerto · Pagamentos</span>
         </div>
+      </div>
+
+      <div class="navitem" data-toggle="agentes-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+        <span>🤖 Agentes de IA</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="subnav" id="agentes-menu">
+        <div class="subitem" data-nav="agentes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+          <span>Central de Agentes</span>
+        </div>
         <div class="subitem" data-nav="whatsapp">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.6-.8L3 21l1.9-5.4A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>
           <span>WhatsApp</span>
-        </div>
-        <div class="subitem" data-nav="notificacoes">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-          <span>Notificações</span>
-          <span class="badge" id="notif-badge" style="display:none">0</span>
-        </div>
-        <div class="subitem" data-nav="cliente">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.8 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg>
-          <span>Área do Cliente</span>
         </div>
         <div class="subitem" data-nav="roteirista">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
           <span>🎬 Roteirista</span>
         </div>
+        <div class="subitem" data-nav="cliente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.8 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg>
+          <span>Área do Cliente</span>
+        </div>
+      </div>
+
+      <div class="navitem" data-toggle="ferramentas-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.7-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/></svg>
+        <span>🧰 Ferramentas</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="subnav" id="ferramentas-menu">
         <div class="subitem" data-nav="drive">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
           <span>Drive</span>
         </div>
-        <div class="subitem" data-nav="comercial">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          <span>Comercial</span>
+        <div class="subitem" data-nav="notificacoes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span>Notificações</span>
+          <span class="badge" id="notif-badge" style="display:none">0</span>
         </div>
       </div>
 
@@ -1522,6 +1550,100 @@ function iniciarAutoSync(){
             });
           })();
         </script>
+      </div>
+
+      <!-- =================== CENTRAL DE AGENTES (funcionários de IA) =================== -->
+      <div class="page" id="page-agentes">
+        <style>
+          #page-agentes .ag-hero{background:#111;color:#fff;border-radius:20px;padding:26px 28px;margin-bottom:22px;position:relative;overflow:hidden}
+          #page-agentes .ag-hero h2{font-size:23px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+          #page-agentes .ag-hero p{font-size:14px;color:#d7d7d4;max-width:640px;line-height:1.5}
+          #page-agentes .ag-flow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+          #page-agentes .ag-step{background:#1f1f1f;border:1px solid #333;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+          #page-agentes .ag-step b{color:var(--yel,#ffd400)}
+          #page-agentes .ag-arrow{color:#666;align-self:center;font-size:15px}
+          #page-agentes .ag-secttl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:24px 4px 12px}
+          #page-agentes .ag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:16px}
+          #page-agentes .ag-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:12px;transition:transform .25s,box-shadow .25s,border-color .25s}
+          #page-agentes .ag-card.on{cursor:pointer}
+          #page-agentes .ag-card.on:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(0,0,0,.09);border-color:var(--yel,#ffd400)}
+          #page-agentes .ag-card.soon{opacity:.62;border-style:dashed}
+          #page-agentes .ag-top{display:flex;align-items:center;gap:12px}
+          #page-agentes .ag-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--yel-bg,#fff7d6);flex-shrink:0}
+          #page-agentes .ag-card.on .ag-ico{background:#111;color:var(--yel,#ffd400)}
+          #page-agentes .ag-nm{font-weight:800;font-size:15px;letter-spacing:-.01em}
+          #page-agentes .ag-role{font-size:11.5px;color:var(--mute);font-weight:600}
+          #page-agentes .ag-desc{font-size:13px;color:var(--txt);line-height:1.5;flex:1}
+          #page-agentes .ag-foot{display:flex;align-items:center;justify-content:space-between;margin-top:2px}
+          #page-agentes .ag-badge{font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px}
+          #page-agentes .ag-badge.on{background:#e6f8ec;color:#127a3e}
+          #page-agentes .ag-badge.soon{background:#f0f0ee;color:#8a8a85}
+          #page-agentes .ag-open{font-size:12.5px;font-weight:700;color:#111}
+          #page-agentes .ag-open::after{content:" →"}
+        </style>
+        <div class="page-head">
+          <div class="page-title"><h1>Central de Agentes</h1><p>Seus funcionários de IA. Cada um prepara o trabalho sozinho e deixa pronto para você dar o aval.</p></div>
+        </div>
+
+        <div class="ag-hero">
+          <h2>🤖 Como os agentes trabalham</h2>
+          <p>Você não fica no operacional. O robô faz o trabalho pesado, organiza tudo e espera o seu toque final — liberdade com rédea curta.</p>
+          <div class="ag-flow">
+            <span class="ag-step">1 · O <b>robô prepara</b> sozinho</span>
+            <span class="ag-arrow">→</span>
+            <span class="ag-step">2 · Cai na sua <b>fila</b></span>
+            <span class="ag-arrow">→</span>
+            <span class="ag-step">3 · Você dá o <b>aval</b> e vai</span>
+          </div>
+        </div>
+
+        <div class="ag-secttl">No ar agora</div>
+        <div class="ag-grid">
+          <div class="ag-card on" onclick="document.querySelector('[data-nav=cobranca]').click()">
+            <div class="ag-top"><div class="ag-ico">💸</div><div><div class="ag-nm">Agente de Cobrança</div><div class="ag-role">Financeiro · receber</div></div></div>
+            <div class="ag-desc">Calcula o vencimento do mês, agrupa por responsável e deixa a mensagem pronta. Você só clica em "Abrir no WhatsApp".</div>
+            <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
+          </div>
+          <div class="ag-card on" onclick="document.querySelector('[data-nav=acerto]').click()">
+            <div class="ag-top"><div class="ag-ico">🧾</div><div><div class="ag-nm">Agente de Acerto</div><div class="ag-role">Financeiro · pagar</div></div></div>
+            <div class="ag-desc">Organiza quem você precisa pagar (equipe, freelas, fornecedores, sócios) com o Pix na mão e marca o que já foi pago.</div>
+            <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
+          </div>
+          <div class="ag-card on" onclick="document.querySelector('[data-nav=whatsapp]').click()">
+            <div class="ag-top"><div class="ag-ico">💬</div><div><div class="ag-nm">Atendente WhatsApp</div><div class="ag-role">Atendimento</div></div></div>
+            <div class="ag-desc">Lê as mensagens que chegam, entende o pedido, já cria a tarefa e sugere a resposta para você aprovar e enviar.</div>
+            <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
+          </div>
+          <div class="ag-card on" onclick="document.querySelector('[data-nav=roteirista]').click()">
+            <div class="ag-top"><div class="ag-ico">🎬</div><div><div class="ag-nm">Roteirista Viral</div><div class="ag-role">Conteúdo</div></div></div>
+            <div class="ag-desc">Transforma um tema em roteiro de Reels/TikTok com gancho, estrutura e legenda — pronto para gravar.</div>
+            <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
+          </div>
+          <div class="ag-card on" onclick="document.querySelector('[data-nav=cliente]').click()">
+            <div class="ag-top"><div class="ag-ico">⭐</div><div><div class="ag-nm">Agente Vivenda</div><div class="ag-role">Área do Cliente</div></div></div>
+            <div class="ag-desc">Atende o cliente no portal, responde dúvidas e abre demandas (arte, vídeo, tráfego) direto para a equipe.</div>
+            <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
+          </div>
+        </div>
+
+        <div class="ag-secttl">Em breve (no plano)</div>
+        <div class="ag-grid">
+          <div class="ag-card soon">
+            <div class="ag-top"><div class="ag-ico">🗓️</div><div><div class="ag-nm">Planejamento de Conteúdo</div><div class="ag-role">Marketing & Criação</div></div></div>
+            <div class="ag-desc">Monta o planejamento mensal de conteúdo por cliente e joga as pautas na fila para o time aprovar.</div>
+            <div class="ag-foot"><span class="ag-badge soon">🔜 Em breve</span></div>
+          </div>
+          <div class="ag-card soon">
+            <div class="ag-top"><div class="ag-ico">✍️</div><div><div class="ag-nm">Legendas</div><div class="ag-role">Social Media</div></div></div>
+            <div class="ag-desc">Escreve as legendas dos posts no tom da marca, com CTA e hashtags, esperando o seu OK.</div>
+            <div class="ag-foot"><span class="ag-badge soon">🔜 Em breve</span></div>
+          </div>
+          <div class="ag-card soon">
+            <div class="ag-top"><div class="ag-ico">📲</div><div><div class="ag-nm">Postagem automática</div><div class="ag-role">Social Media</div></div></div>
+            <div class="ag-desc">Agenda e publica os posts aprovados nas redes, no melhor horário, sem você precisar entrar em cada conta.</div>
+            <div class="ag-foot"><span class="ag-badge soon">🔜 Em breve</span></div>
+          </div>
+        </div>
       </div>
 
       <!-- =================== COBRANÇAS =================== -->
@@ -2824,7 +2946,7 @@ const NAV_CATALOG=[
   {k:'dashboard',l:'Meu Dia'},{k:'reunioes',l:'Reuniões · Agenda'},
   {k:'lista-clientes',l:'Lista de Clientes'},{k:'jornada',l:'Jornada · Sprints'},{k:'regua',l:'Régua dos 15'},
   {k:'tarefas',l:'Tarefas'},{k:'demandas',l:'Demandas'},{k:'rotinas',l:'Rotinas'},
-  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},
+  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},
   {k:'crm',l:'CRM · Pipeline'},
   {k:'organograma',l:'Organograma'},{k:'pops',l:'POPs por Função'},{k:'processos',l:'Processos'},
   {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},
