@@ -480,6 +480,10 @@ table.t tr.high{background:var(--yel-bg)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
           <span>🎬 Roteirista</span>
         </div>
+        <div class="subitem" data-nav="legenda">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          <span>✍️ Legendas</span>
+        </div>
         <div class="subitem" data-nav="cliente">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.8 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg>
           <span>Área do Cliente</span>
@@ -1634,15 +1638,15 @@ function iniciarAutoSync(){
             <div class="ag-desc">Monta o calendário do mês por cliente (usando o cérebro do cliente) e cada ideia vira roteiro num clique.</div>
             <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
           </div>
+          <div class="ag-card on" onclick="document.querySelector('[data-nav=legenda]').click()">
+            <div class="ag-top"><div class="ag-ico">✍️</div><div><div class="ag-nm">Legendas</div><div class="ag-role">Social Media</div></div></div>
+            <div class="ag-desc">Escreve as legendas dos posts no tom da marca, com gancho, CTA e hashtags — a partir do tema ou do roteiro.</div>
+            <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
+          </div>
         </div>
 
         <div class="ag-secttl">Em breve (no plano)</div>
         <div class="ag-grid">
-          <div class="ag-card soon">
-            <div class="ag-top"><div class="ag-ico">✍️</div><div><div class="ag-nm">Legendas</div><div class="ag-role">Social Media</div></div></div>
-            <div class="ag-desc">Escreve as legendas dos posts no tom da marca, com CTA e hashtags, esperando o seu OK.</div>
-            <div class="ag-foot"><span class="ag-badge soon">🔜 Em breve</span></div>
-          </div>
           <div class="ag-card soon">
             <div class="ag-top"><div class="ag-ico">📲</div><div><div class="ag-nm">Postagem automática</div><div class="ag-role">Social Media</div></div></div>
             <div class="ag-desc">Agenda e publica os posts aprovados nas redes, no melhor horário, sem você precisar entrar em cada conta.</div>
@@ -1748,6 +1752,7 @@ function iniciarAutoSync(){
           <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
             <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="rotGerar()">🎬 Gerar roteiros</button>
             <button class="tb-btn" onclick="rotCopiar()">⧉ Copiar</button>
+            <button class="tb-btn" onclick="legDeTema((document.getElementById('rot-out').textContent||document.getElementById('rot-tema').value||'').trim(),document.getElementById('rot-cliente').value||'')">✍️ Virar legenda</button>
             <span id="rot-status" style="font-size:12px;color:var(--mute)"></span>
           </div>
         </div>
@@ -1803,6 +1808,26 @@ function iniciarAutoSync(){
         <div id="pl-cal"></div>
         <div id="pl-out" class="pl-grid" style="display:none"></div>
         <div id="pl-empty" class="card" style="padding:18px;font-size:13.5px;color:var(--mute)">O calendário de conteúdo aparece aqui. 🗓️ Diga o cliente e o período.</div>
+      </div>
+
+      <!-- =================== LEGENDAS =================== -->
+      <div class="page" id="page-legenda">
+        <div class="page-head"><div class="page-title"><h1>✍️ Legendas</h1><p>Escreve a legenda no tom da marca (gancho + CTA + hashtags). Cola o tema ou o roteiro e gera.</p></div></div>
+        <div class="card" style="padding:16px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="grid-column:1/-1"><label class="form-label" style="font-size:11px">Tema ou roteiro</label><textarea id="leg-tema" class="form-input" style="min-height:72px" placeholder="Cole o tema do post ou o roteiro inteiro..."></textarea></div>
+          <div><label class="form-label" style="font-size:11px">Cliente</label><input id="leg-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda"></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px">
+            <div><label class="form-label" style="font-size:11px">Rede</label><select id="leg-rede" class="form-select"><option>Instagram</option><option>TikTok</option><option>Facebook</option></select></div>
+            <div><label class="form-label" style="font-size:11px">Qtd</label><input id="leg-qtd" class="form-input" type="number" value="2" min="1" max="4"></div>
+          </div>
+          <div style="grid-column:1/-1"><label class="form-label" style="font-size:11px">Objetivo (opcional)</label><input id="leg-obj" class="form-input" placeholder="Ex: levar pra loja, gerar comentário, agendar avaliação..."></div>
+          <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
+            <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="legGerar()">✍️ Gerar legendas</button>
+            <button class="tb-btn" onclick="legCopiar()">⧉ Copiar</button>
+            <span id="leg-status" style="font-size:12px;color:var(--mute)"></span>
+          </div>
+        </div>
+        <div id="leg-out" class="card" style="padding:18px;white-space:pre-wrap;font-size:13.5px;line-height:1.65;min-height:120px;color:var(--ink)">As legendas aparecem aqui. ✍️</div>
       </div>
 
       <!-- =================== ÁREA DO CLIENTE · VIVENDA (estilo Apple) =================== -->
@@ -3004,7 +3029,7 @@ const NAV_CATALOG=[
   {k:'dashboard',l:'Meu Dia'},{k:'reunioes',l:'Reuniões · Agenda'},
   {k:'lista-clientes',l:'Lista de Clientes'},{k:'jornada',l:'Jornada · Sprints'},{k:'regua',l:'Régua dos 15'},
   {k:'tarefas',l:'Tarefas'},{k:'demandas',l:'Demandas'},{k:'rotinas',l:'Rotinas'},
-  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},
+  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},
   {k:'crm',l:'CRM · Pipeline'},
   {k:'organograma',l:'Organograma'},{k:'pops',l:'POPs por Função'},{k:'processos',l:'Processos'},
   {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},
@@ -3690,7 +3715,7 @@ function planDetalhe(idx){
     <div style="font-weight:800;font-size:18px;letter-spacing:-.01em;margin-bottom:8px">${mdEsc(i.tema||'')}</div>
     ${i.angulo?`<div style="font-size:13.5px;color:var(--txt);line-height:1.55;margin-bottom:10px">${mdEsc(i.angulo)}</div>`:''}
     ${i.legenda?`<div style="font-size:13px;color:var(--mute);font-style:italic;border-left:2px solid var(--line);padding-left:10px;margin-bottom:16px">“${mdEsc(i.legenda)}”</div>`:''}
-    <div style="display:flex;gap:8px"><button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="planParaRoteirista(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">🎬 Roteirizar</button><button class="tb-btn" onclick="var m=document.getElementById('pl-modal');m&&m.remove()">Fechar</button></div>
+    <div style="display:flex;gap:8px"><button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="planParaRoteirista(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">🎬 Roteirizar</button><button class="tb-btn" onclick="planParaLegenda(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">✍️ Legenda</button><button class="tb-btn" onclick="var m=document.getElementById('pl-modal');m&&m.remove()">Fechar</button></div>
   </div>`;
 }
 function planParaRoteirista(idx){
@@ -3701,6 +3726,33 @@ function planParaRoteirista(idx){
   const nav=document.querySelector('[data-nav="roteirista"]');if(nav)nav.click();
   if(t)t.focus();
   toast&&toast('Tema enviado pro Roteirista 🎬');
+}
+function planParaLegenda(idx){
+  const i=_planIdeias[idx];if(!i)return;
+  const tema=(i.tema||'')+(i.angulo?' — '+i.angulo:'')+(i.legenda?'\nLegenda base: '+i.legenda:'');
+  legDeTema(tema,_planCliente);
+}
+/* ============ LEGENDAS ============ */
+async function legGerar(){
+  const tema=(document.getElementById('leg-tema').value||'').trim();
+  const out=document.getElementById('leg-out');const st=document.getElementById('leg-status');
+  if(!tema){if(st)st.textContent='Cole o tema ou o roteiro.';return;}
+  const cliente=document.getElementById('leg-cliente').value||'';
+  const rede=document.getElementById('leg-rede').value||'Instagram';
+  const objetivo=document.getElementById('leg-obj').value||'';
+  const qtd=document.getElementById('leg-qtd').value||'2';
+  if(st)st.textContent='✍️ Escrevendo...';if(out)out.textContent='Gerando legendas no tom da marca...';
+  try{
+    const r=await cloudCall('save',{action:'agente-legenda',tema,cliente,rede,objetivo,qtd});
+    if(out)out.textContent=(r&&r.text)||'(sem resposta)';if(st)st.textContent='Pronto ✓';
+  }catch(e){if(out)out.textContent='⚠ '+(e.message||'Falha ao gerar');if(st)st.textContent='';}
+}
+function legCopiar(){const t=document.getElementById('leg-out').textContent||'';navigator.clipboard?.writeText(t).then(()=>toast('Legendas copiadas'),()=>toast('Não consegui copiar'));}
+function legDeTema(tema,cliente){
+  const t=document.getElementById('leg-tema');const c=document.getElementById('leg-cliente');
+  if(t)t.value=tema||'';if(c&&cliente)c.value=cliente;
+  const nav=document.querySelector('[data-nav="legenda"]');if(nav)nav.click();
+  if(t)t.focus();toast&&toast('Tema enviado pras Legendas ✍️');
 }
 async function wfaUploadFile(file){
   const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(file);});

@@ -383,6 +383,44 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        if (action === "agente-legenda") {
+          const tema = String(body.tema ?? "").trim();
+          if (!tema) return json({ error: "Diga o tema/assunto (ou cole o roteiro)." }, { status: 400 });
+          const cliente = String(body.cliente ?? "").trim();
+          const rede = String(body.rede ?? "Instagram").trim();
+          const objetivo = String(body.objetivo ?? "").trim();
+          const qtd = Math.min(Math.max(parseInt(String(body.qtd ?? "2"), 10) || 2, 1), 4);
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const key = zapiEnv("ANTHROPIC_API_KEY");
+          if (!key) return json({ error: "IA não configurada." }, { status: 500 });
+          const { clienteBrief } = await import("@/integrations/clientes");
+          const brief = clienteBrief(cliente);
+          const sys = [
+            "Você é COPYWRITER e SOCIAL MEDIA sênior da ARK Content (Brasília). Escreve legendas de Instagram/TikTok que param o scroll, retêm e convertem — NO TOM DA MARCA, como gente de verdade (nunca robótico, nunca clichê de IA).",
+            "REGRAS: A 1ª linha é um GANCHO (a legenda também precisa parar o scroll — nada de 'Você sabia que...'). Corpo curto, quebrado em linhas com respiro, linguagem do cotidiano. UM CTA claro e específico. No fim, 4 a 6 hashtags relevantes (mistura nicho + local de Brasília).",
+            "Para CADA legenda, entregue NESTE formato (sem explicar o raciocínio):",
+            "GANCHO: ...",
+            "CORPO: ... (2-5 linhas curtas)",
+            "CTA: ...",
+            "HASHTAGS: #... #...",
+            "Separe cada variação com uma linha '———'. Assuma os melhores defaults e entregue pronto pra postar.",
+            brief ? "CONTEXTO REAL DO CLIENTE (use de verdade — pessoas, produtos, tom, plano):\n" + brief : "",
+          ].filter(Boolean).join("\n");
+          const user = `Cliente: ${cliente || "(varejo genérico)"} · Rede: ${rede}${objetivo ? " · Objetivo: " + objetivo : ""}\nTema/roteiro:\n"""${tema}"""\nEscreva ${qtd} variação(ões) de legenda.`;
+          try {
+            const r = await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+              body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1800, system: sys, messages: [{ role: "user", content: user }] }),
+            });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            return json({ text: data?.content?.[0]?.text || "(sem resposta)" });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao gerar legendas." }, { status: 502 });
+          }
+        }
+
         if (action === "agente-vivenda") {
           const prompt = String(body.prompt ?? "").trim();
           if (!prompt) return json({ error: "Escreva o que você quer pedir ao agente." }, { status: 400 });
