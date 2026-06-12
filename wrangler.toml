@@ -15,6 +15,11 @@ VITE_SUPABASE_URL = "https://fxfnonozzekxnxddxsnh.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0"
 VITE_SUPABASE_PROJECT_ID = "fxfnonozzekxnxddxsnh"
 
+# WhatsApp via Evolution API (self-host na Oracle). A chave (EVOLUTION_API_KEY) é segredo:
+#   npx wrangler secret put EVOLUTION_API_KEY
+EVOLUTION_API_URL = "http://136.248.75.53:8080"
+EVOLUTION_INSTANCE = "ark"
+
 # SUPABASE_SERVICE_ROLE_KEY é um segredo — será configurado via:
 # wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 

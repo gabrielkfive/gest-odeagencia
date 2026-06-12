@@ -37,6 +37,39 @@ export async function zapiSendText(phone: string, message: string) {
   return data;
 }
 
+// ===== Evolution API (self-host) =====
+export function evoConfig() {
+  return {
+    url: (zapiEnv("EVOLUTION_API_URL") || "").replace(/\/+$/, ""),
+    key: zapiEnv("EVOLUTION_API_KEY"),
+    instance: zapiEnv("EVOLUTION_INSTANCE"),
+  };
+}
+export function evoConfigured() {
+  const c = evoConfig();
+  return !!(c.url && c.key && c.instance);
+}
+export async function evoSendText(phone: string, message: string) {
+  const { url, key, instance } = evoConfig();
+  if (!url || !key || !instance) throw new Error("Evolution não configurada.");
+  const resp = await fetch(`${url}/message/sendText/${instance}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: key },
+    body: JSON.stringify({ number: phone, text: message }),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) {
+    throw new Error((data as { message?: string; error?: string })?.message || (data as any)?.error || "Falha ao enviar pela Evolution");
+  }
+  return data;
+}
+
+// Envio unificado: usa Evolution se configurada; senão cai no Z-API.
+export async function waSendText(phone: string, message: string) {
+  if (evoConfigured()) return evoSendText(phone, message);
+  return zapiSendText(phone, message);
+}
+
 // Acrescenta uma mensagem à conversa, guardando no bloco wfa-whatsapp da tabela workflowark_state.
 export async function appendWhatsapp(
   db: { from: (t: string) => any },

@@ -19,8 +19,8 @@ export const Route = createFileRoute("/api/workflowark/whatsapp/send")({
         if (!phone || !message) return Response.json({ error: "Telefone e mensagem são obrigatórios." }, { status: 400 });
 
         try {
-          const { zapiSendText, appendWhatsapp } = await import("@/integrations/zapi.server");
-          await zapiSendText(phone, message);
+          const { waSendText, appendWhatsapp } = await import("@/integrations/zapi.server");
+          await waSendText(phone, message);
           await appendWhatsapp(db, { phone, dir: "out", text: message });
           return Response.json({ ok: true });
         } catch (e) {
