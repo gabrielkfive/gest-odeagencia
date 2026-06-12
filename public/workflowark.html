@@ -383,33 +383,6 @@ table.t tr.high{background:var(--yel-bg)}
   .g4{grid-template-columns:1fr 1fr!important}
   .page-head h1{font-size:18px}
 }
-/* ============ TEMA JARVIS — menu command center (preto + amarelo neon) ============ */
-.side{background:#0a0a0b;border-right:1px solid #1c1c20}
-.side-head{border-bottom:1px solid #1c1c20}
-.side-head .nm,.brand-info .nm{color:#fff}
-.side-head .sb,.brand-info .sb{color:#6a6a72}
-.nav-label{color:#55555c}
-.navitem{color:#c9c9cf}
-.navitem svg{color:#7c7c84}
-.navitem:hover{background:#151517}
-.navitem.active{background:linear-gradient(90deg,rgba(255,212,0,.18),rgba(255,212,0,.02));color:#ffd400;box-shadow:inset 3px 0 0 #ffd400,0 0 14px rgba(255,212,0,.10)}
-.navitem.active svg{color:#ffd400}
-.navitem .chev{color:#7c7c84}
-.subnav{}
-.subitem{color:#8a8a92}
-.subitem svg{color:#6a6a72}
-.subitem:hover{background:#151517;color:#fff}
-.subitem.active{background:rgba(255,212,0,.12);color:#ffd400}
-.subitem.active svg{color:#ffd400}
-.side-foot{border-top:1px solid #1c1c20}
-.side-foot .nm{color:#fff}
-.side-foot .rl{color:#6a6a72}
-.side-foot .av{box-shadow:0 0 12px rgba(255,212,0,.35)}
-.side-foot .ico{color:#7c7c84}
-.side-foot .ico:hover{background:#151517;color:#fff}
-.crm-pill{background:#141416;border:1px solid #26262b;color:#fff}
-.crm-pill:hover{border-color:#ffd400}
-.nav::-webkit-scrollbar-thumb{background:#26262b}
 </style>
 </head>
 <body>
@@ -2564,22 +2537,22 @@ function iniciarAutoSync(){
 /* ============ DADOS ============ */
 const CLIENTES = [
   // ARK Direto
-  {id:'vivenda',nm:'Vivenda',tipo:'ARK',plano:'Plano X',valor:5500,status:'gr',cap:3,meta:'Maior ticket · 3 captações/mês',extra:'📹 3 captações/mês · cliente prioritário'},
-  {id:'fercon',nm:'Fercon',tipo:'ARK',plano:'Gold',valor:4200,status:'gr',cap:2,meta:'Ampliou · 2 captações/mês',extra:'📹 2 captações/mês · mais reativo que ativo'},
-  {id:'sasse',nm:'Sasse Gifts',tipo:'ARK',plano:'Plano X',valor:4500,status:'gr',cap:2,meta:'2 captações/mês',extra:'📹 2 captações/mês'},
-  {id:'fonseca',nm:'Fonseca & Cavalcanti',tipo:'ARK',plano:'Gold',valor:2500,status:'gr',cap:1,meta:'1 captação/mês · próxima fase',extra:'📹 1 captação · Compliance OAB'},
-  {id:'vaca',nm:'Vaca Velha',tipo:'ARK',plano:'Gold',valor:2000,status:'gr',cap:1,meta:'1 captação/mês (2ª às vezes em 30d)',extra:'📹 1 captação · mês sim, mês não p/ a 2ª'},
-  {id:'bellavita',nm:'Bella Vita',tipo:'ARK',plano:'Gold',valor:3200,status:'y',cap:0,meta:'⏸ PAUSADA · manter cobrança ativa',extra:'Pausada'},
+  {id:'lunnas',nm:"Lunna's",tipo:'ARK',plano:'Gold',valor:2000,status:'gr',meta:'Base estável · captação 11/06 + 26/06',extra:'Samuel cuida do dev do produto'},
+  {id:'vivenda',nm:'Vivenda',tipo:'ARK',plano:'Plano X',valor:5500,status:'gr',meta:'Maior ticket · captação 24/06 10h',extra:'3 captações/mês'},
+  {id:'fercon',nm:'Fercon',tipo:'ARK',plano:'Gold',valor:4200,status:'gr',meta:'Ampliou · reunião semanal · 3 vídeos/sem',extra:'Cliente mais reativo que ativo'},
+  {id:'shopping',nm:'Shopping dos Uniformes',tipo:'ARK',plano:'Gold',valor:1500,status:'gr',meta:'3 publicações + criativo novo',extra:'Conta separada de Sasse'},
+  {id:'sasse',nm:'Sasse Gifts',tipo:'ARK',plano:'Plano X',valor:4500,status:'gr',meta:'Onboarding · captação 20/06',extra:'Fechado via Shopping'},
+  {id:'bellavita',nm:'Bella Vita',tipo:'ARK',plano:'Gold',valor:3200,status:'y',meta:'Travada · primeiro anúncio já rodou',extra:'Manter cobrança ativa'},
+  {id:'fonseca',nm:'Fonseca & Cavalcanti',tipo:'ARK',plano:'Gold',valor:2500,status:'gr',meta:'Acelerou · próxima fase do plano',extra:'Compliance OAB · jurídico'},
+  {id:'vaca',nm:'Vaca Velha',tipo:'ARK',plano:'Gold',valor:2000,status:'gr',meta:'Captação feita · plano em curso',extra:'2ª captação 25/06'},
   // Alpha
   {id:'dom',nm:'Dom Baruka',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',meta:'URGENTE · cardápio + iFood + bebidas',extra:'Auditoria iFood em curso'},
-  {id:'stray',nm:'Stray House',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Recuperação (não é mais urgente)',extra:'ROAS 5,08 · subir criativos'},
-  {id:'cachu',nm:'Cachu Restaurante',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Ajustada ✓ · acompanhando ROAS',extra:'Food porn qui-dom'},
-  {id:'babbo',nm:'Babbo Giovanni',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Em ajuste · criar tarefa on-demand',extra:'Reels já entregue'},
-  {id:'brisa',nm:'Brisa Doce Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · onboarding/inauguração',extra:'Aderir método'},
-  {id:'attra',nm:'Attraversiamo Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · bombando',extra:'+1k seg em 3 dias'},
-  // Churn / Cancelados
-  {id:'lunnas',nm:"Lunna's",tipo:'ARK',plano:'CHURN',valor:0,status:'churn',meta:'❌ Cancelou · fora da operação',extra:'Cancelado'},
-  {id:'shopping',nm:'Shopping dos Uniformes',tipo:'ARK',plano:'CHURN',valor:0,status:'churn',meta:'❌ Cancelou · fora da operação',extra:'Cancelado'},
+  {id:'stray',nm:'Stray House',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',meta:'URGENTE · estratégia de recuperação',extra:'ROAS 5,08 · subir criativos'},
+  {id:'cachu',nm:'Cachu Restaurante',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'ROAS 1,37 em tratativa c/ gestor Alpha',extra:'Food porn qui-dom'},
+  {id:'babbo',nm:'Babbo Giovanni',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'1º anúncio rodando · falta iFood/cardápio',extra:'Reels já entregue'},
+  {id:'brisa',nm:'Brisa Doce Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Onboarding até agosto · inauguração',extra:'Aderir método'},
+  {id:'attra',nm:'Attraversiamo Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Bombando · +1k seg em 3 dias',extra:'Diferencial para anúncio'},
+  // Churn
   {id:'bellato',nm:'Bellato Pizzaria',tipo:'Alpha',plano:'CHURN',valor:0,status:'churn',meta:'Cliente saiu · devolução ~R$8k',extra:'Documentado'},
 ];
 
@@ -3764,23 +3737,7 @@ function applyCalendars(){
 }
 function renderGcal(){applyCalendars();}
 /* ============ WHATSAPP (Z-API) ============ */
-let WPP_TAB='todas';let WPP_SEARCH='';
-function saveWhatsapp(){try{localStorage.setItem('wfa-whatsapp',JSON.stringify(state.whatsapp));}catch(e){}}
-function wppOpen(phone){
-  WPP_ACTIVE=phone;
-  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[phone];
-  if(c&&c.unread){c.unread=0;saveWhatsapp();}
-  renderWhatsapp();
-}
-function wppSetTab(t){WPP_TAB=t;renderWhatsapp();}
-function wppOnSearch(v){WPP_SEARCH=(v||'').toLowerCase();renderWhatsapp();const el=document.getElementById('wpp-search');if(el){el.focus();const val=el.value;el.setSelectionRange(val.length,val.length);}}
-function wppAvatar(c,size){
-  const s=size||44;const nm=(c.nome||c.phone||'?').trim();
-  const ini=nm.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'?';
-  const bg=c.isGroup?'#0b7a5b':'#3b3b3b';
-  return `<span style="width:${s}px;height:${s}px;border-radius:50%;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(s*0.34)}px;flex-shrink:0;position:relative;overflow:hidden">${c.isGroup?'👥':ini}${c.avatar?`<img src="${mdEsc(c.avatar)}" referrerpolicy="no-referrer" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.remove()">`:''}</span>`;
-}
-function wppFmtTime(ts){if(!ts)return '';const d=new Date(ts);const now=new Date();if(d.toDateString()===now.toDateString())return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});}
+function wppOpen(phone){WPP_ACTIVE=phone;renderWhatsapp();}
 function renderWhatsapp(){
   const wrap=document.getElementById('wpp-wrap');if(!wrap)return;
   const conv=(state.whatsapp&&state.whatsapp.conversas)||{};
@@ -3790,50 +3747,35 @@ function renderWhatsapp(){
   const naoLidasWpp=list.reduce((s,c)=>s+(c.unread||0),0);
   const wbTop=document.getElementById('wpp-badge-top');
   if(wbTop){wbTop.textContent=naoLidasWpp>99?'99+':naoLidasWpp;wbTop.style.display=naoLidasWpp?'flex':'none';}
+  const webhookUrl=location.origin+'/api/workflowark/whatsapp/webhook';
   if(!list.length){
     wrap.innerHTML=`<div class="card" style="padding:24px;font-size:13.5px;color:var(--txt);line-height:1.6">
-      <strong>Ainda não há conversas.</strong> Assim que o WhatsApp (Evolution) estiver pareado e chegar uma mensagem, ela aparece aqui — com foto, grupos e tudo.
+      <strong>Ainda não há conversas.</strong> Quando a Z-API estiver conectada e chegar uma mensagem, ela aparece aqui.<br><br>
+      <span style="color:var(--mute)">No painel da Z-API, configure o <strong>webhook "Ao receber"</strong> apontando para este endereço:</span><br>
+      <code style="display:inline-block;margin-top:6px;background:#f4f4f4;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12px">${webhookUrl}</code>
     </div>`;return;
   }
-  const nGrupos=list.filter(c=>c.isGroup).length;
-  const nNao=list.filter(c=>c.unread).length;
-  let flist=list.filter(c=>{
-    if(WPP_TAB==='grupos'&&!c.isGroup)return false;
-    if(WPP_TAB==='nao'&&!c.unread)return false;
-    if(WPP_SEARCH){const hay=((c.nome||'')+' '+(c.phone||'')).toLowerCase();if(!hay.includes(WPP_SEARCH))return false;}
-    return true;
-  });
-  if(!WPP_ACTIVE||!conv[WPP_ACTIVE])WPP_ACTIVE=((flist[0]||list[0])||{}).phone;
+  if(!WPP_ACTIVE||!conv[WPP_ACTIVE])WPP_ACTIVE=list[0].phone;
   const active=conv[WPP_ACTIVE];
-  if(active&&active.unread){active.unread=0;saveWhatsapp();}
-  const tab=(id,lbl,n)=>`<button onclick="wppSetTab('${id}')" style="flex:1;border:none;background:${WPP_TAB===id?'#111':'transparent'};color:${WPP_TAB===id?'#fff':'var(--mute)'};font-size:11.5px;font-weight:700;padding:7px 4px;border-radius:8px;cursor:pointer">${lbl}${n?` <span style="opacity:.75">${n}</span>`:''}</button>`;
-  const items=flist.map(c=>{
+  const items=list.map(c=>{
     const last=c.msgs&&c.msgs[c.msgs.length-1];
     const lastTxt=last?((last.dir==='out'?'Você: ':'')+(last.text||'')):'';
-    const t=wppFmtTime(c.updatedAt||(last&&last.ts));
-    return `<button onclick="wppOpen('${c.phone}')" style="display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:none;border-bottom:1px solid var(--line);background:${c.phone===WPP_ACTIVE?'var(--yel-bg,#fff7d6)':'#fff'};padding:9px 11px;cursor:pointer">
-      ${wppAvatar(c,44)}
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mdEsc(c.nome||c.phone)}</span><span style="font-size:10px;color:var(--mute);flex-shrink:0">${t}</span></div>
-        <div style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span style="font-size:11.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">${mdEsc(lastTxt).slice(0,60)}</span>${c.unread?`<span style="background:#25D366;color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:1px 7px;flex-shrink:0">${c.unread}</span>`:''}</div>
-      </div>
+    return `<button onclick="wppOpen('${c.phone}')" style="display:block;width:100%;text-align:left;border:none;border-bottom:1px solid var(--line);background:${c.phone===WPP_ACTIVE?'var(--yel-bg,#fff7d6)':'#fff'};padding:10px 12px;cursor:pointer">
+      <div style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span style="font-weight:700;font-size:13px">${mdEsc(c.nome||c.phone)}</span>${c.unread?`<span style="background:#25D366;color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:1px 7px">${c.unread}</span>`:''}</div>
+      <div style="font-size:11.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mdEsc(lastTxt).slice(0,64)}</div>
     </button>`;
-  }).join('')||`<div style="padding:18px;text-align:center;font-size:12px;color:var(--mute)">Nada nesta aba.</div>`;
+  }).join('');
   const msgs=(active.msgs||[]).map(m=>{
     const out=m.dir==='out';
     return `<div style="display:flex;justify-content:${out?'flex-end':'flex-start'};margin:4px 0">
       <div style="max-width:72%;background:${out?'var(--yel,#ffd400)':'#fff'};color:${out?'#111':'var(--ink,#111)'};border:1px solid ${out?'var(--yel,#ffd400)':'var(--line)'};border-radius:12px;padding:7px 11px;font-size:13px;box-shadow:0 1px 1px rgba(0,0,0,.05)">${mdEsc(m.text)}<div style="font-size:9.5px;color:${out?'rgba(0,0,0,.45)':'var(--mute)'};text-align:right;margin-top:3px">${m.ts?new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}</div></div>
     </div>`;
   }).join('');
-  wrap.innerHTML=`<div class="wpp-grid" style="display:grid;grid-template-columns:310px 1fr;gap:14px;height:calc(100vh - 210px)">
+  wrap.innerHTML=`<div style="display:grid;grid-template-columns:260px 1fr;gap:14px;height:calc(100vh - 220px)">
+    <div class="card" style="padding:0;overflow:auto">${items}</div>
     <div class="card" style="padding:0;display:flex;flex-direction:column;overflow:hidden">
-      <div style="padding:9px 10px;border-bottom:1px solid var(--line)"><input id="wpp-search" class="form-input" placeholder="🔍 Buscar conversa..." value="${mdEsc(WPP_SEARCH)}" oninput="wppOnSearch(this.value)" style="font-size:12.5px"></div>
-      <div style="display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line)">${tab('todas','Tudo',0)}${tab('nao','Não lidas',nNao)}${tab('grupos','Grupos',nGrupos)}</div>
-      <div style="flex:1;overflow:auto">${items}</div>
-    </div>
-    <div class="card" style="padding:0;display:flex;flex-direction:column;overflow:hidden">
-      <div style="padding:10px 14px;background:#111;color:#fff;font-weight:700;display:flex;align-items:center;gap:10px">${wppAvatar(active,38)}<div style="min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${active.isGroup?'👥 ':''}${mdEsc(active.nome||active.phone)}</div><div style="color:var(--yel,#ffd400);font-weight:600;font-size:11px">${active.isGroup?'Grupo':mdEsc(active.phone)}</div></div></div>
-      <div id="wpp-msgs" style="flex:1;overflow:auto;padding:14px;background:#efeae2">${msgs}</div>
+      <div style="padding:12px 14px;background:#111;color:#fff;font-weight:700;display:flex;align-items:center;gap:8px"><span style="width:30px;height:30px;border-radius:50%;background:var(--yel,#ffd400);color:#111;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">${mdEsc((active.nome||active.phone||'?').trim().charAt(0).toUpperCase())}</span>${mdEsc(active.nome||active.phone)} <span style="color:var(--yel,#ffd400);font-weight:600;font-size:12px">· ${mdEsc(active.phone)}</span></div>
+      <div id="wpp-msgs" style="flex:1;overflow:auto;padding:14px;background:#f6f6f4">${msgs}</div>
       ${active.sugestao?`<div style="padding:9px 12px;border-top:1px solid var(--line);background:var(--yel-bg,#fff7d6)">
         <div style="font-size:10.5px;font-weight:800;color:#8a6d00;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">✨ Sugestão da IA</div>
         <div style="font-size:12.5px;color:var(--ink,#111);margin-bottom:7px">${mdEsc(active.sugestao)}</div>
@@ -3850,6 +3792,7 @@ function renderWhatsapp(){
     </div>
   </div>`;
   const mb=document.getElementById('wpp-msgs');if(mb)mb.scrollTop=mb.scrollHeight;
+  if(active.unread)active.unread=0;
 }
 /* ============ NOTIFICAÇÕES (assistente) ============ */
 function notifReadSet(){try{return new Set(JSON.parse(localStorage.getItem('wfa-notif-read')||'[]'));}catch(e){return new Set();}}
