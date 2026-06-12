@@ -343,13 +343,51 @@ table.t tr.high{background:var(--yel-bg)}
 .toast svg{width:14px;height:14px;color:var(--yel)}
 @keyframes toastIn{from{transform:translateY(15px);opacity:0}to{transform:none;opacity:1}}
 
-/* responsive */
-@media (max-width:900px){.app{grid-template-columns:1fr}.side{display:none}.topbar{padding:0 14px}.page{padding:14px}}
+/* ============ MOBILE / RESPONSIVE ============ */
+.mob-menu{display:none;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;flex-shrink:0;padding:0}
+.mob-menu svg{width:19px;height:19px}
+.side-backdrop{display:none}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;top:0;left:0;bottom:0;width:272px;max-width:85vw;z-index:1000;transform:translateX(-100%);transition:transform .26s cubic-bezier(.16,1,.3,1);box-shadow:0 0 44px rgba(0,0,0,.2)}
+  .side.open{transform:none}
+  .side-backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.44);z-index:999;opacity:0;pointer-events:none;transition:opacity .26s}
+  .side-backdrop.show{opacity:1;pointer-events:auto}
+  .mob-menu{display:inline-flex}
+  .topbar{padding:0 12px;gap:8px}
+  .tb-search{display:none}
+  .tb-pill{display:none}
+  .tb-right{gap:6px}
+  .tb-btn{padding:7px 9px}
+  .crumbs{font-size:13px;font-weight:600}
+  .crumbs span:not(.here):not(.sep){display:none}
+  .page{padding:14px 13px 84px}
+  .page-head{flex-direction:column;align-items:stretch;gap:10px}
+  .page-head h1{font-size:20px}
+  .g4{grid-template-columns:1fr 1fr!important}
+  .g3{grid-template-columns:1fr!important}
+  .task-board{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
+  .task-col{min-width:82vw;scroll-snap-align:start}
+  .filter-bar{flex-wrap:wrap;gap:6px}
+  .filter-bar .form-input,.filter-bar .form-select{min-width:0;max-width:none;flex:1 1 44%}
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .modal-bg{padding:10px}
+  .modal-bg>div,.modal{width:94vw!important;max-width:94vw!important;max-height:88vh;overflow-y:auto}
+  #page-planejamento .plc,#page-tarefas .tcal{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #page-planejamento .plc-grid,#page-tarefas .tcal-grid{min-width:560px}
+  #page-tarefas .db-lb{width:90px}
+}
+@media (max-width:480px){
+  .g4{grid-template-columns:1fr 1fr!important}
+  .page-head h1{font-size:18px}
+}
 </style>
 </head>
 <body>
 
 <div class="app">
+
+  <div class="side-backdrop" id="sideBackdrop" onclick="toggleSide(false)"></div>
 
   <!-- ============== SIDEBAR ============== -->
   <aside class="side">
@@ -545,6 +583,7 @@ table.t tr.high{background:var(--yel-bg)}
   <!-- ============== MAIN ============== -->
   <main class="main">
     <div class="topbar">
+      <button class="mob-menu" onclick="toggleSide()" aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <div class="crumbs" id="crumbs">
         <span>WorkFlowArk</span><span class="sep">/</span><span class="here">Meu Dia</span>
       </div>
@@ -2586,6 +2625,13 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'),2400);
 }
 
+/* ============ MENU MOBILE (drawer) ============ */
+function toggleSide(force){
+  const s=document.querySelector('.side');const b=document.getElementById('sideBackdrop');if(!s)return;
+  const open=force!==undefined?force:!s.classList.contains('open');
+  s.classList.toggle('open',open);
+  if(b)b.classList.toggle('show',open);
+}
 /* ============ NAV ============ */
 document.querySelectorAll('[data-nav]').forEach(el=>{
   el.addEventListener('click',()=>{
@@ -2601,6 +2647,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
     document.querySelector('.view').scrollTo(0,0);
+    if(window.innerWidth<=900)toggleSide(false);
   });
 });
 document.querySelectorAll('[data-toggle]').forEach(el=>{
