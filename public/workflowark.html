@@ -1555,7 +1555,7 @@ let WFA_CLOUD_MUTED = false;
 let WFA_MEMBER = null;
 let WFA_MEMBERS = [];
 // Declarados cedo para evitar erro de inicialização (usados no init e no sync):
-let WPP_ACTIVE=null;
+let WPP_ACTIVE=null;let WPP_TAB='tudo';let WPP_AUTOSYNC=false;
 const DEFAULT_CALENDARS = {
   'gabriel andrade':'gabrielkomercial@gmail.com',
   'danilo de lima':'danilodelima.distribuidoracopa@gmail.com',
@@ -4051,7 +4051,6 @@ function applyCalendars(){
 function renderGcal(){applyCalendars();}
 /* ============ WHATSAPP (Z-API) ============ */
 function wppOpen(phone){WPP_ACTIVE=phone;renderWhatsapp();}
-let WPP_TAB='tudo';let WPP_AUTOSYNC=false;
 function wppSetTab(t){WPP_TAB=t;renderWhatsapp();}
 function wppFilter(){const q=(document.getElementById('wpp-search')?.value||'').toLowerCase();document.querySelectorAll('#wpp-list .wpp-item').forEach(el=>{el.style.display=(el.getAttribute('data-name')||'').includes(q)?'':'none';});}
 function wppAvatarHtml(c,size){
@@ -4141,7 +4140,7 @@ function renderWhatsapp(){
   const mb=document.getElementById('wpp-msgs');if(mb)mb.scrollTop=mb.scrollHeight;
   if(active.unread)active.unread=0;
   // 1ª vez: se há grupos sem nome real, sincroniza sozinho (sem o Gabriel precisar clicar)
-  if(!WPP_AUTOSYNC && list.some(c=>c.isGroup&&!c.subjFetched)){WPP_AUTOSYNC=true;setTimeout(wppSyncGroups,500);}
+  if(WFA_CLOUD_READY && !WPP_AUTOSYNC && list.some(c=>c.isGroup&&!c.subjFetched)){WPP_AUTOSYNC=true;setTimeout(wppSyncGroups,800);}
 }
 async function wppSyncGroups(){
   toast('🔄 Sincronizando grupos...');
