@@ -29,8 +29,8 @@ a{color:inherit;text-decoration:none}
 /* ============ SIDEBAR ============ */
 .side{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;overflow:hidden}
 .side-head{padding:14px 14px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
-.brand-mark{width:36px;height:36px;border-radius:8px;overflow:hidden;display:grid;place-items:center;flex-shrink:0}
-.brand-mark img{width:100%;height:100%;object-fit:cover;display:block}
+.brand-mark{width:38px;height:38px;display:grid;place-items:center;flex-shrink:0}
+.brand-mark img{width:100%;height:100%;object-fit:contain;display:block}
 .brand-info .nm{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
 .brand-info .sb{font-size:10px;color:var(--mute);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
 
@@ -163,14 +163,45 @@ table.t tr.high{background:var(--yel-bg)}
 .alert.red h4{color:#991b1b}.alert.yel h4{color:#854d0e}.alert.green h4{color:#166534}.alert.blue h4{color:#111}
 
 /* client card */
-.cli{background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;border-left:3px solid var(--mute-2);cursor:pointer;transition:all .1s}
-.cli:hover{border-color:var(--line-2);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.cli{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 14px 11px;display:flex;flex-direction:column;gap:9px;border-left:3px solid var(--mute-2);cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s;position:relative}
+.cli:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.07);border-color:var(--line-2)}
 .cli.red{border-left-color:var(--red)}.cli.yel{border-left-color:#eab308}.cli.gr{border-left-color:var(--green)}
-.cli.churn{border-left-color:var(--mute-2);opacity:.6}
+.cli.churn{border-left-color:var(--mute-2);opacity:.62}
 .cli .top{display:flex;justify-content:space-between;align-items:center;gap:7px}
 .cli .nm{font-size:12.5px;font-weight:700;color:var(--ink)}
 .cli .meta{font-size:10.5px;color:var(--mute);display:flex;align-items:center;gap:5px}
 .cli .act{font-size:11.5px;color:var(--txt);line-height:1.4;margin-top:2px}
+/* client card v2 */
+.cli-hd{display:flex;align-items:center;gap:9px}
+.cli-av{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;font-family:var(--mono)}
+.cli-av.red{background:var(--red)}.cli-av.yel{background:#eab308}.cli-av.gr{background:var(--green)}.cli-av.churn{background:var(--mute-2)}
+.cli-hd .nmw{flex:1;min-width:0}
+.cli-hd .nm{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cli-hd .pl{font-size:10px;color:var(--mute);margin-top:1px}
+.cli-chip{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 7px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.cli-chip.red{background:var(--red-soft);color:#b91c1c}.cli-chip.yel{background:#fef9c3;color:#a16207}.cli-chip.gr{background:var(--green-soft);color:#15803d}.cli-chip.churn{background:#f1f1ef;color:#888}
+.cli-mid{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:1px}
+.cli-mrr{font-size:18px;font-weight:800;font-family:var(--mono);color:var(--ink);letter-spacing:-.02em}
+.cli-mrr small{font-size:10px;font-weight:500;color:var(--mute);letter-spacing:0}
+.cli-cap{font-size:10px;color:var(--yel-d);font-weight:700;background:var(--yel-bg);padding:2px 7px;border-radius:6px;white-space:nowrap}
+.cli-act2{font-size:11px;color:var(--txt);line-height:1.35;display:flex;gap:5px;align-items:flex-start;border-top:1px dashed var(--line);padding-top:8px}
+.cli-act2 .ai{color:var(--yel-d);flex-shrink:0;font-weight:800}
+.cli-btns{display:flex;gap:6px}
+.cli-btn{flex:1;font-size:10.5px;font-weight:600;padding:6px;border-radius:7px;border:1px solid var(--line);background:#fff;color:var(--txt);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .1s}
+.cli-btn:hover{background:var(--bg);border-color:var(--line-2)}
+.cli-btn.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+.cli-btn.pri:hover{background:#222}
+/* carteira KPIs */
+.cli-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px}
+.cli-kpi{background:#fff;border:1px solid var(--line);border-radius:9px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.cli-kpi .kl{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-family:var(--mono)}
+.cli-kpi .kv{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.02em;font-family:var(--mono)}
+.cli-kpi .kd{font-size:10px;color:var(--mute)}
+.cli-kpi.dk{background:var(--ink)}.cli-kpi.dk .kv{color:#fff}.cli-kpi.dk .kl{color:#8a8a8a}.cli-kpi.dk .kd{color:#9a9a9a}
+.cli-kpi.yel{background:var(--yel-bg);border-color:#f2e2a8}.cli-kpi.yel .kv{color:var(--yel-d)}
+.cli-hbar{display:flex;height:5px;border-radius:3px;overflow:hidden;margin-top:7px;gap:2px}
+.cli-hbar span{display:block;border-radius:2px}
+@media(max-width:900px){.cli-kpis{grid-template-columns:1fr 1fr}}
 
 /* régua matrix */
 .regua-wrap{background:#fff;border:1px solid var(--line);border-radius:7px;overflow-x:auto}
@@ -277,8 +308,15 @@ table.t tr.high{background:var(--yel-bg)}
 .task-card .tc-date{font-family:var(--mono);font-size:9.5px;color:var(--mute)}
 .task-card .tc-date.late{color:var(--red);font-weight:700}
 .task-card .tc-assign{font-size:9.5px;color:var(--mute);font-weight:600}
-.add-task-btn{background:none;border:1px dashed var(--line-2);border-radius:5px;padding:8px;font-size:11px;color:var(--mute);font-weight:600;cursor:pointer}
+.add-task-btn{background:none;border:1px dashed var(--line-2);border-radius:5px;padding:8px;font-size:11px;color:var(--mute);font-weight:600;cursor:pointer;width:100%;text-align:left}
 .add-task-btn:hover{border-color:var(--ink);color:var(--ink)}
+.qadd-box{background:#fff;border:1px solid var(--line-2);border-radius:7px;padding:7px;display:flex;flex-direction:column;gap:6px;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.qadd-input{width:100%;border:none;outline:none;resize:none;font-size:12px;font-family:inherit;color:var(--ink);min-height:38px;line-height:1.35}
+.qadd-actions{display:flex;gap:6px;align-items:center}
+.qadd-save{background:var(--ink);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer}
+.qadd-save:hover{background:#222}
+.qadd-cancel{background:none;border:none;color:var(--mute);font-size:15px;cursor:pointer;padding:2px 6px}
+.qadd-cancel:hover{color:var(--ink)}
 /* filter bar */
 .filter-bar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center;padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:7px}
 .filter-bar .form-input,.filter-bar .form-select{height:30px;font-size:11px;padding:0 8px;min-width:0}
@@ -420,7 +458,7 @@ table.t tr.high{background:var(--yel-bg)}
   <!-- ============== SIDEBAR ============== -->
   <aside class="side">
     <div class="side-head">
-      <div class="brand-mark"><img src="/ark-logo.png" alt="ARK Content"></div>
+      <div class="brand-mark"><img src="/ark-mark.png" alt="ARK Content"></div>
       <div class="brand-info">
         <div class="nm">ARK Content</div>
         <div class="sb">WorkFlow · v3</div>
@@ -652,6 +690,10 @@ table.t tr.high{background:var(--yel-bg)}
         .md-task .tk-m{font-size:10.5px;color:var(--mute);font-family:var(--mono);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
         .md-task .tk-chip{font-size:9px;font-weight:800;font-family:var(--mono);padding:3px 8px;border-radius:20px;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em}
         .md-chip-late{background:var(--red);color:#fff}.md-chip-today{background:var(--yel);color:#000}.md-chip-soon{background:var(--ink);color:var(--yel)}
+        .md-act{display:flex;gap:5px;flex-shrink:0}
+        .md-act button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:13px;display:grid;place-items:center;transition:all .1s;color:var(--mute);padding:0}
+        .md-act .ok:hover{background:var(--green-soft);border-color:#86efac;color:var(--green)}
+        .md-act .sn:hover{background:var(--yel-soft);border-color:var(--yel);color:var(--yel-d)}
         .md-empty{font-size:12px;color:var(--mute);padding:18px;text-align:center;font-style:italic}
         .md-subhd{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-family:var(--mono);margin:4px 2px 0}
         .md-agwrap{height:560px;background:#fff}
@@ -774,6 +816,8 @@ table.t tr.high{background:var(--yel-bg)}
           <div class="page-title"><h1>Lista de Clientes</h1><p>Carteira consolidada · ARK direta + Squad Alpha</p></div>
           <div style="display:flex;gap:6px"><button class="icobtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtrar</button><button class="tb-btn dk">+ Novo cliente</button></div>
         </div>
+
+        <div class="cli-kpis" id="cli-kpis"></div>
 
         <div class="tabs" data-tabs>
           <div class="tab active" data-sub="todos">Todos <span class="ct">14</span></div>
@@ -914,19 +958,22 @@ table.t tr.high{background:var(--yel-bg)}
           <div class="task-col" data-status="backlog">
             <div class="task-col-head"><h4><span class="dot gray"></span>Backlog</h4><span class="ct" id="ct-backlog">0</span></div>
             <div class="task-list" data-list="backlog"></div>
-            <button class="add-task-btn" onclick="openNovaTarefa('backlog')">+ Adicionar tarefa</button>
+            <div class="qadd" data-qadd="backlog"><button class="add-task-btn" onclick="qaddOpen('backlog')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'backlog')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('backlog',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('backlog')">✕</button></div></div></div>
           </div>
           <div class="task-col" data-status="andamento">
             <div class="task-col-head"><h4><span class="dot y"></span>Em Andamento</h4><span class="ct" id="ct-andamento">0</span></div>
             <div class="task-list" data-list="andamento"></div>
+            <div class="qadd" data-qadd="andamento"><button class="add-task-btn" onclick="qaddOpen('andamento')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'andamento')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('andamento',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('andamento')">✕</button></div></div></div>
           </div>
           <div class="task-col" data-status="aprovacao">
             <div class="task-col-head"><h4><span class="dot" style="background:var(--blue)"></span>Aprovação</h4><span class="ct" id="ct-aprovacao">0</span></div>
             <div class="task-list" data-list="aprovacao"></div>
+            <div class="qadd" data-qadd="aprovacao"><button class="add-task-btn" onclick="qaddOpen('aprovacao')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'aprovacao')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('aprovacao',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('aprovacao')">✕</button></div></div></div>
           </div>
           <div class="task-col" data-status="concluido">
             <div class="task-col-head"><h4><span class="dot g"></span>Concluído</h4><span class="ct" id="ct-concluido">0</span></div>
             <div class="task-list" data-list="concluido"></div>
+            <div class="qadd" data-qadd="concluido"><button class="add-task-btn" onclick="qaddOpen('concluido')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'concluido')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('concluido',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('concluido')">✕</button></div></div></div>
           </div>
         </div>
         <div id="task-lista" class="task-altview" style="display:none"></div>
@@ -940,6 +987,7 @@ table.t tr.high{background:var(--yel-bg)}
         <div class="page-head">
           <div class="page-title"><h1>Régua dos 15</h1><p>Matriz semanal · clique nas células para alternar: pendente → feito → não se aplica</p></div>
           <div style="display:flex;gap:6px">
+            <button class="tb-btn dk" onclick="gerarTarefasRegua()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:5px;vertical-align:-2px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Gerar tarefas da régua</button>
             <button class="icobtn" onclick="resetRegua()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>Resetar mês</button>
           </div>
         </div>
@@ -1397,11 +1445,15 @@ table.t tr.high{background:var(--yel-bg)}
 
       <!-- =================== ROTINAS =================== -->
       <div class="page" id="page-rotinas">
-        <div class="page-head"><div class="page-title"><h1>Rotinas</h1><p>Operação repetitiva da agência · diária, semanal, mensal</p></div></div>
-        <div class="card" style="padding:12px;margin-bottom:12px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px">
+        <div class="page-head">
+          <div class="page-title"><h1>Rotinas</h1><p>Operação repetitiva da agência · viram tarefas no board automaticamente</p></div>
+          <button class="tb-btn dk" onclick="genRotinaTarefas(false)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:5px;vertical-align:-2px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Gerar tarefas de hoje</button>
+        </div>
+        <div class="card" style="padding:12px;margin-bottom:12px;display:grid;grid-template-columns:2fr 1fr 1fr 1.3fr 1fr auto;gap:8px">
           <input id="rt-titulo" class="form-input" placeholder="Título da rotina">
           <select id="rt-freq" class="form-select"><option>Diária</option><option>Semanal</option><option>Quinzenal</option><option>Mensal</option></select>
-          <input id="rt-dia" class="form-input" placeholder="Seg/Ter...">
+          <input id="rt-dia" class="form-input" placeholder="Seg/Ter ou dia 10">
+          <select id="rt-resp" class="form-select"><option value="">Responsável…</option></select>
           <input id="rt-hora" class="form-input" placeholder="09:00">
           <button class="tb-btn" onclick="addRotina()">+</button>
         </div>
@@ -2736,18 +2788,48 @@ function renderClientes(){
   const alpha=CLIENTES.filter(c=>c.tipo==='Alpha');
   ['ark-clientes','ark-clientes-2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=ark.map(cliCard).join('');});
   ['alpha-clientes','alpha-clientes-2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=alpha.map(cliCard).join('');});
+  renderClientesKPIs();
   // popular select da modal nova
   const sel=document.getElementById('nt-cliente');
   if(sel) sel.innerHTML=CLIENTES.filter(c=>c.status!=='churn').map(c=>`<option value="${c.id}">${c.nm}</option>`).join('');
 }
+function cliInitials(nm){const p=nm.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').trim().split(/\s+/);return ((p[0]||'')[0]||'')+((p[1]||'')[0]||'').toUpperCase();}
 function cliCard(c){
-  const st={r:'Urgente',y:'Em ajuste',gr:'Saudável',churn:'CHURN'}[c.status];
-  return `<div class="cli ${c.status}" onclick="goRegua('${c.id}')">
-    <div class="top"><div class="nm">${c.nm}</div><span class="tag ${c.tipo==='ARK'?'yel':'dk'}">${c.plano}</span></div>
-    <div class="meta"><span class="dot ${c.status==='churn'?'gray':c.status}"></span>${st}${c.valor?' · R$ '+c.valor.toLocaleString('pt-BR')+'/mês':''}</div>
-    <div class="act">${c.meta}</div>
-    ${c.extra?`<div style="font-size:10.5px;color:var(--mute);margin-top:3px;font-style:italic">${c.extra}</div>`:''}
+  const st={r:'Urgente',y:'Em ajuste',gr:'Saudável',churn:'Churn'}[c.status]||'';
+  const cls=c.status;
+  const mrr=c.valor?`R$ ${c.valor.toLocaleString('pt-BR')}<small>/mês</small>`:`<span style="font-size:12px;color:var(--mute);font-weight:600">Squad Alpha</span>`;
+  const cap=c.cap?`<span class="cli-cap">📹 ${c.cap}/mês</span>`:'';
+  const isArk=c.tipo==='ARK'&&c.status!=='churn';
+  return `<div class="cli ${cls}" onclick="goRegua('${c.id}')">
+    <div class="cli-hd">
+      <div class="cli-av ${cls}">${cliInitials(c.nm).toUpperCase()}</div>
+      <div class="nmw"><div class="nm">${c.nm}</div><div class="pl">${c.plano}</div></div>
+      <span class="cli-chip ${cls}">${st}</span>
+    </div>
+    <div class="cli-mid"><div class="cli-mrr">${mrr}</div>${cap}</div>
+    <div class="cli-act2"><span class="ai">▸</span><span>${c.meta}</span></div>
+    <div class="cli-btns">
+      <button class="cli-btn pri" onclick="event.stopPropagation();goRegua('${c.id}')">Régua dos 15</button>
+      ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
+    </div>
   </div>`;
+}
+function renderClientesKPIs(){
+  const el=document.getElementById('cli-kpis'); if(!el)return;
+  const ativos=CLIENTES.filter(c=>c.status!=='churn');
+  const mrr=ativos.reduce((s,c)=>s+(c.valor||0),0);
+  const saud=ativos.filter(c=>c.status==='gr').length;
+  const ajuste=ativos.filter(c=>c.status==='y').length;
+  const urg=ativos.filter(c=>c.status==='r').length;
+  const churn=CLIENTES.filter(c=>c.status==='churn').length;
+  const cap=ativos.reduce((s,c)=>s+(c.cap||0),0);
+  const nArk=CLIENTES.filter(c=>c.tipo==='ARK'&&c.status!=='churn').length;
+  const nAlpha=CLIENTES.filter(c=>c.tipo==='Alpha'&&c.status!=='churn').length;
+  el.innerHTML=`
+    <div class="cli-kpi dk"><div class="kl">Carteira ativa</div><div class="kv">${ativos.length}</div><div class="kd">${nArk} ARK · ${nAlpha} Alpha · ${churn} churn</div></div>
+    <div class="cli-kpi yel"><div class="kl">MRR ARK</div><div class="kv">R$ ${mrr.toLocaleString('pt-BR')}</div><div class="kd">mensalidades recorrentes</div></div>
+    <div class="cli-kpi"><div class="kl">Captações / mês</div><div class="kv">${cap}</div><div class="kd">produção de vídeo contratada</div></div>
+    <div class="cli-kpi"><div class="kl">Saúde da carteira</div><div class="kv" style="font-size:14px;margin-top:2px">${saud} ok · ${ajuste} ajuste · ${urg} urgente</div><div class="cli-hbar">${saud?`<span style="flex:${saud};background:var(--green)"></span>`:''}${ajuste?`<span style="flex:${ajuste};background:#eab308"></span>`:''}${urg?`<span style="flex:${urg};background:var(--red)"></span>`:''}</div></div>`;
 }
 function goRegua(id){
   document.querySelector('[data-nav="regua"]').click();
@@ -3085,10 +3167,16 @@ function mdTaskRow(kind,t){
     :(t.data?`<span class="tk-chip md-chip-soon">${mdEsc(t.data.split('-').reverse().slice(0,2).join('/'))}</span>`:'<span class="tk-chip md-chip-soon">Sem data</span>');
   return `<div class="md-task ${kind==='late'?'late':kind==='today'?'today':''}">
     <span class="pr ${mdEsc(t.prio||'media')}"></span>
-    <div class="tk-main"><div class="tk-t">${mdEsc(t.title||'Sem título')}</div>${meta?`<div class="tk-m">${meta}</div>`:''}</div>
+    <div class="tk-main" onclick="openTaskDetail('${t.id}')" style="cursor:pointer"><div class="tk-t">${mdEsc(t.title||'Sem título')}</div>${meta?`<div class="tk-m">${meta}</div>`:''}</div>
     ${chip}
+    <div class="md-act">
+      <button class="ok" title="Já fiz · concluir" onclick="event.stopPropagation();mdDone('${t.id}')">✓</button>
+      <button class="sn" title="Adiar para amanhã" onclick="event.stopPropagation();mdSnooze('${t.id}')">↻</button>
+    </div>
   </div>`;
 }
+function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;t.status='concluido';t.criadaEm=new Date().toISOString();saveTarefas();renderMeuDia();toast('✓ Tarefa concluída · boa!');}
+function mdSnooze(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;const d=new Date();d.setDate(d.getDate()+1);t.data=d.toISOString().split('T')[0];saveTarefas();renderMeuDia();toast('↻ Adiada para amanhã');}
 function renderMeuDia(){
   if(!document.getElementById('page-dashboard'))return;
   if(typeof applyCalendars==='function')applyCalendars();
@@ -3522,7 +3610,7 @@ function taskCard(t){
     ${tagsHtml}
     ${clHtml}
     <div class="tc-meta" style="margin-top:5px">
-      <span class="tc-cli">${c?c.nm:'?'}</span>
+      <span class="tc-cli">${c?c.nm:'—'}</span>
       <span class="tc-date ${late?'late':''}" style="${dateStyle}">${late?'⚠ ':venceHoje?'📅 ':''}${dataFmt}</span>
     </div>
     <div class="tc-meta" style="margin-top:4px">
@@ -3547,6 +3635,20 @@ function bindDrag(){
     l.addEventListener('dragleave',e=>{l.style.background='';});
     l.addEventListener('drop',e=>{e.preventDefault();l.style.background='';const id=e.dataTransfer.getData('id');const t=state.tarefas.find(x=>x.id===id);if(t){t.status=l.dataset.list;saveTarefas();toast('Movida');}});
   });
+}
+
+/* ====== Quick-add inline estilo Trello ====== */
+function qaddOpen(st){const w=document.querySelector(`[data-qadd="${st}"]`);if(!w)return;w.querySelector('.add-task-btn').style.display='none';const b=w.querySelector('.qadd-box');b.style.display='';const ta=b.querySelector('textarea');ta.value='';ta.focus();}
+function qaddClose(st){const w=document.querySelector(`[data-qadd="${st}"]`);if(!w)return;w.querySelector('.add-task-btn').style.display='';const b=w.querySelector('.qadd-box');b.style.display='none';b.querySelector('textarea').value='';}
+function qaddKey(e,st){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();qaddSave(st,true);}else if(e.key==='Escape'){qaddClose(st);}}
+function qaddSave(st,keepOpen){
+  const w=document.querySelector(`[data-qadd="${st}"]`);if(!w)return;
+  const ta=w.querySelector('textarea');const title=(ta.value||'').trim();
+  if(!title){qaddClose(st);return;}
+  state.tarefas.push({id:'q'+Date.now(),title,funcao:'',clienteId:'',sprintN:null,resp:'',data:'',prio:'media',status:st,criadaEm:new Date().toISOString()});
+  saveTarefas();
+  if(keepOpen){const w2=document.querySelector(`[data-qadd="${st}"]`);const ta2=w2&&w2.querySelector('textarea');if(ta2){ta2.value='';ta2.focus();}}
+  else qaddClose(st);
 }
 
 /* ============ NOVA TAREFA MANUAL ============ */
@@ -3600,8 +3702,59 @@ function cycleRegua(id,i){
   const next=cur===''?'ok':cur==='ok'?'no':cur==='no'?'na':'';
   state.regua[id][i]=next;
   saveRegua();renderRegua();
+  // marcar ✓ conclui a tarefa correspondente; "não se aplica" remove
+  const key=reguaKey(id,i);
+  const t=state.tarefas.find(x=>x.reguaKey===key);
+  if(t){
+    if(next==='ok'){ t.status='concluido'; t.criadaEm=t.criadaEm||new Date().toISOString(); saveTarefas(); }
+    else if(next==='na'){ state.tarefas=state.tarefas.filter(x=>x.reguaKey!==key); saveTarefas(); }
+    else if(next===''||next==='no'){ t.status='backlog'; saveTarefas(); }
+  }
 }
 function resetRegua(){if(confirm('Resetar régua do mês?')){state.regua={};saveRegua();renderRegua();toast('Régua resetada');}}
+
+/* ====== Régua → Tarefas reais ====== */
+const REGUA_ITENS=[
+  {label:'Reunião do mês',funcao:'Account Manager'},
+  {label:'Planejamento até dia 15',funcao:'Account Manager'},
+  {label:'Captação',funcao:'Captação'},
+  {label:'Criativo no ar',funcao:'Criador'},
+  {label:'Otimização (sex)',funcao:'Gestor de Tráfego'},
+  {label:'Relatório semanal (seg)',funcao:'Gestor de Tráfego'}
+];
+function reguaMesKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function reguaKey(cliId,i){return 'regua:'+reguaMesKey()+':'+cliId+':'+i;}
+function gerarTarefasRegua(){
+  const ativos=CLIENTES.filter(c=>c.status!=='churn');
+  const today=new Date().toISOString().split('T')[0];
+  let criadas=0;
+  ativos.forEach(c=>{
+    const row=state.regua[c.id]||{};
+    REGUA_ITENS.forEach((it,i)=>{
+      const v=row[i]||'';
+      if(v==='ok'||v==='na') return;              // já feito ou não se aplica → não vira tarefa
+      const key=reguaKey(c.id,i);
+      if(state.tarefas.some(t=>t.reguaKey===key)) return; // evita duplicar
+      state.tarefas.push({
+        id:'rg'+Date.now()+'_'+c.id+'_'+i,
+        title:it.label+' · '+c.nm,
+        funcao:it.funcao,
+        clienteId:c.id,
+        sprintN:null,
+        resp:RESPONSAVEIS_FN[it.funcao]||'',
+        data:today,
+        prio: v==='no'?'alta':'media',
+        status:'backlog',
+        reguaKey:key,
+        criadaEm:new Date().toISOString()
+      });
+      criadas++;
+    });
+  });
+  if(criadas===0){ toast('Régua sem pendências novas · tudo já virou tarefa ✓'); return; }
+  saveTarefas();
+  toast(`${criadas} tarefa(s) criada(s) a partir da régua · ver em Atividades › Tarefas`);
+}
 
 /* ============ BADGES ============ */
 function updateBadges(){
@@ -4476,15 +4629,57 @@ function loadRot(){return JSON.parse(localStorage.getItem('wfa-rotinas')||'[]');
 function saveRot(a){localStorage.setItem('wfa-rotinas',JSON.stringify(a));renderRotinas();}
 function addRotina(){
   const t=document.getElementById('rt-titulo').value.trim();if(!t){toast('Informe o título');return;}
-  const a=loadRot();a.unshift({id:'r'+Date.now(),titulo:t,freq:document.getElementById('rt-freq').value,dia:document.getElementById('rt-dia').value,hora:document.getElementById('rt-hora').value,ativo:true});
-  saveRot(a);['rt-titulo','rt-dia','rt-hora'].forEach(i=>document.getElementById(i).value='');toast('Rotina criada');
+  const a=loadRot();a.unshift({id:'r'+Date.now(),titulo:t,freq:document.getElementById('rt-freq').value,dia:document.getElementById('rt-dia').value,resp:document.getElementById('rt-resp').value,hora:document.getElementById('rt-hora').value,ativo:true});
+  saveRot(a);['rt-titulo','rt-dia','rt-hora'].forEach(i=>document.getElementById(i).value='');
+  const rs=document.getElementById('rt-resp');if(rs)rs.value='';
+  toast('Rotina criada · vai virar tarefa automaticamente');
+  genRotinaTarefas(true);
 }
 function delRot(id){if(confirm('Excluir?'))saveRot(loadRot().filter(x=>x.id!==id));}
 function toggleRot(id){const a=loadRot();const r=a.find(x=>x.id===id);if(r){r.ativo=!r.ativo;saveRot(a);}}
+/* ====== Rotinas → tarefas recorrentes ====== */
+const ROT_DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+function rotinaVenceHoje(r){
+  const hoje=new Date();const dow=ROT_DOW[hoje.getDay()];const dia=hoje.getDate();
+  const f=(r.freq||'').toLowerCase();const campoDia=(r.dia||'').toLowerCase();
+  if(f.startsWith('di')) return true;                               // diária
+  if(f.startsWith('sem')||f.startsWith('quin')){                   // semanal/quinzenal
+    if(!campoDia) return false;
+    return campoDia.includes(dow.toLowerCase());
+  }
+  if(f.startsWith('men')){                                          // mensal
+    const num=parseInt((campoDia.match(/\d+/)||[])[0]||'1',10);
+    return dia===num;
+  }
+  return false;
+}
+function genRotinaTarefas(silent){
+  const today=new Date().toISOString().split('T')[0];
+  const rotinas=loadRot().filter(r=>r.ativo);
+  let criadas=0;
+  rotinas.forEach(r=>{
+    if(!rotinaVenceHoje(r)) return;
+    const key='rotina:'+today+':'+r.id;
+    if(state.tarefas.some(t=>t.rotinaKey===key)) return;
+    state.tarefas.push({
+      id:'rt'+Date.now()+'_'+r.id,
+      title:r.titulo+' · 🔁 rotina',
+      funcao:'',clienteId:'',sprintN:null,
+      resp:r.resp||'',data:today,prio:'media',status:'backlog',
+      rotinaKey:key,criadaEm:new Date().toISOString()
+    });
+    criadas++;
+  });
+  if(criadas){ saveTarefas(); if(!silent) toast(`${criadas} tarefa(s) de rotina criada(s) · ver em Atividades › Tarefas`); }
+  else if(!silent){ toast('Nenhuma rotina vence hoje (ou já viraram tarefa)'); }
+}
 function renderRotinas(){
   const el=document.getElementById('rt-list');if(!el)return;
-  const a=loadRot();if(!a.length){el.innerHTML='<p class="muted" style="font-size:12px">Nenhuma rotina ainda.</p>';return;}
-  el.innerHTML=a.map(r=>`<div class="card" style="padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;${r.ativo?'':'opacity:.5'}"><div><div style="font-weight:600;font-size:13px">${escapeHtml(r.titulo)}</div><div style="display:flex;gap:6px;margin-top:3px"><span class="tag">${r.freq}</span>${r.dia?`<span class="tag">${escapeHtml(r.dia)}</span>`:''}${r.hora?`<span class="tag">${escapeHtml(r.hora)}</span>`:''}</div></div><div style="display:flex;gap:6px"><button class="icobtn" onclick="toggleRot('${r.id}')">${r.ativo?'Pausar':'Ativar'}</button><button class="icobtn" style="color:var(--red)" onclick="delRot('${r.id}')">✕</button></div></div>`).join('');
+  const a=loadRot();if(!a.length){el.innerHTML='<p class="muted" style="font-size:12px">Nenhuma rotina ainda. Crie acima — ela vira tarefa no board automaticamente nos dias certos.</p>';return;}
+  el.innerHTML=a.map(r=>{
+    const hoje=rotinaVenceHoje(r)&&r.ativo;
+    return `<div class="card" style="padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;${r.ativo?'':'opacity:.5'}"><div><div style="font-weight:600;font-size:13px">${escapeHtml(r.titulo)} ${hoje?'<span class="tag yel" style="margin-left:4px">vence hoje</span>':''}</div><div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap"><span class="tag">${r.freq}</span>${r.dia?`<span class="tag">${escapeHtml(r.dia)}</span>`:''}${r.hora?`<span class="tag">${escapeHtml(r.hora)}</span>`:''}${r.resp?`<span class="tag">👤 ${escapeHtml(r.resp)}</span>`:''}</div></div><div style="display:flex;gap:6px"><button class="icobtn" onclick="toggleRot('${r.id}')">${r.ativo?'Pausar':'Ativar'}</button><button class="icobtn" style="color:var(--red)" onclick="delRot('${r.id}')">✕</button></div></div>`;
+  }).join('');
 }
 
 /* ============ OKRs ============ */
@@ -4527,7 +4722,12 @@ function renderProcessos(){
   const ntCli=document.getElementById('nt-cliente');if(ntCli)ntCli.innerHTML=cliOpts;
   const filtCli=document.getElementById('filt-cli');
   if(filtCli)filtCli.innerHTML='<option value="">Todo cliente</option>'+cliOpts;
+  // responsáveis do time para o select de rotinas
+  const team=[...new Set(['Gabriel Andrade',...Object.values(RESPONSAVEIS_FN)])];
+  const rtResp=document.getElementById('rt-resp');
+  if(rtResp)rtResp.innerHTML='<option value="">Responsável…</option>'+team.map(n=>`<option value="${n}">${n}</option>`).join('');
   renderDemandas();renderRotinas();renderOkrs();renderProcessos();
+  genRotinaTarefas(true); // rotinas que vencem hoje viram tarefa automaticamente
   bootCloudSync();
 })();
 
