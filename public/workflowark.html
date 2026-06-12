@@ -783,6 +783,55 @@ table.t tr.high{background:var(--yel-bg)}
           <div class="kpi green"><div class="l">Concluídas hoje</div><div class="v" id="kpi-concluidas">0</div></div>
         </div>
 
+        <style>
+          #page-tarefas .task-views{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+          #page-tarefas .tv-btn{font-size:12.5px;font-weight:600;padding:7px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;transition:.15s}
+          #page-tarefas .tv-btn:hover{border-color:var(--yel,#ffd400)}
+          #page-tarefas .tv-btn.on{background:#111;color:#fff;border-color:#111}
+          #page-tarefas .tl-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+          #page-tarefas .tl-table th{background:#fafafa;text-align:left;padding:10px 12px;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);border-bottom:1px solid var(--line)}
+          #page-tarefas .tl-table td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+          #page-tarefas .tl-row{cursor:pointer}#page-tarefas .tl-row:hover{background:#fafafa}
+          #page-tarefas .tl-tt{font-weight:600;color:var(--ink)}
+          #page-tarefas .tl-pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+          #page-tarefas .tl-st-backlog{background:#f0f0ee;color:#777}
+          #page-tarefas .tl-st-andamento{background:#fff3cd;color:#8a6d00}
+          #page-tarefas .tl-st-aprovacao{background:#e7f0ff;color:#2b62c4}
+          #page-tarefas .tl-st-concluido{background:#e6f8ec;color:#127a3e}
+          #page-tarefas .tl-late{color:var(--red,#e0364f);font-weight:700}
+          #page-tarefas .tcal{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+          #page-tarefas .tcal-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:800;text-transform:capitalize}
+          #page-tarefas .tcal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+          #page-tarefas .tcal-dow{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--mute);text-align:center;padding:7px 0;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+          #page-tarefas .tcal-dow:nth-child(7){border-right:none}
+          #page-tarefas .tcal-cell{min-height:92px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px;display:flex;flex-direction:column;gap:3px}
+          #page-tarefas .tcal-cell:nth-child(7n){border-right:none}
+          #page-tarefas .tcal-cell.muted{background:#fafafa}
+          #page-tarefas .tcal-num{font-size:10.5px;color:var(--mute);font-weight:600;align-self:flex-start}
+          #page-tarefas .tcal-cell.today .tcal-num{background:var(--yel,#ffd400);color:#111;border-radius:5px;padding:0 5px}
+          #page-tarefas .tcal-chip{font-size:10px;line-height:1.2;padding:3px 5px;border-radius:6px;cursor:pointer;background:#fff7d6;border-left:3px solid var(--yel,#ffd400);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+          #page-tarefas .tcal-chip.late{background:#ffe9ec;border-left-color:var(--red,#e0364f)}
+          #page-tarefas .tcal-chip.done{background:#e6f8ec;border-left-color:#19b36b;text-decoration:line-through;opacity:.7}
+          #page-tarefas .tp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+          #page-tarefas .tp-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+          #page-tarefas .tp-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+          #page-tarefas .tp-av{width:36px;height:36px;border-radius:50%;background:#111;color:var(--yel,#ffd400);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
+          #page-tarefas .tp-nm{font-weight:700;font-size:14px}
+          #page-tarefas .tp-sub{font-size:11px;color:var(--mute)}
+          #page-tarefas .tp-bar{display:flex;height:7px;border-radius:999px;overflow:hidden;margin:8px 0;background:#f0f0ee}
+          #page-tarefas .tp-seg{height:100%}
+          #page-tarefas .tp-task{font-size:12px;padding:6px 8px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center}
+          #page-tarefas .tp-task:hover{background:#fafafa}
+          #page-tarefas .tp-task .d{font-size:10.5px;color:var(--mute)}
+          #page-tarefas .tp-task.late .d{color:var(--red,#e0364f);font-weight:700}
+        </style>
+        <div class="task-views" id="task-views">
+          <button class="tv-btn on" data-tv="kanban" onclick="tarefaSetView('kanban')">▦ Kanban</button>
+          <button class="tv-btn" data-tv="lista" onclick="tarefaSetView('lista')">☰ Lista</button>
+          <button class="tv-btn" data-tv="calendario" onclick="tarefaSetView('calendario')">🗓️ Calendário</button>
+          <button class="tv-btn" data-tv="pessoas" onclick="tarefaSetView('pessoas')">👥 Por Pessoa</button>
+        </div>
+
         <div class="task-board" id="task-board">
           <div class="task-col" data-status="backlog">
             <div class="task-col-head"><h4><span class="dot gray"></span>Backlog</h4><span class="ct" id="ct-backlog">0</span></div>
@@ -802,6 +851,9 @@ table.t tr.high{background:var(--yel-bg)}
             <div class="task-list" data-list="concluido"></div>
           </div>
         </div>
+        <div id="task-lista" class="task-altview" style="display:none"></div>
+        <div id="task-calendario" class="task-altview" style="display:none"></div>
+        <div id="task-pessoas" class="task-altview" style="display:none"></div>
       </div>
 
       <!-- =================== RÉGUA DOS 15 =================== -->
@@ -3253,6 +3305,77 @@ function renderTarefas(){
   document.getElementById('kpi-concluidas').textContent=state.tarefas.filter(t=>t.status==='concluido'&&t.criadaEm&&t.criadaEm.startsWith(today)).length;
   // bind drag
   bindDrag();
+  tarefaApplyView();
+}
+let WFA_TASK_VIEW='kanban';
+function tarefaSetView(v){
+  WFA_TASK_VIEW=v;
+  document.querySelectorAll('#task-views .tv-btn').forEach(b=>b.classList.toggle('on',b.dataset.tv===v));
+  renderTarefas();
+}
+function tarefaApplyView(){
+  const board=document.getElementById('task-board');if(!board)return;
+  const lista=document.getElementById('task-lista'),cal=document.getElementById('task-calendario'),pess=document.getElementById('task-pessoas');
+  board.style.display=WFA_TASK_VIEW==='kanban'?'':'none';
+  if(lista)lista.style.display=WFA_TASK_VIEW==='lista'?'':'none';
+  if(cal)cal.style.display=WFA_TASK_VIEW==='calendario'?'':'none';
+  if(pess)pess.style.display=WFA_TASK_VIEW==='pessoas'?'':'none';
+  if(WFA_TASK_VIEW==='lista')renderTaskLista();
+  else if(WFA_TASK_VIEW==='calendario')renderTaskCalendario();
+  else if(WFA_TASK_VIEW==='pessoas')renderTaskPessoas();
+}
+function taskFiltradas(){return state.tarefas.filter(tarefaPassaFiltro);}
+function taskStatusLabel(s){return s==='backlog'?'Backlog':s==='andamento'?'Em Andamento':s==='aprovacao'?'Aprovação':s==='concluido'?'Concluído':s;}
+function renderTaskLista(){
+  const today=new Date().toISOString().split('T')[0];
+  const ts=taskFiltradas().slice().sort((a,b)=>{const da=a.data||'9999',db=b.data||'9999';return da<db?-1:da>db?1:0;});
+  const rows=ts.map(t=>{
+    const c=CLIENTES.find(x=>x.id===t.clienteId);
+    const late=t.data&&t.data<today&&t.status!=='concluido';
+    const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';
+    const prio=t.prio==='alta'?'🔴 Alta':t.prio==='baixa'?'🟢 Baixa':'🟡 Média';
+    return `<tr class="tl-row" onclick="openTaskDetail('${t.id}')"><td class="tl-tt">${escapeHtml(t.title)}</td><td>${c?escapeHtml(c.nm):'—'}</td><td>${escapeHtml(t.resp||'—')}</td><td class="${late?'tl-late':''}">${late?'⚠ ':''}${dataFmt}</td><td>${prio}</td><td><span class="tl-pill tl-st-${t.status}">${taskStatusLabel(t.status)}</span></td></tr>`;
+  }).join('');
+  document.getElementById('task-lista').innerHTML=`<table class="tl-table"><thead><tr><th>Tarefa</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:20px">Nenhuma tarefa.</td></tr>'}</tbody></table>`;
+}
+function renderTaskCalendario(){
+  const ts=taskFiltradas();
+  const today=new Date();today.setHours(0,0,0,0);
+  const dated=ts.map(t=>({t,d:t.data?new Date(t.data+'T00:00:00'):null})).filter(x=>x.d&&!isNaN(x.d.getTime()));
+  const ref=dated.length?dated.slice().sort((a,b)=>a.d-b.d)[0].d:new Date();
+  const year=ref.getFullYear(),month=ref.getMonth();
+  const first=new Date(year,month,1);const startDow=first.getDay();const days=new Date(year,month+1,0).getDate();
+  const monthName=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const byDay={};dated.forEach(x=>{if(x.d.getMonth()===month&&x.d.getFullYear()===year){(byDay[x.d.getDate()]=byDay[x.d.getDate()]||[]).push(x.t);}});
+  const todayStr=new Date().toISOString().split('T')[0];
+  let cells='';
+  for(let b=0;b<startDow;b++)cells+='<div class="tcal-cell muted"></div>';
+  for(let day=1;day<=days;day++){
+    const dd=new Date(year,month,day);const isToday=dd.getTime()===today.getTime();
+    const items=(byDay[day]||[]).map(t=>{const late=t.data&&t.data<todayStr&&t.status!=='concluido';const cls=t.status==='concluido'?'done':late?'late':'';return `<div class="tcal-chip ${cls}" onclick="openTaskDetail('${t.id}')" title="${escapeHtml(t.title)}">${escapeHtml(t.title.slice(0,30))}</div>`;}).join('');
+    cells+=`<div class="tcal-cell${isToday?' today':''}"><span class="tcal-num">${day}</span>${items}</div>`;
+  }
+  document.getElementById('task-calendario').innerHTML=`<div class="tcal"><div class="tcal-head"><span>${monthName}</span><span style="font-size:12px;color:var(--mute)">${dated.length} com prazo</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`;
+}
+function renderTaskPessoas(){
+  const today=new Date().toISOString().split('T')[0];
+  const ts=taskFiltradas();
+  const byResp={};
+  ts.forEach(t=>{const r=((t.resp||'').trim())||'Sem responsável';(byResp[r]=byResp[r]||[]).push(t);});
+  const nomes=Object.keys(byResp).sort((a,b)=>byResp[b].length-byResp[a].length);
+  const initials=n=>n.split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'?';
+  const cards=nomes.map(nm=>{
+    const arr=byResp[nm];
+    const ativos=arr.filter(t=>t.status!=='concluido');
+    const atras=arr.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
+    const cnt={backlog:0,andamento:0,aprovacao:0,concluido:0};arr.forEach(t=>{cnt[t.status]=(cnt[t.status]||0)+1;});
+    const tot=arr.length||1;
+    const seg=(c,col)=>cnt[c]?`<div class="tp-seg" style="width:${cnt[c]/tot*100}%;background:${col}"></div>`:'';
+    const lista=arr.slice().sort((a,b)=>((a.data||'9999')<(b.data||'9999')?-1:1)).slice(0,6).map(t=>{const late=t.data&&t.data<today&&t.status!=='concluido';const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';return `<div class="tp-task ${late?'late':''}" onclick="openTaskDetail('${t.id}')"><span>${t.status==='concluido'?'✅ ':''}${escapeHtml(t.title.slice(0,38))}</span><span class="d">${late?'⚠ ':''}${dataFmt}</span></div>`;}).join('');
+    return `<div class="tp-card"><div class="tp-head"><div class="tp-av">${initials(nm)}</div><div><div class="tp-nm">${escapeHtml(nm)}</div><div class="tp-sub">${ativos.length} ativas${atras?` · <span style="color:var(--red,#e0364f);font-weight:700">${atras} atrasada${atras>1?'s':''}</span>`:''}</div></div></div><div class="tp-bar">${seg('backlog','#bbb')}${seg('andamento','#ffd400')}${seg('aprovacao','#4a90ff')}${seg('concluido','#19b36b')}</div>${lista||'<div class="tp-sub">Sem tarefas</div>'}${arr.length>6?`<div class="tp-sub" style="margin-top:6px">+${arr.length-6} outras</div>`:''}</div>`;
+  }).join('');
+  document.getElementById('task-pessoas').innerHTML=`<div class="tp-grid">${cards||'<div class="tp-sub">Nenhuma tarefa.</div>'}</div>`;
 }
 function taskCard(t){
   const c=CLIENTES.find(x=>x.id===t.clienteId);
