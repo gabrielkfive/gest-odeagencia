@@ -10,6 +10,23 @@ export const Route = createFileRoute("/api/workflowark/whatsapp/webhook")({
         try {
           const body: any = await request.json().catch(() => ({}));
 
+          // Evolution manda o QR aqui (evento qrcode.updated). Guardamos pra exibir numa página.
+          if (body?.event === "qrcode.updated") {
+            const b64 = body?.data?.qrcode?.base64 || body?.data?.base64 || "";
+            const code = body?.data?.qrcode?.code || body?.data?.code || "";
+            if (b64) {
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+              await (supabaseAdmin as any).from("workflowark_state").upsert({ key: "wfa-wa-qr", data: { base64: b64, code, ts: Date.now() } });
+            }
+            return Response.json({ ok: true });
+          }
+          // Quando conecta, limpa o QR.
+          if (body?.event === "connection.update" && /open/i.test(String(body?.data?.state || ""))) {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            await (supabaseAdmin as any).from("workflowark_state").upsert({ key: "wfa-wa-qr", data: { base64: "", connected: true, ts: Date.now() } });
+            return Response.json({ ok: true });
+          }
+
           let phone = "";
           let fromMe = false;
           let name = "";
