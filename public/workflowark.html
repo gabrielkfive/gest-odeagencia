@@ -1545,7 +1545,7 @@ table.t tr.high{background:var(--yel-bg)}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -1665,6 +1665,7 @@ function applyCloudState(remote){
   state.gcal=JSON.parse(localStorage.getItem('wfa-gcal')||'{}');
   const jornada=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
   if(jornada&&typeof jornada==='object')SPRINTS.forEach(sp=>{sp.clis=jornada[sp.n]||[];});
+  if(typeof rebuildPeople==='function')rebuildPeople();if(typeof fillRespSelects==='function')fillRespSelects();
   renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function')renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function')renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
   if(typeof renderCrm==='function')renderCrm();
   if(typeof renderAgenda==='function')renderAgenda();
@@ -2740,6 +2741,27 @@ function cliRemove(){
   }catch(e){}
 })();
 
+// ---- Colaboradores personalizados (nuvem · wfa-colab-custom) ----
+function loadColabCustom(){ try{ return JSON.parse(localStorage.getItem('wfa-colab-custom')||'[]'); }catch(e){ return []; } }
+function saveColabCustom(arr){ localStorage.setItem('wfa-colab-custom', JSON.stringify(arr)); if(typeof rebuildPeople==='function')rebuildPeople(); fillRespSelects(); if(typeof renderMeuDia==='function')renderMeuDia(); }
+// Acrescenta os colaboradores personalizados aos selects de Responsável (sem duplicar).
+function fillRespSelects(){
+  const extra=loadColabCustom();
+  document.querySelectorAll('#nt-resp, #td-resp').forEach(sel=>{
+    if(!sel)return;
+    extra.forEach(nm=>{ if(![...sel.options].some(o=>o.value===nm||o.textContent===nm)){ const o=document.createElement('option'); o.textContent=nm; sel.appendChild(o); } });
+  });
+}
+// Seed único do Samuel Magalhães (colaborador pedido pelo Gabriel)
+(function seedSamuel(){
+  try{
+    if(localStorage.getItem('wfa-seed-samuel'))return;
+    const arr=loadColabCustom();
+    if(!arr.some(n=>String(n).toLowerCase().includes('samuel'))){ arr.push('Samuel Magalhães'); localStorage.setItem('wfa-colab-custom',JSON.stringify(arr)); }
+    localStorage.setItem('wfa-seed-samuel','1');
+  }catch(e){}
+})();
+
 const SPRINT_ATIVIDADES = {
   0:[{t:'Grupo de WhatsApp criado',f:'Account Manager'},{t:'Pasta de armazenamento (Drive)',f:'Account Manager'},{t:'Mensagem inicial enviada',f:'Account Manager'},{t:'Vídeo explicando a jornada',f:'Account Manager'},{t:'Instruções para gravações',f:'Account Manager'},{t:'Drive de referências',f:'Account Manager'}],
   1:[{t:'Criativo inicial',f:'Criador'},{t:'Reunião de briefing',f:'Account Manager'},{t:'Guia de redes sociais',f:'Designer'},{t:'Acesso à conta de anúncio',f:'Gestor de Tráfego'}],
@@ -3357,7 +3379,10 @@ function renderMeuDia(){
 
 /* ============ IDENTIDADE / MÊS ============ */
 const ROLE_LABEL={admin:'CEO · Admin',gestor:'Gestor',financeiro:'Financeiro',operacao:'Operação',comercial:'Comercial',marketing:'Marketing',viewer:'Visualização'};
-const MD_PEOPLE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Maria Luiza','Bruno','Saulo','Henrique','Nicolas','Luckas Gomes','Giuseppe','Márcio','Kaique'];
+const MD_PEOPLE_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Maria Luiza','Bruno','Saulo','Henrique','Nicolas','Luckas Gomes','Giuseppe','Márcio','Kaique'];
+let MD_PEOPLE=MD_PEOPLE_BASE.slice();
+function rebuildPeople(){ MD_PEOPLE = MD_PEOPLE_BASE.concat(loadColabCustom().filter(n=>!MD_PEOPLE_BASE.includes(n))); }
+rebuildPeople();
 
 /* ============ CONTROLE DE ACESSO (RBAC) ============ */
 const NAV_CATALOG=[
@@ -3873,6 +3898,7 @@ function updateBadges(){
 }
 
 /* ============ INIT ============ */
+fillRespSelects();
 renderClientes();
 renderSprints();
 renderTarefas();
