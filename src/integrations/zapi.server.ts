@@ -70,6 +70,37 @@ export async function waSendText(phone: string, message: string) {
   return zapiSendText(phone, message);
 }
 
+// Estado da conexão da instância: "open" (conectado) | "connecting" | "close" |
+// "unconfigured" | "offline" (servidor fora do ar) | "error" | "notfound".
+export async function evoConnectionState(): Promise<string> {
+  const { url, key, instance } = evoConfig();
+  if (!url || !key || !instance) return "unconfigured";
+  try {
+    const resp = await fetch(`${url}/instance/connectionState/${instance}`, { headers: { apikey: key } });
+    if (resp.status === 404) return "notfound";
+    const data: any = await resp.json().catch(() => ({}));
+    if (!resp.ok) return "error";
+    return String(data?.instance?.state || data?.state || "unknown");
+  } catch {
+    return "offline"; // não alcançou o servidor Evolution (VM caída / porta fechada)
+  }
+}
+
+// Dispara a conexão e devolve o QR Code (base64 data-URI) pra escanear.
+// Em instância já conectada, a Evolution responde sem base64 (state=open).
+export async function evoConnect(): Promise<{ base64: string; code: string; state?: string }> {
+  const { url, key, instance } = evoConfig();
+  if (!url || !key || !instance) throw new Error("Evolution não configurada.");
+  const resp = await fetch(`${url}/instance/connect/${instance}`, { headers: { apikey: key } });
+  const data: any = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data?.message || data?.error || `Evolution respondeu ${resp.status}`);
+  return {
+    base64: data?.base64 || data?.qrcode?.base64 || "",
+    code: data?.code || data?.qrcode?.code || data?.pairingCode || "",
+    state: data?.instance?.state,
+  };
+}
+
 // Busca a foto de perfil (pessoa ou grupo) pela Evolution. "" se não houver/falhar.
 export async function evoFetchAvatar(numberOrJid: string): Promise<string> {
   try {

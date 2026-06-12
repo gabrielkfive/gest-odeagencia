@@ -17,7 +17,9 @@ VITE_SUPABASE_PROJECT_ID = "fxfnonozzekxnxddxsnh"
 
 # WhatsApp via Evolution API (self-host na Oracle). A chave (EVOLUTION_API_KEY) é segredo:
 #   npx wrangler secret put EVOLUTION_API_KEY
-EVOLUTION_API_URL = "http://136.248.75.53:8080"
+# Hostname via nip.io (resolve p/ 136.248.75.53). Cloudflare Workers BLOQUEIA fetch a
+# IP cru (erro 1003 "Direct IP access not allowed"); por isso usamos um hostname.
+EVOLUTION_API_URL = "http://136.248.75.53.nip.io:8080"
 EVOLUTION_INSTANCE = "ark"
 
 # SUPABASE_SERVICE_ROLE_KEY é um segredo — será configurado via:

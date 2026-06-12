@@ -6,28 +6,52 @@ export const Route = createFileRoute("/api/workflowark/whatsapp/qr")({
   server: {
     handlers: {
       GET: async () => {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const db = supabaseAdmin as any;
+        const { evoConnectionState, evoConnect } = await import("@/integrations/zapi.server");
+
+        // 1) Estado real da instância na Evolution (fonte da verdade).
+        const state = await evoConnectionState();
+
+        let problema = ""; // mensagem de diagnóstico quando algo está fora do ar
+        let connected = false;
+        if (state === "open") {
+          connected = true;
+          try { await db.from("workflowark_state").upsert({ key: "wfa-wa-qr", data: { connected: true, ts: Date.now() } }); } catch { /* ignore */ }
+        } else if (state === "offline") {
+          problema = "O servidor do WhatsApp (Evolution) não respondeu. A máquina pode estar desligada — avise o Claude.";
+        } else if (state === "unconfigured") {
+          problema = "WhatsApp ainda não configurado (faltam as credenciais da Evolution).";
+        } else if (state === "notfound") {
+          problema = "A instância 'ark' não existe na Evolution — peça pro Claude recriar a instância.";
+        } else if (state === "error") {
+          problema = "Não consegui autenticar na Evolution (a chave pode estar errada) — avise o Claude.";
+        } else {
+          // close / connecting / unknown → dispara o connect só pra a Evolution emitir o QR.
+          // O QR em si NÃO vem nessa resposta (count:0); chega pelo webhook qrcode.updated,
+          // que o nosso /webhook salva em wfa-wa-qr. Por isso aqui só disparamos e seguimos lendo.
+          try { await evoConnect(); } catch { /* ignore — pode já estar conectando */ }
+        }
+
+        // 2) Lê o QR mais recente que o WEBHOOK salvou (não sobrescreve).
         let d: any = {};
-        try {
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data: row } = await (supabaseAdmin as any)
-            .from("workflowark_state")
-            .select("data")
-            .eq("key", "wfa-wa-qr")
-            .maybeSingle();
-          d = row?.data || {};
-        } catch {
-          /* ignore */
+        if (!connected) {
+          try {
+            const { data: row } = await db.from("workflowark_state").select("data").eq("key", "wfa-wa-qr").maybeSingle();
+            d = row?.data || {};
+          } catch { /* ignore */ }
         }
         const fresh = d.ts && Date.now() - d.ts < 80000;
+
         let body: string;
-        if (d.connected) {
+        if (connected || d.connected) {
           body = `<div class="ok">✅ WhatsApp conectado!</div><p class="sub">Pode fechar esta página. As conversas já aparecem no sistema.</p>`;
         } else if (fresh && d.base64) {
           body = `<div class="qr"><img src="${d.base64}" alt="QR" width="300" height="300"></div>
             <p class="sub">No celular: <b>WhatsApp → Aparelhos conectados → Conectar um aparelho</b> → aponte para o código.</p>
             ${d.code ? `<p class="code">ou código: <b>${String(d.code).replace(/[<>]/g, "")}</b></p>` : ""}`;
         } else {
-          body = `<div class="wait">⏳ Gerando o QR Code...</div><p class="sub">Se demorar, peça pro Claude recriar a instância. Esta página atualiza sozinha.</p>`;
+          body = `<div class="wait">⏳ ${problema || "Gerando o QR Code..."}</div><p class="sub">Esta página atualiza sozinha.</p>`;
         }
         const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
