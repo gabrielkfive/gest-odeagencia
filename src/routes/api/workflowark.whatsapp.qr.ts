@@ -27,10 +27,18 @@ export const Route = createFileRoute("/api/workflowark/whatsapp/qr")({
         } else if (state === "error") {
           problema = "Não consegui autenticar na Evolution (a chave pode estar errada) — avise o Claude.";
         } else {
-          // close / connecting / unknown → dispara o connect só pra a Evolution emitir o QR.
-          // O QR em si NÃO vem nessa resposta (count:0); chega pelo webhook qrcode.updated,
-          // que o nosso /webhook salva em wfa-wa-qr. Por isso aqui só disparamos e seguimos lendo.
-          try { await evoConnect(); } catch { /* ignore — pode já estar conectando */ }
+          // close / connecting / unknown → dispara o connect. Com a versão do WhatsApp Web
+          // atualizada (CONFIG_SESSION_PHONE_VERSION), o QR vem direto nessa resposta (base64);
+          // guardamos em wfa-wa-qr. O webhook qrcode.updated também salva, como reforço.
+          try {
+            const r = await evoConnect();
+            if (r.state === "open") {
+              connected = true;
+              await db.from("workflowark_state").upsert({ key: "wfa-wa-qr", data: { connected: true, ts: Date.now() } });
+            } else if (r.base64) {
+              await db.from("workflowark_state").upsert({ key: "wfa-wa-qr", data: { base64: r.base64, code: r.code, ts: Date.now() } });
+            }
+          } catch { /* ignore — pode já estar conectando */ }
         }
 
         // 2) Lê o QR mais recente que o WEBHOOK salvou (não sobrescreve).
