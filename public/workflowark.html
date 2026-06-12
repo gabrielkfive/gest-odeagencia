@@ -824,6 +824,7 @@ table.t tr.high{background:var(--yel-bg)}
           #page-tarefas .tp-task:hover{background:#fafafa}
           #page-tarefas .tp-task .d{font-size:10.5px;color:var(--mute)}
           #page-tarefas .tp-task.late .d{color:var(--red,#e0364f);font-weight:700}
+          #page-tarefas .tc-av{width:20px;height:20px;border-radius:50%;background:#111;color:var(--yel,#ffd400);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:9px;flex-shrink:0}
         </style>
         <div class="task-views" id="task-views">
           <button class="tv-btn on" data-tv="kanban" onclick="tarefaSetView('kanban')">▦ Kanban</button>
@@ -3326,6 +3327,7 @@ function tarefaApplyView(){
 }
 function taskFiltradas(){return state.tarefas.filter(tarefaPassaFiltro);}
 function taskStatusLabel(s){return s==='backlog'?'Backlog':s==='andamento'?'Em Andamento':s==='aprovacao'?'Aprovação':s==='concluido'?'Concluído':s;}
+function taskInitials(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'?';}
 function renderTaskLista(){
   const today=new Date().toISOString().split('T')[0];
   const ts=taskFiltradas().slice().sort((a,b)=>{const da=a.data||'9999',db=b.data||'9999';return da<db?-1:da>db?1:0;});
@@ -3405,7 +3407,7 @@ function taskCard(t){
       <span class="tc-date ${late?'late':''}" style="${dateStyle}">${late?'⚠ ':venceHoje?'📅 ':''}${dataFmt}</span>
     </div>
     <div class="tc-meta" style="margin-top:4px">
-      <span class="tc-assign">👤 ${escapeHtml(t.resp||'—')}</span>
+      <span class="tc-assign" style="display:inline-flex;align-items:center;gap:5px">${t.resp?`<span class="tc-av">${taskInitials(t.resp)}</span>`:'👤 '}${escapeHtml(t.resp||'—')}</span>
       <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
         <button class="icobtn" style="padding:2px 6px;font-size:9.5px" title="Mover para próxima etapa" onclick="event.stopPropagation();moveTask('${t.id}','${nextStatus}')">→</button>
         <button class="icobtn" style="padding:2px 6px;font-size:9.5px;color:var(--red)" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>
