@@ -81,7 +81,7 @@ export async function processWaWebhook(body: any): Promise<void> {
   if (phone && text && typeof text === "string") {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { appendWhatsapp } = await import("@/integrations/zapi.server");
-    await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid });
+    await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name });
     // Assistente: só em mensagens recebidas e fora de grupo (evita enxurrada de tarefas).
     if (!fromMe && !isGroup) {
       const { runAgentOnIncoming } = await import("@/integrations/agent.server");

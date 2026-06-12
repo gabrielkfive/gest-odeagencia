@@ -119,10 +119,35 @@ export async function evoFetchAvatar(numberOrJid: string): Promise<string> {
   }
 }
 
+// Nome (subject) de um grupo pela Evolution. "" se falhar.
+export async function evoGroupSubject(jid: string): Promise<string> {
+  try {
+    const { url, key, instance } = evoConfig();
+    if (!url || !key || !instance || !jid) return "";
+    const resp = await fetch(`${url}/group/findGroupInfos/${instance}?groupJid=${encodeURIComponent(jid)}`, { headers: { apikey: key } });
+    if (!resp.ok) return "";
+    const data: any = await resp.json().catch(() => ({}));
+    return String(data?.subject || "");
+  } catch { return ""; }
+}
+
+// Lista todos os grupos (jid, subject, foto) — usado pra preencher nomes de uma vez.
+export async function evoAllGroups(): Promise<Array<{ jid: string; subject: string; pic: string }>> {
+  try {
+    const { url, key, instance } = evoConfig();
+    if (!url || !key || !instance) return [];
+    const resp = await fetch(`${url}/group/fetchAllGroups/${instance}?getParticipants=false`, { headers: { apikey: key } });
+    if (!resp.ok) return [];
+    const data: any = await resp.json().catch(() => []);
+    if (!Array.isArray(data)) return [];
+    return data.map((g: any) => ({ jid: String(g.id || ""), subject: String(g.subject || ""), pic: String(g.pictureUrl || "") }));
+  } catch { return []; }
+}
+
 // Acrescenta uma mensagem à conversa, guardando no bloco wfa-whatsapp da tabela workflowark_state.
 export async function appendWhatsapp(
   db: { from: (t: string) => any },
-  msg: { phone: string; name?: string; dir: "in" | "out"; text: string; ts?: number; isGroup?: boolean; jid?: string },
+  msg: { phone: string; name?: string; dir: "in" | "out"; text: string; ts?: number; isGroup?: boolean; jid?: string; senderName?: string },
 ) {
   const key = "wfa-whatsapp";
   const phone = String(msg.phone || "").replace(/\D/g, "");
@@ -133,12 +158,24 @@ export async function appendWhatsapp(
       ? (row.data as { conversas?: Record<string, any> })
       : { conversas: {} };
   if (!state.conversas) state.conversas = {};
-  const c = state.conversas[phone] || { phone, nome: msg.name || phone, msgs: [] };
-  if (msg.name) c.nome = msg.name;
-  if (typeof msg.isGroup === "boolean") c.isGroup = msg.isGroup;
+  const c = state.conversas[phone] || { phone, nome: phone, msgs: [] };
+  if (msg.isGroup) {
+    c.isGroup = true;
+    // Nome do grupo = subject (busca uma vez; pushName aqui é o REMETENTE, não o grupo).
+    if (!c.subjFetched || !c.nome || c.nome === phone) {
+      const s = await evoGroupSubject(msg.jid || "");
+      if (s) { c.nome = s; c.subjFetched = true; }
+    }
+    if (!c.nome) c.nome = "Grupo";
+  } else {
+    if (msg.name) c.nome = msg.name;
+    if (!c.nome) c.nome = phone;
+  }
   if (msg.jid) c.jid = msg.jid;
   if (!c.avatar) { try { const a = await evoFetchAvatar(msg.jid || phone); if (a) c.avatar = a; } catch { /* ignore */ } }
-  c.msgs.push({ dir: msg.dir, text: String(msg.text), ts: msg.ts || Date.now() });
+  const m: any = { dir: msg.dir, text: String(msg.text), ts: msg.ts || Date.now() };
+  if (msg.isGroup && msg.dir === "in" && msg.senderName) m.sender = msg.senderName; // quem mandou no grupo
+  c.msgs.push(m);
   c.msgs = c.msgs.slice(-300);
   c.updatedAt = Date.now();
   c.unread = msg.dir === "in" ? (c.unread || 0) + 1 : 0;

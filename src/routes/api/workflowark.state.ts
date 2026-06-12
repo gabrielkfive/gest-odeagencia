@@ -456,15 +456,52 @@ export const Route = createFileRoute("/api/workflowark/state")({
 
         if (action === "send-whatsapp") {
           const phone = String(body.phone ?? "").replace(/\D/g, "");
+          const jid = String(body.jid ?? "");
           const message = String(body.message ?? "").trim();
           if (!phone || !message) return json({ error: "Telefone e mensagem são obrigatórios." }, { status: 400 });
+          const isGroup = jid.includes("@g.us");
+          const target = isGroup ? jid : phone; // grupo: envia pro jid; pessoa: pro número
           try {
             const { waSendText, appendWhatsapp } = await import("@/integrations/zapi.server");
-            await waSendText(phone, message);
-            await appendWhatsapp(ctx.db as any, { phone, dir: "out", text: message });
+            await waSendText(target, message);
+            await appendWhatsapp(ctx.db as any, { phone, dir: "out", text: message, isGroup, jid });
             return json({ ok: true });
           } catch (e) {
             return json({ error: (e as Error)?.message || "Falha ao enviar pelo WhatsApp." }, { status: 502 });
+          }
+        }
+
+        // Preenche nome + foto dos GRUPOS de uma vez (corrige conversas com nome do remetente).
+        if (action === "wa-sync-groups") {
+          try {
+            const { evoAllGroups } = await import("@/integrations/zapi.server");
+            const groups = await evoAllGroups();
+            const byJid: Record<string, { subject: string; pic: string }> = {};
+            const byDigits: Record<string, { subject: string; pic: string }> = {};
+            groups.forEach((g) => {
+              if (g.jid) byJid[g.jid] = { subject: g.subject, pic: g.pic };
+              const d = g.jid.replace(/\D/g, "");
+              if (d) byDigits[d] = { subject: g.subject, pic: g.pic };
+            });
+            const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-whatsapp").maybeSingle();
+            const st: any = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : { conversas: {} };
+            if (!st.conversas) st.conversas = {};
+            let n = 0;
+            Object.entries(st.conversas).forEach(([pk, c]: [string, any]) => {
+              const j = c.jid || "";
+              const d = String(c.phone || pk).replace(/\D/g, "");
+              const g = byJid[j] || byDigits[d];
+              if (g) {
+                c.isGroup = true;
+                if (g.subject) { c.nome = g.subject; c.subjFetched = true; }
+                if (g.pic) c.avatar = g.pic;
+                n++;
+              }
+            });
+            await ctx.db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: st });
+            return json({ ok: true, updated: n, groups: groups.length });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao sincronizar grupos" }, { status: 502 });
           }
         }
 
