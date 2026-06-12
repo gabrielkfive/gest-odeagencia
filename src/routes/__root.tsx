@@ -76,8 +76,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Gestão de Agência" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#ffd400" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-title", content: "WorkFlowArk" },
+      { title: "WorkFlowArk · ARK Content" },
       { name: "description", content: "Agency Sync Hub centralizes advertising agency operations by integrating calendars, finances, and client communications." },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Gestão de Agência" },
@@ -95,6 +100,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/ark-logo.png" },
+      { rel: "icon", href: "/ark-logo.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -119,6 +127,15 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {
+        /* PWA opcional: ignora falha de registro */
+      });
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
