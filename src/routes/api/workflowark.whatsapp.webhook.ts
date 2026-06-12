@@ -16,6 +16,7 @@ export const Route = createFileRoute("/api/workflowark/whatsapp/webhook")({
           let text = "";
           let ts = Date.now();
           let isGroup = false;
+          let jid = "";
 
           // ===== Formato Evolution API (messages.upsert) =====
           if (body?.event || body?.data?.key) {
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/api/workflowark/whatsapp/webhook")({
             if (event && event !== "messages.upsert") return Response.json({ ok: true }); // ignora qrcode/connection/etc
             const d = Array.isArray(body.data) ? (body.data[0] || {}) : (body.data || {});
             const k = d.key || {};
-            const jid = String(k.remoteJid || "");
+            jid = String(k.remoteJid || "");
             isGroup = jid.includes("@g.us");
             phone = jid.replace(/@.*/, "").replace(/\D/g, "");
             fromMe = !!k.fromMe;
@@ -75,7 +76,7 @@ export const Route = createFileRoute("/api/workflowark/whatsapp/webhook")({
           if (phone && text && typeof text === "string") {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
             const { appendWhatsapp } = await import("@/integrations/zapi.server");
-            await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts });
+            await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid });
             // Assistente: só em mensagens recebidas e fora de grupo (evita enxurrada de tarefas).
             if (!fromMe && !isGroup) {
               const { runAgentOnIncoming } = await import("@/integrations/agent.server");

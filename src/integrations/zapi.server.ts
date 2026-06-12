@@ -70,10 +70,28 @@ export async function waSendText(phone: string, message: string) {
   return zapiSendText(phone, message);
 }
 
+// Busca a foto de perfil (pessoa ou grupo) pela Evolution. "" se não houver/falhar.
+export async function evoFetchAvatar(numberOrJid: string): Promise<string> {
+  try {
+    const { url, key, instance } = evoConfig();
+    if (!url || !key || !instance || !numberOrJid) return "";
+    const resp = await fetch(`${url}/chat/fetchProfilePictureUrl/${instance}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: key },
+      body: JSON.stringify({ number: numberOrJid }),
+    });
+    if (!resp.ok) return "";
+    const data: any = await resp.json().catch(() => ({}));
+    return String(data?.profilePictureUrl || data?.url || "");
+  } catch {
+    return "";
+  }
+}
+
 // Acrescenta uma mensagem à conversa, guardando no bloco wfa-whatsapp da tabela workflowark_state.
 export async function appendWhatsapp(
   db: { from: (t: string) => any },
-  msg: { phone: string; name?: string; dir: "in" | "out"; text: string; ts?: number },
+  msg: { phone: string; name?: string; dir: "in" | "out"; text: string; ts?: number; isGroup?: boolean; jid?: string },
 ) {
   const key = "wfa-whatsapp";
   const phone = String(msg.phone || "").replace(/\D/g, "");
@@ -86,6 +104,9 @@ export async function appendWhatsapp(
   if (!state.conversas) state.conversas = {};
   const c = state.conversas[phone] || { phone, nome: msg.name || phone, msgs: [] };
   if (msg.name) c.nome = msg.name;
+  if (typeof msg.isGroup === "boolean") c.isGroup = msg.isGroup;
+  if (msg.jid) c.jid = msg.jid;
+  if (!c.avatar) { try { const a = await evoFetchAvatar(msg.jid || phone); if (a) c.avatar = a; } catch { /* ignore */ } }
   c.msgs.push({ dir: msg.dir, text: String(msg.text), ts: msg.ts || Date.now() });
   c.msgs = c.msgs.slice(-300);
   c.updatedAt = Date.now();
