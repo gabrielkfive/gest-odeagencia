@@ -2365,6 +2365,9 @@ function iniciarAutoSync(){
           .cal-d.empty{background:var(--bg);cursor:default}
           .cal-d.empty:hover{background:var(--bg)}
           .cal-d.today{background:#fffbeb}
+          .cal-d.drag-over{background:var(--yel-bg);box-shadow:inset 0 0 0 2px var(--yel)}
+          .cal-d .ev{cursor:grab}
+          .cal-d .ev:active{cursor:grabbing}
           .cal-d .dn{font-size:11px;font-weight:700;color:var(--mute-2);margin-bottom:3px}
           .cal-d.today .dn{color:var(--yel-d);font-weight:800}
           .cal-d .ev{font-size:10.5px;padding:1.5px 5px;border-radius:3px;margin-bottom:2px;background:var(--blue-soft);color:#333;border:1px solid #d4d4d4;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;justify-content:space-between;gap:3px}
@@ -2433,6 +2436,7 @@ function iniciarAutoSync(){
               </select></div>
           </div>
           <div class="agenda-mfoot">
+            <button class="icobtn" id="agenda-del-btn" onclick="agendaDeleteFromModal()" style="display:none;color:#dc2626;margin-right:auto">Excluir</button>
             <button class="icobtn" onclick="agendaCloseModal()">Cancelar</button>
             <button class="tb-btn" onclick="agendaSaveEvent()">Salvar evento</button>
           </div>
@@ -4991,16 +4995,32 @@ function agendaNavMes(dir){
   if(agendaMes.mes<0){agendaMes.mes=11;agendaMes.ano--;}
   renderAgenda();
 }
+let agendaEditId=null; // id do evento sendo editado (null = novo)
 function agendaOpenModal(dateStr){
+  agendaEditId=null;
   document.getElementById('agenda-modal').classList.add('open');
   document.getElementById('agenda-ev-date').value=dateStr||'';
   document.getElementById('agenda-ev-title').value='';
   document.getElementById('agenda-ev-time').value='';
   document.getElementById('agenda-ev-type').value='';
   document.getElementById('agenda-modal-title').textContent='Novo Evento';
+  document.getElementById('agenda-del-btn').style.display='none';
   setTimeout(()=>document.getElementById('agenda-ev-title').focus(),80);
 }
-function agendaCloseModal(){document.getElementById('agenda-modal').classList.remove('open');}
+function agendaEditEvent(id,e){
+  if(e)e.stopPropagation();
+  const ev=loadAgendaEvents().find(x=>x.id===id);if(!ev)return;
+  agendaEditId=id;
+  document.getElementById('agenda-modal').classList.add('open');
+  document.getElementById('agenda-ev-title').value=ev.title||'';
+  document.getElementById('agenda-ev-date').value=ev.date||'';
+  document.getElementById('agenda-ev-time').value='';
+  document.getElementById('agenda-ev-type').value=ev.type||'';
+  document.getElementById('agenda-modal-title').textContent='Editar Evento';
+  document.getElementById('agenda-del-btn').style.display='';
+  setTimeout(()=>document.getElementById('agenda-ev-date').focus(),80);
+}
+function agendaCloseModal(){document.getElementById('agenda-modal').classList.remove('open');agendaEditId=null;}
 function agendaSaveEvent(){
   const title=document.getElementById('agenda-ev-title').value.trim();
   const date=document.getElementById('agenda-ev-date').value;
@@ -5009,13 +5029,39 @@ function agendaSaveEvent(){
   const time=document.getElementById('agenda-ev-time').value;
   const type=document.getElementById('agenda-ev-type').value;
   const arr=loadAgendaEvents();
-  arr.push({id:'ae'+Date.now(),date,title:title+(time?' '+time:''),type});
-  saveAgendaEvents(arr);agendaCloseModal();toast('Evento adicionado');
+  if(agendaEditId){
+    const ev=arr.find(x=>x.id===agendaEditId);
+    if(ev){ev.title=title+(time?' '+time:'');ev.date=date;ev.type=type;}
+    saveAgendaEvents(arr);agendaCloseModal();toast('Evento atualizado');
+  }else{
+    arr.push({id:'ae'+Date.now(),date,title:title+(time?' '+time:''),type});
+    saveAgendaEvents(arr);agendaCloseModal();toast('Evento adicionado');
+  }
+}
+function agendaDeleteFromModal(){
+  if(!agendaEditId)return;
+  if(!confirm('Excluir este evento?'))return;
+  saveAgendaEvents(loadAgendaEvents().filter(ev=>ev.id!==agendaEditId));
+  agendaCloseModal();toast('Evento excluído');
 }
 function agendaDelEvent(id,e){
   e.stopPropagation();
   if(!confirm('Excluir este evento?'))return;
   saveAgendaEvents(loadAgendaEvents().filter(ev=>ev.id!==id));
+}
+// ---- arrastar evento p/ outro dia (mover de data) ----
+function agendaDragStart(e,id){
+  e.dataTransfer.setData('text/plain',id);
+  e.dataTransfer.effectAllowed='move';
+}
+function agendaDropOn(e,dateStr){
+  e.preventDefault();
+  const id=e.dataTransfer.getData('text/plain');if(!id||!dateStr)return;
+  const arr=loadAgendaEvents();
+  const ev=arr.find(x=>x.id===id);
+  if(!ev||ev.date===dateStr)return;
+  ev.date=dateStr;
+  saveAgendaEvents(arr);toast('Evento movido');
 }
 function renderAgenda(){
   const {ano,mes}=agendaMes;
@@ -5044,8 +5090,12 @@ function renderAgenda(){
     const d=document.createElement('div');
     d.className='cal-d'+(isToday?' today':'');
     d.onclick=()=>agendaOpenModal(dateStr);
+    // arrastar evento p/ outro dia (mover de data)
+    d.ondragover=(e)=>{e.preventDefault();d.classList.add('drag-over');};
+    d.ondragleave=()=>d.classList.remove('drag-over');
+    d.ondrop=(e)=>{d.classList.remove('drag-over');agendaDropOn(e,dateStr);};
     d.innerHTML=`<div class="dn">${day}</div>`+
-      dayEvs.map(ev=>`<div class="ev${ev.type?' '+ev.type:''}">${escapeHtml(ev.title)}<span class="ev-del" onclick="agendaDelEvent('${ev.id}',event)" title="Excluir">✕</span></div>`).join('')+
+      dayEvs.map(ev=>`<div class="ev${ev.type?' '+ev.type:''}" draggable="true" title="Clique para editar · arraste para mover de dia" ondragstart="agendaDragStart(event,'${ev.id}')" onclick="agendaEditEvent('${ev.id}',event)">${escapeHtml(ev.title)}<span class="ev-del" onclick="agendaDelEvent('${ev.id}',event)" title="Excluir">✕</span></div>`).join('')+
       `<span class="add-ev" title="Adicionar evento">+</span>`;
     grid.appendChild(d);
   }
