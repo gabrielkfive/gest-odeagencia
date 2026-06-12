@@ -816,7 +816,7 @@ table.t tr.high{background:var(--yel-bg)}
       <div class="page" id="page-lista-clientes">
         <div class="page-head">
           <div class="page-title"><h1>Lista de Clientes</h1><p>Carteira consolidada · ARK direta + Squad Alpha</p></div>
-          <div style="display:flex;gap:6px"><button class="icobtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtrar</button><button class="tb-btn dk">+ Novo cliente</button></div>
+          <div style="display:flex;gap:6px"><button class="icobtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtrar</button><button class="tb-btn dk" onclick="cliNovoOpen()">+ Novo cliente</button></div>
         </div>
 
         <div class="cli-kpis" id="cli-kpis"></div>
@@ -1545,7 +1545,7 @@ table.t tr.high{background:var(--yel-bg)}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -2447,6 +2447,29 @@ function iniciarAutoSync(){
   </main>
 </div>
 
+<!-- MODAL: Novo / Editar Cliente -->
+<div class="modal-bg" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-head"><h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span><span id="cli-modal-title">Novo cliente</span></h3><span class="x" onclick="closeModal('modal-cliente')">✕</span></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nome do cliente</label><input class="form-input" id="cli-f-nome" placeholder="Ex: Valhalla"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="cli-f-tipo"><option value="ARK">ARK Direto (cobrança mensal)</option><option value="Alpha">Squad Alpha (pré-pago)</option></select></div>
+        <div class="form-group"><label class="form-label">Plano</label><input class="form-input" id="cli-f-plano" placeholder="Ex: Gold, Plano X, Alpha Senior"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Valor mensal (R$)</label><input class="form-input" id="cli-f-valor" type="number" min="0" placeholder="Ex: 3500 (deixe 0 se Alpha)"></div>
+        <div class="form-group"><label class="form-label">Captações/mês</label><input class="form-input" id="cli-f-cap" type="number" min="0" placeholder="Ex: 1"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Situação</label><select class="form-select" id="cli-f-status"><option value="gr">🟢 Saudável</option><option value="y">🟡 Em ajuste</option><option value="r">🔴 Urgente</option><option value="churn">⚫ Churn / Cancelado</option></select></div>
+        <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="cli-f-meta" placeholder="Ex: Novo · onboarding"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="icobtn" id="cli-del-btn" onclick="cliRemove()" style="display:none;color:#dc2626;margin-right:auto">Excluir cliente</button><button class="icobtn" onclick="closeModal('modal-cliente')">Cancelar</button><button class="tb-btn" onclick="cliSave()">Salvar cliente</button></div>
+  </div>
+</div>
+
 <!-- MODAL: Sugestão de Atividades por Sprint -->
 <div class="modal-bg" id="modal-sprint">
   <div class="modal">
@@ -2619,7 +2642,7 @@ function iniciarAutoSync(){
 
 <script>
 /* ============ DADOS ============ */
-const CLIENTES = [
+const CLIENTES_BASE = [
   // ARK Direto
   {id:'vivenda',nm:'Vivenda',tipo:'ARK',plano:'Plano X',valor:5500,status:'gr',cap:3,meta:'Maior ticket · 3 captações/mês',extra:'📹 3 captações/mês · prioritário'},
   {id:'fercon',nm:'Fercon',tipo:'ARK',plano:'Gold',valor:4200,status:'gr',cap:2,meta:'Ampliou · 2 captações/mês',extra:'📹 2 captações/mês · mais reativo que ativo'},
@@ -2639,6 +2662,83 @@ const CLIENTES = [
   {id:'shopping',nm:'Shopping dos Uniformes',tipo:'ARK',plano:'CHURN',valor:0,status:'churn',meta:'❌ Cancelou · fora da operação',extra:'Cancelado'},
   {id:'bellato',nm:'Bellato Pizzaria',tipo:'Alpha',plano:'CHURN',valor:0,status:'churn',meta:'Cliente saiu · devolução ~R$8k',extra:'Documentado'},
 ];
+
+// Clientes personalizados (adicionados pelo Gabriel) — salvos na nuvem (wfa-clientes-custom).
+// CLIENTES = base + personalizados, então todo o sistema (cobrança, régua, sprints, KPIs) os enxerga.
+function loadClientesCustom(){ try{ return JSON.parse(localStorage.getItem('wfa-clientes-custom')||'[]'); }catch(e){ return []; } }
+function saveClientesCustom(arr){ localStorage.setItem('wfa-clientes-custom', JSON.stringify(arr)); rebuildClientes(); if(typeof renderClientes==='function') renderClientes(); }
+let CLIENTES = CLIENTES_BASE.slice();
+function rebuildClientes(){ const custom=loadClientesCustom().map(c=>({...c,custom:true})); CLIENTES = CLIENTES_BASE.concat(custom); }
+rebuildClientes();
+
+// ---- Novo / Editar / Remover cliente ----
+let cliEditId=null;
+function cliNovoOpen(){
+  cliEditId=null;
+  document.getElementById('cli-modal-title').textContent='Novo cliente';
+  ['nome','plano','valor','cap','meta'].forEach(f=>document.getElementById('cli-f-'+f).value='');
+  document.getElementById('cli-f-tipo').value='ARK';
+  document.getElementById('cli-f-status').value='gr';
+  document.getElementById('cli-del-btn').style.display='none';
+  document.getElementById('modal-cliente').classList.add('open');
+  setTimeout(()=>document.getElementById('cli-f-nome').focus(),80);
+}
+function cliEditOpen(id){
+  const c=loadClientesCustom().find(x=>x.id===id); if(!c)return;
+  cliEditId=id;
+  document.getElementById('cli-modal-title').textContent='Editar cliente';
+  document.getElementById('cli-f-nome').value=c.nm||'';
+  document.getElementById('cli-f-tipo').value=c.tipo||'ARK';
+  document.getElementById('cli-f-plano').value=(c.plano&&c.plano!=='—')?c.plano:'';
+  document.getElementById('cli-f-valor').value=c.valor||'';
+  document.getElementById('cli-f-cap').value=c.cap||'';
+  document.getElementById('cli-f-status').value=c.status||'gr';
+  document.getElementById('cli-f-meta').value=c.meta||'';
+  document.getElementById('cli-del-btn').style.display='';
+  document.getElementById('modal-cliente').classList.add('open');
+}
+function cliSlug(nm){return (nm||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,24)||('cli'+Date.now());}
+function cliSave(){
+  const nm=document.getElementById('cli-f-nome').value.trim();
+  if(!nm){toast('Informe o nome do cliente');return;}
+  const tipo=document.getElementById('cli-f-tipo').value;
+  const plano=document.getElementById('cli-f-plano').value.trim()||(tipo==='Alpha'?'Alpha Senior':'—');
+  const valor=parseInt(document.getElementById('cli-f-valor').value,10)||0;
+  const cap=parseInt(document.getElementById('cli-f-cap').value,10)||0;
+  const status=document.getElementById('cli-f-status').value;
+  const meta=document.getElementById('cli-f-meta').value.trim()||'Cliente cadastrado';
+  const arr=loadClientesCustom();
+  if(cliEditId){
+    const c=arr.find(x=>x.id===cliEditId);
+    if(c){c.nm=nm;c.tipo=tipo;c.plano=plano;c.valor=valor;c.cap=cap;c.status=status;c.meta=meta;c.extra=meta;}
+    saveClientesCustom(arr);toast('Cliente atualizado ✓');
+  }else{
+    let id=cliSlug(nm); const all=CLIENTES_BASE.concat(arr);
+    while(all.some(x=>x.id===id)) id=id+'-'+Math.floor(Math.random()*99);
+    arr.push({id,nm,tipo,plano,valor,cap,status,meta,extra:meta});
+    saveClientesCustom(arr);toast('Cliente "'+nm+'" adicionado ✓');
+  }
+  closeModal('modal-cliente');
+}
+function cliRemove(){
+  if(!cliEditId)return;
+  if(!confirm('Excluir este cliente do sistema?'))return;
+  saveClientesCustom(loadClientesCustom().filter(x=>x.id!==cliEditId));
+  closeModal('modal-cliente');toast('Cliente excluído');
+}
+// Seed único da Valhalla (cliente pedido pelo Gabriel) — fica editável pelo botão Editar.
+(function seedValhalla(){
+  try{
+    if(localStorage.getItem('wfa-seed-valhalla'))return;
+    const arr=loadClientesCustom();
+    if(!arr.some(c=>String(c.nm||'').toLowerCase().includes('valhalla'))){
+      arr.push({id:'valhalla',nm:'Valhalla',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Novo cliente'});
+      localStorage.setItem('wfa-clientes-custom',JSON.stringify(arr));
+    }
+    localStorage.setItem('wfa-seed-valhalla','1');
+    rebuildClientes();
+  }catch(e){}
+})();
 
 const SPRINT_ATIVIDADES = {
   0:[{t:'Grupo de WhatsApp criado',f:'Account Manager'},{t:'Pasta de armazenamento (Drive)',f:'Account Manager'},{t:'Mensagem inicial enviada',f:'Account Manager'},{t:'Vídeo explicando a jornada',f:'Account Manager'},{t:'Instruções para gravações',f:'Account Manager'},{t:'Drive de referências',f:'Account Manager'}],
@@ -2790,6 +2890,7 @@ document.querySelectorAll('[data-reset]').forEach(b=>{
 
 /* ============ CLIENTES ============ */
 function renderClientes(){
+  rebuildClientes();
   const ark=CLIENTES.filter(c=>c.tipo==='ARK');
   const alpha=CLIENTES.filter(c=>c.tipo==='Alpha');
   ['ark-clientes','ark-clientes-2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=ark.map(cliCard).join('');});
@@ -2817,6 +2918,7 @@ function cliCard(c){
     <div class="cli-btns">
       <button class="cli-btn pri" onclick="event.stopPropagation();goRegua('${c.id}')">Régua dos 15</button>
       ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
+      ${c.custom?`<button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">✏️ Editar</button>`:''}
     </div>
   </div>`;
 }
