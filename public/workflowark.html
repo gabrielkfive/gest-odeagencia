@@ -2564,21 +2564,19 @@ function iniciarAutoSync(){
 /* ============ DADOS ============ */
 const CLIENTES = [
   // ARK Direto
-  {id:'lunnas',nm:"Lunna's",tipo:'ARK',plano:'Gold',valor:2000,status:'gr',meta:'Base estável · captação 11/06 + 26/06',extra:'Samuel cuida do dev do produto'},
-  {id:'vivenda',nm:'Vivenda',tipo:'ARK',plano:'Plano X',valor:5500,status:'gr',meta:'Maior ticket · captação 24/06 10h',extra:'3 captações/mês'},
-  {id:'fercon',nm:'Fercon',tipo:'ARK',plano:'Gold',valor:4200,status:'gr',meta:'Ampliou · reunião semanal · 3 vídeos/sem',extra:'Cliente mais reativo que ativo'},
-  {id:'shopping',nm:'Shopping dos Uniformes',tipo:'ARK',plano:'Gold',valor:1500,status:'gr',meta:'3 publicações + criativo novo',extra:'Conta separada de Sasse'},
-  {id:'sasse',nm:'Sasse Gifts',tipo:'ARK',plano:'Plano X',valor:4500,status:'gr',meta:'Onboarding · captação 20/06',extra:'Fechado via Shopping'},
-  {id:'bellavita',nm:'Bella Vita',tipo:'ARK',plano:'Gold',valor:3200,status:'y',meta:'Travada · primeiro anúncio já rodou',extra:'Manter cobrança ativa'},
-  {id:'fonseca',nm:'Fonseca & Cavalcanti',tipo:'ARK',plano:'Gold',valor:2500,status:'gr',meta:'Acelerou · próxima fase do plano',extra:'Compliance OAB · jurídico'},
-  {id:'vaca',nm:'Vaca Velha',tipo:'ARK',plano:'Gold',valor:2000,status:'gr',meta:'Captação feita · plano em curso',extra:'2ª captação 25/06'},
+  {id:'vivenda',nm:'Vivenda',tipo:'ARK',plano:'Plano X',valor:5500,status:'gr',cap:3,meta:'Maior ticket · 3 captações/mês',extra:'📹 3 captações/mês · cliente prioritário'},
+  {id:'fercon',nm:'Fercon',tipo:'ARK',plano:'Gold',valor:4200,status:'gr',cap:2,meta:'Ampliou · 2 captações/mês',extra:'📹 2 captações/mês · mais reativo que ativo'},
+  {id:'sasse',nm:'Sasse Gifts',tipo:'ARK',plano:'Plano X',valor:4500,status:'gr',cap:2,meta:'2 captações/mês',extra:'📹 2 captações/mês'},
+  {id:'fonseca',nm:'Fonseca & Cavalcanti',tipo:'ARK',plano:'Gold',valor:2500,status:'gr',cap:1,meta:'1 captação/mês · próxima fase',extra:'📹 1 captação · Compliance OAB'},
+  {id:'vaca',nm:'Vaca Velha',tipo:'ARK',plano:'Gold',valor:2000,status:'gr',cap:1,meta:'1 captação/mês (2ª às vezes em 30d)',extra:'📹 1 captação · mês sim, mês não p/ a 2ª'},
+  {id:'bellavita',nm:'Bella Vita',tipo:'ARK',plano:'Gold',valor:3200,status:'y',cap:0,meta:'⏸ PAUSADA · manter cobrança ativa',extra:'Pausada'},
   // Alpha
   {id:'dom',nm:'Dom Baruka',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',meta:'URGENTE · cardápio + iFood + bebidas',extra:'Auditoria iFood em curso'},
-  {id:'stray',nm:'Stray House',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',meta:'URGENTE · estratégia de recuperação',extra:'ROAS 5,08 · subir criativos'},
-  {id:'cachu',nm:'Cachu Restaurante',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'ROAS 1,37 em tratativa c/ gestor Alpha',extra:'Food porn qui-dom'},
-  {id:'babbo',nm:'Babbo Giovanni',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'1º anúncio rodando · falta iFood/cardápio',extra:'Reels já entregue'},
-  {id:'brisa',nm:'Brisa Doce Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Onboarding até agosto · inauguração',extra:'Aderir método'},
-  {id:'attra',nm:'Attraversiamo Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Bombando · +1k seg em 3 dias',extra:'Diferencial para anúncio'},
+  {id:'stray',nm:'Stray House',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Recuperação (não é mais urgente)',extra:'ROAS 5,08 · subir criativos'},
+  {id:'cachu',nm:'Cachu Restaurante',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Ajustada ✓ · acompanhando ROAS',extra:'Food porn qui-dom'},
+  {id:'babbo',nm:'Babbo Giovanni',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Em ajuste · criar tarefa on-demand',extra:'Reels já entregue'},
+  {id:'brisa',nm:'Brisa Doce Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · onboarding/inauguração',extra:'Aderir método'},
+  {id:'attra',nm:'Attraversiamo Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · bombando',extra:'+1k seg em 3 dias'},
   // Churn
   {id:'bellato',nm:'Bellato Pizzaria',tipo:'Alpha',plano:'CHURN',valor:0,status:'churn',meta:'Cliente saiu · devolução ~R$8k',extra:'Documentado'},
 ];
