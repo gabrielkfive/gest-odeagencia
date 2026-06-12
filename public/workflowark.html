@@ -1614,7 +1614,7 @@ async function cloudCall(action,payload){
     try{
       return await new Promise((resolve,reject)=>{
         const id='wfa_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-        const t=setTimeout(()=>{window.removeEventListener('message',h);reject(new Error('timeout'));},5000);
+        const t=setTimeout(()=>{window.removeEventListener('message',h);reject(new Error('timeout'));},20000);
         function h(e){
           if(e.data?.type==='wfa-cloud-response'&&e.data.id===id){
             clearTimeout(t);window.removeEventListener('message',h);
