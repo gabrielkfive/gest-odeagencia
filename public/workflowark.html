@@ -1031,6 +1031,7 @@ table.t tr.high{background:var(--yel-bg)}
           <div style="display:flex;gap:6px;align-items:center">
             <span id="sync-status" style="font-size:10px;color:var(--mute);font-family:var(--mono)"></span>
             <button class="icobtn" id="btn-sync" onclick="sincronizarAgora()" title="Buscar dados mais recentes do servidor">↻ Sincronizar</button>
+            <button class="icobtn" title="Atribui as tarefas que o Conselho criou às pessoas certas (pelo organograma)" onclick="(function(){const n=redistribuirTarefasConselho();toast(n?('✓ '+n+' tarefa(s) distribuída(s) pra equipe'):'Tarefas do conselho já têm responsável');})()">Distribuir do conselho</button>
             <button class="tb-btn" onclick="openNovaTarefa()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova</button>
           </div>
         </div>
@@ -5351,6 +5352,33 @@ function jarvisExecute(raw){
     jarvisGo('dashboard'); setTimeout(()=>{if(typeof mdJarvisFalar==='function')mdJarvisFalar();},400);
     return 'Aqui está o resumo do seu dia.';
   }
+  // DISTRIBUIR as tarefas do conselho pra equipe certa (pelo organograma)
+  if(re('distribu|reparte|divide|designa|atribu|repassa') && has('conselho','tarefas','equipe','time','pessoas','responsav') && !ehPergunta){
+    const n=redistribuirTarefasConselho(); jarvisGo('tarefas');
+    return n?('Distribuí '+n+' tarefa'+(n>1?'s':'')+' do conselho para a equipe certa, Senhor.'):'As tarefas do conselho já estão com seus responsáveis, Senhor.';
+  }
+  // CONCLUIR tarefa: "conclui/marca a tarefa X como feita/pronta"
+  {
+    const mc=raw.match(/(?:conclui[r]?|finaliza[r]?|marc\w*)\s+(?:a\s+)?(?:tarefa\s+)?(.+)/i);
+    if(re('conclu|finaliz') || (re('marc') && re('feit|pront|conclu'))){
+      if(mc&&mc[1]){
+        const alvo=mc[1].replace(/\b(como|feita|feito|pronta|pronto|conclu[ií]da?|conclu[ií]do)\b/ig,'').trim();
+        const tk=ARK_acharTarefa(alvo);
+        if(tk){ tk.status='concluido'; if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); if(typeof updateBadges==='function')updateBadges(); return 'Feito, Senhor. Marquei "'+tk.title+'" como concluída.'; }
+      }
+    }
+  }
+  // DESIGNAR tarefa para uma pessoa: "passa/atribui/delega a tarefa X pro Fulano"
+  if(re('atribu|designa|passa|delega|repassa') && re('\\b(para|pro|pra)\\b') && !has('conselho')){
+    const time=(typeof MD_PEOPLE!=='undefined')?MD_PEOPLE:[];
+    const nrm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    const pessoa=time.find(p=>{const f=nrm(p).split(' ')[0];return f.length>=3&&t.includes(f);});
+    if(pessoa){
+      const alvo=raw.replace(/.*?(?:tarefa)\s+/i,'').replace(/\s+(?:para|pro|pra)\s+.*$/i,'').trim();
+      const tk=ARK_acharTarefa(alvo);
+      if(tk){ tk.resp=pessoa; if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); return 'Pronto, Senhor. "'+tk.title+'" agora é com '+pessoa+'.'; }
+    }
+  }
   // MARCAR NO GOOGLE AGENDA / CALENDAR (cria evento real): "marca/adiciona/agenda ... na agenda/calendário ... hoje/amanhã/às 15h"
   if(re('agenda|calend') && re('adicion|marc|agend|coloc|bot|p[oõ]e|marqu|cria') && re('\\d{1,2}\\s*(h|:|hora)|meio[ -]?dia|hoje|amanh|segunda|ter[çc]a|quarta|quinta|sexta|s[áa]bado|domingo')){
     return jarvisAgendarGoogle(raw);
@@ -5443,6 +5471,39 @@ async function jarvisAgendarGoogle(raw){
     }
     return 'Adicionei "'+titulo+'" '+quando+' na agenda do sistema. Para gravar no seu Google Calendar, é só conectar em Integrações, Senhor.';
   }catch(e){ return 'Adicionei "'+titulo+'" '+quando+' na agenda do sistema, Senhor.'; }
+}
+/* ===== Designação de tarefas: área/função -> PESSOA (pelo organograma) ===== */
+function ARK_pessoaPorArea(area){
+  const a=String(area||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  if(/trafego|ads|midia paga|gestor de tr|performance|campanha/.test(a))return 'Danilo de Lima';
+  if(/social|conteudo|criador|community|instagram|reels/.test(a))return 'Maria Luiza';
+  if(/account|cs|atendimento|sucesso do cliente|relacionamento/.test(a))return 'Lucas Rosi';
+  if(/roteir/.test(a))return 'Maria Luiza';
+  if(/design|arte|criativo|pe[çc]a/.test(a))return 'M. Portela';
+  if(/edi[çc]ao|editor|video|corte/.test(a))return 'Luckas Gomes';
+  if(/capta/.test(a))return 'Omar';
+  if(/comercial|vendas|sdr|prospec|lead/.test(a))return 'Saulo';
+  if(/diretor|opera|gestao|estrateg|ceo|financ/.test(a))return 'Gabriel Andrade';
+  return 'Gabriel Andrade'; // sem correspondência: o Gabriel decide o destino
+}
+// Redistribui as tarefas que o Conselho criou (estavam nos agentes) para as PESSOAS certas
+function redistribuirTarefasConselho(){
+  const ts=state.tarefas||[]; let n=0; const time=(typeof MD_PEOPLE!=='undefined')?MD_PEOPLE:[];
+  ts.forEach(t=>{
+    const ehAuto=t.origem==='conselho-auto'||t.origem==='conselho'||(Array.isArray(t.tags)&&t.tags.includes('conselho'));
+    if(ehAuto && (!t.resp || !time.includes(t.resp))){
+      const p=ARK_pessoaPorArea(t.resp||t.funcao||t.area||t.title);
+      if(p){ t.resp=p; n++; }
+    }
+  });
+  if(n){ if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); if(typeof updateBadges==='function')updateBadges(); }
+  return n;
+}
+// Encontra uma tarefa pelo texto (substring no título)
+function ARK_acharTarefa(txt){
+  const q=String(txt||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  if(q.length<3)return null;
+  return (state.tarefas||[]).find(t=>String(t.title||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').includes(q))||null;
 }
 function jarvisFalar(txt){jarvisSpeak(String(txt||'').replace(/[#*_`]/g,''));}
 function jarvisMic(){

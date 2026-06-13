@@ -10,6 +10,22 @@ import { createFileRoute } from "@tanstack/react-router";
 //   /api/workflowark/agents-run?key=ark-2026
 const RUN_KEY = "ark-2026";
 
+// Mapeia a área/função sugerida pela IA para a PESSOA responsável (organograma da ARK).
+// Assim o conselho atribui a tarefa a quem executa, não a um "agente".
+function pessoaPorArea(area: string): string {
+  const a = String(area || "").toLowerCase();
+  if (/tr[áa]fego|ads|m[íi]dia paga|performance|campanha|gestor de tr/.test(a)) return "Danilo de Lima";
+  if (/social|conte[úu]do|criador|community|instagram|reels/.test(a)) return "Maria Luiza";
+  if (/account|cs|atendimento|sucesso do cliente|relacionamento/.test(a)) return "Lucas Rosi";
+  if (/roteir/.test(a)) return "Maria Luiza";
+  if (/design|arte|criativo|pe[çc]a/.test(a)) return "M. Portela";
+  if (/edi[çc][ãa]o|editor|v[íi]deo|corte/.test(a)) return "Luckas Gomes";
+  if (/capta/.test(a)) return "Omar";
+  if (/comercial|vendas|sdr|prospec|lead/.test(a)) return "Saulo";
+  if (/diretor|opera|gest[ãa]o|estrat|ceo|financ/.test(a)) return "Gabriel Andrade";
+  return "Gabriel Andrade"; // sem correspondência: cai pro Gabriel decidir
+}
+
 // Catálogo enxuto p/ dar contexto de nicho ao conselho (espelha CLIENTES_BASE do app).
 const CLIENTES_CTX: { id: string; nm: string; seg: string; nota: string }[] = [
   { id: "vivenda", nm: "Vivenda", seg: "Farmácia de manipulação / dermocosméticos (cremes de ureia, NAC, cafeína)", nota: "MAIOR ticket, prioritário. 3 captações/mês. Plano de Copa. Decisores: Remerson (pai), Graziella, Yuri." },
@@ -163,9 +179,11 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               const dup = tarefas.some((t) => t.clienteId === c.id && (t.title || "") === title && (t.origem === "conselho-auto"));
               if (dup) return;
               const d = new Date(Date.now() + (i + 1) * 86400000).toISOString().split("T")[0];
+              const area = String(tk?.resp || "");
+              const pessoa = pessoaPorArea(area);
               tarefas.push({
-                id: "ca" + Date.now() + i + c.id, title, desc: "Gerado pelo Conselho de IA (autônomo) · " + c.nm,
-                funcao: "", clienteId: c.id, resp: String(tk?.resp || ""), data: d, prio: "media",
+                id: "ca" + Date.now() + i + c.id, title, desc: "Gerado pelo Conselho de IA · " + c.nm + (area ? " · área: " + area : ""),
+                funcao: area, clienteId: c.id, resp: pessoa, data: d, prio: "media",
                 status: "backlog", tags: ["conselho", "auto"], checklist: [], sprintN: null,
                 origem: "conselho-auto", criadaEm: new Date().toISOString(),
               });
