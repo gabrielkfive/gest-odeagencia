@@ -2449,6 +2449,15 @@ function iniciarAutoSync(){
   </main>
 </div>
 
+<!-- MODAL: Resumo do dia (WhatsApp + voz JARVIS) -->
+<div class="modal-bg" id="modal-wpp-resumo">
+  <div class="modal" style="max-width:560px;max-height:86vh;display:flex;flex-direction:column">
+    <div class="modal-head"><h3>🧠 Resumo do dia · WhatsApp</h3><span class="x" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">✕</span></div>
+    <div class="modal-body" id="wres-body" style="overflow:auto;flex:1;min-height:0"></div>
+    <div class="modal-foot"><button class="icobtn" onclick="wppFalar()">🔊 Ouvir (JARVIS)</button><button class="icobtn" onclick="wppPararVoz()">⏹ Parar</button><button class="tb-btn" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">Fechar</button></div>
+  </div>
+</div>
+
 <!-- MODAL: Mídias / Links / Docs da conversa -->
 <div class="modal-bg" id="modal-wpp-media">
   <div class="modal" style="max-width:520px;max-height:86vh;display:flex;flex-direction:column">
@@ -4342,6 +4351,29 @@ async function wppPanelOpenMedia(phone,idx){
   if(m.media.type==='image'||m.media.type==='sticker'){ wppLightbox(phone,idx); }
   else { const a=document.createElement('a'); a.href=m._media; if(m.media.type==='video')a.target='_blank'; else a.download=m._fname||'arquivo'; document.body.appendChild(a); a.click(); a.remove(); }
 }
+// ---- Resumo do dia (IA) + voz JARVIS ----
+let _wresTexto='';
+async function wppResumo(){
+  const body=document.getElementById('wres-body'); if(!body)return;
+  body.innerHTML='<div style="padding:24px;text-align:center;color:var(--mute)">🧠 Lendo as conversas e resumindo...</div>';
+  document.getElementById('modal-wpp-resumo').classList.add('open');
+  try{
+    const r=await cloudCall('save',{action:'wa-resumo'});
+    _wresTexto=(r&&r.resumo)||'(sem resumo)';
+    body.innerHTML='<div style="white-space:pre-wrap;font-size:13px;line-height:1.6">'+mdEsc(_wresTexto)+'</div>';
+  }catch(e){ body.innerHTML='<div style="padding:14px;color:#c0392b">⚠ '+mdEsc((e&&e.message)||'Falha ao gerar resumo')+'</div>'; }
+}
+function wppFalar(){
+  if(!_wresTexto){toast('Gere o resumo primeiro');return;}
+  try{
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(_wresTexto.replace(/[⚡💰📋🟢🆕🤖📎🖼🎬🔗#*]/g,''));
+    u.lang='pt-BR'; u.rate=1.05;
+    const vs=window.speechSynthesis.getVoices(); const pt=vs.find(v=>/pt[-_]?BR|portugu/i.test((v.lang||'')+(v.name||''))); if(pt)u.voice=pt;
+    window.speechSynthesis.speak(u);
+  }catch(e){toast('Voz não suportada neste navegador');}
+}
+function wppPararVoz(){try{window.speechSynthesis.cancel();}catch(e){}}
 function wppAvatarHtml(c,size){
   const s=size||40;const ini=mdEsc((c.nome||c.phone||'?').trim().charAt(0).toUpperCase());
   const badge=c.isGroup?`<span style="position:absolute;right:-2px;bottom:-2px;background:#25D366;border:2px solid #fff;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px">👥</span>`:'';
@@ -4408,6 +4440,7 @@ function renderWhatsapp(){
     <div style="display:flex;flex-direction:column;border-right:1px solid var(--line);background:#fff;min-width:0;min-height:0">
       <div style="padding:9px 10px;border-bottom:1px solid var(--line);display:flex;gap:6px;align-items:center">
         <input id="wpp-search" oninput="wppFilter()" placeholder="🔍 Buscar conversa..." style="flex:1;border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12.5px;outline:none">
+        <button onclick="wppResumo()" title="Resumo do dia (IA) + voz" style="border:1px solid var(--line);background:#fff;border-radius:8px;height:32px;padding:0 8px;cursor:pointer;font-size:13px;flex-shrink:0">🧠</button>
         <button onclick="wppSyncGroups()" title="Atualizar nomes e fotos dos grupos" style="border:1px solid var(--line);background:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:14px;flex-shrink:0">🔄</button>
       </div>
       <div style="padding:7px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)">${tab('tudo','Tudo')}${tab('nao','Não lidas',naoLidasWpp||'')}${tab('grupos','Grupos')}${tab('diretos','Diretos')}${tab('ARK','🏷 ARK')}${tab('ALPHA','🏷 ALPHA')}</div>

@@ -545,6 +545,35 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        // Resumo executivo das conversas de WhatsApp das últimas 24h (IA).
+        if (action === "wa-resumo") {
+          try {
+            const { zapiEnv } = await import("@/integrations/zapi.server");
+            const aiKey = zapiEnv("ANTHROPIC_API_KEY");
+            if (!aiKey) return json({ error: "IA não configurada (sem ANTHROPIC_API_KEY)." }, { status: 500 });
+            const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-whatsapp").maybeSingle();
+            const st: any = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : { conversas: {} };
+            const convs: any[] = Object.values(st.conversas || {});
+            const since = Date.now() - 24 * 3600 * 1000;
+            const recent = convs.filter((c) => (c.updatedAt || 0) > since).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, 25);
+            let digest = "";
+            recent.forEach((c) => {
+              const msgs = (c.msgs || []).filter((m: any) => (m.ts || 0) > since).slice(-8);
+              if (!msgs.length) return;
+              digest += `\n--- ${c.nome || c.phone}${c.isGroup ? " (grupo)" : ""}${c.labels && c.labels.length ? " [" + c.labels.join(",") + "]" : ""} ---\n`;
+              msgs.forEach((m: any) => { digest += `${m.dir === "out" ? "Você" : (m.sender || c.nome || "Contato")}: ${String(m.text || "").slice(0, 200)}\n`; });
+            });
+            if (!digest.trim()) return json({ ok: true, resumo: "Sem conversas novas nas últimas 24h." });
+            const sys = "Você é o assistente de operações da ARK Content (agência de marketing gastronômico em Brasília). Recebe as conversas de WhatsApp das últimas 24h e faz um RESUMO EXECUTIVO pro dono (Gabriel), em português, direto e acionável. Estruture: \n⚡ PRECISA DE RESPOSTA/AÇÃO (por contato: o que pedem e o que fazer)\n💰 OPORTUNIDADES / LEADS\n📋 ACOMPANHAMENTOS\n🟢 RESTO (1 linha). Curto e prático. Destaque urgências.";
+            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1200, system: sys, messages: [{ role: "user", content: `Conversas das últimas 24h:\n${digest.slice(0, 12000)}` }] }) });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            return json({ ok: true, resumo: data?.content?.[0]?.text || "(sem resposta)" });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao resumir" }, { status: 502 });
+          }
+        }
+
         // Define as tags (labels) de uma conversa (ex: ARK, ALPHA) — persiste na nuvem.
         if (action === "wa-set-labels") {
           const phone = String(body.phone ?? "").replace(/\D/g, "");
