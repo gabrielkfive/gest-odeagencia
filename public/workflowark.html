@@ -2213,7 +2213,7 @@ function iniciarAutoSync(){
         <div class="page-head"><div class="page-title"><h1>Processos por área</h1><p>Passo a passo de cada operação · estrutura por área funcional</p></div></div>
         <div class="card" style="padding:12px;margin-bottom:12px;display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px">
           <input id="pr-titulo" class="form-input" placeholder="Título do processo">
-          <select id="pr-area" class="form-select"><option>Comercial</option><option>Marketing</option><option>Operação</option><option>Financeiro</option><option>Gestão</option></select>
+          <select id="pr-area" class="form-select"><option>Comercial</option><option>Account/CS</option><option>Tráfego</option><option>Social/Conteúdo</option><option>Design</option><option>Edição/Captação</option><option>Financeiro</option><option>Gestão</option></select>
           <input id="pr-desc" class="form-input" placeholder="Descrição curta">
           <button class="tb-btn" onclick="addProcesso()">+</button>
         </div>
@@ -5504,6 +5504,48 @@ function renderOkrs(){
 }
 
 /* ============ PROCESSOS ============ */
+const PROCESSOS_SEED=[
+  // COMERCIAL
+  {area:'Comercial',titulo:'Atender novo lead no WhatsApp',desc:'Do primeiro contato à qualificação',passos:['Responder em até 15 min com saudação + nome da ARK','Entender o segmento, objetivo e o que já fazem hoje','Perguntar verba/expectativa e prazo','Marcar uma call de diagnóstico','Registrar o lead no CRM (etapa: Novo)']},
+  {area:'Comercial',titulo:'Enviar proposta/orçamento',desc:'Padrão de envio',passos:['Montar a proposta com escopo + valor (modelo ARK)','Revisar com o Gabriel se for fora do padrão','Enviar PDF + mensagem resumindo o valor entregue','Mover o lead pra etapa Proposta no CRM','Agendar follow-up em 2 dias']},
+  {area:'Comercial',titulo:'Follow-up de proposta',desc:'Não deixar esfriar',passos:['Dia +2: mensagem leve perguntando se ficou dúvida','Dia +5: reforçar 1 benefício + prova social','Dia +8: oferta de call rápida pra destravar','Se sem resposta em 14d: marcar como frio e nutrir']},
+  {area:'Comercial',titulo:'Fechamento e passagem de bastão',desc:'Lead virou cliente',passos:['Confirmar plano, valor e data de início','Coletar dados de contrato e pagamento','Criar o cliente no sistema (+ Novo cliente)','Passar pro Account com briefing inicial','Disparar o Onboarding (Sprint 0)']},
+  // ACCOUNT / CS
+  {area:'Account/CS',titulo:'Onboarding de cliente novo',desc:'Primeiros 7 dias',passos:['Criar grupo de WhatsApp + pasta no Drive','Enviar vídeo de boas-vindas e como funciona','Reunião de briefing (objetivos, público, tom)','Pegar acessos (Instagram, conta de anúncios)','Montar 1ª linha editorial e alinhar expectativas']},
+  {area:'Account/CS',titulo:'Reunião mensal de resultados (RAPRE)',desc:'1x/mês por cliente',passos:['Puxar números do mês (tráfego + social)','Montar a apresentação (o que foi feito + resultado)','Apresentar, ouvir o cliente e anotar pedidos','Definir o foco do próximo mês','Registrar tarefas que saíram da call']},
+  {area:'Account/CS',titulo:'Régua dos 15 (acompanhamento)',desc:'Garantir entregas no prazo',passos:['Até dia 15: 100% dos planejamentos apresentados','Checar captações agendadas do mês','Revisar pendências de cada cliente','Sinalizar riscos pro Gabriel cedo']},
+  {area:'Account/CS',titulo:'Cliente insatisfeito',desc:'Apagar incêndio do jeito certo',passos:['Responder rápido, ouvir sem se defender','Levar pro Gabriel se for risco de churn','Propor plano de correção com prazo','Acompanhar de perto por 2 semanas']},
+  // TRÁFEGO
+  {area:'Tráfego',titulo:'Subir campanha nova',desc:'Setup padrão',passos:['Confirmar objetivo, público e verba com o Account','Conferir pixel/conta e criativo aprovado','Estruturar campanha/conjuntos/anúncios','Subir e validar entrega nas primeiras horas','Avisar o Account que está no ar']},
+  {area:'Tráfego',titulo:'Otimização semanal',desc:'Toda semana por cliente',passos:['Analisar CPA, ROAS, CTR da semana','Pausar o que está ruim, escalar o que vai bem','Pedir criativos novos se a fadiga subir','Anotar aprendizados no relatório']},
+  {area:'Tráfego',titulo:'Relatório semanal',desc:'Transparência pro cliente',passos:['Compilar investido x resultado','Comparar com a semana anterior','Escrever leitura honesta + próximo passo','Enviar pro Account repassar']},
+  {area:'Tráfego',titulo:'Anúncio reprovado',desc:'Resolver rápido',passos:['Ler o motivo da reprovação','Ajustar criativo/texto conforme política','Recorrer se for engano','Documentar pra não repetir']},
+  // SOCIAL / CONTEÚDO
+  {area:'Social/Conteúdo',titulo:'Planejamento de conteúdo mensal',desc:'Base do mês',passos:['Revisar objetivos e datas do mês','Definir pilares e formatos','Montar o calendário (use o Planejamento de IA)','Aprovar com o Account/cliente','Distribuir tarefas de produção']},
+  {area:'Social/Conteúdo',titulo:'Produção de Reels',desc:'Da ideia ao post',passos:['Roteiro (use o Roteirista) com gancho ≤3s','Agendar/gravar a captação','Editar no padrão da marca','Legenda (use o agente de Legendas) + CTA','Postar no melhor horário e acompanhar']},
+  // DESIGN
+  {area:'Design',titulo:'Criar arte/criativo',desc:'Pedido de design',passos:['Receber briefing (objetivo, formato, referências)','Criar dentro da identidade do cliente','Revisão interna','Ajustar com feedback','Entregar nos tamanhos certos']},
+  // EDIÇÃO / CAPTAÇÃO
+  {area:'Edição/Captação',titulo:'Captação',desc:'Dia de gravação',passos:['Confirmar roteiro, local e horário','Checar equipamento e luz','Gravar seguindo o roteiro (takes extras)','Fazer backup no Drive no mesmo dia']},
+  {area:'Edição/Captação',titulo:'Edição de vídeo',desc:'Entrega de corte',passos:['Ler o roteiro e separar os melhores takes','Cortar no ritmo + legendas','Revisão interna','Ajustar alterações do Account','Exportar e subir no Drive']},
+  // FINANCEIRO
+  {area:'Financeiro',titulo:'Cobrança mensal',desc:'Janela dia 8–10',passos:['Sistema calcula o vencimento (nunca fim de semana)','Conferir recorrentes x novos valores','Gerar a mensagem e enviar no WhatsApp','Marcar como cobrado e conciliar o recebimento']},
+  {area:'Financeiro',titulo:'Acerto da equipe',desc:'Pagamentos dia 10',passos:['Conferir a lista A Pagar (Acerto)','Validar valores e chaves Pix','Pagar e marcar como pago','Guardar comprovantes']},
+  {area:'Financeiro',titulo:'Fechamento do mês',desc:'Resultado',passos:['Somar receitas x custos do mês','Conferir margem por cliente','Registrar caixa e resultado','Levar pontos de atenção pro Gabriel']},
+  // GESTÃO
+  {area:'Gestão',titulo:'AllHands mensal',desc:'Time alinhado',passos:['Revisar resultados do mês anterior','Apresentar metas/OKRs do mês','Reconhecer entregas e destravar problemas','Definir prioridades por área']},
+  {area:'Gestão',titulo:'Definir OKRs',desc:'A cada ciclo',passos:['Definir 1 objetivo claro por área','Criar 2-4 resultados-chave mensuráveis','Alinhar com os responsáveis','Acompanhar semanalmente na aba OKRs']},
+];
+(function seedProcessos(){
+  try{
+    if(localStorage.getItem('wfa-seed-processos'))return;
+    const cur=JSON.parse(localStorage.getItem('wfa-processos')||'[]');
+    const in_=new Set(cur.map(p=>p.titulo));
+    const add=PROCESSOS_SEED.filter(p=>!in_.has(p.titulo)).map((p,i)=>({id:'ps'+Date.now()+i,...p}));
+    if(add.length){localStorage.setItem('wfa-processos',JSON.stringify(cur.concat(add)));}
+    localStorage.setItem('wfa-seed-processos','1');
+  }catch(e){}
+})();
 function loadProc(){return JSON.parse(localStorage.getItem('wfa-processos')||'[]');}
 function saveProc(a){localStorage.setItem('wfa-processos',JSON.stringify(a));renderProcessos();}
 function addProcesso(){
