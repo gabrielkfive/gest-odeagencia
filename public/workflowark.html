@@ -999,10 +999,10 @@ table.t tr.high{background:var(--yel-bg)}
 
         <div class="subpage active" data-subpage="todos">
           <div class="sect-title"><h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></span>ARK Content Direto</h2><span class="sub">8 ativos</span></div>
-          <div class="g3" id="ark-clientes"></div>
+          <div class="g3 stagger" id="ark-clientes"></div>
 
           <div class="sect-title" style="margin-top:18px"><h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>Squad Alpha Senior</h2><span class="sub">6 ativos · 1 churn</span></div>
-          <div class="g3" id="alpha-clientes"></div>
+          <div class="g3 stagger" id="alpha-clientes"></div>
         </div>
         <div class="subpage" data-subpage="ark"><div class="g3" id="ark-clientes-2"></div></div>
         <div class="subpage" data-subpage="alpha"><div class="g3" id="alpha-clientes-2"></div></div>
@@ -3550,7 +3550,7 @@ function cliCard(c){
   const st={r:'Urgente',y:'Em ajuste',gr:'Saudável',churn:'Churn'}[c.status]||'';
   const cls=c.status;
   const mrr=c.valor?`R$ ${c.valor.toLocaleString('pt-BR')}<small>/mês</small>`:`<span style="font-size:12px;color:var(--mute);font-weight:600">Squad Alpha</span>`;
-  const cap=c.cap?`<span class="cli-cap">📹 ${c.cap}/mês</span>`:'';
+  const cap=c.cap?`<span class="cli-cap">${c.cap} captações/mês</span>`:'';
   const isArk=c.tipo==='ARK'&&c.status!=='churn';
   return `<div class="cli ${cls}" onclick="cliDetalhe('${c.id}')">
     <div class="cli-hd">
@@ -3563,7 +3563,7 @@ function cliCard(c){
     <div class="cli-btns">
       <button class="cli-btn pri" onclick="event.stopPropagation();cliDetalhe('${c.id}')">Abrir ficha</button>
       ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
-      ${c.custom?`<button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">✏️ Editar</button>`:''}
+      ${c.custom?`<button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">Editar</button>`:''}
     </div>
   </div>`;
 }
