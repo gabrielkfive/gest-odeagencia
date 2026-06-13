@@ -4067,6 +4067,39 @@ function renderGcal(){applyCalendars();}
 /* ============ WHATSAPP (Z-API) ============ */
 function wppOpen(phone){WPP_ACTIVE=phone;renderWhatsapp();}
 function wppSetTab(t){WPP_TAB=t;renderWhatsapp();}
+// ---- mídia: monta o corpo da mensagem (texto ou foto/vídeo/áudio/doc) ----
+function wppMsgBody(m,phone,mi){
+  if(!m.media) return `<span style="white-space:pre-wrap;word-break:break-word">${mdEsc(m.text)}</span>`;
+  const t=m.media.type;
+  const cap=m.media.caption?`<div style="margin-top:4px;white-space:pre-wrap;word-break:break-word">${mdEsc(m.media.caption)}</div>`:'';
+  const dl=(label)=>m._media?`<a href="${m._media}" download="${mdEsc(m._fname||m.media.fileName||'arquivo')}" style="display:inline-block;margin-top:5px;font-size:11px;color:#1d8a4e;font-weight:700;text-decoration:none">⬇ Baixar ${label||''}</a>`:'';
+  if(!m.mkey) return `<span style="white-space:pre-wrap;word-break:break-word">${mdEsc(m.text)}</span>`; // sem chave (msg antiga): só texto
+  if(!m._media){
+    if(m._loading) return `<div style="font-size:12px;color:#555;padding:6px 2px">⏳ Carregando mídia...</div>`;
+    const lbl={image:'🖼️ Ver imagem',sticker:'🩷 Ver figurinha',video:'🎬 Ver vídeo',audio:'▶️ Ouvir áudio',document:'📎 Abrir '+mdEsc(m.media.fileName||'documento')}[t]||'📎 Ver mídia';
+    return `<button onclick="wppMedia('${phone}',${mi})" style="border:1px dashed #9bbf9b;background:#f3faf3;color:#1d6b3a;border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:600;cursor:pointer">${lbl}</button>${cap}`;
+  }
+  if(t==='image'||t==='sticker') return `<img src="${m._media}" onclick="wppLightbox('${phone}',${mi})" style="max-width:230px;max-height:270px;border-radius:8px;display:block;cursor:zoom-in">${cap}${dl()}`;
+  if(t==='video') return `<video src="${m._media}" controls preload="metadata" style="max-width:250px;border-radius:8px;display:block"></video>${cap}${dl()}`;
+  if(t==='audio') return `<audio src="${m._media}" controls style="width:230px;display:block"></audio>`;
+  return `${dl(m.media.fileName||'')}`;
+}
+async function wppMedia(phone,mi){
+  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[phone];
+  const m=c&&c.msgs&&c.msgs[mi]; if(!m||!m.media||!m.mkey||m._media)return;
+  m._loading=true; renderWhatsapp();
+  try{
+    const r=await cloudCall('save',{action:'wa-media',id:m.mkey.id,remoteJid:m.mkey.remoteJid,fromMe:m.mkey.fromMe});
+    m._media=r.dataUrl; m._fname=r.fileName||'arquivo'; m._loading=false; renderWhatsapp();
+  }catch(e){ m._loading=false; renderWhatsapp(); toast('⚠ '+((e&&e.message)||'Falha ao baixar mídia')); }
+}
+function wppLightbox(phone,mi){
+  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[phone];
+  const m=c&&c.msgs&&c.msgs[mi]; if(!m||!m._media)return;
+  let ov=document.getElementById('wpp-lightbox');
+  if(!ov){ov=document.createElement('div');ov.id='wpp-lightbox';ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100000;display:flex;align-items:center;justify-content:center;cursor:zoom-out';ov.onclick=()=>ov.remove();document.body.appendChild(ov);}
+  ov.innerHTML=`<img src="${m._media}" style="max-width:92vw;max-height:92vh;border-radius:8px">`;
+}
 function wppFilter(){const q=(document.getElementById('wpp-search')?.value||'').toLowerCase();document.querySelectorAll('#wpp-list .wpp-item').forEach(el=>{el.style.display=(el.getAttribute('data-name')||'').includes(q)?'':'none';});}
 function wppAvatarHtml(c,size){
   const s=size||40;const ini=mdEsc((c.nome||c.phone||'?').trim().charAt(0).toUpperCase());
@@ -4111,7 +4144,7 @@ function renderWhatsapp(){
     </button>`;
   }).join('');
   let lastDay='';
-  const msgs=(active.msgs||[]).map(m=>{
+  const msgs=(active.msgs||[]).map((m,mi)=>{
     const out=m.dir==='out';
     const day=m.ts?new Date(m.ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
     let sep='';
@@ -4119,7 +4152,7 @@ function renderWhatsapp(){
     const senderTag=(!out&&active.isGroup&&m.sender)?`<div style="font-size:10.5px;font-weight:700;color:#1d8a4e;margin-bottom:2px">${mdEsc(m.sender)}</div>`:'';
     const stIcon=out?(m.status==='sending'?' <span title="enviando">🕐</span>':m.status==='failed'?` <span title="${mdEsc(m.error||'falhou')}" style="color:#c0392b;font-weight:700">⚠ falhou</span>`:' <span title="enviado" style="color:#34b7f1">✓</span>'):'';
     return sep+`<div style="display:flex;justify-content:${out?'flex-end':'flex-start'};margin:3px 0">
-      <div style="max-width:74%;background:${out?(m.status==='failed'?'#ffe2de':'#d9fdd3'):'#fff'};color:#111;border-radius:10px;padding:6px 10px 5px;font-size:13px;box-shadow:0 1px .5px rgba(0,0,0,.13)">${senderTag}<span style="white-space:pre-wrap;word-break:break-word">${mdEsc(m.text)}</span><div style="font-size:9.5px;color:rgba(0,0,0,.4);text-align:right;margin-top:2px">${m.ts?new Date(m.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}${stIcon}</div></div>
+      <div style="max-width:74%;background:${out?(m.status==='failed'?'#ffe2de':'#d9fdd3'):'#fff'};color:#111;border-radius:10px;padding:6px 10px 5px;font-size:13px;box-shadow:0 1px .5px rgba(0,0,0,.13)">${senderTag}${wppMsgBody(m,active.phone,mi)}<div style="font-size:9.5px;color:rgba(0,0,0,.4);text-align:right;margin-top:2px">${m.ts?new Date(m.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}${stIcon}</div></div>
     </div>`;
   }).join('');
   const sub=active.isGroup?'Grupo':('+'+mdEsc(active.phone));

@@ -505,6 +505,21 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        // Baixa a mídia de uma mensagem (sob demanda) e devolve como data URL.
+        if (action === "wa-media") {
+          const id = String(body.id ?? "");
+          const remoteJid = body.remoteJid ? String(body.remoteJid) : undefined;
+          const fromMe = typeof body.fromMe === "boolean" ? body.fromMe : undefined;
+          if (!id) return json({ error: "id da mídia obrigatório" }, { status: 400 });
+          try {
+            const { evoMediaBase64 } = await import("@/integrations/zapi.server");
+            const r = await evoMediaBase64(id, remoteJid, fromMe);
+            return json({ ok: true, dataUrl: `data:${r.mimetype};base64,${r.base64}`, mimetype: r.mimetype, fileName: r.fileName });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao baixar mídia" }, { status: 502 });
+          }
+        }
+
         // Marca uma conversa como LIDA (zera não-lidas) — persiste na nuvem.
         if (action === "wa-mark-read") {
           const phone = String(body.phone ?? "").replace(/\D/g, "");

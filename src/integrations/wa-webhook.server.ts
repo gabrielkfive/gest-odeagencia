@@ -32,6 +32,8 @@ export async function processWaWebhook(body: any): Promise<void> {
   let ts = Date.now();
   let isGroup = false;
   let jid = "";
+  let media: any = null; // {type,caption?,fileName?,mimetype,ptt?}
+  let mkey: any = null;  // {id,remoteJid,fromMe} p/ baixar a midia depois
 
   // ===== Formato Evolution API (messages.upsert) =====
   if (body?.event || body?.data?.key) {
@@ -55,6 +57,13 @@ export async function processWaWebhook(body: any): Promise<void> {
       else if (m.contactMessage || m.contactsArrayMessage) text = "👤 [Contato]";
       else if (m.stickerMessage) text = "🩷 [Figurinha]";
     }
+    // captura metadados da mídia (pra ver/baixar/ouvir depois, sob demanda)
+    if (m.imageMessage) media = { type: "image", caption: m.imageMessage.caption || "", mimetype: m.imageMessage.mimetype || "image/jpeg" };
+    else if (m.videoMessage) media = { type: "video", caption: m.videoMessage.caption || "", mimetype: m.videoMessage.mimetype || "video/mp4" };
+    else if (m.audioMessage) media = { type: "audio", mimetype: m.audioMessage.mimetype || "audio/ogg", ptt: !!m.audioMessage.ptt };
+    else if (m.documentMessage) media = { type: "document", fileName: m.documentMessage.fileName || "documento", mimetype: m.documentMessage.mimetype || "" };
+    else if (m.stickerMessage) media = { type: "sticker", mimetype: "image/webp" };
+    if (media) mkey = { id: k.id, remoteJid: k.remoteJid, fromMe: !!k.fromMe };
     ts = d.messageTimestamp ? Number(d.messageTimestamp) * 1000 : Date.now();
   }
   // ===== Formato Z-API (fallback) =====
@@ -81,7 +90,7 @@ export async function processWaWebhook(body: any): Promise<void> {
   if (phone && text && typeof text === "string") {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { appendWhatsapp } = await import("@/integrations/zapi.server");
-    await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name });
+    await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name, media, mkey });
     // Assistente: só em mensagens recebidas e fora de grupo (evita enxurrada de tarefas).
     if (!fromMe && !isGroup) {
       const { runAgentOnIncoming } = await import("@/integrations/agent.server");

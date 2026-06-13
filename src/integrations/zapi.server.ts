@@ -165,10 +165,24 @@ export async function evoAllGroups(): Promise<Array<{ jid: string; subject: stri
   } catch { return []; }
 }
 
+// Baixa o conteúdo (base64) de uma mídia do WhatsApp pela chave da mensagem.
+export async function evoMediaBase64(id: string, remoteJid?: string, fromMe?: boolean) {
+  const { url, key, instance } = evoConfig();
+  if (!url || !key || !instance || !id) throw new Error("Mídia indisponível.");
+  const resp = await fetch(`${url}/chat/getBase64FromMediaMessage/${instance}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: key },
+    body: JSON.stringify({ message: { key: { id, ...(remoteJid ? { remoteJid } : {}), ...(typeof fromMe === "boolean" ? { fromMe } : {}) } }, convertToMp4: false }),
+  });
+  const data: any = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data?.base64) throw new Error(data?.message || data?.error || "Não consegui baixar a mídia.");
+  return { base64: String(data.base64), mimetype: String(data.mimetype || "application/octet-stream"), fileName: String(data.fileName || "arquivo") };
+}
+
 // Acrescenta uma mensagem à conversa, guardando no bloco wfa-whatsapp da tabela workflowark_state.
 export async function appendWhatsapp(
   db: { from: (t: string) => any },
-  msg: { phone: string; name?: string; dir: "in" | "out"; text: string; ts?: number; isGroup?: boolean; jid?: string; senderName?: string },
+  msg: { phone: string; name?: string; dir: "in" | "out"; text: string; ts?: number; isGroup?: boolean; jid?: string; senderName?: string; media?: any; mkey?: any },
 ) {
   const key = "wfa-whatsapp";
   const phone = String(msg.phone || "").replace(/\D/g, "");
@@ -196,6 +210,7 @@ export async function appendWhatsapp(
   if (!c.avatar) { try { const a = await evoFetchAvatar(msg.jid || phone); if (a) c.avatar = a; } catch { /* ignore */ } }
   const m: any = { dir: msg.dir, text: String(msg.text), ts: msg.ts || Date.now() };
   if (msg.isGroup && msg.dir === "in" && msg.senderName) m.sender = msg.senderName; // quem mandou no grupo
+  if (msg.media) { m.media = msg.media; if (msg.mkey) m.mkey = msg.mkey; } // foto/video/audio/doc p/ ver depois
   c.msgs.push(m);
   c.msgs = c.msgs.slice(-300);
   c.updatedAt = Date.now();
