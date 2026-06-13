@@ -6434,7 +6434,10 @@ function renderProcessos(){
   const inputEl=panel.querySelector('#ia-input');
   const sendBtn=panel.querySelector('#ia-send');
   const history=[];
-  fab.onclick=()=>{panel.classList.toggle('open');if(panel.classList.contains('open'))setTimeout(()=>inputEl.focus(),50);};
+  // O botão da ARK abre o JARVIS EXECUTOR (voz + ações). Cai no chat antigo só se o JARVIS não existir.
+  fab.onclick=()=>{ if(typeof jarvisOpen==='function'){ jarvisOpen(); } else { panel.classList.toggle('open'); if(panel.classList.contains('open'))setTimeout(()=>inputEl.focus(),50); } };
+  // esconde o botão 🎙️ duplicado (agora o acesso é pelo botão da ARK)
+  try{ const jf=document.getElementById('jarvis-fab'); if(jf)jf.style.display='none'; }catch(e){}
   panel.querySelector('#ia-close').onclick=()=>panel.classList.remove('open');
   function pushMsg(role,text){const d=document.createElement('div');d.className='m '+(role==='user'?'u':'a');d.textContent=text;msgsEl.appendChild(d);msgsEl.scrollTop=msgsEl.scrollHeight;return d;}
   panel.querySelector('#ia-form').addEventListener('submit',async e=>{
