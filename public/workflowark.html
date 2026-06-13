@@ -1545,7 +1545,7 @@ table.t tr.high{background:var(--yel-bg)}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -2449,6 +2449,22 @@ function iniciarAutoSync(){
   </main>
 </div>
 
+<!-- MODAL: Ficha do Cliente -->
+<div class="modal-bg" id="modal-cli-detalhe">
+  <div class="modal" style="max-width:680px;max-height:88vh;overflow:auto">
+    <div class="modal-head"><h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Ficha do Cliente</h3><span class="x" onclick="closeModal('modal-cli-detalhe')">✕</span></div>
+    <div class="modal-body" id="clid-body"></div>
+  </div>
+</div>
+<style>
+  #modal-cli-detalhe .cli-sect{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  #modal-cli-detalhe .cli-sect h4{font-size:13px;font-weight:700;margin-bottom:9px}
+  #modal-cli-detalhe .cli-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  #modal-cli-detalhe .crm-fi label{display:block;font-size:11px;color:var(--mute);margin-bottom:3px;font-weight:600}
+  #modal-cli-detalhe .crm-fi input{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-size:12.5px;box-sizing:border-box}
+  @media(max-width:600px){#modal-cli-detalhe .cli-grid{grid-template-columns:1fr}}
+</style>
+
 <!-- MODAL: Gerenciar pessoas / equipe -->
 <div class="modal-bg" id="modal-colab">
   <div class="modal" style="max-width:440px">
@@ -2744,6 +2760,57 @@ function cliRemove(){
   saveClientesCustom(loadClientesCustom().filter(x=>x.id!==cliEditId));
   closeModal('modal-cliente');toast('Cliente excluído');
 }
+// ---- Ficha do Cliente (cadastro + briefing + links + tarefas) ----
+let CLI_DET_ID=null;
+function cliDetAll(){ try{ return JSON.parse(localStorage.getItem('wfa-cliente-detalhes')||'{}'); }catch(e){ return {}; } }
+function cliDetData(id){ return cliDetAll()[id]||{}; }
+function cliDetField(k,v){ const all=cliDetAll(); all[CLI_DET_ID]=all[CLI_DET_ID]||{}; all[CLI_DET_ID][k]=v; localStorage.setItem('wfa-cliente-detalhes',JSON.stringify(all)); }
+function cliDetalhe(id){
+  const c=CLIENTES.find(x=>x.id===id); if(!c)return;
+  CLI_DET_ID=id; const d=cliDetData(id);
+  const fld=(k,label,ph,val)=>`<div class="crm-fi"><label>${label}</label><input value="${mdEsc(val!==undefined?val:(d[k]||''))}" placeholder="${ph||''}" oninput="cliDetField('${k}',this.value)"></div>`;
+  const tarefas=(state.tarefas||[]).filter(t=>t.clienteId===id || ((t.title||'').toLowerCase().includes(String(c.nm||'').toLowerCase()) && c.nm));
+  const tHtml=tarefas.length?tarefas.slice(0,40).map(t=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)"><span style="font-size:12.5px">${mdEsc(t.title)}</span><span style="font-size:11px;color:var(--mute);white-space:nowrap">${mdEsc(t.resp||'')}${t.data?' · '+mdEsc(t.data):''}</span></div>`).join(''):'<div style="color:var(--mute);font-size:12.5px">Nenhuma tarefa deste cliente ainda.</div>';
+  const stL={r:'🔴 Urgente',y:'🟡 Em ajuste',gr:'🟢 Saudável',churn:'⚫ Churn'}[c.status]||'';
+  document.getElementById('clid-body').innerHTML=`
+    <div style="display:flex;align-items:center;gap:13px;margin-bottom:6px">
+      <div class="cli-av ${c.status}" style="width:54px;height:54px;font-size:21px;flex-shrink:0">${cliInitials(c.nm).toUpperCase()}</div>
+      <div style="min-width:0"><div style="font-size:20px;font-weight:800">${mdEsc(c.nm)}</div><div style="color:var(--mute);font-size:13px">${mdEsc(c.plano||'')} · ${c.tipo==='ARK'?'ARK Direto':'Squad Alpha'} · ${stL}</div></div>
+    </div>
+    <div class="cli-sect"><h4>📋 Informações Gerais</h4>
+      <div class="cli-grid">
+        ${fld('empresa','Empresa / Razão social','')}
+        ${fld('responsavel','Account responsável','')}
+        ${fld('email','E-mail','')}
+        ${fld('telefone','Telefone / WhatsApp','')}
+        ${fld('instagram','Instagram','@perfil')}
+        ${fld('nicho','Nicho','')}
+        ${fld('inicio','Início do contrato','')}
+        ${fld('valor','Valor do contrato', 'R$', d.valor!==undefined?d.valor:(c.valor?('R$ '+Number(c.valor).toLocaleString('pt-BR')):''))}
+        ${fld('localizacao','Localização','cidade/UF')}
+        ${fld('origem','Origem do cliente','indicação, anúncio...')}
+      </div>
+    </div>
+    <div class="cli-sect"><h4>📝 Briefing</h4>
+      <textarea class="form-input" rows="4" style="width:100%;box-sizing:border-box" placeholder="Objetivos, público-alvo, tom de voz, observações..." oninput="cliDetField('briefing',this.value)">${mdEsc(d.briefing||'')}</textarea>
+    </div>
+    <div class="cli-sect"><h4>🔗 Links e Acessos</h4>
+      <div class="cli-grid">
+        ${fld('linkInsta','Link do Instagram','https://')}
+        ${fld('linkDrive','Pasta no Drive','https://')}
+        ${fld('linkContrato','Contrato','https://')}
+        ${fld('linkAds','Conta de anúncios','')}
+      </div>
+    </div>
+    <div class="cli-sect"><h4>✅ Tarefas do cliente <span style="color:var(--mute);font-weight:500;font-size:12px">(${tarefas.length})</span></h4>${tHtml}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+      <button class="icobtn" onclick="closeModal('modal-cli-detalhe');goRegua('${id}')">Régua dos 15</button>
+      <button class="icobtn" onclick="closeModal('modal-cli-detalhe');document.querySelector('[data-nav=jornada]')&&document.querySelector('[data-nav=jornada]').click()">Ver na Jornada</button>
+      ${c.custom?`<button class="icobtn" onclick="closeModal('modal-cli-detalhe');cliEditOpen('${id}')">Editar cadastro</button>`:''}
+      <button class="tb-btn" style="margin-left:auto" onclick="closeModal('modal-cli-detalhe')">Pronto</button>
+    </div>`;
+  document.getElementById('modal-cli-detalhe').classList.add('open');
+}
 // Seed único da Valhalla (cliente pedido pelo Gabriel) — fica editável pelo botão Editar.
 (function seedValhalla(){
   try{
@@ -2964,7 +3031,7 @@ function cliCard(c){
   const mrr=c.valor?`R$ ${c.valor.toLocaleString('pt-BR')}<small>/mês</small>`:`<span style="font-size:12px;color:var(--mute);font-weight:600">Squad Alpha</span>`;
   const cap=c.cap?`<span class="cli-cap">📹 ${c.cap}/mês</span>`:'';
   const isArk=c.tipo==='ARK'&&c.status!=='churn';
-  return `<div class="cli ${cls}" onclick="goRegua('${c.id}')">
+  return `<div class="cli ${cls}" onclick="cliDetalhe('${c.id}')">
     <div class="cli-hd">
       <div class="cli-av ${cls}">${cliInitials(c.nm).toUpperCase()}</div>
       <div class="nmw"><div class="nm">${c.nm}</div><div class="pl">${c.plano}</div></div>
@@ -2973,7 +3040,7 @@ function cliCard(c){
     <div class="cli-mid"><div class="cli-mrr">${mrr}</div>${cap}</div>
     <div class="cli-act2"><span class="ai">▸</span><span>${c.meta}</span></div>
     <div class="cli-btns">
-      <button class="cli-btn pri" onclick="event.stopPropagation();goRegua('${c.id}')">Régua dos 15</button>
+      <button class="cli-btn pri" onclick="event.stopPropagation();cliDetalhe('${c.id}')">Abrir ficha</button>
       ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
       ${c.custom?`<button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">✏️ Editar</button>`:''}
     </div>
@@ -3893,6 +3960,7 @@ const REGUA_ITENS=[
 function reguaMesKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function reguaKey(cliId,i){return 'regua:'+reguaMesKey()+':'+cliId+':'+i;}
 function gerarTarefasRegua(){
+  if(!confirm('Isso cria UMA tarefa para cada item pendente da régua de TODOS os clientes (pode ser muita coisa). Quer continuar?'))return;
   const ativos=CLIENTES.filter(c=>c.status!=='churn');
   const today=new Date().toISOString().split('T')[0];
   let criadas=0;
