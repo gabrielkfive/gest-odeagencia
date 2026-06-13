@@ -2659,8 +2659,22 @@ function iniciarAutoSync(){
           <div id="meta-contas" style="margin-top:10px"></div>
           <div id="meta-relatorio" style="margin-top:12px"></div>
         </div>
+        <div class="card" style="padding:18px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="font-size:15px;font-weight:800">Google Calendar (JARVIS marca sua agenda)</h3><span id="gcal-badge" style="font-size:11px;font-weight:700;color:var(--mute)">verificando...</span></div>
+          <p style="font-size:12.5px;color:var(--mute);line-height:1.5;margin-bottom:10px">Conecte sua conta Google pra o JARVIS <b>criar eventos de verdade</b> na sua agenda, por prioridade. Você autoriza uma vez e pronto. O acesso fica <b>só no servidor</b>.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="tb-btn dk" id="gcal-connect" onclick="gcalConnect()">Conectar Google Calendar</button>
+            <button class="icobtn" onclick="gcalStatus()">Verificar status</button>
+            <span id="gcal-msg" style="font-size:12px;color:var(--mute)"></span>
+          </div>
+          <div id="gcal-setup" style="font-size:11.5px;color:var(--mute);line-height:1.6;margin-top:10px;display:none">
+            <b>Ainda falta o setup (uma vez):</b> no Google Cloud → ative a <b>Google Calendar API</b>, crie um <b>ID do cliente OAuth (App da Web)</b> com o redirect
+            <code style="background:var(--bg);padding:1px 5px;border-radius:4px">https://workflowark.arkcontent.workers.dev/api/google/callback</code>,
+            e me passe o <b>Client ID</b> + <b>Client Secret</b> (eu guardo como segredo). Passo-a-passo completo em <b>docs/O-QUE-O-GABRIEL-PRECISA.md</b>.
+          </div>
+        </div>
         <div class="card" style="padding:18px;opacity:.65">
-          <h3 style="font-size:15px;font-weight:800;margin-bottom:4px">📧 E-mail · 🔍 Google Ads · ⚙️ n8n</h3>
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:4px">E-mail · Google Ads · n8n</h3>
           <p style="font-size:12.5px;color:var(--mute);line-height:1.5">Em breve — precisam de configuração extra (serviço de e-mail, developer token do Google, instância n8n). Veja o passo-a-passo no <b>Tutorial → Conectar integrações</b>.</p>
         </div>
       </div>
@@ -3464,7 +3478,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='conselho'&&typeof consPopular==='function'){try{consPopular();}catch(e){}}
     if(p==='agentes'){try{agPolish();agLive();}catch(e){}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
-    if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}}
+    if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
     if(p==='whatsapp'){try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
@@ -5204,6 +5218,23 @@ async function metaStatusLoad(){
     metaRenderContas(r.accounts||[]);
   }catch(e){badge.textContent='erro';}
 }
+/* ---- Google Calendar (JARVIS marca agenda) ---- */
+async function gcalStatus(){
+  const badge=document.getElementById('gcal-badge');const setup=document.getElementById('gcal-setup');const btn=document.getElementById('gcal-connect');if(!badge)return;
+  badge.textContent='verificando...';badge.style.color='var(--mute)';
+  try{
+    const r=await cloudCall('save',{action:'google-status'});
+    if(!r.configured){badge.textContent='○ falta setup';badge.style.color='#c0392b';if(setup)setup.style.display='block';if(btn)btn.disabled=true;return;}
+    if(setup)setup.style.display='none';if(btn)btn.disabled=false;
+    if(r.connected){badge.textContent='● conectado'+(r.email?' · '+r.email:'');badge.style.color='#1d8a4e';if(btn)btn.textContent='Reconectar Google';}
+    else{badge.textContent='○ não conectado';badge.style.color='#c0392b';}
+  }catch(e){badge.textContent='erro';}
+}
+function gcalConnect(){
+  // abre o consentimento do Google numa nova aba
+  window.open('/api/google/auth','_blank');
+  const m=document.getElementById('gcal-msg');if(m)m.textContent='Abri a tela do Google numa nova aba. Autorize e volte — depois clique em "Verificar status".';
+}
 async function metaConectar(){
   const t=(document.getElementById('meta-token').value||'').trim();const msg=document.getElementById('meta-status-msg');
   if(!t){if(msg)msg.textContent='Cole o token primeiro.';return;}
@@ -6563,7 +6594,7 @@ function jarvisPlanAgenda(){
   </div>`;
   box.scrollIntoView({behavior:'smooth',block:'start'});
 }
-function jarvisPlanAplicar(){
+async function jarvisPlanAplicar(){
   const sel=[...document.querySelectorAll('#jarvis-plan input[data-jp]:checked')].map(c=>_jarvisPlan[+c.dataset.jp]);
   if(!sel.length){toast('Selecione ao menos uma');return;}
   const evs=loadAgendaEvents();
@@ -6576,6 +6607,15 @@ function jarvisPlanAplicar(){
   if(typeof renderTarefas==='function')renderTarefas();if(typeof renderMeuDia==='function')renderMeuDia();
   document.getElementById('jarvis-plan').style.display='none';
   toast(sel.length+' tarefa(s) agendada(s) ✓');
+  // tenta criar de verdade no Google Calendar (se conectado)
+  try{
+    const st=await cloudCall('save',{action:'google-status'});
+    if(st&&st.connected){
+      const events=sel.map(p=>({title:p.title,date:p.date,time:p.time,durationMin:60,notes:'Plano do JARVIS · '+(p.cli||'ARK')}));
+      const r=await cloudCall('save',{action:'google-cal-create',events});
+      if(r&&r.criados)toast('✓ '+r.criados+' evento(s) criados no Google Calendar');
+    }
+  }catch(e){/* silencioso: agenda local já foi salva */}
 }
 function saveAgendaEvents(arr){localStorage.setItem('wfa-agenda-events',JSON.stringify(arr));renderAgenda();}
 function agendaNavMes(dir){

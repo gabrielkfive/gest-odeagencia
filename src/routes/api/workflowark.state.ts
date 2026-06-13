@@ -22,6 +22,7 @@ const STATE_KEYS = new Set([
   "wfa-notificacoes",
   "wfa-conselho-briefings",
   "wfa-drive",
+  "wfa-brand",
 ]);
 
 const VALID_ROLES = new Set([
@@ -192,7 +193,9 @@ export const Route = createFileRoute("/api/workflowark/state")({
           .select("key,data,updated_at");
         if (error) return json({ error: "Não foi possível carregar os dados." }, { status: 500 });
 
-        const state = Object.fromEntries((rows ?? []).map((row: any) => [row.key, row.data]));
+        // NUNCA devolve segredos/tokens ao cliente (Meta token, Google OAuth refresh token…)
+        const isSensitive = (k: string) => /-(secret|oauth)$/.test(k);
+        const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key)).map((row: any) => [row.key, row.data]));
         let members: WorkflowMember[] = [];
         if (ctx.isAdmin) {
           const result = await ctx.db
@@ -581,6 +584,31 @@ export const Route = createFileRoute("/api/workflowark/state")({
             if (!r.ok || d.error) return json({ error: d?.error?.message || "Falha no relatório" }, { status: 502 });
             return json({ ok: true, insights: (d.data && d.data[0]) || null });
           } catch (e) { return json({ error: (e as Error)?.message || "Falha" }, { status: 502 }); }
+        }
+
+        // Google Calendar: status da conexão
+        if (action === "google-status") {
+          try {
+            const { googleConfig, getStoredOAuth } = await import("@/integrations/google.server");
+            const { clientId } = googleConfig();
+            const rec = await getStoredOAuth(ctx.db);
+            return json({ ok: true, configured: !!clientId, connected: !!(rec && rec.refresh_token), email: rec?.email || "" });
+          } catch (e) { return json({ error: (e as Error)?.message || "Falha" }, { status: 502 }); }
+        }
+        // Google Calendar: cria eventos (JARVIS marca a agenda). body.events = [{title,date,time?,durationMin?,notes?}]
+        if (action === "google-cal-create") {
+          const events = Array.isArray(body.events) ? body.events.slice(0, 30) : [];
+          if (!events.length) return json({ error: "Sem eventos" }, { status: 400 });
+          try {
+            const { createCalendarEvent } = await import("@/integrations/google.server");
+            const results: any[] = [];
+            for (const ev of events) {
+              try { const r = await createCalendarEvent(ctx.db, ev); results.push({ ok: true, title: ev.title, link: r.htmlLink }); }
+              catch (e) { results.push({ ok: false, title: ev.title, error: (e as Error)?.message || "falha" }); }
+            }
+            const criados = results.filter((r) => r.ok).length;
+            return json({ ok: true, criados, total: events.length, results });
+          } catch (e) { return json({ error: (e as Error)?.message || "Falha ao criar eventos" }, { status: 502 }); }
         }
 
         // JARVIS: assistente de voz conversacional da ARK (respostas curtas, faladas).

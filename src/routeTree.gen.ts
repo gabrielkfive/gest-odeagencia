@@ -19,6 +19,8 @@ import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowar
 import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowark.sheet'
 import { Route as ApiWorkflowarkAiCheckRouteImport } from './routes/api/workflowark.ai-check'
 import { Route as ApiWorkflowarkAgentsRunRouteImport } from './routes/api/workflowark.agents-run'
+import { Route as ApiGoogleCallbackRouteImport } from './routes/api/google.callback'
+import { Route as ApiGoogleAuthRouteImport } from './routes/api/google.auth'
 import { Route as ApiAuthSignupRouteImport } from './routes/api/auth.signup'
 import { Route as ApiWorkflowarkWhatsappWebhookRouteImport } from './routes/api/workflowark.whatsapp.webhook'
 import { Route as ApiWorkflowarkWhatsappSendRouteImport } from './routes/api/workflowark.whatsapp.send'
@@ -74,6 +76,16 @@ const ApiWorkflowarkAgentsRunRoute = ApiWorkflowarkAgentsRunRouteImport.update({
   path: '/api/workflowark/agents-run',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGoogleCallbackRoute = ApiGoogleCallbackRouteImport.update({
+  id: '/api/google/callback',
+  path: '/api/google/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGoogleAuthRoute = ApiGoogleAuthRouteImport.update({
+  id: '/api/google/auth',
+  path: '/api/google/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSignupRoute = ApiAuthSignupRouteImport.update({
   id: '/api/auth/signup',
   path: '/api/auth/signup',
@@ -111,6 +123,8 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
+  '/api/google/auth': typeof ApiGoogleAuthRoute
+  '/api/google/callback': typeof ApiGoogleCallbackRoute
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
@@ -127,6 +141,8 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
+  '/api/google/auth': typeof ApiGoogleAuthRoute
+  '/api/google/callback': typeof ApiGoogleCallbackRoute
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
@@ -145,6 +161,8 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
+  '/api/google/auth': typeof ApiGoogleAuthRoute
+  '/api/google/callback': typeof ApiGoogleCallbackRoute
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
@@ -163,6 +181,8 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/ia'
     | '/api/auth/signup'
+    | '/api/google/auth'
+    | '/api/google/callback'
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/sheet'
@@ -179,6 +199,8 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/ia'
     | '/api/auth/signup'
+    | '/api/google/auth'
+    | '/api/google/callback'
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/sheet'
@@ -196,6 +218,8 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/api/ia'
     | '/api/auth/signup'
+    | '/api/google/auth'
+    | '/api/google/callback'
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/sheet'
@@ -213,6 +237,8 @@ export interface RootRouteChildren {
   SistemaRoute: typeof SistemaRoute
   ApiIaRoute: typeof ApiIaRoute
   ApiAuthSignupRoute: typeof ApiAuthSignupRoute
+  ApiGoogleAuthRoute: typeof ApiGoogleAuthRoute
+  ApiGoogleCallbackRoute: typeof ApiGoogleCallbackRoute
   ApiWorkflowarkAgentsRunRoute: typeof ApiWorkflowarkAgentsRunRoute
   ApiWorkflowarkAiCheckRoute: typeof ApiWorkflowarkAiCheckRoute
   ApiWorkflowarkSheetRoute: typeof ApiWorkflowarkSheetRoute
@@ -294,6 +320,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWorkflowarkAgentsRunRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/google/callback': {
+      id: '/api/google/callback'
+      path: '/api/google/callback'
+      fullPath: '/api/google/callback'
+      preLoaderRoute: typeof ApiGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/google/auth': {
+      id: '/api/google/auth'
+      path: '/api/google/auth'
+      fullPath: '/api/google/auth'
+      preLoaderRoute: typeof ApiGoogleAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/signup': {
       id: '/api/auth/signup'
       path: '/api/auth/signup'
@@ -365,6 +405,8 @@ const rootRouteChildren: RootRouteChildren = {
   SistemaRoute: SistemaRoute,
   ApiIaRoute: ApiIaRoute,
   ApiAuthSignupRoute: ApiAuthSignupRoute,
+  ApiGoogleAuthRoute: ApiGoogleAuthRoute,
+  ApiGoogleCallbackRoute: ApiGoogleCallbackRoute,
   ApiWorkflowarkAgentsRunRoute: ApiWorkflowarkAgentsRunRoute,
   ApiWorkflowarkAiCheckRoute: ApiWorkflowarkAiCheckRoute,
   ApiWorkflowarkSheetRoute: ApiWorkflowarkSheetRoute,
