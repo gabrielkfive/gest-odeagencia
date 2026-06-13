@@ -505,6 +505,23 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        // Marca uma conversa como LIDA (zera não-lidas) — persiste na nuvem.
+        if (action === "wa-mark-read") {
+          const phone = String(body.phone ?? "").replace(/\D/g, "");
+          if (!phone) return json({ error: "phone obrigatório" }, { status: 400 });
+          try {
+            const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-whatsapp").maybeSingle();
+            const st: any = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : { conversas: {} };
+            if (st.conversas && st.conversas[phone]) {
+              st.conversas[phone].unread = 0;
+              await ctx.db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: st });
+            }
+            return json({ ok: true });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao marcar como lido" }, { status: 502 });
+          }
+        }
+
         if (action === "set-my-name") {
           const full_name = String(body.full_name ?? "").trim();
           if (!full_name) return json({ error: "Informe um nome." }, { status: 400 });

@@ -4117,8 +4117,9 @@ function renderWhatsapp(){
     let sep='';
     if(day&&day!==lastDay){lastDay=day;sep=`<div style="text-align:center;margin:10px 0"><span style="background:#e7e7e3;color:#555;font-size:10.5px;padding:2px 10px;border-radius:10px">${day}</span></div>`;}
     const senderTag=(!out&&active.isGroup&&m.sender)?`<div style="font-size:10.5px;font-weight:700;color:#1d8a4e;margin-bottom:2px">${mdEsc(m.sender)}</div>`:'';
+    const stIcon=out?(m.status==='sending'?' <span title="enviando">🕐</span>':m.status==='failed'?` <span title="${mdEsc(m.error||'falhou')}" style="color:#c0392b;font-weight:700">⚠ falhou</span>`:' <span title="enviado" style="color:#34b7f1">✓</span>'):'';
     return sep+`<div style="display:flex;justify-content:${out?'flex-end':'flex-start'};margin:3px 0">
-      <div style="max-width:74%;background:${out?'#d9fdd3':'#fff'};color:#111;border-radius:10px;padding:6px 10px 5px;font-size:13px;box-shadow:0 1px .5px rgba(0,0,0,.13)">${senderTag}<span style="white-space:pre-wrap;word-break:break-word">${mdEsc(m.text)}</span><div style="font-size:9.5px;color:rgba(0,0,0,.4);text-align:right;margin-top:2px">${m.ts?new Date(m.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}</div></div>
+      <div style="max-width:74%;background:${out?(m.status==='failed'?'#ffe2de':'#d9fdd3'):'#fff'};color:#111;border-radius:10px;padding:6px 10px 5px;font-size:13px;box-shadow:0 1px .5px rgba(0,0,0,.13)">${senderTag}<span style="white-space:pre-wrap;word-break:break-word">${mdEsc(m.text)}</span><div style="font-size:9.5px;color:rgba(0,0,0,.4);text-align:right;margin-top:2px">${m.ts?new Date(m.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}${stIcon}</div></div>
     </div>`;
   }).join('');
   const sub=active.isGroup?'Grupo':('+'+mdEsc(active.phone));
@@ -4153,7 +4154,7 @@ function renderWhatsapp(){
     </div>
   </div>`;
   const mb=document.getElementById('wpp-msgs');if(mb)mb.scrollTop=mb.scrollHeight;
-  if(active.unread)active.unread=0;
+  if(active.unread){active.unread=0;try{cloudCall('save',{action:'wa-mark-read',phone:active.phone});}catch(e){}if(typeof updateBadges==='function')updateBadges();}
   // 1ª vez: se há grupos sem nome real, sincroniza sozinho (sem o Gabriel precisar clicar)
   if(WFA_CLOUD_READY && !WPP_AUTOSYNC && list.some(c=>c.isGroup&&!c.subjFetched)){WPP_AUTOSYNC=true;setTimeout(wppSyncGroups,800);}
 }
@@ -4486,11 +4487,15 @@ async function wppSend(){
   const inp=document.getElementById('wpp-input');const msg=(inp&&inp.value||'').trim();if(!msg||!WPP_ACTIVE)return;
   inp.value='';
   const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[WPP_ACTIVE];
-  if(c){c.msgs=c.msgs||[];c.msgs.push({dir:'out',text:msg,ts:Date.now()});c.updatedAt=Date.now();renderWhatsapp();}
+  const localMsg={dir:'out',text:msg,ts:Date.now(),status:'sending'};
+  if(c){c.msgs=c.msgs||[];c.msgs.push(localMsg);c.updatedAt=Date.now();renderWhatsapp();}
   try{
     await cloudCall('save',{action:'send-whatsapp',phone:WPP_ACTIVE,message:msg,jid:(c&&c.jid)||''});
-    toast('Enviado ✓');
-  }catch(e){toast('⚠ '+(e.message||'Não consegui enviar'));}
+    localMsg.status='sent';renderWhatsapp();toast('Enviado ✓');
+  }catch(e){
+    localMsg.status='failed';localMsg.error=(e&&e.message)||'falha';renderWhatsapp();
+    toast('⚠ '+(e.message||'Não consegui enviar'));
+  }
 }
 /* ============ FINANCEIRO · lê a planilha do Google ============ */
 let FIN_CACHE=null;

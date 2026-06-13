@@ -52,14 +52,35 @@ export function evoConfigured() {
 export async function evoSendText(phone: string, message: string) {
   const { url, key, instance } = evoConfig();
   if (!url || !key || !instance) throw new Error("Evolution não configurada.");
-  const resp = await fetch(`${url}/message/sendText/${instance}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: key },
-    body: JSON.stringify({ number: phone, text: message }),
-  });
-  const data = await resp.json().catch(() => ({}));
-  if (!resp.ok) {
-    throw new Error((data as { message?: string; error?: string })?.message || (data as any)?.error || "Falha ao enviar pela Evolution");
+  const doSend = async () => {
+    const resp = await fetch(`${url}/message/sendText/${instance}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: key },
+      body: JSON.stringify({ number: phone, text: message }),
+    });
+    const data: any = await resp.json().catch(() => ({}));
+    return { ok: resp.ok, data };
+  };
+  const errText = (data: any) => {
+    const m = data?.response?.message ?? data?.message;
+    return Array.isArray(m) ? m.join("; ") : (typeof m === "string" ? m : data?.error || "Falha ao enviar pela Evolution");
+  };
+  let { ok, data } = await doSend();
+  // "No sessions": a 1ª tentativa faz o WhatsApp buscar a chave do contato; reenviar costuma funcionar.
+  if (!ok && /no sessions|session|prekey|encrypt/i.test(errText(data))) {
+    await new Promise((r) => setTimeout(r, 2000));
+    ({ ok, data } = await doSend());
+    if (!ok && /no sessions|session|prekey|encrypt/i.test(errText(data))) {
+      await new Promise((r) => setTimeout(r, 2500));
+      ({ ok, data } = await doSend());
+    }
+  }
+  if (!ok) {
+    const e = errText(data);
+    if (/no sessions|session|prekey|encrypt/i.test(e)) {
+      throw new Error("O WhatsApp ainda está sincronizando este contato. Tente enviar de novo em alguns segundos.");
+    }
+    throw new Error(e);
   }
   return data;
 }
