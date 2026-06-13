@@ -5314,7 +5314,8 @@ async function jarvisSend(txt){
   const inp=document.getElementById('jarvis-input'); txt=(txt||(inp&&inp.value)||'').trim(); if(!txt)return; if(inp)inp.value='';
   JARVIS_MSGS.push({role:'user',content:txt});
   // 1) tenta EXECUTAR um comando no sistema (estilo Fazm). Se executou, nem chama a IA.
-  const done=jarvisExecute(txt);
+  let done=jarvisExecute(txt);
+  if(done&&typeof done.then==='function'){ JARVIS_MSGS.push({role:'assistant',content:'…'}); jarvisRender(); done=await done; JARVIS_MSGS.pop(); }
   if(done){ JARVIS_MSGS.push({role:'assistant',content:done}); jarvisRender(); jarvisFalar(done); return; }
   // 2) senão, conversa com a IA
   JARVIS_MSGS.push({role:'assistant',content:'…'}); jarvisRender();
@@ -5349,6 +5350,10 @@ function jarvisExecute(raw){
   if(has('resumo','panorama') || re('como (ta|esta|tá|está) (meu|o) dia') || has('o que tenho hoje','o que tem pra hoje')){
     jarvisGo('dashboard'); setTimeout(()=>{if(typeof mdJarvisFalar==='function')mdJarvisFalar();},400);
     return 'Aqui está o resumo do seu dia.';
+  }
+  // MARCAR NO GOOGLE AGENDA / CALENDAR (cria evento real): "marca/adiciona/agenda ... na agenda/calendário ... hoje/amanhã/às 15h"
+  if(re('agenda|calend') && re('adicion|marc|agend|coloc|bot|p[oõ]e|marqu|cria') && re('\\d{1,2}\\s*(h|:|hora)|meio[ -]?dia|hoje|amanh|segunda|ter[çc]a|quarta|quinta|sexta|s[áa]bado|domingo')){
+    return jarvisAgendarGoogle(raw);
   }
   // criar tarefa: "criar tarefa X", "nova tarefa X", "anota X", "lembra de X", "adiciona tarefa X"
   let m=raw.match(/(?:criar?|nova|adicionar?|anota[r]?|lembra(?:r)?(?:\s+de)?|bota[r]?)\s+(?:uma\s+)?(?:tarefa|task|lembrete)?\s*[:\-]?\s*(.+)/i);
@@ -5396,6 +5401,48 @@ function jarvisExecute(raw){
   ];
   for(const [kw,nav,label] of navMap){ if(kw.some(k=>t.includes(k))){ if(jarvisGo(nav))return 'Abrindo '+label+'.'; } }
   return null; // não é comando → conversa com a IA
+}
+// interpreta "quando" (data + hora) a partir da fala
+function jarvisParseWhen(t){
+  const now=new Date(); const d=new Date(now);
+  if(/depois de amanh/.test(t)) d.setDate(d.getDate()+2);
+  else if(/amanh/.test(t)) d.setDate(d.getDate()+1);
+  else {
+    const wd={'domingo':0,'segunda':1,'terca':2,'terça':2,'quarta':3,'quinta':4,'sexta':5,'sabado':6,'sábado':6};
+    for(const k in wd){ if(t.includes(k)){ let diff=(wd[k]-now.getDay()+7)%7; if(diff===0)diff=7; d.setDate(now.getDate()+diff); break; } }
+  }
+  const date=d.toISOString().split('T')[0];
+  let time='';
+  if(/meio[ -]?dia/.test(t)) time='12:00';
+  else { const mt=t.match(/(?:as|às)?\s*(\d{1,2})(?:[:h](\d{2}))?\s*(?:h|hs|horas)?/); if(mt){ let hh=parseInt(mt[1],10); const mm=mt[2]||'00'; if(/da tarde|da noite/.test(t)&&hh<12)hh+=12; if(hh>=0&&hh<=23) time=String(hh).padStart(2,'0')+':'+mm; } }
+  return {date,time};
+}
+async function jarvisAgendarGoogle(raw){
+  const t=String(raw).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const {date,time}=jarvisParseWhen(t);
+  let titulo=String(raw)
+    .replace(/.*?(adicion\w*|marqu\w*|marc\w*|agend\w*|coloc\w*|bot\w*|p[oõ]e\w*|cria\w*)\s+/i,'')
+    .replace(/\b(n[oa]s?|em|no meu|na minha|meu|minha)\b/ig,' ')
+    .replace(/\b(google\s*)?(agenda|calend[áa]rio)\b/ig,' ')
+    .replace(/(depois de )?amanh\S*/ig,' ')
+    .replace(/\b(hoje|segunda|ter[çc]a|quarta|quinta|sexta|s[áa]bado|domingo)\b/ig,' ')
+    .replace(/(?:as|às)?\s*\d{1,2}([:h]\d{2})?\s*(h|hs|horas|da manh[ãa]|da tarde|da noite|em ponto)?/ig,' ')
+    .replace(/\b(para|pra|pro|de|da|do)\b\s*$/ig,'')
+    .replace(/\s{2,}/g,' ').trim();
+  if(!titulo||titulo.length<2)titulo='Compromisso';
+  // 1) adiciona na agenda do sistema (sempre)
+  try{ const evs=loadAgendaEvents(); evs.push({id:'jg'+Date.now(),date,title:titulo,time,type:'reuniao'}); saveAgendaEvents(evs); }catch(e){}
+  const quando=date.split('-').reverse().slice(0,2).join('/')+(time?(' às '+time):'');
+  // 2) tenta criar no Google Calendar (se conectado)
+  try{
+    const st=await cloudCall('save',{action:'google-status'});
+    if(st&&st.connected){
+      const r=await cloudCall('save',{action:'google-cal-create',events:[{title:titulo,date,time,durationMin:60}]});
+      if(r&&r.criados) return 'Pronto, Senhor. Agendei "'+titulo+'" '+quando+' no seu Google Calendar.';
+      return 'Adicionei "'+titulo+'" '+quando+' na agenda. Tive um problema ao gravar no Google — verifique a conexão em Integrações.';
+    }
+    return 'Adicionei "'+titulo+'" '+quando+' na agenda do sistema. Para gravar no seu Google Calendar, é só conectar em Integrações, Senhor.';
+  }catch(e){ return 'Adicionei "'+titulo+'" '+quando+' na agenda do sistema, Senhor.'; }
 }
 function jarvisFalar(txt){jarvisSpeak(String(txt||'').replace(/[#*_`]/g,''));}
 function jarvisMic(){
