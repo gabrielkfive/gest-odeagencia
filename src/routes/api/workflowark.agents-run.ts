@@ -132,6 +132,14 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           let briefings: any[] = Array.isArray(bRow?.data) ? bRow.data : [];
           briefings = briefings.filter((b) => (b.ts || 0) > Date.now() - 14 * 86400 * 1000);
 
+          // agenda existente (pra ADICIONAR os alinhamentos do conselho — append-only)
+          const { data: agRow, error: agErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-agenda-events").maybeSingle();
+          const agendaOk = !agErr;
+          const agenda: any[] = Array.isArray(agRow?.data) ? agRow.data.slice() : [];
+          const agendaBaseLen = agenda.length;
+          // próximo dia útil a partir de amanhã
+          const proxDiaUtil = (offset: number) => { const d = new Date(); d.setDate(d.getDate() + 1 + offset); while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1); return d.toISOString().split("T")[0]; };
+
           // define quem o conselho vai debater AGORA
           const temHoje = (id: string) => briefings.some((b) => b.clienteId === id && b.date === hoje);
           let alvos = soCliente
@@ -143,12 +151,14 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             "Você é o CONSELHO DE IA da ARK Content (agência de marketing de gastronomia/varejo). " +
             "O conselho tem vozes: Diretor de Operações, Gestor de Tráfego, Social Media, Roteirista e Account/CS. " +
             "Pense ALÉM do operacional: aprofunde no nicho, traga referências de marcas/criadores em alta no mesmo segmento, ideias de parceria reais, ALINHAMENTOS/REUNIÕES necessários e uma ROTEIRIZAÇÃO de captação (Reels) viável de gravar. " +
+            "Proponha também um ORÇAMENTO de mídia realista pra esse cliente. Benchmarks Brasil 2025-26: Meta Ads Click-to-WhatsApp é o melhor pra PME (CPL R$5-25, conversão 15-30%); Google Ads CPL R$30-200. Regra: CPL máximo = ticket médio × taxa de conversão. Diga verba mensal sugerida, canal (geralmente Click-to-WhatsApp), e o resultado esperado em leads/reuniões. " +
             "Responda SOMENTE em JSON válido, sem texto fora do JSON, no formato: " +
             '{"debate":[{"voz":"Gestor de Tráfego","fala":"..."},{"voz":"Social Media","fala":"..."}],' +
             '"decisao":"frase única e forte","plano":["passo 1","passo 2","passo 3"],' +
             '"tarefas":[{"title":"tarefa acionável curta","resp":"área responsável (trafego, social, account, design, edicao, captacao, comercial)"}],' +
             '"reunioes":["alinhamento/reunião a marcar + com quem"],' +
             '"roteiro":"roteiro curto de 1 Reel: gancho + 3 cenas + CTA (1 parágrafo)",' +
+            '"orcamento":"verba mensal sugerida + canal + resultado esperado (ex: R$1.500/mês em Click-to-WhatsApp ~ 60-100 leads)",' +
             '"referencias":["marca/criador + por que olhar"],"parcerias":["ideia de parceria concreta"]}. ' +
             "Máx 3 falas, 3 passos, 3 tarefas, 2 reuniões, 2 referências, 2 parcerias. Português, específico e prático.";
 
@@ -176,6 +186,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               parcerias: Array.isArray(j.parcerias) ? j.parcerias.slice(0, 2).map((x: any) => String(x)) : [],
               reunioes: Array.isArray(j.reunioes) ? j.reunioes.slice(0, 2).map((x: any) => String(x)) : [],
               roteiro: String(j.roteiro || ""),
+              orcamento: String(j.orcamento || ""),
             };
             // PRESERVA o histórico: cada debate é ADICIONADO (nada do que o conselho já
             // propôs desaparece). Mantém os últimos 60.
@@ -212,6 +223,11 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
                 origem: "conselho-auto", criadaEm: new Date().toISOString(),
               });
               criadas++;
+              // também entra NA AGENDA (alinhamento do conselho)
+              const evTitle = (c.id === "ark" ? "" : c.nm + ": ") + String(rm || "").slice(0, 80);
+              if (!agenda.some((e) => e.title === evTitle)) {
+                agenda.push({ id: "ce" + Date.now() + i + c.id, date: proxDiaUtil(i), title: evTitle, time: i === 0 ? "10:00" : "15:00", type: "reuniao", origem: "conselho" });
+              }
             });
             notifs.push({ tipo: "conselho", clienteId: c.id, texto: `🧠 Conselho debateu ${c.nm}: ${brief.decisao}` });
           }
@@ -224,6 +240,8 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             salvouTarefas = !upErr;
           }
           await db.from("workflowark_state").upsert({ key: "wfa-conselho-briefings", data: briefings.slice(0, 60) });
+          // grava os alinhamentos na agenda (append-only e só se a leitura veio OK)
+          if (agendaOk && agenda.length > agendaBaseLen) { try { await db.from("workflowark_state").upsert({ key: "wfa-agenda-events", data: agenda.slice(-300) }); } catch { /* */ } }
 
           if (notifs.length) {
             const { data: nRow, error: nErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-notificacoes").maybeSingle();

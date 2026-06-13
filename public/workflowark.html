@@ -5201,6 +5201,7 @@ function consAutoRender(){
       <div class="brf-top"><div class="cl">${escapeHtml(b.cliente||'ARK')} · ${b.date===hoje?'hoje':escapeHtml(b.date||'')}</div><div class="dc">${escapeHtml(b.decisao||'—')}</div></div>
       <div class="brf-body">
         ${(b.plano&&b.plano.length)?`<div class="lb">Plano</div><ul>${b.plano.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
+        ${b.orcamento?`<div class="lb">Orçamento de mídia sugerido</div><div style="font-size:12px;line-height:1.5;font-weight:600;color:var(--ink);background:#eef7ee;border-radius:8px;padding:8px 10px">${escapeHtml(b.orcamento)}</div>`:''}
         ${b.roteiro?`<div class="lb">Roteirização (Reel)</div><div style="font-size:12px;line-height:1.5;background:var(--yel-bg);border-radius:8px;padding:8px 10px">${escapeHtml(b.roteiro)}</div>`:''}
         ${(b.reunioes&&b.reunioes.length)?`<div class="lb">Reuniões / alinhamentos</div><ul>${b.reunioes.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
         ${(b.referencias&&b.referencias.length)?`<div class="lb">Referências do nicho</div><ul>${b.referencias.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
