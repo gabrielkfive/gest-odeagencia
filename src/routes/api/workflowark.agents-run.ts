@@ -46,7 +46,20 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             return r.ok ? (d?.content?.[0]?.text || "") : "";
           };
           const parseJSON = (txt: string) => {
-            try { const m = txt.match(/\{[\s\S]*\}/); return m ? JSON.parse(m[0]) : null; } catch { return null; }
+            if (!txt) return null;
+            let s = String(txt).replace(/```json|```/g, "").trim();
+            const m = s.match(/\{[\s\S]*\}/);
+            if (!m) return null;
+            let body = m[0];
+            try { return JSON.parse(body); } catch {}
+            // tenta reparar JSON truncado (resposta cortada por max_tokens): fecha aspas/colchetes
+            try {
+              let t = body.replace(/,\s*$/, "");
+              const opens = (t.match(/\[/g) || []).length, closes = (t.match(/\]/g) || []).length;
+              for (let i = 0; i < opens - closes; i++) t += "]";
+              if (!t.trim().endsWith("}")) t += "}";
+              return JSON.parse(t);
+            } catch { return null; }
           };
 
           const notifs: any[] = [];
@@ -74,7 +87,10 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           }
 
           // 2) Conselho autônomo POR CLIENTE ----------------------------------------
-          const alvos = soCliente ? CLIENTES_CTX.filter((c) => c.id === soCliente) : CLIENTES_CTX;
+          // Pra não estourar o tempo da request (Cloudflare ~limite por request), o run
+          // completo é INCREMENTAL: a cada chamada processa só quem ainda não tem briefing
+          // de hoje, no máx. MAX_POR_CHAMADA. Várias chamadas no dia completam o conjunto.
+          const MAX_POR_CHAMADA = 3;
 
           // tarefas existentes (pra anexar as novas)
           // SEGURANÇA CONTRA PERDA DE DADOS: se a leitura falhar, NÃO escrevemos nada em
@@ -88,6 +104,13 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           const { data: bRow } = await db.from("workflowark_state").select("data").eq("key", "wfa-conselho-briefings").maybeSingle();
           let briefings: any[] = Array.isArray(bRow?.data) ? bRow.data : [];
           briefings = briefings.filter((b) => (b.ts || 0) > Date.now() - 14 * 86400 * 1000);
+
+          // define quem o conselho vai debater AGORA
+          const temHoje = (id: string) => briefings.some((b) => b.clienteId === id && b.date === hoje);
+          let alvos = soCliente
+            ? CLIENTES_CTX.filter((c) => c.id === soCliente)
+            : CLIENTES_CTX.filter((c) => !temHoje(c.id)).slice(0, MAX_POR_CHAMADA);
+          const faltam = soCliente ? 0 : CLIENTES_CTX.filter((c) => !temHoje(c.id)).length - alvos.length;
 
           const sysConselho =
             "Você é o CONSELHO DE IA da ARK Content (agência de marketing de gastronomia/varejo). " +
@@ -106,7 +129,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               sysConselho,
               `Cliente: ${c.nm}. Segmento: ${c.seg}. Contexto: ${c.nota}. ` +
                 `Debata o que ESTE cliente precisa AGORA pra vender mais e crescer, com referências do nicho e uma ideia de parceria. Hoje é ${hoje}.`,
-              1100,
+              1600,
             );
             const j = parseJSON(raw);
             if (!j) continue;
@@ -164,8 +187,9 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) });
             }
           }
-          if (!soCliente) await db.from("workflowark_state").upsert({ key: "wfa-agents-lastrun", data: { date: hoje, ts: Date.now() } });
-          return Response.json({ ok: true, ran: true, clientes: alvos.length, tarefas: criadas, tarefasSalvas: salvouTarefas, notificacoes: notifs.length });
+          // só marca "rodou hoje" quando TODOS os clientes já têm briefing de hoje
+          if (!soCliente && faltam === 0) await db.from("workflowark_state").upsert({ key: "wfa-agents-lastrun", data: { date: hoje, ts: Date.now() } });
+          return Response.json({ ok: true, ran: true, clientes: alvos.length, faltam, tarefas: criadas, tarefasSalvas: salvouTarefas, notificacoes: notifs.length });
         } catch (e) {
           return Response.json({ error: (e as Error)?.message || "falha" }, { status: 500 });
         }
