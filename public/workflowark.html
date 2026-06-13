@@ -2771,11 +2771,15 @@ function iniciarAutoSync(){
             <span><span class="dot" style="background:#dc2626"></span>Urgente</span>
             <span><span class="dot" style="background:#555"></span>Operacional</span>
           </div>
-          <button class="tb-btn" onclick="agendaOpenModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Novo evento
-          </button>
+          <div style="display:flex;gap:8px">
+            <button class="tb-btn dk" onclick="jarvisPlanAgenda()" title="JARVIS organiza suas tarefas nos próximos dias úteis">JARVIS · planejar meus dias</button>
+            <button class="tb-btn" onclick="agendaOpenModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Novo evento
+            </button>
+          </div>
         </div>
+        <div id="jarvis-plan" style="display:none;margin-bottom:14px"></div>
         <div class="cal-wrap">
           <div class="cal-head">
             <h3 id="agenda-cal-title">Junho 2026</h3>
@@ -6421,6 +6425,58 @@ function loadAgendaEvents(){
   const raw=localStorage.getItem('wfa-agenda-events');
   if(raw)return JSON.parse(raw);
   return JSON.parse(JSON.stringify(AGENDA_INITIAL_EVENTS));
+}
+/* JARVIS planeja a agenda: pega tarefas atrasadas/sem data por prioridade e propõe
+   encaixá-las nos próximos dias úteis. O usuário aprova → vira evento (e data na tarefa).
+   A criação real no Google Calendar liga quando o OAuth do Gabriel estiver configurado. */
+let _jarvisPlan=[];
+function jarvisPlanAgenda(){
+  const box=document.getElementById('jarvis-plan');if(!box)return;
+  const hoje=new Date().toISOString().split('T')[0];
+  const prioRank={alta:0,media:1,baixa:2};
+  const cand=(state.tarefas||[]).filter(t=>t.status!=='concluido' && (!t.data || t.data<hoje))
+    .sort((a,b)=>(a.data?0:1)-(b.data?0:1)||(prioRank[a.prio]??1)-(prioRank[b.prio]??1));
+  if(!cand.length){box.style.display='block';box.innerHTML='<div class="card" style="padding:16px">Nada pra reorganizar — sua agenda está em dia. ✓</div>';return;}
+  // distribui em dias úteis a partir de amanhã, 3 por dia, horários 9h/11h/15h
+  const horas=['09:00','11:00','15:00','16:30'];
+  const dias=[];let d=new Date();d.setDate(d.getDate()+1);
+  while(dias.length<Math.ceil(cand.length/3)+2){const wd=d.getDay();if(wd!==0&&wd!==6)dias.push(new Date(d));d.setDate(d.getDate()+1);}
+  _jarvisPlan=cand.slice(0,12).map((t,i)=>{
+    const dia=dias[Math.floor(i/3)]||dias[dias.length-1];
+    return {taskId:t.id,title:t.title,prio:t.prio,cli:mdClientName(t.clienteId),
+      date:dia.toISOString().split('T')[0],time:horas[i%3]};
+  });
+  const fmtD=s=>s.split('-').reverse().slice(0,2).join('/');
+  box.style.display='block';
+  box.innerHTML=`<div class="card" style="padding:16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe680,var(--yel) 55%,#a07e00)"></div>
+      <div><div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-family:var(--mono)">JARVIS</div><div style="font-weight:800;font-size:14px">Plano pros seus próximos dias (${_jarvisPlan.length} tarefas priorizadas)</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+      ${_jarvisPlan.map((p,i)=>`<label style="display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;font-size:12.5px"><input type="checkbox" checked data-jp="${i}"><span style="font-family:var(--mono);font-size:11px;color:var(--yel-d);min-width:78px">${fmtD(p.date)} ${p.time}</span><span style="flex:1">${escapeHtml(p.title)}</span>${p.cli?`<span style="font-size:11px;color:var(--mute)">${escapeHtml(p.cli)}</span>`:''}</label>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="tb-btn dk" onclick="jarvisPlanAplicar()">Agendar selecionadas</button>
+      <button class="tb-btn" onclick="document.getElementById('jarvis-plan').style.display='none'">Descartar</button>
+      <span style="font-size:11px;color:var(--mute);align-self:center;margin-left:auto">Escrita no Google Calendar liga quando você conectar o OAuth.</span>
+    </div>
+  </div>`;
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function jarvisPlanAplicar(){
+  const sel=[...document.querySelectorAll('#jarvis-plan input[data-jp]:checked')].map(c=>_jarvisPlan[+c.dataset.jp]);
+  if(!sel.length){toast('Selecione ao menos uma');return;}
+  const evs=loadAgendaEvents();
+  sel.forEach(p=>{
+    evs.push({id:'jp'+Date.now()+Math.floor(Math.random()*999),date:p.date,title:p.title,time:p.time,type:p.prio==='alta'?'urgente':'operacional'});
+    const t=(state.tarefas||[]).find(x=>x.id===p.taskId);if(t&&!t.data){t.data=p.date;}
+  });
+  saveAgendaEvents(evs);
+  if(typeof saveTarefas==='function')saveTarefas();
+  if(typeof renderTarefas==='function')renderTarefas();if(typeof renderMeuDia==='function')renderMeuDia();
+  document.getElementById('jarvis-plan').style.display='none';
+  toast(sel.length+' tarefa(s) agendada(s) ✓');
 }
 function saveAgendaEvents(arr){localStorage.setItem('wfa-agenda-events',JSON.stringify(arr));renderAgenda();}
 function agendaNavMes(dir){
