@@ -507,6 +507,29 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        // Envia mídia (imagem/vídeo/áudio/documento) a partir de base64.
+        if (action === "send-whatsapp-media") {
+          const phone = String(body.phone ?? "").replace(/\D/g, "");
+          const jid = String(body.jid ?? "");
+          const base64 = String(body.base64 ?? "");
+          const mimetype = String(body.mimetype ?? "application/octet-stream");
+          const fileName = String(body.fileName ?? "arquivo");
+          const caption = String(body.caption ?? "");
+          if (!phone || !base64) return json({ error: "Destino e arquivo são obrigatórios." }, { status: 400 });
+          const target = jid ? jid : phone;
+          const isGroup = jid.includes("@g.us");
+          const mediatype = /^image\//.test(mimetype) ? "image" : /^video\//.test(mimetype) ? "video" : /^audio\//.test(mimetype) ? "audio" : "document";
+          try {
+            const { evoSendMedia, evoSendAudio, appendWhatsapp } = await import("@/integrations/zapi.server");
+            if (mediatype === "audio") await evoSendAudio(target, base64);
+            else await evoSendMedia(target, { base64, mimetype, fileName, mediatype, caption });
+            await appendWhatsapp(ctx.db as any, { phone, dir: "out", text: caption || `📎 ${fileName}`, isGroup, jid });
+            return json({ ok: true });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao enviar mídia." }, { status: 502 });
+          }
+        }
+
         // Baixa a mídia de uma mensagem (sob demanda) e devolve como data URL.
         if (action === "wa-media") {
           const id = String(body.id ?? "");

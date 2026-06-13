@@ -4269,6 +4269,28 @@ async function wppFwdConfirm(){
   toast(failc?('Encaminhado: '+okc+' · falhas: '+failc):('✓ Encaminhado ('+okc+')'));
 }
 function wppFilter(){const q=(document.getElementById('wpp-search')?.value||'').toLowerCase();document.querySelectorAll('#wpp-list .wpp-item').forEach(el=>{el.style.display=(el.getAttribute('data-name')||'').includes(q)?'':'none';});}
+// ---- Enviar mídia (anexar foto/vídeo/áudio/documento) ----
+function wppAttach(){const f=document.getElementById('wpp-file');if(f){f.value='';f.click();}}
+function wppFileChosen(input){
+  const file=input.files&&input.files[0]; if(!file||!WPP_ACTIVE)return;
+  if(file.size>10*1024*1024){toast('Arquivo muito grande (máx 10MB)');return;}
+  const reader=new FileReader();
+  reader.onload=async()=>{
+    const dataUrl=String(reader.result||''); const base64=dataUrl.split(',')[1]||'';
+    if(!base64){toast('Não consegui ler o arquivo');return;}
+    const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[WPP_ACTIVE];
+    const capInp=document.getElementById('wpp-input'); const caption=(capInp&&capInp.value||'').trim(); if(capInp)capInp.value='';
+    const mt=file.type||'application/octet-stream';
+    const localMsg={dir:'out',text:caption||('📎 '+file.name),ts:Date.now(),status:'sending'};
+    if(c){c.msgs=c.msgs||[];c.msgs.push(localMsg);c.updatedAt=Date.now();renderWhatsapp();}
+    toast('Enviando mídia...');
+    try{
+      await cloudCall('save',{action:'send-whatsapp-media',phone:WPP_ACTIVE,jid:(c&&c.jid)||'',base64,mimetype:mt,fileName:file.name,caption});
+      localMsg.status='sent';renderWhatsapp();toast('Mídia enviada ✓');
+    }catch(e){localMsg.status='failed';localMsg.error=(e&&e.message)||'falha';renderWhatsapp();toast('⚠ '+((e&&e.message)||'Falha ao enviar mídia'));}
+  };
+  reader.readAsDataURL(file);
+}
 function wppAvatarHtml(c,size){
   const s=size||40;const ini=mdEsc((c.nome||c.phone||'?').trim().charAt(0).toUpperCase());
   const badge=c.isGroup?`<span style="position:absolute;right:-2px;bottom:-2px;background:#25D366;border:2px solid #fff;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px">👥</span>`:'';
@@ -4360,6 +4382,8 @@ function renderWhatsapp(){
         </div>
       </div>`:''}
       <div style="display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:#f0f0ed;flex-shrink:0">
+        <input type="file" id="wpp-file" style="display:none" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="wppFileChosen(this)">
+        <button class="icobtn" title="Anexar foto, vídeo, áudio ou documento" onclick="wppAttach()" style="border-radius:20px;flex-shrink:0;font-size:17px;padding:0 12px">📎</button>
         <input id="wpp-input" class="form-input" placeholder="Escreva uma mensagem..." style="flex:1;border-radius:20px" onkeydown="if(event.key==='Enter')wppSend()">
         <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700;border-radius:20px" onclick="wppSend()">Enviar ➤</button>
       </div>

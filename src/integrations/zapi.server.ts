@@ -88,6 +88,38 @@ export async function evoSendText(phone: string, message: string) {
   return data;
 }
 
+// Envia mídia (imagem/vídeo/documento) por base64.
+export async function evoSendMedia(target: string, opts: { base64: string; mimetype: string; fileName?: string; mediatype?: string; caption?: string }) {
+  const { url, key, instance } = evoConfig();
+  if (!url || !key || !instance) throw new Error("Evolution não configurada.");
+  const resp = await fetch(`${url}/message/sendMedia/${instance}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: key },
+    body: JSON.stringify({ number: target, mediatype: opts.mediatype || "document", mimetype: opts.mimetype || "application/octet-stream", media: opts.base64, fileName: opts.fileName || "arquivo", caption: opts.caption || "" }),
+  });
+  const data: any = await resp.json().catch(() => ({}));
+  if (!resp.ok) {
+    const m = data?.response?.message ?? data?.message;
+    const e = Array.isArray(m) ? (m.some((x: any) => x?.exists === false) ? "WhatsApp não reconheceu este contato." : m.map((x: any) => (typeof x === "string" ? x : JSON.stringify(x))).join("; ")) : (typeof m === "string" ? m : data?.error || "Falha ao enviar mídia");
+    throw new Error(typeof e === "string" ? e : "Falha ao enviar mídia");
+  }
+  return data;
+}
+
+// Envia áudio (mensagem de voz) por base64.
+export async function evoSendAudio(target: string, base64: string) {
+  const { url, key, instance } = evoConfig();
+  if (!url || !key || !instance) throw new Error("Evolution não configurada.");
+  const resp = await fetch(`${url}/message/sendWhatsAppAudio/${instance}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: key },
+    body: JSON.stringify({ number: target, audio: base64 }),
+  });
+  const data: any = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data?.message || data?.error || "Falha ao enviar áudio");
+  return data;
+}
+
 // Envio unificado: usa Evolution se configurada; senão cai no Z-API.
 export async function waSendText(phone: string, message: string) {
   if (evoConfigured()) return evoSendText(phone, message);
