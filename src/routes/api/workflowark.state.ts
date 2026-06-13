@@ -19,6 +19,8 @@ const STATE_KEYS = new Set([
   "wfa-acerto",
   "wfa-planilha",
   "wfa-planejamento",
+  "wfa-notificacoes",
+  "wfa-conselho-briefings",
 ]);
 
 const VALID_ROLES = new Set([

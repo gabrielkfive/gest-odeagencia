@@ -513,7 +513,6 @@ table.t tr.high{background:var(--yel-bg)}
       <div class="brand-mark"><img src="/ark-mark.png" alt="ARK Content"></div>
       <div class="brand-info">
         <div class="nm">ARK Content</div>
-        <div class="sb">WorkFlow · v3</div>
       </div>
     </div>
 
@@ -1602,7 +1601,7 @@ table.t tr.high{background:var(--yel-bg)}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -2494,16 +2493,44 @@ function iniciarAutoSync(){
       <!-- =================== CONSELHO DE IA =================== -->
       <div class="page" id="page-conselho">
         <div class="page-head">
-          <div class="page-title"><h1>🧠 Conselho de IA</h1><p>Os especialistas da ARK debatem o tema e entregam uma decisão + plano de ação</p></div>
+          <div class="page-title"><h1>🧠 Conselho de IA</h1><p>Os agentes da ARK debatem sozinhos, todo dia, cliente por cliente — e deixam decisões, planos e tarefas prontas pra você de manhã.</p></div>
+          <button class="tb-btn dk" id="cons-run-btn" onclick="consRodarAuto()">▶ Rodar conselho agora</button>
         </div>
-        <div class="card" style="padding:16px;margin-bottom:14px">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
-            <div style="flex:1;min-width:220px"><label class="form-label">O que o conselho deve resolver?</label><input id="cons-tema" class="form-input" placeholder="Ex: como aumentar agendamentos da Vivenda na Copa? / o que postar essa semana?"></div>
-            <div style="min-width:160px"><label class="form-label">Cliente (opcional)</label><select id="cons-cliente" class="form-select"></select></div>
-            <button class="tb-btn dk" onclick="consRodar()">⚖️ Reunir o conselho</button>
+        <style>
+          .brf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-bottom:18px}
+          .brf{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:box-shadow .15s,transform .15s}
+          .brf:hover{box-shadow:0 8px 28px rgba(0,0,0,.07);transform:translateY(-1px)}
+          .brf-top{background:linear-gradient(135deg,#0a0a0a,#1a1714);color:#fff;padding:13px 15px}
+          .brf-top .cl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--yel);font-family:var(--mono)}
+          .brf-top .dc{font-size:13.5px;font-weight:700;margin-top:3px;line-height:1.35}
+          .brf-body{padding:13px 15px;font-size:12.5px}
+          .brf-body .lb{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-family:var(--mono);margin:10px 0 5px}
+          .brf-body ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px}
+          .brf-body li{padding-left:15px;position:relative;line-height:1.4}
+          .brf-body li::before{content:"›";position:absolute;left:0;color:var(--yel-d);font-weight:800}
+          .brf-debate{border-top:1px solid var(--line);margin-top:11px;padding-top:10px;display:none}
+          .brf-debate.open{display:block}
+          .brf-debate .v{margin-bottom:7px}
+          .brf-debate .v b{color:var(--ink)}
+          .brf-foot{display:flex;gap:8px;padding:0 15px 13px}
+          .brf-foot button{font-size:11px;font-weight:600;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+          .brf-foot button.pri{background:var(--yel);border-color:var(--yel-d)}
+          .cons-empty{text-align:center;padding:40px 20px;color:var(--mute);border:1px dashed var(--line-2);border-radius:14px;margin-bottom:18px}
+        </style>
+        <div id="cons-status" style="font-size:12px;color:var(--mute);margin-bottom:10px"></div>
+        <div id="cons-auto"></div>
+
+        <details style="margin-bottom:14px">
+          <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--mute)">⚖️ Quer perguntar algo específico pro conselho agora?</summary>
+          <div class="card" style="padding:16px;margin-top:10px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+              <div style="flex:1;min-width:220px"><label class="form-label">O que o conselho deve resolver?</label><input id="cons-tema" class="form-input" placeholder="Ex: como aumentar agendamentos da Vivenda na Copa? / o que postar essa semana?"></div>
+              <div style="min-width:160px"><label class="form-label">Cliente (opcional)</label><select id="cons-cliente" class="form-select"></select></div>
+              <button class="tb-btn dk" onclick="consRodar()">⚖️ Reunir o conselho</button>
+            </div>
+            <div id="cons-status2" style="font-size:12px;color:var(--mute);margin-top:8px"></div>
           </div>
-          <div id="cons-status" style="font-size:12px;color:var(--mute);margin-top:8px"></div>
-        </div>
+        </details>
         <div id="cons-out"></div>
       </div>
 
@@ -4661,15 +4688,57 @@ function tutorialNarrar(){
 }
 /* ============ CONSELHO DE IA ============ */
 let _consData=null;
-function consPopular(){const sel=document.getElementById('cons-cliente');if(sel&&!sel.options.length)sel.innerHTML='<option value="">— sem cliente —</option>'+CLIENTES.filter(c=>c.status!=='churn').map(c=>`<option value="${mdEsc(c.nm)}">${mdEsc(c.nm)}</option>`).join('');}
+function consPopular(){const sel=document.getElementById('cons-cliente');if(sel&&!sel.options.length)sel.innerHTML='<option value="">— sem cliente —</option>'+CLIENTES.filter(c=>c.status!=='churn').map(c=>`<option value="${mdEsc(c.nm)}">${mdEsc(c.nm)}</option>`).join('');consAutoRender();}
 async function consRodar(){
   const tema=(document.getElementById('cons-tema').value||'').trim();
   const cliente=document.getElementById('cons-cliente').value||'';
-  const st=document.getElementById('cons-status'),out=document.getElementById('cons-out');
+  const st=document.getElementById('cons-status2'),out=document.getElementById('cons-out');
   if(!tema){if(st)st.textContent='Escreva o tema que o conselho deve resolver.';return;}
   if(st)st.textContent='⚖️ O conselho está debatendo...';if(out)out.innerHTML='';
   try{ const r=await cloudCall('save',{action:'conselho',tema,cliente}); _consData=r; consRender(r); if(st)st.textContent='Pronto ✓'; }
   catch(e){ if(st)st.textContent='⚠ '+((e&&e.message)||'Falha ao reunir o conselho'); }
+}
+/* ---- Conselho AUTÔNOMO: feed dos debates diários ---- */
+function consBriefings(){try{return JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){return [];}}
+function consToggleDebate(id){const d=document.getElementById('brfd-'+id);if(d)d.classList.toggle('open');}
+function consAutoRender(){
+  const wrap=document.getElementById('cons-auto');if(!wrap)return;
+  const hoje=new Date().toISOString().split('T')[0];
+  const all=consBriefings();
+  // mostra os de hoje primeiro; se não houver de hoje, mostra os mais recentes
+  const list=(all.filter(b=>b.date===hoje).length?all.filter(b=>b.date===hoje):all).slice(0,12);
+  if(!list.length){wrap.innerHTML='<div class="cons-empty">Os agentes ainda não debateram hoje.<br>Clique em <b>▶ Rodar conselho agora</b> — ou eles fazem isso sozinhos toda manhã.</div>';return;}
+  wrap.innerHTML='<div class="brf-grid">'+list.map(b=>`
+    <div class="brf">
+      <div class="brf-top"><div class="cl">${escapeHtml(b.cliente||'ARK')} · ${b.date===hoje?'hoje':escapeHtml(b.date||'')}</div><div class="dc">${escapeHtml(b.decisao||'—')}</div></div>
+      <div class="brf-body">
+        ${(b.plano&&b.plano.length)?`<div class="lb">Plano</div><ul>${b.plano.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
+        ${(b.referencias&&b.referencias.length)?`<div class="lb">Referências do nicho</div><ul>${b.referencias.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
+        ${(b.parcerias&&b.parcerias.length)?`<div class="lb">Parcerias possíveis</div><ul>${b.parcerias.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
+        <div class="brf-debate" id="brfd-${b.id}">
+          <div class="lb">Debate</div>
+          ${(b.debate||[]).map(d=>`<div class="v"><b>${escapeHtml(d.voz||'')}:</b> ${escapeHtml(d.fala||'')}</div>`).join('')||'<div class="muted">—</div>'}
+        </div>
+      </div>
+      <div class="brf-foot">
+        <button onclick="consToggleDebate('${b.id}')">Ver debate</button>
+        <button class="pri" onclick="document.querySelector('[data-nav=tarefas]').click()">Ver tarefas geradas</button>
+      </div>
+    </div>`).join('')+'</div>';
+}
+async function consRodarAuto(){
+  const btn=document.getElementById('cons-run-btn');const st=document.getElementById('cons-status');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Debatendo...';}
+  if(st)st.textContent='Os agentes estão debatendo cliente por cliente — pode levar ~1 min.';
+  try{
+    const r=await fetch('/api/workflowark/agents-run?key=ark-2026&force=1');
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||j.error)throw new Error(j.error||'falha');
+    if(st)st.textContent=`✓ Conselho rodou: ${j.clientes||0} clientes, ${j.tarefas||0} tarefas criadas.`;
+    await sincronizarAgora(); // puxa os briefings/tarefas novos da nuvem
+    consAutoRender();
+  }catch(e){ if(st)st.textContent='⚠ '+((e&&e.message)||'Falha ao rodar o conselho'); }
+  finally{ if(btn){btn.disabled=false;btn.textContent='▶ Rodar conselho agora';} }
 }
 function consAvatarCor(n){return {'Diretor de Operações':'#0a0a0a','Gestor de Tráfego':'#1d4ed8','Social Media':'#db2777','Roteirista':'#7c3aed','Designer':'#ea580c','Account/CS':'#0d9488','Account':'#0d9488','CS':'#0d9488','Comercial':'#a07e00'}[n]||'#555';}
 function consRender(r){
