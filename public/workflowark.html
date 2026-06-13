@@ -1199,7 +1199,7 @@ table.t tr.high{background:var(--yel-bg)}
 
       <!-- =================== ORGANOGRAMA =================== -->
       <div class="page" id="page-organograma">
-        <div class="page-head"><div class="page-title"><h1>Organograma Oficial</h1><p>Quem faz o quê na ARK · 5 áreas + edição transversal · ARK direta + Squad Alpha</p></div></div>
+        <div class="page-head"><div class="page-title"><h1>Organograma Oficial</h1><p>Quem faz o quê na ARK · 5 áreas + edição transversal · ARK direta + Squad Alpha</p></div><button class="tb-btn dk" onclick="colabOpen()">+ Adicionar pessoa</button></div>
 
         <style>
           .org-ceo{background:#000;color:#fff;border-radius:12px;padding:18px 24px;text-align:center;max-width:420px;margin:0 auto 0;border:2px solid var(--yel)}
@@ -2449,6 +2449,22 @@ function iniciarAutoSync(){
   </main>
 </div>
 
+<!-- MODAL: Gerenciar pessoas / equipe -->
+<div class="modal-bg" id="modal-colab">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head"><h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>Equipe · adicionar pessoas</h3><span class="x" onclick="closeModal('modal-colab')">✕</span></div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input class="form-input" id="colab-nome" placeholder="Nome da pessoa (ex: Samuel Magalhães)" style="flex:1" onkeydown="if(event.key==='Enter')colabAdd()">
+        <button class="tb-btn" onclick="colabAdd()">+ Adicionar</button>
+      </div>
+      <div style="font-size:11px;color:var(--mute);margin-bottom:6px">Pessoas adicionadas (aparecem em todos os responsáveis de tarefa):</div>
+      <div id="colab-list"></div>
+    </div>
+    <div class="modal-foot"><button class="tb-btn" onclick="closeModal('modal-colab')">Pronto</button></div>
+  </div>
+</div>
+
 <!-- MODAL: Novo / Editar Cliente -->
 <div class="modal-bg" id="modal-cliente">
   <div class="modal">
@@ -2502,7 +2518,7 @@ function iniciarAutoSync(){
         <div class="form-group"><label class="form-label">Função</label><select class="form-select" id="nt-funcao"><option>Account Manager</option><option>Gestor de Tráfego</option><option>Criador</option><option>Editor</option><option>Designer</option><option>Captação</option></select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Responsável</label><select class="form-select" id="nt-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Omar</option><option>Henrique</option><option>Nicolas</option><option>Luckas Gomes</option></select></div>
+        <div class="form-group"><label class="form-label">Responsável <a onclick="colabOpen()" style="color:#a07e00;cursor:pointer;font-weight:700">+ pessoa</a></label><select class="form-select" id="nt-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Omar</option><option>Henrique</option><option>Nicolas</option><option>Luckas Gomes</option></select></div>
         <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="nt-data" type="date"></div>
       </div>
       <div class="form-row">
@@ -2528,7 +2544,7 @@ function iniciarAutoSync(){
         <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="td-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Responsável</label><select class="form-select" id="td-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Márcio</option><option>Henrique</option><option>Nicolas</option><option>Anderson</option><option>João Gabriel</option><option>Maria Clara</option><option>Luckas Gomes</option><option>Kaique</option><option>Lush</option></select></div>
+        <div class="form-group"><label class="form-label">Responsável <a onclick="colabOpen()" style="color:#a07e00;cursor:pointer;font-weight:700">+ pessoa</a></label><select class="form-select" id="td-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Márcio</option><option>Henrique</option><option>Nicolas</option><option>Anderson</option><option>João Gabriel</option><option>Maria Clara</option><option>Luckas Gomes</option><option>Kaique</option><option>Lush</option></select></div>
         <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="td-data" type="date"></div>
       </div>
       <div class="form-row">
@@ -2742,17 +2758,34 @@ function cliRemove(){
   }catch(e){}
 })();
 
-// ---- Colaboradores personalizados (nuvem · wfa-colab-custom) ----
+// ---- Equipe: base + colaboradores personalizados (nuvem · wfa-colab-custom) ----
+const TEAM_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Saulo','Bruno','Maria Luiza','M. Portela','Luckas Gomes','Omar','Henrique','Nicolas','Giuseppe','Márcio','Kaique','Lush','Anderson','João Gabriel','Maria Clara'];
 function loadColabCustom(){ try{ return JSON.parse(localStorage.getItem('wfa-colab-custom')||'[]'); }catch(e){ return []; } }
 function saveColabCustom(arr){ localStorage.setItem('wfa-colab-custom', JSON.stringify(arr)); if(typeof rebuildPeople==='function')rebuildPeople(); fillRespSelects(); if(typeof renderMeuDia==='function')renderMeuDia(); }
-// Acrescenta os colaboradores personalizados aos selects de Responsável (sem duplicar).
+// Lista completa da equipe (base + adicionados), sem duplicar.
+function allTeam(){ const ex=loadColabCustom(); return TEAM_BASE.concat(ex.filter(n=>n&&!TEAM_BASE.includes(n))); }
+// Reconstrói TODOS os seletores de Responsável com a equipe completa (preserva a seleção atual).
 function fillRespSelects(){
-  const extra=loadColabCustom();
-  document.querySelectorAll('#nt-resp, #td-resp').forEach(sel=>{
-    if(!sel)return;
-    extra.forEach(nm=>{ if(![...sel.options].some(o=>o.value===nm||o.textContent===nm)){ const o=document.createElement('option'); o.textContent=nm; sel.appendChild(o); } });
-  });
+  const opts=allTeam().map(n=>`<option value="${mdEsc(n)}">${mdEsc(n)}</option>`).join('');
+  document.querySelectorAll('#nt-resp, #td-resp').forEach(sel=>{ if(!sel)return; const cur=sel.value; sel.innerHTML=opts; if(cur&&allTeam().includes(cur))sel.value=cur; });
 }
+// ---- Gerenciar pessoas (adicionar/remover) ----
+function colabOpen(){
+  const list=loadColabCustom();
+  document.getElementById('colab-list').innerHTML = list.length
+    ? list.map(n=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)"><span style="font-weight:600">${mdEsc(n)}</span><button class="icobtn" style="color:#dc2626" onclick="colabRemove(${JSON.stringify(n).replace(/"/g,'&quot;')})">Remover</button></div>`).join('')
+    : '<div style="color:var(--mute);font-size:12.5px;padding:6px 0">Ninguém adicionado ainda. A equipe fixa já aparece nos responsáveis.</div>';
+  document.getElementById('colab-nome').value='';
+  document.getElementById('modal-colab').classList.add('open');
+  setTimeout(()=>document.getElementById('colab-nome').focus(),80);
+}
+function colabAdd(){
+  const nm=(document.getElementById('colab-nome').value||'').trim(); if(!nm){toast('Digite o nome da pessoa');return;}
+  const arr=loadColabCustom();
+  if(allTeam().some(n=>n.toLowerCase()===nm.toLowerCase())){toast('Essa pessoa já está na equipe');return;}
+  arr.push(nm); saveColabCustom(arr); colabOpen(); toast('Pessoa adicionada ✓');
+}
+function colabRemove(nm){ saveColabCustom(loadColabCustom().filter(n=>n!==nm)); colabOpen(); toast('Removido'); }
 // Seed único do Samuel Magalhães (colaborador pedido pelo Gabriel)
 (function seedSamuel(){
   try{
@@ -3251,7 +3284,7 @@ function openSprint(n,cliId){
         <div class="as-title">${a.t} <span class="tag yel">média</span> <span style="font-size:10px;color:var(--mute);font-weight:600">${a.f}</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
           <div><label class="form-label" style="font-size:9px;margin-bottom:2px">Vencimento</label><input class="form-input" type="date" id="atv-data-${i}" value="${venc}" style="padding:5px 8px;font-size:11.5px"></div>
-          <div><label class="form-label" style="font-size:9px;margin-bottom:2px">Responsável</label><select class="form-select" id="atv-resp-${i}" style="padding:5px 8px;font-size:11.5px"><option>${RESPONSAVEIS_FN[a.f]||'Lucas Rosi'}</option><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>M. Portela</option></select></div>
+          <div><label class="form-label" style="font-size:9px;margin-bottom:2px">Responsável</label><select class="form-select" id="atv-resp-${i}" style="padding:5px 8px;font-size:11.5px"><option>${RESPONSAVEIS_FN[a.f]||'Lucas Rosi'}</option>${allTeam().map(n=>`<option>${mdEsc(n)}</option>`).join('')}</select></div>
         </div>
       </div>
     </div>
