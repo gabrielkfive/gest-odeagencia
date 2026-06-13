@@ -2851,12 +2851,15 @@ function iniciarAutoSync(){
 <button onclick="jarvisOpen()" title="JARVIS — fale comigo" id="jarvis-fab" style="position:fixed;bottom:18px;right:18px;z-index:9000;width:54px;height:54px;border-radius:50%;border:2px solid var(--yel,#ffd400);background:#0a0a0a;color:var(--yel,#ffd400);font-size:23px;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer">🎙️</button>
 <div class="modal-bg" id="modal-jarvis">
   <div class="modal" style="max-width:480px;height:72vh;max-height:620px;display:flex;flex-direction:column">
-    <div class="modal-head"><h3>🎙️ JARVIS · ARK</h3><span class="x" onclick="window.speechSynthesis.cancel();closeModal('modal-jarvis')">✕</span></div>
+    <div class="modal-head"><h3>JARVIS · ARK</h3><span class="x" onclick="try{jarvisConvStop()}catch(e){};window.speechSynthesis.cancel();closeModal('modal-jarvis')">✕</span></div>
     <div class="modal-body" id="jarvis-msgs" style="flex:1;overflow:auto;min-height:0;background:#efeae2"></div>
-    <div style="display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);flex-shrink:0">
-      <button id="jarvis-mic" class="icobtn" onclick="jarvisMic()" title="Falar" style="font-size:18px;border-radius:20px;flex-shrink:0">🎙️</button>
-      <input id="jarvis-input" class="form-input" placeholder="Fale ou digite..." style="flex:1;border-radius:20px" onkeydown="if(event.key==='Enter')jarvisSend()">
-      <button class="tb-btn dk" style="border-radius:20px;flex-shrink:0" onclick="jarvisSend()">➤</button>
+    <div style="display:flex;flex-direction:column;gap:8px;padding:10px;border-top:1px solid var(--line);flex-shrink:0">
+      <button id="jarvis-conv" class="tb-btn" style="border-radius:20px;font-weight:700" onclick="jarvisConversaToggle()">● Conversar</button>
+      <div style="display:flex;gap:8px">
+        <button id="jarvis-mic" class="icobtn" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;border-radius:20px;flex-shrink:0">🎙️</button>
+        <input id="jarvis-input" class="form-input" placeholder="Fale ou digite..." style="flex:1;border-radius:20px" onkeydown="if(event.key==='Enter')jarvisSend()">
+        <button class="tb-btn dk" style="border-radius:20px;flex-shrink:0" onclick="jarvisSend()">➤</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3542,6 +3545,20 @@ function arkPickVoice(){
   }catch(e){_arkVoice=null;}
 }
 let _fishOff=false, _jarvisAudio=null;
+// limpa o texto pra FALA: tira markdown, emoji, símbolos — pra não ler "hashtag asterisco"
+function arkSpeechClean(s){
+  s=String(s||'');
+  try{ s=s.replace(EMOJI_RE,''); EMOJI_RE.lastIndex=0; }catch(e){}
+  return s
+    .replace(/```[\s\S]*?```/g,' ')      // blocos de código
+    .replace(/[#>*_`~|]/g,' ')            // marcações markdown
+    .replace(/^\s*[-•]\s*/gm,'')          // bullets
+    .replace(/\s*\n\s*/g,'. ')            // quebras viram pausa
+    .replace(/\.{2,}/g,'.')
+    .replace(/\s{2,}/g,' ')
+    .trim();
+}
+function jarvisSpokeEnd(){try{document.dispatchEvent(new Event('jarvis-spoke'));}catch(e){}}
 function jarvisSpeakBrowser(txt){
   try{
     window.speechSynthesis.cancel();
@@ -3549,10 +3566,12 @@ function jarvisSpeakBrowser(txt){
     const u=new SpeechSynthesisUtterance(String(txt));
     u.lang='pt-BR';u.rate=.98;u.pitch=.8;u.volume=1; // mais grave e pausado = clima JARVIS
     if(_arkVoice)u.voice=_arkVoice;
+    u.onend=jarvisSpokeEnd;
     window.speechSynthesis.speak(u);
-  }catch(e){toast('Voz não suportada neste navegador');}
+  }catch(e){toast('Voz não suportada neste navegador');jarvisSpokeEnd();}
 }
 async function jarvisSpeak(txt){
+  txt=arkSpeechClean(txt);
   if(!txt)return;
   // 1) tenta a voz PREMIUM (Fish Audio, via servidor). Se não tiver chave, usa o navegador.
   if(!_fishOff && typeof cloudCall==='function'){
@@ -3562,6 +3581,7 @@ async function jarvisSpeak(txt){
         try{window.speechSynthesis.cancel();}catch(e){}
         try{if(_jarvisAudio){_jarvisAudio.pause();}}catch(e){}
         _jarvisAudio=new Audio('data:audio/mp3;base64,'+r.audio);
+        _jarvisAudio.onended=jarvisSpokeEnd; _jarvisAudio.onerror=jarvisSpokeEnd;
         _jarvisAudio.play().catch(()=>jarvisSpeakBrowser(txt));
         return;
       }
@@ -4219,27 +4239,27 @@ let _mdJarvisTxt='';
 function mdRenderJarvis(nLate,nToday,nPend){
   const box=document.getElementById('md-jarvis'),txt=document.getElementById('md-jarvis-txt');
   if(!box||!txt)return;
-  let resumoIA='';
+  // conta itens do resumo do WhatsApp (sem ler o markdown todo — só sinaliza)
+  let waItens=0;
   try{
     const nots=JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]');
     const r=nots.find(n=>n.tipo==='resumo');
-    if(r&&r.texto)resumoIA=String(r.texto).replace(/^🧠[^:]*:\s*/,'').trim();
+    if(r&&r.texto){ const clean=arkSpeechClean(r.texto); waItens=(clean.match(/\n|·|;|\. /g)||[]).length+1; }
   }catch(e){}
-  const nome=(WFA_MEMBER&&WFA_MEMBER.full_name)?mdFirst(WFA_MEMBER.full_name):'';
-  // monta um briefing falado curto e natural
-  const partes=[];
-  partes.push(`${mdGreeting()}${nome?', '+nome:''}.`);
-  if(nLate)partes.push(`Você tem ${nLate} tarefa${nLate>1?'s':''} atrasada${nLate>1?'s':''} que precisam destravar.`);
+  // briefing FORMAL estilo JARVIS, curto e limpo (esse texto é falado e exibido)
+  const partes=[`${mdGreeting()}, Senhor.`];
+  if(nLate)partes.push(`${nLate} tarefa${nLate>1?'s':''} atrasada${nLate>1?'s':''} exige${nLate>1?'m':''} sua atenção.`);
   if(nToday)partes.push(`${nToday} vence${nToday>1?'m':''} hoje.`);
-  if(!nLate&&!nToday)partes.push(`Nada atrasado e nada vencendo hoje — dia livre pra avançar no estratégico.`);
-  if(nPend)partes.push(`E ${nPend} pendente${nPend>1?'s':''} no radar.`);
-  if(resumoIA)partes.push('Do WhatsApp: '+resumoIA);
-  // conta quantos debates o conselho deixou hoje
+  if(!nLate&&!nToday)partes.push(`Nada atrasado nem vencendo hoje — o caminho está livre para o estratégico.`);
+  if(nPend)partes.push(`${nPend} pendente${nPend>1?'s':''} no radar.`);
+  let nBrf=0;
   try{
     const hoje=new Date().toISOString().split('T')[0];
-    const brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]').filter(b=>b.date===hoje);
-    if(brfs.length)partes.push(`O conselho deixou ${brfs.length} debate${brfs.length>1?'s':''} pronto${brfs.length>1?'s':''} pra você, com plano e tarefas.`);
+    nBrf=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]').filter(b=>b.date===hoje).length;
   }catch(e){}
+  if(nBrf)partes.push(`O conselho preparou ${nBrf} ${nBrf>1?'debates':'debate'} com plano e tarefas.`);
+  if(waItens>1)partes.push(`Há um resumo do WhatsApp aguardando, com ${waItens} pontos — diga "abrir WhatsApp" para os detalhes.`);
+  partes.push(`Estou à disposição.`);
   _mdJarvisTxt=partes.join(' ');
   txt.textContent=_mdJarvisTxt;
   box.classList.add('show');
@@ -5390,6 +5410,54 @@ function jarvisMic(){
   _jarvisRec.onerror=()=>{toast('Não captei o áudio, tenta de novo');};
   _jarvisRec.onend=()=>{const b=document.getElementById('jarvis-mic');if(b)b.textContent='🎙️';_jarvisRec=null;};
   try{_jarvisRec.start();}catch(e){}
+}
+/* ===== MODO CONVERSA (mãos-livres, estilo JARVIS) =====
+   Ouve contínuo, espera ~2,5s de silêncio depois que você para de falar, executa/responde,
+   fala, e volta a ouvir. Não fala por cima: enquanto ele pensa/fala, o microfone fica em pausa. */
+let _jConv=false,_jConvRec=null,_jSilence=null,_jBuf='',_jThinking=false;
+function jarvisAfterSpeak(cb){
+  let done=false; const fire=()=>{if(done)return;done=true;document.removeEventListener('jarvis-spoke',fire);cb();};
+  document.addEventListener('jarvis-spoke',fire);
+  setTimeout(fire,15000); // fallback se o evento não vier
+}
+function jarvisConvBtn(on){const b=document.getElementById('jarvis-conv');if(b){b.textContent=on?'■ Encerrar conversa':'● Conversar';b.style.background=on?'#dc2626':'';b.style.color=on?'#fff':'';}}
+function jarvisConversaToggle(){
+  if(_jConv){jarvisConvStop();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Conversa por voz só no Chrome/Edge');return;}
+  _jConv=true; jarvisConvBtn(true);
+  jarvisSpeak('Sistemas online, Senhor. Estou ouvindo.');
+  jarvisAfterSpeak(()=>{ if(_jConv) jarvisConvListen(); });
+}
+function jarvisConvStop(){
+  _jConv=false; _jThinking=false; clearTimeout(_jSilence);
+  try{if(_jConvRec){_jConvRec.onend=null;_jConvRec.stop();}}catch(e){} _jConvRec=null;
+  try{if(_jarvisAudio)_jarvisAudio.pause();}catch(e){} try{window.speechSynthesis.cancel();}catch(e){}
+  jarvisConvBtn(false);
+}
+function jarvisConvListen(){
+  if(!_jConv||_jThinking)return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const rec=new SR(); _jConvRec=rec; rec.lang='pt-BR'; rec.continuous=true; rec.interimResults=true; _jBuf='';
+  const mic=document.getElementById('jarvis-mic'); if(mic)mic.textContent='🔴';
+  rec.onresult=(e)=>{
+    let fin=''; for(let i=e.resultIndex;i<e.results.length;i++){ if(e.results[i].isFinal) fin+=e.results[i][0].transcript+' '; }
+    if(fin) _jBuf+=fin;
+    clearTimeout(_jSilence); _jSilence=setTimeout(jarvisConvFlush, 2500); // 2,5s de silêncio = sua vez acabou
+  };
+  rec.onerror=()=>{};
+  rec.onend=()=>{ if(_jConv && !_jThinking){ try{rec.start();}catch(e){} } };
+  try{rec.start();}catch(e){}
+}
+async function jarvisConvFlush(){
+  if(!_jConv)return;
+  const txt=_jBuf.trim(); _jBuf=''; clearTimeout(_jSilence);
+  if(!txt){ return; }
+  _jThinking=true;
+  try{if(_jConvRec){_jConvRec.onend=null;_jConvRec.stop();}}catch(e){}
+  const mic=document.getElementById('jarvis-mic'); if(mic)mic.textContent='🎙️';
+  try{ await jarvisSend(txt); }catch(e){}
+  jarvisAfterSpeak(()=>{ _jThinking=false; if(_jConv) jarvisConvListen(); });
 }
 function wppAvatarHtml(c,size){
   const s=size||40;const ini=mdEsc((c.nome||c.phone||'?').trim().charAt(0).toUpperCase());
