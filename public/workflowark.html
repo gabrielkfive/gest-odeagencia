@@ -796,7 +796,7 @@ table.t tr.high{background:var(--yel-bg)}
         <span>WorkFlowArk</span><span class="sep">/</span><span class="here">Meu Dia</span>
       </div>
       <div class="tb-right">
-        <div class="tb-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar..."></div>
+        <div class="tb-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="gsearch" placeholder="Buscar cliente, tarefa, processo, página…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onkeydown="if(event.key==='Escape')gsearchClose()"><div id="gsearch-res"></div></div>
         <button class="tb-btn" data-nav="whatsapp" title="WhatsApp" style="position:relative;padding:7px 9px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.6-.8L3 21l1.9-5.4A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>
           <span id="wpp-badge-top" style="display:none;position:absolute;top:-4px;right:-4px;background:#25D366;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:10px;align-items:center;justify-content:center;padding:0 3px">0</span>
@@ -3515,6 +3515,49 @@ function jarvisSpeak(txt){
 }
 // vozes carregam async no Chrome
 if('speechSynthesis'in window){window.speechSynthesis.onvoiceschanged=()=>{_arkVoiceTried=false;};}
+
+/* ============ BUSCA GLOBAL (estilo command palette) ============ */
+(function(){const css=document.createElement('style');css.textContent=`
+  #gsearch-res{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-2);max-height:60vh;overflow-y:auto;z-index:9997;display:none;padding:6px}
+  #gsearch-res.open{display:block}
+  #gsearch-res .gs-grp{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute-2);font-family:var(--mono);padding:8px 10px 4px}
+  #gsearch-res .gs-it{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+  #gsearch-res .gs-it:hover,#gsearch-res .gs-it.sel{background:var(--bg)}
+  #gsearch-res .gs-mono{width:26px;height:26px;border-radius:7px;background:#0b0b0c;color:var(--gold);font-family:var(--mono);font-size:9px;font-weight:800;display:grid;place-items:center;flex-shrink:0}
+  #gsearch-res .gs-t{font-size:13px;font-weight:600;color:var(--ink)}
+  #gsearch-res .gs-s{font-size:11px;color:var(--mute)}
+  #gsearch-res .gs-empty{padding:14px;color:var(--mute);font-size:12.5px;text-align:center}
+`;document.head.appendChild(css);})();
+function gsearchClose(){const r=document.getElementById('gsearch-res');if(r)r.classList.remove('open');}
+document.addEventListener('click',(e)=>{const s=document.querySelector('.tb-search');if(s&&!s.contains(e.target))gsearchClose();});
+function gsGo(kind,arg){
+  gsearchClose();const gi=document.getElementById('gsearch');if(gi)gi.value='';
+  if(kind==='nav'){const el=document.querySelector('[data-nav="'+arg+'"]');if(el)el.click();}
+  else if(kind==='cli'){if(typeof cliDetalhe==='function')cliDetalhe(arg);}
+  else if(kind==='tarefa'){const el=document.querySelector('[data-nav="tarefas"]');if(el)el.click();if(typeof openTaskDetail==='function')setTimeout(()=>openTaskDetail(arg),120);}
+  else if(kind==='proc'){const el=document.querySelector('[data-nav="processos"]');if(el)el.click();setTimeout(()=>{const c=document.getElementById('pc-'+arg);if(c){c.classList.add('open');c.scrollIntoView({behavior:'smooth',block:'center'});}},160);}
+}
+function globalSearch(q){
+  const res=document.getElementById('gsearch-res');if(!res)return;
+  q=(q||'').toLowerCase().trim();
+  if(!q){res.classList.remove('open');res.innerHTML='';return;}
+  const out=[];
+  // páginas
+  try{const pgs=(typeof NAV_CATALOG!=='undefined'?NAV_CATALOG:[]).filter(s=>s.l.toLowerCase().includes(q)).slice(0,4);
+    if(pgs.length)out.push(['Páginas',pgs.map(s=>({mono:s.l.slice(0,2).toUpperCase(),t:s.l,s:'ir para a página',k:'nav',a:s.k}))]);}catch(e){}
+  // clientes
+  try{const cs=(typeof CLIENTES!=='undefined'?CLIENTES:[]).filter(c=>String(c.nm||'').toLowerCase().includes(q)).slice(0,6);
+    if(cs.length)out.push(['Clientes',cs.map(c=>({mono:cliInitials(c.nm).toUpperCase(),t:c.nm,s:(c.plano||'')+' · '+(c.tipo==='ARK'?'ARK':'Alpha'),k:'cli',a:c.id}))]);}catch(e){}
+  // tarefas
+  try{const ts=(state.tarefas||[]).filter(t=>String(t.title||'').toLowerCase().includes(q)).slice(0,6);
+    if(ts.length)out.push(['Tarefas',ts.map(t=>({mono:'TK',t:t.title,s:[t.resp,t.data].filter(Boolean).join(' · ')||'tarefa',k:'tarefa',a:t.id}))]);}catch(e){}
+  // processos
+  try{const ps=(typeof loadProc==='function'?loadProc():[]).filter(p=>String(p.titulo||'').toLowerCase().includes(q)||String(p.area||'').toLowerCase().includes(q)).slice(0,6);
+    if(ps.length)out.push(['Processos',ps.map(p=>({mono:(typeof procMono==='function'?procMono(p.area):'PR'),t:p.titulo,s:p.area,k:'proc',a:p.id}))]);}catch(e){}
+  if(!out.length){res.innerHTML='<div class="gs-empty">Nada encontrado para "'+escapeHtml(q)+'"</div>';res.classList.add('open');return;}
+  res.innerHTML=out.map(([grp,items])=>`<div class="gs-grp">${grp}</div>`+items.map(it=>`<div class="gs-it" onclick="gsGo('${it.k}','${String(it.a).replace(/'/g,"")}')"><div class="gs-mono">${escapeHtml(it.mono)}</div><div style="min-width:0"><div class="gs-t">${escapeHtml(it.t)}</div><div class="gs-s">${escapeHtml(it.s||'')}</div></div></div>`).join('')).join('');
+  res.classList.add('open');
+}
 
 /* ============ TABS ============ */
 document.querySelectorAll('[data-tabs]').forEach(group=>{
