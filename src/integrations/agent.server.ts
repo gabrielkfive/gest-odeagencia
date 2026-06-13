@@ -147,9 +147,26 @@ export async function addTaskFromDemand(db: any, d: Demanda, ctx: { phone?: stri
   return id;
 }
 
+// Filtro de economia: só vale chamar a IA (custo) se a mensagem tem cara de pedido/demanda.
+// Conversa fiada (oi, ok, obrigado, emoji, áudio/imagem sem texto) é ignorada -> não gasta token.
+export function worthAnalyzing(text: string): boolean {
+  const t = norm(text).trim();
+  if (t.length < 6) return false;
+  // placeholders de mídia sem conteúdo textual relevante
+  if (/^(🎤|🖼️|🎬|📎|📍|👤|🩷)?\s*\[(áudio|audio|imagem|vídeo|video|documento|localização|localizacao|contato|figurinha)\]?/i.test(text.trim())) return false;
+  // saudações / agradecimentos / confirmações curtas
+  if (t.length < 32 && /\b(ok|okay|blz|beleza|valeu|vlw|obg|obrigad[oa]|bom dia|boa tarde|boa noite|oi|ola|opa|eai|e ai|kk+|haha|rs+|perfeito|show|otimo|isso|sim|nao|certo|combinado|de nada|ta bom|tmj|fechou|👍|✅|🙏|👌|🔝|❤|😂)\b/.test(t)) return false;
+  // sinais de demanda/pedido -> vale analisar
+  const r = analyzeMessage(text);
+  if (r.isDemand) return true;
+  if (/\?|\bpode\b|\bpoderia\b|\bconsegue\b|\bprecis|\bqueria\b|\bquero\b|\bgostaria\b|\bmanda|\benvia|\bfaz |\bfazer\b|\bmuda|\balter|\bajust|\bcorrig|\brefaz|\bmarca|\bagend|\borcament|\borçament|\bproposta\b|\bquanto\b|\bvalor|\bprazo\b|\burgent|\bproblema\b|\bnao funciona|\bnão funciona/.test(t)) return true;
+  return false;
+}
+
 // Roda quando chega uma mensagem (entrada). Usa IA; cai para regras se falhar.
 export async function runAgentOnIncoming(db: any, msg: { phone: string; name?: string; text: string }) {
   try {
+    if (!worthAnalyzing(msg.text)) return; // economia: ignora conversa fiada (não chama o Claude)
     let d: AIResult | null = null;
     try { d = await aiAnalyze(msg.text, msg.name); } catch { d = null; }
     if (!d) {
