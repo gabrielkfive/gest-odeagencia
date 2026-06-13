@@ -3541,8 +3541,8 @@ function arkPickVoice(){
     _arkVoice=pool[0]||null;
   }catch(e){_arkVoice=null;}
 }
-function jarvisSpeak(txt){
-  if(!txt)return;
+let _fishOff=false, _jarvisAudio=null;
+function jarvisSpeakBrowser(txt){
   try{
     window.speechSynthesis.cancel();
     if(!_arkVoiceTried){arkPickVoice();_arkVoiceTried=true;}
@@ -3551,6 +3551,24 @@ function jarvisSpeak(txt){
     if(_arkVoice)u.voice=_arkVoice;
     window.speechSynthesis.speak(u);
   }catch(e){toast('Voz não suportada neste navegador');}
+}
+async function jarvisSpeak(txt){
+  if(!txt)return;
+  // 1) tenta a voz PREMIUM (Fish Audio, via servidor). Se não tiver chave, usa o navegador.
+  if(!_fishOff && typeof cloudCall==='function'){
+    try{
+      const r=await cloudCall('save',{action:'tts',text:String(txt).slice(0,1000)});
+      if(r&&r.ok&&r.audio){
+        try{window.speechSynthesis.cancel();}catch(e){}
+        try{if(_jarvisAudio){_jarvisAudio.pause();}}catch(e){}
+        _jarvisAudio=new Audio('data:audio/mp3;base64,'+r.audio);
+        _jarvisAudio.play().catch(()=>jarvisSpeakBrowser(txt));
+        return;
+      }
+      if(r&&r.nokey){_fishOff=true;} // sem chave: não tenta de novo nesta sessão
+    }catch(e){/* cai pro navegador */}
+  }
+  jarvisSpeakBrowser(txt);
 }
 // vozes carregam async no Chrome
 if('speechSynthesis'in window){window.speechSynthesis.onvoiceschanged=()=>{_arkVoiceTried=false;};}

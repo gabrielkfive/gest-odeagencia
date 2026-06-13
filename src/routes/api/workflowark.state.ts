@@ -586,6 +586,31 @@ export const Route = createFileRoute("/api/workflowark/state")({
           } catch (e) { return json({ error: (e as Error)?.message || "Falha" }, { status: 502 }); }
         }
 
+        // Voz premium do JARVIS via Fish Audio. Segredo: FISH_API_KEY.
+        // Voz (reference_id) configurável; default = a que o Gabriel escolheu.
+        if (action === "tts") {
+          const text = String(body.text ?? "").slice(0, 1200).trim();
+          if (!text) return json({ error: "Sem texto" }, { status: 400 });
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const key = zapiEnv("FISH_API_KEY");
+          if (!key) return json({ ok: false, nokey: true });
+          const voice = String(body.voice || zapiEnv("FISH_VOICE_ID") || "ec426c7ea3554caba8a5b077a4c701aa");
+          const model = String(body.model || "s2-pro");
+          try {
+            const r = await fetch("https://api.fish.audio/v1/tts", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", model },
+              body: JSON.stringify({ text, reference_id: voice, format: "mp3" }),
+            });
+            if (!r.ok) { const e = await r.text().catch(() => ""); return json({ ok: false, error: "Fish Audio: " + r.status + " " + e.slice(0, 200) }, { status: 502 }); }
+            const buf = await r.arrayBuffer();
+            const bytes = new Uint8Array(buf);
+            let bin = ""; const CH = 0x8000;
+            for (let i = 0; i < bytes.length; i += CH) bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + CH)));
+            return json({ ok: true, audio: btoa(bin) });
+          } catch (e) { return json({ ok: false, error: (e as Error)?.message || "Falha no TTS" }, { status: 502 }); }
+        }
+
         // Google Calendar: status da conexão
         if (action === "google-status") {
           try {
