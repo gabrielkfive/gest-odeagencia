@@ -2062,7 +2062,13 @@ function iniciarAutoSync(){
           .cli-foot .mk{display:inline-flex;align-items:center;gap:10px;color:#fff;font-family:'JetBrains Mono',monospace;letter-spacing:.2em;font-size:12px}
           @media(max-width:760px){.cli-grid2,.cli-stats{grid-template-columns:1fr}.cli-sec{padding:60px 22px}}
         </style>
-        <div class="cli-wrap">
+        <div style="padding:13px 18px;background:#fff;border-bottom:1px solid #e8e8ed;display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:6">
+          <span style="font-weight:800;font-size:14px">Área do Cliente</span>
+          <select id="cli-area-sel" class="form-select" style="max-width:260px" onchange="cliAreaSelect(this.value)"></select>
+          <span style="font-size:11.5px;color:#86868b">escolha o cliente pra ver o portal dele</span>
+        </div>
+        <div id="cli-portal-generic" style="display:none"></div>
+        <div class="cli-wrap" id="cli-vivenda-orig">
           <section class="cli-hero">
             <div class="cli-kick">ARK Content · Planejamento Estratégico</div>
             <h1 class="cli-h1">Farmácia <em>Vivenda</em></h1>
@@ -2848,6 +2854,54 @@ function cliRemove(){
   saveClientesCustom(loadClientesCustom().filter(x=>x.id!==cliEditId));
   closeModal('modal-cliente');toast('Cliente excluído');
 }
+// ---- Área do Cliente: portal por cliente (todos), sem custo de IA ----
+function cliAreaPopular(){
+  const sel=document.getElementById('cli-area-sel'); if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="vivenda">Vivenda (portal completo)</option>'+CLIENTES.filter(c=>c.status!=='churn'&&c.id!=='vivenda').map(c=>`<option value="${c.id}">${mdEsc(c.nm)}</option>`).join('');
+  if(cur)sel.value=cur;
+}
+function cliAreaSelect(id){
+  const orig=document.getElementById('cli-vivenda-orig'); const gen=document.getElementById('cli-portal-generic');
+  if(id==='vivenda'){ if(orig)orig.style.display=''; if(gen)gen.style.display='none'; return; }
+  if(orig)orig.style.display='none'; if(!gen)return;
+  const c=CLIENTES.find(x=>x.id===id); if(!c){gen.innerHTML='';return;}
+  const d=(typeof cliDetData==='function')?cliDetData(id):{};
+  const tarefas=(state.tarefas||[]).filter(t=>t.clienteId===id||(c.nm&&(t.title||'').toLowerCase().includes(String(c.nm).toLowerCase())));
+  const stL={r:'🔴 Urgente',y:'🟡 Em ajuste',gr:'🟢 Saudável'}[c.status]||'Ativo';
+  const info=(lbl,val)=>val?`<div style="margin-bottom:12px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#86868b;margin-bottom:3px">${lbl}</div><div style="font-size:15px">${mdEsc(val)}</div></div>`:'';
+  const tHtml=tarefas.length?tarefas.slice(0,12).map(t=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #e8e8ed"><span style="font-size:14px">${mdEsc(t.title)}</span><span style="font-size:12px;color:#86868b;white-space:nowrap">${mdEsc(t.resp||'')}${t.data?' · '+mdEsc(t.data):''}</span></div>`).join(''):'<div style="color:#86868b">Nenhuma tarefa ainda.</div>';
+  gen.innerHTML=`
+    <div class="cli-wrap">
+      <section class="cli-hero">
+        <div class="cli-kick">ARK CONTENT · ${c.tipo==='ARK'?'PARCEIRO ARK':'SQUAD ALPHA'}</div>
+        <h1 class="cli-h1">${mdEsc(c.nm)}</h1>
+        <p style="color:#a1a1a6;margin-top:18px;font-size:18px">${mdEsc(c.plano||'')} · ${stL}</p>
+      </section>
+      <section class="cli-sec">
+        <div class="cli-stats">
+          <div class="cli-stat"><div class="v">${c.valor?('R$'+Number(c.valor).toLocaleString('pt-BR')):'—'}</div><div class="l">Mensal</div></div>
+          <div class="cli-stat"><div class="v">${c.cap||'—'}</div><div class="l">Captações/mês</div></div>
+          <div class="cli-stat"><div class="v">${tarefas.length}</div><div class="l">Tarefas</div></div>
+          <div class="cli-stat"><div class="v">${c.tipo==='ARK'?'ARK':'α'}</div><div class="l">Tipo</div></div>
+        </div>
+      </section>
+      <section class="cli-sec">
+        <h2 style="font-size:32px;font-weight:800;letter-spacing:-.03em;margin-bottom:24px">Briefing & Contato</h2>
+        <div class="cli-grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:30px">
+          <div>${info('Briefing', d.briefing)||'<div style="color:#86868b">Briefing não preenchido. Edite na ficha do cliente.</div>'}${info('Nicho',d.nicho)}${info('Observação',c.meta)}</div>
+          <div>${info('Account responsável',d.responsavel)}${info('E-mail',d.email)}${info('Telefone',d.telefone)}${info('Instagram',d.instagram)}${info('Início',d.inicio)}</div>
+        </div>
+      </section>
+      <section class="cli-sec">
+        <h2 style="font-size:32px;font-weight:800;letter-spacing:-.03em;margin-bottom:20px">Tarefas do cliente</h2>
+        ${tHtml}
+        <button onclick="cliDetalhe('${id}')" style="margin-top:24px;background:#0a0a0a;color:#fff;border:none;border-radius:100px;padding:14px 28px;font-size:15px;font-weight:600;cursor:pointer">Abrir ficha completa</button>
+      </section>
+      <footer class="cli-foot"><div class="mk"><span style="width:8px;height:8px;border-radius:50%;background:var(--cl-yel)"></span>ARK CONTENT · 2026</div><p style="margin-top:14px;font-size:13px">Portal do cliente · ${mdEsc(c.nm)}</p></footer>
+    </div>`;
+  gen.style.display='';
+}
 // ---- Ficha do Cliente (cadastro + briefing + links + tarefas) ----
 let CLI_DET_ID=null;
 function cliDetAll(){ try{ return JSON.parse(localStorage.getItem('wfa-cliente-detalhes')||'{}'); }catch(e){ return {}; } }
@@ -3043,6 +3097,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     if(p==='tutorial'&&typeof renderTutorial==='function'){try{renderTutorial();}catch(e){console.warn('tut',e);}}
     if(p==='conselho'&&typeof consPopular==='function'){try{consPopular();}catch(e){}}
+    if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='whatsapp'){try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
