@@ -1555,7 +1555,7 @@ let WFA_CLOUD_MUTED = false;
 let WFA_MEMBER = null;
 let WFA_MEMBERS = [];
 // Declarados cedo para evitar erro de inicialização (usados no init e no sync):
-let WPP_ACTIVE=null;let WPP_TAB='tudo';let WPP_AUTOSYNC=false;let WPP_SEL=new Set();let WPP_FWD_ITEMS=[];let WPP_FWD_TARGETS=new Set();
+let WPP_ACTIVE=null;let WPP_TAB='tudo';let WPP_AUTOSYNC=false;let WPP_SEL=new Set();let WPP_FWD_ITEMS=[];let WPP_FWD_TARGETS=new Set();const WPP_LABELS=['ARK','ALPHA','Lead','Fornecedor'];
 const DEFAULT_CALENDARS = {
   'gabriel andrade':'gabrielkomercial@gmail.com',
   'danilo de lima':'danilodelima.distribuidoracopa@gmail.com',
@@ -2448,6 +2448,18 @@ function iniciarAutoSync(){
     </div>
   </main>
 </div>
+
+<!-- MODAL: Mídias / Links / Docs da conversa -->
+<div class="modal-bg" id="modal-wpp-media">
+  <div class="modal" style="max-width:520px;max-height:86vh;display:flex;flex-direction:column">
+    <div class="modal-head"><h3 id="wmp-title">Mídias</h3><span class="x" onclick="closeModal('modal-wpp-media')">✕</span></div>
+    <div class="modal-body" id="wmp-body" style="overflow:auto;flex:1;min-height:0"></div>
+  </div>
+</div>
+<style>
+  #modal-wpp-media .cli-sect{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+  #modal-wpp-media .cli-sect h4{font-size:12.5px;font-weight:700;margin-bottom:8px}
+</style>
 
 <!-- MODAL: Encaminhar mensagem -->
 <div class="modal-bg" id="modal-wpp-fwd">
@@ -4291,6 +4303,45 @@ function wppFileChosen(input){
   };
   reader.readAsDataURL(file);
 }
+// ---- Tags (ARK / ALPHA / etc.) — WPP_LABELS declarado no topo (evita TDZ) ----
+function wppLabelColor(l){return {ARK:'#0a0a0a',ALPHA:'#a07e00',Lead:'#1d4ed8',Fornecedor:'#6b21a8'}[l]||'#555';}
+function wppLabelToggle(phone,label){
+  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[phone]; if(!c)return;
+  c.labels=Array.isArray(c.labels)?c.labels:[];
+  c.labels=c.labels.includes(label)?c.labels.filter(l=>l!==label):c.labels.concat(label);
+  renderWhatsapp();
+  try{cloudCall('save',{action:'wa-set-labels',phone,labels:c.labels});}catch(e){}
+}
+function wppLabelChips(c,small){
+  const ls=Array.isArray(c.labels)?c.labels:[]; if(!ls.length)return '';
+  return ls.map(l=>`<span style="background:${wppLabelColor(l)};color:#fff;font-size:${small?'8.5px':'10px'};font-weight:700;border-radius:10px;padding:1px ${small?'6px':'7px'};margin-right:3px">${mdEsc(l)}</span>`).join('');
+}
+// ---- Painel de imagens / links / docs da conversa ----
+function wppMediaPanel(phone){
+  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[phone]; if(!c)return;
+  const msgs=c.msgs||[];
+  const media=msgs.map((m,i)=>({m,i})).filter(o=>o.m.media&&o.m.mkey);
+  const imgs=media.filter(o=>o.m.media.type==='image'||o.m.media.type==='sticker');
+  const vids=media.filter(o=>o.m.media.type==='video');
+  const docs=media.filter(o=>o.m.media.type==='document');
+  const urlRe=/(https?:\/\/[^\s]+)/g; const links=[];
+  msgs.forEach(m=>{(String(m.text||'').match(urlRe)||[]).forEach(u=>links.push(u));});
+  const uniqLinks=[...new Set(links)];
+  const sec=(t,h)=>`<div class="cli-sect"><h4>${t}</h4>${h||'<div style="color:var(--mute);font-size:12px">Nada aqui ainda.</div>'}</div>`;
+  const imgGrid=imgs.length?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${imgs.map(o=>`<div onclick="wppPanelOpenMedia('${phone}',${o.i})" style="aspect-ratio:1;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;background:#eee${o.m._media?(";background-image:url('"+o.m._media+"');background-size:cover;background-position:center"):''}">${o.m._media?'':'🖼️'}</div>`).join('')}</div>`:'';
+  const vidList=vids.length?vids.map(o=>`<button class="icobtn" style="display:block;width:100%;text-align:left;margin-bottom:4px" onclick="wppPanelOpenMedia('${phone}',${o.i})">🎬 Vídeo · ${o.m.ts?new Date(o.m.ts).toLocaleDateString('pt-BR'):''}</button>`).join(''):'';
+  const docList=docs.length?docs.map(o=>`<button class="icobtn" style="display:block;width:100%;text-align:left;margin-bottom:4px" onclick="wppPanelOpenMedia('${phone}',${o.i})">📎 ${mdEsc(o.m.media.fileName||'documento')}</button>`).join(''):'';
+  const linkList=uniqLinks.length?uniqLinks.map(u=>`<a href="${mdEsc(u)}" target="_blank" rel="noopener" style="display:block;font-size:12px;color:#1d4ed8;margin-bottom:5px;word-break:break-all">${mdEsc(u)}</a>`).join(''):'';
+  document.getElementById('wmp-title').textContent='Mídias · '+(c.nome||c.phone);
+  document.getElementById('wmp-body').innerHTML=sec('🖼️ Imagens ('+imgs.length+')',imgGrid)+sec('🎬 Vídeos ('+vids.length+')',vidList)+sec('🔗 Links ('+uniqLinks.length+')',linkList)+sec('📎 Documentos ('+docs.length+')',docList);
+  document.getElementById('modal-wpp-media').classList.add('open');
+}
+async function wppPanelOpenMedia(phone,idx){
+  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[phone]; const m=c&&c.msgs&&c.msgs[idx]; if(!m||!m.mkey)return;
+  if(!m._media){ toast('Carregando...'); try{ const r=await cloudCall('save',{action:'wa-media',id:m.mkey.id,remoteJid:m.mkey.remoteJid,fromMe:m.mkey.fromMe}); m._media=r.dataUrl; m._fname=r.fileName||'arquivo'; }catch(e){toast('⚠ '+((e&&e.message)||'falha'));return;} }
+  if(m.media.type==='image'||m.media.type==='sticker'){ wppLightbox(phone,idx); }
+  else { const a=document.createElement('a'); a.href=m._media; if(m.media.type==='video')a.target='_blank'; else a.download=m._fname||'arquivo'; document.body.appendChild(a); a.click(); a.remove(); }
+}
 function wppAvatarHtml(c,size){
   const s=size||40;const ini=mdEsc((c.nome||c.phone||'?').trim().charAt(0).toUpperCase());
   const badge=c.isGroup?`<span style="position:absolute;right:-2px;bottom:-2px;background:#25D366;border:2px solid #fff;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px">👥</span>`:'';
@@ -4321,6 +4372,7 @@ function renderWhatsapp(){
   if(WPP_TAB==='nao')fl=list.filter(c=>c.unread>0);
   else if(WPP_TAB==='grupos')fl=list.filter(c=>c.isGroup);
   else if(WPP_TAB==='diretos')fl=list.filter(c=>!c.isGroup);
+  else if(WPP_LABELS.indexOf(WPP_TAB)>=0)fl=list.filter(c=>Array.isArray(c.labels)&&c.labels.includes(WPP_TAB));
   if(!WPP_ACTIVE||!conv[WPP_ACTIVE])WPP_ACTIVE=(fl[0]||list[0]).phone;
   const active=conv[WPP_ACTIVE];
   const tab=(k,l,n)=>`<button onclick="wppSetTab('${k}')" style="border:none;background:${WPP_TAB===k?'var(--yel,#ffd400)':'#f0f0ed'};color:#111;font-weight:${WPP_TAB===k?'700':'500'};font-size:11.5px;padding:5px 11px;border-radius:20px;cursor:pointer;white-space:nowrap">${l}${n?` <b>${n}</b>`:''}</button>`;
@@ -4331,7 +4383,7 @@ function renderWhatsapp(){
     return `<button class="wpp-item" data-name="${mdEsc((c.nome||c.phone||'').toLowerCase())}" onclick="wppOpen('${c.phone}')" style="display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:none;border-bottom:1px solid var(--line);background:${c.phone===WPP_ACTIVE?'var(--yel-bg,#fff7d6)':'#fff'};padding:9px 11px;cursor:pointer">
       ${wppAvatarHtml(c,44)}
       <span style="flex:1;min-width:0">
-        <span style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mdEsc(c.nome||c.phone)}</span><span style="font-size:10px;color:var(--mute);flex-shrink:0">${last?wppTime(last.ts):''}</span></span>
+        <span style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${wppLabelChips(c,true)}${mdEsc(c.nome||c.phone)}</span><span style="font-size:10px;color:var(--mute);flex-shrink:0">${last?wppTime(last.ts):''}</span></span>
         <span style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span style="font-size:11.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">${mdEsc(lastTxt).slice(0,60)}</span>${c.unread?`<span style="background:#25D366;color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:1px 7px;flex-shrink:0">${c.unread}</span>`:''}</span>
       </span>
     </button>`;
@@ -4358,13 +4410,17 @@ function renderWhatsapp(){
         <input id="wpp-search" oninput="wppFilter()" placeholder="🔍 Buscar conversa..." style="flex:1;border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12.5px;outline:none">
         <button onclick="wppSyncGroups()" title="Atualizar nomes e fotos dos grupos" style="border:1px solid var(--line);background:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:14px;flex-shrink:0">🔄</button>
       </div>
-      <div style="padding:7px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)">${tab('tudo','Tudo')}${tab('nao','Não lidas',naoLidasWpp||'')}${tab('grupos','Grupos')}${tab('diretos','Diretos')}</div>
+      <div style="padding:7px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)">${tab('tudo','Tudo')}${tab('nao','Não lidas',naoLidasWpp||'')}${tab('grupos','Grupos')}${tab('diretos','Diretos')}${tab('ARK','🏷 ARK')}${tab('ALPHA','🏷 ALPHA')}</div>
       <div id="wpp-list" style="flex:1;min-height:0;overflow:auto">${items||'<div style="padding:20px;color:var(--mute);font-size:12.5px;text-align:center">Nenhuma conversa nessa aba.</div>'}</div>
     </div>
     <div style="display:flex;flex-direction:column;overflow:hidden;background:#efeae2;min-height:0">
       <div style="padding:9px 14px;background:#0a0a0a;color:#fff;display:flex;align-items:center;gap:10px;flex-shrink:0">
         ${wppAvatarHtml(active,38)}
         <span style="flex:1;min-width:0"><span style="font-weight:700;font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mdEsc(active.nome||active.phone)}</span><span style="color:var(--yel,#ffd400);font-size:11px">${sub}</span></span>
+        <span style="display:flex;gap:4px;align-items:center;flex-shrink:0">
+          ${['ARK','ALPHA'].map(l=>{const on=Array.isArray(active.labels)&&active.labels.includes(l);return `<button onclick="wppLabelToggle('${active.phone}','${l}')" title="Marcar como ${l}" style="border:1px solid ${on?wppLabelColor(l):'#666'};background:${on?wppLabelColor(l):'transparent'};color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:2px 8px;cursor:pointer">${l}</button>`;}).join('')}
+          <button onclick="wppMediaPanel('${active.phone}')" title="Imagens, links e documentos da conversa" style="border:none;background:transparent;color:#fff;cursor:pointer;font-size:16px;padding:0 4px">📂</button>
+        </span>
       </div>
       <div id="wpp-msgs" style="flex:1;min-height:0;overflow:auto;padding:14px 16px">${msgs}</div>
       ${WPP_SEL.size?`<div style="display:flex;gap:8px;align-items:center;padding:8px 12px;border-top:1px solid var(--line);background:#fff7d6;flex-shrink:0">

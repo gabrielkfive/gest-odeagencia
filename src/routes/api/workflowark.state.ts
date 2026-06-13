@@ -545,6 +545,24 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        // Define as tags (labels) de uma conversa (ex: ARK, ALPHA) — persiste na nuvem.
+        if (action === "wa-set-labels") {
+          const phone = String(body.phone ?? "").replace(/\D/g, "");
+          const labels = Array.isArray(body.labels) ? body.labels.map((x: any) => String(x)).slice(0, 8) : [];
+          if (!phone) return json({ error: "phone obrigatório" }, { status: 400 });
+          try {
+            const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-whatsapp").maybeSingle();
+            const st: any = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : { conversas: {} };
+            if (st.conversas && st.conversas[phone]) {
+              st.conversas[phone].labels = labels;
+              await ctx.db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: st });
+            }
+            return json({ ok: true });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao salvar tags" }, { status: 502 });
+          }
+        }
+
         // Marca uma conversa como LIDA (zera não-lidas) — persiste na nuvem.
         if (action === "wa-mark-read") {
           const phone = String(body.phone ?? "").replace(/\D/g, "");
