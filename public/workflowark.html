@@ -611,6 +611,10 @@ table.t tr.high{background:var(--yel-bg)}
           <span>Notificações</span>
           <span class="badge" id="notif-badge" style="display:none">0</span>
         </div>
+        <div class="subitem" data-nav="tutorial">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Tutorial / POPs</span>
+        </div>
       </div>
 
       <div class="nav-label">Conhecimento</div>
@@ -2347,6 +2351,22 @@ function iniciarAutoSync(){
         </div>
       </div>
 
+      <!-- =================== TUTORIAL / POPs =================== -->
+      <div class="page" id="page-tutorial">
+        <div class="page-head">
+          <div class="page-title"><h1>Tutorial & POPs</h1><p>Como usar o WorkFlowArk · guia rápido pra qualquer pessoa da equipe</p></div>
+          <button class="tb-btn dk" onclick="tutorialNarrar()">🔊 JARVIS narra</button>
+        </div>
+        <div class="card" style="padding:18px;margin-bottom:14px;background:#0a0a0a;color:#fff">
+          <div style="font-size:18px;font-weight:800;margin-bottom:4px">👋 Bem-vindo à ARK Content</div>
+          <div style="font-size:13px;color:#ddd;line-height:1.6">Aqui é o cérebro da agência: tarefas, clientes, financeiro, WhatsApp e os agentes de IA, tudo num lugar só. Siga os 6 passos abaixo que em 5 minutos você está operando.</div>
+        </div>
+        <h2 style="font-size:15px;font-weight:800;margin:6px 0 10px">🚀 Primeiros passos</h2>
+        <div class="g3" id="tut-steps"></div>
+        <h2 style="font-size:15px;font-weight:800;margin:20px 0 10px">📋 POPs — como fazer cada coisa</h2>
+        <div class="g2" id="tut-pops"></div>
+      </div>
+
       <!-- =================== AGENDA EDITÁVEL =================== -->
       <div class="page" id="page-agenda">
         <style>
@@ -2987,6 +3007,8 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(sub) sub.previousElementSibling?.classList.add('active');
     document.getElementById('page-'+p)?.classList.add('active');
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
+    if(p==='tutorial'&&typeof renderTutorial==='function'){try{renderTutorial();}catch(e){console.warn('tut',e);}}
+    if(p==='whatsapp'){try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
@@ -3528,7 +3550,7 @@ const NAV_CATALOG=[
   {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},
   {k:'crm',l:'CRM · Pipeline'},
   {k:'organograma',l:'Organograma'},{k:'pops',l:'POPs por Função'},{k:'processos',l:'Processos'},
-  {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},
+  {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},{k:'tutorial',l:'Tutorial / POPs'},
 ];
 const _ALL_NAV=NAV_CATALOG.map(s=>s.k);
 const _BASE_NAV=['dashboard','reunioes','agenda','organograma','pops','processos','meumes'];
@@ -4374,6 +4396,35 @@ function wppFalar(){
   }catch(e){toast('Voz não suportada neste navegador');}
 }
 function wppPararVoz(){try{window.speechSynthesis.cancel();}catch(e){}}
+/* ============ TUTORIAL / POPs ============ */
+const TUT_STEPS=[
+  {t:'Meu Dia',d:'Sua tela inicial: tarefas de hoje, agenda e os números do dia.',nav:'dashboard'},
+  {t:'Clientes',d:'Clique num cliente pra abrir a Ficha: cadastro, briefing, links e as tarefas dele.',nav:'lista-clientes'},
+  {t:'Tarefas',d:'Crie e acompanhe demandas (Kanban, Lista, Calendário). No "+ pessoa" você adiciona responsáveis.',nav:'tarefas'},
+  {t:'WhatsApp',d:'Responda, encaminhe, envie foto/áudio, marque ARK/ALPHA e veja o Resumo do dia (🧠).',nav:'whatsapp'},
+  {t:'Financeiro',d:'Sua planilha, cobranças e acertos da equipe num lugar só.',nav:'financeiro'},
+  {t:'Agentes de IA',d:'Roteirista, Planejamento e Legendas: a IA cria pra você aprovar.',nav:'agentes'},
+];
+const TUT_POPS=[
+  {t:'✅ Criar uma tarefa',d:'Aba Tarefas → "+ Nova tarefa" → título, cliente, responsável e prazo. Pra adicionar alguém novo na lista, clique "+ pessoa".'},
+  {t:'🧑‍💼 Adicionar um cliente',d:'Lista de Clientes → "+ Novo cliente". Depois clique no card pra abrir a Ficha e completar cadastro/briefing.'},
+  {t:'💬 Responder e encaminhar no WhatsApp',d:'Abra a conversa, escreva e Enviar. Encaminhar: ↪ na mensagem (ou selecione várias → "Encaminhar"). 📎 anexa foto/áudio/documento.'},
+  {t:'🧠 Resumo do dia',d:'Na aba WhatsApp, botão 🧠 no topo: a IA resume as conversas das últimas 24h e diz o que precisa responder. 🔊 pra ouvir (JARVIS).'},
+  {t:'🏷 Marcar cliente ARK / ALPHA',d:'No topo da conversa, clique ARK ou ALPHA. Depois filtre por essas tags nas abas da lista.'},
+  {t:'🎬 Gerar roteiro / legenda',d:'Agentes de IA → Roteirista (ou Legendas): informe tema/cliente e a IA gera. Revise e use.'},
+  {t:'💰 Cobrar um cliente',d:'Aba Cobranças: o sistema calcula o vencimento e gera a mensagem pronta pra mandar no WhatsApp.'},
+  {t:'👥 Adicionar pessoa na equipe',d:'Organograma → "+ Adicionar pessoa" (ou "+ pessoa" ao criar tarefa). Aparece em todos os responsáveis.'},
+];
+function renderTutorial(){
+  const s=document.getElementById('tut-steps');
+  if(s)s.innerHTML=TUT_STEPS.map((t,i)=>`<div class="card" style="padding:14px"><div style="font-size:11px;font-weight:800;color:#a07e00">PASSO ${i+1}</div><div style="font-size:14px;font-weight:700;margin:3px 0">${t.t}</div><div style="font-size:12.5px;color:var(--mute);line-height:1.5">${mdEsc(t.d)}</div>${t.nav?`<button class="tb-btn" style="margin-top:9px" onclick="var e=document.querySelector('[data-nav=${t.nav}]');if(e)e.click()">Abrir ${t.t}</button>`:''}</div>`).join('');
+  const p=document.getElementById('tut-pops');
+  if(p)p.innerHTML=TUT_POPS.map(o=>`<div class="card" style="padding:14px"><div style="font-size:13.5px;font-weight:700;margin-bottom:5px">${o.t}</div><div style="font-size:12.5px;color:var(--mute);line-height:1.6">${mdEsc(o.d)}</div></div>`).join('');
+}
+function tutorialNarrar(){
+  const txt='Bem-vindo ao WorkFlowArk, o cérebro da ARK Content. '+TUT_STEPS.map((t,i)=>'Passo '+(i+1)+': '+t.t+'. '+t.d).join(' ');
+  try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='pt-BR';u.rate=1.05;const vs=window.speechSynthesis.getVoices();const pt=vs.find(v=>/pt[-_]?BR|portugu/i.test((v.lang||'')+(v.name||'')));if(pt)u.voice=pt;window.speechSynthesis.speak(u);}catch(e){toast('Voz não suportada neste navegador');}
+}
 function wppAvatarHtml(c,size){
   const s=size||40;const ini=mdEsc((c.nome||c.phone||'?').trim().charAt(0).toUpperCase());
   const badge=c.isGroup?`<span style="position:absolute;right:-2px;bottom:-2px;background:#25D366;border:2px solid #fff;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px">👥</span>`:'';
