@@ -6075,7 +6075,14 @@ function renderProcessos(){
 (function initIA(){
   const css=document.createElement('style');
   css.textContent=`
-    #ia-fab{position:fixed;bottom:18px;right:18px;width:54px;height:54px;border-radius:50%;background:var(--yel);color:#000;display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.18);z-index:9998;border:2px solid var(--ink);font-weight:800;font-family:var(--mono);font-size:11px}
+    #ia-fab{position:fixed;bottom:18px;right:18px;width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#1c1a16,#0a0a0a 70%);display:grid;place-items:center;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.32),0 0 0 1px rgba(255,199,0,.25) inset;z-index:9998;border:1px solid #23231f;overflow:hidden;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s}
+    #ia-fab::after{content:"";position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(from 0deg,transparent,rgba(255,199,0,.55),transparent 30%);animation:iaRing 4s linear infinite;opacity:.0;transition:opacity .3s}
+    #ia-fab:hover{transform:scale(1.06)}
+    #ia-fab:hover::after{opacity:1}
+    @keyframes iaRing{to{transform:rotate(360deg)}}
+    #ia-fab img{width:30px;height:30px;object-fit:contain;position:relative;z-index:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+    #ia-fab .iadot{position:absolute;bottom:9px;right:9px;width:9px;height:9px;border-radius:50%;background:#3ddc84;border:2px solid #0a0a0a;z-index:2;box-shadow:0 0 8px rgba(61,220,132,.7);animation:iaLive 2.4s ease-in-out infinite}
+    @keyframes iaLive{0%,100%{opacity:1}50%{opacity:.45}}
     #ia-panel{position:fixed;bottom:82px;right:18px;width:360px;max-height:520px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18);display:none;flex-direction:column;z-index:9999;overflow:hidden}
     #ia-panel.open{display:flex}
     #ia-head{background:#000;color:var(--yel);padding:10px 14px;font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
@@ -6090,7 +6097,7 @@ function renderProcessos(){
     #ia-send:disabled{opacity:.5;cursor:wait}
   `;
   document.head.appendChild(css);
-  const fab=document.createElement('div');fab.id='ia-fab';fab.title='IA · pergunte qualquer coisa sobre o sistema';fab.innerHTML='IA';
+  const fab=document.createElement('div');fab.id='ia-fab';fab.title='JARVIS · assistente da ARK';fab.innerHTML='<img src="/ark-mark.png" alt="ARK"><span class="iadot"></span>';
   const panel=document.createElement('div');panel.id='ia-panel';
   panel.innerHTML=`
     <div id="ia-head"><span>IA WorkFlowArk</span><span style="cursor:pointer" id="ia-close">✕</span></div>
