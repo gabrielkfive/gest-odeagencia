@@ -152,15 +152,16 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             "O conselho tem vozes: Diretor de Operações, Gestor de Tráfego, Social Media, Roteirista e Account/CS. " +
             "Pense ALÉM do operacional: aprofunde no nicho, traga referências de marcas/criadores em alta no mesmo segmento, ideias de parceria reais, ALINHAMENTOS/REUNIÕES necessários e uma ROTEIRIZAÇÃO de captação (Reels) viável de gravar. " +
             "Proponha também um ORÇAMENTO de mídia realista pra esse cliente. Benchmarks Brasil 2025-26: Meta Ads Click-to-WhatsApp é o melhor pra PME (CPL R$5-25, conversão 15-30%); Google Ads CPL R$30-200. Regra: CPL máximo = ticket médio × taxa de conversão. Diga verba mensal sugerida, canal (geralmente Click-to-WhatsApp), e o resultado esperado em leads/reuniões. " +
-            "Responda SOMENTE em JSON válido, sem texto fora do JSON, no formato: " +
-            '{"debate":[{"voz":"Gestor de Tráfego","fala":"..."},{"voz":"Social Media","fala":"..."}],' +
-            '"decisao":"frase única e forte","plano":["passo 1","passo 2","passo 3"],' +
-            '"tarefas":[{"title":"tarefa acionável curta","resp":"área responsável (trafego, social, account, design, edicao, captacao, comercial)"}],' +
-            '"reunioes":["alinhamento/reunião a marcar + com quem"],' +
-            '"roteiro":"roteiro curto de 1 Reel: gancho + 3 cenas + CTA (1 parágrafo)",' +
+            "Responda SOMENTE em JSON válido, sem texto fora do JSON. Ordem dos campos (preencha TODOS): " +
+            '{"decisao":"frase única e forte",' +
             '"orcamento":"verba mensal sugerida + canal + resultado esperado (ex: R$1.500/mês em Click-to-WhatsApp ~ 60-100 leads)",' +
-            '"referencias":["marca/criador + por que olhar"],"parcerias":["ideia de parceria concreta"]}. ' +
-            "Máx 3 falas, 3 passos, 3 tarefas, 2 reuniões, 2 referências, 2 parcerias. Português, específico e prático.";
+            '"roteiro":"roteiro curto de 1 Reel: gancho + 3 cenas + CTA (1 parágrafo)",' +
+            '"plano":["passo 1","passo 2","passo 3"],' +
+            '"reunioes":["alinhamento/reunião a marcar + com quem"],' +
+            '"tarefas":[{"title":"tarefa acionável curta","resp":"área (trafego, social, account, design, edicao, captacao, comercial)"}],' +
+            '"referencias":["marca/criador + por que olhar"],"parcerias":["ideia de parceria concreta"],' +
+            '"debate":[{"voz":"Gestor de Tráfego","fala":"..."},{"voz":"Social Media","fala":"..."}]}. ' +
+            "Máx 3 passos, 3 tarefas, 2 reuniões, 2 referências, 2 parcerias, 2 falas. Português, específico e prático.";
 
           let criadas = 0;
           for (const c of alvos) {
@@ -168,7 +169,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               sysConselho,
               `Cliente: ${c.nm}. Segmento: ${c.seg}. Contexto: ${c.nota}. ` +
                 `Debata o que ESTE cliente precisa AGORA pra vender mais e crescer, com referências do nicho e uma ideia de parceria. Hoje é ${hoje}.`,
-              1600,
+              2400,
             );
             const j = parseJSON(raw);
             if (!j) continue;
