@@ -179,6 +179,43 @@ export async function evoMediaBase64(id: string, remoteJid?: string, fromMe?: bo
   return { base64: String(data.base64), mimetype: String(data.mimetype || "application/octet-stream"), fileName: String(data.fileName || "arquivo") };
 }
 
+// Transcreve áudio (base64) com o Whisper do Cloudflare Workers AI (grátis).
+export async function transcribeAudioBase64(base64: string): Promise<string> {
+  try {
+    const ai = (cfEnv as Record<string, any>)?.AI;
+    if (!ai || !base64) return "";
+    const bin = atob(base64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const out: any = await ai.run("@cf/openai/whisper", { audio: [...bytes] });
+    return String(out?.text || "").trim();
+  } catch { return ""; }
+}
+
+// Descreve uma imagem (base64) em 1 frase usando Claude (visão) — p/ o agente saber a relevância.
+export async function describeImageBase64(base64: string, mimetype: string): Promise<string> {
+  try {
+    const key = zapiEnv("ANTHROPIC_API_KEY");
+    if (!key || !base64) return "";
+    const mt = /png|gif|webp/i.test(mimetype || "") ? (mimetype as string).toLowerCase() : "image/jpeg";
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5",
+        max_tokens: 180,
+        messages: [{ role: "user", content: [
+          { type: "image", source: { type: "base64", media_type: mt, data: base64 } },
+          { type: "text", text: "Descreva em 1 frase curta e objetiva o que há nesta imagem, em português, pensando numa agência de marketing (ex.: print de conversa, foto de prato/produto, arte/criativo, documento, comprovante de pagamento, briefing)." },
+        ] }],
+      }),
+    });
+    if (!resp.ok) return "";
+    const data: any = await resp.json().catch(() => ({}));
+    return String(data?.content?.[0]?.text || "").trim();
+  } catch { return ""; }
+}
+
 // Acrescenta uma mensagem à conversa, guardando no bloco wfa-whatsapp da tabela workflowark_state.
 export async function appendWhatsapp(
   db: { from: (t: string) => any },

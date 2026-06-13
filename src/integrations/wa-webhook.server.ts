@@ -86,6 +86,24 @@ export async function processWaWebhook(body: any): Promise<void> {
     }
   }
 
+  // Enriquece mídia de DMs recebidas: transcreve áudio e descreve imagem (p/ exibir + alimentar o agente).
+  if (!fromMe && !isGroup && media && mkey) {
+    try {
+      const { evoMediaBase64, transcribeAudioBase64, describeImageBase64 } = await import("@/integrations/zapi.server");
+      if (media.type === "audio") {
+        const md = await evoMediaBase64(mkey.id, mkey.remoteJid, mkey.fromMe);
+        const tr = await transcribeAudioBase64(md.base64);
+        if (tr) text = "🎤 " + tr;
+      } else if (media.type === "image" || media.type === "sticker") {
+        const md = await evoMediaBase64(mkey.id, mkey.remoteJid, mkey.fromMe);
+        const desc = await describeImageBase64(md.base64, md.mimetype);
+        if (desc) text = (media.caption ? media.caption + " — " : "") + "🖼️ [Imagem: " + desc + "]";
+      } else if (media.type === "document") {
+        text = "📎 [Documento: " + (media.fileName || "arquivo") + "]" + (media.caption ? " " + media.caption : "");
+      }
+    } catch { /* segue com o placeholder */ }
+  }
+
   // só guarda mensagens de texto reais (ignora status, recibos, etc.)
   if (phone && text && typeof text === "string") {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
