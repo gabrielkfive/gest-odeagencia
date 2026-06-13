@@ -2391,6 +2391,8 @@ function iniciarAutoSync(){
         <div class="g3" id="tut-steps"></div>
         <h2 style="font-size:15px;font-weight:800;margin:20px 0 10px">📋 POPs — como fazer cada coisa</h2>
         <div class="g2" id="tut-pops"></div>
+        <h2 style="font-size:15px;font-weight:800;margin:20px 0 10px">🔌 Conectar integrações (libera Meta, Google e e-mail)</h2>
+        <div class="g2" id="tut-integ"></div>
       </div>
 
       <!-- =================== AGENDA EDITÁVEL =================== -->
@@ -4505,7 +4507,15 @@ const TUT_POPS=[
   {t:'💰 Cobrar um cliente',d:'Aba Cobranças: o sistema calcula o vencimento e gera a mensagem pronta pra mandar no WhatsApp.'},
   {t:'👥 Adicionar pessoa na equipe',d:'Organograma → "+ Adicionar pessoa" (ou "+ pessoa" ao criar tarefa). Aparece em todos os responsáveis.'},
 ];
+const TUT_INTEG=[
+  {t:'📧 E-mail (Gmail) — 3 min · MAIS FÁCIL',d:'1) Entre em myaccount.google.com/security\n2) Ative a "Verificação em duas etapas"\n3) Busque "Senhas de app" → criar → nome "ARK"\n4) Copie a senha de 16 letras e mande pro Claude junto com o e-mail.\n➡️ Libera: ler e-mails + enviar orçamento.'},
+  {t:'📱 Meta (Instagram/Facebook)',d:'1) business.facebook.com → Configurações do negócio\n2) Usuários → Usuários do sistema → Adicionar (Admin)\n3) Gerar token com: ads_read, ads_management, pages_manage_posts, instagram_basic, instagram_content_publish\n4) Mande o token pro Claude.\n➡️ Libera: relatórios de Ads + postagem automática.'},
+  {t:'🔍 Google Ads (mais técnico)',d:'Precisa de developer token (conta MCC, ~1-2 dias de aprovação) + login Google. O Claude te guia clique a clique quando for a hora. Deixe por último.'},
+  {t:'💳 Crédito da IA (agentes 24/7)',d:'console.anthropic.com → Billing → adicione ~$20 e ative recarga automática. Sem crédito, os agentes 24/7 e a IA param quando zerar.'},
+];
 function renderTutorial(){
+  const g=document.getElementById('tut-integ');
+  if(g)g.innerHTML=TUT_INTEG.map(o=>`<div class="card" style="padding:14px"><div style="font-size:13.5px;font-weight:700;margin-bottom:5px">${o.t}</div><div style="font-size:12.5px;color:var(--mute);line-height:1.6;white-space:pre-line">${mdEsc(o.d)}</div></div>`).join('');
   const s=document.getElementById('tut-steps');
   if(s)s.innerHTML=TUT_STEPS.map((t,i)=>`<div class="card" style="padding:14px"><div style="font-size:11px;font-weight:800;color:#a07e00">PASSO ${i+1}</div><div style="font-size:14px;font-weight:700;margin:3px 0">${t.t}</div><div style="font-size:12.5px;color:var(--mute);line-height:1.5">${mdEsc(t.d)}</div>${t.nav?`<button class="tb-btn" style="margin-top:9px" onclick="var e=document.querySelector('[data-nav=${t.nav}]');if(e)e.click()">Abrir ${t.t}</button>`:''}</div>`).join('');
   const p=document.getElementById('tut-pops');
