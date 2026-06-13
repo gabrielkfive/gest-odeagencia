@@ -1715,7 +1715,7 @@ table.t tr.high{background:var(--yel-bg)}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -2098,8 +2098,14 @@ function iniciarAutoSync(){
           #page-drive .dz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
           #page-drive .dz-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;cursor:pointer;transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column;gap:10px}
           #page-drive .dz-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,0,0,.08);border-color:var(--yel)}
-          #page-drive .dz-ico{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--yel-bg,#fff7d6)}
-          #page-drive .dz-card.doc .dz-ico{background:#111;color:var(--yel)}
+          #page-drive .dz-ico{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-family:var(--mono);letter-spacing:.02em;color:var(--gold,#caa64a);background:#0b0b0c;border:1px solid #23231f}
+          #page-drive .dz-card.doc .dz-ico{background:#0b0b0c;color:var(--yel)}
+          #page-drive .dz-card{position:relative}
+          #page-drive .dz-del{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:7px;border:1px solid var(--line);background:#fff;color:var(--mute-2);font-size:11px;display:none;align-items:center;justify-content:center;cursor:pointer}
+          #page-drive .dz-card:hover .dz-del{display:flex}
+          #page-drive .dz-del:hover{color:var(--red);border-color:var(--red-soft)}
+          #page-drive .dz-add{border-style:dashed;justify-content:center;align-items:center;text-align:center;color:var(--mute)}
+          #page-drive .dz-add:hover{border-color:var(--yel)}
           #page-drive .dz-nm{font-weight:700;font-size:14px}#page-drive .dz-meta{font-size:11.5px;color:var(--mute)}
           /* documento de roteiros */
           .rot-doc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
@@ -5477,32 +5483,58 @@ const ROTEIROS_VIVENDA=[
 function renderRoteirosVivenda(){
   return ROTEIROS_VIVENDA.map(r=>`<div class="rot-doc"><div class="rot-num"><span class="q">#${r.n}</span> · "${mdEsc(r.titulo)}"</div><div class="rot-meta">${mdEsc(r.meta)}</div><div class="rot-ctx"><strong>Contexto:</strong> ${mdEsc(r.ctx)}</div><table class="rot-tab"><thead><tr><th>Cena</th><th>Visual / Take</th><th>Fala / Locução</th><th>Observações</th></tr></thead><tbody>${r.cenas.map((c,i)=>`<tr><td>${i+1}</td><td>${mdEsc(c[0])}</td><td class="fala">${mdEsc(c[1])}</td><td>${mdEsc(c[2])}</td></tr>`).join('')}</tbody></table><div class="rot-cta">🎯 ${mdEsc(r.cta)}</div><div class="rot-leg">Legenda: ${mdEsc(r.leg)}</div></div>`).join('');
 }
-const DRIVE={'Farmácia Vivenda':{ico:'💊',pastas:{
-  'Roteiros Vivenda':{ico:'🎬',tipo:'doc',meta:'12 roteiros · Junho 2026'},
-  'Planejamentos':{ico:'📑',tipo:'vazio'},
-  'Artes':{ico:'🎨',tipo:'vazio'},
-  'Vídeos':{ico:'🎞️',tipo:'vazio'},
+const DRIVE_DEFAULT={'Farmácia Vivenda':{ico:'VV',pastas:{
+  'Roteiros Vivenda':{ico:'RT',tipo:'doc',meta:'12 roteiros · Junho 2026'},
+  'Planejamentos':{ico:'PL',tipo:'vazio'},
+  'Artes':{ico:'AR',tipo:'vazio'},
+  'Vídeos':{ico:'VD',tipo:'vazio'},
 }}};
+function driveLoad(){try{const s=JSON.parse(localStorage.getItem('wfa-drive')||'null');if(s&&typeof s==='object'&&Object.keys(s).length)return s;}catch(e){}return JSON.parse(JSON.stringify(DRIVE_DEFAULT));}
+function driveSave(){localStorage.setItem('wfa-drive',JSON.stringify(DRIVE));}
+let DRIVE=driveLoad();
+function driveMono(nm){return String(nm||'').trim().slice(0,2).toUpperCase();}
 let DRIVE_PATH=[];
 function driveGo(i){DRIVE_PATH=DRIVE_PATH.slice(0,i);renderDrive();}
 function driveOpen(name){DRIVE_PATH.push(name);renderDrive();}
+function driveNovaPasta(){
+  if(DRIVE_PATH.length===0){
+    const nm=prompt('Nome da nova pasta de cliente:');if(!nm||!nm.trim())return;
+    if(DRIVE[nm.trim()]){toast('Já existe uma pasta com esse nome');return;}
+    DRIVE[nm.trim()]={ico:driveMono(nm),pastas:{}};driveSave();renderDrive();toast('Pasta de cliente criada ✓');
+  }else if(DRIVE_PATH.length===1){
+    const cli=DRIVE[DRIVE_PATH[0]];if(!cli)return;
+    const nm=prompt('Nome da nova subpasta dentro de "'+DRIVE_PATH[0]+'":');if(!nm||!nm.trim())return;
+    if(cli.pastas[nm.trim()]){toast('Já existe uma subpasta com esse nome');return;}
+    cli.pastas[nm.trim()]={ico:driveMono(nm),tipo:'vazio'};driveSave();renderDrive();toast('Subpasta criada ✓');
+  }else{toast('Crie subpastas no nível do cliente');}
+}
+function driveExcluir(nm){
+  if(!confirm('Excluir a pasta "'+nm+'"?'))return;
+  if(DRIVE_PATH.length===0){delete DRIVE[nm];}
+  else if(DRIVE_PATH.length===1){const cli=DRIVE[DRIVE_PATH[0]];if(cli)delete cli.pastas[nm];}
+  driveSave();renderDrive();toast('Pasta excluída');
+}
 function driveCopiarRoteiros(){const t=document.getElementById('dz-body');navigator.clipboard?.writeText(t?t.innerText:'').then(()=>toast('Roteiros copiados'),()=>toast('Não consegui copiar'));}
+function driveNovaBtn(label){return `<div class="dz-card dz-add" onclick="driveNovaPasta()"><div class="dz-ico" style="background:#fff;border:1.5px dashed var(--line-2);color:var(--mute-2)">+</div><div class="dz-nm">${label}</div><div class="dz-meta">criar nova</div></div>`;}
 function renderDrive(){
   const body=document.getElementById('dz-body');const cr=document.getElementById('dz-crumbs');if(!body)return;
-  let crumbs=`<b onclick="driveGo(0)">📂 Drive</b>`;
+  DRIVE=driveLoad(); // sempre reflete o que veio da nuvem
+  let crumbs=`<b onclick="driveGo(0)">Drive</b>`;
   DRIVE_PATH.forEach((p,i)=>{crumbs+=` <span style="color:var(--mute-2)">/</span> <span onclick="driveGo(${i+1})">${mdEsc(p)}</span>`;});
   if(cr)cr.innerHTML=crumbs;
+  const cardCli=(nm,c)=>`<div class="dz-card" onclick="driveOpen('${nm.replace(/'/g,"")}')"><button class="dz-del" title="Excluir" onclick="event.stopPropagation();driveExcluir('${nm.replace(/'/g,"")}')">✕</button><div class="dz-ico">${mdEsc(c.ico||driveMono(nm))}</div><div class="dz-nm">${mdEsc(nm)}</div><div class="dz-meta">${Object.keys(c.pastas||{}).length} pastas</div></div>`;
   if(DRIVE_PATH.length===0){
-    body.innerHTML=`<div class="dz-grid">${Object.entries(DRIVE).map(([nm,c])=>`<div class="dz-card" onclick="driveOpen('${nm.replace(/'/g,"")}')"><div class="dz-ico">${c.ico}</div><div class="dz-nm">${mdEsc(nm)}</div><div class="dz-meta">${Object.keys(c.pastas).length} pastas</div></div>`).join('')}</div>`;return;
+    body.innerHTML=`<div class="dz-grid">${Object.entries(DRIVE).map(([nm,c])=>cardCli(nm,c)).join('')}${driveNovaBtn('Nova pasta de cliente')}</div>`;return;
   }
   const cli=DRIVE[DRIVE_PATH[0]];if(!cli){body.innerHTML='';return;}
   if(DRIVE_PATH.length===1){
-    body.innerHTML=`<div class="dz-grid">${Object.entries(cli.pastas).map(([nm,p])=>`<div class="dz-card ${p.tipo==='doc'?'doc':''}" onclick="driveOpen('${nm.replace(/'/g,"")}')"><div class="dz-ico">${p.ico}</div><div class="dz-nm">${mdEsc(nm)}</div><div class="dz-meta">${p.tipo==='doc'?(p.meta||'documento'):'pasta'}</div></div>`).join('')}</div>`;return;
+    const cardSub=(nm,p)=>`<div class="dz-card ${p.tipo==='doc'?'doc':''}" onclick="driveOpen('${nm.replace(/'/g,"")}')">${p.tipo!=='doc'?`<button class="dz-del" title="Excluir" onclick="event.stopPropagation();driveExcluir('${nm.replace(/'/g,"")}')">✕</button>`:''}<div class="dz-ico">${mdEsc(p.ico||driveMono(nm))}</div><div class="dz-nm">${mdEsc(nm)}</div><div class="dz-meta">${p.tipo==='doc'?(p.meta||'documento'):'pasta'}</div></div>`;
+    body.innerHTML=`<div class="dz-grid">${Object.entries(cli.pastas).map(([nm,p])=>cardSub(nm,p)).join('')}${driveNovaBtn('Nova subpasta')}</div>`;return;
   }
   if(DRIVE_PATH[1]==='Roteiros Vivenda'){
-    body.innerHTML=`<div class="dz-doc-head"><h2>🎬 Roteiros Vivenda — Junho 2026</h2><button class="tb-btn" onclick="driveCopiarRoteiros()">⧉ Copiar tudo</button></div>${renderRoteirosVivenda()}`;
+    body.innerHTML=`<div class="dz-doc-head"><h2>Roteiros Vivenda — Junho 2026</h2><button class="tb-btn" onclick="driveCopiarRoteiros()">Copiar tudo</button></div>${renderRoteirosVivenda()}`;
   }else{
-    body.innerHTML=`<div class="card" style="padding:24px;color:var(--mute)">Pasta vazia por enquanto. Use "📎 Enviar arquivo" lá em cima pra subir documentos aqui.</div>`;
+    body.innerHTML=`<div class="card" style="padding:24px;color:var(--mute)">Pasta vazia por enquanto. Use "Enviar arquivo" lá em cima pra subir documentos aqui.</div>`;
   }
 }
 async function vivAgente(){
