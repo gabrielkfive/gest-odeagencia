@@ -669,6 +669,54 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
           }
         }
 
+        // JARVIS-AGENTE: Claude COM FERRAMENTAS. Recebe o comando + contexto, decide
+        // sozinho quais ações executar (não depende de frases programadas). O cliente
+        // executa as ações devolvidas. É a "minha capacidade" transferida pro JARVIS.
+        if (action === "jarvis-agent") {
+          const msgs = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
+          if (!msgs.length) return json({ error: "Diga algo." }, { status: 400 });
+          const ctx2 = body.contexto && typeof body.contexto === "object" ? body.contexto : {};
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const aiKey = zapiEnv("ANTHROPIC_API_KEY");
+          if (!aiKey) return json({ error: "IA não configurada" }, { status: 500 });
+          // memória do JARVIS (aprende preferências do Gabriel)
+          let memoria: string[] = [];
+          try { const { data } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-jarvis-memory").maybeSingle(); if (Array.isArray(data?.data)) memoria = data.data.slice(-40); } catch { /* */ }
+          const tools = [
+            { name: "navegar", description: "Abre uma página/aba do sistema.", input_schema: { type: "object", properties: { pagina: { type: "string", description: "ex: dashboard, lista-clientes, tarefas, financeiro, cobranca, acerto, agentes, conselho, whatsapp, roteirista, legenda, planejamento, drive, agenda, processos, organograma, integracoes, cliente, meumes" } }, required: ["pagina"] } },
+            { name: "abrir_cliente", description: "Abre a ficha de um cliente pelo nome.", input_schema: { type: "object", properties: { nome: { type: "string" } }, required: ["nome"] } },
+            { name: "criar_tarefa", description: "Cria uma tarefa.", input_schema: { type: "object", properties: { titulo: { type: "string" }, responsavel: { type: "string", description: "nome da pessoa OU área (tráfego, social, account, design, edição, captação, comercial)" }, cliente: { type: "string" }, data: { type: "string", description: "YYYY-MM-DD" }, prioridade: { type: "string", enum: ["alta", "media", "baixa"] } }, required: ["titulo"] } },
+            { name: "concluir_tarefa", description: "Marca uma tarefa como concluída (busca pelo título).", input_schema: { type: "object", properties: { titulo: { type: "string" } }, required: ["titulo"] } },
+            { name: "designar_tarefa", description: "Atribui uma tarefa a uma pessoa.", input_schema: { type: "object", properties: { titulo: { type: "string" }, responsavel: { type: "string" } }, required: ["titulo", "responsavel"] } },
+            { name: "mudar_tarefa", description: "Muda data e/ou prioridade de uma tarefa.", input_schema: { type: "object", properties: { titulo: { type: "string" }, data: { type: "string" }, prioridade: { type: "string", enum: ["alta", "media", "baixa"] } }, required: ["titulo"] } },
+            { name: "agendar_evento", description: "Cria um evento no Google Calendar e na agenda.", input_schema: { type: "object", properties: { titulo: { type: "string" }, data: { type: "string", description: "YYYY-MM-DD" }, hora: { type: "string", description: "HH:MM" } }, required: ["titulo", "data"] } },
+            { name: "rodar_conselho", description: "Dispara o Conselho de IA para debater os clientes agora.", input_schema: { type: "object", properties: {} } },
+            { name: "distribuir_tarefas_conselho", description: "Reatribui as tarefas criadas pelo conselho às pessoas certas.", input_schema: { type: "object", properties: {} } },
+            { name: "gerar_roteiro", description: "Gera roteiros de Reels para um cliente sobre um tema.", input_schema: { type: "object", properties: { cliente: { type: "string" }, tema: { type: "string" } }, required: ["tema"] } },
+            { name: "resumir_whatsapp", description: "Gera o resumo das conversas do WhatsApp das últimas 24h.", input_schema: { type: "object", properties: {} } },
+            { name: "lembrar", description: "Guarda uma preferência/fato importante do Gabriel pra lembrar sempre.", input_schema: { type: "object", properties: { fato: { type: "string" } }, required: ["fato"] } },
+          ];
+          const sys =
+            "Você é o JARVIS da ARK Content (inspirado no JARVIS do Homem de Ferro). Trate o Gabriel por 'Senhor', formal e conciso (será falado). " +
+            "Você AGE no sistema usando as ferramentas disponíveis — escolha a(s) ferramenta(s) certa(s) para o pedido. Pode usar várias. " +
+            "Para perguntas (status, atrasadas, quem tem o quê), responda em TEXTO curto usando o CONTEXTO; só use ferramenta se for uma ação. " +
+            "Sempre devolva também uma frase curta confirmando o que fez (1-2 frases, sem markdown). " +
+            `\n\nCONTEXTO AGORA: ${JSON.stringify(ctx2).slice(0, 3500)}` +
+            (memoria.length ? `\n\nO QUE VOCÊ JÁ APRENDEU SOBRE O GABRIEL: ${memoria.join("; ")}` : "");
+          try {
+            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 700, system: sys, tools, messages: msgs.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "") })).filter((m: any) => m.content) }) });
+            const d: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: d?.error?.message || "Falha na IA" }, { status: 502 });
+            const blocks: any[] = Array.isArray(d?.content) ? d.content : [];
+            const say = blocks.filter((b) => b.type === "text").map((b) => b.text).join(" ").trim();
+            const actions = blocks.filter((b) => b.type === "tool_use").map((b) => ({ tool: b.name, input: b.input || {} }));
+            // grava memória se o JARVIS pediu pra lembrar
+            const lembrar = actions.filter((a) => a.tool === "lembrar").map((a) => String(a.input?.fato || "")).filter(Boolean);
+            if (lembrar.length) { try { memoria = memoria.concat(lembrar).slice(-60); await ctx.db.from("workflowark_state").upsert({ key: "wfa-jarvis-memory", data: memoria }); } catch { /* */ } }
+            return json({ ok: true, say: say || "", actions: actions.filter((a) => a.tool !== "lembrar"), aprendeu: lembrar });
+          } catch (e) { return json({ error: (e as Error)?.message || "Falha no JARVIS" }, { status: 502 }); }
+        }
+
         // Conselho de IA: especialistas da ARK debatem o tema e consolidam decisão + plano.
         if (action === "conselho") {
           const tema = String(body.tema ?? "").trim();

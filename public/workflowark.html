@@ -5318,13 +5318,19 @@ async function jarvisSend(txt){
   let done=jarvisExecute(txt);
   if(done&&typeof done.then==='function'){ JARVIS_MSGS.push({role:'assistant',content:'…'}); jarvisRender(); done=await done; JARVIS_MSGS.pop(); }
   if(done){ JARVIS_MSGS.push({role:'assistant',content:done}); jarvisRender(); jarvisFalar(done); return; }
-  // 2) senão, conversa com a IA
+  // 2) senão, vira AGENTE: Claude COM FERRAMENTAS decide e o cliente executa
   JARVIS_MSGS.push({role:'assistant',content:'…'}); jarvisRender();
   try{
-    const r=await cloudCall('save',{action:'jarvis',messages:JARVIS_MSGS.filter(m=>m.content!=='…')});
-    const reply=(r&&r.reply)||'(sem resposta)';
-    JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:reply}; jarvisRender(); jarvisFalar(reply);
-  }catch(e){ JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:'⚠ '+((e&&e.message)||'falha')}; jarvisRender(); }
+    const r=await cloudCall('save',{action:'jarvis-agent',messages:JARVIS_MSGS.filter(m=>m.content!=='…'),contexto:jarvisContexto()});
+    const did=await jarvisRunActions(r&&r.actions);
+    let say=(r&&r.say)||'';
+    if(!say) say = did?'Feito, Senhor.':'Não entendi o comando, Senhor. Pode repetir?';
+    JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:say}; jarvisRender(); jarvisFalar(say);
+  }catch(e){
+    // fallback final: conversa simples
+    try{ const r=await cloudCall('save',{action:'jarvis',messages:JARVIS_MSGS.filter(m=>m.content!=='…')}); const reply=(r&&r.reply)||'(sem resposta)'; JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:reply}; jarvisRender(); jarvisFalar(reply); }
+    catch(e2){ JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:'⚠ '+((e2&&e2.message)||'falha')}; jarvisRender(); }
+  }
 }
 /* JARVIS EXECUTOR (estilo Fazm): interpreta comandos e AGE no sistema.
    Retorna a frase de confirmação (string) se executou, ou null pra cair na conversa. */
@@ -5567,6 +5573,59 @@ function ARK_acharTarefa(txt){
   const q=String(txt||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
   if(q.length<3)return null;
   return (state.tarefas||[]).find(t=>String(t.title||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').includes(q))||null;
+}
+/* ===== JARVIS-AGENTE: contexto + despachante de ações (executa o que o Claude decidir) ===== */
+function jarvisContexto(){
+  const hoje=new Date().toISOString().split('T')[0];
+  const ts=state.tarefas||[];
+  const abertas=ts.filter(t=>t.status!=='concluido');
+  const atrasadas=abertas.filter(t=>t.data&&t.data<hoje);
+  let brf=0;try{brf=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]').filter(b=>b.date===hoje).length;}catch(e){}
+  return {
+    hoje, tarefasAbertas:abertas.length, atrasadas:atrasadas.length,
+    atrasadasTop:atrasadas.slice(0,8).map(t=>({titulo:t.title,resp:t.resp,data:t.data})),
+    porPessoa:(typeof MD_PEOPLE!=='undefined'?MD_PEOPLE:[]).map(p=>({pessoa:p,abertas:abertas.filter(t=>t.resp===p).length})).filter(x=>x.abertas),
+    briefingsHoje:brf,
+    clientes:(typeof CLIENTES!=='undefined'?CLIENTES:[]).filter(c=>c.status!=='churn').map(c=>c.nm).slice(0,30),
+    equipe:(typeof MD_PEOPLE!=='undefined'?MD_PEOPLE:[]).slice(0,20)
+  };
+}
+function jarvisPessoa(nome){
+  if(!nome)return '';
+  const time=(typeof MD_PEOPLE!=='undefined')?MD_PEOPLE:[];
+  const n=String(nome).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const p=time.find(x=>{const f=x.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');return f===n||f.split(' ')[0]===n.split(' ')[0]||f.includes(n)||n.includes(f.split(' ')[0]);});
+  return p || (typeof ARK_pessoaPorArea==='function'?ARK_pessoaPorArea(nome):'');
+}
+function jarvisCriarTarefaObj(i){
+  const cli=(typeof CLIENTES!=='undefined'?CLIENTES:[]).find(c=>i.cliente&&c.nm.toLowerCase().includes(String(i.cliente).toLowerCase()));
+  state.tarefas=state.tarefas||[];
+  state.tarefas.push({id:'ja'+Date.now()+Math.floor(Math.random()*999),title:String(i.titulo||'Tarefa').slice(0,140),desc:'',funcao:'',clienteId:cli?cli.id:'',resp:i.responsavel?jarvisPessoa(i.responsavel):'',data:i.data||'',prio:i.prioridade||'media',status:'backlog',tags:['jarvis'],checklist:[],sprintN:null,origem:'jarvis',criadaEm:new Date().toISOString()});
+}
+async function jarvisAgendarDireto(titulo,date,hora){
+  try{ const evs=loadAgendaEvents(); evs.push({id:'ja'+Date.now(),date,title:titulo,time:hora||'',type:'reuniao'}); saveAgendaEvents(evs); }catch(e){}
+  try{ const st=await cloudCall('save',{action:'google-status'}); if(st&&st.connected){ await cloudCall('save',{action:'google-cal-create',events:[{title:titulo,date,time:hora||'',durationMin:60}]}); } }catch(e){}
+}
+async function jarvisRunActions(actions){
+  let did=0, mexeuTarefa=false;
+  for(const a of (actions||[])){
+    const i=a.input||{};
+    try{
+      if(a.tool==='navegar'){ if(jarvisGo(i.pagina))did++; }
+      else if(a.tool==='abrir_cliente'){ const c=(CLIENTES||[]).find(x=>{const n=x.nm.toLowerCase();const q=String(i.nome||'').toLowerCase();return n.includes(q)||q.includes(n.split(' ')[0]);}); if(c&&typeof cliDetalhe==='function'){cliDetalhe(c.id);did++;} }
+      else if(a.tool==='criar_tarefa'){ jarvisCriarTarefaObj(i); mexeuTarefa=true;did++; }
+      else if(a.tool==='concluir_tarefa'){ const tk=ARK_acharTarefa(i.titulo); if(tk){tk.status='concluido';mexeuTarefa=true;did++;} }
+      else if(a.tool==='designar_tarefa'){ const tk=ARK_acharTarefa(i.titulo); const p=jarvisPessoa(i.responsavel); if(tk&&p){tk.resp=p;mexeuTarefa=true;did++;} }
+      else if(a.tool==='mudar_tarefa'){ const tk=ARK_acharTarefa(i.titulo); if(tk){ if(i.data)tk.data=i.data; if(i.prioridade)tk.prio=i.prioridade; mexeuTarefa=true;did++; } }
+      else if(a.tool==='agendar_evento'){ await jarvisAgendarDireto(i.titulo,i.data,i.hora); did++; }
+      else if(a.tool==='rodar_conselho'){ jarvisGo('conselho'); if(typeof consRodarAuto==='function')consRodarAuto(); did++; }
+      else if(a.tool==='distribuir_tarefas_conselho'){ if(typeof redistribuirTarefasConselho==='function')redistribuirTarefasConselho(); did++; }
+      else if(a.tool==='gerar_roteiro'){ const cli=(CLIENTES||[]).find(x=>i.cliente&&x.nm.toLowerCase().includes(String(i.cliente).toLowerCase())); jarvisGo('roteirista'); setTimeout(()=>{try{const tt=document.getElementById('rot-tema');if(tt)tt.value=i.tema||'';const rc=document.getElementById('rot-cliente');if(rc)rc.value=cli?cli.nm:(i.cliente||'');if(typeof rotGerar==='function')rotGerar();}catch(e){}},350); did++; }
+      else if(a.tool==='resumir_whatsapp'){ jarvisGo('whatsapp'); setTimeout(()=>{try{if(typeof wppResumo==='function')wppResumo();}catch(e){}},400); did++; }
+    }catch(e){}
+  }
+  if(mexeuTarefa){ if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); if(typeof updateBadges==='function')updateBadges(); }
+  return did;
 }
 function jarvisFalar(txt){jarvisSpeak(String(txt||'').replace(/[#*_`]/g,''));}
 function jarvisMic(){
