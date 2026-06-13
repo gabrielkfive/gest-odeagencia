@@ -18,6 +18,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
 import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowark.sheet'
 import { Route as ApiWorkflowarkAiCheckRouteImport } from './routes/api/workflowark.ai-check'
+import { Route as ApiWorkflowarkAgentsRunRouteImport } from './routes/api/workflowark.agents-run'
 import { Route as ApiAuthSignupRouteImport } from './routes/api/auth.signup'
 import { Route as ApiWorkflowarkWhatsappWebhookRouteImport } from './routes/api/workflowark.whatsapp.webhook'
 import { Route as ApiWorkflowarkWhatsappSendRouteImport } from './routes/api/workflowark.whatsapp.send'
@@ -68,6 +69,11 @@ const ApiWorkflowarkAiCheckRoute = ApiWorkflowarkAiCheckRouteImport.update({
   path: '/api/workflowark/ai-check',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWorkflowarkAgentsRunRoute = ApiWorkflowarkAgentsRunRouteImport.update({
+  id: '/api/workflowark/agents-run',
+  path: '/api/workflowark/agents-run',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSignupRoute = ApiAuthSignupRouteImport.update({
   id: '/api/auth/signup',
   path: '/api/auth/signup',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
+  '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
+  '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
+  '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/ia'
     | '/api/auth/signup'
+    | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/sheet'
     | '/api/workflowark/state'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/ia'
     | '/api/auth/signup'
+    | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/sheet'
     | '/api/workflowark/state'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/api/ia'
     | '/api/auth/signup'
+    | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/sheet'
     | '/api/workflowark/state'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   SistemaRoute: typeof SistemaRoute
   ApiIaRoute: typeof ApiIaRoute
   ApiAuthSignupRoute: typeof ApiAuthSignupRoute
+  ApiWorkflowarkAgentsRunRoute: typeof ApiWorkflowarkAgentsRunRoute
   ApiWorkflowarkAiCheckRoute: typeof ApiWorkflowarkAiCheckRoute
   ApiWorkflowarkSheetRoute: typeof ApiWorkflowarkSheetRoute
   ApiWorkflowarkStateRoute: typeof ApiWorkflowarkStateRoute
@@ -274,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWorkflowarkAiCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/workflowark/agents-run': {
+      id: '/api/workflowark/agents-run'
+      path: '/api/workflowark/agents-run'
+      fullPath: '/api/workflowark/agents-run'
+      preLoaderRoute: typeof ApiWorkflowarkAgentsRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/signup': {
       id: '/api/auth/signup'
       path: '/api/auth/signup'
@@ -345,6 +365,7 @@ const rootRouteChildren: RootRouteChildren = {
   SistemaRoute: SistemaRoute,
   ApiIaRoute: ApiIaRoute,
   ApiAuthSignupRoute: ApiAuthSignupRoute,
+  ApiWorkflowarkAgentsRunRoute: ApiWorkflowarkAgentsRunRoute,
   ApiWorkflowarkAiCheckRoute: ApiWorkflowarkAiCheckRoute,
   ApiWorkflowarkSheetRoute: ApiWorkflowarkSheetRoute,
   ApiWorkflowarkStateRoute: ApiWorkflowarkStateRoute,
