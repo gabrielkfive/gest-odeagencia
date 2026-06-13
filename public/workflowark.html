@@ -1845,6 +1845,20 @@ function collectLocalCloudState(){
   }
   return entries;
 }
+// Liga os agentes 24/7: na 1ª abertura do dia, dispara o Conselho autônomo (idempotente
+// no servidor via wfa-agents-lastrun). Some o conselho debate todos os clientes (auto-encadeia)
+// e os briefings caem no Meu Dia. Funciona junto com o cron diário do servidor.
+async function arkDailyAgentsKick(){
+  try{
+    const hoje=new Date().toISOString().split('T')[0];
+    if(localStorage.getItem('wfa-agents-kick-date')===hoje)return;
+    localStorage.setItem('wfa-agents-kick-date',hoje);
+    const r=await fetch('/api/workflowark/agents-run?key=ark-2026');
+    if(!r.ok)return;
+    // dá um tempinho pro auto-encadeamento e puxa os briefings novos
+    setTimeout(async()=>{try{await sincronizarAgora();if(typeof renderMeuDia==='function')renderMeuDia();if(typeof consAutoRender==='function')consAutoRender();}catch(e){}},9000);
+  }catch(e){/* silencioso */}
+}
 function applyCloudState(remote){
   WFA_CLOUD_MUTED=true;
   Object.entries(remote||{}).forEach(([key,value])=>{
@@ -1890,6 +1904,7 @@ async function bootCloudSync(){
     toast('✓ Sincronizado');
     atualizarBadgeSync(true);
     iniciarAutoSync();
+    arkDailyAgentsKick(); // 1ª abertura do dia liga os agentes (idempotente)
   }catch(err){
     WFA_CLOUD_READY=false;
     atualizarBadgeSync(false);
@@ -5140,7 +5155,7 @@ function renderWhatsapp(){
     let sep='';
     if(day&&day!==lastDay){lastDay=day;sep=`<div style="text-align:center;margin:10px 0"><span style="background:#e7e7e3;color:#555;font-size:10.5px;padding:2px 10px;border-radius:10px">${day}</span></div>`;}
     const senderTag=(!out&&active.isGroup&&m.sender)?`<div style="font-size:10.5px;font-weight:700;color:#1d8a4e;margin-bottom:2px">${mdEsc(m.sender)}</div>`:'';
-    const stIcon=out?(m.status==='sending'?' <span title="enviando">🕐</span>':m.status==='failed'?` <span title="${mdEsc(m.error||'falhou')}" style="color:#c0392b;font-weight:700">⚠ falhou</span>`:' <span title="enviado" style="color:#34b7f1">✓</span>'):'';
+    const stIcon=out?(m.status==='sending'?' <span title="enviando">enviando…</span>':m.status==='failed'?` <span title="${mdEsc(m.error||'falhou')}" style="color:#c0392b;font-weight:700">⚠ falhou</span> <span onclick="event.stopPropagation();wppReenviar('${active.phone}',${mi})" title="Reenviar" style="cursor:pointer;color:#1d8a4e;font-weight:700;text-decoration:underline">reenviar</span>`:' <span title="enviado" style="color:#34b7f1">✓</span>'):'';
     const selChk=`<span onclick="event.stopPropagation();wppSelToggle(${mi})" title="Selecionar" style="cursor:pointer;font-size:16px;line-height:1;flex-shrink:0;color:${WPP_SEL.has(mi)?'#25D366':'#cfcfcf'}">${WPP_SEL.has(mi)?'☑':'☐'}</span>`;
     return sep+`<div style="display:flex;align-items:center;gap:7px;justify-content:${out?'flex-end':'flex-start'};margin:3px 0">
       ${out?'':selChk}
@@ -5562,6 +5577,19 @@ async function wppSend(){
   }catch(e){
     localMsg.status='failed';localMsg.error=(e&&e.message)||'falha';renderWhatsapp();
     toast('⚠ '+(e.message||'Não consegui enviar'));
+  }
+}
+// Reenvia uma mensagem que falhou (tapa final do WhatsApp)
+async function wppReenviar(phone,mi){
+  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[phone];
+  const m=c&&c.msgs&&c.msgs[mi];if(!m||m.status!=='failed')return;
+  m.status='sending';m.error='';renderWhatsapp();
+  try{
+    await cloudCall('save',{action:'send-whatsapp',phone,message:m.text||'',jid:(c&&c.jid)||''});
+    m.status='sent';renderWhatsapp();toast('Reenviado ✓');
+  }catch(e){
+    m.status='failed';m.error=(e&&e.message)||'falha';renderWhatsapp();
+    toast('⚠ '+((e&&e.message)||'Não consegui reenviar'));
   }
 }
 /* ============ FINANCEIRO · lê a planilha do Google ============ */
