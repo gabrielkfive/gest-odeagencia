@@ -3238,13 +3238,13 @@ function cliDetalhe(id){
   const fld=(k,label,ph,val)=>`<div class="crm-fi"><label>${label}</label><input value="${mdEsc(val!==undefined?val:(d[k]||''))}" placeholder="${ph||''}" oninput="cliDetField('${k}',this.value)"></div>`;
   const tarefas=(state.tarefas||[]).filter(t=>t.clienteId===id || ((t.title||'').toLowerCase().includes(String(c.nm||'').toLowerCase()) && c.nm));
   const tHtml=tarefas.length?tarefas.slice(0,40).map(t=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)"><span style="font-size:12.5px">${mdEsc(t.title)}</span><span style="font-size:11px;color:var(--mute);white-space:nowrap">${mdEsc(t.resp||'')}${t.data?' · '+mdEsc(t.data):''}</span></div>`).join(''):'<div style="color:var(--mute);font-size:12.5px">Nenhuma tarefa deste cliente ainda.</div>';
-  const stL={r:'🔴 Urgente',y:'🟡 Em ajuste',gr:'🟢 Saudável',churn:'⚫ Churn'}[c.status]||'';
+  const stL={r:'Urgente',y:'Em ajuste',gr:'Saudável',churn:'Churn'}[c.status]||'';
   document.getElementById('clid-body').innerHTML=`
     <div style="display:flex;align-items:center;gap:13px;margin-bottom:6px">
       <div class="cli-av ${c.status}" style="width:54px;height:54px;font-size:21px;flex-shrink:0">${cliInitials(c.nm).toUpperCase()}</div>
       <div style="min-width:0"><div style="font-size:20px;font-weight:800">${mdEsc(c.nm)}</div><div style="color:var(--mute);font-size:13px">${mdEsc(c.plano||'')} · ${c.tipo==='ARK'?'ARK Direto':'Squad Alpha'} · ${stL}</div></div>
     </div>
-    <div class="cli-sect"><h4>📋 Informações Gerais</h4>
+    <div class="cli-sect"><h4>Informações Gerais</h4>
       <div class="cli-grid">
         ${fld('empresa','Empresa / Razão social','')}
         ${fld('responsavel','Account responsável','')}
@@ -3258,10 +3258,10 @@ function cliDetalhe(id){
         ${fld('origem','Origem do cliente','indicação, anúncio...')}
       </div>
     </div>
-    <div class="cli-sect"><h4>📝 Briefing</h4>
+    <div class="cli-sect"><h4>Briefing</h4>
       <textarea class="form-input" rows="4" style="width:100%;box-sizing:border-box" placeholder="Objetivos, público-alvo, tom de voz, observações..." oninput="cliDetField('briefing',this.value)">${mdEsc(d.briefing||'')}</textarea>
     </div>
-    <div class="cli-sect"><h4>🔗 Links e Acessos</h4>
+    <div class="cli-sect"><h4>Links e Acessos</h4>
       <div class="cli-grid">
         ${fld('linkInsta','Link do Instagram','https://')}
         ${fld('linkDrive','Pasta no Drive','https://')}
@@ -3269,7 +3269,12 @@ function cliDetalhe(id){
         ${fld('linkAds','Conta de anúncios','')}
       </div>
     </div>
-    <div class="cli-sect"><h4>✅ Tarefas do cliente <span style="color:var(--mute);font-weight:500;font-size:12px">(${tarefas.length})</span></h4>${tHtml}</div>
+    <div class="cli-sect"><h4>Tarefas do cliente <span style="color:var(--mute);font-weight:500;font-size:12px">(${tarefas.length})</span></h4>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input id="clid-newtask" class="form-input" placeholder="Nova tarefa pra ${mdEsc(c.nm)}…" style="flex:1" onkeydown="if(event.key==='Enter')cliAddTask('${id}')">
+        <button class="tb-btn" onclick="cliAddTask('${id}')">+ Adicionar</button>
+      </div>
+      ${tHtml}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
       <button class="icobtn" onclick="closeModal('modal-cli-detalhe');goRegua('${id}')">Régua dos 15</button>
       <button class="icobtn" onclick="closeModal('modal-cli-detalhe');document.querySelector('[data-nav=jornada]')&&document.querySelector('[data-nav=jornada]').click()">Ver na Jornada</button>
@@ -3277,6 +3282,17 @@ function cliDetalhe(id){
       <button class="tb-btn" style="margin-left:auto" onclick="closeModal('modal-cli-detalhe')">Pronto</button>
     </div>`;
   document.getElementById('modal-cli-detalhe').classList.add('open');
+}
+// Adiciona tarefa direto na ficha do cliente (acumulativo pedido pelo Gabriel)
+function cliAddTask(id){
+  const inp=document.getElementById('clid-newtask');const t=(inp&&inp.value||'').trim();if(!t)return;
+  const c=CLIENTES.find(x=>x.id===id);
+  state.tarefas=state.tarefas||[];
+  state.tarefas.push({id:'cli'+Date.now(),title:t.slice(0,140),desc:'',funcao:'',clienteId:id,resp:'',data:'',prio:'media',status:'backlog',tags:['cliente'],checklist:[],sprintN:null,origem:'ficha-cliente',criadaEm:new Date().toISOString()});
+  if(typeof saveTarefas==='function')saveTarefas();else localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));
+  if(typeof renderTarefas==='function')renderTarefas();if(typeof updateBadges==='function')updateBadges();
+  toast('Tarefa adicionada a '+(c?c.nm:'cliente')+' ✓');
+  cliDetalhe(id); // re-render da ficha com a nova tarefa
 }
 // Seed único da Valhalla (cliente pedido pelo Gabriel) — fica editável pelo botão Editar.
 (function seedValhalla(){
