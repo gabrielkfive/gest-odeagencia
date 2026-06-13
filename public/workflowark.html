@@ -4504,9 +4504,11 @@ async function importarDados(){
 }
 
 function renderTarefas(){
-  ['backlog','andamento','aprovacao','concluido'].forEach(st=>{
+  const STATS=['backlog','andamento','aprovacao','concluido'];
+  STATS.forEach(st=>{
     const list=document.querySelector(`[data-list="${st}"]`);if(!list)return;
-    const filt=state.tarefas.filter(t=>t.status===st&&tarefaPassaFiltro(t));
+    // status desconhecido (dado antigo/importado) cai no Backlog — nada some
+    const filt=state.tarefas.filter(t=>(t.status===st||(st==='backlog'&&!STATS.includes(t.status)))&&tarefaPassaFiltro(t));
     list.innerHTML=filt.map(taskCard).join('')||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`;
     document.getElementById('ct-'+st).textContent=filt.length;
   });
@@ -4649,10 +4651,10 @@ function taskCard(t){
     ${clHtml}
     <div class="tc-meta" style="margin-top:5px">
       <span class="tc-cli">${c?c.nm:'—'}</span>
-      <span class="tc-date ${late?'late':''}" style="${dateStyle}">${late?'⚠ ':venceHoje?'📅 ':''}${dataFmt}</span>
+      <span class="tc-date ${late?'late':''}" style="${dateStyle}">${late?'Atrasada · ':venceHoje?'Hoje · ':''}${dataFmt}</span>
     </div>
     <div class="tc-meta" style="margin-top:4px">
-      <span class="tc-assign" style="display:inline-flex;align-items:center;gap:5px">${t.resp?`<span class="tc-av">${taskInitials(t.resp)}</span>`:'👤 '}${escapeHtml(t.resp||'—')}</span>
+      <span class="tc-assign" style="display:inline-flex;align-items:center;gap:5px">${t.resp?`<span class="tc-av">${taskInitials(t.resp)}</span>`:''}${escapeHtml(t.resp||'sem responsável')}</span>
       <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
         <button class="icobtn" style="padding:2px 6px;font-size:9.5px" title="Mover para próxima etapa" onclick="event.stopPropagation();moveTask('${t.id}','${nextStatus}')">→</button>
         <button class="icobtn" style="padding:2px 6px;font-size:9.5px;color:var(--red)" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>
