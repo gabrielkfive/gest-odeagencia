@@ -3599,6 +3599,19 @@ function agLive(){
     el.innerHTML=`<span class="pulse"></span><span class="txt">Os agentes rodam sozinhos todo dia. Ainda não debateram hoje — pode disparar agora.</span><button onclick="document.querySelector('[data-nav=conselho]').click()">Abrir Conselho</button>`;
   }
 }
+/* Sweeper de consistência Luce: tira emoji de botões/títulos de ação (mantém o texto).
+   Roda 1x no load. Só mexe em nós-folha de texto pra não quebrar SVGs/handlers. */
+function arkDeEmojiChrome(){
+  try{
+    const sels='.tb-btn,.tv-btn,.pl-vbtn,.jv-spk,#page-planejamento h3,#page-integracoes h3,#page-integracoes h4,#page-drive .dz-doc-head h2';
+    document.querySelectorAll(sels).forEach(el=>{
+      el.childNodes.forEach(n=>{
+        if(n.nodeType===3){const t=n.nodeValue;const c=t.replace(EMOJI_RE,'').replace(/\s{2,}/g,' ');EMOJI_RE.lastIndex=0;if(c!==t)n.nodeValue=c.replace(/^\s+/,'').length?c:c.trim();}
+      });
+    });
+  }catch(e){}
+}
+window.addEventListener('DOMContentLoaded',()=>{setTimeout(arkDeEmojiChrome,50);});
 
 /* ============ TABS ============ */
 document.querySelectorAll('[data-tabs]').forEach(group=>{
