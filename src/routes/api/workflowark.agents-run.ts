@@ -14,10 +14,15 @@ const RUN_KEY = "ark-2026";
 const CLIENTES_CTX: { id: string; nm: string; seg: string; nota: string }[] = [
   { id: "vivenda", nm: "Vivenda", seg: "Farmácia de manipulação / dermocosméticos (cremes de ureia, NAC, cafeína)", nota: "MAIOR ticket, prioritário. 3 captações/mês. Plano de Copa. Decisores: Remerson (pai), Graziella, Yuri." },
   { id: "fercon", nm: "Fercon", seg: "Gastronomia", nota: "2 captações/mês, mais reativo que ativo — provocar pauta." },
-  { id: "sasse", nm: "Sasse Gifts", seg: "Presentes / gifts", nota: "2 captações/mês." },
-  { id: "cachu", nm: "Cachu Restaurante", seg: "Restaurante (food porn)", nota: "Saudável, acompanhar ROAS, conteúdo qui-dom." },
-  { id: "attra", nm: "Attraversiamo Café", seg: "Cafeteria", nota: "Bombando (+1k seguidores em 3 dias) — surfar a onda." },
+  { id: "sasse", nm: "Sasse Gifts", seg: "Presentes / gifts personalizados", nota: "2 captações/mês." },
+  { id: "cachu", nm: "Cachu Restaurante", seg: "Restaurante (food porn)", nota: "Acompanhar ROAS, conteúdo qui-dom; precisa de consistência diária." },
+  { id: "attra", nm: "Attraversiamo Café", seg: "Cafeteria", nota: "Bombando (+1k seguidores em 3 dias) — surfar a onda e monetizar." },
   { id: "brisa", nm: "Brisa Doce Café", seg: "Cafeteria / doces", nota: "Onboarding + inauguração." },
+  { id: "fonseca", nm: "Fonseca & Cavalcanti", seg: "Advocacia (compliance OAB)", nota: "1 captação/mês; conteúdo precisa respeitar limites de publicidade da OAB; autoridade." },
+  { id: "vaca", nm: "Vaca Velha", seg: "Restaurante / churrascaria", nota: "1 captação/mês (2ª às vezes); ramp-up de receita." },
+  { id: "dom", nm: "Dom Baruka", seg: "Restaurante (Squad Alpha)", nota: "URGENTE: cardápio + iFood + bebidas; auditoria iFood em curso." },
+  { id: "stray", nm: "Stray House", seg: "Restaurante/bar (Squad Alpha)", nota: "Recuperação; ROAS ~5; subir criativos novos." },
+  { id: "babbo", nm: "Babbo Giovanni", seg: "Restaurante italiano (Squad Alpha)", nota: "Em ajuste; criar pauta sob demanda." },
 ];
 
 export const Route = createFileRoute("/api/workflowark/agents-run")({
