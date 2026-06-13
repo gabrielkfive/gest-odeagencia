@@ -2449,6 +2449,17 @@ function iniciarAutoSync(){
   </main>
 </div>
 
+<!-- MODAL: Encaminhar mensagem -->
+<div class="modal-bg" id="modal-wpp-fwd">
+  <div class="modal" style="max-width:420px;max-height:82vh;overflow:auto">
+    <div class="modal-head"><h3>Encaminhar para...</h3><span class="x" onclick="closeModal('modal-wpp-fwd')">✕</span></div>
+    <div class="modal-body">
+      <input id="fwd-search" class="form-input" placeholder="🔍 Buscar conversa..." oninput="wppFwdFilter()" style="margin-bottom:8px">
+      <div id="fwd-list"></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Ficha do Cliente -->
 <div class="modal-bg" id="modal-cli-detalhe">
   <div class="modal" style="max-width:680px;max-height:88vh;overflow:auto">
@@ -4201,6 +4212,32 @@ function wppLightbox(phone,mi){
   if(!ov){ov=document.createElement('div');ov.id='wpp-lightbox';ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100000;display:flex;align-items:center;justify-content:center;cursor:zoom-out';ov.onclick=()=>ov.remove();document.body.appendChild(ov);}
   ov.innerHTML=`<img src="${m._media}" style="max-width:92vw;max-height:92vh;border-radius:8px">`;
 }
+// ---- Encaminhar mensagem ----
+let WPP_FWD=null;
+function wppForward(phone,mi){
+  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[phone];
+  const m=c&&c.msgs&&c.msgs[mi]; if(!m)return;
+  WPP_FWD={ text: m.text||'' };
+  const conv=(state.whatsapp&&state.whatsapp.conversas)||{};
+  const list=Object.values(conv).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  document.getElementById('fwd-list').innerHTML=list.map(cc=>`<button class="fwd-item" data-n="${mdEsc((cc.nome||cc.phone||'').toLowerCase())}" onclick="wppForwardSend('${cc.phone}')" style="display:flex;gap:9px;align-items:center;width:100%;text-align:left;border:none;border-bottom:1px solid var(--line);background:#fff;padding:8px 10px;cursor:pointer">${wppAvatarHtml(cc,36)}<span style="font-weight:600;font-size:13px">${mdEsc(cc.nome||cc.phone)}</span></button>`).join('');
+  document.getElementById('fwd-search').value='';
+  document.getElementById('modal-wpp-fwd').classList.add('open');
+}
+function wppFwdFilter(){const q=(document.getElementById('fwd-search').value||'').toLowerCase();document.querySelectorAll('#fwd-list .fwd-item').forEach(el=>{el.style.display=(el.getAttribute('data-n')||'').includes(q)?'':'none';});}
+async function wppForwardSend(targetPhone){
+  if(!WPP_FWD){closeModal('modal-wpp-fwd');return;}
+  const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[targetPhone];
+  const txt=(WPP_FWD.text||'').trim();
+  closeModal('modal-wpp-fwd');
+  if(!txt){toast('Essa mensagem não tem texto pra encaminhar');return;}
+  const localMsg={dir:'out',text:txt,ts:Date.now(),status:'sending'};
+  if(c){c.msgs=c.msgs||[];c.msgs.push(localMsg);c.updatedAt=Date.now();if(WPP_ACTIVE===targetPhone)renderWhatsapp();}
+  try{
+    await cloudCall('save',{action:'send-whatsapp',phone:targetPhone,message:txt,jid:(c&&c.jid)||''});
+    localMsg.status='sent';if(WPP_ACTIVE===targetPhone)renderWhatsapp();toast('Encaminhado ✓');
+  }catch(e){localMsg.status='failed';localMsg.error=(e&&e.message)||'falha';if(WPP_ACTIVE===targetPhone)renderWhatsapp();toast('⚠ '+((e&&e.message)||'Falha ao encaminhar'));}
+}
 function wppFilter(){const q=(document.getElementById('wpp-search')?.value||'').toLowerCase();document.querySelectorAll('#wpp-list .wpp-item').forEach(el=>{el.style.display=(el.getAttribute('data-name')||'').includes(q)?'':'none';});}
 function wppAvatarHtml(c,size){
   const s=size||40;const ini=mdEsc((c.nome||c.phone||'?').trim().charAt(0).toUpperCase());
@@ -4253,7 +4290,7 @@ function renderWhatsapp(){
     const senderTag=(!out&&active.isGroup&&m.sender)?`<div style="font-size:10.5px;font-weight:700;color:#1d8a4e;margin-bottom:2px">${mdEsc(m.sender)}</div>`:'';
     const stIcon=out?(m.status==='sending'?' <span title="enviando">🕐</span>':m.status==='failed'?` <span title="${mdEsc(m.error||'falhou')}" style="color:#c0392b;font-weight:700">⚠ falhou</span>`:' <span title="enviado" style="color:#34b7f1">✓</span>'):'';
     return sep+`<div style="display:flex;justify-content:${out?'flex-end':'flex-start'};margin:3px 0">
-      <div style="max-width:74%;background:${out?(m.status==='failed'?'#ffe2de':'#d9fdd3'):'#fff'};color:#111;border-radius:10px;padding:6px 10px 5px;font-size:13px;box-shadow:0 1px .5px rgba(0,0,0,.13)">${senderTag}${wppMsgBody(m,active.phone,mi)}<div style="font-size:9.5px;color:rgba(0,0,0,.4);text-align:right;margin-top:2px">${m.ts?new Date(m.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}${stIcon}</div></div>
+      <div style="max-width:74%;background:${out?(m.status==='failed'?'#ffe2de':'#d9fdd3'):'#fff'};color:#111;border-radius:10px;padding:6px 10px 5px;font-size:13px;box-shadow:0 1px .5px rgba(0,0,0,.13)">${senderTag}${wppMsgBody(m,active.phone,mi)}<div style="font-size:9.5px;color:rgba(0,0,0,.4);text-align:right;margin-top:2px">${m.ts?new Date(m.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}${stIcon}<span onclick="event.stopPropagation();wppForward('${active.phone}',${mi})" title="Encaminhar" style="cursor:pointer;margin-left:8px;color:#9a9a9a">↪</span></div></div>
     </div>`;
   }).join('');
   const sub=active.isGroup?'Grupo':('+'+mdEsc(active.phone));

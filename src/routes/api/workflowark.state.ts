@@ -460,7 +460,9 @@ export const Route = createFileRoute("/api/workflowark/state")({
           const message = String(body.message ?? "").trim();
           if (!phone || !message) return json({ error: "Telefone e mensagem são obrigatórios." }, { status: 400 });
           const isGroup = jid.includes("@g.us");
-          const target = isGroup ? jid : phone; // grupo: envia pro jid; pessoa: pro número
+          // Sempre envia pro JID completo quando temos (cobre @lid/privacidade, @s.whatsapp.net e grupos);
+          // só cai pros dígitos se não houver jid. Enviar pros dígitos de um @lid falha (não é telefone).
+          const target = jid ? jid : phone;
           try {
             const { waSendText, appendWhatsapp } = await import("@/integrations/zapi.server");
             await waSendText(target, message);
