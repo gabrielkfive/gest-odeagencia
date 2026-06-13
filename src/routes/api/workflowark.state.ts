@@ -545,6 +545,31 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        // Conselho de IA: especialistas da ARK debatem o tema e consolidam decisão + plano.
+        if (action === "conselho") {
+          const tema = String(body.tema ?? "").trim();
+          const cliente = String(body.cliente ?? "").trim();
+          if (!tema) return json({ error: "Escreva o que o conselho deve resolver." }, { status: 400 });
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const aiKey = zapiEnv("ANTHROPIC_API_KEY");
+          if (!aiKey) return json({ error: "IA não configurada (sem ANTHROPIC_API_KEY)." }, { status: 500 });
+          let brief = "";
+          if (cliente) { try { const { clienteBrief } = await import("@/integrations/clientes"); brief = clienteBrief(cliente) || ""; } catch { /* ignore */ } }
+          const sys = `Você simula o CONSELHO DE IA da ARK Content (agência de marketing gastronômico em Brasília). Membros: Diretor de Operações, Gestor de Tráfego, Social Media, Roteirista, Designer, Account/CS, Comercial. Eles DEBATEM o tema (cada um na sua ótica, podem discordar) e o Diretor consolida numa decisão clara + plano de ação prático e realista (foco em vender/agendar, orçamento de PME brasileira). Não invente dados; se faltar, diga o que precisa.${brief ? "\n\nCONTEXTO DO CLIENTE:\n" + brief : ""}\n\nResponda SOMENTE com JSON válido: {"debate":[{"agente":"...","fala":"..."}],"plano":["..."],"decisao":"..."}. Cada "fala" curta (1-2 frases). 4 a 7 membros. "plano" com 3-6 ações objetivas. "decisao" em 2-3 linhas.`;
+          try {
+            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1600, system: sys, messages: [{ role: "user", content: `Tema pro conselho debater: ${tema}${cliente ? ` (cliente: ${cliente})` : ""}` }] }) });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            let raw: string = data?.content?.[0]?.text || "";
+            raw = raw.replace(/```json|```/g, "").trim();
+            const m = raw.match(/\{[\s\S]*\}/);
+            const parsed = m ? JSON.parse(m[0]) : { debate: [], plano: [], decisao: raw };
+            return json({ ok: true, debate: parsed.debate || [], plano: parsed.plano || [], decisao: parsed.decisao || "" });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha no conselho" }, { status: 502 });
+          }
+        }
+
         // Resumo executivo das conversas de WhatsApp das últimas 24h (IA).
         if (action === "wa-resumo") {
           try {
