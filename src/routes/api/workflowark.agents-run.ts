@@ -77,8 +77,12 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           const alvos = soCliente ? CLIENTES_CTX.filter((c) => c.id === soCliente) : CLIENTES_CTX;
 
           // tarefas existentes (pra anexar as novas)
-          const { data: tRow } = await db.from("workflowark_state").select("data").eq("key", "wfa-tarefas").maybeSingle();
-          const tarefas: any[] = Array.isArray(tRow?.data) ? tRow.data : [];
+          // SEGURANÇA CONTRA PERDA DE DADOS: se a leitura falhar, NÃO escrevemos nada em
+          // wfa-tarefas (senão sobrescreveríamos as tarefas reais com uma lista curta).
+          const { data: tRow, error: tErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-tarefas").maybeSingle();
+          const tarefasLoadOk = !tErr;
+          const tarefasBaseLen = Array.isArray(tRow?.data) ? tRow.data.length : 0;
+          const tarefas: any[] = Array.isArray(tRow?.data) ? tRow.data.slice() : [];
 
           // briefings existentes (mantém os de hoje atualizados, descarta antigos > 14 dias)
           const { data: bRow } = await db.from("workflowark_state").select("data").eq("key", "wfa-conselho-briefings").maybeSingle();
@@ -142,18 +146,26 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             notifs.push({ tipo: "conselho", clienteId: c.id, texto: `🧠 Conselho debateu ${c.nm}: ${brief.decisao}` });
           }
 
-          // persiste tudo
-          if (criadas) await db.from("workflowark_state").upsert({ key: "wfa-tarefas", data: tarefas });
+          // persiste tudo — só grava tarefas se a leitura veio OK e o resultado é
+          // estritamente maior (append-only). Nunca encolhe a lista real.
+          let salvouTarefas = false;
+          if (criadas && tarefasLoadOk && tarefas.length >= tarefasBaseLen + 1) {
+            const { error: upErr } = await db.from("workflowark_state").upsert({ key: "wfa-tarefas", data: tarefas });
+            salvouTarefas = !upErr;
+          }
           await db.from("workflowark_state").upsert({ key: "wfa-conselho-briefings", data: briefings.slice(0, 60) });
 
           if (notifs.length) {
-            const { data: nRow } = await db.from("workflowark_state").select("data").eq("key", "wfa-notificacoes").maybeSingle();
-            const arr = Array.isArray(nRow?.data) ? nRow.data : [];
-            notifs.forEach((n) => arr.unshift({ id: "auto" + Date.now() + Math.floor(Math.random() * 999), ts: Date.now(), lido: false, ...n }));
-            await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) });
+            const { data: nRow, error: nErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-notificacoes").maybeSingle();
+            // mesma proteção: só anexa notificações se a leitura veio OK
+            if (!nErr) {
+              const arr = Array.isArray(nRow?.data) ? nRow.data : [];
+              notifs.forEach((n) => arr.unshift({ id: "auto" + Date.now() + Math.floor(Math.random() * 999), ts: Date.now(), lido: false, ...n }));
+              await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) });
+            }
           }
           if (!soCliente) await db.from("workflowark_state").upsert({ key: "wfa-agents-lastrun", data: { date: hoje, ts: Date.now() } });
-          return Response.json({ ok: true, ran: true, clientes: alvos.length, tarefas: criadas, notificacoes: notifs.length });
+          return Response.json({ ok: true, ran: true, clientes: alvos.length, tarefas: criadas, tarefasSalvas: salvouTarefas, notificacoes: notifs.length });
         } catch (e) {
           return Response.json({ error: (e as Error)?.message || "falha" }, { status: 500 });
         }

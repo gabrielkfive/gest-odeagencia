@@ -114,6 +114,55 @@ a{color:inherit;text-decoration:none}
 .kpi .v{font-size:22px;font-weight:700;letter-spacing:-.015em;color:var(--ink);line-height:1.05;font-family:var(--mono)}
 .kpi .d{font-size:11px;color:var(--mute);margin-top:auto}
 .kpi.yel{background:var(--yel-bg);border-color:var(--yel)}
+
+/* ============ CAMADA DE MOVIMENTO (vida + 60fps) ============ */
+/* transição suave ao trocar de página */
+.page.active{animation:pageIn .42s cubic-bezier(.16,1,.3,1)}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* cards e kpis ganham profundidade e reagem ao mouse */
+.card,.kpi{transition:transform .18s cubic-bezier(.16,1,.3,1),box-shadow .18s ease,border-color .18s ease}
+.card:hover,.kpi:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(10,10,10,.07);border-color:var(--line-2)}
+.card.dk:hover{box-shadow:0 12px 30px rgba(10,10,10,.28)}
+/* KPI ganha um brilho sutil ao passar o mouse */
+.kpi{position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,rgba(255,199,0,.10) 50%,transparent 60%);transform:translateX(-120%);transition:transform .6s ease}
+.kpi:hover::after{transform:translateX(120%)}
+.kpi .v{transition:transform .18s ease}
+.kpi:hover .v{transform:scale(1.04)}
+/* navegação com micro-movimento */
+.navitem{transition:background .14s ease,transform .14s cubic-bezier(.16,1,.3,1),color .14s ease}
+.navitem:hover{transform:translateX(3px)}
+.navitem svg{transition:transform .2s cubic-bezier(.16,1,.3,1)}
+.navitem:hover svg{transform:scale(1.12)}
+.navitem.active svg{transform:scale(1.06)}
+.subitem{transition:background .14s ease,transform .14s ease,color .14s ease}
+.subitem:hover{transform:translateX(2px)}
+/* botões com resposta tátil */
+.tb-btn,.icobtn,button.pri{transition:transform .12s cubic-bezier(.16,1,.3,1),box-shadow .15s ease,filter .15s ease}
+.tb-btn:hover{transform:translateY(-1px)}
+.tb-btn:active,.icobtn:active{transform:scale(.94)}
+/* badges pulsam quando há algo novo */
+.badge{transition:transform .2s ease}
+@keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.badge.pulse{animation:badgePulse 1s ease 2}
+/* entrada em cascata (stagger) — aplique .stagger no container */
+.stagger>*{opacity:0;animation:cardUp .5s cubic-bezier(.16,1,.3,1) forwards}
+.stagger>*:nth-child(1){animation-delay:.02s}.stagger>*:nth-child(2){animation-delay:.07s}
+.stagger>*:nth-child(3){animation-delay:.12s}.stagger>*:nth-child(4){animation-delay:.17s}
+.stagger>*:nth-child(5){animation-delay:.22s}.stagger>*:nth-child(6){animation-delay:.27s}
+.stagger>*:nth-child(7){animation-delay:.32s}.stagger>*:nth-child(8){animation-delay:.37s}
+.stagger>*:nth-child(n+9){animation-delay:.4s}
+@keyframes cardUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+/* tabs com sublinhado deslizante */
+.tab{transition:color .15s ease}
+.tab::after{content:"";position:absolute}
+/* reveal on scroll (JS adiciona .in) */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s cubic-bezier(.16,1,.3,1)}
+.reveal.in{opacity:1;transform:translateY(0)}
+@media (prefers-reduced-motion:reduce){
+  .page.active,.stagger>*,.reveal{animation:none!important;opacity:1!important;transform:none!important}
+  .card:hover,.kpi:hover,.navitem:hover,.tb-btn:hover{transform:none}
+}
 .kpi.green{background:var(--green-soft);border-color:#86efac}
 .kpi.red{background:var(--red-soft);border-color:#fca5a5}
 .kpi.dk{background:var(--ink);color:#fff}
@@ -3270,6 +3319,70 @@ document.querySelectorAll('[data-toggle]').forEach(el=>{
   el.addEventListener('click',()=>{el.classList.toggle('open');document.getElementById(el.dataset.toggle)?.classList.toggle('open');});
 });
 
+/* ============ MOVIMENTO: contadores animados + reveal + voz JARVIS ============ */
+const ARK_REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+// conta de 0 até o número final (só em .kpi .v que sejam números)
+function animateCounters(scope){
+  if(ARK_REDUCED)return;
+  (scope||document).querySelectorAll('.kpi .v').forEach(el=>{
+    if(el.dataset.counted)return;
+    const raw=(el.textContent||'').trim();
+    const m=raw.match(/^(R\$\s*)?([\d.]+)$/); // só números puros (ou R$)
+    if(!m)return;
+    const pre=m[1]||'';const target=parseInt(m[2].replace(/\./g,''),10);
+    if(!isFinite(target)||target<=0)return;
+    el.dataset.counted='1';
+    const dur=620,t0=performance.now();
+    (function step(now){
+      const p=Math.min(1,(now-t0)/dur);const ease=1-Math.pow(1-p,3);
+      el.textContent=pre+Math.round(target*ease).toLocaleString('pt-BR');
+      if(p<1)requestAnimationFrame(step);else el.textContent=raw;
+    })(t0);
+  });
+}
+// reveal-on-scroll dentro da .view
+const arkReveal=('IntersectionObserver'in window)?new IntersectionObserver((ents)=>{
+  ents.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');arkReveal.unobserve(e.target);}});
+},{root:document.querySelector('.view'),threshold:.08}):null;
+function bindReveal(scope){if(!arkReveal||ARK_REDUCED)return;(scope||document).querySelectorAll('.reveal:not(.in)').forEach(el=>arkReveal.observe(el));}
+// dispara animações quando uma página fica ativa
+function arkPageAnimated(p){const pg=document.getElementById('page-'+p);if(!pg)return;animateCounters(pg);bindReveal(pg);}
+// engata no clique de navegação (sem reescrever o handler existente)
+document.querySelectorAll('[data-nav]').forEach(el=>el.addEventListener('click',()=>setTimeout(()=>arkPageAnimated(el.dataset.nav),60)));
+
+/* Voz do JARVIS — uma só função pra todo o app. Voz masculina pt-BR mais natural/grave. */
+let _arkVoice=null,_arkVoiceTried=false;
+function arkPickVoice(){
+  try{
+    const vs=window.speechSynthesis.getVoices()||[];
+    const pt=vs.filter(v=>/pt[-_]?BR|portugu/i.test((v.lang||'')+' '+(v.name||'')));
+    const pool=pt.length?pt:vs;
+    // preferência: vozes "Natural"/Online masculinas (Antonio/Daniel/Fabio), senão Google pt-BR, senão qualquer pt
+    const score=(v)=>{const n=(v.name||'').toLowerCase();let s=0;
+      if(/natural|online|neural/.test(n))s+=5;
+      if(/ant[oô]nio|daniel|f[aá]bio|jul(io|io)|thiago|male|masc/.test(n))s+=4;
+      if(/google/.test(n))s+=2;
+      if(/pt[-_]?br/i.test(v.lang||''))s+=2;
+      if(/maria|f[eê]mea|female|luciana|francisca|helena/.test(n))s-=3;
+      return s;};
+    pool.sort((a,b)=>score(b)-score(a));
+    _arkVoice=pool[0]||null;
+  }catch(e){_arkVoice=null;}
+}
+function jarvisSpeak(txt){
+  if(!txt)return;
+  try{
+    window.speechSynthesis.cancel();
+    if(!_arkVoiceTried){arkPickVoice();_arkVoiceTried=true;}
+    const u=new SpeechSynthesisUtterance(String(txt));
+    u.lang='pt-BR';u.rate=.98;u.pitch=.8;u.volume=1; // mais grave e pausado = clima JARVIS
+    if(_arkVoice)u.voice=_arkVoice;
+    window.speechSynthesis.speak(u);
+  }catch(e){toast('Voz não suportada neste navegador');}
+}
+// vozes carregam async no Chrome
+if('speechSynthesis'in window){window.speechSynthesis.onvoiceschanged=()=>{_arkVoiceTried=false;};}
+
 /* ============ TABS ============ */
 document.querySelectorAll('[data-tabs]').forEach(group=>{
   group.querySelectorAll('.tab[data-sub]').forEach(t=>{
@@ -4640,13 +4753,7 @@ async function wppResumo(){
 }
 function wppFalar(){
   if(!_wresTexto){toast('Gere o resumo primeiro');return;}
-  try{
-    window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(_wresTexto.replace(/[⚡💰📋🟢🆕🤖📎🖼🎬🔗#*]/g,''));
-    u.lang='pt-BR'; u.rate=1.05;
-    const vs=window.speechSynthesis.getVoices(); const pt=vs.find(v=>/pt[-_]?BR|portugu/i.test((v.lang||'')+(v.name||''))); if(pt)u.voice=pt;
-    window.speechSynthesis.speak(u);
-  }catch(e){toast('Voz não suportada neste navegador');}
+  jarvisSpeak(_wresTexto.replace(/[⚡💰📋🟢🆕🤖📎🖼🎬🔗#*]/g,''));
 }
 function wppPararVoz(){try{window.speechSynthesis.cancel();}catch(e){}}
 /* ============ TUTORIAL / POPs ============ */
@@ -4684,7 +4791,7 @@ function renderTutorial(){
 }
 function tutorialNarrar(){
   const txt='Bem-vindo ao WorkFlowArk, o cérebro da ARK Content. '+TUT_STEPS.map((t,i)=>'Passo '+(i+1)+': '+t.t+'. '+t.d).join(' ');
-  try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='pt-BR';u.rate=1.05;const vs=window.speechSynthesis.getVoices();const pt=vs.find(v=>/pt[-_]?BR|portugu/i.test((v.lang||'')+(v.name||'')));if(pt)u.voice=pt;window.speechSynthesis.speak(u);}catch(e){toast('Voz não suportada neste navegador');}
+  jarvisSpeak(txt);
 }
 /* ============ CONSELHO DE IA ============ */
 let _consData=null;
@@ -4750,7 +4857,7 @@ function consRender(r){
     <div class="card" style="padding:16px;margin-bottom:12px;background:#fffbeb;border:1px solid var(--yel,#ffd400)"><h3 style="font-size:14px;font-weight:800;margin-bottom:8px">✅ Decisão</h3><div style="font-size:13.5px;line-height:1.6;white-space:pre-wrap">${mdEsc(r.decisao||'')}</div></div>
     <div class="card" style="padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><h3 style="font-size:14px;font-weight:800">📋 Plano de ação</h3><div style="display:flex;gap:6px"><button class="tb-btn" onclick="consNarrar()">🔊 Ouvir</button><button class="tb-btn dk" onclick="consCriarTarefas()">+ Criar tarefas</button></div></div><ul style="font-size:13px;padding-left:18px;margin:0">${plano||'<li>—</li>'}</ul></div>`;
 }
-function consNarrar(){if(!_consData)return;const txt='Decisão do conselho: '+(_consData.decisao||'')+'. Plano de ação: '+((_consData.plano||[]).join('. '));try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='pt-BR';u.rate=1.05;const vs=window.speechSynthesis.getVoices();const pt=vs.find(v=>/pt[-_]?BR|portugu/i.test((v.lang||'')+(v.name||'')));if(pt)u.voice=pt;window.speechSynthesis.speak(u);}catch(e){toast('Voz não suportada');}}
+function consNarrar(){if(!_consData)return;jarvisSpeak('Decisão do conselho: '+(_consData.decisao||'')+'. Plano de ação: '+((_consData.plano||[]).join('. ')));}
 function consCriarTarefas(){
   if(!_consData||!(_consData.plano||[]).length){toast('Sem plano pra virar tarefa');return;}
   const cliente=document.getElementById('cons-cliente').value||'';const cli=CLIENTES.find(c=>c.nm===cliente);const today=Date.now();
@@ -4815,7 +4922,7 @@ async function jarvisSend(txt){
     JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:reply}; jarvisRender(); jarvisFalar(reply);
   }catch(e){ JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:'⚠ '+((e&&e.message)||'falha')}; jarvisRender(); }
 }
-function jarvisFalar(txt){try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(txt||'').replace(/[#*_`]/g,''));u.lang='pt-BR';u.rate=1.06;const vs=window.speechSynthesis.getVoices();const pt=vs.find(v=>/pt[-_]?BR|portugu/i.test((v.lang||'')+(v.name||'')));if(pt)u.voice=pt;window.speechSynthesis.speak(u);}catch(e){}}
+function jarvisFalar(txt){jarvisSpeak(String(txt||'').replace(/[#*_`]/g,''));}
 function jarvisMic(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){toast('Voz por microfone só no Chrome/Edge');return;}
