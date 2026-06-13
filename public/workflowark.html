@@ -2489,6 +2489,20 @@ function iniciarAutoSync(){
   </main>
 </div>
 
+<!-- BOTÃO FLUTUANTE + MODAL: JARVIS (voz) -->
+<button onclick="jarvisOpen()" title="JARVIS — fale comigo" id="jarvis-fab" style="position:fixed;bottom:18px;right:18px;z-index:9000;width:54px;height:54px;border-radius:50%;border:2px solid var(--yel,#ffd400);background:#0a0a0a;color:var(--yel,#ffd400);font-size:23px;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer">🎙️</button>
+<div class="modal-bg" id="modal-jarvis">
+  <div class="modal" style="max-width:480px;height:72vh;max-height:620px;display:flex;flex-direction:column">
+    <div class="modal-head"><h3>🎙️ JARVIS · ARK</h3><span class="x" onclick="window.speechSynthesis.cancel();closeModal('modal-jarvis')">✕</span></div>
+    <div class="modal-body" id="jarvis-msgs" style="flex:1;overflow:auto;min-height:0;background:#efeae2"></div>
+    <div style="display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);flex-shrink:0">
+      <button id="jarvis-mic" class="icobtn" onclick="jarvisMic()" title="Falar" style="font-size:18px;border-radius:20px;flex-shrink:0">🎙️</button>
+      <input id="jarvis-input" class="form-input" placeholder="Fale ou digite..." style="flex:1;border-radius:20px" onkeydown="if(event.key==='Enter')jarvisSend()">
+      <button class="tb-btn dk" style="border-radius:20px;flex-shrink:0" onclick="jarvisSend()">➤</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Resumo do dia (WhatsApp + voz JARVIS) -->
 <div class="modal-bg" id="modal-wpp-resumo">
   <div class="modal" style="max-width:560px;max-height:86vh;display:flex;flex-direction:column">
@@ -4474,6 +4488,38 @@ function consCriarTarefas(){
   const cliente=document.getElementById('cons-cliente').value||'';const cli=CLIENTES.find(c=>c.nm===cliente);const today=Date.now();
   _consData.plano.forEach((p,i)=>{const d=new Date(today+(i+1)*86400000);state.tarefas.push({id:'cons'+Date.now()+i,title:String(p).slice(0,120),desc:'Gerado pelo Conselho de IA'+(cliente?(' · '+cliente):''),funcao:'',clienteId:cli?cli.id:'',resp:'',data:d.toISOString().split('T')[0],prio:'media',status:'backlog',tags:['conselho'],checklist:[],sprintN:null,origem:'conselho',criadaEm:new Date().toISOString()});});
   saveTarefas();toast('✓ '+_consData.plano.length+' tarefas criadas');
+}
+/* ============ JARVIS — assistente de VOZ (fala e ouve) ============ */
+let JARVIS_MSGS=[]; let _jarvisRec=null;
+function jarvisOpen(){document.getElementById('modal-jarvis').classList.add('open');jarvisRender();setTimeout(()=>{const i=document.getElementById('jarvis-input');if(i)i.focus();},100);}
+function jarvisRender(){
+  const b=document.getElementById('jarvis-msgs'); if(!b)return;
+  if(!JARVIS_MSGS.length){b.innerHTML='<div style="text-align:center;color:var(--mute);font-size:12.5px;padding:24px">🎙️ Toque no microfone e fale, ou digite. Ex: "Quais tarefas estão atrasadas?", "Me dá uma ideia pra Vivenda na Copa".</div>';return;}
+  b.innerHTML=JARVIS_MSGS.map(m=>`<div style="display:flex;justify-content:${m.role==='user'?'flex-end':'flex-start'};margin:5px 0"><div style="max-width:82%;background:${m.role==='user'?'#d9fdd3':'#fff'};border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:13px;line-height:1.5;white-space:pre-wrap">${mdEsc(m.content)}</div></div>`).join('');
+  b.scrollTop=b.scrollHeight;
+}
+async function jarvisSend(txt){
+  const inp=document.getElementById('jarvis-input'); txt=(txt||(inp&&inp.value)||'').trim(); if(!txt)return; if(inp)inp.value='';
+  JARVIS_MSGS.push({role:'user',content:txt}); JARVIS_MSGS.push({role:'assistant',content:'…'}); jarvisRender();
+  try{
+    const r=await cloudCall('save',{action:'jarvis',messages:JARVIS_MSGS.filter(m=>m.content!=='…')});
+    const reply=(r&&r.reply)||'(sem resposta)';
+    JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:reply}; jarvisRender(); jarvisFalar(reply);
+  }catch(e){ JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:'⚠ '+((e&&e.message)||'falha')}; jarvisRender(); }
+}
+function jarvisFalar(txt){try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(txt||'').replace(/[#*_`]/g,''));u.lang='pt-BR';u.rate=1.06;const vs=window.speechSynthesis.getVoices();const pt=vs.find(v=>/pt[-_]?BR|portugu/i.test((v.lang||'')+(v.name||'')));if(pt)u.voice=pt;window.speechSynthesis.speak(u);}catch(e){}}
+function jarvisMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voz por microfone só no Chrome/Edge');return;}
+  const btn=document.getElementById('jarvis-mic');
+  if(_jarvisRec){try{_jarvisRec.stop();}catch(e){}_jarvisRec=null;if(btn)btn.textContent='🎙️';return;}
+  window.speechSynthesis.cancel();
+  _jarvisRec=new SR(); _jarvisRec.lang='pt-BR'; _jarvisRec.interimResults=false; _jarvisRec.maxAlternatives=1;
+  if(btn)btn.textContent='🔴';
+  _jarvisRec.onresult=(e)=>{const t=e.results[0][0].transcript;jarvisSend(t);};
+  _jarvisRec.onerror=()=>{toast('Não captei o áudio, tenta de novo');};
+  _jarvisRec.onend=()=>{const b=document.getElementById('jarvis-mic');if(b)b.textContent='🎙️';_jarvisRec=null;};
+  try{_jarvisRec.start();}catch(e){}
 }
 function wppAvatarHtml(c,size){
   const s=size||40;const ini=mdEsc((c.nome||c.phone||'?').trim().charAt(0).toUpperCase());

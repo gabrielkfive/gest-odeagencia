@@ -545,6 +545,35 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        // JARVIS: assistente de voz conversacional da ARK (respostas curtas, faladas).
+        if (action === "jarvis") {
+          const msgs = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
+          const pergunta = String(body.pergunta ?? "").trim();
+          if (!msgs.length && !pergunta) return json({ error: "Diga algo." }, { status: 400 });
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const aiKey = zapiEnv("ANTHROPIC_API_KEY");
+          if (!aiKey) return json({ error: "IA não configurada (sem ANTHROPIC_API_KEY)." }, { status: 500 });
+          let ctxInfo = "";
+          try {
+            const { data: trow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-tarefas").maybeSingle();
+            const tarefas: any[] = Array.isArray(trow?.data) ? trow.data : [];
+            const hoje = new Date().toISOString().split("T")[0];
+            const atras = tarefas.filter((t) => t.data && t.data < hoje && t.status !== "concluido").length;
+            const abertas = tarefas.filter((t) => t.status !== "concluido").length;
+            ctxInfo = `\n\nDADOS AGORA: ${abertas} tarefas abertas, ${atras} atrasadas.`;
+          } catch { /* ignore */ }
+          const sys = `Você é o JARVIS da ARK Content (agência de marketing gastronômico em Brasília; dono: Gabriel Andrade). Assistente de voz: respostas CURTAS e diretas (serão FALADAS em voz alta — no máximo 2-4 frases), tom de braço-direito esperto e brasileiro, prático. Ajuda com operação, clientes, ideias e decisões da agência. Se pedirem uma ação no sistema, diga o caminho rápido. Não invente dados.${ctxInfo}`;
+          const messages = msgs.length ? msgs.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "") })).filter((m: any) => m.content) : [{ role: "user", content: pergunta }];
+          try {
+            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 400, system: sys, messages }) });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            return json({ ok: true, reply: data?.content?.[0]?.text || "(sem resposta)" });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha no JARVIS" }, { status: 502 });
+          }
+        }
+
         // Conselho de IA: especialistas da ARK debatem o tema e consolidam decisão + plano.
         if (action === "conselho") {
           const tema = String(body.tema ?? "").trim();
