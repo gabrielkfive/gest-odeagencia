@@ -5293,20 +5293,22 @@ function jarvisExecute(raw){
   const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   const t=norm(raw);
   const has=(...w)=>w.some(x=>t.includes(x));
+  const re=(p)=>new RegExp(p).test(t);
+  const ehPergunta=/^(o que|oque|qual|quais|quanto|quantos|quantas|como|quem|quando|onde|por que|porque|pra que)\b/.test(t);
   // fechar o JARVIS
-  if(/^(fecha|fechar|sair|tchau)\b/.test(t)){closeModal('modal-jarvis');return 'Fechando. É só me chamar.';}
-  // rodar o conselho
-  if(has('rodar conselho','reunir conselho','roda o conselho','reunir o conselho','conselho agora','debater clientes')){
+  if(re('^(fecha|fechar|sair|tchau|valeu|obrigad)')){closeModal('modal-jarvis');return 'Fechando. É só me chamar.';}
+  // rodar o conselho — qualquer "conselho" + verbo de ação (e não sendo pergunta)
+  if(has('conselho') && !ehPergunta && re('rod|reun|reún|cham|debat|dispar|ativ|liga|executa|junta|começa|comeca|bora')){
     jarvisGo('conselho'); if(typeof consRodarAuto==='function')setTimeout(()=>consRodarAuto(),300);
     return 'Reunindo o conselho agora — vou debater os clientes e deixar planos e tarefas prontos.';
   }
-  // planejar a agenda/dia
-  if(has('planejar meu dia','planeja meu dia','planejar a agenda','planeja a agenda','organizar minha agenda','organiza a agenda','planejar meus dias','planejar a semana','planejar o mes')){
+  // planejar a agenda/dia — "planej/organiz" + dia/agenda/semana/mês/tarefa
+  if(re('planej|organiz|arrum') && has('dia','agenda','semana','mes','mês','tarefa','rotina')){
     jarvisGo('agenda'); if(typeof jarvisPlanAgenda==='function')setTimeout(()=>jarvisPlanAgenda(),300);
     return 'Abrindo o planejador: priorizei suas tarefas e propus os horários. É só conferir e agendar.';
   }
   // resumo do dia
-  if(has('resumo do dia','como ta meu dia','como esta meu dia','meu resumo','resumo de hoje','o que tenho hoje')){
+  if(has('resumo','panorama') || re('como (ta|esta|tá|está) (meu|o) dia') || has('o que tenho hoje','o que tem pra hoje')){
     jarvisGo('dashboard'); setTimeout(()=>{if(typeof mdJarvisFalar==='function')mdJarvisFalar();},400);
     return 'Aqui está o resumo do seu dia.';
   }
@@ -5324,7 +5326,11 @@ function jarvisExecute(raw){
   if(has('cliente','ficha')||/\b(abrir?|mostra[r]?|abre)\b/.test(t)){
     try{
       const lista=(typeof CLIENTES!=='undefined'?CLIENTES:[]);
-      const hit=lista.find(c=>t.includes(norm(c.nm)));
+      const hit=lista.find(c=>{
+        const n=norm(c.nm); if(t.includes(n))return true;
+        const first=n.split(/\s+/)[0]; if(first.length>=4 && t.includes(first))return true;
+        return t.includes(String(c.id||'').toLowerCase());
+      });
       if(hit&&typeof cliDetalhe==='function'){cliDetalhe(hit.id);return 'Abrindo a ficha de '+hit.nm+'.';}
     }catch(e){}
   }
