@@ -1727,7 +1727,7 @@ function atualizarBadgeSync(ok){
   el.style.color=ok?'var(--mute)':'var(--red)';
 }
 function iniciarAutoSync(){
-  setInterval(()=>{if(WFA_CLOUD_READY&&document.visibilityState!=='hidden')sincronizarAgora();},30000);
+  setInterval(()=>{if(WFA_CLOUD_READY&&document.visibilityState!=='hidden')sincronizarAgora();},12000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&WFA_CLOUD_READY)sincronizarAgora();});
 }
           (function(){
@@ -4350,13 +4350,13 @@ function renderNotificacoes(){
   const badgeTop=document.getElementById('notif-badge-top');
   if(badgeTop){badgeTop.textContent=naoLidas>99?'99+':naoLidas;badgeTop.style.display=naoLidas?'flex':'none';}
   const wrap=document.getElementById('notif-wrap');if(!wrap)return;
-  if(!arr.length){wrap.innerHTML='<div class="card" style="padding:24px;color:var(--mute)">Nada por aqui ainda. Quando chegar mensagem no WhatsApp, o assistente cria a tarefa e te avisa aqui.</div>';return;}
-  wrap.innerHTML=arr.map(n=>{
-    const nova=!read.has(n.id);
+  const show=arr.filter(n=>!read.has(n.id)); // só as NÃO lidas aparecem (lidas somem)
+  if(!show.length){wrap.innerHTML='<div class="card" style="padding:24px;color:var(--mute)">✓ Tudo em dia — nenhuma notificação pendente.</div>';return;}
+  wrap.innerHTML=show.map(n=>{
     const dt=n.ts?new Date(n.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-    return `<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid ${nova?'var(--yel,#ffd400)':'var(--line)'};display:flex;justify-content:space-between;gap:10px;align-items:center">
-      <div><div style="font-size:13px;font-weight:${nova?'700':'500'}">${mdEsc(n.texto||'')}</div><div style="font-size:11px;color:var(--mute);margin-top:3px">${dt}${n.tarefaId?' · tarefa criada':''}</div></div>
-      ${nova?`<button class="tb-btn" onclick="marcarNotifLida('${n.id}')">ok</button>`:''}
+    return `<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid var(--yel,#ffd400);display:flex;justify-content:space-between;gap:10px;align-items:center">
+      <div><div style="font-size:13px;font-weight:700">${mdEsc(n.texto||'')}</div><div style="font-size:11px;color:var(--mute);margin-top:3px">${dt}${n.tarefaId?' · tarefa criada':''}</div></div>
+      <button class="tb-btn" onclick="marcarNotifLida('${n.id}')">ok</button>
     </div>`;
   }).join('');
 }

@@ -158,6 +158,8 @@ export async function runAgentOnIncoming(db: any, msg: { phone: string; name?: s
     }
     if (d.resposta_sugerida) { try { await setSugestao(db, msg.phone, d.resposta_sugerida); } catch { /* ignore */ } }
     const sug = d.resposta_sugerida ? `\n💬 Sugestão: "${d.resposta_sugerida}"` : "";
+    // Sino só notifica quando vira TAREFA (evita encher de notificação a cada mensagem).
+    // Mensagens normais: a sugestão da IA já fica na conversa (setSugestao), sem notificação.
     if (d.isDemand) {
       const tarefaId = await addTaskFromDemand(db, d, { phone: msg.phone, nome: msg.name, text: msg.text });
       await addNotificacao(db, {
@@ -166,13 +168,6 @@ export async function runAgentOnIncoming(db: any, msg: { phone: string; name?: s
         phone: msg.phone,
         nome: msg.name,
         tarefaId,
-      });
-    } else {
-      await addNotificacao(db, {
-        tipo: "mensagem",
-        texto: `💬 ${msg.name || msg.phone}: "${String(msg.text).slice(0, 80)}"${sug}`,
-        phone: msg.phone,
-        nome: msg.name,
       });
     }
   } catch {
