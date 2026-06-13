@@ -189,6 +189,11 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           }
           // só marca "rodou hoje" quando TODOS os clientes já têm briefing de hoje
           if (!soCliente && faltam === 0) await db.from("workflowark_state").upsert({ key: "wfa-agents-lastrun", data: { date: hoje, ts: Date.now() } });
+          // AUTO-ENCADEIA: se ainda faltam clientes e este lote produziu algo, dispara o
+          // próximo lote em background (best-effort) — assim 1 chamada do cron cobre todos.
+          if (!soCliente && faltam > 0 && criadas > 0) {
+            try { fetch(`${u.origin}/api/workflowark/agents-run?key=${RUN_KEY}`).catch(() => {}); } catch { /* ignore */ }
+          }
           return Response.json({ ok: true, ran: true, clientes: alvos.length, faltam, tarefas: criadas, tarefasSalvas: salvouTarefas, notificacoes: notifs.length });
         } catch (e) {
           return Response.json({ error: (e as Error)?.message || "falha" }, { status: 500 });
