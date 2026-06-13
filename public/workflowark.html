@@ -1670,6 +1670,7 @@ function applyCloudState(remote){
   if(typeof renderCrm==='function')renderCrm();
   if(typeof renderAgenda==='function')renderAgenda();
   if(typeof renderComercialMes==='function')renderComercialMes();
+  if(typeof restoreLastPage==='function')restoreLastPage(); // volta p/ a aba que estava (1x, após RBAC)
 }
 function isEmptyCloudValue(v){return v==null||(Array.isArray(v)&&v.length===0)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===0)||v==='';}
 async function bootCloudSync(){
@@ -2844,6 +2845,7 @@ function toggleSide(force){
 document.querySelectorAll('[data-nav]').forEach(el=>{
   el.addEventListener('click',()=>{
     const p=el.dataset.nav;
+    try{localStorage.setItem('wfa-current-page',p);}catch(e){} // lembra a aba p/ restaurar ao recarregar
     document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.navitem,.subitem').forEach(x=>x.classList.remove('active'));
     el.classList.add('active');
@@ -3923,6 +3925,19 @@ if(state.tarefas.length===0){
 /* Meu Dia: render inicial + auto-atualização a cada minuto */
 try{renderMonthPill();renderIdentity();renderMeuDia();applyAccess();}catch(e){console.warn('renderMeuDia',e);}
 setInterval(()=>{try{renderMonthPill();renderMeuDia();}catch(e){}},60000);
+try{restoreLastPage();}catch(e){} // tenta restaurar a aba já no boot (retenta após sync se RBAC ainda não liberou)
+
+/* Restaura a última aba aberta ao recarregar (chamada após o sync/RBAC; roda 1x) */
+let WFA_PAGE_RESTORED=false;
+function restoreLastPage(){
+  if(WFA_PAGE_RESTORED)return;
+  try{
+    const _lp=localStorage.getItem('wfa-current-page');
+    if(!_lp || _lp==='dashboard'){WFA_PAGE_RESTORED=true;return;}
+    const _el=document.querySelector('[data-nav="'+_lp+'"]');
+    if(_el && _el.style.display!=='none'){ _el.click(); WFA_PAGE_RESTORED=true; } // só marca feito se trocou (senão tenta após sync)
+  }catch(e){}
+}
 
 /* ============ HELPERS ============ */
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
