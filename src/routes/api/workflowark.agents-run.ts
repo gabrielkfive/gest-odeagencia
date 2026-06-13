@@ -38,7 +38,13 @@ const CLIENTES_CTX: { id: string; nm: string; seg: string; nota: string }[] = [
   { id: "vaca", nm: "Vaca Velha", seg: "Restaurante / churrascaria", nota: "1 captação/mês (2ª às vezes); ramp-up de receita." },
   { id: "dom", nm: "Dom Baruka", seg: "Restaurante (Squad Alpha)", nota: "URGENTE: cardápio + iFood + bebidas; auditoria iFood em curso." },
   { id: "stray", nm: "Stray House", seg: "Restaurante/bar (Squad Alpha)", nota: "Recuperação; ROAS ~5; subir criativos novos." },
-  { id: "babbo", nm: "Babbo Giovanni", seg: "Restaurante italiano (Squad Alpha)", nota: "Em ajuste; criar pauta sob demanda." },
+  { id: "babbo", nm: "Babbo Giovanni", seg: "Restaurante italiano (Squad Alpha)", nota: "Em ajuste; precisa de uma roteirização interessante de Reels, viável de gravar e exportável pro Drive." },
+  { id: "ark", nm: "ARK Content", seg: "A PRÓPRIA agência (marketing de gastronomia/varejo) — cliente interno", nota:
+      "OBJETIVO: marcar o MÁXIMO de reuniões comerciais (conversão: 10 reuniões = 1 fechamento, então volume de reuniões é tudo). " +
+      "Criativo CAMPEÃO no ar no Meta (desde anteontem trouxe 3 reuniões): fala sobre fazer produção audiovisual profissional pra ir mais longe. " +
+      "Replicar o sucesso criando um novo criativo/roteiro usando o CASE ATTRAVERSIAMO: ganhou +3 mil seguidores em menos de 10 dias E, mais importante, viu diferença no CAIXA, no balcão e no movimento da loja (não só no Instagram). " +
+      "Posicionamento ARK: profissionalismo da equipe de produção audiovisual (captação+edição) + atendimento de qualidade + comercial estabilizado, sempre buscando melhorias. " +
+      "Entregar: uma roteirização de captação pra próxima semana com composição de imagens e CHAMADA PARA AÇÃO forte." },
 ];
 
 export const Route = createFileRoute("/api/workflowark/agents-run")({
@@ -136,13 +142,15 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           const sysConselho =
             "Você é o CONSELHO DE IA da ARK Content (agência de marketing de gastronomia/varejo). " +
             "O conselho tem vozes: Diretor de Operações, Gestor de Tráfego, Social Media, Roteirista e Account/CS. " +
-            "Pense ALÉM do operacional: aprofunde no nicho do cliente, traga referências de marcas/criadores que estão crescendo no mesmo segmento e ideias de parceria reais. " +
+            "Pense ALÉM do operacional: aprofunde no nicho, traga referências de marcas/criadores em alta no mesmo segmento, ideias de parceria reais, ALINHAMENTOS/REUNIÕES necessários e uma ROTEIRIZAÇÃO de captação (Reels) viável de gravar. " +
             "Responda SOMENTE em JSON válido, sem texto fora do JSON, no formato: " +
             '{"debate":[{"voz":"Gestor de Tráfego","fala":"..."},{"voz":"Social Media","fala":"..."}],' +
             '"decisao":"frase única e forte","plano":["passo 1","passo 2","passo 3"],' +
-            '"tarefas":[{"title":"tarefa acionável curta","resp":"área responsável"}],' +
+            '"tarefas":[{"title":"tarefa acionável curta","resp":"área responsável (trafego, social, account, design, edicao, captacao, comercial)"}],' +
+            '"reunioes":["alinhamento/reunião a marcar + com quem"],' +
+            '"roteiro":"roteiro curto de 1 Reel: gancho + 3 cenas + CTA (1 parágrafo)",' +
             '"referencias":["marca/criador + por que olhar"],"parcerias":["ideia de parceria concreta"]}. ' +
-            "Máx 3 falas no debate, 3 passos no plano, 3 tarefas, 2 referências, 2 parcerias. Tudo em português, específico e prático.";
+            "Máx 3 falas, 3 passos, 3 tarefas, 2 reuniões, 2 referências, 2 parcerias. Português, específico e prático.";
 
           let criadas = 0;
           for (const c of alvos) {
@@ -155,7 +163,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             const j = parseJSON(raw);
             if (!j) continue;
             const brief = {
-              id: "brf" + c.id + "-" + hoje,
+              id: "brf" + c.id + "-" + hoje + "-" + Date.now(),
               clienteId: c.id,
               cliente: c.nm,
               date: hoje,
@@ -166,9 +174,11 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               plano: Array.isArray(j.plano) ? j.plano.slice(0, 3).map((x: any) => String(x)) : [],
               referencias: Array.isArray(j.referencias) ? j.referencias.slice(0, 2).map((x: any) => String(x)) : [],
               parcerias: Array.isArray(j.parcerias) ? j.parcerias.slice(0, 2).map((x: any) => String(x)) : [],
+              reunioes: Array.isArray(j.reunioes) ? j.reunioes.slice(0, 2).map((x: any) => String(x)) : [],
+              roteiro: String(j.roteiro || ""),
             };
-            // substitui briefing do mesmo cliente+dia se reexecutar
-            briefings = briefings.filter((b) => b.id !== brief.id);
+            // PRESERVA o histórico: cada debate é ADICIONADO (nada do que o conselho já
+            // propôs desaparece). Mantém os últimos 60.
             briefings.unshift(brief);
 
             // cria tarefas (evita duplicar pelo título+cliente no dia)
@@ -185,6 +195,20 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
                 id: "ca" + Date.now() + i + c.id, title, desc: "Gerado pelo Conselho de IA · " + c.nm + (area ? " · área: " + area : ""),
                 funcao: area, clienteId: c.id, resp: pessoa, data: d, prio: "media",
                 status: "backlog", tags: ["conselho", "auto"], checklist: [], sprintN: null,
+                origem: "conselho-auto", criadaEm: new Date().toISOString(),
+              });
+              criadas++;
+            });
+            // cria as REUNIÕES/ALINHAMENTOS sugeridos (vão pro Account marcar)
+            (Array.isArray(j.reunioes) ? j.reunioes : []).slice(0, 2).forEach((rm: any, i: number) => {
+              const title = "Alinhar: " + String(rm || "").slice(0, 110);
+              if (String(rm || "").length < 4) return;
+              if (tarefas.some((t) => t.clienteId === c.id && (t.title || "") === title)) return;
+              const d = new Date(Date.now() + (i + 1) * 86400000).toISOString().split("T")[0];
+              tarefas.push({
+                id: "cr" + Date.now() + i + c.id, title, desc: "Reunião/alinhamento sugerido pelo Conselho · " + c.nm,
+                funcao: "Account", clienteId: c.id, resp: "Lucas Rosi", data: d, prio: "media",
+                status: "backlog", tags: ["conselho", "auto", "reuniao"], checklist: [], sprintN: null,
                 origem: "conselho-auto", criadaEm: new Date().toISOString(),
               });
               criadas++;
