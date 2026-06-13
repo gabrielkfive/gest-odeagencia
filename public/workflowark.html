@@ -1981,8 +1981,15 @@ function iniciarAutoSync(){
           #page-agentes .ag-card.on:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(0,0,0,.09);border-color:var(--yel,#ffd400)}
           #page-agentes .ag-card.soon{opacity:.62;border-style:dashed}
           #page-agentes .ag-top{display:flex;align-items:center;gap:12px}
-          #page-agentes .ag-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--yel-bg,#fff7d6);flex-shrink:0}
-          #page-agentes .ag-card.on .ag-ico{background:#111;color:var(--yel,#ffd400)}
+          #page-agentes .ag-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-family:var(--mono);letter-spacing:.02em;background:#0b0b0c;color:var(--gold,#caa64a);border:1px solid #23231f;flex-shrink:0}
+          #page-agentes .ag-card.on .ag-ico{background:#0b0b0c;color:var(--yel,#ffd400)}
+          #page-agentes .ag-live{margin-top:18px;display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px 16px}
+          #page-agentes .ag-live .pulse{width:9px;height:9px;border-radius:50%;background:#3ddc84;box-shadow:0 0 10px rgba(61,220,132,.8);animation:iaLive 2.2s ease-in-out infinite;flex-shrink:0}
+          #page-agentes .ag-live .txt{font-size:12.5px;color:#e9e7e0}
+          #page-agentes .ag-live .txt b{color:var(--yel)}
+          #page-agentes .ag-live button{margin-left:auto;background:var(--yel);color:#000;border:none;border-radius:9px;padding:7px 13px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap}
+          #page-agentes .ag-badge.on{background:#e6f8ec;color:#127a3e;display:inline-flex;align-items:center;gap:6px}
+          #page-agentes .ag-badge.on::before{content:"";width:7px;height:7px;border-radius:50%;background:#16a34a;box-shadow:0 0 6px rgba(22,163,74,.6)}
           #page-agentes .ag-nm{font-weight:800;font-size:15px;letter-spacing:-.01em}
           #page-agentes .ag-role{font-size:11.5px;color:var(--mute);font-weight:600}
           #page-agentes .ag-desc{font-size:13px;color:var(--txt);line-height:1.5;flex:1}
@@ -2007,6 +2014,7 @@ function iniciarAutoSync(){
             <span class="ag-arrow">→</span>
             <span class="ag-step">3 · Você dá o <b>aval</b> e vai</span>
           </div>
+          <div id="ag-live"></div>
         </div>
 
         <div class="ag-secttl">No ar agora</div>
@@ -3442,6 +3450,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     if(p==='tutorial'&&typeof renderTutorial==='function'){try{renderTutorial();}catch(e){console.warn('tut',e);}}
     if(p==='conselho'&&typeof consPopular==='function'){try{consPopular();}catch(e){}}
+    if(p==='agentes'){try{agPolish();agLive();}catch(e){}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}}
     if(p==='whatsapp'){try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
@@ -3561,6 +3570,34 @@ function globalSearch(q){
   if(!out.length){res.innerHTML='<div class="gs-empty">Nada encontrado para "'+escapeHtml(q)+'"</div>';res.classList.add('open');return;}
   res.innerHTML=out.map(([grp,items])=>`<div class="gs-grp">${grp}</div>`+items.map(it=>`<div class="gs-it" onclick="gsGo('${it.k}','${String(it.a).replace(/'/g,"")}')"><div class="gs-mono">${escapeHtml(it.mono)}</div><div style="min-width:0"><div class="gs-t">${escapeHtml(it.t)}</div><div class="gs-s">${escapeHtml(it.s||'')}</div></div></div>`).join('')).join('');
   res.classList.add('open');
+}
+
+/* ============ CENTRAL DE AGENTES: polish (monogramas) + status ao vivo ============ */
+const EMOJI_RE=/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}️‍]/gu;
+function agPolish(){
+  document.querySelectorAll('#page-agentes .ag-card').forEach(card=>{
+    const ico=card.querySelector('.ag-ico'),nm=card.querySelector('.ag-nm');
+    if(ico&&nm&&EMOJI_RE.test(ico.textContent||'')){
+      const stop=new Set(['de','do','da','e','of','the','no','na']);
+      const words=nm.textContent.replace(/[^A-Za-zÀ-ÿ ]/g,'').trim().split(/\s+/).filter(w=>!stop.has(w.toLowerCase()));
+      const mono=((words[0]||'')[0]||'')+((words[1]||'')[0]||(words[0]||'')[1]||'');
+      ico.textContent=mono.toUpperCase();
+    }
+    const b=card.querySelector('.ag-badge');if(b)b.textContent=b.textContent.replace(EMOJI_RE,'').trim();
+    EMOJI_RE.lastIndex=0;
+  });
+}
+function agLive(){
+  const el=document.getElementById('ag-live');if(!el)return;
+  const hoje=new Date().toISOString().split('T')[0];
+  let brfs=[];try{brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){}
+  const hojeBrfs=brfs.filter(b=>b.date===hoje);
+  const tAuto=(state.tarefas||[]).filter(t=>t.origem==='conselho-auto'&&String(t.criadaEm||'').startsWith(hoje)).length;
+  if(hojeBrfs.length){
+    el.innerHTML=`<span class="pulse"></span><span class="txt">Os agentes já trabalharam hoje: <b>${hojeBrfs.length} debate${hojeBrfs.length>1?'s':''}</b> do conselho${tAuto?` e <b>${tAuto} tarefa${tAuto>1?'s':''}</b> criadas`:''}. Veja no Meu Dia.</span><button onclick="document.querySelector('[data-nav=conselho]').click()">Ver debates</button>`;
+  }else{
+    el.innerHTML=`<span class="pulse"></span><span class="txt">Os agentes rodam sozinhos todo dia. Ainda não debateram hoje — pode disparar agora.</span><button onclick="document.querySelector('[data-nav=conselho]').click()">Abrir Conselho</button>`;
+  }
 }
 
 /* ============ TABS ============ */
