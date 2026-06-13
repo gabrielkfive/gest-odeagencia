@@ -1715,7 +1715,7 @@ table.t tr.high{background:var(--yel-bg)}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -1884,6 +1884,7 @@ function applyCloudState(remote){
   if(typeof renderAgenda==='function')renderAgenda();
   if(typeof renderComercialMes==='function')renderComercialMes();
   if(typeof restoreLastPage==='function')restoreLastPage(); // volta p/ a aba que estava (1x, após RBAC)
+  if(typeof applyBrand==='function')applyBrand(); // aplica marca White Label sincronizada
 }
 function isEmptyCloudValue(v){return v==null||(Array.isArray(v)&&v.length===0)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===0)||v==='';}
 async function bootCloudSync(){
@@ -3091,6 +3092,17 @@ function iniciarAutoSync(){
           <button class="tb-btn" onclick="importarDados()">⬆ Importar dados</button>
         </div>
 
+        <div class="set-sect-t" style="margin-bottom:9px">Marca (White Label)</div>
+        <p class="muted" style="font-size:10.5px;margin-bottom:9px">Personalize o nome e a cor do sistema. Base para vender o WorkFlowArk como produto de outras agências.</p>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
+          <div><label class="form-label">Nome do produto</label><input id="brand-name" class="form-input" placeholder="WorkFlowArk"></div>
+          <div><label class="form-label">Cor de destaque</label><input id="brand-color" type="color" value="#FFC700" style="width:52px;height:38px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff;cursor:pointer"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+          <button class="tb-btn" onclick="saveBrand()">Aplicar marca</button>
+          <button class="icobtn" onclick="resetBrand()">Restaurar ARK</button>
+        </div>
+
         <div class="set-sect-t" style="margin-bottom:9px">Dados de demonstração</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
           <button class="icobtn" onclick="popularExemplos()">+ Popular tarefas de exemplo</button>
@@ -3612,6 +3624,43 @@ function arkDeEmojiChrome(){
   }catch(e){}
 }
 window.addEventListener('DOMContentLoaded',()=>{setTimeout(arkDeEmojiChrome,50);});
+
+/* ============ MARCA / WHITE LABEL ============ */
+function loadBrand(){try{return JSON.parse(localStorage.getItem('wfa-brand')||'null')||{};}catch(e){return {};}}
+function applyBrand(){
+  const b=loadBrand();
+  if(b.color){
+    const c=b.color;
+    document.documentElement.style.setProperty('--yel',c);
+    // deriva tons claros pra fundos/bordas (mantém o sistema coeso)
+    document.documentElement.style.setProperty('--yel-bg',c+'14');
+    document.documentElement.style.setProperty('--yel-soft',c+'22');
+    document.documentElement.style.setProperty('--yel-d',c);
+  }
+  if(b.name){
+    const nm=document.querySelector('.brand-info .nm');if(nm)nm.textContent=b.name;
+    try{document.title=b.name+' · Sistema';}catch(e){}
+  }
+}
+function saveBrand(){
+  const name=(document.getElementById('brand-name').value||'').trim();
+  const color=document.getElementById('brand-color').value||'#FFC700';
+  localStorage.setItem('wfa-brand',JSON.stringify({name,color}));
+  applyBrand();toast('Marca aplicada ✓');
+}
+function resetBrand(){
+  localStorage.removeItem('wfa-brand');
+  document.documentElement.style.removeProperty('--yel');
+  document.documentElement.style.removeProperty('--yel-bg');
+  document.documentElement.style.removeProperty('--yel-soft');
+  document.documentElement.style.removeProperty('--yel-d');
+  const nm=document.querySelector('.brand-info .nm');if(nm)nm.textContent='ARK Content';
+  const bn=document.getElementById('brand-name');if(bn)bn.value='';
+  const bc=document.getElementById('brand-color');if(bc)bc.value='#FFC700';
+  toast('Marca ARK restaurada');
+}
+// aplica a marca salva no carregamento e preenche os campos
+window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{applyBrand();const b=loadBrand();const bn=document.getElementById('brand-name');if(bn&&b.name)bn.value=b.name;const bc=document.getElementById('brand-color');if(bc&&b.color)bc.value=b.color;},120);});
 
 /* ============ TABS ============ */
 document.querySelectorAll('[data-tabs]').forEach(group=>{
