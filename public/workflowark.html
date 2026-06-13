@@ -901,7 +901,7 @@ table.t tr.high{background:var(--yel-bg)}
             <h1>Meu Mês · Junho 2026</h1>
             <p>Contexto geral do mês para a All Hands · fechamento, conquistas e direção</p>
           </div>
-          <button class="icobtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>Atualizar</button>
+          <span class="md-count" style="background:var(--yel-bg);color:var(--yel-d);border:1px solid var(--yel);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap">✎ Clique em qualquer texto para editar</span>
         </div>
 
         <div class="explainer">
@@ -1768,9 +1768,37 @@ async function cloudCall(action,payload){
   // Acesso direto (sem iframe) ou fallback: usa Supabase direto
   return directCloudCall(action,payload);
 }
+/* ===== SYNC ROBUSTO (anti-perda de dados) =====
+   Mudanças locais entram numa fila com reenvio. Enquanto uma chave não foi confirmada
+   na nuvem, ela fica "suja" e a puxada periódica NÃO sobrescreve o valor local.
+   Assim uma falha de rede/payload grande nunca apaga tarefa/WhatsApp já editados. */
+const WFA_DIRTY=new Set();        // chaves com escrita ainda não confirmada
+const WFA_PENDING=new Map();      // chave -> último valor a enviar
+let _wfaFlushing=false;
 function cloudSave(key,value){
-  if(!WFA_CLOUD_READY||WFA_CLOUD_MUTED||!isWfaCloudKey(key))return;
-  cloudCall('save',{action:'save-state',key,data:parseCloudValue(value)}).catch(()=>toast('Sem conexão com a nuvem · tentando novamente depois'));
+  if(!isWfaCloudKey(key)||WFA_CLOUD_MUTED)return; // MUTED = estamos aplicando remoto, não reenfileira
+  WFA_DIRTY.add(key);
+  WFA_PENDING.set(key,parseCloudValue(value));
+  wfaFlush();
+}
+async function wfaFlush(){
+  if(_wfaFlushing||!WFA_CLOUD_READY||!WFA_PENDING.size)return;
+  _wfaFlushing=true;
+  try{
+    while(WFA_PENDING.size){
+      const it=WFA_PENDING.entries().next().value;const key=it[0],data=it[1];
+      WFA_PENDING.delete(key);
+      try{
+        await cloudCall('save',{action:'save-state',key,data});
+        if(!WFA_PENDING.has(key))WFA_DIRTY.delete(key); // confirmou (e não houve edição nova no meio)
+        atualizarBadgeSync(true);
+      }catch(e){
+        WFA_PENDING.set(key,data);            // mantém na fila p/ próxima tentativa
+        atualizarBadgeSync(false);
+        break;                                 // para; tenta de novo no próximo tick
+      }
+    }
+  }finally{_wfaFlushing=false;}
 }
 localStorage.setItem=function(key,value){WFA_LS_SET(key,value);cloudSave(key,value);};
 localStorage.removeItem=function(key){WFA_LS_REMOVE(key);cloudSave(key,null);};
@@ -1786,6 +1814,7 @@ function applyCloudState(remote){
   WFA_CLOUD_MUTED=true;
   Object.entries(remote||{}).forEach(([key,value])=>{
     if(!isWfaCloudKey(key)||value==null)return;
+    if(WFA_DIRTY.has(key))return; // PROTEÇÃO: não sobrescreve mudança local ainda não confirmada
     WFA_LS_SET(key,typeof value==='string'?value:JSON.stringify(value));
   });
   WFA_CLOUD_MUTED=false;
@@ -1862,8 +1891,10 @@ function atualizarBadgeSync(ok){
   el.style.color=ok?'var(--mute)':'var(--red)';
 }
 function iniciarAutoSync(){
-  setInterval(()=>{if(WFA_CLOUD_READY&&document.visibilityState!=='hidden')sincronizarAgora();},6000);
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&WFA_CLOUD_READY)sincronizarAgora();});
+  setInterval(()=>{if(WFA_CLOUD_READY&&document.visibilityState!=='hidden'){wfaFlush();sincronizarAgora();}},6000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&WFA_CLOUD_READY){wfaFlush();sincronizarAgora();}});
+  // tenta reenviar pendências antes de fechar/atualizar a aba
+  window.addEventListener('beforeunload',()=>{try{wfaFlush();}catch(e){}});
 }
           (function(){
             const KEY='wfa-okrs-edits';
@@ -5981,7 +6012,7 @@ function renderProcessos(){
 /* ============ EDIT-IN-PLACE para Campanhas e Comercial ============ */
 (function initInlineEdit(){
   const KEY='wfa-inline-edits';
-  const targets=['#page-campanhas','#page-comercial'];
+  const targets=['#page-campanhas','#page-comercial','#page-meumes'];
   const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
   targets.forEach(sel=>{
     const root=document.querySelector(sel);if(!root)return;
