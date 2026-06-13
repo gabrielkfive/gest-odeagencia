@@ -545,6 +545,41 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        // Meta: salva o token (só no servidor, key fora de WFA_CLOUD_KEYS — não vaza pro front).
+        if (action === "set-meta-config") {
+          const token = String(body.token ?? "").trim();
+          try {
+            await ctx.db.from("workflowark_state").upsert({ key: "wfa-meta-secret", data: { token } });
+            return json({ ok: true });
+          } catch (e) { return json({ error: (e as Error)?.message || "Falha ao salvar" }, { status: 502 }); }
+        }
+        if (action === "meta-status") {
+          try {
+            const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-meta-secret").maybeSingle();
+            const token = (row?.data as any)?.token || "";
+            if (!token) return json({ ok: true, configured: false });
+            const r = await fetch(`https://graph.facebook.com/v21.0/me/adaccounts?fields=name,account_id,currency&limit=200&access_token=${encodeURIComponent(token)}`);
+            const d: any = await r.json().catch(() => ({}));
+            if (!r.ok || d.error) return json({ ok: true, configured: true, error: d?.error?.message || "Token inválido ou sem permissão", accounts: [] });
+            return json({ ok: true, configured: true, accounts: (d.data || []).map((a: any) => ({ id: a.account_id, name: a.name, currency: a.currency })) });
+          } catch (e) { return json({ error: (e as Error)?.message || "Falha" }, { status: 502 }); }
+        }
+        if (action === "meta-relatorio") {
+          const accountId = String(body.accountId ?? "").replace(/[^0-9]/g, "");
+          const preset = String(body.preset ?? "last_30d").replace(/[^a-z0-9_]/g, "");
+          if (!accountId) return json({ error: "Conta obrigatória" }, { status: 400 });
+          try {
+            const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-meta-secret").maybeSingle();
+            const token = (row?.data as any)?.token || "";
+            if (!token) return json({ error: "Meta não conectado" }, { status: 400 });
+            const fields = "spend,impressions,clicks,cpc,ctr,reach,actions";
+            const r = await fetch(`https://graph.facebook.com/v21.0/act_${accountId}/insights?fields=${fields}&date_preset=${encodeURIComponent(preset)}&access_token=${encodeURIComponent(token)}`);
+            const d: any = await r.json().catch(() => ({}));
+            if (!r.ok || d.error) return json({ error: d?.error?.message || "Falha no relatório" }, { status: 502 });
+            return json({ ok: true, insights: (d.data && d.data[0]) || null });
+          } catch (e) { return json({ error: (e as Error)?.message || "Falha" }, { status: 502 }); }
+        }
+
         // JARVIS: assistente de voz conversacional da ARK (respostas curtas, faladas).
         if (action === "jarvis") {
           const msgs = Array.isArray(body.messages) ? body.messages.slice(-12) : [];

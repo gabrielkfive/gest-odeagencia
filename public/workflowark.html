@@ -619,6 +619,10 @@ table.t tr.high{background:var(--yel-bg)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span>Tutorial / POPs</span>
         </div>
+        <div class="subitem" data-nav="integracoes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span>🔌 Integrações</span>
+        </div>
       </div>
 
       <div class="nav-label">Conhecimento</div>
@@ -2361,6 +2365,28 @@ function iniciarAutoSync(){
         </div>
       </div>
 
+      <!-- =================== INTEGRAÇÕES =================== -->
+      <div class="page" id="page-integracoes">
+        <div class="page-head">
+          <div class="page-title"><h1>🔌 Integrações</h1><p>Conecte Meta, Google e e-mail · você cola a chave, o sistema usa (a chave fica só no servidor)</p></div>
+        </div>
+        <div class="card" style="padding:18px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="font-size:15px;font-weight:800">📱 Meta (Instagram / Facebook Ads)</h3><span id="meta-badge" style="font-size:11px;font-weight:700;color:var(--mute)">verificando...</span></div>
+          <p style="font-size:12.5px;color:var(--mute);line-height:1.5;margin-bottom:10px">Cole o <b>token</b> da sua conta Meta Business (Usuários do sistema → gerar token com ads_read). Veja o passo no Tutorial. O token fica guardado <b>só no servidor</b>, não aparece aqui depois de salvar.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:1;min-width:260px"><label class="form-label">Token do Meta</label><input id="meta-token" class="form-input" type="password" placeholder="Cole aqui o token (EAAB...)"></div>
+            <button class="tb-btn dk" onclick="metaConectar()">Conectar</button>
+          </div>
+          <div id="meta-status-msg" style="font-size:12px;margin-top:8px"></div>
+          <div id="meta-contas" style="margin-top:10px"></div>
+          <div id="meta-relatorio" style="margin-top:12px"></div>
+        </div>
+        <div class="card" style="padding:18px;opacity:.65">
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:4px">📧 E-mail · 🔍 Google Ads · ⚙️ n8n</h3>
+          <p style="font-size:12.5px;color:var(--mute);line-height:1.5">Em breve — precisam de configuração extra (serviço de e-mail, developer token do Google, instância n8n). Veja o passo-a-passo no <b>Tutorial → Conectar integrações</b>.</p>
+        </div>
+      </div>
+
       <!-- =================== CONSELHO DE IA =================== -->
       <div class="page" id="page-conselho">
         <div class="page-head">
@@ -3100,6 +3126,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='tutorial'&&typeof renderTutorial==='function'){try{renderTutorial();}catch(e){console.warn('tut',e);}}
     if(p==='conselho'&&typeof consPopular==='function'){try{consPopular();}catch(e){}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
+    if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}}
     if(p==='whatsapp'){try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
@@ -3642,7 +3669,7 @@ const NAV_CATALOG=[
   {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'conselho',l:'Conselho de IA'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},
   {k:'crm',l:'CRM · Pipeline'},
   {k:'organograma',l:'Organograma'},{k:'pops',l:'POPs por Função'},{k:'processos',l:'Processos'},
-  {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},{k:'tutorial',l:'Tutorial / POPs'},
+  {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},{k:'tutorial',l:'Tutorial / POPs'},{k:'integracoes',l:'Integrações'},
 ];
 const _ALL_NAV=NAV_CATALOG.map(s=>s.k);
 const _BASE_NAV=['dashboard','reunioes','agenda','organograma','pops','processos','meumes'];
@@ -4553,6 +4580,46 @@ function consCriarTarefas(){
   const cliente=document.getElementById('cons-cliente').value||'';const cli=CLIENTES.find(c=>c.nm===cliente);const today=Date.now();
   _consData.plano.forEach((p,i)=>{const d=new Date(today+(i+1)*86400000);state.tarefas.push({id:'cons'+Date.now()+i,title:String(p).slice(0,120),desc:'Gerado pelo Conselho de IA'+(cliente?(' · '+cliente):''),funcao:'',clienteId:cli?cli.id:'',resp:'',data:d.toISOString().split('T')[0],prio:'media',status:'backlog',tags:['conselho'],checklist:[],sprintN:null,origem:'conselho',criadaEm:new Date().toISOString()});});
   saveTarefas();toast('✓ '+_consData.plano.length+' tarefas criadas');
+}
+/* ============ INTEGRAÇÃO META (self-service) ============ */
+async function metaStatusLoad(){
+  const badge=document.getElementById('meta-badge'); if(!badge)return;
+  badge.textContent='verificando...';badge.style.color='var(--mute)';
+  try{
+    const r=await cloudCall('save',{action:'meta-status'});
+    if(!r.configured){badge.textContent='○ não conectado';badge.style.color='#c0392b';return;}
+    if(r.error){badge.textContent='⚠ token inválido';badge.style.color='#c0392b';const m=document.getElementById('meta-status-msg');if(m)m.innerHTML='<span style="color:#c0392b">'+mdEsc(r.error)+'</span>';return;}
+    badge.textContent='● conectado';badge.style.color='#1d8a4e';
+    metaRenderContas(r.accounts||[]);
+  }catch(e){badge.textContent='erro';}
+}
+async function metaConectar(){
+  const t=(document.getElementById('meta-token').value||'').trim();const msg=document.getElementById('meta-status-msg');
+  if(!t){if(msg)msg.textContent='Cole o token primeiro.';return;}
+  if(msg)msg.textContent='Conectando...';
+  try{await cloudCall('save',{action:'set-meta-config',token:t});document.getElementById('meta-token').value='';await metaStatusLoad();if(msg)msg.innerHTML='<span style="color:#1d8a4e">✓ Token salvo no servidor</span>';}
+  catch(e){if(msg)msg.innerHTML='<span style="color:#c0392b">⚠ '+((e&&e.message)||'falha')+'</span>';}
+}
+function metaRenderContas(accs){
+  const el=document.getElementById('meta-contas');if(!el)return;
+  if(!accs.length){el.innerHTML='<div style="font-size:12px;color:var(--mute)">Nenhuma conta de anúncio nesse token.</div>';return;}
+  el.innerHTML='<div style="font-size:12px;font-weight:700;margin:4px 0 6px">Contas de anúncio ('+accs.length+') — clique pra ver o relatório:</div>'+accs.map(a=>`<button class="icobtn" style="display:block;width:100%;text-align:left;margin-bottom:4px" onclick="metaRelatorio('${a.id}',${JSON.stringify(a.name).replace(/"/g,'&quot;')})">📊 ${mdEsc(a.name)} <span style="color:var(--mute)">(${mdEsc(a.id)})</span></button>`).join('');
+}
+async function metaRelatorio(id,nome){
+  const out=document.getElementById('meta-relatorio');if(out)out.innerHTML='<div style="color:var(--mute);font-size:12.5px;padding:6px 0">Buscando relatório (30 dias)...</div>';
+  try{
+    const r=await cloudCall('save',{action:'meta-relatorio',accountId:id,preset:'last_30d'});const i=r.insights;
+    if(!i){if(out)out.innerHTML='<div style="color:var(--mute);font-size:12.5px">Sem dados nos últimos 30 dias.</div>';return;}
+    const fmt=(v)=>Number(v||0).toLocaleString('pt-BR');
+    out.innerHTML=`<div class="card" style="padding:14px;background:#fafafa"><div style="font-weight:700;margin-bottom:10px">📊 ${mdEsc(nome||'')} · últimos 30 dias</div><div class="g3" style="gap:8px">
+      <div class="kpi"><div class="l">Investido</div><div class="v" style="font-size:18px">R$ ${fmt(i.spend)}</div></div>
+      <div class="kpi"><div class="l">Impressões</div><div class="v" style="font-size:18px">${fmt(i.impressions)}</div></div>
+      <div class="kpi"><div class="l">Cliques</div><div class="v" style="font-size:18px">${fmt(i.clicks)}</div></div>
+      <div class="kpi"><div class="l">CTR</div><div class="v" style="font-size:18px">${(parseFloat(i.ctr||0)).toFixed(2)}%</div></div>
+      <div class="kpi"><div class="l">CPC</div><div class="v" style="font-size:18px">R$ ${(parseFloat(i.cpc||0)).toFixed(2)}</div></div>
+      <div class="kpi"><div class="l">Alcance</div><div class="v" style="font-size:18px">${fmt(i.reach)}</div></div>
+    </div></div>`;
+  }catch(e){if(out)out.innerHTML='<div style="color:#c0392b;font-size:12.5px">⚠ '+((e&&e.message)||'falha')+'</div>';}
 }
 /* ============ JARVIS — assistente de VOZ (fala e ouve) ============ */
 let JARVIS_MSGS=[]; let _jarvisRec=null;
