@@ -831,7 +831,37 @@ table.t tr.high{background:var(--yel-bg)}
           <button class="icobtn" onclick="renderMeuDia()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>Atualizar</button>
         </div>
 
-        <div class="g4" id="md-kpis" style="margin-bottom:16px"></div>
+        <!-- JARVIS: resumo do dia -->
+        <style>
+          #md-jarvis{position:relative;overflow:hidden;border-radius:16px;padding:18px 20px;margin-bottom:14px;background:linear-gradient(135deg,#0a0a0a 0%,#15120c 100%);color:#fff;display:none}
+          #md-jarvis.show{display:block}
+          #md-jarvis::before{content:"";position:absolute;left:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,199,0,.18),transparent 65%);pointer-events:none}
+          #md-jarvis .jv-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+          #md-jarvis .jv-orb{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe680,var(--yel) 55%,#a07e00);box-shadow:0 0 0 4px rgba(255,199,0,.14);animation:orbPulse 2.6s ease-in-out infinite}
+          @keyframes orbPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 4px rgba(255,199,0,.14)}50%{transform:scale(1.08);box-shadow:0 0 0 7px rgba(255,199,0,.05)}}
+          #md-jarvis .jv-ttl{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--yel);font-family:var(--mono)}
+          #md-jarvis .jv-nm{font-size:14px;font-weight:800}
+          #md-jarvis .jv-txt{font-size:13px;line-height:1.6;color:#e9e7e0;white-space:pre-wrap;max-width:880px}
+          #md-jarvis .jv-spk{margin-top:10px;background:var(--yel);color:#000;border:none;border-radius:9px;padding:7px 13px;font-weight:700;font-size:12px;cursor:pointer}
+          #md-briefings{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;margin-bottom:16px;scroll-snap-type:x mandatory}
+          #md-briefings::-webkit-scrollbar{height:6px}#md-briefings::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px}
+          #md-briefings:empty{display:none}
+          .mdb{min-width:280px;max-width:300px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;cursor:pointer}
+          .mdb .top{background:linear-gradient(135deg,#0a0a0a,#1a1714);color:#fff;padding:10px 13px}
+          .mdb .top .c{font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--yel);font-family:var(--mono)}
+          .mdb .top .d{font-size:12.5px;font-weight:700;margin-top:2px;line-height:1.3}
+          .mdb .bd{padding:10px 13px;font-size:11.5px;color:var(--txt)}
+          .mdb .bd li{margin-bottom:3px;list-style:none;padding-left:13px;position:relative}
+          .mdb .bd li::before{content:"›";position:absolute;left:0;color:var(--yel-d);font-weight:800}
+        </style>
+        <div id="md-jarvis">
+          <div class="jv-hd"><div class="jv-orb"></div><div><div class="jv-ttl">Assistente ARK</div><div class="jv-nm">JARVIS · seu resumo de hoje</div></div></div>
+          <div class="jv-txt" id="md-jarvis-txt"></div>
+          <button class="jv-spk" onclick="mdJarvisFalar()">🔊 JARVIS narra meu dia</button>
+        </div>
+        <div id="md-briefings"></div>
+
+        <div class="g4 stagger" id="md-kpis" style="margin-bottom:16px"></div>
 
         <div class="md-grid">
           <div class="md-card">
@@ -3858,6 +3888,11 @@ function renderMeuDia(){
     mdKpi('dk','Pendentes',pend.length,'próximas e sem data'),
     mdKpi('green','Concluídas hoje',doneToday.length,'no seu nome'),
   ].join('');
+  if(typeof animateCounters==='function')setTimeout(()=>animateCounters(document.getElementById('page-dashboard')),30);
+  // JARVIS: resumo do dia (lê a última notificação de resumo/ideia/conselho)
+  mdRenderJarvis(late.length,todayT.length,pend.length);
+  // Briefings do conselho de hoje
+  mdRenderBriefings();
   // título do cartão de tarefas
   const tt=document.getElementById('md-tasks-title');
   if(tt)tt.textContent=myName?'Minhas tarefas':'Tarefas do time';
@@ -3896,6 +3931,50 @@ function renderMeuDia(){
         </div>
       </div>`).join(''):'<div class="md-empty" style="color:#a8a8a4">Sem tarefas atribuídas ainda.</div>';
   }else if(wrap){wrap.style.display='none';}
+}
+
+/* ---- JARVIS no Meu Dia: resumo + briefings ---- */
+let _mdJarvisTxt='';
+function mdRenderJarvis(nLate,nToday,nPend){
+  const box=document.getElementById('md-jarvis'),txt=document.getElementById('md-jarvis-txt');
+  if(!box||!txt)return;
+  let resumoIA='';
+  try{
+    const nots=JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]');
+    const r=nots.find(n=>n.tipo==='resumo');
+    if(r&&r.texto)resumoIA=String(r.texto).replace(/^🧠[^:]*:\s*/,'').trim();
+  }catch(e){}
+  const nome=(WFA_MEMBER&&WFA_MEMBER.full_name)?mdFirst(WFA_MEMBER.full_name):'';
+  // monta um briefing falado curto e natural
+  const partes=[];
+  partes.push(`${mdGreeting()}${nome?', '+nome:''}.`);
+  if(nLate)partes.push(`Você tem ${nLate} tarefa${nLate>1?'s':''} atrasada${nLate>1?'s':''} que precisam destravar.`);
+  if(nToday)partes.push(`${nToday} vence${nToday>1?'m':''} hoje.`);
+  if(!nLate&&!nToday)partes.push(`Nada atrasado e nada vencendo hoje — dia livre pra avançar no estratégico.`);
+  if(nPend)partes.push(`E ${nPend} pendente${nPend>1?'s':''} no radar.`);
+  if(resumoIA)partes.push('Do WhatsApp: '+resumoIA);
+  // conta quantos debates o conselho deixou hoje
+  try{
+    const hoje=new Date().toISOString().split('T')[0];
+    const brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]').filter(b=>b.date===hoje);
+    if(brfs.length)partes.push(`O conselho deixou ${brfs.length} debate${brfs.length>1?'s':''} pronto${brfs.length>1?'s':''} pra você, com plano e tarefas.`);
+  }catch(e){}
+  _mdJarvisTxt=partes.join(' ');
+  txt.textContent=_mdJarvisTxt;
+  box.classList.add('show');
+}
+function mdJarvisFalar(){ if(typeof jarvisSpeak==='function') jarvisSpeak(_mdJarvisTxt||'Sem resumo no momento.'); }
+function mdRenderBriefings(){
+  const wrap=document.getElementById('md-briefings');if(!wrap)return;
+  let brfs=[];try{brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){}
+  const hoje=new Date().toISOString().split('T')[0];
+  const list=(brfs.filter(b=>b.date===hoje).length?brfs.filter(b=>b.date===hoje):brfs).slice(0,8);
+  if(!list.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=list.map(b=>`
+    <div class="mdb" onclick="document.querySelector('[data-nav=conselho]').click()">
+      <div class="top"><div class="c">🧠 ${mdEsc(b.cliente||'ARK')}</div><div class="d">${mdEsc(b.decisao||'—')}</div></div>
+      <div class="bd"><ul>${(b.plano||[]).slice(0,3).map(p=>`<li>${mdEsc(p)}</li>`).join('')||'<li class="muted">ver plano</li>'}</ul></div>
+    </div>`).join('');
 }
 
 /* ============ IDENTIDADE / MÊS ============ */
