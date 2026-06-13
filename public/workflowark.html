@@ -3404,7 +3404,7 @@ const RESPONSAVEIS_FN = {
   'Gestor de Tráfego':'Danilo de Lima',
   'Criador':'Maria Luiza',
   'Designer':'M. Portela',
-  'Editor':'Luckas Gomes',
+  'Editor':'Samuel Magalhães',
   'Captação':'Omar'
 };
 
@@ -4281,7 +4281,7 @@ function mdRenderBriefings(){
 
 /* ============ IDENTIDADE / MÊS ============ */
 const ROLE_LABEL={admin:'CEO · Admin',gestor:'Gestor',financeiro:'Financeiro',operacao:'Operação',comercial:'Comercial',marketing:'Marketing',viewer:'Visualização'};
-const MD_PEOPLE_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Maria Luiza','Bruno','Saulo','Henrique','Nicolas','Luckas Gomes','Giuseppe','Márcio','Kaique'];
+const MD_PEOPLE_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Samuel Magalhães','Maria Luiza','Bruno','Saulo','Henrique','Nicolas','Luckas Gomes','Giuseppe','Márcio','Kaique'];
 let MD_PEOPLE=MD_PEOPLE_BASE.slice();
 function rebuildPeople(){ MD_PEOPLE = MD_PEOPLE_BASE.concat(loadColabCustom().filter(n=>!MD_PEOPLE_BASE.includes(n))); }
 rebuildPeople();
@@ -5360,24 +5360,87 @@ function jarvisExecute(raw){
   // CONCLUIR tarefa: "conclui/marca a tarefa X como feita/pronta"
   {
     const mc=raw.match(/(?:conclui[r]?|finaliza[r]?|marc\w*)\s+(?:a\s+)?(?:tarefa\s+)?(.+)/i);
-    if(re('conclu|finaliz') || (re('marc') && re('feit|pront|conclu'))){
-      if(mc&&mc[1]){
-        const alvo=mc[1].replace(/\b(como|feita|feito|pronta|pronto|conclu[ií]da?|conclu[ií]do)\b/ig,'').trim();
-        const tk=ARK_acharTarefa(alvo);
-        if(tk){ tk.status='concluido'; if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); if(typeof updateBadges==='function')updateBadges(); return 'Feito, Senhor. Marquei "'+tk.title+'" como concluída.'; }
-      }
+    if((re('conclu|finaliz') || (re('marc') && re('feit|pront|conclu'))) && mc&&mc[1]){
+      const alvo=mc[1].replace(/\b(como|feita|feito|pronta|pronto|conclu[ií]da?|conclu[ií]do)\b/ig,'').trim();
+      const tk=ARK_acharTarefa(alvo);
+      if(tk){ tk.status='concluido'; if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); if(typeof updateBadges==='function')updateBadges(); return 'Feito, Senhor. Marquei "'+tk.title+'" como concluída.'; }
+      return 'Não localizei a tarefa "'+alvo+'", Senhor. Diga o nome como aparece na lista de Atividades.';
     }
   }
   // DESIGNAR tarefa para uma pessoa: "passa/atribui/delega a tarefa X pro Fulano"
-  if(re('atribu|designa|passa|delega|repassa') && re('\\b(para|pro|pra)\\b') && !has('conselho')){
+  if(re('atribu|designa|passa|delega|repassa') && re('\\b(para|pro|pra)\\b') && !has('conselho') && has('tarefa')){
     const time=(typeof MD_PEOPLE!=='undefined')?MD_PEOPLE:[];
     const nrm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
     const pessoa=time.find(p=>{const f=nrm(p).split(' ')[0];return f.length>=3&&t.includes(f);});
-    if(pessoa){
-      const alvo=raw.replace(/.*?(?:tarefa)\s+/i,'').replace(/\s+(?:para|pro|pra)\s+.*$/i,'').trim();
-      const tk=ARK_acharTarefa(alvo);
-      if(tk){ tk.resp=pessoa; if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); return 'Pronto, Senhor. "'+tk.title+'" agora é com '+pessoa+'.'; }
+    const alvo=raw.replace(/.*?(?:tarefa)\s+/i,'').replace(/\s+(?:para|pro|pra)\s+.*$/i,'').trim();
+    const tk=ARK_acharTarefa(alvo);
+    if(tk&&pessoa){ tk.resp=pessoa; if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); return 'Pronto, Senhor. "'+tk.title+'" agora é com '+pessoa+'.'; }
+    if(!tk) return 'Não localizei a tarefa "'+alvo+'", Senhor.';
+    return 'Não entendi para quem designar, Senhor. Diga o nome da pessoa.';
+  }
+  const _hoje=new Date().toISOString().split('T')[0];
+  const _aberta=tk=>tk.status!=='concluido';
+  const _nrm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const _achaPessoa=()=>{const time=(typeof MD_PEOPLE!=='undefined')?MD_PEOPLE:[];return time.find(p=>{const f=_nrm(p).split(' ')[0];return f.length>=3&&t.includes(f);});};
+  const _achaCliente=()=>{try{return (CLIENTES||[]).find(c=>{const n=_nrm(c.nm);if(t.includes(n))return true;const f=n.split(/\s+/)[0];return f.length>=4&&t.includes(f);});}catch(e){return null;}};
+  // MUDAR PRIORIDADE: "marca a tarefa X como urgente / alta / baixa prioridade"
+  if(re('urgente|priorid|alta prioridade|baixa prioridade') && re('marc|muda|deixa|torna|coloc')){
+    const prio=/baixa/.test(t)?'baixa':(/m[ée]dia/.test(t)?'media':'alta');
+    const alvo=raw.replace(/.*?(?:tarefa)\s+/i,'').replace(/\s+como\s+.*$/i,'').replace(/\b(urgente|priorid\w*|alta|baixa|m[ée]dia)\b/ig,'').trim();
+    const tk=ARK_acharTarefa(alvo); if(tk){tk.prio=prio;if(typeof saveTarefas==='function')saveTarefas();if(typeof renderTarefas==='function')renderTarefas();if(typeof renderMeuDia==='function')renderMeuDia();return 'Pronto, Senhor. "'+tk.title+'" agora é prioridade '+prio+'.';}
+    if(has('tarefa'))return 'Não localizei a tarefa "'+alvo+'", Senhor.';
+  }
+  // MUDAR DATA/PRAZO: "muda a tarefa X pra sexta / amanhã"
+  if(re('muda|altera|adia|remarca|passa') && has('tarefa') && re('prazo|data|pra |para |sexta|segunda|ter[çc]a|quarta|quinta|sabado|sábado|domingo|amanh|hoje')){
+    const {date}=jarvisParseWhen(t);
+    const alvo=raw.replace(/.*?tarefa\s+/i,'').replace(/\s+(?:pra|para|pro)\s+.*$/i,'').replace(/\s+(?:de|o|a)\s+prazo.*/i,'').trim();
+    const tk=ARK_acharTarefa(alvo); if(tk){tk.data=date;if(typeof saveTarefas==='function')saveTarefas();if(typeof renderTarefas==='function')renderTarefas();if(typeof renderMeuDia==='function')renderMeuDia();return 'Feito. "'+tk.title+'" remarcada para '+date.split('-').reverse().slice(0,2).join('/')+', Senhor.';}
+    return 'Não localizei a tarefa "'+alvo+'", Senhor.';
+  }
+  // ROTEIRO por voz: "faz um roteiro pra Vivenda sobre X"
+  if(has('roteiro','roteiros') && re('faz|cria|gera|escrev|monta|quero')){
+    const cli=_achaCliente();
+    let tema=''; const ms=raw.match(/sobre\s+(.+)/i); if(ms)tema=ms[1].trim();
+    if(!tema){ tema=raw.replace(/.*?roteiros?\s*/i,'').replace(/\b(pra|para|pro)\s+[^,]*/i,'').trim(); }
+    jarvisGo('roteirista');
+    setTimeout(()=>{try{const tt=document.getElementById('rot-tema');if(tt)tt.value=tema||'novidade do mês';const rc=document.getElementById('rot-cliente');if(rc)rc.value=cli?cli.nm:'';if(typeof rotGerar==='function')rotGerar();}catch(e){}},350);
+    return 'Pois não, Senhor. Gerando roteiros'+(cli?(' para '+cli.nm):'')+(tema?(' sobre '+tema):'')+'.';
+  }
+  // RESUMIR WHATSAPP: "resume o WhatsApp"
+  if(has('whatsapp','zap','whats') && re('resum|o que rolou|novidad|mensagens')){
+    jarvisGo('whatsapp'); setTimeout(()=>{try{if(typeof wppResumo==='function')wppResumo();}catch(e){}},400);
+    return 'Compilando as conversas das últimas 24 horas, Senhor. Um momento.';
+  }
+  // COBRANÇA: "quem falta cobrar esse mês"
+  if(re('cobr') && (re('quem|falta|quanto|pendent')||has('cobrança','cobranca','cobrar'))){
+    jarvisGo('cobranca'); return 'Abrindo as cobranças do mês, Senhor. Os clientes a cobrar estão destacados.';
+  }
+  // STATUS DE CLIENTE: "como tá a Vivenda" / "status da Vivenda"
+  if((re('como (ta|esta|tá|está)|status|situacao|situação|saude|saúde')||ehPergunta) && _achaCliente()){
+    const c=_achaCliente();
+    const ts=(state.tarefas||[]).filter(x=>x.clienteId===c.id||_nrm(x.title).includes(_nrm(c.nm)));
+    const abertas=ts.filter(_aberta).length, atras=ts.filter(x=>x.data&&x.data<_hoje&&_aberta(x)).length;
+    const stL={r:'em situação urgente',y:'em ajuste',gr:'saudável',churn:'fora da operação'}[c.status]||'ativo';
+    cliDetalhe&&cliDetalhe(c.id);
+    return 'Senhor, '+c.nm+' está '+stL+'. '+(abertas?(abertas+' tarefa'+(abertas>1?'s':'')+' aberta'+(abertas>1?'s':'')+(atras?(', sendo '+atras+' atrasada'+(atras>1?'s':'')):'')+'.'):'Sem tarefas abertas no momento.')+' Abri a ficha para os detalhes.';
+  }
+  // TAREFAS DE UMA PESSOA: "o que o Danilo tem pra fazer"
+  {
+    const p=_achaPessoa();
+    if(p && (re('o que|tem pra fazer|tarefas d|carga|fazendo')||ehPergunta)){
+      const ts=(state.tarefas||[]).filter(x=>x.resp===p&&_aberta(x));
+      const atras=ts.filter(x=>x.data&&x.data<_hoje).length;
+      const top=ts.slice(0,3).map(x=>x.title).join('; ');
+      jarvisGo('tarefas');
+      return p.split(' ')[0]+' tem '+ts.length+' tarefa'+(ts.length!==1?'s':'')+' aberta'+(ts.length!==1?'s':'')+(atras?(', '+atras+' atrasada'+(atras>1?'s':'')):'')+(top?('. As principais: '+top+'.'):'.');
     }
+  }
+  // TAREFAS ATRASADAS: "quais estão atrasadas"
+  if(re('atrasad|atrasou|vencid') && (re('quais|quantas|o que|tem')||ehPergunta)){
+    const ts=(state.tarefas||[]).filter(x=>x.data&&x.data<_hoje&&_aberta(x));
+    const top=ts.slice(0,4).map(x=>x.title+(x.resp?(' ('+x.resp.split(' ')[0]+')'):'')).join('; ');
+    jarvisGo('tarefas');
+    return ts.length?('Senhor, há '+ts.length+' tarefa'+(ts.length>1?'s':'')+' atrasada'+(ts.length>1?'s':'')+'. '+(top?('Destaque: '+top+'.'):'')):'Nada atrasado, Senhor. Tudo sob controle.';
   }
   // MARCAR NO GOOGLE AGENDA / CALENDAR (cria evento real): "marca/adiciona/agenda ... na agenda/calendário ... hoje/amanhã/às 15h"
   if(re('agenda|calend') && re('adicion|marc|agend|coloc|bot|p[oõ]e|marqu|cria') && re('\\d{1,2}\\s*(h|:|hora)|meio[ -]?dia|hoje|amanh|segunda|ter[çc]a|quarta|quinta|sexta|s[áa]bado|domingo')){
@@ -5480,7 +5543,7 @@ function ARK_pessoaPorArea(area){
   if(/account|cs|atendimento|sucesso do cliente|relacionamento/.test(a))return 'Lucas Rosi';
   if(/roteir/.test(a))return 'Maria Luiza';
   if(/design|arte|criativo|pe[çc]a/.test(a))return 'M. Portela';
-  if(/edi[çc]ao|editor|video|corte/.test(a))return 'Luckas Gomes';
+  if(/edi[çc]ao|editor|video|corte/.test(a))return 'Samuel Magalhães';
   if(/capta/.test(a))return 'Omar';
   if(/comercial|vendas|sdr|prospec|lead/.test(a))return 'Saulo';
   if(/diretor|opera|gestao|estrateg|ceo|financ/.test(a))return 'Gabriel Andrade';

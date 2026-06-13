@@ -19,7 +19,7 @@ function pessoaPorArea(area: string): string {
   if (/account|cs|atendimento|sucesso do cliente|relacionamento/.test(a)) return "Lucas Rosi";
   if (/roteir/.test(a)) return "Maria Luiza";
   if (/design|arte|criativo|pe[çc]a/.test(a)) return "M. Portela";
-  if (/edi[çc][ãa]o|editor|v[íi]deo|corte/.test(a)) return "Luckas Gomes";
+  if (/edi[çc][ãa]o|editor|v[íi]deo|corte/.test(a)) return "Samuel Magalhães";
   if (/capta/.test(a)) return "Omar";
   if (/comercial|vendas|sdr|prospec|lead/.test(a)) return "Saulo";
   if (/diretor|opera|gest[ãa]o|estrat|ceo|financ/.test(a)) return "Gabriel Andrade";
