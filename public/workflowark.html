@@ -5268,18 +5268,90 @@ let JARVIS_MSGS=[]; let _jarvisRec=null;
 function jarvisOpen(){document.getElementById('modal-jarvis').classList.add('open');jarvisRender();setTimeout(()=>{const i=document.getElementById('jarvis-input');if(i)i.focus();},100);}
 function jarvisRender(){
   const b=document.getElementById('jarvis-msgs'); if(!b)return;
-  if(!JARVIS_MSGS.length){b.innerHTML='<div style="text-align:center;color:var(--mute);font-size:12.5px;padding:24px">🎙️ Toque no microfone e fale, ou digite. Ex: "Quais tarefas estão atrasadas?", "Me dá uma ideia pra Vivenda na Copa".</div>';return;}
+  if(!JARVIS_MSGS.length){b.innerHTML='<div style="text-align:center;color:var(--mute);font-size:12.5px;padding:24px;line-height:1.7">Fale ou digite. Eu <b>executo</b>:<br>"rodar conselho" · "planejar meu dia" · "criar tarefa ligar pra Vivenda"<br>"abrir cliente Vivenda" · "abrir financeiro" · "resumo do dia"<br><span style="opacity:.7">…ou pergunte qualquer coisa que eu respondo.</span></div>';return;}
   b.innerHTML=JARVIS_MSGS.map(m=>`<div style="display:flex;justify-content:${m.role==='user'?'flex-end':'flex-start'};margin:5px 0"><div style="max-width:82%;background:${m.role==='user'?'#d9fdd3':'#fff'};border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:13px;line-height:1.5;white-space:pre-wrap">${mdEsc(m.content)}</div></div>`).join('');
   b.scrollTop=b.scrollHeight;
 }
 async function jarvisSend(txt){
   const inp=document.getElementById('jarvis-input'); txt=(txt||(inp&&inp.value)||'').trim(); if(!txt)return; if(inp)inp.value='';
-  JARVIS_MSGS.push({role:'user',content:txt}); JARVIS_MSGS.push({role:'assistant',content:'…'}); jarvisRender();
+  JARVIS_MSGS.push({role:'user',content:txt});
+  // 1) tenta EXECUTAR um comando no sistema (estilo Fazm). Se executou, nem chama a IA.
+  const done=jarvisExecute(txt);
+  if(done){ JARVIS_MSGS.push({role:'assistant',content:done}); jarvisRender(); jarvisFalar(done); return; }
+  // 2) senão, conversa com a IA
+  JARVIS_MSGS.push({role:'assistant',content:'…'}); jarvisRender();
   try{
     const r=await cloudCall('save',{action:'jarvis',messages:JARVIS_MSGS.filter(m=>m.content!=='…')});
     const reply=(r&&r.reply)||'(sem resposta)';
     JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:reply}; jarvisRender(); jarvisFalar(reply);
   }catch(e){ JARVIS_MSGS[JARVIS_MSGS.length-1]={role:'assistant',content:'⚠ '+((e&&e.message)||'falha')}; jarvisRender(); }
+}
+/* JARVIS EXECUTOR (estilo Fazm): interpreta comandos e AGE no sistema.
+   Retorna a frase de confirmação (string) se executou, ou null pra cair na conversa. */
+function jarvisGo(nav){const el=document.querySelector('[data-nav="'+nav+'"]');if(el){el.click();return true;}return false;}
+function jarvisExecute(raw){
+  const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const t=norm(raw);
+  const has=(...w)=>w.some(x=>t.includes(x));
+  // fechar o JARVIS
+  if(/^(fecha|fechar|sair|tchau)\b/.test(t)){closeModal('modal-jarvis');return 'Fechando. É só me chamar.';}
+  // rodar o conselho
+  if(has('rodar conselho','reunir conselho','roda o conselho','reunir o conselho','conselho agora','debater clientes')){
+    jarvisGo('conselho'); if(typeof consRodarAuto==='function')setTimeout(()=>consRodarAuto(),300);
+    return 'Reunindo o conselho agora — vou debater os clientes e deixar planos e tarefas prontos.';
+  }
+  // planejar a agenda/dia
+  if(has('planejar meu dia','planeja meu dia','planejar a agenda','planeja a agenda','organizar minha agenda','organiza a agenda','planejar meus dias','planejar a semana','planejar o mes')){
+    jarvisGo('agenda'); if(typeof jarvisPlanAgenda==='function')setTimeout(()=>jarvisPlanAgenda(),300);
+    return 'Abrindo o planejador: priorizei suas tarefas e propus os horários. É só conferir e agendar.';
+  }
+  // resumo do dia
+  if(has('resumo do dia','como ta meu dia','como esta meu dia','meu resumo','resumo de hoje','o que tenho hoje')){
+    jarvisGo('dashboard'); setTimeout(()=>{if(typeof mdJarvisFalar==='function')mdJarvisFalar();},400);
+    return 'Aqui está o resumo do seu dia.';
+  }
+  // criar tarefa: "criar tarefa X", "nova tarefa X", "anota X", "lembra de X", "adiciona tarefa X"
+  let m=raw.match(/(?:criar?|nova|adicionar?|anota[r]?|lembra(?:r)?(?:\s+de)?|bota[r]?)\s+(?:uma\s+)?(?:tarefa|task|lembrete)?\s*[:\-]?\s*(.+)/i);
+  if(has('tarefa','lembrete','anota','lembra')&&m&&m[1]&&m[1].trim().length>2){
+    const titulo=m[1].trim().replace(/^(de|pra|para)\s+/i,'');
+    state.tarefas=state.tarefas||[];
+    state.tarefas.push({id:'jv'+Date.now(),title:titulo.slice(0,140),desc:'',funcao:'',clienteId:'',resp:'',data:'',prio:'media',status:'backlog',tags:['jarvis'],checklist:[],sprintN:null,origem:'jarvis',criadaEm:new Date().toISOString()});
+    if(typeof saveTarefas==='function')saveTarefas();else localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));
+    if(typeof renderTarefas==='function')renderTarefas();if(typeof updateBadges==='function')updateBadges();if(typeof renderMeuDia==='function')renderMeuDia();
+    return 'Anotado: "'+titulo+'". Já está nas suas tarefas.';
+  }
+  // abrir cliente por nome: "abrir cliente X", "ficha do X", "mostra o X"
+  if(has('cliente','ficha')||/\b(abrir?|mostra[r]?|abre)\b/.test(t)){
+    try{
+      const lista=(typeof CLIENTES!=='undefined'?CLIENTES:[]);
+      const hit=lista.find(c=>t.includes(norm(c.nm)));
+      if(hit&&typeof cliDetalhe==='function'){cliDetalhe(hit.id);return 'Abrindo a ficha de '+hit.nm+'.';}
+    }catch(e){}
+  }
+  // navegação por nome de página
+  const navMap=[
+    [['meu dia','dashboard','inicio','home'],'dashboard','Meu Dia'],
+    [['lista de clientes','meus clientes','clientes'],'lista-clientes','Clientes'],
+    [['tarefas','atividades','kanban'],'tarefas','Atividades'],
+    [['financeiro','finanças','financas'],'financeiro','Financeiro'],
+    [['cobranca','cobrança','cobrar'],'cobranca','Cobranças'],
+    [['acerto','pagamentos','pagar'],'acerto','Acerto'],
+    [['central de agentes','agentes'],'agentes','Central de Agentes'],
+    [['conselho'],'conselho','Conselho'],
+    [['whatsapp','zap'],'whatsapp','WhatsApp'],
+    [['roteirista','roteiro'],'roteirista','Roteirista'],
+    [['legenda'],'legenda','Legendas'],
+    [['planejamento','calendario de conteudo'],'planejamento','Planejamento'],
+    [['drive','arquivos'],'drive','Drive'],
+    [['agenda','calendario'],'agenda','Agenda'],
+    [['processos','procedimentos'],'processos','Processos'],
+    [['organograma','equipe','time'],'organograma','Organograma'],
+    [['integracoes','integrações','conectar','integração'],'integracoes','Integrações'],
+    [['area do cliente','portal'],'cliente','Área do Cliente'],
+    [['meu mes','meu mês'],'meumes','Meu Mês'],
+  ];
+  for(const [kw,nav,label] of navMap){ if(kw.some(k=>t.includes(k))){ if(jarvisGo(nav))return 'Abrindo '+label+'.'; } }
+  return null; // não é comando → conversa com a IA
 }
 function jarvisFalar(txt){jarvisSpeak(String(txt||'').replace(/[#*_`]/g,''));}
 function jarvisMic(){
