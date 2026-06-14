@@ -2737,6 +2737,12 @@ function iniciarAutoSync(){
           .brf-foot button{font-size:11px;font-weight:600;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
           .brf-foot button.pri{background:var(--yel);border-color:var(--yel-d)}
           .cons-empty{text-align:center;padding:40px 20px;color:var(--mute);border:1px dashed var(--line-2);border-radius:14px;margin-bottom:18px}
+          .brf-ideias{display:flex;flex-direction:column;gap:5px}
+          .brf-idea{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.4;padding:6px 8px;border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:background .12s}
+          .brf-idea:hover{background:var(--bg)}
+          .brf-idea.on{background:#eef7ee;border-color:#cfe8cf}
+          .brf-idea.on span{text-decoration:none;color:var(--ink)}
+          .brf-idea input{margin-top:2px;flex-shrink:0;width:15px;height:15px;accent-color:var(--green)}
         </style>
         <div id="cons-status" style="font-size:12px;color:var(--mute);margin-bottom:10px"></div>
         <div id="cons-auto"></div>
@@ -5243,6 +5249,26 @@ async function consRodar(){
 }
 /* ---- Conselho AUTÔNOMO: feed dos debates diários ---- */
 function consBriefings(){try{return JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){return [];}}
+// Promove (ou desfaz) uma IDEIA do conselho em tarefa real, com check
+function consPromoverIdeia(briefId,idx,checked){
+  let brfs=consBriefings(); const b=brfs.find(x=>x.id===briefId); if(!b||!b.ideias||!b.ideias[idx])return;
+  const idea=b.ideias[idx]; idea.feito=!!checked;
+  const tid='idea-'+briefId+'-'+idx;
+  state.tarefas=state.tarefas||[];
+  if(checked){
+    if(!state.tarefas.some(t=>t.id===tid)){
+      const pessoa=(typeof ARK_pessoaPorArea==='function')?ARK_pessoaPorArea(idea.area||b.clienteId):'';
+      state.tarefas.push({id:tid,title:idea.titulo,desc:'Ideia do Conselho · '+(b.cliente||''),funcao:idea.area||'',clienteId:b.clienteId||'',resp:pessoa,data:'',prio:'media',status:'backlog',tags:['conselho','ideia'],checklist:[],sprintN:null,origem:'conselho-ideia',criadaEm:new Date().toISOString()});
+    }
+    toast('✓ Ideia virou tarefa'+( ((typeof ARK_pessoaPorArea==='function')&&ARK_pessoaPorArea(idea.area||b.clienteId))?(' · '+ARK_pessoaPorArea(idea.area||b.clienteId).split(' ')[0]):''));
+  }else{
+    state.tarefas=state.tarefas.filter(t=>t.id!==tid); if(typeof addDeleted==='function')addDeleted(tid);
+    toast('Ideia voltou a ser só ideia');
+  }
+  localStorage.setItem('wfa-conselho-briefings',JSON.stringify(brfs)); // persiste o check (sincroniza)
+  if(typeof saveTarefas==='function')saveTarefas();
+  consAutoRender();
+}
 function consToggleDebate(id){const d=document.getElementById('brfd-'+id);if(d)d.classList.toggle('open');}
 function consAutoRender(){
   const wrap=document.getElementById('cons-auto');if(!wrap)return;
@@ -5255,6 +5281,7 @@ function consAutoRender(){
     <div class="brf">
       <div class="brf-top"><div class="cl">${escapeHtml(b.cliente||'ARK')} · ${b.date===hoje?'hoje':escapeHtml(b.date||'')}</div><div class="dc">${escapeHtml(b.decisao||'—')}</div></div>
       <div class="brf-body">
+        ${(b.ideias&&b.ideias.length)?`<div class="lb">Ideias — marque pra virar tarefa</div><div class="brf-ideias">${b.ideias.map((id,ix)=>`<label class="brf-idea ${id.feito?'on':''}"><input type="checkbox" ${id.feito?'checked':''} onchange="consPromoverIdeia('${b.id}',${ix},this.checked)"><span>${escapeHtml(id.titulo)}${id.area?` <em style="color:var(--mute);font-style:normal;font-size:10px">· ${escapeHtml(id.area)}</em>`:''}</span></label>`).join('')}</div>`:''}
         ${(b.plano&&b.plano.length)?`<div class="lb">Plano</div><ul>${b.plano.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
         ${b.orcamento?`<div class="lb">Orçamento de mídia sugerido</div><div style="font-size:12px;line-height:1.5;font-weight:600;color:var(--ink);background:#eef7ee;border-radius:8px;padding:8px 10px">${escapeHtml(b.orcamento)}</div>`:''}
         ${b.roteiro?`<div class="lb">Roteirização (Reel)</div><div style="font-size:12px;line-height:1.5;background:var(--yel-bg);border-radius:8px;padding:8px 10px">${escapeHtml(b.roteiro)}</div>`:''}

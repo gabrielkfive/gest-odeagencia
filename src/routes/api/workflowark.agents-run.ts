@@ -210,45 +210,17 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               reunioes: Array.isArray(j.reunioes) ? j.reunioes.slice(0, 2).map((x: any) => String(x)) : [],
               roteiro: String(j.roteiro || ""),
               orcamento: String(j.orcamento || ""),
+              // IDEIAS (NÃO viram tarefa automaticamente — o Gabriel dá check pra promover).
+              // Resolve o "muito volume": nada de auto-flood no Kanban.
+              ideias: (Array.isArray(j.tarefas) ? j.tarefas : []).slice(0, 3).map((tk: any) => ({
+                titulo: String(tk?.title || "").slice(0, 140), area: String(tk?.resp || ""), feito: false,
+              })).filter((x: any) => x.titulo),
             };
-            // PRESERVA o histórico: cada debate é ADICIONADO (nada do que o conselho já
-            // propôs desaparece). Mantém os últimos 60.
+            // PRESERVA o histórico: cada debate é ADICIONADO. Mantém os últimos 60.
             briefings.unshift(brief);
-
-            // NÃO EMPILHAR: se o cliente já tem >=6 tarefas abertas do conselho, não cria
-            // mais (evita o acúmulo que vimos). O briefing/roteiro/orçamento continua sendo salvo.
-            const abertasConselho = tarefas.filter((t) => t.clienteId === c.id && t.origem === "conselho-auto" && t.status !== "concluido").length;
-            const novas = abertasConselho >= 6 ? [] : (Array.isArray(j.tarefas) ? j.tarefas : []).slice(0, 3);
-            novas.forEach((tk: any, i: number) => {
-              const title = String(tk?.title || "").slice(0, 120);
-              if (!title) return;
-              const dup = tarefas.some((t) => t.clienteId === c.id && (t.title || "") === title && (t.origem === "conselho-auto"));
-              if (dup) return;
-              const d = new Date(Date.now() + (i + 1) * 86400000).toISOString().split("T")[0];
-              const area = String(tk?.resp || "");
-              const pessoa = pessoaPorArea(area);
-              tarefas.push({
-                id: "ca" + Date.now() + i + c.id, title, desc: "Gerado pelo Conselho de IA · " + c.nm + (area ? " · área: " + area : ""),
-                funcao: area, clienteId: c.id, resp: pessoa, data: d, prio: "media",
-                status: "backlog", tags: ["conselho", "auto"], checklist: [], sprintN: null,
-                origem: "conselho-auto", criadaEm: new Date().toISOString(),
-              });
-              criadas++;
-            });
-            // cria as REUNIÕES/ALINHAMENTOS sugeridos (vão pro Account marcar)
+            // Apenas as REUNIÕES/ALINHAMENTOS entram direto NA AGENDA (não no Kanban)
             (Array.isArray(j.reunioes) ? j.reunioes : []).slice(0, 2).forEach((rm: any, i: number) => {
-              const title = "Alinhar: " + String(rm || "").slice(0, 110);
               if (String(rm || "").length < 4) return;
-              if (tarefas.some((t) => t.clienteId === c.id && (t.title || "") === title)) return;
-              const d = new Date(Date.now() + (i + 1) * 86400000).toISOString().split("T")[0];
-              tarefas.push({
-                id: "cr" + Date.now() + i + c.id, title, desc: "Reunião/alinhamento sugerido pelo Conselho · " + c.nm,
-                funcao: "Account", clienteId: c.id, resp: "Lucas Rosi", data: d, prio: "media",
-                status: "backlog", tags: ["conselho", "auto", "reuniao"], checklist: [], sprintN: null,
-                origem: "conselho-auto", criadaEm: new Date().toISOString(),
-              });
-              criadas++;
-              // também entra NA AGENDA (alinhamento do conselho)
               const evTitle = (c.id === "ark" ? "" : c.nm + ": ") + String(rm || "").slice(0, 80);
               if (!agenda.some((e) => e.title === evTitle)) {
                 agenda.push({ id: "ce" + Date.now() + i + c.id, date: proxDiaUtil(i), title: evTitle, time: i === 0 ? "10:00" : "15:00", type: "reuniao", origem: "conselho" });
