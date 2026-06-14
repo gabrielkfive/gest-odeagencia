@@ -1861,11 +1861,31 @@ async function arkDailyAgentsKick(){
     setTimeout(async()=>{try{await sincronizarAgora();if(typeof renderMeuDia==='function')renderMeuDia();if(typeof consAutoRender==='function')consAutoRender();}catch(e){}},9000);
   }catch(e){/* silencioso */}
 }
+// Mescla duas listas de objetos por id (união). Base = remoto; se localPrevalece, o local
+// vence em conflito de id. Garante que adições do servidor (conselho) E edições locais
+// coexistam — nada "some".
+function wfaMergeById(remoteArr,localArr,localPrevalece){
+  const byId={}; const order=[];
+  (Array.isArray(remoteArr)?remoteArr:[]).forEach(o=>{if(o&&o.id){if(!(o.id in byId))order.push(o.id);byId[o.id]=o;}});
+  (Array.isArray(localArr)?localArr:[]).forEach(o=>{if(o&&o.id){if(!(o.id in byId)){order.push(o.id);byId[o.id]=o;}else if(localPrevalece)byId[o.id]=o;}});
+  return order.map(id=>byId[id]);
+}
+const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes'];
 function applyCloudState(remote){
   WFA_CLOUD_MUTED=true;
   Object.entries(remote||{}).forEach(([key,value])=>{
     if(!isWfaCloudKey(key)||value==null)return;
-    if(WFA_DIRTY.has(key))return; // PROTEÇÃO: não sobrescreve mudança local ainda não confirmada
+    // Listas append-heavy (server + cliente escrevem): MESCLA por id (nunca sobrescreve cego)
+    if(WFA_MERGE_KEYS.includes(key)){
+      let rArr=value; if(typeof rArr==='string'){try{rArr=JSON.parse(rArr);}catch(e){rArr=[];}}
+      if(Array.isArray(rArr)){
+        let lArr=[];try{lArr=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+        const merged=wfaMergeById(rArr,lArr,WFA_DIRTY.has(key)); // se dirty, local vence conflitos
+        WFA_LS_SET(key,JSON.stringify(merged));
+        return;
+      }
+    }
+    if(WFA_DIRTY.has(key))return; // demais chaves: protege mudança local não confirmada
     WFA_LS_SET(key,typeof value==='string'?value:JSON.stringify(value));
   });
   WFA_CLOUD_MUTED=false;
