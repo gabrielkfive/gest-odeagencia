@@ -1717,7 +1717,7 @@ table.t tr.high{background:var(--yel-bg)}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-deleted-ids'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -1871,16 +1871,26 @@ function wfaMergeById(remoteArr,localArr,localPrevalece){
   return order.map(id=>byId[id]);
 }
 const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes'];
+const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events']; // itens apagados nunca voltam
+/* LÁPIDE DE EXCLUSÃO: ids apagados ficam em wfa-deleted-ids (sincronizado). A mescla
+   nunca ressuscita um id que está na lápide. Resolve "excluo e a tarefa volta". */
+function loadDeleted(){try{return new Set(JSON.parse(localStorage.getItem('wfa-deleted-ids')||'[]'));}catch(e){return new Set();}}
+function addDeleted(ids){const s=loadDeleted();(Array.isArray(ids)?ids:[ids]).forEach(i=>{if(i)s.add(i);});localStorage.setItem('wfa-deleted-ids',JSON.stringify([...s].slice(-3000)));}
 function applyCloudState(remote){
   WFA_CLOUD_MUTED=true;
+  // 1) une a lápide (remoto + local) antes de mesclar as listas
+  let deletedSet=loadDeleted();
+  try{ let rd=remote['wfa-deleted-ids']; if(typeof rd==='string')rd=JSON.parse(rd); if(Array.isArray(rd))rd.forEach(i=>deletedSet.add(i)); }catch(e){}
+  WFA_LS_SET('wfa-deleted-ids',JSON.stringify([...deletedSet].slice(-3000)));
   Object.entries(remote||{}).forEach(([key,value])=>{
-    if(!isWfaCloudKey(key)||value==null)return;
+    if(!isWfaCloudKey(key)||value==null||key==='wfa-deleted-ids')return;
     // Listas append-heavy (server + cliente escrevem): MESCLA por id (nunca sobrescreve cego)
     if(WFA_MERGE_KEYS.includes(key)){
       let rArr=value; if(typeof rArr==='string'){try{rArr=JSON.parse(rArr);}catch(e){rArr=[];}}
       if(Array.isArray(rArr)){
         let lArr=[];try{lArr=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
-        const merged=wfaMergeById(rArr,lArr,WFA_DIRTY.has(key)); // se dirty, local vence conflitos
+        let merged=wfaMergeById(rArr,lArr,WFA_DIRTY.has(key)); // se dirty, local vence conflitos
+        if(WFA_TOMBSTONE_KEYS.includes(key))merged=merged.filter(o=>!deletedSet.has(o.id)); // remove apagados
         WFA_LS_SET(key,JSON.stringify(merged));
         return;
       }
@@ -3172,7 +3182,6 @@ const CLIENTES_BASE = [
   {id:'sasse',nm:'Sasse Gifts',tipo:'ARK',plano:'Plano X',valor:4500,status:'gr',cap:2,meta:'2 captações/mês',extra:'📹 2 captações/mês'},
   {id:'fonseca',nm:'Fonseca & Cavalcanti',tipo:'ARK',plano:'Gold',valor:2500,status:'gr',cap:1,meta:'1 captação/mês · próxima fase',extra:'📹 1 captação · Compliance OAB'},
   {id:'vaca',nm:'Vaca Velha',tipo:'ARK',plano:'Gold',valor:2000,status:'gr',cap:1,meta:'1 captação/mês (2ª às vezes em 30d)',extra:'📹 1 captação · mês sim/mês não p/ a 2ª'},
-  {id:'bellavita',nm:'Bella Vita',tipo:'ARK',plano:'Gold',valor:3200,status:'y',cap:0,meta:'⏸ PAUSADA · manter cobrança ativa',extra:'Pausada'},
   // Alpha
   {id:'dom',nm:'Dom Baruka',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',meta:'URGENTE · cardápio + iFood + bebidas',extra:'Auditoria iFood em curso'},
   {id:'stray',nm:'Stray House',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Recuperação (não é mais urgente)',extra:'ROAS 5,08 · subir criativos'},
@@ -3180,10 +3189,7 @@ const CLIENTES_BASE = [
   {id:'babbo',nm:'Babbo Giovanni',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Em ajuste · criar tarefa on-demand',extra:'Reels já entregue'},
   {id:'brisa',nm:'Brisa Doce Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · onboarding/inauguração',extra:'Aderir método'},
   {id:'attra',nm:'Attraversiamo Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · bombando',extra:'+1k seg em 3 dias'},
-  // Churn / Cancelados
-  {id:'lunnas',nm:"Lunna's",tipo:'ARK',plano:'CHURN',valor:0,status:'churn',meta:'❌ Cancelou · fora da operação',extra:'Cancelado'},
-  {id:'shopping',nm:'Shopping dos Uniformes',tipo:'ARK',plano:'CHURN',valor:0,status:'churn',meta:'❌ Cancelou · fora da operação',extra:'Cancelado'},
-  {id:'bellato',nm:'Bellato Pizzaria',tipo:'Alpha',plano:'CHURN',valor:0,status:'churn',meta:'Cliente saiu · devolução ~R$8k',extra:'Documentado'},
+  // (Lunna's, Shopping dos Uniformes, Bellato e Bella Vita removidos do sistema a pedido do Gabriel)
 ];
 
 // Clientes personalizados (adicionados pelo Gabriel) — salvos na nuvem (wfa-clientes-custom).
@@ -4536,7 +4542,13 @@ function renderTarefas(){
   STATS.forEach(st=>{
     const list=document.querySelector(`[data-list="${st}"]`);if(!list)return;
     // status desconhecido (dado antigo/importado) cai no Backlog — nada some
-    const filt=state.tarefas.filter(t=>(t.status===st||(st==='backlog'&&!STATS.includes(t.status)))&&tarefaPassaFiltro(t));
+    const _pr={alta:0,media:1,baixa:2};
+    const filt=state.tarefas.filter(t=>(t.status===st||(st==='backlog'&&!STATS.includes(t.status)))&&tarefaPassaFiltro(t))
+      .sort((a,b)=>{ // manual (ordem) primeiro se definida; senão prioridade, depois data
+        if(a.ord!=null&&b.ord!=null&&a.ord!==b.ord)return a.ord-b.ord;
+        const p=(_pr[a.prio]??1)-(_pr[b.prio]??1); if(p)return p;
+        return (a.data||'9999').localeCompare(b.data||'9999');
+      });
     list.innerHTML=filt.map(taskCard).join('')||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`;
     document.getElementById('ct-'+st).textContent=filt.length;
   });
@@ -4684,6 +4696,8 @@ function taskCard(t){
     <div class="tc-meta" style="margin-top:4px">
       <span class="tc-assign" style="display:inline-flex;align-items:center;gap:5px">${t.resp?`<span class="tc-av">${taskInitials(t.resp)}</span>`:''}${escapeHtml(t.resp||'sem responsável')}</span>
       <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
+        <button class="icobtn" style="padding:2px 5px;font-size:9.5px" title="Subir" onclick="event.stopPropagation();taskMove('${t.id}',-1)">↑</button>
+        <button class="icobtn" style="padding:2px 5px;font-size:9.5px" title="Descer" onclick="event.stopPropagation();taskMove('${t.id}',1)">↓</button>
         <button class="icobtn" style="padding:2px 6px;font-size:9.5px" title="Mover para próxima etapa" onclick="event.stopPropagation();moveTask('${t.id}','${nextStatus}')">→</button>
         <button class="icobtn" style="padding:2px 6px;font-size:9.5px;color:var(--red)" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>
       </div>
@@ -4691,7 +4705,18 @@ function taskCard(t){
   </div>`;
 }
 function moveTask(id,newSt){const t=state.tarefas.find(x=>x.id===id);if(t){t.status=newSt;saveTarefas();toast(`Tarefa movida para ${newSt}`);}}
-function delTask(id){if(confirm('Excluir tarefa?')){state.tarefas=state.tarefas.filter(x=>x.id!==id);saveTarefas();toast('Tarefa excluída');}}
+// move a tarefa pra cima/baixo na mesma coluna (define ordem manual)
+function taskMove(id,dir){
+  const t=state.tarefas.find(x=>x.id===id);if(!t)return;
+  const _pr={alta:0,media:1,baixa:2};
+  const col=state.tarefas.filter(x=>x.status===t.status||(t.status==='backlog'&&!['backlog','andamento','aprovacao','concluido'].includes(x.status)))
+    .sort((a,b)=>{ if(a.ord!=null&&b.ord!=null&&a.ord!==b.ord)return a.ord-b.ord; const p=(_pr[a.prio]??1)-(_pr[b.prio]??1); if(p)return p; return (a.data||'9999').localeCompare(b.data||'9999'); });
+  const i=col.findIndex(x=>x.id===id); const j=i+dir; if(j<0||j>=col.length)return;
+  col.forEach((x,k)=>x.ord=k); // fixa a ordem atual
+  const tmp=col[i].ord; col[i].ord=col[j].ord; col[j].ord=tmp; // troca
+  saveTarefas();
+}
+function delTask(id){state.tarefas=state.tarefas.filter(x=>x.id!==id);addDeleted(id);saveTarefas();toast('Tarefa excluída');}
 
 function bindDrag(){
   document.querySelectorAll('.task-card').forEach(c=>{
@@ -4948,7 +4973,7 @@ function delCheck(i){
 }
 function delTaskFromModal(){
   const id=document.getElementById('td-id').value;
-  if(confirm('Excluir tarefa?')){state.tarefas=state.tarefas.filter(x=>x.id!==id);saveTarefas();closeModal('modal-detail');toast('Excluída');}
+  state.tarefas=state.tarefas.filter(x=>x.id!==id);addDeleted(id);saveTarefas();closeModal('modal-detail');toast('Excluída');
 }
 
 /* Agenda e financeiro agora são iframes hardcoded — funções mantidas como stub para compatibilidade */
@@ -5466,6 +5491,12 @@ function jarvisExecute(raw){
     jarvisGo('dashboard'); setTimeout(()=>{if(typeof mdJarvisFalar==='function')mdJarvisFalar();},400);
     return 'Aqui está o resumo do seu dia.';
   }
+  // APAGAR EM MASSA: "apaga todas as tarefas do cliente X"
+  if(re('apag|exclui|delet|limpa|remov') && has('tarefa','tarefas') && re('tod')){
+    const cli=(typeof CLIENTES!=='undefined'?CLIENTES:[]).find(c=>{const n=c.nm.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');if(t.includes(n))return true;const f=n.split(/\s+/)[0];return f.length>=4&&t.includes(f);});
+    if(cli){ const n=apagarTarefasCliente(cli.id); jarvisGo('tarefas'); return n?('Apaguei '+n+' tarefa'+(n>1?'s':'')+' de '+cli.nm+', Senhor.'):('Não havia tarefas de '+cli.nm+'.'); }
+    return 'De qual cliente, Senhor? Diga o nome.';
+  }
   // DISTRIBUIR as tarefas do conselho pra equipe certa (pelo organograma)
   if(re('distribu|reparte|divide|designa|atribu|repassa') && has('conselho','tarefas','equipe','time','pessoas','responsav') && !ehPergunta){
     const r=redistribuirTarefasConselho(); jarvisGo('tarefas');
@@ -5695,8 +5726,17 @@ function limparExcessoConselho(manterPorCliente){
   Object.values(porCli).forEach(arr=>{ arr.sort((a,b)=>String(b.criadaEm||'').localeCompare(String(a.criadaEm||''))); arr.slice(N).forEach(t=>remover.add(t.id)); });
   if(!remover.size)return 0;
   state.tarefas=ts.filter(t=>!remover.has(t.id));
+  addDeleted([...remover]); // lápide: não voltam
   if(typeof saveTarefas==='function')saveTarefas();
   return remover.size;
+}
+// Apaga em massa as tarefas de um cliente (JARVIS). Retorna quantas.
+function apagarTarefasCliente(clienteId){
+  const ts=state.tarefas||[]; const rem=ts.filter(t=>t.clienteId===clienteId).map(t=>t.id);
+  if(!rem.length)return 0;
+  state.tarefas=ts.filter(t=>t.clienteId!==clienteId); addDeleted(rem);
+  if(typeof saveTarefas==='function')saveTarefas();
+  return rem.length;
 }
 // Encontra uma tarefa pelo texto (substring no título)
 function ARK_acharTarefa(txt){
@@ -5762,6 +5802,7 @@ async function jarvisRunActions(actions){
       else if(a.tool==='gerar_roteiro'){ const cli=(CLIENTES||[]).find(x=>i.cliente&&x.nm.toLowerCase().includes(String(i.cliente).toLowerCase())); jarvisGo('roteirista'); setTimeout(()=>{try{const tt=document.getElementById('rot-tema');if(tt)tt.value=i.tema||'';const rc=document.getElementById('rot-cliente');if(rc)rc.value=cli?cli.nm:(i.cliente||'');if(typeof rotGerar==='function')rotGerar();}catch(e){}},350); det.push('Gerando roteiro'+(cli?(' para '+cli.nm):'')); }
       else if(a.tool==='resumir_whatsapp'){ jarvisGo('whatsapp'); setTimeout(()=>{try{if(typeof wppResumo==='function')wppResumo();}catch(e){}},400); det.push('Compilando o resumo do WhatsApp'); }
       else if(a.tool==='analisar_whatsapp'){ const msg=await jarvisAnalisaWpp(); det.push(msg); }
+      else if(a.tool==='apagar_tarefas_cliente'){ const c=(CLIENTES||[]).find(x=>x.nm.toLowerCase().includes(String(i.cliente||'').toLowerCase())); if(c){const n=apagarTarefasCliente(c.id); det.push('Apaguei '+n+' tarefa(s) de '+c.nm);} else det.push('Cliente "'+i.cliente+'" não encontrado'); }
     }catch(e){}
   }
   if(mexeuTarefa){ if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); if(typeof updateBadges==='function')updateBadges(); }

@@ -23,6 +23,7 @@ const STATE_KEYS = new Set([
   "wfa-conselho-briefings",
   "wfa-drive",
   "wfa-brand",
+  "wfa-deleted-ids",
 ]);
 
 const VALID_ROLES = new Set([
@@ -695,6 +696,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
             { name: "gerar_roteiro", description: "Gera roteiros de Reels para um cliente sobre um tema.", input_schema: { type: "object", properties: { cliente: { type: "string" }, tema: { type: "string" } }, required: ["tema"] } },
             { name: "resumir_whatsapp", description: "Gera o resumo das conversas do WhatsApp das últimas 24h.", input_schema: { type: "object", properties: {} } },
             { name: "analisar_whatsapp", description: "Analisa a EFETIVIDADE do atendimento no WhatsApp (tempos de resposta, leads não respondidos, conversão).", input_schema: { type: "object", properties: {} } },
+            { name: "apagar_tarefas_cliente", description: "Apaga TODAS as tarefas de um cliente (pelo nome).", input_schema: { type: "object", properties: { cliente: { type: "string" } }, required: ["cliente"] } },
             { name: "lembrar", description: "Guarda uma preferência/fato importante do Gabriel pra lembrar sempre.", input_schema: { type: "object", properties: { fato: { type: "string" } }, required: ["fato"] } },
           ];
           const sys =
