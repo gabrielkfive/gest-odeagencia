@@ -193,8 +193,10 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             // propôs desaparece). Mantém os últimos 60.
             briefings.unshift(brief);
 
-            // cria tarefas (evita duplicar pelo título+cliente no dia)
-            const novas = (Array.isArray(j.tarefas) ? j.tarefas : []).slice(0, 3);
+            // NÃO EMPILHAR: se o cliente já tem >=6 tarefas abertas do conselho, não cria
+            // mais (evita o acúmulo que vimos). O briefing/roteiro/orçamento continua sendo salvo.
+            const abertasConselho = tarefas.filter((t) => t.clienteId === c.id && t.origem === "conselho-auto" && t.status !== "concluido").length;
+            const novas = abertasConselho >= 6 ? [] : (Array.isArray(j.tarefas) ? j.tarefas : []).slice(0, 3);
             novas.forEach((tk: any, i: number) => {
               const title = String(tk?.title || "").slice(0, 120);
               if (!title) return;

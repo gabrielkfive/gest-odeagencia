@@ -1032,6 +1032,7 @@ table.t tr.high{background:var(--yel-bg)}
             <span id="sync-status" style="font-size:10px;color:var(--mute);font-family:var(--mono)"></span>
             <button class="icobtn" id="btn-sync" onclick="sincronizarAgora()" title="Buscar dados mais recentes do servidor">↻ Sincronizar</button>
             <button class="icobtn" title="Atribui as tarefas que o Conselho criou às pessoas certas (pelo organograma)" onclick="(function(){const r=redistribuirTarefasConselho();toast(r.n?('✓ '+r.n+' distribuída(s): '+r.resumo):'Tarefas do conselho já têm responsável');})()">Distribuir do conselho</button>
+            <button class="icobtn" title="Enxuga as tarefas do conselho mantendo as 5 mais recentes por cliente (não apaga as suas)" onclick="(function(){if(!confirm('Manter só as 5 tarefas mais recentes do conselho por cliente? (suas tarefas não são tocadas)'))return;const n=limparExcessoConselho(5);toast(n?('🧹 '+n+' tarefa(s) do conselho arquivadas'):'Nada a enxugar');})()">Enxugar conselho</button>
             <button class="tb-btn" onclick="openNovaTarefa()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova</button>
           </div>
         </div>
@@ -5499,6 +5500,13 @@ function jarvisExecute(raw){
     setTimeout(()=>{try{const tt=document.getElementById('rot-tema');if(tt)tt.value=tema||'novidade do mês';const rc=document.getElementById('rot-cliente');if(rc)rc.value=cli?cli.nm:'';if(typeof rotGerar==='function')rotGerar();}catch(e){}},350);
     return 'Pois não, Senhor. Gerando roteiros'+(cli?(' para '+cli.nm):'')+(tema?(' sobre '+tema):'')+'.';
   }
+  // EFETIVIDADE DO WHATSAPP: "estamos sendo efetivos? analisa o atendimento"
+  if(re('efetiv|eficaz|eficien') && has('whatsapp','zap','whats','atendimento','respond')){
+    return jarvisAnalisaWpp();
+  }
+  if(re('analis') && has('whatsapp','zap','atendimento')){
+    return jarvisAnalisaWpp();
+  }
   // RESUMIR WHATSAPP: "resume o WhatsApp"
   if(has('whatsapp','zap','whats') && re('resum|o que rolou|novidad|mensagens')){
     jarvisGo('whatsapp'); setTimeout(()=>{try{if(typeof wppResumo==='function')wppResumo();}catch(e){}},400);
@@ -5658,11 +5666,32 @@ function redistribuirTarefasConselho(){
   const resumo=Object.entries(porPessoa).sort((a,b)=>b[1]-a[1]).map(([p,c])=>c+' para '+p.split(' ')[0]).join(', ');
   return {n, resumo, lista};
 }
+// Enxuga as tarefas do conselho: mantém as N mais recentes POR CLIENTE (remove só conselho-auto
+// abertas que excedem). Não toca em tarefas suas nem concluídas. Retorna quantas removeu.
+function limparExcessoConselho(manterPorCliente){
+  const N=manterPorCliente||5; const ts=state.tarefas||[];
+  const porCli={}; ts.forEach(t=>{ if(t.origem==='conselho-auto'&&t.status!=='concluido'){ (porCli[t.clienteId||'']=porCli[t.clienteId||'']||[]).push(t); } });
+  const remover=new Set();
+  Object.values(porCli).forEach(arr=>{ arr.sort((a,b)=>String(b.criadaEm||'').localeCompare(String(a.criadaEm||''))); arr.slice(N).forEach(t=>remover.add(t.id)); });
+  if(!remover.size)return 0;
+  state.tarefas=ts.filter(t=>!remover.has(t.id));
+  if(typeof saveTarefas==='function')saveTarefas();
+  return remover.size;
+}
 // Encontra uma tarefa pelo texto (substring no título)
 function ARK_acharTarefa(txt){
   const q=String(txt||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
   if(q.length<3)return null;
   return (state.tarefas||[]).find(t=>String(t.title||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').includes(q))||null;
+}
+// Analisa a efetividade do WhatsApp (chama o servidor) e devolve o veredito falado
+async function jarvisAnalisaWpp(){
+  jarvisGo('whatsapp');
+  try{
+    const r=await cloudCall('save',{action:'wa-efetividade'});
+    if(r&&r.analise){ const m=r.metricas||{}; return 'Senhor, analisei o WhatsApp. '+m.naoRespondidas+' conversa(s) sem resposta, tempo médio de resposta '+(m.tempoMedioRespostaMin||0)+' min. '+r.analise; }
+    return 'Não consegui analisar o WhatsApp agora, Senhor.';
+  }catch(e){ return 'Falha ao analisar o WhatsApp, Senhor: '+((e&&e.message)||''); }
 }
 /* ===== JARVIS-AGENTE: contexto + despachante de ações (executa o que o Claude decidir) ===== */
 function jarvisContexto(){
@@ -5712,6 +5741,7 @@ async function jarvisRunActions(actions){
       else if(a.tool==='distribuir_tarefas_conselho'){ const r=(typeof redistribuirTarefasConselho==='function')?redistribuirTarefasConselho():{n:0}; det.push(r.n?('Distribuí '+r.n+' tarefas: '+r.resumo):'As tarefas do conselho já tinham responsável'); }
       else if(a.tool==='gerar_roteiro'){ const cli=(CLIENTES||[]).find(x=>i.cliente&&x.nm.toLowerCase().includes(String(i.cliente).toLowerCase())); jarvisGo('roteirista'); setTimeout(()=>{try{const tt=document.getElementById('rot-tema');if(tt)tt.value=i.tema||'';const rc=document.getElementById('rot-cliente');if(rc)rc.value=cli?cli.nm:(i.cliente||'');if(typeof rotGerar==='function')rotGerar();}catch(e){}},350); det.push('Gerando roteiro'+(cli?(' para '+cli.nm):'')); }
       else if(a.tool==='resumir_whatsapp'){ jarvisGo('whatsapp'); setTimeout(()=>{try{if(typeof wppResumo==='function')wppResumo();}catch(e){}},400); det.push('Compilando o resumo do WhatsApp'); }
+      else if(a.tool==='analisar_whatsapp'){ const msg=await jarvisAnalisaWpp(); det.push(msg); }
     }catch(e){}
   }
   if(mexeuTarefa){ if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); if(typeof updateBadges==='function')updateBadges(); }

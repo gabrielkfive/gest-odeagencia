@@ -694,6 +694,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
             { name: "distribuir_tarefas_conselho", description: "Reatribui as tarefas criadas pelo conselho às pessoas certas.", input_schema: { type: "object", properties: {} } },
             { name: "gerar_roteiro", description: "Gera roteiros de Reels para um cliente sobre um tema.", input_schema: { type: "object", properties: { cliente: { type: "string" }, tema: { type: "string" } }, required: ["tema"] } },
             { name: "resumir_whatsapp", description: "Gera o resumo das conversas do WhatsApp das últimas 24h.", input_schema: { type: "object", properties: {} } },
+            { name: "analisar_whatsapp", description: "Analisa a EFETIVIDADE do atendimento no WhatsApp (tempos de resposta, leads não respondidos, conversão).", input_schema: { type: "object", properties: {} } },
             { name: "lembrar", description: "Guarda uma preferência/fato importante do Gabriel pra lembrar sempre.", input_schema: { type: "object", properties: { fato: { type: "string" } }, required: ["fato"] } },
           ];
           const sys =
@@ -769,6 +770,44 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
           } catch (e) {
             return json({ error: (e as Error)?.message || "Falha ao resumir" }, { status: 502 });
           }
+        }
+
+        // Efetividade do WhatsApp: a ARK (dona + cliente) está sendo eficaz? Tempos de resposta,
+        // leads não respondidos, qualidade. Mede + pede veredito da IA.
+        if (action === "wa-efetividade") {
+          try {
+            const { zapiEnv } = await import("@/integrations/zapi.server");
+            const aiKey = zapiEnv("ANTHROPIC_API_KEY");
+            if (!aiKey) return json({ error: "IA não configurada" }, { status: 500 });
+            const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-whatsapp").maybeSingle();
+            const st: any = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : { conversas: {} };
+            const convs: any[] = Object.values(st.conversas || {}).filter((c: any) => !c.isGroup); // foco em 1:1 (leads/clientes)
+            const semana = Date.now() - 7 * 86400 * 1000;
+            let pend = 0, respondidos = 0; let somaResp = 0, nResp = 0; const naoRespondidos: string[] = [];
+            convs.forEach((c: any) => {
+              const msgs = (c.msgs || []).filter((m: any) => (m.ts || 0) > semana);
+              if (!msgs.length) return;
+              const last = msgs[msgs.length - 1];
+              if (last && last.dir === "in") { pend++; if (naoRespondidos.length < 12) naoRespondidos.push(`${c.nome || c.phone}: "${String(last.text || "").slice(0, 80)}"`); }
+              else respondidos++;
+              // tempo de resposta: pares in->out
+              for (let i = 1; i < msgs.length; i++) { if (msgs[i].dir === "out" && msgs[i - 1].dir === "in" && msgs[i].ts && msgs[i - 1].ts) { somaResp += (msgs[i].ts - msgs[i - 1].ts); nResp++; } }
+            });
+            const tempoMedioMin = nResp ? Math.round(somaResp / nResp / 60000) : 0;
+            const metr = { conversas: convs.length, naoRespondidas: pend, respondidas: respondidos, tempoMedioRespostaMin: tempoMedioMin };
+            const sys = "Você é o Diretor de Operações IA da ARK Content. Avalie a EFETIVIDADE do atendimento por WhatsApp (a ARK é dona do software e também faz o próprio marketing). Seja direto e honesto. Em português, curto: \n1) VEREDITO (estamos eficazes? nota 0-10 e por quê)\n2) RISCOS (leads/clientes não respondidos que podem esfriar)\n3) 3 AÇÕES concretas pra melhorar conversão e tempo de resposta. Use os números e os exemplos.";
+            const user = `MÉTRICAS (últimos 7 dias, conversas 1:1): ${JSON.stringify(metr)}.\nNÃO RESPONDIDOS (última msg foi do contato):\n${naoRespondidos.join("\n") || "nenhum"}`;
+            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 900, system: sys, messages: [{ role: "user", content: user }] }) });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            const analise = data?.content?.[0]?.text || "";
+            // guarda como notificação (o Gabriel vê de manhã)
+            try {
+              const { data: nRow, error: nErr } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-notificacoes").maybeSingle();
+              if (!nErr) { const arr = Array.isArray(nRow?.data) ? nRow.data : []; arr.unshift({ id: "wae" + Date.now(), ts: Date.now(), lido: false, tipo: "efetividade", texto: "📊 Efetividade do WhatsApp: " + analise }); await ctx.db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) }); }
+            } catch { /* */ }
+            return json({ ok: true, metricas: metr, analise });
+          } catch (e) { return json({ error: (e as Error)?.message || "Falha" }, { status: 502 }); }
         }
 
         // Define as tags (labels) de uma conversa (ex: ARK, ALPHA) — persiste na nuvem.
