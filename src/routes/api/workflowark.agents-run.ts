@@ -111,6 +111,28 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               );
               if (resumo) notifs.push({ tipo: "resumo", texto: "🧠 Resumo automático do dia (WhatsApp):\n" + resumo });
             }
+            // EFETIVIDADE: o conselho usa o software pra entender se o atendimento está eficaz
+            try {
+              const c11: any[] = convs.filter((c) => !c.isGroup);
+              const semana = Date.now() - 7 * 86400 * 1000;
+              let pend = 0; const naoResp: string[] = []; let somaResp = 0, nResp = 0;
+              c11.forEach((c) => {
+                const msgs = (c.msgs || []).filter((m: any) => (m.ts || 0) > semana);
+                if (!msgs.length) return;
+                const last = msgs[msgs.length - 1];
+                if (last && last.dir === "in") { pend++; if (naoResp.length < 10) naoResp.push(`${c.nome || c.phone}: "${String(last.text || "").slice(0, 70)}"`); }
+                for (let i = 1; i < msgs.length; i++) { if (msgs[i].dir === "out" && msgs[i - 1].dir === "in" && msgs[i].ts && msgs[i - 1].ts) { somaResp += msgs[i].ts - msgs[i - 1].ts; nResp++; } }
+              });
+              if (c11.length) {
+                const tmin = nResp ? Math.round(somaResp / nResp / 60000) : 0;
+                const verdict = await callAI(
+                  "Você é o Diretor de Operações IA da ARK. Avalie a EFETIVIDADE do atendimento no WhatsApp. Curto, em português: nota 0-10 + 1 frase do porquê + 2 ações pra melhorar conversão/tempo de resposta. Use os números.",
+                  `7 dias (1:1): ${c11.length} conversas, ${pend} sem resposta, tempo médio de resposta ${tmin} min.\nNão respondidos:\n${naoResp.join("\n") || "nenhum"}`,
+                  500,
+                );
+                if (verdict) notifs.push({ tipo: "efetividade", texto: `📊 Efetividade do WhatsApp (${pend} sem resposta · ${tmin} min médio):\n` + verdict });
+              }
+            } catch { /* */ }
           }
 
           // 2) Conselho autônomo POR CLIENTE ----------------------------------------
