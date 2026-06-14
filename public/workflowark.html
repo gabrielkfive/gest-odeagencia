@@ -3110,6 +3110,13 @@ function iniciarAutoSync(){
           <button class="tb-btn" onclick="importarDados()">⬆ Importar dados</button>
         </div>
 
+        <div class="set-sect-t" style="margin-bottom:9px">JARVIS</div>
+        <p class="muted" style="font-size:10.5px;margin-bottom:9px">Abra o JARVIS batendo <b>2 palmas</b> (usa o microfone; você autoriza uma vez). Toca um som de inicialização ao abrir.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+          <button class="tb-btn" id="clap-btn" onclick="arkClapToggle()">Ativar abrir por 2 palmas</button>
+          <button class="icobtn" onclick="jarvisBootSound()">▶ Ouvir o som</button>
+        </div>
+
         <div class="set-sect-t" style="margin-bottom:9px">Marca (White Label)</div>
         <p class="muted" style="font-size:10.5px;margin-bottom:9px">Personalize o nome e a cor do sistema. Base para vender o WorkFlowArk como produto de outras agências.</p>
         <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
@@ -5309,7 +5316,81 @@ async function metaRelatorio(id,nome){
 }
 /* ============ JARVIS — assistente de VOZ (fala e ouve) ============ */
 let JARVIS_MSGS=[]; let _jarvisRec=null;
-function jarvisOpen(){document.getElementById('modal-jarvis').classList.add('open');jarvisRender();setTimeout(()=>{const i=document.getElementById('jarvis-input');if(i)i.focus();},100);}
+/* Som de inicialização do JARVIS (sintetizado — não uso a trilha do filme por direitos
+   autorais, mas evoca o "power-up": swell grave + arpejo ascendente + brilho). */
+let _arkAudioCtx=null;
+function arkAudioCtx(){ try{ _arkAudioCtx=_arkAudioCtx||new (window.AudioContext||window.webkitAudioContext)(); if(_arkAudioCtx.state==='suspended')_arkAudioCtx.resume(); return _arkAudioCtx; }catch(e){return null;} }
+function jarvisBootSound(){
+  const ac=arkAudioCtx(); if(!ac)return; const t0=ac.currentTime;
+  const master=ac.createGain(); master.gain.value=0.0001; master.connect(ac.destination);
+  master.gain.setValueAtTime(0.0001,t0); master.gain.exponentialRampToValueAtTime(0.5,t0+0.06); master.gain.exponentialRampToValueAtTime(0.18,t0+0.5); master.gain.exponentialRampToValueAtTime(0.0001,t0+1.6);
+  // swell grave
+  const sub=ac.createOscillator(); sub.type='sine'; sub.frequency.setValueAtTime(110,t0); sub.frequency.exponentialRampToValueAtTime(220,t0+0.5); const sg=ac.createGain(); sg.gain.value=0.5; sub.connect(sg).connect(master); sub.start(t0); sub.stop(t0+1.6);
+  // arpejo ascendente (power-up)
+  [[0,392],[0.10,523],[0.20,659],[0.32,784],[0.46,1046]].forEach(([dt,f])=>{ const o=ac.createOscillator(); o.type='triangle'; o.frequency.value=f; const g=ac.createGain(); g.gain.value=0.0001; g.gain.setValueAtTime(0.0001,t0+dt); g.gain.exponentialRampToValueAtTime(0.4,t0+dt+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t0+dt+0.4); o.connect(g).connect(master); o.start(t0+dt); o.stop(t0+dt+0.45); });
+}
+/* ===== MODO 2 PALMAS: bate 2 palmas e o JARVIS abre (opt-in, usa o microfone) ===== */
+let _clapStream=null,_clapRAF=null,_clapHits=[],_clapArmed=false;
+async function arkClapStart(silent){
+  if(_clapStream)return true;
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    _clapStream=stream; const ac=arkAudioCtx(); const src=ac.createMediaStreamSource(stream);
+    const an=ac.createAnalyser(); an.fftSize=512; src.connect(an); const buf=new Uint8Array(an.fftSize);
+    let lastLevel=0;
+    const loop=()=>{
+      if(!_clapStream){return;}
+      an.getByteTimeDomainData(buf);
+      let peak=0; for(let i=0;i<buf.length;i++){const v=Math.abs(buf[i]-128)/128; if(v>peak)peak=v;}
+      const now=performance.now();
+      // clap = transiente forte (subida brusca) com refratário
+      if(peak>0.45 && lastLevel<0.2 && (!_clapHits.length || now-_clapHits[_clapHits.length-1]>220)){
+        _clapHits.push(now); _clapHits=_clapHits.filter(t=>now-t<1300);
+        if(_clapHits.length>=2 && !document.getElementById('modal-jarvis').classList.contains('open')){
+          _clapHits=[]; jarvisOpen();
+        }
+      }
+      lastLevel=peak; _clapRAF=requestAnimationFrame(loop);
+    };
+    loop(); _clapArmed=true; localStorage.setItem('wfa-clap-mode','1');
+    if(!silent)toast('👏 Modo 2 palmas ativo — bate 2 palmas pra abrir o JARVIS');
+    const b=document.getElementById('clap-btn'); if(b){b.textContent='● 2 palmas: ATIVO';b.style.color='#1d8a4e';}
+    return true;
+  }catch(e){ if(!silent)toast('Não consegui acessar o microfone'); return false; }
+}
+function arkClapStop(){
+  try{if(_clapStream){_clapStream.getTracks().forEach(t=>t.stop());}}catch(e){}
+  _clapStream=null; if(_clapRAF)cancelAnimationFrame(_clapRAF); _clapArmed=false; localStorage.removeItem('wfa-clap-mode');
+  const b=document.getElementById('clap-btn'); if(b){b.textContent='Ativar abrir por 2 palmas';b.style.color='';}
+  toast('Modo 2 palmas desligado');
+}
+function arkClapToggle(){ if(_clapArmed)arkClapStop(); else arkClapStart(false); }
+// se estava ativo, tenta religar no 1º clique do usuário (mic exige gesto)
+if(localStorage.getItem('wfa-clap-mode')){ document.addEventListener('click',function _once(){document.removeEventListener('click',_once);arkClapStart(true);},{once:true}); }
+
+let _jarvisFirstOpen=true;
+function jarvisOpen(){
+  document.getElementById('modal-jarvis').classList.add('open');
+  try{jarvisBootSound();}catch(e){}
+  jarvisRender();
+  setTimeout(()=>{const i=document.getElementById('jarvis-input');if(i)i.focus();},100);
+  // ao abrir, o JARVIS já dá o brief do dia (autônomo) — 1x por abertura de sessão
+  if(_jarvisFirstOpen && !JARVIS_MSGS.length){ _jarvisFirstOpen=false; setTimeout(jarvisAutoBrief,700); }
+}
+function jarvisAutoBrief(){
+  try{
+    const hoje=new Date().toISOString().split('T')[0];
+    const ts=state.tarefas||[]; const atras=ts.filter(t=>t.data&&t.data<hoje&&t.status!=='concluido').length; const hojeT=ts.filter(t=>t.data===hoje&&t.status!=='concluido').length;
+    let brf=0;try{brf=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]').filter(b=>b.date===hoje).length;}catch(e){}
+    const nome=(WFA_MEMBER&&WFA_MEMBER.full_name)?mdFirst(WFA_MEMBER.full_name):'';
+    const partes=[(mdGreeting()+(nome?', '+nome:''))+', Senhor. Sistemas online.'];
+    if(atras)partes.push(atras+' tarefa'+(atras>1?'s':'')+' atrasada'+(atras>1?'s':'')+'.'); if(hojeT)partes.push(hojeT+' vence'+(hojeT>1?'m':'')+' hoje.');
+    if(brf)partes.push('O conselho deixou '+brf+' debate'+(brf>1?'s':'')+' pronto'+(brf>1?'s':'')+'.');
+    partes.push('Como posso ajudar?');
+    const txt=partes.join(' ');
+    JARVIS_MSGS.push({role:'assistant',content:txt}); jarvisRender(); if(typeof jarvisFalar==='function')jarvisFalar(txt);
+  }catch(e){}
+}
 function jarvisRender(){
   const b=document.getElementById('jarvis-msgs'); if(!b)return;
   if(!JARVIS_MSGS.length){b.innerHTML='<div style="text-align:center;color:var(--mute);font-size:12.5px;padding:24px;line-height:1.7">Fale ou digite. Eu <b>executo</b>:<br>"rodar conselho" · "planejar meu dia" · "criar tarefa ligar pra Vivenda"<br>"abrir cliente Vivenda" · "abrir financeiro" · "resumo do dia"<br><span style="opacity:.7">…ou pergunte qualquer coisa que eu respondo.</span></div>';return;}
