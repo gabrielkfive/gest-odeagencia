@@ -117,8 +117,8 @@ function AuthPage() {
 
       <div className="ax-brand">
         <div className="ax-logo">
-          <span className="ax-logo-mark">ARK</span>
-          <span className="ax-logo-sub">CONTENT</span>
+          <img src="/ark-mark.png" alt="ARK Content" className="ax-logo-img" />
+          <span className="ax-logo-sub">ARK CONTENT</span>
         </div>
         <h1 className="ax-h1">
           Seja bem-vindo ao centro de comando da <span className="hl">maior agência de marketing do Brasil</span>.
@@ -136,6 +136,7 @@ function AuthPage() {
       <div className="ax-card-shell">
         <div className="ax-card">
           <div className="ax-card-head">
+            <img src="/ark-logo.png" alt="ARK Content" className="ax-card-logo" />
             <div className="ax-card-title">WorkFlowArk</div>
             <div className="ax-card-sb">Sistema operacional da ARK Content</div>
           </div>
@@ -216,9 +217,11 @@ const CSS = `
 .ax-wrap{position:fixed;inset:0;background:#0a0a0a;color:#fff;display:grid;grid-template-columns:1.1fr .9fr;font-family:'Inter',system-ui,sans-serif;overflow:auto}
 .ax-wrap *{box-sizing:border-box}
 .ax-brand{padding:6vh 5vw;display:flex;flex-direction:column;justify-content:center;gap:22px;background:radial-gradient(120% 90% at 0% 0%,#1a1a1a 0%,#0a0a0a 60%)}
-.ax-logo{display:flex;align-items:baseline;gap:8px}
+.ax-logo{display:flex;align-items:center;gap:12px}
+.ax-logo-img{height:56px;width:56px;object-fit:contain;display:block}
 .ax-logo-mark{font-weight:900;font-size:26px;letter-spacing:-.02em;color:#FFC700}
-.ax-logo-sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.35em;color:#a3a3a3}
+.ax-logo-sub{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.35em;color:#FFC700}
+.ax-card-logo{height:58px;width:58px;object-fit:contain;display:block;margin:0 auto 12px;border-radius:14px}
 .ax-h1{font-size:clamp(26px,3.4vw,46px);line-height:1.08;font-weight:800;letter-spacing:-.02em;margin:0;max-width:14ch}
 .ax-h1 .hl{color:#FFC700}
 .ax-quote{font-size:clamp(14px,1.3vw,18px);color:#d4d0c4;margin:0;max-width:34ch;line-height:1.5;border-left:3px solid #FFC700;padding-left:14px}

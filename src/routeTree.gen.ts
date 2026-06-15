@@ -22,6 +22,7 @@ import { Route as ApiWorkflowarkAgentsRunRouteImport } from './routes/api/workfl
 import { Route as ApiGoogleCallbackRouteImport } from './routes/api/google.callback'
 import { Route as ApiGoogleAuthRouteImport } from './routes/api/google.auth'
 import { Route as ApiAuthSignupRouteImport } from './routes/api/auth.signup'
+import { Route as ApiAuthSeedEvaluatorsRouteImport } from './routes/api/auth.seed-evaluators'
 import { Route as ApiWorkflowarkWhatsappWebhookRouteImport } from './routes/api/workflowark.whatsapp.webhook'
 import { Route as ApiWorkflowarkWhatsappSendRouteImport } from './routes/api/workflowark.whatsapp.send'
 import { Route as ApiWorkflowarkWhatsappQrRouteImport } from './routes/api/workflowark.whatsapp.qr'
@@ -91,6 +92,11 @@ const ApiAuthSignupRoute = ApiAuthSignupRouteImport.update({
   path: '/api/auth/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthSeedEvaluatorsRoute = ApiAuthSeedEvaluatorsRouteImport.update({
+  id: '/api/auth/seed-evaluators',
+  path: '/api/auth/seed-evaluators',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWorkflowarkWhatsappWebhookRoute =
   ApiWorkflowarkWhatsappWebhookRouteImport.update({
     id: '/api/workflowark/whatsapp/webhook',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
+  '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
   '/api/google/callback': typeof ApiGoogleCallbackRoute
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
+  '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
   '/api/google/callback': typeof ApiGoogleCallbackRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/sistema': typeof SistemaRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
+  '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
   '/api/google/callback': typeof ApiGoogleCallbackRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/app'
     | '/api/ia'
+    | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
     | '/api/google/auth'
     | '/api/google/callback'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/app'
     | '/api/ia'
+    | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
     | '/api/google/auth'
     | '/api/google/callback'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/_authenticated/app'
     | '/api/ia'
+    | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
     | '/api/google/auth'
     | '/api/google/callback'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   SistemaRoute: typeof SistemaRoute
   ApiIaRoute: typeof ApiIaRoute
+  ApiAuthSeedEvaluatorsRoute: typeof ApiAuthSeedEvaluatorsRoute
   ApiAuthSignupRoute: typeof ApiAuthSignupRoute
   ApiGoogleAuthRoute: typeof ApiGoogleAuthRoute
   ApiGoogleCallbackRoute: typeof ApiGoogleCallbackRoute
@@ -341,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/seed-evaluators': {
+      id: '/api/auth/seed-evaluators'
+      path: '/api/auth/seed-evaluators'
+      fullPath: '/api/auth/seed-evaluators'
+      preLoaderRoute: typeof ApiAuthSeedEvaluatorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/workflowark/whatsapp/webhook': {
       id: '/api/workflowark/whatsapp/webhook'
       path: '/api/workflowark/whatsapp/webhook'
@@ -404,6 +424,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   SistemaRoute: SistemaRoute,
   ApiIaRoute: ApiIaRoute,
+  ApiAuthSeedEvaluatorsRoute: ApiAuthSeedEvaluatorsRoute,
   ApiAuthSignupRoute: ApiAuthSignupRoute,
   ApiGoogleAuthRoute: ApiGoogleAuthRoute,
   ApiGoogleCallbackRoute: ApiGoogleCallbackRoute,

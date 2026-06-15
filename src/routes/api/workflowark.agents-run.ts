@@ -172,25 +172,31 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           const sysConselho =
             "Você é o CONSELHO DE IA da ARK Content (agência de marketing de gastronomia/varejo). " +
             "O conselho tem vozes: Diretor de Operações, Gestor de Tráfego, Social Media, Roteirista e Account/CS. " +
-            "Pense ALÉM do operacional: aprofunde no nicho, traga referências de marcas/criadores em alta no mesmo segmento, ideias de parceria reais, ALINHAMENTOS/REUNIÕES necessários e uma ROTEIRIZAÇÃO de captação (Reels) viável de gravar. " +
-            "Proponha também um ORÇAMENTO de mídia realista pra esse cliente. Benchmarks Brasil 2025-26: Meta Ads Click-to-WhatsApp é o melhor pra PME (CPL R$5-25, conversão 15-30%); Google Ads CPL R$30-200. Regra: CPL máximo = ticket médio × taxa de conversão. Diga verba mensal sugerida, canal (geralmente Click-to-WhatsApp), e o resultado esperado em leads/reuniões. " +
+            "Eles se reúnem como um TIME INTERNO da agência: pensam fundo em CADA cliente e definem o que A ARK vai executar. " +
+            "REGRAS DE QUALIDADE (críticas): " +
+            "1) Traga só ideias ESPECÍFICAS deste cliente e do momento dele — nada de conselho genérico que qualquer IA daria (ex: 'poste mais', 'use stories', 'crie identidade visual'). Se não tiver uma ideia realmente boa e específica, traga MENOS itens. Qualidade vale mais que quantidade. " +
+            "2) PROIBIDO falar de ESTOQUE, inventário ou 'capacidade de vender mais por causa de estoque'. Os clientes da ARK conseguem repor; estoque é irrelevante e não é assunto da agência. " +
+            "3) Não repita o mesmo tipo de ideia entre clientes. Pense no ângulo, na narrativa, no produto-herói, na sazonalidade e na referência concreta do nicho. " +
+            "4) 'alinhamentos' = ALINHAMENTOS INTERNOS do próprio time da ARK pra executar o plano (ex: 'Alinhamento de tráfego x social sobre a campanha', 'Revisão de roteiro com o Account'). NUNCA são tarefas pro Gabriel nem reuniões pra falar de estoque com o cliente. São a agenda do conselho. " +
+            "Proponha também um ORÇAMENTO de mídia realista. Benchmarks Brasil 2025-26: Meta Ads Click-to-WhatsApp é o melhor pra PME (CPL R$5-25, conversão 15-30%); Google Ads CPL R$30-200. Regra: CPL máximo = ticket médio × taxa de conversão. Diga verba mensal, canal (geralmente Click-to-WhatsApp) e resultado esperado em leads. " +
             "Responda SOMENTE em JSON válido, sem texto fora do JSON. Ordem dos campos (preencha TODOS): " +
-            '{"decisao":"frase única e forte",' +
-            '"orcamento":"verba mensal sugerida + canal + resultado esperado (ex: R$1.500/mês em Click-to-WhatsApp ~ 60-100 leads)",' +
+            '{"decisao":"frase única e forte, específica deste cliente",' +
+            '"orcamento":"verba mensal + canal + resultado esperado (ex: R$1.500/mês em Click-to-WhatsApp ~ 60-100 leads)",' +
             '"roteiro":"roteiro curto de 1 Reel: gancho + 3 cenas + CTA (1 parágrafo)",' +
-            '"plano":["passo 1","passo 2","passo 3"],' +
-            '"reunioes":["alinhamento/reunião a marcar + com quem"],' +
-            '"tarefas":[{"title":"tarefa acionável curta","resp":"área (trafego, social, account, design, edicao, captacao, comercial)"}],' +
-            '"referencias":["marca/criador + por que olhar"],"parcerias":["ideia de parceria concreta"],' +
+            '"plano":["passo específico 1","passo específico 2"],' +
+            '"reunioes":["alinhamento INTERNO do time pra executar (com qual área)"],' +
+            '"tarefas":[{"title":"ideia acionável, específica e não-óbvia","resp":"área (trafego, social, account, design, edicao, captacao, comercial)"}],' +
+            '"referencias":["marca/criador real do nicho + por que olhar"],"parcerias":["ideia de parceria concreta e plausível na praça"],' +
             '"debate":[{"voz":"Gestor de Tráfego","fala":"..."},{"voz":"Social Media","fala":"..."}]}. ' +
-            "Máx 3 passos, 3 tarefas, 2 reuniões, 2 referências, 2 parcerias, 2 falas. Português, específico e prático.";
+            "Máx 2 passos, 2 ideias, 1 alinhamento interno, 2 referências, 1 parceria, 2 falas. Português, específico e prático.";
 
           let criadas = 0;
           for (const c of alvos) {
             const raw = await callAI(
               sysConselho,
               `Cliente: ${c.nm}. Segmento: ${c.seg}. Contexto: ${c.nota}. ` +
-                `Debata o que ESTE cliente precisa AGORA pra vender mais e crescer, com referências do nicho e uma ideia de parceria. Hoje é ${hoje}.`,
+                `Debata o que ESTE cliente precisa AGORA pra vender mais e crescer em CONTEÚDO e MÍDIA — com referências reais do nicho e uma parceria plausível. ` +
+                `Nada de estoque/inventário. Nada de conselho óbvio. Hoje é ${hoje}.`,
               2400,
             );
             const j = parseJSON(raw);
@@ -204,22 +210,22 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               lido: false,
               debate: Array.isArray(j.debate) ? j.debate.slice(0, 3) : [],
               decisao: String(j.decisao || ""),
-              plano: Array.isArray(j.plano) ? j.plano.slice(0, 3).map((x: any) => String(x)) : [],
+              plano: Array.isArray(j.plano) ? j.plano.slice(0, 2).map((x: any) => String(x)) : [],
               referencias: Array.isArray(j.referencias) ? j.referencias.slice(0, 2).map((x: any) => String(x)) : [],
-              parcerias: Array.isArray(j.parcerias) ? j.parcerias.slice(0, 2).map((x: any) => String(x)) : [],
-              reunioes: Array.isArray(j.reunioes) ? j.reunioes.slice(0, 2).map((x: any) => String(x)) : [],
+              parcerias: Array.isArray(j.parcerias) ? j.parcerias.slice(0, 1).map((x: any) => String(x)) : [],
+              reunioes: Array.isArray(j.reunioes) ? j.reunioes.slice(0, 1).map((x: any) => String(x)) : [],
               roteiro: String(j.roteiro || ""),
               orcamento: String(j.orcamento || ""),
               // IDEIAS (NÃO viram tarefa automaticamente — o Gabriel dá check pra promover).
               // Resolve o "muito volume": nada de auto-flood no Kanban.
-              ideias: (Array.isArray(j.tarefas) ? j.tarefas : []).slice(0, 3).map((tk: any) => ({
+              ideias: (Array.isArray(j.tarefas) ? j.tarefas : []).slice(0, 2).map((tk: any) => ({
                 titulo: String(tk?.title || "").slice(0, 140), area: String(tk?.resp || ""), feito: false,
               })).filter((x: any) => x.titulo),
             };
             // PRESERVA o histórico: cada debate é ADICIONADO. Mantém os últimos 60.
             briefings.unshift(brief);
             // Apenas as REUNIÕES/ALINHAMENTOS entram direto NA AGENDA (não no Kanban)
-            (Array.isArray(j.reunioes) ? j.reunioes : []).slice(0, 2).forEach((rm: any, i: number) => {
+            (Array.isArray(j.reunioes) ? j.reunioes : []).slice(0, 1).forEach((rm: any, i: number) => {
               if (String(rm || "").length < 4) return;
               const evTitle = (c.id === "ark" ? "" : c.nm + ": ") + String(rm || "").slice(0, 80);
               if (!agenda.some((e) => e.title === evTitle)) {

@@ -611,6 +611,10 @@ table.t tr.high{background:var(--yel-bg)}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Meu Dia</span>
       </div>
+      <div class="navitem" onclick="jarvisOpen()" title="Conversar com o JARVIS">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/></svg>
+        <span>JARVIS</span>
+      </div>
       <div class="navitem" data-nav="reunioes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Reuniões · Agenda</span>
@@ -698,10 +702,6 @@ table.t tr.high{background:var(--yel-bg)}
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="subnav" id="agentes-menu">
-        <div class="subitem" data-nav="agentes">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
-          <span>Central de Agentes</span>
-        </div>
         <div class="subitem" data-nav="conselho">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span>Conselho de IA</span>
@@ -709,10 +709,6 @@ table.t tr.high{background:var(--yel-bg)}
         <div class="subitem" data-nav="planejamento">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
           <span>Planejamento</span>
-        </div>
-        <div class="subitem" data-nav="whatsapp">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.6-.8L3 21l1.9-5.4A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>
-          <span>WhatsApp</span>
         </div>
         <div class="subitem" data-nav="roteirista">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
@@ -743,10 +739,6 @@ table.t tr.high{background:var(--yel-bg)}
           <span>Notificações</span>
           <span class="badge" id="notif-badge" style="display:none">0</span>
         </div>
-        <div class="subitem" data-nav="tutorial">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span>Tutorial / POPs</span>
-        </div>
         <div class="subitem" data-nav="integracoes">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
           <span>Integrações</span>
@@ -762,6 +754,10 @@ table.t tr.high{background:var(--yel-bg)}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         <span>POPs por Função</span>
       </div>
+      <div class="navitem" data-nav="tutorial">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Tutorial / POPs</span>
+      </div>
       <div class="navitem" data-nav="processos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         <span>Processos por área</span>
@@ -773,6 +769,12 @@ table.t tr.high{background:var(--yel-bg)}
       <div class="navitem" data-nav="meumes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="22"/><line x1="15" y1="10" x2="15" y2="22"/></svg>
         <span>Meu Mês</span>
+      </div>
+
+      <div class="navitem nav-wpp" data-nav="whatsapp" style="margin-top:10px;border-top:1px solid var(--line);padding-top:14px">
+        <img src="/whatsapp.svg" alt="WhatsApp" style="width:18px;height:18px;object-fit:contain;flex-shrink:0">
+        <span>WhatsApp</span>
+        <span class="badge" id="wpp-badge-nav" style="display:none;background:#25D366;color:#fff">0</span>
       </div>
 
     </nav>
@@ -797,12 +799,12 @@ table.t tr.high{background:var(--yel-bg)}
       </div>
       <div class="tb-right">
         <div class="tb-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="gsearch" placeholder="Buscar cliente, tarefa, processo, página…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onkeydown="if(event.key==='Escape')gsearchClose()"><div id="gsearch-res"></div></div>
-        <button class="tb-btn" data-nav="whatsapp" title="WhatsApp" style="position:relative;padding:7px 9px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.6-.8L3 21l1.9-5.4A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>
+        <button class="tb-btn tb-ic" data-nav="whatsapp" title="WhatsApp" style="position:relative;padding:6px">
+          <img src="/whatsapp.svg" alt="WhatsApp" style="width:21px;height:21px;display:block">
           <span id="wpp-badge-top" style="display:none;position:absolute;top:-4px;right:-4px;background:#25D366;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:10px;align-items:center;justify-content:center;padding:0 3px">0</span>
         </button>
-        <button class="tb-btn" data-nav="notificacoes" title="Notificações" style="position:relative;padding:7px 9px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <button class="tb-btn tb-ic" data-nav="notificacoes" title="Notificações" style="position:relative;padding:6px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></svg>
           <span id="notif-badge-top" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red,#e5484d);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:10px;align-items:center;justify-content:center;padding:0 3px">0</span>
         </button>
         <span class="tb-pill" id="tb-month">Junho · 2026</span>
@@ -889,14 +891,24 @@ table.t tr.high{background:var(--yel-bg)}
           .mdb .bd li{margin-bottom:3px;list-style:none;padding-left:13px;position:relative}
           .mdb .bd li::before{content:"›";position:absolute;left:0;color:var(--yel-d);font-weight:800}
         </style>
-        <div id="md-jarvis">
-          <div class="jv-hd"><div class="jv-orb"></div><div><div class="jv-ttl">Assistente ARK</div><div class="jv-nm">JARVIS · seu resumo de hoje</div></div></div>
+        <div id="md-jarvis" onclick="jarvisOpen()" title="Conversar com o JARVIS" style="cursor:pointer">
+          <div class="jv-hd"><div class="jv-orb"></div><div><div class="jv-ttl">Assistente ARK</div><div class="jv-nm">JARVIS · seu resumo de hoje</div></div><span style="margin-left:auto;font-size:11px;color:var(--yel);font-weight:700;white-space:nowrap">Conversar →</span></div>
           <div class="jv-txt" id="md-jarvis-txt"></div>
-          <button class="jv-spk" onclick="mdJarvisFalar()">🔊 JARVIS narra meu dia</button>
+          <button class="jv-spk" onclick="event.stopPropagation();mdJarvisFalar()">🔊 JARVIS narra meu dia</button>
         </div>
-        <div id="md-briefings"></div>
 
         <div class="g4 stagger" id="md-kpis" style="margin-bottom:16px"></div>
+
+        <div id="md-council-bar" style="display:none;margin-bottom:16px">
+          <button id="md-council-hd" onclick="mdToggleCouncil()" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 14px;cursor:pointer;font-family:inherit">
+            <span style="font-size:12.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px">
+              <span style="width:7px;height:7px;border-radius:50%;background:var(--yel);display:inline-block"></span>
+              Conselho de IA · <b id="md-council-n">0</b> debates de hoje
+            </span>
+            <span id="md-council-chev" style="font-size:11px;color:var(--mute);font-weight:700">ver ▾</span>
+          </button>
+          <div id="md-briefings" style="display:none;margin-top:10px"></div>
+        </div>
 
         <div class="md-grid">
           <div class="md-card">
@@ -3121,6 +3133,12 @@ function iniciarAutoSync(){
           <datalist id="set-people"></datalist>
           <p class="muted" style="font-size:10.5px;margin-top:6px">Use o mesmo nome que aparece nas tarefas (campo "responsável") para o "Meu Dia" reconhecer as suas atividades.</p>
         </div>
+        <div class="set-sect-t" style="margin:18px 0 8px">Preferências de menu</div>
+        <label style="display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="pref-regua" onchange="togglePrefRegua(this.checked)">
+          <span>Mostrar a aba <strong>Régua dos 15</strong> no menu (em Clientes)</span>
+        </label>
+        <p class="muted" style="font-size:10.5px;margin-top:6px">Desligada por padrão enquanto não está em uso. Ligue aqui quando quiser usá-la de novo — nada é apagado.</p>
       </div>
 
       <!-- EQUIPE & ACESSOS (admin) -->
@@ -4306,12 +4324,21 @@ function mdRenderJarvis(nLate,nToday,nPend){
   box.classList.add('show');
 }
 function mdJarvisFalar(){ if(typeof jarvisSpeak==='function') jarvisSpeak(_mdJarvisTxt||'Sem resumo no momento.'); }
+function mdToggleCouncil(){
+  const bd=document.getElementById('md-briefings');const chev=document.getElementById('md-council-chev');
+  if(!bd)return;const open=bd.style.display!=='none';
+  bd.style.display=open?'none':'flex';
+  if(chev)chev.textContent=open?'ver ▾':'ocultar ▴';
+}
 function mdRenderBriefings(){
   const wrap=document.getElementById('md-briefings');if(!wrap)return;
+  const bar=document.getElementById('md-council-bar');
   let brfs=[];try{brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){}
   const hoje=new Date().toISOString().split('T')[0];
   const list=(brfs.filter(b=>b.date===hoje).length?brfs.filter(b=>b.date===hoje):brfs).slice(0,8);
-  if(!list.length){wrap.innerHTML='';return;}
+  const nEl=document.getElementById('md-council-n');if(nEl)nEl.textContent=list.length;
+  if(!list.length){wrap.innerHTML='';if(bar)bar.style.display='none';return;}
+  if(bar)bar.style.display='';
   wrap.innerHTML=list.map(b=>`
     <div class="mdb" onclick="document.querySelector('[data-nav=conselho]').click()">
       <div class="top"><div class="c">CONSELHO · ${mdEsc(b.cliente||'ARK')}</div><div class="d">${mdEsc(b.decisao||'—')}</div></div>
@@ -4320,7 +4347,7 @@ function mdRenderBriefings(){
 }
 
 /* ============ IDENTIDADE / MÊS ============ */
-const ROLE_LABEL={admin:'CEO · Admin',gestor:'Gestor',financeiro:'Financeiro',operacao:'Operação',comercial:'Comercial',marketing:'Marketing',viewer:'Visualização'};
+const ROLE_LABEL={admin:'CEO · Admin',gestor:'Gestor',financeiro:'Financeiro',operacao:'Operação',comercial:'Comercial',marketing:'Marketing',viewer:'Visualização',avaliador:'Avaliador · Professor'};
 const MD_PEOPLE_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Samuel Magalhães','Maria Luiza','Bruno','Saulo','Henrique','Nicolas','Luckas Gomes','Giuseppe','Márcio','Kaique'];
 let MD_PEOPLE=MD_PEOPLE_BASE.slice();
 function rebuildPeople(){ MD_PEOPLE = MD_PEOPLE_BASE.concat(loadColabCustom().filter(n=>!MD_PEOPLE_BASE.includes(n))); }
@@ -4345,6 +4372,9 @@ const ROLE_ACCESS={
   marketing:_BASE_NAV.concat(['tarefas','demandas','lista-clientes','campanhas']),
   financeiro:_BASE_NAV.concat(['financeiro','cobranca','campanhas']),
   viewer:_BASE_NAV,
+  // Professores avaliadores: veem a vitrine completa do sistema, sem dados sensíveis
+  // (financeiro, cobrança, pagamentos, WhatsApp e notificações ficam de fora).
+  avaliador:_BASE_NAV.concat(['lista-clientes','jornada','regua','tarefas','agentes','conselho','planejamento','legenda','cliente','roteirista','drive','crm','okrs','campanhas','tutorial','integracoes']),
 };
 function roleAccessList(role){return ROLE_ACCESS[role]||ROLE_ACCESS.viewer;}
 function memberAccess(m){
@@ -4364,9 +4394,13 @@ function memberAccess(m){
 // Abas escondidas do menu (ainda existem p/ o JS, mas não poluem a navegação até terem dados).
 // Gabriel pediu: esconder Reuniões·Agenda, Performance (OKRs/Campanhas) e tirar Demandas/Rotinas das Atividades.
 const HIDDEN_NAV=new Set(['reunioes','okrs','campanhas','demandas','rotinas']);
+// Abas opcionais: escondidas por padrão, o gestor liga/desliga nas Configurações.
+function prefHidden(){const s=new Set();if(localStorage.getItem('wfa-show-regua')!=='1')s.add('regua');return s;}
+function togglePrefRegua(on){try{localStorage.setItem('wfa-show-regua',on?'1':'0');}catch(e){}applyAccess();}
 function applyAccess(){
   const acc=memberAccess(WFA_MEMBER);
-  document.querySelectorAll('[data-nav]').forEach(el=>{const k=el.dataset.nav;if(HIDDEN_NAV.has(k)){el.style.display='none';return;}if(!(k in acc))return;el.style.display=acc[k]===false?'none':'';});
+  const hid=new Set([...HIDDEN_NAV,...prefHidden()]);
+  document.querySelectorAll('[data-nav]').forEach(el=>{const k=el.dataset.nav;if(hid.has(k)){el.style.display='none';return;}if(!(k in acc))return;el.style.display=acc[k]===false?'none':'';});
   document.querySelectorAll('.subnav').forEach(sub=>{
     const anyVis=[...sub.querySelectorAll('[data-nav]')].some(el=>el.style.display!=='none');
     const parent=sub.previousElementSibling;
@@ -4402,6 +4436,7 @@ function openSettings(){
   const m=WFA_MEMBER;
   const nmEl=document.getElementById('set-me-nm');if(nmEl)nmEl.textContent=m&&m.full_name?m.full_name:'Sem nome definido';
   const meta=document.getElementById('set-me-meta');if(meta)meta.textContent=(m?(ROLE_LABEL[m.role]||m.role||'Membro'):'—')+(m&&m.email?' · '+m.email:'');
+  const pr=document.getElementById('pref-regua');if(pr)pr.checked=localStorage.getItem('wfa-show-regua')==='1';
   setTab('perfil');
   renderSettingsTeam();
   document.getElementById('modal-settings').classList.add('open');
@@ -5141,6 +5176,54 @@ function wppFileChosen(input){
     }catch(e){localMsg.status='failed';localMsg.error=(e&&e.message)||'falha';renderWhatsapp();toast('⚠ '+((e&&e.message)||'Falha ao enviar mídia'));}
   };
   reader.readAsDataURL(file);
+}
+// ---- Gravar e enviar áudio (mensagem de voz) ----
+var WPP_REC=null,WPP_RECCHUNKS=[],WPP_RECSTREAM=null,WPP_RECT0=0,WPP_RECTIMER=null;
+function wppMicBtnState(on){
+  const b=document.getElementById('wpp-mic');if(!b)return;
+  b.textContent=on?'■':'🎤';
+  b.title=on?'Parar e enviar áudio':'Gravar e enviar áudio';
+  b.style.background=on?'#c0392b':'';
+  b.style.color=on?'#fff':'';
+  b.style.borderColor=on?'#c0392b':'';
+}
+async function wppMicToggle(){
+  // se já está gravando, para (e envia)
+  if(WPP_REC&&WPP_REC.state==='recording'){WPP_REC.stop();return;}
+  if(!WPP_ACTIVE){toast('Abra uma conversa primeiro');return;}
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Gravação de áudio não é suportada neste navegador');return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    WPP_RECSTREAM=stream;WPP_RECCHUNKS=[];
+    const mime=MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')?'audio/ogg;codecs=opus':MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'';
+    WPP_REC=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+    WPP_REC.ondataavailable=e=>{if(e.data&&e.data.size)WPP_RECCHUNKS.push(e.data);};
+    WPP_REC.onstop=async()=>{
+      try{WPP_RECSTREAM.getTracks().forEach(t=>t.stop());}catch(e){}
+      if(WPP_RECTIMER){clearInterval(WPP_RECTIMER);WPP_RECTIMER=null;}
+      const type=(WPP_REC&&WPP_REC.mimeType)||'audio/webm';
+      const blob=new Blob(WPP_RECCHUNKS,{type});
+      WPP_REC=null;wppMicBtnState(false);
+      if(blob.size<1200){toast('Áudio muito curto');return;}
+      const reader=new FileReader();
+      reader.onload=async()=>{
+        const base64=String(reader.result||'').split(',')[1]||'';
+        if(!base64){toast('Não consegui ler o áudio');return;}
+        const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[WPP_ACTIVE];
+        const localMsg={dir:'out',text:'🎤 Mensagem de voz',ts:Date.now(),status:'sending'};
+        if(c){c.msgs=c.msgs||[];c.msgs.push(localMsg);c.updatedAt=Date.now();renderWhatsapp();}
+        toast('Enviando áudio...');
+        try{
+          await cloudCall('save',{action:'send-whatsapp-media',phone:WPP_ACTIVE,jid:(c&&c.jid)||'',base64,mimetype:type.split(';')[0],fileName:'audio.ogg',caption:''});
+          localMsg.status='sent';renderWhatsapp();toast('Áudio enviado ✓');
+        }catch(e){localMsg.status='failed';localMsg.error=(e&&e.message)||'falha';renderWhatsapp();toast('⚠ '+((e&&e.message)||'Falha ao enviar áudio'));}
+      };
+      reader.readAsDataURL(blob);
+    };
+    WPP_REC.start();WPP_RECT0=Date.now();wppMicBtnState(true);
+    toast('🎙️ Gravando... clique de novo para enviar');
+    WPP_RECTIMER=setInterval(()=>{const b=document.getElementById('wpp-mic');if(b&&WPP_REC&&WPP_REC.state==='recording'){const s=Math.floor((Date.now()-WPP_RECT0)/1000);b.textContent=(s<10?'0:0'+s:'0:'+s);}},500);
+  }catch(e){toast('⚠ Permita o microfone no navegador para gravar áudio');}
 }
 // ---- Tags (ARK / ALPHA / etc.) — WPP_LABELS declarado no topo (evita TDZ) ----
 function wppLabelColor(l){return {ARK:'#0a0a0a',ALPHA:'#a07e00',Lead:'#1d4ed8',Fornecedor:'#6b21a8'}[l]||'#555';}
@@ -5909,6 +5992,9 @@ function renderWhatsapp(){
   // preserva o que está sendo digitado/buscado (a auto-atualização redesenha a tela)
   const _ipEl=document.getElementById('wpp-input');const _ipVal=_ipEl?_ipEl.value:'';const _ipFoc=_ipEl&&document.activeElement===_ipEl;
   const _seEl=document.getElementById('wpp-search');const _seVal=_seEl?_seEl.value:'';const _seFoc=_seEl&&document.activeElement===_seEl;
+  // preserva a posição de rolagem da lista de conversas (a auto-sync de 6s redesenhava e jogava pro topo)
+  const _listEl=document.getElementById('wpp-list');const _listScroll=_listEl?_listEl.scrollTop:0;
+  const _msgsElPrev=document.getElementById('wpp-msgs');const _msgsScroll=_msgsElPrev?_msgsElPrev.scrollTop:null;const _msgsAtBottom=_msgsElPrev?(_msgsElPrev.scrollHeight-_msgsElPrev.scrollTop-_msgsElPrev.clientHeight<60):true;
   const conv=(state.whatsapp&&state.whatsapp.conversas)||{};
   let list=Object.values(conv).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
   const status=document.getElementById('wpp-status');
@@ -5916,6 +6002,8 @@ function renderWhatsapp(){
   const naoLidasWpp=list.reduce((s,c)=>s+(c.unread||0),0);
   const wbTop=document.getElementById('wpp-badge-top');
   if(wbTop){wbTop.textContent=naoLidasWpp>99?'99+':naoLidasWpp;wbTop.style.display=naoLidasWpp?'flex':'none';}
+  const wbNav=document.getElementById('wpp-badge-nav');
+  if(wbNav){wbNav.textContent=naoLidasWpp>99?'99+':naoLidasWpp;wbNav.style.display=naoLidasWpp?'':'none';}
   if(!list.length){
     wrap.innerHTML=`<div class="card" style="padding:24px;font-size:13.5px;color:var(--txt);line-height:1.6">
       <strong>Ainda não há conversas.</strong> Assim que chegar uma mensagem no WhatsApp conectado, ela aparece aqui.<br><br>
@@ -5996,12 +6084,18 @@ function renderWhatsapp(){
       <div style="display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:#f0f0ed;flex-shrink:0">
         <input type="file" id="wpp-file" style="display:none" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="wppFileChosen(this)">
         <button class="icobtn" title="Anexar foto, vídeo, áudio ou documento" onclick="wppAttach()" style="border-radius:20px;flex-shrink:0;font-size:17px;padding:0 12px">📎</button>
+        <button class="icobtn" id="wpp-mic" title="Gravar e enviar áudio" onclick="wppMicToggle()" style="border-radius:20px;flex-shrink:0;font-size:17px;padding:0 12px">🎤</button>
         <input id="wpp-input" class="form-input" placeholder="Escreva uma mensagem..." style="flex:1;border-radius:20px" onkeydown="if(event.key==='Enter')wppSend()">
         <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700;border-radius:20px" onclick="wppSend()">Enviar ➤</button>
       </div>
     </div>
   </div>`;
-  const mb=document.getElementById('wpp-msgs');if(mb)mb.scrollTop=mb.scrollHeight;
+  // mensagens: mantém no fundo se já estava no fundo; senão preserva onde o usuário estava lendo
+  const mb=document.getElementById('wpp-msgs');if(mb){mb.scrollTop=(_msgsAtBottom||_msgsScroll==null)?mb.scrollHeight:_msgsScroll;}
+  // lista de conversas: restaura a rolagem (evita o "sobe sozinho" durante a auto-sync)
+  const _nl=document.getElementById('wpp-list');if(_nl&&_listScroll)_nl.scrollTop=_listScroll;
+  // se estiver gravando áudio, mantém o botão no estado "gravando" após o redesenho
+  if(typeof WPP_REC!=='undefined'&&WPP_REC&&WPP_REC.state==='recording')wppMicBtnState(true);
   // restaura digitação/busca após o redesenho
   const _ni=document.getElementById('wpp-input');if(_ni&&_ipVal){_ni.value=_ipVal;if(_ipFoc){_ni.focus();try{_ni.setSelectionRange(_ipVal.length,_ipVal.length);}catch(e){}}}
   const _ns=document.getElementById('wpp-search');if(_ns&&_seVal){_ns.value=_seVal;if(_seFoc){_ns.focus();}wppFilter();}
