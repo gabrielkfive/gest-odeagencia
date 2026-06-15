@@ -2194,7 +2194,10 @@ function iniciarAutoSync(){
         </style>
         <div class="page-head">
           <div class="page-title"><h1>Drive</h1><p>Arquivos e documentos da ARK por cliente · tudo num lugar só.</p></div>
-          <div><label class="tb-btn" style="cursor:pointer">📎 Enviar arquivo<input type="file" style="display:none" onchange="arquivoUpload(this)"></label></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="tb-btn" onclick="driveSyncConselhoBtn()" title="Arquiva as últimas ideias do Conselho de IA em cada cliente">🧠 Recuperar ideias do conselho</button>
+            <label class="tb-btn" style="cursor:pointer">📎 Enviar arquivo<input type="file" style="display:none" onchange="arquivoUpload(this)"></label>
+          </div>
         </div>
         <div class="dz-crumbs" id="dz-crumbs"></div>
         <div id="dz-body"></div>
@@ -2900,15 +2903,22 @@ function iniciarAutoSync(){
 <!-- BOTÃO FLUTUANTE + MODAL: JARVIS (voz) -->
 <button onclick="jarvisOpen()" title="JARVIS — fale comigo" id="jarvis-fab" style="position:fixed;bottom:18px;right:18px;z-index:9000;width:54px;height:54px;border-radius:50%;border:2px solid var(--yel,#ffd400);background:#0a0a0a;color:var(--yel,#ffd400);font-size:23px;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer">🎙️</button>
 <div class="modal-bg" id="modal-jarvis">
-  <div class="modal" style="max-width:480px;height:72vh;max-height:620px;display:flex;flex-direction:column">
+  <div class="modal" style="max-width:680px;height:84vh;max-height:760px;display:flex;flex-direction:column">
     <div class="modal-head"><h3>JARVIS · ARK</h3><span class="x" onclick="try{jarvisConvStop()}catch(e){};window.speechSynthesis.cancel();closeModal('modal-jarvis')">✕</span></div>
     <div class="modal-body" id="jarvis-msgs" style="flex:1;overflow:auto;min-height:0;background:#efeae2"></div>
     <div style="display:flex;flex-direction:column;gap:8px;padding:10px;border-top:1px solid var(--line);flex-shrink:0">
-      <button id="jarvis-conv" class="tb-btn" style="border-radius:20px;font-weight:700" onclick="jarvisConversaToggle()">● Conversar</button>
-      <div style="display:flex;gap:8px">
-        <button id="jarvis-mic" class="icobtn" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;border-radius:20px;flex-shrink:0">🎙️</button>
-        <input id="jarvis-input" class="form-input" placeholder="Fale ou digite..." style="flex:1;border-radius:20px" onkeydown="if(event.key==='Enter')jarvisSend()">
-        <button class="tb-btn dk" style="border-radius:20px;flex-shrink:0" onclick="jarvisSend()">➤</button>
+      <div id="jarvis-attach" style="display:none;align-items:center;gap:8px;background:var(--yel-bg,#fff7d6);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12px">
+        <span style="font-weight:700">📄 <span id="jarvis-attach-nm">documento</span></span>
+        <span id="jarvis-attach-meta" style="color:var(--mute);font-family:var(--mono)"></span>
+        <button class="icobtn" style="margin-left:auto;padding:2px 8px" onclick="jarvisClearAttach()">remover</button>
+      </div>
+      <input type="file" id="jarvis-file" style="display:none" accept=".txt,.md,.markdown,.html,.htm,.csv,.json,.rtf,.srt,.vtt,text/*" onchange="jarvisFileChosen(this)">
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <button id="jarvis-conv" class="icobtn" title="Modo conversa (voz)" style="border-radius:20px;flex-shrink:0;font-weight:700;padding:0 12px;height:40px" onclick="jarvisConversaToggle()">●</button>
+        <button id="jarvis-mic" class="icobtn" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;border-radius:20px;flex-shrink:0;height:40px">🎙️</button>
+        <button class="icobtn" onclick="jarvisAttach()" title="Anexar documento (txt, md, html, csv, json…)" style="font-size:17px;border-radius:20px;flex-shrink:0;height:40px">📎</button>
+        <textarea id="jarvis-input" class="form-input" placeholder="Fale, digite ou cole um documento…  (Enter envia · Shift+Enter pula linha)" rows="1" style="flex:1;border-radius:18px;resize:none;max-height:160px;min-height:40px;padding:9px 14px;line-height:1.4;font-family:inherit" oninput="jarvisAutoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();jarvisSend();}"></textarea>
+        <button class="tb-btn dk" style="border-radius:20px;flex-shrink:0;height:40px" onclick="jarvisSend()">➤</button>
       </div>
     </div>
   </div>
@@ -5553,11 +5563,37 @@ function jarvisRender(){
   b.innerHTML=JARVIS_MSGS.map(m=>`<div style="display:flex;justify-content:${m.role==='user'?'flex-end':'flex-start'};margin:5px 0"><div style="max-width:82%;background:${m.role==='user'?'#d9fdd3':'#fff'};border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:13px;line-height:1.5;white-space:pre-wrap">${mdEsc(m.content)}</div></div>`).join('');
   b.scrollTop=b.scrollHeight;
 }
+// ---- Anexar / colar documento no chat do JARVIS ----
+var JARVIS_ATTACH=null; // {nome, texto}
+function jarvisAutoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px';}
+function jarvisAttach(){const f=document.getElementById('jarvis-file');if(f){f.value='';f.click();}}
+function jarvisClearAttach(){JARVIS_ATTACH=null;const w=document.getElementById('jarvis-attach');if(w)w.style.display='none';}
+function jarvisFileChosen(input){
+  const file=input.files&&input.files[0]; if(!file)return;
+  if(file.size>600*1024){toast('Documento muito grande (máx 600KB de texto)');return;}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    let texto=String(reader.result||'');
+    if(texto.length>120000)texto=texto.slice(0,120000)+'\n…(documento cortado)';
+    JARVIS_ATTACH={nome:file.name,texto};
+    const w=document.getElementById('jarvis-attach');const nm=document.getElementById('jarvis-attach-nm');const mt=document.getElementById('jarvis-attach-meta');
+    if(nm)nm.textContent=file.name; if(mt)mt.textContent=(texto.length>999?(Math.round(texto.length/1000)+'k'):(texto.length))+' caracteres'; if(w)w.style.display='flex';
+    toast('Documento anexado ✓ — agora escreva o que quer que eu faça com ele');
+  };
+  reader.readAsText(file);
+}
 async function jarvisSend(txt){
-  const inp=document.getElementById('jarvis-input'); txt=(txt||(inp&&inp.value)||'').trim(); if(!txt)return; if(inp)inp.value='';
+  const inp=document.getElementById('jarvis-input'); txt=(txt||(inp&&inp.value)||'').trim();
+  if(!txt&&!JARVIS_ATTACH)return; if(inp){inp.value='';jarvisAutoGrow(inp);}
+  // anexa o documento (se houver) como contexto da mensagem
+  if(JARVIS_ATTACH){
+    const doc=JARVIS_ATTACH; jarvisClearAttach();
+    txt=`[DOCUMENTO ANEXADO: ${doc.nome}]\n${doc.texto}\n[FIM DO DOCUMENTO]\n\n${txt||'Considere o documento acima.'}`;
+  }
   JARVIS_MSGS.push({role:'user',content:txt});
   // 1) tenta EXECUTAR um comando no sistema (estilo Fazm). Se executou, nem chama a IA.
-  let done=jarvisExecute(txt);
+  // Pula o executor quando há documento colado/longo (evita falso-positivo de comando).
+  let done=(txt.length>500||txt.indexOf('[DOCUMENTO ANEXADO')===0)?null:jarvisExecute(txt);
   if(done&&typeof done.then==='function'){ JARVIS_MSGS.push({role:'assistant',content:'…'}); jarvisRender(); done=await done; JARVIS_MSGS.pop(); }
   if(done){ JARVIS_MSGS.push({role:'assistant',content:done}); jarvisRender(); jarvisFalar(done); return; }
   // 2) senão, vira AGENTE: Claude COM FERRAMENTAS decide e o cliente executa
@@ -5941,7 +5977,7 @@ function jarvisAfterSpeak(cb){
   document.addEventListener('jarvis-spoke',fire);
   setTimeout(fire,15000); // fallback se o evento não vier
 }
-function jarvisConvBtn(on){const b=document.getElementById('jarvis-conv');if(b){b.textContent=on?'■ Encerrar conversa':'● Conversar';b.style.background=on?'#dc2626':'';b.style.color=on?'#fff':'';}}
+function jarvisConvBtn(on){const b=document.getElementById('jarvis-conv');if(b){b.textContent=on?'■':'●';b.title=on?'Encerrar conversa (voz)':'Modo conversa (voz)';b.style.background=on?'#dc2626':'';b.style.color=on?'#fff':'';}}
 function jarvisConversaToggle(){
   if(_jConv){jarvisConvStop();return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -6419,9 +6455,59 @@ function driveExcluir(nm){
   driveSave();renderDrive();toast('Pasta excluída');
 }
 function driveCopiarRoteiros(){const t=document.getElementById('dz-body');navigator.clipboard?.writeText(t?t.innerText:'').then(()=>toast('Roteiros copiados'),()=>toast('Não consegui copiar'));}
+// Arquiva as ideias do Conselho de IA no Drive, numa subpasta "Ideias do Conselho" por cliente.
+function driveSyncConselho(){
+  let brfs=[];try{brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){}
+  if(!brfs.length)return 0;
+  DRIVE=driveLoad();
+  const byCli={};
+  brfs.forEach(b=>{const cli=(b.cliente||'ARK').trim();(byCli[cli]=byCli[cli]||[]).push(b);});
+  let total=0;
+  Object.entries(byCli).forEach(([cli,list])=>{
+    if(!DRIVE[cli])DRIVE[cli]={ico:driveMono(cli),pastas:{}};
+    if(!DRIVE[cli].pastas)DRIVE[cli].pastas={};
+    const items=list.slice().sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,40).map(b=>({
+      id:b.id,date:b.date||'',decisao:b.decisao||'',
+      plano:Array.isArray(b.plano)?b.plano:[],
+      ideias:(Array.isArray(b.ideias)?b.ideias:[]).map(i=>i&&i.titulo?i.titulo:String(i)),
+      referencias:Array.isArray(b.referencias)?b.referencias:[],
+      parcerias:Array.isArray(b.parcerias)?b.parcerias:[],
+      roteiro:b.roteiro||'',orcamento:b.orcamento||''
+    }));
+    DRIVE[cli].pastas['Ideias do Conselho']={ico:'IC',tipo:'conselho',meta:items.length+' debates',items};
+    total+=items.length;
+  });
+  driveSave();
+  return total;
+}
+function driveSyncConselhoBtn(){
+  const n=driveSyncConselho();
+  renderDrive();
+  toast(n?('🧠 '+n+' debates arquivados no Drive ✓'):'Nenhuma ideia do conselho ainda');
+}
+function renderConselhoDoc(sub){
+  const items=Array.isArray(sub.items)?sub.items:[];
+  if(!items.length)return '<div class="card" style="padding:24px;color:var(--mute)">Sem ideias do conselho ainda. Use "Recuperar ideias do conselho" lá em cima.</div>';
+  return items.map(it=>{
+    const bloco=(t,arr)=>arr&&arr.length?`<div style="margin-top:7px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)">${t}</div><ul style="margin:3px 0 0 16px;font-size:12.5px;color:var(--ink);line-height:1.5">${arr.map(x=>`<li>${mdEsc(String(x))}</li>`).join('')}</ul></div>`:'';
+    return `<div class="card" style="padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--yel,#ffd400)">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+        <div style="font-size:14px;font-weight:800;color:var(--ink)">${mdEsc(it.decisao||'Debate do conselho')}</div>
+        <div style="font-size:11px;color:var(--mute);font-family:var(--mono);white-space:nowrap">${mdEsc(it.date||'')}</div>
+      </div>
+      ${bloco('Plano',it.plano)}
+      ${bloco('Ideias',it.ideias)}
+      ${bloco('Referências',it.referencias)}
+      ${bloco('Parcerias',it.parcerias)}
+      ${it.orcamento?`<div style="margin-top:7px;font-size:12px"><b>Orçamento:</b> ${mdEsc(it.orcamento)}</div>`:''}
+      ${it.roteiro?`<div style="margin-top:7px;font-size:12px;color:var(--txt)"><b>Roteiro:</b> ${mdEsc(it.roteiro)}</div>`:''}
+    </div>`;
+  }).join('');
+}
 function driveNovaBtn(label){return `<div class="dz-card dz-add" onclick="driveNovaPasta()"><div class="dz-ico" style="background:#fff;border:1.5px dashed var(--line-2);color:var(--mute-2)">+</div><div class="dz-nm">${label}</div><div class="dz-meta">criar nova</div></div>`;}
 function renderDrive(){
   const body=document.getElementById('dz-body');const cr=document.getElementById('dz-crumbs');if(!body)return;
+  if(!window._driveConsSynced){window._driveConsSynced=true;try{driveSyncConselho();}catch(e){}} // arquiva ideias do conselho 1x por sessão
   DRIVE=driveLoad(); // sempre reflete o que veio da nuvem
   let crumbs=`<b onclick="driveGo(0)">Drive</b>`;
   DRIVE_PATH.forEach((p,i)=>{crumbs+=` <span style="color:var(--mute-2)">/</span> <span onclick="driveGo(${i+1})">${mdEsc(p)}</span>`;});
@@ -6435,8 +6521,11 @@ function renderDrive(){
     const cardSub=(nm,p)=>`<div class="dz-card ${p.tipo==='doc'?'doc':''}" onclick="driveOpen('${nm.replace(/'/g,"")}')">${p.tipo!=='doc'?`<button class="dz-del" title="Excluir" onclick="event.stopPropagation();driveExcluir('${nm.replace(/'/g,"")}')">✕</button>`:''}<div class="dz-ico">${mdEsc(p.ico||driveMono(nm))}</div><div class="dz-nm">${mdEsc(nm)}</div><div class="dz-meta">${p.tipo==='doc'?(p.meta||'documento'):'pasta'}</div></div>`;
     body.innerHTML=`<div class="dz-grid">${Object.entries(cli.pastas).map(([nm,p])=>cardSub(nm,p)).join('')}${driveNovaBtn('Nova subpasta')}</div>`;return;
   }
+  const subAtual=cli.pastas&&cli.pastas[DRIVE_PATH[1]];
   if(DRIVE_PATH[1]==='Roteiros Vivenda'){
     body.innerHTML=`<div class="dz-doc-head"><h2>Roteiros Vivenda — Junho 2026</h2><button class="tb-btn" onclick="driveCopiarRoteiros()">Copiar tudo</button></div>${renderRoteirosVivenda()}`;
+  }else if(subAtual&&subAtual.tipo==='conselho'){
+    body.innerHTML=`<div class="dz-doc-head"><h2>Ideias do Conselho — ${mdEsc(DRIVE_PATH[0])}</h2><button class="tb-btn" onclick="driveSyncConselhoBtn()">↻ Atualizar</button></div>${renderConselhoDoc(subAtual)}`;
   }else{
     body.innerHTML=`<div class="card" style="padding:24px;color:var(--mute)">Pasta vazia por enquanto. Use "Enviar arquivo" lá em cima pra subir documentos aqui.</div>`;
   }
