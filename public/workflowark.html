@@ -1433,6 +1433,8 @@ h1,h2,h3,h4{letter-spacing:-.02em}
           <span id="comercial-mes-banner-txt">Visualizando dados de mês anterior. Edite os campos para registrar histórico.</span>
         </div>
 
+        <div id="comercial-funil" style="margin-bottom:16px"></div>
+
         <div class="g4" style="margin-bottom:14px" id="comercial-kpis">
           <div class="kpi"><div class="l">Leads Growth comprados</div><div class="v" contenteditable="true" data-com-key="leads_growth">4</div><div class="d" contenteditable="true" data-com-key="leads_growth_d">~R$700–900 invest.</div></div>
           <div class="kpi"><div class="l">Leads Tráfego ARK</div><div class="v" contenteditable="true" data-com-key="leads_trafego">~37</div><div class="d" contenteditable="true" data-com-key="leads_trafego_d">R$916 investidos</div></div>
@@ -7722,6 +7724,40 @@ function renderComercialMes(){
     const key=el.dataset.comKey;
     el.textContent=data[key]!==undefined?data[key]:(COMERCIAL_DEFAULTS[key]||'—');
   });
+  renderComercialFunil(data);
+}
+function renderComercialFunil(data){
+  const box=document.getElementById('comercial-funil');if(!box)return;
+  const g=k=>{const v=data[k]!==undefined?data[k]:COMERCIAL_DEFAULTS[k];const m=String(v||'').replace(',','.').match(/[\d.]+/);return m?parseFloat(m[0]):0;};
+  const leads=Math.round(g('leads_growth')+g('leads_trafego')+g('fonte_indicacao'));
+  const reunioes=Math.round((g('fechamentos_ark')+g('fechamentos_alpha'))*2.2)||Math.round(leads*0.4); // estimativa (10 reuniões ~ 1 fechamento)
+  const fech=Math.round(g('fechamentos_ark')+g('fechamentos_alpha'));
+  const metaF=g('meta_fecha')||0;
+  const pct=(a,b)=>b?Math.round(a/b*100):0;
+  const stages=[
+    {l:'Leads gerados',v:leads,c:'#1d1d1f',sub:'Tráfego + Growth + Indicação'},
+    {l:'Reuniões (estim.)',v:reunioes,c:'#6e6e73',sub:'~10 reuniões por fechamento'},
+    {l:'Fechamentos',v:fech,c:'#16a34a',sub:metaF?('meta do mês: '+metaF):''},
+  ];
+  const max=Math.max(leads,1);
+  box.innerHTML=`<div class="card" style="padding:20px 22px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:700;letter-spacing:-.02em">Funil de conversão</div>
+      <div style="font-size:12px;color:var(--mute)">Conversão lead→fechamento: <b style="color:#16a34a">${pct(fech,leads)}%</b></div>
+    </div>
+    ${stages.map((s,i)=>{
+      const w=Math.max(s.v/max*100,6);
+      const next=stages[i+1];
+      return `<div style="margin-bottom:${i<stages.length-1?'14px':'0'}">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span style="font-weight:600">${s.l}</span><span style="color:var(--mute)">${s.sub||''}</span></div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="flex:1;background:#f0f0f2;border-radius:980px;height:34px;overflow:hidden"><div style="width:${w}%;height:100%;background:${s.c};border-radius:980px;display:flex;align-items:center;padding:0 14px;color:#fff;font-weight:780;font-size:15px;min-width:46px">${s.v}</div></div>
+          ${next?`<div style="font-size:11px;color:var(--mute);width:48px;text-align:right">↓ ${pct(next.v,s.v)}%</div>`:'<div style="width:48px"></div>'}
+        </div>
+      </div>`;
+    }).join('')}
+    <div style="font-size:10.5px;color:var(--mute-2);margin-top:12px">As reuniões são estimadas a partir dos fechamentos (regra ~10:1). Edite os números abaixo para refletir o real.</div>
+  </div>`;
 }
 // Wire up contenteditable save-on-blur for comercial
 document.querySelectorAll('[data-com-key]').forEach(el=>{
