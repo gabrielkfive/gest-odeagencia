@@ -2214,6 +2214,12 @@ function iniciarAutoSync(){
             <div><label class="form-label" style="font-size:11px">Plataforma</label><select id="rot-plat" class="form-select"><option>Instagram Reels</option><option>TikTok</option><option>YouTube Shorts</option></select></div>
             <div><label class="form-label" style="font-size:11px">Qtd</label><input id="rot-qtd" class="form-input" type="number" value="3" min="1" max="8"></div>
           </div>
+          <div style="grid-column:1/-1">
+            <label class="form-label" style="font-size:11px;display:flex;align-items:center;gap:8px">Histórico / referências (opcional)
+              <label class="icobtn" style="cursor:pointer;font-size:11px;padding:2px 8px">📎 anexar<input type="file" id="rot-file" style="display:none" accept=".txt,.md,.markdown,.html,.htm,.csv,.json,.srt,.vtt,text/*" onchange="rotFileChosen(this)"></label>
+            </label>
+            <textarea id="rot-ref" class="form-input" style="min-height:70px" placeholder="Cole aqui roteiros técnicos antigos, tom de voz, regras do cliente, HTML… o roteirista usa como referência pra manter o padrão."></textarea>
+          </div>
           <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
             <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="rotGerar()">🎬 Gerar roteiros</button>
             <button class="tb-btn" onclick="rotCopiar()">⧉ Copiar</button>
@@ -6179,11 +6185,20 @@ async function rotGerar(){
   const cliente=document.getElementById('rot-cliente').value||'';
   const plataforma=document.getElementById('rot-plat').value||'Instagram Reels';
   const qtd=document.getElementById('rot-qtd').value||'3';
+  let referencia=(document.getElementById('rot-ref')&&document.getElementById('rot-ref').value||'').trim();
+  if(referencia.length>40000)referencia=referencia.slice(0,40000)+'\n…(cortado)';
   if(st)st.textContent='🎬 Roteirizando...';if(out)out.textContent='Gerando roteiros com o método viral...';
   try{
-    const r=await cloudCall('save',{action:'agente-roteirista',tema,cliente,plataforma,qtd});
+    const r=await cloudCall('save',{action:'agente-roteirista',tema,cliente,plataforma,qtd,referencia});
     if(out)out.textContent=(r&&r.text)||'(sem resposta)';if(st)st.textContent='Pronto ✓';
   }catch(e){if(out)out.textContent='⚠ '+(e.message||'Falha ao gerar');if(st)st.textContent='';}
+}
+function rotFileChosen(input){
+  const file=input.files&&input.files[0]; if(!file)return;
+  if(file.size>400*1024){toast('Documento muito grande (máx 400KB)');return;}
+  const reader=new FileReader();
+  reader.onload=()=>{const ta=document.getElementById('rot-ref');if(ta){const ex=ta.value?ta.value+'\n\n':'';ta.value=ex+String(reader.result||'');}toast('Documento anexado às referências ✓');};
+  reader.readAsText(file);
 }
 function rotCopiar(){const t=document.getElementById('rot-out').textContent||'';navigator.clipboard?.writeText(t).then(()=>toast('Roteiros copiados'),()=>toast('Não consegui copiar'));}
 /* ============ PLANEJAMENTO DE CONTEÚDO ============ */

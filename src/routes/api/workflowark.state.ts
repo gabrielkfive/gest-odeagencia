@@ -336,7 +336,11 @@ export const Route = createFileRoute("/api/workflowark/state")({
           const sysFull = brief
             ? sys + "\n\nCONTEXTO REAL DO CLIENTE (use de verdade — pessoas, produtos, tom e plano; NADA genérico):\n" + brief
             : sys;
-          const user = `Cliente: ${cliente || "(varejo gastronômico genérico)"} · Plataforma: ${plataforma} · Tema/assunto: ${tema}\nGere ${qtd} roteiro(s) de vídeo curto, prontos pra gravar.`;
+          const referencia = String(body.referencia ?? "").trim().slice(0, 40000);
+          const refBlock = referencia
+            ? `\n\nHISTÓRICO/REFERÊNCIAS COLADAS PELO GESTOR (use como padrão de tom, estrutura e regras — NÃO copie literal, mas mantenha a mesma pegada):\n${referencia}`
+            : "";
+          const user = `Cliente: ${cliente || "(varejo gastronômico genérico)"} · Plataforma: ${plataforma} · Tema/assunto: ${tema}\nGere ${qtd} roteiro(s) de vídeo curto, prontos pra gravar.${refBlock}`;
           try {
             const r = await fetch("https://api.anthropic.com/v1/messages", {
               method: "POST",
