@@ -533,6 +533,34 @@ table.t tr.high{background:var(--yel-bg)}
 .crm-pill{background:#141416;border:1px solid #26262b;color:#fff}
 .crm-pill:hover{border-color:#ffd400}
 .nav::-webkit-scrollbar-thumb{background:#26262b}
+
+/* ============ REFINO APPLE — minimalista, claro e arejado (jun/2026) ============ */
+:root{
+  --line:#ededeb;--line-2:#dededa;
+  --shadow:0 1px 2px rgba(0,0,0,.035),0 6px 22px rgba(0,0,0,.045);
+  --shadow-2:0 14px 50px rgba(0,0,0,.12);
+}
+body{-moz-osx-font-smoothing:grayscale;letter-spacing:-.011em}
+/* títulos com tracking apertado (estilo SF/Apple) */
+.page-title h1{font-size:27px;font-weight:760;letter-spacing:-.032em;color:#0b0b0c}
+.page-title p{font-size:13px;color:var(--mute);letter-spacing:-.005em}
+.page{padding:26px 34px 72px}
+/* superfícies mais arejadas e suaves */
+.card,.md-card{border-radius:18px;border-color:var(--line);box-shadow:var(--shadow)}
+.kpi{border-radius:18px;border-color:var(--line);box-shadow:var(--shadow)}
+/* botões estilo Apple: pílula, sutil, com transição limpa */
+.tb-btn{border-radius:980px;border:1px solid var(--line);background:#fff;font-weight:600;transition:border-color .15s,background .15s,transform .12s}
+.tb-btn:hover{border-color:var(--line-2);transform:translateY(-1px)}
+.icobtn{border-radius:980px}
+/* topbar translúcido (vidro), bem Apple */
+.topbar{background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line)}
+.tb-ic{border-radius:980px}
+.tb-ic:hover{background:var(--bg)}
+/* nav: menos brilho neon, mais sóbrio */
+.navitem,.subitem{border-radius:9px}
+.navitem.active{background:rgba(255,212,0,.12);box-shadow:inset 3px 0 0 #ffd400;color:#ffd400}
+/* busca do topo mais limpa */
+.tb-search input{border-radius:980px;background:var(--bg);border:1px solid var(--line)}
 </style>
 </head>
 <body>
