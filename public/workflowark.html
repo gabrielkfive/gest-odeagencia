@@ -611,10 +611,6 @@ table.t tr.high{background:var(--yel-bg)}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Meu Dia</span>
       </div>
-      <div class="navitem" onclick="jarvisOpen()" title="Conversar com o JARVIS">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/></svg>
-        <span>JARVIS</span>
-      </div>
       <div class="navitem" data-nav="reunioes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Reuniões · Agenda</span>
@@ -702,6 +698,10 @@ table.t tr.high{background:var(--yel-bg)}
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="subnav" id="agentes-menu">
+        <div class="subitem" data-nav="jarvis">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/></svg>
+          <span>JARVIS</span>
+        </div>
         <div class="subitem" data-nav="conselho">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span>Conselho de IA</span>
@@ -1021,6 +1021,28 @@ table.t tr.high{background:var(--yel-bg)}
       </div>
 
       <!-- =================== JORNADA / SPRINTS =================== -->
+      <div class="page" id="page-jarvis">
+        <div class="page-head"><div class="page-title"><h1>JARVIS</h1><p>Seu assistente executor · converse, dê comandos e anexe documentos (txt, md, html, csv, json…).</p></div></div>
+        <div style="display:flex;flex-direction:column;height:calc(100vh - 180px);min-height:460px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#efeae2;max-width:1000px">
+          <div id="jarvis-msgs" style="flex:1;overflow:auto;min-height:0;padding:18px"></div>
+          <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-top:1px solid var(--line);background:#fff;flex-shrink:0">
+            <div id="jarvis-attach" style="display:none;align-items:center;gap:8px;background:var(--yel-bg,#fff7d6);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12px">
+              <span style="font-weight:700">📄 <span id="jarvis-attach-nm">documento</span></span>
+              <span id="jarvis-attach-meta" style="color:var(--mute);font-family:var(--mono)"></span>
+              <button class="icobtn" style="margin-left:auto;padding:2px 8px" onclick="jarvisClearAttach()">remover</button>
+            </div>
+            <input type="file" id="jarvis-file" style="display:none" accept=".txt,.md,.markdown,.html,.htm,.csv,.json,.rtf,.srt,.vtt,text/*" onchange="jarvisFileChosen(this)">
+            <div style="display:flex;gap:8px;align-items:flex-end">
+              <button id="jarvis-conv" class="icobtn" title="Modo conversa (voz)" style="border-radius:20px;flex-shrink:0;font-weight:700;padding:0 12px;height:40px" onclick="jarvisConversaToggle()">●</button>
+              <button id="jarvis-mic" class="icobtn" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;border-radius:20px;flex-shrink:0;height:40px">🎙️</button>
+              <button class="icobtn" onclick="jarvisAttach()" title="Anexar documento" style="font-size:17px;border-radius:20px;flex-shrink:0;height:40px">📎</button>
+              <textarea id="jarvis-input" class="form-input" placeholder="Fale, digite ou cole um documento…  (Enter envia · Shift+Enter pula linha)" rows="1" style="flex:1;border-radius:18px;resize:none;max-height:160px;min-height:40px;padding:9px 14px;line-height:1.4;font-family:inherit" oninput="jarvisAutoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();jarvisSend();}"></textarea>
+              <button class="tb-btn dk" style="border-radius:20px;flex-shrink:0;height:40px" onclick="jarvisSend()">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="page" id="page-jornada">
         <div class="page-head">
           <div class="page-title"><h1>Jornada do Cliente</h1><p>Acompanhe o progresso dos clientes em cada sprint · Clique no sprint para sugerir e criar atividades</p></div>
@@ -2908,28 +2930,6 @@ function iniciarAutoSync(){
 
 <!-- BOTÃO FLUTUANTE + MODAL: JARVIS (voz) -->
 <button onclick="jarvisOpen()" title="JARVIS — fale comigo" id="jarvis-fab" style="position:fixed;bottom:18px;right:18px;z-index:9000;width:54px;height:54px;border-radius:50%;border:2px solid var(--yel,#ffd400);background:#0a0a0a;color:var(--yel,#ffd400);font-size:23px;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer">🎙️</button>
-<div class="modal-bg" id="modal-jarvis">
-  <div class="modal" style="max-width:680px;height:84vh;max-height:760px;display:flex;flex-direction:column">
-    <div class="modal-head"><h3>JARVIS · ARK</h3><span class="x" onclick="try{jarvisConvStop()}catch(e){};window.speechSynthesis.cancel();closeModal('modal-jarvis')">✕</span></div>
-    <div class="modal-body" id="jarvis-msgs" style="flex:1;overflow:auto;min-height:0;background:#efeae2"></div>
-    <div style="display:flex;flex-direction:column;gap:8px;padding:10px;border-top:1px solid var(--line);flex-shrink:0">
-      <div id="jarvis-attach" style="display:none;align-items:center;gap:8px;background:var(--yel-bg,#fff7d6);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12px">
-        <span style="font-weight:700">📄 <span id="jarvis-attach-nm">documento</span></span>
-        <span id="jarvis-attach-meta" style="color:var(--mute);font-family:var(--mono)"></span>
-        <button class="icobtn" style="margin-left:auto;padding:2px 8px" onclick="jarvisClearAttach()">remover</button>
-      </div>
-      <input type="file" id="jarvis-file" style="display:none" accept=".txt,.md,.markdown,.html,.htm,.csv,.json,.rtf,.srt,.vtt,text/*" onchange="jarvisFileChosen(this)">
-      <div style="display:flex;gap:8px;align-items:flex-end">
-        <button id="jarvis-conv" class="icobtn" title="Modo conversa (voz)" style="border-radius:20px;flex-shrink:0;font-weight:700;padding:0 12px;height:40px" onclick="jarvisConversaToggle()">●</button>
-        <button id="jarvis-mic" class="icobtn" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;border-radius:20px;flex-shrink:0;height:40px">🎙️</button>
-        <button class="icobtn" onclick="jarvisAttach()" title="Anexar documento (txt, md, html, csv, json…)" style="font-size:17px;border-radius:20px;flex-shrink:0;height:40px">📎</button>
-        <textarea id="jarvis-input" class="form-input" placeholder="Fale, digite ou cole um documento…  (Enter envia · Shift+Enter pula linha)" rows="1" style="flex:1;border-radius:18px;resize:none;max-height:160px;min-height:40px;padding:9px 14px;line-height:1.4;font-family:inherit" oninput="jarvisAutoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();jarvisSend();}"></textarea>
-        <button class="tb-btn dk" style="border-radius:20px;flex-shrink:0;height:40px" onclick="jarvisSend()">➤</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL: Resumo do dia (WhatsApp + voz JARVIS) -->
 <div class="modal-bg" id="modal-wpp-resumo">
   <div class="modal" style="max-width:560px;max-height:86vh;display:flex;flex-direction:column">
@@ -3555,6 +3555,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='tutorial'&&typeof renderTutorial==='function'){try{renderTutorial();}catch(e){console.warn('tut',e);}}
     if(p==='conselho'&&typeof consPopular==='function'){try{consPopular();}catch(e){}}
     if(p==='agentes'){try{agPolish();agLive();}catch(e){}}
+    if(p==='jarvis'){try{jarvisPageEnter();}catch(e){}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
     if(p==='whatsapp'){try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
@@ -5518,7 +5519,7 @@ async function arkClapStart(silent){
       // clap = transiente forte (subida brusca) com refratário
       if(peak>0.45 && lastLevel<0.2 && (!_clapHits.length || now-_clapHits[_clapHits.length-1]>220)){
         _clapHits.push(now); _clapHits=_clapHits.filter(t=>now-t<1300);
-        if(_clapHits.length>=2 && !document.getElementById('modal-jarvis').classList.contains('open')){
+        if(_clapHits.length>=2 && !document.getElementById('page-jarvis').classList.contains('active')){
           _clapHits=[]; jarvisOpen();
         }
       }
@@ -5542,10 +5543,15 @@ if(localStorage.getItem('wfa-clap-mode')){ document.addEventListener('click',fun
 
 let _jarvisFirstOpen=true;
 function jarvisOpen(){
-  document.getElementById('modal-jarvis').classList.add('open');
+  // JARVIS agora é uma PÁGINA inteira dentro de "Agentes de IA" (não mais pop-up)
+  const nav=document.querySelector('[data-nav="jarvis"]');
+  if(nav){const sub=nav.closest('.subnav');if(sub){const tgl=sub.previousElementSibling;if(tgl&&tgl.hasAttribute('data-toggle')){tgl.classList.add('open');sub.classList.add('open');}}nav.click();}
+  else jarvisPageEnter();
+}
+function jarvisPageEnter(){
   try{jarvisBootSound();}catch(e){}
   jarvisRender();
-  setTimeout(()=>{const i=document.getElementById('jarvis-input');if(i)i.focus();},100);
+  setTimeout(()=>{const i=document.getElementById('jarvis-input');if(i)i.focus();},120);
   // ao abrir, o JARVIS já dá o brief do dia (autônomo) — 1x por abertura de sessão
   if(_jarvisFirstOpen && !JARVIS_MSGS.length){ _jarvisFirstOpen=false; setTimeout(jarvisAutoBrief,700); }
 }
@@ -5627,7 +5633,7 @@ function jarvisExecute(raw){
   const re=(p)=>new RegExp(p).test(t);
   const ehPergunta=/^(o que|oque|qual|quais|quanto|quantos|quantas|como|quem|quando|onde|por que|porque|pra que)\b/.test(t);
   // fechar o JARVIS
-  if(re('^(fecha|fechar|sair|tchau|valeu|obrigad)')){closeModal('modal-jarvis');return 'Fechando. É só me chamar.';}
+  if(re('^(fecha|fechar|sair|tchau|valeu|obrigad)')){const d=document.querySelector('[data-nav="dashboard"]');if(d)d.click();return 'Pronto. Estou aqui em Agentes de IA quando precisar.';}
   // rodar o conselho — qualquer "conselho" + verbo de ação (e não sendo pergunta)
   if(has('conselho') && !ehPergunta && re('rod|reun|reún|cham|debat|dispar|ativ|liga|executa|junta|começa|comeca|bora')){
     jarvisGo('conselho'); if(typeof consRodarAuto==='function')setTimeout(()=>consRodarAuto(),300);
