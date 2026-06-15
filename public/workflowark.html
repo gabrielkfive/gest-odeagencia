@@ -534,33 +534,71 @@ table.t tr.high{background:var(--yel-bg)}
 .crm-pill:hover{border-color:#ffd400}
 .nav::-webkit-scrollbar-thumb{background:#26262b}
 
-/* ============ REFINO APPLE — minimalista, claro e arejado (jun/2026) ============ */
+/* ============ REDESIGN APPLE — claro, minimalista, premium (jun/2026 v2) ============ */
 :root{
-  --line:#ededeb;--line-2:#dededa;
-  --shadow:0 1px 2px rgba(0,0,0,.035),0 6px 22px rgba(0,0,0,.045);
-  --shadow-2:0 14px 50px rgba(0,0,0,.12);
+  --bg:#f5f5f7;            /* cinza Apple */
+  --surface:#ffffff;
+  --line:#e6e6e8;--line-2:#d9d9dd;
+  --ink:#1d1d1f;--ink-2:#1d1d1f;--txt:#1d1d1f;--mute:#6e6e73;--mute-2:#a1a1a6;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);
+  --shadow-2:0 18px 60px rgba(0,0,0,.14);
 }
-body{-moz-osx-font-smoothing:grayscale;letter-spacing:-.011em}
-/* títulos com tracking apertado (estilo SF/Apple) */
-.page-title h1{font-size:27px;font-weight:760;letter-spacing:-.032em;color:#0b0b0c}
-.page-title p{font-size:13px;color:var(--mute);letter-spacing:-.005em}
-.page{padding:26px 34px 72px}
-/* superfícies mais arejadas e suaves */
-.card,.md-card{border-radius:18px;border-color:var(--line);box-shadow:var(--shadow)}
-.kpi{border-radius:18px;border-color:var(--line);box-shadow:var(--shadow)}
-/* botões estilo Apple: pílula, sutil, com transição limpa */
-.tb-btn{border-radius:980px;border:1px solid var(--line);background:#fff;font-weight:600;transition:border-color .15s,background .15s,transform .12s}
+body{-moz-osx-font-smoothing:grayscale;letter-spacing:-.012em;color:var(--ink)}
+.view{background:var(--bg)}
+.page{padding:30px 38px 80px}
+/* tipografia SF-like: títulos grandes, tracking apertado */
+.page-title h1{font-size:30px;font-weight:780;letter-spacing:-.036em;color:#1d1d1f}
+.page-title p{font-size:13.5px;color:var(--mute);letter-spacing:-.006em;margin-top:4px}
+h1,h2,h3,h4{letter-spacing:-.02em}
+/* superfícies: brancas, cantos generosos, sombra sutil, sem borda dura */
+.card,.md-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:18px 20px}
+/* KPI: números grandes, flat, arejado */
+.kpi{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:18px 20px;min-height:104px}
+.kpi .l{font-size:11px;color:var(--mute);font-weight:600;letter-spacing:.02em;text-transform:none}
+.kpi .v{font-size:30px;font-weight:760;letter-spacing:-.03em;font-family:var(--sans);color:#1d1d1f}
+.kpi .d{font-size:11.5px;color:var(--mute)}
+.kpi.dk{background:#1d1d1f}.kpi.dk .v{color:#fff}.kpi.dk .l,.kpi.dk .d{color:#a1a1a6}
+.kpi.yel{background:#fff}.kpi.yel .v{color:#1d1d1f}
+/* espaçamento mais generoso entre blocos */
+.g2{gap:18px}.g3{gap:16px}.g4{gap:16px}
+/* seções: divisória fininha, ícone discreto */
+.sect-title{margin:30px 0 14px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+.sect-title h2{font-size:15px;font-weight:680}
+.sect-title h2 .ic{background:#f5f5f7;color:var(--mute);border-radius:8px;width:24px;height:24px}
+/* botões estilo Apple: pílula, limpos */
+.tb-btn{border-radius:980px;border:1px solid var(--line);background:#fff;font-weight:600;padding:8px 16px;transition:border-color .15s,background .15s,transform .12s}
 .tb-btn:hover{border-color:var(--line-2);transform:translateY(-1px)}
-.icobtn{border-radius:980px}
-/* topbar translúcido (vidro), bem Apple */
-.topbar{background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line)}
-.tb-ic{border-radius:980px}
-.tb-ic:hover{background:var(--bg)}
-/* nav: menos brilho neon, mais sóbrio */
-.navitem,.subitem{border-radius:9px}
-.navitem.active{background:rgba(255,212,0,.12);box-shadow:inset 3px 0 0 #ffd400;color:#ffd400}
-/* busca do topo mais limpa */
-.tb-search input{border-radius:980px;background:var(--bg);border:1px solid var(--line)}
+.tb-btn.dk{background:#1d1d1f;color:#fff;border-color:#1d1d1f}
+.tb-btn.dk:hover{background:#000}
+.icobtn{border-radius:980px;border:1px solid var(--line);background:#fff}
+.tag{border-radius:980px;padding:3px 10px;font-weight:600}
+/* topbar: vidro translúcido (bem Apple) */
+.topbar{background:rgba(245,245,247,.7);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+.tb-ic{border-radius:980px;border:1px solid transparent}
+.tb-ic:hover{background:#fff;border-color:var(--line)}
+.tb-search input{border-radius:980px;background:#fff;border:1px solid var(--line);padding:8px 14px 8px 34px}
+.tb-pill{border-radius:980px}
+/* TAREFAS do Meu Dia: cartão branco com acento lateral, sem fundo colorido pesado */
+.md-task{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.md-task.late{background:#fff;border-color:var(--line);border-left:3px solid var(--red)}
+.md-task.today{background:#fff;border-color:var(--line);border-left:3px solid var(--yel)}
+.md-task .tk-chip{border-radius:980px;font-size:9px;padding:3px 9px}
+.md-chip-late{background:#fdecec;color:#c0392b}.md-chip-today{background:#fff7d6;color:#9a7400}.md-chip-soon{background:#f0f0f2;color:#1d1d1f}
+.md-card .md-hd{background:#1d1d1f}
+.md-card{border-radius:20px}
+/* JARVIS no Meu Dia: mais limpo */
+#md-jarvis{border-radius:22px;background:linear-gradient(135deg,#1d1d1f 0%,#2a2622 100%)}
+/* sidebar: mantém escura premium, porém active mais sóbrio (sem neon forte) */
+.navitem,.subitem{border-radius:10px}
+.navitem.active{background:rgba(255,255,255,.06);box-shadow:inset 2px 0 0 #ffd400;color:#fff}
+.navitem.active svg{color:#ffd400}
+.subitem.active{background:rgba(255,255,255,.05);color:#fff}
+.crm-pill{border-radius:12px}
+/* inputs gerais arredondados */
+.form-input,.form-select{border-radius:12px;border:1px solid var(--line)}
+.form-input:focus,.form-select:focus{border-color:var(--mute-2);outline:none}
+/* alerts mais suaves */
+.alert{border-radius:16px}
 </style>
 </head>
 <body>
