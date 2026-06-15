@@ -2038,6 +2038,7 @@ async function bootCloudSync(){
     atualizarBadgeSync(true);
     iniciarAutoSync();
     arkDailyAgentsKick(); // 1ª abertura do dia liga os agentes (idempotente)
+    try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
     WFA_CLOUD_READY=false;
     atualizarBadgeSync(false);
@@ -2872,19 +2873,37 @@ function iniciarAutoSync(){
 
       <!-- =================== TUTORIAL / POPs =================== -->
       <div class="page" id="page-tutorial">
+        <style>
+          #page-tutorial .tut-hero{position:relative;overflow:hidden;border-radius:24px;background:linear-gradient(135deg,#1d1d1f,#2a2622);color:#fff;padding:34px 36px;margin-bottom:26px}
+          #page-tutorial .tut-hero::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,199,0,.16),transparent 65%)}
+          #page-tutorial .tut-hero h2{font-size:30px;font-weight:780;letter-spacing:-.035em;margin:0 0 8px}
+          #page-tutorial .tut-hero p{font-size:14.5px;color:#d2d2d7;line-height:1.6;max-width:620px;margin:0}
+          #page-tutorial .tut-hero .acts{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+          #page-tutorial .tut-sec{font-size:19px;font-weight:740;letter-spacing:-.025em;margin:30px 0 14px}
+          #page-tutorial .step{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s;cursor:default}
+          #page-tutorial .step:hover{transform:translateY(-3px);box-shadow:0 14px 38px rgba(0,0,0,.08)}
+          #page-tutorial .step .n{width:34px;height:34px;border-radius:50%;background:#1d1d1f;color:#ffd400;font-weight:800;display:grid;place-items:center;font-size:14px;margin-bottom:12px}
+          #page-tutorial .step h4{font-size:16px;font-weight:700;letter-spacing:-.02em;margin:0 0 5px}
+          #page-tutorial .step p{font-size:13px;color:var(--mute);line-height:1.55;margin:0}
+          #page-tutorial .step .go{margin-top:13px}
+          #page-tutorial .pop{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+          #page-tutorial .pop h4{font-size:14.5px;font-weight:700;margin:0 0 5px}
+          #page-tutorial .pop p{font-size:12.5px;color:var(--mute);line-height:1.6;margin:0;white-space:pre-line}
+        </style>
         <div class="page-head">
-          <div class="page-title"><h1>Tutorial & POPs</h1><p>Como usar o WorkFlowArk · guia rápido pra qualquer pessoa da equipe</p></div>
-          <button class="tb-btn dk" onclick="tutorialNarrar()">🔊 JARVIS narra</button>
+          <div class="page-title"><h1>Tutorial & Conhecimento</h1><p>Como usar o WorkFlowArk · guia rápido pra qualquer pessoa da equipe</p></div>
+          <div style="display:flex;gap:8px"><button class="tb-btn" onclick="onboardOpen()">▶ Ver introdução</button><button class="tb-btn dk" onclick="tutorialNarrar()">🔊 JARVIS narra</button></div>
         </div>
-        <div class="card" style="padding:18px;margin-bottom:14px;background:#0a0a0a;color:#fff">
-          <div style="font-size:18px;font-weight:800;margin-bottom:4px">👋 Bem-vindo à ARK Content</div>
-          <div style="font-size:13px;color:#ddd;line-height:1.6">Aqui é o cérebro da agência: tarefas, clientes, financeiro, WhatsApp e os agentes de IA, tudo num lugar só. Siga os 6 passos abaixo que em 5 minutos você está operando.</div>
+        <div class="tut-hero">
+          <h2>Bem-vindo ao WorkFlowArk</h2>
+          <p>O cérebro da ARK Content: tarefas, clientes, financeiro, WhatsApp, Drive e os agentes de IA — tudo num lugar só. Siga os passos abaixo e em 5 minutos você está operando.</p>
+          <div class="acts"><button class="tb-btn" style="background:#ffd400;color:#000;border-color:#ffd400" onclick="onboardOpen()">Começar tour</button><button class="tb-btn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.3)" onclick="document.querySelector('[data-nav=dashboard]').click()">Ir pro Meu Dia</button></div>
         </div>
-        <h2 style="font-size:15px;font-weight:800;margin:6px 0 10px">🚀 Primeiros passos</h2>
+        <div class="tut-sec">Primeiros passos</div>
         <div class="g3" id="tut-steps"></div>
-        <h2 style="font-size:15px;font-weight:800;margin:20px 0 10px">📋 POPs — como fazer cada coisa</h2>
+        <div class="tut-sec">Como fazer cada coisa</div>
         <div class="g2" id="tut-pops"></div>
-        <h2 style="font-size:15px;font-weight:800;margin:20px 0 10px">🔌 Conectar integrações (libera Meta, Google e e-mail)</h2>
+        <div class="tut-sec">Conectar integrações (Meta, Google e e-mail)</div>
         <div class="g2" id="tut-integ"></div>
       </div>
 
@@ -3002,6 +3021,36 @@ function iniciarAutoSync(){
     <div class="modal-head"><h3>🧠 Resumo do dia · WhatsApp</h3><span class="x" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">✕</span></div>
     <div class="modal-body" id="wres-body" style="overflow:auto;flex:1;min-height:0"></div>
     <div class="modal-foot"><button class="icobtn" onclick="wppFalar()">🔊 Ouvir (JARVIS)</button><button class="icobtn" onclick="wppPararVoz()">⏹ Parar</button><button class="tb-btn" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Onboarding imersivo (primeiro acesso) -->
+<div class="modal-bg" id="modal-onboard">
+  <style>
+    #modal-onboard .ob{width:560px;max-width:94vw;background:#fff;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-2)}
+    #modal-onboard .ob-stage{position:relative;height:230px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1d1d1f,#2a2622);color:#fff;overflow:hidden}
+    #modal-onboard .ob-stage::after{content:"";position:absolute;right:-50px;top:-50px;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(255,199,0,.18),transparent 65%)}
+    #modal-onboard .ob-emoji{font-size:64px;filter:saturate(.1)}
+    #modal-onboard .ob-ico{width:84px;height:84px}
+    #modal-onboard .ob-body{padding:26px 30px 22px;text-align:center}
+    #modal-onboard .ob-body h3{font-size:23px;font-weight:780;letter-spacing:-.03em;margin:0 0 8px}
+    #modal-onboard .ob-body p{font-size:14px;color:var(--mute);line-height:1.6;margin:0 auto;max-width:420px}
+    #modal-onboard .ob-dots{display:flex;gap:7px;justify-content:center;margin:20px 0 4px}
+    #modal-onboard .ob-dots i{width:7px;height:7px;border-radius:50%;background:var(--line-2);transition:.2s}
+    #modal-onboard .ob-dots i.on{background:#1d1d1f;width:22px;border-radius:980px}
+    #modal-onboard .ob-foot{display:flex;align-items:center;justify-content:space-between;padding:0 30px 26px}
+  </style>
+  <div class="ob">
+    <div class="ob-stage"><div id="ob-art"></div></div>
+    <div class="ob-body">
+      <h3 id="ob-title">—</h3>
+      <p id="ob-text">—</p>
+      <div class="ob-dots" id="ob-dots"></div>
+    </div>
+    <div class="ob-foot">
+      <button class="tb-btn" onclick="onboardClose()" style="border:none">Pular</button>
+      <button class="tb-btn dk" id="ob-next" onclick="onboardNext()">Próximo →</button>
+    </div>
   </div>
 </div>
 
@@ -5391,16 +5440,38 @@ const TUT_INTEG=[
 ];
 function renderTutorial(){
   const g=document.getElementById('tut-integ');
-  if(g)g.innerHTML=TUT_INTEG.map(o=>`<div class="card" style="padding:14px"><div style="font-size:13.5px;font-weight:700;margin-bottom:5px">${o.t}</div><div style="font-size:12.5px;color:var(--mute);line-height:1.6;white-space:pre-line">${mdEsc(o.d)}</div></div>`).join('');
+  if(g)g.innerHTML=TUT_INTEG.map(o=>`<div class="pop"><h4>${o.t}</h4><p>${mdEsc(o.d)}</p></div>`).join('');
   const s=document.getElementById('tut-steps');
-  if(s)s.innerHTML=TUT_STEPS.map((t,i)=>`<div class="card" style="padding:14px"><div style="font-size:11px;font-weight:800;color:#a07e00">PASSO ${i+1}</div><div style="font-size:14px;font-weight:700;margin:3px 0">${t.t}</div><div style="font-size:12.5px;color:var(--mute);line-height:1.5">${mdEsc(t.d)}</div>${t.nav?`<button class="tb-btn" style="margin-top:9px" onclick="var e=document.querySelector('[data-nav=${t.nav}]');if(e)e.click()">Abrir ${t.t}</button>`:''}</div>`).join('');
+  if(s)s.innerHTML=TUT_STEPS.map((t,i)=>`<div class="step"><div class="n">${i+1}</div><h4>${mdEsc(t.t)}</h4><p>${mdEsc(t.d)}</p>${t.nav?`<button class="tb-btn go" onclick="var e=document.querySelector('[data-nav=${t.nav}]');if(e)e.click()">Abrir ${mdEsc(t.t)} →</button>`:''}</div>`).join('');
   const p=document.getElementById('tut-pops');
-  if(p)p.innerHTML=TUT_POPS.map(o=>`<div class="card" style="padding:14px"><div style="font-size:13.5px;font-weight:700;margin-bottom:5px">${o.t}</div><div style="font-size:12.5px;color:var(--mute);line-height:1.6">${mdEsc(o.d)}</div></div>`).join('');
+  if(p)p.innerHTML=TUT_POPS.map(o=>`<div class="pop"><h4>${o.t}</h4><p>${mdEsc(o.d)}</p></div>`).join('');
 }
 function tutorialNarrar(){
   const txt='Bem-vindo ao WorkFlowArk, o cérebro da ARK Content. '+TUT_STEPS.map((t,i)=>'Passo '+(i+1)+': '+t.t+'. '+t.d).join(' ');
   jarvisSpeak(txt);
 }
+/* ============ ONBOARDING IMERSIVO (primeiro acesso) ============ */
+const ONBOARD_SLIDES=[
+  {art:'🗂️',title:'Tudo num lugar só',text:'Tarefas, clientes, financeiro, WhatsApp, Drive e os agentes de IA — o WorkFlowArk centraliza toda a operação da ARK.'},
+  {art:'☀️',title:'Comece pelo Meu Dia',text:'Sua tela inicial mostra o que vence hoje, o que está atrasado e o resumo do JARVIS. É de lá que você toca o dia.'},
+  {art:'whatsapp',title:'WhatsApp sempre à mão',text:'No topo você responde, encaminha, manda foto e áudio — e a IA sugere a resposta e resume o seu dia.'},
+  {art:'✨',title:'Agentes de IA trabalhando',text:'O Conselho debate seus clientes todo dia, o Roteirista cria roteiros e o JARVIS executa comandos e lê documentos que você anexa.'},
+  {art:'✅',title:'Pronto pra operar',text:'Explore à vontade. O guia completo fica em "Tutorial & Conhecimento" sempre que precisar.'},
+];
+let _obIdx=0;
+function onboardOpen(){_obIdx=0;onboardRender();document.getElementById('modal-onboard').classList.add('open');}
+function onboardClose(){document.getElementById('modal-onboard').classList.remove('open');try{localStorage.setItem('wfa-onboarded','1');}catch(e){}}
+function onboardNext(){if(_obIdx>=ONBOARD_SLIDES.length-1){onboardClose();return;}_obIdx++;onboardRender();}
+function onboardRender(){
+  const s=ONBOARD_SLIDES[_obIdx];if(!s)return;
+  const art=document.getElementById('ob-art');
+  if(art)art.innerHTML=(s.art==='whatsapp')?'<img src="/whatsapp.svg" class="ob-ico" alt="WhatsApp">':('<div class="ob-emoji">'+s.art+'</div>');
+  document.getElementById('ob-title').textContent=s.title;
+  document.getElementById('ob-text').textContent=s.text;
+  document.getElementById('ob-dots').innerHTML=ONBOARD_SLIDES.map((_,i)=>`<i class="${i===_obIdx?'on':''}"></i>`).join('');
+  document.getElementById('ob-next').textContent=_obIdx>=ONBOARD_SLIDES.length-1?'Começar ✓':'Próximo →';
+}
+function onboardMaybeAuto(){try{if(localStorage.getItem('wfa-onboarded')!=='1')setTimeout(onboardOpen,1300);}catch(e){}}
 /* ============ CONSELHO DE IA ============ */
 let _consData=null;
 function consPopular(){const sel=document.getElementById('cons-cliente');if(sel&&!sel.options.length)sel.innerHTML='<option value="">— sem cliente —</option>'+CLIENTES.filter(c=>c.status!=='churn').map(c=>`<option value="${mdEsc(c.nm)}">${mdEsc(c.nm)}</option>`).join('');consAutoRender();}
