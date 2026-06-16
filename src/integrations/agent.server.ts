@@ -178,13 +178,23 @@ export async function runAgentOnIncoming(db: any, msg: { phone: string; name?: s
     // Sino só notifica quando vira TAREFA (evita encher de notificação a cada mensagem).
     // Mensagens normais: a sugestão da IA já fica na conversa (setSugestao), sem notificação.
     if (d.isDemand) {
-      const tarefaId = await addTaskFromDemand(db, d, { phone: msg.phone, nome: msg.name, text: msg.text });
+      // APROVAÇÃO (pedido do Gabriel): o WhatsApp NÃO cria mais tarefa sozinho. Ele propõe
+      // a tarefa numa notificação; o Gabriel aprova (ou descarta) no sino e SÓ AÍ vira cartão.
       await addNotificacao(db, {
         tipo: d.intent,
-        texto: `🆕 ${d.titulo} — tarefa p/ ${d.resp || "definir"} (de ${msg.name || msg.phone})${sug}`,
+        texto: `🆕 Sugestão de tarefa: ${d.titulo} — p/ ${d.resp || "definir"} (de ${msg.name || msg.phone})${sug}`,
         phone: msg.phone,
         nome: msg.name,
-        tarefaId,
+        tarefaProposta: {
+          title: d.titulo,
+          funcao: d.funcao,
+          resp: d.resp,
+          data: todayPlus(d.prazoDias),
+          prio: "media",
+          desc: `Via WhatsApp${msg.name ? " de " + msg.name : ""}${msg.phone ? " (" + msg.phone + ")" : ""}:\n"${msg.text}"`,
+          tags: ["whatsapp"],
+          origem: "whatsapp",
+        },
       });
     }
   } catch {

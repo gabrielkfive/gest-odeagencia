@@ -2026,6 +2026,36 @@ function applyCloudState(remote){
   if(typeof restoreLastPage==='function')restoreLastPage(); // volta p/ a aba que estava (1x, após RBAC)
   if(typeof applyBrand==='function')applyBrand(); // aplica marca White Label sincronizada
 }
+/* ===== LIMPEZA ÚNICA DO CONSELHO (pedido do Gabriel, 16/06) =====
+   O conselho vinha empilhando tarefa sem fim (130-140 cartões). Esta rotina, UMA vez por
+   aparelho, joga toda tarefa criada pelo Conselho de IA — e qualquer tarefa que tinha sido
+   excluída e voltou (lápide) — pra CONCLUÍDO. Não apaga nada: só tira do caminho pra o time
+   ver só o que ele consegue executar. Idempotente: tarefa já concluída não é tocada. */
+function wfaLimpezaConselhoV1(){
+  try{
+    if(localStorage.getItem('wfa-limpeza-conselho-v1')==='1')return;
+    let ts=[];try{ts=JSON.parse(localStorage.getItem('wfa-tarefas')||'[]');}catch(e){localStorage.setItem('wfa-limpeza-conselho-v1','1');return;}
+    if(!Array.isArray(ts)){localStorage.setItem('wfa-limpeza-conselho-v1','1');return;}
+    const del=(typeof loadDeleted==='function')?loadDeleted():new Set();
+    let n=0;
+    ts.forEach(t=>{
+      if(!t||t.status==='concluido')return;
+      const ehConselho=t.origem==='conselho'||t.origem==='conselho-auto'||t.origem==='conselho-ideia'||(Array.isArray(t.tags)&&t.tags.includes('conselho'));
+      const voltouDaLapide=t.id&&del.has(t.id);
+      if(ehConselho||voltouDaLapide){t.status='concluido';t.concluidaEm=new Date().toISOString();n++;}
+    });
+    localStorage.setItem('wfa-limpeza-conselho-v1','1');
+    if(n){
+      state.tarefas=ts;
+      localStorage.setItem('wfa-tarefas',JSON.stringify(ts)); // intercept -> marca dirty + sobe pra nuvem
+      if(typeof renderTarefas==='function')renderTarefas();
+      if(typeof renderSprints==='function')renderSprints();
+      if(typeof updateBadges==='function')updateBadges();
+      if(typeof renderMeuDia==='function')renderMeuDia();
+      if(typeof toast==='function')toast('🧹 '+n+' tarefa(s) do conselho movidas para Concluído');
+    }
+  }catch(e){/* nunca derruba o boot */}
+}
 function isEmptyCloudValue(v){return v==null||(Array.isArray(v)&&v.length===0)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===0)||v==='';}
 async function bootCloudSync(){
   try{
@@ -2045,7 +2075,10 @@ async function bootCloudSync(){
     toast('✓ Sincronizado');
     atualizarBadgeSync(true);
     iniciarAutoSync();
-    arkDailyAgentsKick(); // 1ª abertura do dia liga os agentes (idempotente)
+    // CONSELHO PARADO (pedido do Gabriel, 16/06): NÃO dispara mais debate automático todo
+    // dia — isso enchia o sistema de notificação e tarefa. O conselho só roda quando ele
+    // aperta "Rodar conselho agora". // arkDailyAgentsKick();
+    wfaLimpezaConselhoV1(); // limpeza única: tarefas do conselho/ressuscitadas -> Concluído
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
     WFA_CLOUD_READY=false;
@@ -6377,11 +6410,43 @@ function renderNotificacoes(){
   if(!show.length){wrap.innerHTML='<div class="card" style="padding:24px;color:var(--mute)">✓ Tudo em dia — nenhuma notificação pendente.</div>';return;}
   wrap.innerHTML=show.map(n=>{
     const dt=n.ts?new Date(n.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    // Sugestão de tarefa do WhatsApp: só vira cartão quando o Gabriel APROVA aqui.
+    const temProposta=n.tarefaProposta&&!n.aprovada&&!n.descartada;
+    let acoes;
+    if(temProposta){
+      acoes=`<div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="tb-btn" style="background:#1a7f3c;border-color:#1a7f3c;color:#fff;font-weight:700" onclick="notifAprovarTarefa('${n.id}')">✓ Criar tarefa</button>
+        <button class="tb-btn" onclick="notifDescartarTarefa('${n.id}')">Descartar</button>
+      </div>`;
+    }else{
+      acoes=`<button class="tb-btn" onclick="marcarNotifLida('${n.id}')">ok</button>`;
+    }
+    const rod=n.tarefaProposta?(n.aprovada?' · tarefa criada ✓':(n.descartada?' · descartada':' · aguardando sua aprovação')):(n.tarefaId?' · tarefa criada':'');
     return `<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid var(--yel,#ffd400);display:flex;justify-content:space-between;gap:10px;align-items:center">
-      <div><div style="font-size:13px;font-weight:700">${mdEsc(n.texto||'')}</div><div style="font-size:11px;color:var(--mute);margin-top:3px">${dt}${n.tarefaId?' · tarefa criada':''}</div></div>
-      <button class="tb-btn" onclick="marcarNotifLida('${n.id}')">ok</button>
+      <div><div style="font-size:13px;font-weight:700">${mdEsc(n.texto||'')}</div><div style="font-size:11px;color:var(--mute);margin-top:3px">${dt}${rod}</div></div>
+      ${acoes}
     </div>`;
   }).join('');
+}
+// Salva as notificações na nuvem (o setItem é interceptado -> marca dirty + sobe).
+function saveNotificacoes(){try{localStorage.setItem('wfa-notificacoes',JSON.stringify(state.notificacoes||[]));}catch(e){}}
+// Aprova a sugestão do WhatsApp: cria o cartão de verdade no backlog.
+function notifAprovarTarefa(id){
+  const n=(state.notificacoes||[]).find(x=>x.id===id);if(!n||!n.tarefaProposta||n.aprovada)return;
+  const p=n.tarefaProposta;
+  const tid='wa'+Date.now()+Math.floor(Math.random()*999);
+  state.tarefas.push({id:tid,title:p.title||'(sem título)',desc:p.desc||'',funcao:p.funcao||'',clienteId:p.clienteId||'',resp:p.resp||'',data:p.data||'',prio:p.prio||'media',status:'backlog',tags:Array.isArray(p.tags)?p.tags:['whatsapp'],checklist:[],sprintN:null,origem:p.origem||'whatsapp',criadaEm:new Date().toISOString()});
+  n.aprovada=true;n.tarefaId=tid;
+  saveTarefas();saveNotificacoes();
+  const s=notifReadSet();s.add(id);notifSaveRead(s); // some do sino (já resolvida)
+  renderNotificacoes();toast('✓ Tarefa criada no board');
+}
+// Descarta a sugestão: não cria nada.
+function notifDescartarTarefa(id){
+  const n=(state.notificacoes||[]).find(x=>x.id===id);if(!n)return;
+  n.descartada=true;saveNotificacoes();
+  const s=notifReadSet();s.add(id);notifSaveRead(s);
+  renderNotificacoes();toast('Sugestão descartada');
 }
 function marcarNotifLida(id){const s=notifReadSet();s.add(id);notifSaveRead(s);renderNotificacoes();}
 function marcarNotifLidas(){const s=notifReadSet();(state.notificacoes||[]).forEach(n=>s.add(n.id));notifSaveRead(s);renderNotificacoes();toast('Notificações marcadas como lidas');}

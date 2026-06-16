@@ -60,8 +60,11 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const db = supabaseAdmin as any;
           const hoje = new Date().toISOString().split("T")[0];
-          const { data: lastRow } = await db.from("workflowark_state").select("data").eq("key", "wfa-agents-lastrun").maybeSingle();
-          if (!force && !soCliente && (lastRow?.data as any)?.date === hoje) return Response.json({ ok: true, ran: false, motivo: "já rodou hoje" });
+          // CONSELHO AUTOMÁTICO DESLIGADO (pedido do Gabriel, 16/06): vinha enchendo o sistema
+          // de notificação e tarefa. Agora o conselho SÓ roda manualmente — o botão "Rodar
+          // conselho agora" chama com ?force=1 (ou ?cliente=). Qualquer chamada automática
+          // (cron externo sem force) não faz nada.
+          if (!force && !soCliente) return Response.json({ ok: true, ran: false, motivo: "conselho automático desligado" });
 
           const { zapiEnv } = await import("@/integrations/zapi.server");
           const aiKey = zapiEnv("ANTHROPIC_API_KEY");
