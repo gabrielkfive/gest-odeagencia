@@ -24,6 +24,14 @@ const STATE_KEYS = new Set([
   "wfa-drive",
   "wfa-brand",
   "wfa-deleted-ids",
+  // Config que o CLIENTE é dono e precisa sincronizar (faltavam aqui -> o save-state
+  // devolvia 400 "Bloco inválido" e o sistema mostrava "Erro ao sincronizar", além de
+  // os colaboradores/clientes custom não passarem de um aparelho pro outro).
+  "wfa-clientes-custom",
+  "wfa-colab-custom",
+  "wfa-cliente-detalhes",
+  // OBS: wfa-whatsapp é de propósito SERVER-OWNED (escrito pelo webhook). O cliente só LÊ;
+  // não entra aqui pra um save do cliente nunca sobrescrever mensagens que chegaram no servidor.
 ]);
 
 const VALID_ROLES = new Set([
