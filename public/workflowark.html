@@ -1722,8 +1722,11 @@ h1,h2,h3,h4{letter-spacing:-.02em}
       <!-- =================== ROTINAS =================== -->
       <div class="page" id="page-rotinas">
         <div class="page-head">
-          <div class="page-title"><h1>Rotinas</h1><p>Operação repetitiva da agência · viram tarefas no board automaticamente</p></div>
-          <button class="tb-btn dk" onclick="genRotinaTarefas(false)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:5px;vertical-align:-2px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Gerar tarefas de hoje</button>
+          <div class="page-title"><h1>Rotinas</h1><p>Operação repetitiva da agência · você gera as tarefas quando quiser</p></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mute);cursor:pointer" title="Se ligado, as rotinas viram tarefa sozinhas nos dias certos"><input type="checkbox" id="rt-auto" onchange="setAutoTarefas(this.checked)"> gerar automático</label>
+            <button class="tb-btn dk" onclick="genRotinaTarefas(false)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:5px;vertical-align:-2px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Gerar tarefas de hoje</button>
+          </div>
         </div>
         <div class="card" style="padding:12px;margin-bottom:12px;display:grid;grid-template-columns:2fr 1fr 1fr 1.3fr 1fr auto;gap:8px">
           <input id="rt-titulo" class="form-input" placeholder="Título da rotina">
@@ -2003,17 +2006,20 @@ function applyCloudState(remote){
   WFA_CLOUD_MUTED=false;
   state.tarefas=JSON.parse(localStorage.getItem('wfa-tarefas')||'[]');
   state.regua=JSON.parse(localStorage.getItem('wfa-regua')||'{}');
-  state.cobranca=JSON.parse(localStorage.getItem('wfa-cobranca')||'{}');
-  state.acerto=JSON.parse(localStorage.getItem('wfa-acerto')||'{}');
-  state.planilha=JSON.parse(localStorage.getItem('wfa-planilha')||'null');
-  state.whatsapp=JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}');
+  // ANTI-PERDA: chaves de objeto único (não-mescladas) NÃO podem reidratar de uma
+  // versão antiga enquanto há edição local não confirmada (dirty). Senão o que o
+  // Gabriel acabou de digitar "some sozinho" na próxima puxada de 6s.
+  if(!WFA_DIRTY.has('wfa-cobranca'))state.cobranca=JSON.parse(localStorage.getItem('wfa-cobranca')||'{}');
+  if(!WFA_DIRTY.has('wfa-acerto'))state.acerto=JSON.parse(localStorage.getItem('wfa-acerto')||'{}');
+  if(!WFA_DIRTY.has('wfa-planilha'))state.planilha=JSON.parse(localStorage.getItem('wfa-planilha')||'null');
+  if(!WFA_DIRTY.has('wfa-whatsapp'))state.whatsapp=JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}');
   state.notificacoes=JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]');
   state.planejamento=JSON.parse(localStorage.getItem('wfa-planejamento')||'{}');
   state.gcal=JSON.parse(localStorage.getItem('wfa-gcal')||'{}');
   const jornada=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
   if(jornada&&typeof jornada==='object')SPRINTS.forEach(sp=>{sp.clis=jornada[sp.n]||[];});
   if(typeof rebuildPeople==='function')rebuildPeople();if(typeof fillRespSelects==='function')fillRespSelects();
-  renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function')renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function')renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
+  renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function'&&!(typeof planIsEditing==='function'&&planIsEditing()))renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function')renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
   if(typeof renderCrm==='function')renderCrm();
   if(typeof renderAgenda==='function')renderAgenda();
   if(typeof renderComercialMes==='function')renderComercialMes();
@@ -2078,8 +2084,16 @@ function atualizarBadgeSync(ok){
 }
 function iniciarAutoSync(){
   setInterval(()=>{if(WFA_CLOUD_READY&&document.visibilityState!=='hidden'){wfaFlush();sincronizarAgora();}},6000);
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&WFA_CLOUD_READY){wfaFlush();sincronizarAgora();}});
-  // tenta reenviar pendências antes de fechar/atualizar a aba
+  document.addEventListener('visibilitychange',()=>{
+    if(!WFA_CLOUD_READY)return;
+    if(document.visibilityState==='visible'){wfaFlush();sincronizarAgora();}
+    // MOBILE: ao trocar de app/minimizar a página fica "hidden" (e o celular NÃO dispara
+    // beforeunload de forma confiável) -> dá o flush AGORA pra não perder o que foi digitado.
+    else{try{wfaFlush();}catch(e){}}
+  });
+  // pagehide é o evento confiável no mobile (Safari/Chrome) ao fechar/navegar
+  window.addEventListener('pagehide',()=>{try{wfaFlush();}catch(e){}});
+  // tenta reenviar pendências antes de fechar/atualizar a aba (desktop)
   window.addEventListener('beforeunload',()=>{try{wfaFlush();}catch(e){}});
 }
           (function(){
@@ -3333,6 +3347,8 @@ function iniciarAutoSync(){
 <script>
 /* ============ DADOS ============ */
 const CLIENTES_BASE = [
+  // ARK Content (cliente interno: aparece em tarefas/filtros, fora da carteira e da cobrança)
+  {id:'ark',nm:'ARK Content',tipo:'Interno',plano:'Interno',valor:0,status:'gr',meta:'Marketing e operação da própria ARK',extra:'Tarefas internas da agência'},
   // ARK Direto
   {id:'vivenda',nm:'Vivenda',tipo:'ARK',plano:'Plano X',valor:5500,status:'gr',cap:3,meta:'Maior ticket · 3 captações/mês',extra:'📹 3 captações/mês · prioritário'},
   {id:'fercon',nm:'Fercon',tipo:'ARK',plano:'Gold',valor:4200,status:'gr',cap:2,meta:'Ampliou · 2 captações/mês',extra:'📹 2 captações/mês · mais reativo que ativo'},
@@ -3354,8 +3370,17 @@ const CLIENTES_BASE = [
 function loadClientesCustom(){ try{ return JSON.parse(localStorage.getItem('wfa-clientes-custom')||'[]'); }catch(e){ return []; } }
 function saveClientesCustom(arr){ localStorage.setItem('wfa-clientes-custom', JSON.stringify(arr)); rebuildClientes(); if(typeof renderClientes==='function') renderClientes(); }
 let CLIENTES = CLIENTES_BASE.slice();
-function rebuildClientes(){ const custom=loadClientesCustom().map(c=>({...c,custom:true})); CLIENTES = CLIENTES_BASE.concat(custom); }
+function rebuildClientes(){ const custom=loadClientesCustom().map(c=>({...c,custom:true})); CLIENTES = CLIENTES_BASE.concat(custom); if(typeof fillClienteSelects==='function')fillClienteSelects(); }
 rebuildClientes();
+// (Re)popula TODOS os selects de cliente (criar tarefa, filtro, modal de detalhe, conselho)
+// com a lista completa — inclui ARK Content e os clientes personalizados. Preserva a seleção.
+function fillClienteSelects(){
+  const opts=CLIENTES.map(c=>`<option value="${c.id}">${mdEsc(c.nm)}</option>`).join('');
+  const set=(id,prefix)=>{const el=document.getElementById(id);if(!el)return;const cur=el.value;el.innerHTML=(prefix||'')+opts;if(cur)el.value=cur;};
+  set('nt-cliente','');                       // criar tarefa
+  set('td-cliente','');                        // modal de detalhe da tarefa
+  set('filt-cli','<option value="">Todo cliente</option>'); // filtro do board
+}
 
 // ---- Novo / Editar / Remover cliente ----
 let cliEditId=null;
@@ -4017,7 +4042,15 @@ const COB_RESPONSAVEIS=['Gabriel','Danilo'];
 const COB_MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 
 function cobMesKey(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
-function cobClientes(){return CLIENTES.filter(c=>c.tipo==='ARK'&&c.valor>0&&c.status!=='churn');}
+function cobClientes(){
+  const reais=CLIENTES.filter(c=>c.tipo==='ARK'&&c.valor>0&&c.status!=='churn');
+  const nomes=new Set(reais.map(c=>normName(c.nm)));
+  // + clientes que vieram da planilha do Financeiro (entradas sintéticas plan-*)
+  const extras=Object.entries(state.cobranca||{})
+    .filter(([id,d])=>id.indexOf('plan-')===0&&d&&d._plan&&(d._nome||'').trim()&&!nomes.has(normName(d._nome)))
+    .map(([id,d])=>({id,nm:d._nome,valor:Number(d._valor)||0,plano:'Planilha',tipo:'ARK',status:'ok',_plan:true}));
+  return reais.concat(extras);
+}
 function cobData(c){const cur=state.cobranca[c.id]||{};return Object.assign({resp:COB_RESP_DEFAULT[c.id]||'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},cur);}
 
 /* Vencimento: dia 10; se cair no fim de semana, puxa para a sexta anterior (dia 9 sáb, dia 8 dom) */
@@ -4117,7 +4150,7 @@ function cobToggle(id,on){
   saveCobranca();renderCobranca();
 }
 function cobCopiar(id){
-  const c=CLIENTES.find(x=>x.id===id);if(!c)return;
+  const c=cobClientes().find(x=>x.id===id)||CLIENTES.find(x=>x.id===id);if(!c)return;
   const msg=cobMensagem(c,cobData(c),cobVencimento());
   navigator.clipboard?.writeText(msg).then(()=>toast('Mensagem copiada'),()=>toast('Não consegui copiar'));
 }
@@ -5291,25 +5324,53 @@ async function wppFwdConfirm(){
 function wppFilter(){const q=(document.getElementById('wpp-search')?.value||'').toLowerCase();document.querySelectorAll('#wpp-list .wpp-item').forEach(el=>{el.style.display=(el.getAttribute('data-name')||'').includes(q)?'':'none';});}
 // ---- Enviar mídia (anexar foto/vídeo/áudio/documento) ----
 function wppAttach(){const f=document.getElementById('wpp-file');if(f){f.value='';f.click();}}
-function wppFileChosen(input){
-  const file=input.files&&input.files[0]; if(!file||!WPP_ACTIVE)return;
-  if(file.size>10*1024*1024){toast('Arquivo muito grande (máx 10MB)');return;}
+function wppFileChosen(input){const files=input.files?[...input.files]:[];files.forEach(f=>wppSendFile(f));}
+// Núcleo de envio de mídia — reusado por botão, COLAR (paste) e ARRASTAR E SOLTAR (drop)
+function wppSendFile(file,caption){
+  if(!file){return;} if(!WPP_ACTIVE){toast('Abra uma conversa primeiro');return;}
+  if(file.size>16*1024*1024){toast('Arquivo muito grande (máx 16MB): '+(file.name||''));return;}
   const reader=new FileReader();
   reader.onload=async()=>{
     const dataUrl=String(reader.result||''); const base64=dataUrl.split(',')[1]||'';
     if(!base64){toast('Não consegui ler o arquivo');return;}
     const c=state.whatsapp&&state.whatsapp.conversas&&state.whatsapp.conversas[WPP_ACTIVE];
-    const capInp=document.getElementById('wpp-input'); const caption=(capInp&&capInp.value||'').trim(); if(capInp)capInp.value='';
+    const capInp=document.getElementById('wpp-input'); const cap=(caption!=null?caption:(capInp&&capInp.value||'')).trim(); if(caption==null&&capInp)capInp.value='';
     const mt=file.type||'application/octet-stream';
-    const localMsg={dir:'out',text:caption||('📎 '+file.name),ts:Date.now(),status:'sending'};
+    const nome=file.name||(mt.indexOf('image')===0?'foto.png':mt.indexOf('video')===0?'video.mp4':'arquivo');
+    const localMsg={dir:'out',text:cap||('📎 '+nome),ts:Date.now(),status:'sending'};
     if(c){c.msgs=c.msgs||[];c.msgs.push(localMsg);c.updatedAt=Date.now();renderWhatsapp();}
     toast('Enviando mídia...');
     try{
-      await cloudCall('save',{action:'send-whatsapp-media',phone:WPP_ACTIVE,jid:(c&&c.jid)||'',base64,mimetype:mt,fileName:file.name,caption});
+      await cloudCall('save',{action:'send-whatsapp-media',phone:WPP_ACTIVE,jid:(c&&c.jid)||'',base64,mimetype:mt,fileName:nome,caption:cap});
       localMsg.status='sent';renderWhatsapp();toast('Mídia enviada ✓');
     }catch(e){localMsg.status='failed';localMsg.error=(e&&e.message)||'falha';renderWhatsapp();toast('⚠ '+((e&&e.message)||'Falha ao enviar mídia'));}
   };
   reader.readAsDataURL(file);
+}
+// Liga COLAR e ARRASTAR-E-SOLTAR no painel do WhatsApp (uma única vez; handlers no documento
+// que só agem quando a aba WhatsApp está visível e há conversa aberta — sobrevive aos re-renders).
+var WPP_PD_INIT=false;
+function wppPageVisible(){const m=document.getElementById('wpp-msgs');return !!(m&&m.offsetParent!==null);}
+function wppDropZone(){return document.getElementById('wpp-msgs');}
+function wppInitPasteDrop(){
+  if(WPP_PD_INIT)return; WPP_PD_INIT=true;
+  // COLAR (Ctrl+V) imagem/arquivo da área de transferência
+  document.addEventListener('paste',e=>{
+    if(!wppPageVisible()||!WPP_ACTIVE)return;
+    const items=(e.clipboardData&&e.clipboardData.items)||[]; let achou=false;
+    for(const it of items){ if(it.kind==='file'){ const f=it.getAsFile(); if(f){achou=true;wppSendFile(f);} } }
+    if(achou)e.preventDefault();
+  });
+  // ARRASTAR E SOLTAR arquivos sobre a conversa
+  document.addEventListener('dragover',e=>{ if(!wppPageVisible())return; if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files')){e.preventDefault();const z=wppDropZone();if(z)z.style.outline='3px dashed var(--yel,#ffd400)';} });
+  document.addEventListener('dragleave',e=>{ const z=wppDropZone();if(z&&(e.relatedTarget==null))z.style.outline=''; });
+  document.addEventListener('drop',e=>{
+    if(!wppPageVisible())return;
+    const files=e.dataTransfer&&e.dataTransfer.files; if(!files||!files.length)return;
+    e.preventDefault(); const z=wppDropZone();if(z)z.style.outline='';
+    if(!WPP_ACTIVE){toast('Abra uma conversa primeiro');return;}
+    [...files].forEach(f=>wppSendFile(f));
+  });
 }
 // ---- Gravar e enviar áudio (mensagem de voz) ----
 var WPP_REC=null,WPP_RECCHUNKS=[],WPP_RECSTREAM=null,WPP_RECT0=0,WPP_RECTIMER=null;
@@ -6176,6 +6237,7 @@ function wppAvatarHtml(c,size){
 function wppTime(ts){if(!ts)return '';const d=new Date(ts),n=new Date();const sameDay=d.toDateString()===n.toDateString();return sameDay?d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});}
 function renderWhatsapp(){
   const wrap=document.getElementById('wpp-wrap');if(!wrap)return;
+  if(typeof wppInitPasteDrop==='function')wppInitPasteDrop();
   // preserva o que está sendo digitado/buscado (a auto-atualização redesenha a tela)
   const _ipEl=document.getElementById('wpp-input');const _ipVal=_ipEl?_ipEl.value:'';const _ipFoc=_ipEl&&document.activeElement===_ipEl;
   const _seEl=document.getElementById('wpp-search');const _seVal=_seEl?_seEl.value:'';const _seFoc=_seEl&&document.activeElement===_seEl;
@@ -6864,9 +6926,12 @@ async function renderFin(force){
 }
 
 /* ============ MINHA PLANILHA (estilo Excel: Clientes | Time) ============ */
-function savePlanilha(){localStorage.setItem('wfa-planilha',JSON.stringify(state.planilha||{}));}
+function savePlanilha(){localStorage.setItem('wfa-planilha',JSON.stringify(state.planilha||{}));try{if(typeof finSyncFromPlanilha==='function'&&!PLAN_SEEDING)finSyncFromPlanilha();}catch(e){}}
 let PLAN_SAVE_T=null;
-function planSaveSoon(){clearTimeout(PLAN_SAVE_T);PLAN_SAVE_T=setTimeout(savePlanilha,600);}
+// marca dirty NA HORA (protege da puxada de nuvem) e grava de fato após o debounce
+function planSaveSoon(){try{if(typeof WFA_DIRTY!=='undefined')WFA_DIRTY.add('wfa-planilha');}catch(e){}clearTimeout(PLAN_SAVE_T);PLAN_SAVE_T=setTimeout(savePlanilha,600);}
+// está editando uma célula da planilha? (foco dentro do #plan-wrap) -> não re-renderizar por cima
+function planIsEditing(){const w=document.getElementById('plan-wrap');return !!(w&&document.activeElement&&w.contains(document.activeElement));}
 function planNum(s){if(s==null)return null;let t=String(s).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');if(t===''||isNaN(parseFloat(t)))return null;return parseFloat(t);}
 function planFmt(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});}
 function planNovoMes(nome,base){
@@ -6912,6 +6977,27 @@ function planSummaryHTML(m){
     finKpiCard('red','A pagar',finBRL(s.tPag),m.pagar.length+' itens'),
     finKpiCard(s.resultado>=0?'yel':'red','Resultado',finBRL(s.resultado),s.tRec>0?('margem '+Math.round(s.resultado/s.tRec*100)+'%'):'')].join('');
 }
+/* ===== SINCRONIA Financeiro (planilha) <-> Cobranças / Acerto =====
+   A planilha é a fonte do mês: "Clientes a receber" vira Cobrança e "Time & despesas
+   a pagar" vira Acerto. Marcar cobrado/pago reflete nos dois lados (verde na planilha).
+   Ligação por nome (normName), SEMPRE aditiva — nunca apaga o que já existe. */
+function finRecCobId(nome){const n=normName(nome);if(!n)return'';const c=(typeof CLIENTES!=='undefined'?CLIENTES:[]).find(x=>normName(x.nm)===n);return c?c.id:('plan-'+n.replace(/\s+/g,'-'));}
+function finPagAceId(nome){const n=normName(nome);return n?('fin-'+n.replace(/\s+/g,'-')):'';}
+function finRecCobrado(nome){const id=finRecCobId(nome);return !!(id&&state.cobranca&&state.cobranca[id]&&state.cobranca[id].cobradoMes===cobMesKey());}
+function finPagPago(nome){const id=finPagAceId(nome);return !!(id&&state.acerto&&state.acerto[id]&&state.acerto[id].pagoMes===cobMesKey());}
+function finEnsurePagItem(x){if(!state.acerto)state.acerto={};const id=finPagAceId(x.nome);if(!id)return;const prev=state.acerto[id]||{};state.acerto[id]=Object.assign({custom:true,fixo:true,cat:acertoClassify(x.nome),pix:'',obs:'',pagoMes:''},prev,{nome:x.nome,valor:String(x.valor||''),dia:prev.dia||'10'});}
+function planToggleCob(i){const m=planActive();const x=m.receitas[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao cliente primeiro');return;}const id=finRecCobId(x.nome);const on=!finRecCobrado(x.nome);if(!state.cobranca[id]||!state.cobranca[id]._plan){const n=normName(x.nome);if(!CLIENTES.find(c=>normName(c.nm)===n)){state.cobranca[id]=Object.assign({resp:'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},state.cobranca[id]||{},{_plan:true,_nome:x.nome,_valor:Number(x.valor)||0});}}if(typeof cobToggle==='function')cobToggle(id,on);renderPlanilha();}
+function planTogglePag(i){const m=planActive();const x=m.pagar[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao pagamento primeiro');return;}finEnsurePagItem(x);const id=finPagAceId(x.nome);const on=!finPagPago(x.nome);if(typeof acertoToggle==='function')acertoToggle(id,on);renderPlanilha();}
+// Replica a planilha do mês ativo para Cobranças e Acerto (aditivo)
+function finSyncFromPlanilha(opts){opts=opts||{};if(typeof planEnsure==='function')planEnsure();const m=(typeof planActive==='function')?planActive():null;if(!m)return;if(!state.acerto)state.acerto={};if(!state.cobranca)state.cobranca={};
+  (m.pagar||[]).forEach(x=>{if(!(x.nome||'').trim()&&!x.valor)return;finEnsurePagItem(x);});
+  state.acerto.__seeded=true;
+  (m.receitas||[]).forEach(x=>{const nm=(x.nome||'').trim();if(!nm)return;const n=normName(nm);if(CLIENTES.find(c=>normName(c.nm)===n))return;/* cliente real já aparece via CLIENTES */const id='plan-'+n.replace(/\s+/g,'-');const prev=state.cobranca[id]||{};state.cobranca[id]=Object.assign({resp:'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},prev,{_plan:true,_nome:nm,_valor:Number(x.valor)||0});});
+  saveAcerto();saveCobranca();
+  if(typeof renderAcerto==='function')renderAcerto();
+  if(typeof renderCobranca==='function')renderCobranca();
+  if(opts.toast)toast('Sincronizado com Cobranças e Acerto ✓');
+}
 function renderPlanilha(){
   const wrap=document.getElementById('plan-wrap');if(!wrap)return;
   planEnsure();const m=planActive();const s=planSums(m);
@@ -6922,50 +7008,54 @@ function renderPlanilha(){
   const thr='style="padding:7px 9px;border:1px solid var(--line);background:#f6f6f4;text-align:right;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#555"';
   const ft='style="padding:8px 9px;border:1px solid var(--line);font-weight:800;border-top:2px solid var(--ink,#111)"';
   const ftr='style="padding:8px 9px;border:1px solid var(--line);text-align:right;font-weight:800;border-top:2px solid var(--ink,#111);font-variant-numeric:tabular-nums"';
-  const recRows=m.receitas.map((x,i)=>{const mg=planMargem(x);return `<tr>
+  const stBtn=(on,fn,labOn,lab)=>`<button onclick="${fn}" class="tb-btn" style="padding:3px 10px;font-size:10.5px;${on?'background:#1a7f3c;border-color:#1a7f3c;color:#fff':''}">${on?labOn:lab}</button>`;
+  const recRows=m.receitas.map((x,i)=>{const mg=planMargem(x);const cob=finRecCobrado(x.nome);return `<tr style="${cob?'background:#eafaef':''}">
       <td ${ce} oninput="planLiveRec(${i},'nome',this.textContent)">${mdEsc(x.nome||'')}</td>
       <td ${ceR} oninput="planLiveRec(${i},'valor',this.textContent)">${x.valor?planFmt(x.valor):''}</td>
       <td ${ceR} oninput="planLiveRec(${i},'custo',this.textContent)">${x.custo?planFmt(x.custo):''}</td>
       <td id="planmar-${i}" style="padding:6px 9px;border:1px solid var(--line);text-align:right;font-weight:700;color:${planMargemCor(mg)}">${planNum(x.valor)?mg+'%':''}</td>
+      <td style="border:1px solid var(--line);text-align:center;white-space:nowrap">${stBtn(cob,`planToggleCob(${i})`,'Cobrado','Cobrar')}</td>
       <td style="border:1px solid var(--line);text-align:center;width:24px"><span onclick="planDelRec(${i})" title="apagar" style="cursor:pointer;color:var(--mute)">×</span></td>
     </tr>`;}).join('');
-  const pagRows=m.pagar.map((x,i)=>`<tr>
+  const pagRows=m.pagar.map((x,i)=>{const pago=finPagPago(x.nome);return `<tr style="${pago?'background:#eafaef':''}">
       <td ${ce} oninput="planLivePag(${i},'nome',this.textContent)">${mdEsc(x.nome||'')}</td>
       <td ${ceR} oninput="planLivePag(${i},'valor',this.textContent)">${x.valor?planFmt(x.valor):''}</td>
+      <td style="border:1px solid var(--line);text-align:center;white-space:nowrap">${stBtn(pago,`planTogglePag(${i})`,'Pago','Pagar')}</td>
       <td style="border:1px solid var(--line);text-align:center;width:24px"><span onclick="planDelPag(${i})" title="apagar" style="cursor:pointer;color:var(--mute)">×</span></td>
-    </tr>`).join('');
+    </tr>`;}).join('');
   wrap.innerHTML=`
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <strong style="font-size:15px">📊 Minha Planilha</strong>
-      <span style="font-size:11px;color:var(--mute)">edite clicando nas células · salva sozinho na nuvem</span>
+      <strong style="font-size:15px;letter-spacing:-.02em">Minha Planilha</strong>
+      <span style="font-size:11px;color:var(--mute)">edite clicando nas células · salva sozinho na nuvem · sincroniza com Cobranças e Acerto</span>
       <div style="flex:1"></div>
-      <button class="tb-btn" onclick="planImportGoogle()">⤵ Importar do Google</button>
-      <button class="tb-btn" onclick="planExportCSV()">⬇ Exportar CSV</button>
+      <button class="tb-btn" onclick="finSyncFromPlanilha({toast:true})" title="Atualizar Cobranças e Acerto com esta planilha">Sincronizar abas</button>
+      <button class="tb-btn" onclick="planImportGoogle()">Importar do Google</button>
+      <button class="tb-btn" onclick="planExportCSV()">Exportar CSV</button>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
       ${tabs}
       <button class="tb-btn" title="copiar mês atual para um novo" onclick="planAddMes(true)">+ Novo mês (copiar)</button>
       <button class="tb-btn" title="mês em branco" onclick="planAddMes(false)">+ Branco</button>
       <span style="width:1px;height:20px;background:var(--line)"></span>
-      <button class="tb-btn" title="renomear mês" onclick="planRenameMes()">✎ Renomear</button>
-      <button class="tb-btn" style="color:var(--red)" title="apagar mês" onclick="planDelMes()">🗑</button>
+      <button class="tb-btn" title="renomear mês" onclick="planRenameMes()">Renomear</button>
+      <button class="tb-btn" style="color:var(--red)" title="apagar mês" onclick="planDelMes()">Apagar mês</button>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px">
       <div class="card" style="padding:0;overflow:auto">
-        <div style="font-weight:700;font-size:13px;padding:11px 12px;background:#eafaef;border-bottom:1px solid var(--line)">💚 Clientes · a receber <span style="color:var(--mute);font-weight:500">· ${m.receitas.length}</span></div>
+        <div style="font-weight:700;font-size:13px;padding:11px 12px;background:#eafaef;border-bottom:1px solid var(--line)">Clientes · a receber <span style="color:var(--mute);font-weight:500">· ${m.receitas.length}</span></div>
         <table style="border-collapse:collapse;font-size:12.5px;width:100%">
-          <thead><tr><th ${th}>Cliente</th><th ${thr}>Valor</th><th ${thr}>Custo</th><th ${thr}>Margem</th><th ${th}></th></tr></thead>
+          <thead><tr><th ${th}>Cliente</th><th ${thr}>Valor</th><th ${thr}>Custo</th><th ${thr}>Margem</th><th ${th}>Status</th><th ${th}></th></tr></thead>
           <tbody>${recRows}</tbody>
-          <tfoot><tr><td ${ft}>TOTAL</td><td ${ftr} id="plan-rectot">${planFmt(s.tRec)}</td><td ${ftr} id="plan-custot">${planFmt(s.tCusto)}</td><td ${ft}></td><td ${ft}></td></tr></tfoot>
+          <tfoot><tr><td ${ft}>TOTAL</td><td ${ftr} id="plan-rectot">${planFmt(s.tRec)}</td><td ${ftr} id="plan-custot">${planFmt(s.tCusto)}</td><td ${ft}></td><td ${ft}></td><td ${ft}></td></tr></tfoot>
         </table>
         <div style="padding:8px 10px"><button class="tb-btn" onclick="planAddRec()">+ Cliente</button></div>
       </div>
       <div class="card" style="padding:0;overflow:auto">
-        <div style="font-weight:700;font-size:13px;padding:11px 12px;background:var(--yel-bg,#fff7d6);border-bottom:1px solid var(--line)">🟡 Time & despesas · a pagar <span style="color:var(--mute);font-weight:500">· ${m.pagar.length}</span></div>
+        <div style="font-weight:700;font-size:13px;padding:11px 12px;background:var(--yel-bg,#fff7d6);border-bottom:1px solid var(--line)">Time & despesas · a pagar <span style="color:var(--mute);font-weight:500">· ${m.pagar.length}</span></div>
         <table style="border-collapse:collapse;font-size:12.5px;width:100%">
-          <thead><tr><th ${th}>Quem / o quê</th><th ${thr}>Valor</th><th ${th}></th></tr></thead>
+          <thead><tr><th ${th}>Quem / o quê</th><th ${thr}>Valor</th><th ${th}>Status</th><th ${th}></th></tr></thead>
           <tbody>${pagRows}</tbody>
-          <tfoot><tr><td ${ft}>TOTAL</td><td ${ftr} id="plan-pagtot">${planFmt(s.tPag)}</td><td ${ft}></td></tr></tfoot>
+          <tfoot><tr><td ${ft}>TOTAL</td><td ${ftr} id="plan-pagtot">${planFmt(s.tPag)}</td><td ${ft}></td><td ${ft}></td></tr></tfoot>
         </table>
         <div style="padding:8px 10px"><button class="tb-btn" onclick="planAddPag()">+ Pagamento</button></div>
       </div>
@@ -7017,7 +7107,7 @@ function planHasData(){planEnsure();return state.planilha.meses.some(m=>m.receit
 async function planAutoSeed(){
   planEnsure();
   if(PLAN_SEEDING||state.planilha.seeded)return;
-  if(planHasData()){state.planilha.seeded=true;savePlanilha();if(typeof acertoSeedFromFin==='function')acertoSeedFromFin();return;}
+  if(planHasData()){state.planilha.seeded=true;savePlanilha();if(typeof finSyncFromPlanilha==='function')finSyncFromPlanilha();return;}
   PLAN_SEEDING=true;
   try{
     if(!FIN_SHEETS){const lr=await fetch('/api/workflowark/sheet?list=1');const lj=await lr.json().catch(()=>({}));FIN_SHEETS=(lj.sheets&&lj.sheets.length)?lj.sheets:[];finPopulateMonths();}
@@ -7031,7 +7121,7 @@ async function planAutoSeed(){
     }
     const m=planActive();await planFillFromGoogle(m,gid);if(nomeMes)m.nome=nomeMes;
     state.planilha.seeded=true;savePlanilha();renderPlanilha();
-    if(typeof acertoSeedFromFin==='function')acertoSeedFromFin();
+    if(typeof finSyncFromPlanilha==='function')finSyncFromPlanilha();
   }catch(e){/* deixa em branco; tenta de novo no próximo load */}
   finally{PLAN_SEEDING=false;}
 }
@@ -7084,7 +7174,13 @@ function rotinaVenceHoje(r){
   }
   return false;
 }
+function autoTarefasOn(){return localStorage.getItem('wfa-auto-tarefas')==='1';}
+function setAutoTarefas(on){localStorage.setItem('wfa-auto-tarefas',on?'1':'0');toast(on?'Rotinas voltam a virar tarefa automaticamente':'Tarefas automáticas desligadas');if(on)genRotinaTarefas(true);}
 function genRotinaTarefas(silent){
+  // STOP automático (pedido do Gabriel): rotinas NÃO viram tarefa sozinhas.
+  // Só geram quando ele aperta o botão "Gerar tarefas de hoje" (silent=false),
+  // a menos que ele ligue a geração automática nas Rotinas.
+  if(silent&&!autoTarefasOn())return;
   const today=new Date().toISOString().split('T')[0];
   const rotinas=loadRot().filter(r=>r.ativo);
   let criadas=0;
@@ -7105,6 +7201,7 @@ function genRotinaTarefas(silent){
   else if(!silent){ toast('Nenhuma rotina vence hoje (ou já viraram tarefa)'); }
 }
 function renderRotinas(){
+  const auto=document.getElementById('rt-auto');if(auto)auto.checked=autoTarefasOn();
   const el=document.getElementById('rt-list');if(!el)return;
   const a=loadRot();if(!a.length){el.innerHTML='<p class="muted" style="font-size:12px">Nenhuma rotina ainda. Crie acima — ela vira tarefa no board automaticamente nos dias certos.</p>';return;}
   el.innerHTML=a.map(r=>{
@@ -7229,11 +7326,7 @@ function renderProcessos(){
 
 /* ============ INIT NOVAS PÁGINAS ============ */
 (function initExtras(){
-  // popular select de clientes nos modais e filtro
-  const cliOpts=CLIENTES.map(c=>`<option value="${c.id}">${c.nm}</option>`).join('');
-  const ntCli=document.getElementById('nt-cliente');if(ntCli)ntCli.innerHTML=cliOpts;
-  const filtCli=document.getElementById('filt-cli');
-  if(filtCli)filtCli.innerHTML='<option value="">Todo cliente</option>'+cliOpts;
+  fillClienteSelects();
   // responsáveis do time para o select de rotinas
   const team=[...new Set(['Gabriel Andrade',...Object.values(RESPONSAVEIS_FN)])];
   const rtResp=document.getElementById('rt-resp');

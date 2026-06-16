@@ -1,10 +1,15 @@
 // Service worker do WorkFlowArk (PWA).
 // Estratégia segura: só faz cache-first de ASSETS estáticos (imagens, fontes, css).
 // Navegações e API vão sempre pela rede -> nunca serve build/dados velhos.
-const CACHE = "wfa-static-v1";
+const CACHE = "wfa-static-v2";
 
 self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
+self.addEventListener("activate", (e) => e.waitUntil((async () => {
+  // limpa caches de versões antigas (evita servir asset velho no mobile)
+  const keys = await caches.keys();
+  await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+  await self.clients.claim();
+})()));
 
 self.addEventListener("fetch", (e) => {
   const req = e.request;
