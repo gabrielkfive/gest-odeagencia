@@ -2074,6 +2074,32 @@ function wfaLimpezaConselhoV1(){
     }
   }catch(e){/* nunca derruba o boot */}
 }
+/* ===== SEED de clientes pedidos pelo Gabriel (16/06): 4B Burguer e Pizzaria Sabor e Lenha =====
+   Entram como clientes PERSONALIZADOS (editáveis pela interface e sincronizados). Roda PÓS-sync
+   (dados já mesclados da nuvem) pra nunca sobrescrever a lista existente. Idempotente: não
+   duplica se o cliente já existir (por nome) na base ou nos personalizados. valor=0 mantém
+   fora da Cobrança até o Gabriel definir plano/valor no botão Editar. */
+function wfaSeedClientesV1(){
+  try{
+    if(localStorage.getItem('wfa-seed-clientes-v1')==='1')return;
+    const novos=[
+      {id:'4b-burguer',nm:'4B Burguer',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Hamburgueria'},
+      {id:'pizzaria-sabor-e-lenha',nm:'Pizzaria Sabor e Lenha',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Pizzaria'},
+    ];
+    const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'').trim();
+    const todos=(typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE);
+    const existentes=new Set(todos.map(c=>norm(c.nm)));
+    const arr=loadClientesCustom();
+    let add=0;
+    novos.forEach(n=>{ if(!existentes.has(norm(n.nm))&&!arr.some(c=>c.id===n.id||norm(c.nm)===norm(n.nm))){ arr.push(n); add++; } });
+    localStorage.setItem('wfa-seed-clientes-v1','1');
+    if(add){
+      saveClientesCustom(arr); // persiste, reconstrói CLIENTES, re-renderiza e sincroniza
+      if(typeof fillClienteSelects==='function')fillClienteSelects();
+      if(typeof toast==='function')toast('✓ '+add+' cliente(s) adicionado(s): '+novos.map(n=>n.nm).join(' · '));
+    }
+  }catch(e){/* nunca derruba o boot */}
+}
 function isEmptyCloudValue(v){return v==null||(Array.isArray(v)&&v.length===0)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===0)||v==='';}
 async function bootCloudSync(){
   try{
@@ -2097,6 +2123,7 @@ async function bootCloudSync(){
     // dia — isso enchia o sistema de notificação e tarefa. O conselho só roda quando ele
     // aperta "Rodar conselho agora". // arkDailyAgentsKick();
     wfaLimpezaConselhoV1(); // limpeza única: tarefas do conselho/ressuscitadas -> Concluído
+    wfaSeedClientesV1();     // adiciona 4B Burguer e Pizzaria Sabor e Lenha (1x, idempotente)
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
     WFA_CLOUD_READY=false;
