@@ -1133,6 +1133,7 @@ h1,h2,h3,h4{letter-spacing:-.02em}
             <button class="icobtn" id="btn-sync" onclick="sincronizarAgora()" title="Buscar dados mais recentes do servidor">↻ Sincronizar</button>
             <button class="icobtn" title="Atribui as tarefas que o Conselho criou às pessoas certas (pelo organograma)" onclick="(function(){const r=redistribuirTarefasConselho();toast(r.n?('✓ '+r.n+' distribuída(s): '+r.resumo):'Tarefas do conselho já têm responsável');})()">Distribuir do conselho</button>
             <button class="icobtn" title="Enxuga as tarefas do conselho mantendo as 5 mais recentes por cliente (não apaga as suas)" onclick="(function(){if(!confirm('Manter só as 5 tarefas mais recentes do conselho por cliente? (suas tarefas não são tocadas)'))return;const n=limparExcessoConselho(5);toast(n?('🧹 '+n+' tarefa(s) do conselho arquivadas'):'Nada a enxugar');})()">Enxugar conselho</button>
+            <button class="icobtn" title="Move todas as tarefas atrasadas (não concluídas) para amanhã — pra reorganizar o board" onclick="adiarAtrasadas()">📅 Adiar atrasadas → amanhã</button>
             <button class="tb-btn" onclick="openNovaTarefa()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova</button>
           </div>
         </div>
@@ -1162,7 +1163,7 @@ h1,h2,h3,h4{letter-spacing:-.02em}
         </div>
 
         <div class="g4" style="margin-bottom:14px">
-          <div class="kpi"><div class="l">Total</div><div class="v" id="kpi-total">0</div></div>
+          <div class="kpi"><div class="l">Ativas</div><div class="v" id="kpi-total">0</div></div>
           <div class="kpi yel"><div class="l">Em andamento</div><div class="v" id="kpi-andamento">0</div></div>
           <div class="kpi red"><div class="l">Atrasadas</div><div class="v" id="kpi-atrasadas">0</div></div>
           <div class="kpi green"><div class="l">Concluídas hoje</div><div class="v" id="kpi-concluidas">0</div></div>
@@ -1885,30 +1886,39 @@ async function directCloudCall(action,payload){
   if(!resp.ok)throw new Error(result.error||'Erro ao sincronizar');
   return result;
 }
-async function cloudCall(action,payload){
-  // Em iframe: usa postMessage para o React app pai (que tem a sessão)
-  if(window.parent!==window){
-    try{
-      return await new Promise((resolve,reject)=>{
-        const id='wfa_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-        const t=setTimeout(()=>{window.removeEventListener('message',h);reject(new Error('timeout'));},20000);
-        function h(e){
-          if(e.data?.type==='wfa-cloud-response'&&e.data.id===id){
-            clearTimeout(t);window.removeEventListener('message',h);
-            if(e.data.ok)resolve(e.data.data);
-            else reject(new Error(e.data.error||'Erro'));
-          }
-        }
-        window.addEventListener('message',h);
-        window.parent.postMessage({type:'wfa-cloud',id,action,payload},'*');
-      });
-    }catch(e){
-      if(e.message!=='timeout')throw e;
-      // Se pai não respondeu em 5s, tenta direto
+// Pede ao app pai (React, que tem a sessão) via postMessage. Usado como FALLBACK.
+function cloudCallViaParent(action,payload,timeoutMs){
+  return new Promise((resolve,reject)=>{
+    if(window.parent===window){reject(new Error('sem-pai'));return;}
+    const id='wfa_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const t=setTimeout(()=>{window.removeEventListener('message',h);reject(new Error('timeout'));},timeoutMs||12000);
+    function h(e){
+      if(e.data?.type==='wfa-cloud-response'&&e.data.id===id){
+        clearTimeout(t);window.removeEventListener('message',h);
+        if(e.data.ok)resolve(e.data.data);
+        else reject(new Error(e.data.error||'Erro'));
+      }
     }
+    window.addEventListener('message',h);
+    window.parent.postMessage({type:'wfa-cloud',id,action,payload},'*');
+  });
+}
+async function cloudCall(action,payload){
+  // CAMINHO PRINCIPAL: DIRETO. O iframe é MESMA ORIGEM e MESMO projeto Supabase do app pai,
+  // então compartilha a sessão no localStorage. Falar direto com a API é muito mais confiável
+  // do que depender do postMessage (que no MOBILE estourava timeout e o sync parava de vez).
+  let directErr=null;
+  try{
+    const {data:{session}}=await _wfaSb.auth.getSession();
+    if(session&&session.access_token) return await directCloudCall(action,payload);
+  }catch(e){ directErr=e; }
+  // FALLBACK: pede ao app pai (caso o iframe não tenha a sessão por algum motivo)
+  try{ return await cloudCallViaParent(action,payload); }
+  catch(e){
+    // último recurso: tenta direto de novo (pode ter renovado o token nesse meio tempo)
+    try{ return await directCloudCall(action,payload); }
+    catch(e2){ throw directErr||e2||e; }
   }
-  // Acesso direto (sem iframe) ou fallback: usa Supabase direto
-  return directCloudCall(action,payload);
 }
 /* ===== SYNC ROBUSTO (anti-perda de dados) =====
    Mudanças locais entram numa fila com reenvio. Enquanto uma chave não foi confirmada
@@ -1939,7 +1949,11 @@ async function wfaFlush(){
         if(!WFA_PENDING.has(key))WFA_DIRTY.delete(key); // confirmou (e não houve edição nova no meio)
         atualizarBadgeSync(true);
       }catch(e){
-        WFA_PENDING.set(key,data);            // mantém na fila p/ próxima tentativa
+        // CHAVE VENENO: se o servidor recusa essa chave em definitivo (ex: "Bloco inválido"),
+        // NÃO reenfileira — senão ela trava a fila e mantém o badge vermelho pra sempre.
+        const permanente=/inv[áa]lido|bloco inv/i.test((e&&e.message)||'');
+        if(permanente){ WFA_DIRTY.delete(key); continue; } // descarta e segue pras outras
+        WFA_PENDING.set(key,data);            // erro transitório: mantém na fila p/ próxima tentativa
         atualizarBadgeSync(false);
         break;                                 // para; tenta de novo no próximo tick
       }
@@ -2087,14 +2101,17 @@ async function bootCloudSync(){
   }catch(err){
     WFA_CLOUD_READY=false;
     atualizarBadgeSync(false);
-    toast('⚠ '+(err?.message||'Não foi possível sincronizar'));
+    // Só avisa UMA vez (não a cada retry de 10s) — e de forma calma. Os dados ficam locais.
+    if(!window._wfaBootWarned){window._wfaBootWarned=true;toast('Conectando ao servidor…');}
     // Tenta novamente em 10 segundos
     setTimeout(bootCloudSync,10000);
   }
 }
-async function sincronizarAgora(){
+// silent=true (auto-sync de 6s): NUNCA mostra toast de erro — blips de rede são normais e
+// os dados não se perdem (fila de reenvio). Só o clique manual no botão avisa em caso de erro.
+async function sincronizarAgora(silent){
   const btn=document.getElementById('btn-sync');
-  if(btn){btn.disabled=true;btn.textContent='↻ Sincronizando...';}
+  if(btn&&!silent){btn.disabled=true;btn.textContent='↻ Sincronizando...';}
   try{
     const res=await cloudCall('load');
     const remote=res.state||{};
@@ -2105,25 +2122,34 @@ async function sincronizarAgora(){
     atualizarBadgeSync(true);
   }catch(err){
     atualizarBadgeSync(false);
-    toast('Erro ao sincronizar: '+(err?.message||'verifique a conexão'));
+    if(!silent)toast('Erro ao sincronizar: '+(err?.message||'verifique a conexão'));
   }finally{
-    if(btn){btn.disabled=false;btn.textContent='↻ Sincronizar';}
+    if(btn&&!silent){btn.disabled=false;btn.textContent='↻ Sincronizar';}
   }
 }
+// Badge tolerante: 1-2 falhas seguidas (blip) NÃO assustam; só depois de 3 mostra "reconectando"
+// (calmo, não vermelho de pânico). Qualquer sucesso zera e volta ao ✓ na hora.
+let WFA_SYNC_FAILS=0;
 function atualizarBadgeSync(ok){
   const el=document.getElementById('sync-status');
   if(!el)return;
-  const agora=new Date();
-  const h=String(agora.getHours()).padStart(2,'0');
-  const m=String(agora.getMinutes()).padStart(2,'0');
-  el.textContent=ok?`✓ ${h}:${m}`:'✗ offline';
-  el.style.color=ok?'var(--mute)':'var(--red)';
+  if(ok){
+    WFA_SYNC_FAILS=0;
+    const agora=new Date();
+    const h=String(agora.getHours()).padStart(2,'0');
+    const m=String(agora.getMinutes()).padStart(2,'0');
+    el.textContent=`✓ ${h}:${m}`;el.style.color='var(--mute)';
+  }else{
+    WFA_SYNC_FAILS++;
+    if(WFA_SYNC_FAILS>=3){el.textContent='↻ reconectando…';el.style.color='var(--mute)';}
+    // 1-2 falhas: não mexe no badge (provavelmente só um blip — os dados estão a salvo)
+  }
 }
 function iniciarAutoSync(){
-  setInterval(()=>{if(WFA_CLOUD_READY&&document.visibilityState!=='hidden'){wfaFlush();sincronizarAgora();}},6000);
+  setInterval(()=>{if(WFA_CLOUD_READY&&document.visibilityState!=='hidden'){wfaFlush();sincronizarAgora(true);}},6000);
   document.addEventListener('visibilitychange',()=>{
     if(!WFA_CLOUD_READY)return;
-    if(document.visibilityState==='visible'){wfaFlush();sincronizarAgora();}
+    if(document.visibilityState==='visible'){wfaFlush();sincronizarAgora(true);}
     // MOBILE: ao trocar de app/minimizar a página fica "hidden" (e o celular NÃO dispara
     // beforeunload de forma confiável) -> dá o flush AGORA pra não perder o que foi digitado.
     else{try{wfaFlush();}catch(e){}}
@@ -4787,6 +4813,19 @@ async function importarDados(){
   toast('✓ '+n+' blocos importados e sincronizados');
 }
 
+// Move TODAS as tarefas atrasadas (data < hoje e não concluídas) para AMANHÃ.
+// Reorganiza o board sem perder nada — o Gabriel aperta quando quer "zerar o atraso".
+function adiarAtrasadas(){
+  const today=new Date().toISOString().split('T')[0];
+  const amanha=new Date(Date.now()+86400000).toISOString().split('T')[0];
+  const atrasadas=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido');
+  if(!atrasadas.length){toast('Nenhuma tarefa atrasada 👌');return;}
+  if(!confirm('Mover '+atrasadas.length+' tarefa(s) atrasada(s) para amanhã ('+amanha.split('-').reverse().join('/')+')?'))return;
+  atrasadas.forEach(t=>{t.data=amanha;});
+  saveTarefas();
+  if(typeof renderMeuDia==='function')renderMeuDia();
+  toast('📅 '+atrasadas.length+' tarefa(s) movida(s) para amanhã');
+}
 function renderTarefas(){
   const STATS=['backlog','andamento','aprovacao','concluido'];
   STATS.forEach(st=>{
@@ -4802,8 +4841,8 @@ function renderTarefas(){
     list.innerHTML=filt.map(taskCard).join('')||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`;
     document.getElementById('ct-'+st).textContent=filt.length;
   });
-  // KPIs
-  document.getElementById('kpi-total').textContent=state.tarefas.length;
+  // KPIs — "Ativas" = não concluídas (o total cru de 200+ assustava o time logo de cara)
+  document.getElementById('kpi-total').textContent=state.tarefas.filter(t=>t.status!=='concluido').length;
   document.getElementById('kpi-andamento').textContent=state.tarefas.filter(t=>t.status==='andamento').length;
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('kpi-atrasadas').textContent=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
@@ -4981,7 +5020,10 @@ function bindDrag(){
 }
 
 /* ====== Quick-add inline estilo Trello ====== */
-function qaddOpen(st){const w=document.querySelector(`[data-qadd="${st}"]`);if(!w)return;w.querySelector('.add-task-btn').style.display='none';const b=w.querySelector('.qadd-box');b.style.display='';const ta=b.querySelector('textarea');ta.value='';ta.focus();}
+// "+ Adicionar cartão" agora ABRE a tela de Nova Tarefa já na coluna certa (pedido do
+// Gabriel): assim o time preenche responsável/cliente/data e o cartão não nasce "solto".
+function qaddOpen(st){ openNovaTarefa(st); }
+// (mantidas para compatibilidade; o quick-add inline foi substituído pelo modal)
 function qaddClose(st){const w=document.querySelector(`[data-qadd="${st}"]`);if(!w)return;w.querySelector('.add-task-btn').style.display='';const b=w.querySelector('.qadd-box');b.style.display='none';b.querySelector('textarea').value='';}
 function qaddKey(e,st){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();qaddSave(st,true);}else if(e.key==='Escape'){qaddClose(st);}}
 function qaddSave(st,keepOpen){
@@ -4996,9 +5038,15 @@ function qaddSave(st,keepOpen){
 
 /* ============ NOVA TAREFA MANUAL ============ */
 function openNovaTarefa(status){
+  // limpa os campos pra não herdar lixo da última tarefa
+  ['nt-title','nt-desc','nt-tags'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  if(typeof fillRespSelects==='function')fillRespSelects(); // garante a equipe completa no select
+  if(typeof fillClienteSelects==='function')fillClienteSelects();
+  const pr=document.getElementById('nt-prio');if(pr)pr.value='media';
   document.getElementById('nt-status').value=status||'backlog';
   document.getElementById('nt-data').value=new Date(Date.now()+3*86400000).toISOString().split('T')[0];
   document.getElementById('modal-nova').classList.add('open');
+  setTimeout(()=>{const t=document.getElementById('nt-title');if(t)t.focus();},80); // foco no título
 }
 function criarTarefaManual(){
   const title=document.getElementById('nt-title').value.trim();if(!title){toast('Informe o título');return;}

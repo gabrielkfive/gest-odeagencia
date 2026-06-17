@@ -21,8 +21,14 @@ function AppPage() {
         const frame = e.source as Window | null;
         const id = e.data.id;
         try {
-          const { data } = await supabase.auth.getSession();
-          const token = data.session?.access_token;
+          let { data } = await supabase.auth.getSession();
+          let token = data.session?.access_token;
+          // Operação o dia todo: se o token sumiu/expirou, tenta renovar antes de falhar
+          // (evita "Erro ao sincronizar" por sessão velha em quem deixa a aba aberta horas).
+          if (!token) {
+            const refreshed = await supabase.auth.refreshSession();
+            token = refreshed.data.session?.access_token;
+          }
           if (!token) throw new Error("Sessão expirada. Entre novamente.");
 
           const payload = e.data.action === "load" ? undefined : JSON.stringify(e.data.payload ?? {});
