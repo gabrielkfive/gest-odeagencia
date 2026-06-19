@@ -13,6 +13,7 @@ import { Route as SistemaRouteImport } from './routes/sistema'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TccApresentacaoRouteImport } from './routes/tcc.apresentacao'
 import { Route as ApiIaRouteImport } from './routes/api/ia'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
@@ -45,6 +46,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TccApresentacaoRoute = TccApresentacaoRouteImport.update({
+  id: '/tcc/apresentacao',
+  path: '/tcc/apresentacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiIaRoute = ApiIaRouteImport.update({
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
+  '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
+  '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/sistema': typeof SistemaRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
+  '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/app'
     | '/api/ia'
+    | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
     | '/api/google/auth'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/app'
     | '/api/ia'
+    | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
     | '/api/google/auth'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/_authenticated/app'
     | '/api/ia'
+    | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
     | '/api/google/auth'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   SistemaRoute: typeof SistemaRoute
   ApiIaRoute: typeof ApiIaRoute
+  TccApresentacaoRoute: typeof TccApresentacaoRoute
   ApiAuthSeedEvaluatorsRoute: typeof ApiAuthSeedEvaluatorsRoute
   ApiAuthSignupRoute: typeof ApiAuthSignupRoute
   ApiGoogleAuthRoute: typeof ApiGoogleAuthRoute
@@ -289,6 +302,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tcc/apresentacao': {
+      id: '/tcc/apresentacao'
+      path: '/tcc/apresentacao'
+      fullPath: '/tcc/apresentacao'
+      preLoaderRoute: typeof TccApresentacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ia': {
@@ -424,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   SistemaRoute: SistemaRoute,
   ApiIaRoute: ApiIaRoute,
+  TccApresentacaoRoute: TccApresentacaoRoute,
   ApiAuthSeedEvaluatorsRoute: ApiAuthSeedEvaluatorsRoute,
   ApiAuthSignupRoute: ApiAuthSignupRoute,
   ApiGoogleAuthRoute: ApiGoogleAuthRoute,
