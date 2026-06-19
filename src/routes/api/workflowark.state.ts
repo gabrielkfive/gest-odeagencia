@@ -554,8 +554,19 @@ export const Route = createFileRoute("/api/workflowark/state")({
           const id = String(body.id ?? "");
           const remoteJid = body.remoteJid ? String(body.remoteJid) : undefined;
           const fromMe = typeof body.fromMe === "boolean" ? body.fromMe : undefined;
+          const filenameHint = body.filename ? String(body.filename) : undefined;
           if (!id) return json({ error: "id da mídia obrigatório" }, { status: 400 });
           try {
+            const { bridgeConfigured, bridgeDownload, bridgeMediaBase64 } = await import("@/integrations/zapi.server");
+            if (bridgeConfigured() && remoteJid) {
+              // Dispara download no bridge (idempotente: retorna imediatamente se já baixado)
+              const dl = await bridgeDownload(id, remoteJid);
+              const storeBase = "/home/ubuntu/whatsapp-mcp/whatsapp-bridge/store/";
+              const relPath = dl.path.startsWith(storeBase) ? dl.path.slice(storeBase.length) : (filenameHint || dl.filename);
+              const r = await bridgeMediaBase64(relPath);
+              return json({ ok: true, dataUrl: `data:${r.mimetype};base64,${r.base64}`, mimetype: r.mimetype, fileName: r.fileName });
+            }
+            // Fallback: Evolution API
             const { evoMediaBase64 } = await import("@/integrations/zapi.server");
             const r = await evoMediaBase64(id, remoteJid, fromMe);
             return json({ ok: true, dataUrl: `data:${r.mimetype};base64,${r.base64}`, mimetype: r.mimetype, fileName: r.fileName });

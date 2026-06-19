@@ -5373,8 +5373,19 @@ async function wppMedia(phone,mi){
   const m=c&&c.msgs&&c.msgs[mi]; if(!m||!m.media||!m.mkey||m._media)return;
   m._loading=true; renderWhatsapp();
   try{
-    const r=await cloudCall('save',{action:'wa-media',id:m.mkey.id,remoteJid:m.mkey.remoteJid,fromMe:m.mkey.fromMe});
-    m._media=r.dataUrl; m._fname=r.fileName||'arquivo'; m._loading=false; renderWhatsapp();
+    const r=await cloudCall('save',{action:'wa-media',id:m.mkey.id,remoteJid:m.mkey.remoteJid,fromMe:m.mkey.fromMe,filename:m.mkey.filename||''});
+    // Converte data URL → blob URL para áudio/vídeo terem streaming/seeking correto no browser
+    if(r.dataUrl&&r.dataUrl.startsWith('data:')){
+      try{
+        const comma=r.dataUrl.indexOf(',');
+        const b64=r.dataUrl.slice(comma+1);
+        const mime=(r.dataUrl.slice(5,comma).split(';')[0])||r.mimetype||'application/octet-stream';
+        const bytes=Uint8Array.from(atob(b64),ch=>ch.charCodeAt(0));
+        const blob=new Blob([bytes],{type:mime});
+        m._media=URL.createObjectURL(blob);
+      }catch{m._media=r.dataUrl;}
+    }else{m._media=r.dataUrl||'';}
+    m._fname=r.fileName||'arquivo'; m._loading=false; renderWhatsapp();
   }catch(e){ m._loading=false; renderWhatsapp(); toast('⚠ '+((e&&e.message)||'Falha ao baixar mídia')); }
 }
 function wppLightbox(phone,mi){

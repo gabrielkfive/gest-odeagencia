@@ -120,8 +120,69 @@ export async function evoSendAudio(target: string, base64: string) {
   return data;
 }
 
-// Envio unificado: usa Evolution se configurada; senão cai no Z-API.
+// ===== Bridge (whatsmeow via whatsapp-mcp) =====
+export function bridgeConfig() {
+  return {
+    url: (zapiEnv("WHATSAPP_BRIDGE_URL") || "").replace(/\/+$/, ""),
+    token: zapiEnv("WHATSAPP_BRIDGE_TOKEN"),
+  };
+}
+export function bridgeConfigured() {
+  const c = bridgeConfig();
+  return !!(c.url && c.token);
+}
+
+export async function bridgeSendText(recipient: string, message: string) {
+  const { url, token } = bridgeConfig();
+  if (!url || !token) throw new Error("Bridge não configurada.");
+  const resp = await fetch(`${url}/api/send`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ recipient, message }),
+  });
+  const data: any = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data?.error || data?.message || "Falha ao enviar pelo bridge.");
+  return data;
+}
+
+// Dispara o download de uma mídia e retorna o caminho do arquivo no disco.
+export async function bridgeDownload(messageId: string, chatJID: string): Promise<{ filename: string; path: string }> {
+  const { url, token } = bridgeConfig();
+  if (!url || !token) throw new Error("Bridge não configurada.");
+  const resp = await fetch(`${url}/api/download`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ message_id: messageId, chat_jid: chatJID }),
+  });
+  const data: any = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data?.message || "Falha ao baixar mídia pelo bridge.");
+  return { filename: String(data.filename || ""), path: String(data.path || "") };
+}
+
+// Busca o conteúdo de um arquivo de mídia via nginx e retorna como base64.
+export async function bridgeMediaBase64(relPath: string): Promise<{ base64: string; mimetype: string; fileName: string }> {
+  const { url } = bridgeConfig();
+  if (!url) throw new Error("Bridge não configurada.");
+  // relPath é o caminho relativo a partir do store (ex: "556199...@s.whatsapp.net/audio_...ogg")
+  const mediaUrl = `${url}/media/${relPath}`;
+  const resp = await fetch(mediaUrl);
+  if (!resp.ok) throw new Error(`Mídia não encontrada no servidor (${resp.status}).`);
+  const bytes = await resp.arrayBuffer();
+  const mimetype = resp.headers.get("content-type") || "application/octet-stream";
+  const fileName = relPath.split("/").pop() || "arquivo";
+  // Converte ArrayBuffer para base64
+  let b64 = "";
+  const chunk = 8192;
+  const arr = new Uint8Array(bytes);
+  for (let i = 0; i < arr.length; i += chunk) {
+    b64 += String.fromCharCode(...arr.subarray(i, i + chunk));
+  }
+  return { base64: btoa(b64), mimetype, fileName };
+}
+
+// Envio unificado: usa Bridge se configurada, senão Evolution, senão Z-API.
 export async function waSendText(phone: string, message: string) {
+  if (bridgeConfigured()) return bridgeSendText(phone, message);
   if (evoConfigured()) return evoSendText(phone, message);
   return zapiSendText(phone, message);
 }

@@ -4,7 +4,87 @@
 // (ex.: /webhook/qrcode-updated, /webhook/connection-update, /webhook/messages-upsert).
 // O nome do evento também vem no corpo (body.event), então a lógica é a mesma.
 
+// Detecta se o payload vem do Bridge (whatsmeow) ou da Evolution API.
+// Bridge: tem "sender" e "chatJID" mas NÃO tem "event" nem "data.key".
+function isBridgeWebhook(body: any): boolean {
+  return !!(body?.chatJID !== undefined && !body?.event && !body?.data?.key);
+}
+
 export async function processWaWebhook(body: any): Promise<void> {
+  // ===== Formato Bridge (whatsmeow / whatsapp-mcp) =====
+  if (isBridgeWebhook(body)) {
+    // Reações: ignorar por enquanto
+    if (body?.eventType === "reaction") return;
+
+    const jid = String(body.chatJID || "");
+    if (!jid) return;
+    const isGroup = jid.includes("@g.us");
+    const phone = jid.replace(/@.*/, "").replace(/\D/g, "");
+    const fromMe = !!body.isFromMe;
+    const name = String(body.sender || "").split("@")[0] || phone;
+    let text = String(body.content || "");
+    const messageId = String(body.messageId || "");
+    const ts = Date.now();
+
+    let media: any = null;
+    let mkey: any = null;
+
+    const mt = String(body.mediaType || "");
+    if (mt) {
+      const fname = String(body.mediaFilename || "");
+      const mime = String(body.mimeType || "");
+      if (mt === "image" || mt === "sticker") {
+        if (!text) text = mt === "sticker" ? "🩷 [Figurinha]" : "🖼️ [Imagem]";
+        media = { type: mt === "sticker" ? "sticker" : "image", mimetype: mime || "image/jpeg", caption: text };
+        if (messageId) mkey = { id: messageId, remoteJid: jid, fromMe, filename: fname };
+        // Imagem vem com base64 no webhook — descreve pra alimentar o agente
+        if (!fromMe && !isGroup && body.mediaBase64 && body.mediaBase64.length > 0) {
+          try {
+            const { describeImageBase64 } = await import("@/integrations/zapi.server");
+            const desc = await describeImageBase64(body.mediaBase64, mime || "image/jpeg");
+            if (desc) text = (body.content ? body.content + " — " : "") + "🖼️ [Imagem: " + desc + "]";
+          } catch { /* segue com placeholder */ }
+        }
+      } else if (mt === "audio") {
+        if (!text) text = "🎤 [Áudio]";
+        media = { type: "audio", mimetype: mime || "audio/ogg", ptt: true };
+        if (messageId) mkey = { id: messageId, remoteJid: jid, fromMe, filename: fname };
+        // Áudio: tenta transcrever usando o arquivo já baixado pelo bridge
+        if (!fromMe && !isGroup && messageId) {
+          try {
+            const { bridgeDownload, bridgeMediaBase64, transcribeAudioBase64 } = await import("@/integrations/zapi.server");
+            const dl = await bridgeDownload(messageId, jid);
+            const storeBase = "/home/ubuntu/whatsapp-mcp/whatsapp-bridge/store/";
+            const relPath = dl.path.startsWith(storeBase) ? dl.path.slice(storeBase.length) : dl.filename;
+            if (relPath) mkey.filename = dl.filename; // atualiza com filename real do disco
+            const md = await bridgeMediaBase64(relPath);
+            const tr = await transcribeAudioBase64(md.base64);
+            if (tr) text = "🎤 " + tr;
+          } catch { /* segue com placeholder */ }
+        }
+      } else if (mt === "video") {
+        if (!text) text = "🎬 [Vídeo]";
+        media = { type: "video", mimetype: mime || "video/mp4", caption: text, fileName: fname };
+        if (messageId) mkey = { id: messageId, remoteJid: jid, fromMe, filename: fname };
+      } else if (mt === "document") {
+        if (!text) text = "📎 [Documento" + (fname ? ": " + fname : "") + "]";
+        media = { type: "document", fileName: fname || "documento", mimetype: mime || "" };
+        if (messageId) mkey = { id: messageId, remoteJid: jid, fromMe, filename: fname };
+      }
+    }
+
+    if (phone && text) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { appendWhatsapp } = await import("@/integrations/zapi.server");
+      await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name, media, mkey });
+      if (!fromMe && !isGroup) {
+        const { runAgentOnIncoming } = await import("@/integrations/agent.server");
+        await runAgentOnIncoming(supabaseAdmin as any, { phone, name, text });
+      }
+    }
+    return;
+  }
+
   // Evolution manda o QR aqui (evento qrcode.updated). Guardamos pra exibir numa página.
   if (body?.event === "qrcode.updated" || body?.event === "QRCODE_UPDATED") {
     const b64 = body?.data?.qrcode?.base64 || body?.data?.base64 || "";
