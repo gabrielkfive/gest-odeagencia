@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkFlowArk — TCC · Gabriel Andrade · CEUB 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b;
+  --bg2:#111114;
+  --panel:#16161a;
+  --ink:#f5f5f2;
+  --muted:#9a9aa2;
+  --faint:#5a5a62;
+  --amber:#ffc400;
+  --amber-soft:#f5b301;
+  --line:rgba(255,255,255,.08);
+  --line2:rgba(255,255,255,.14);
+  --display:"Sora","Segoe UI",system-ui,sans-serif;
+  --body:"Inter","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--body);
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+
+/* ---------- DECK / SLIDE ENGINE ---------- */
+.deck{position:fixed;inset:0;}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:6vmin 9vmin;
+  opacity:0;visibility:hidden;transform:translateY(14px) scale(.995);
+  transition:opacity .5s ease, transform .5s ease, visibility .5s;
+  background:
+    radial-gradient(120% 80% at 88% -10%, rgba(255,196,0,.07), transparent 55%),
+    radial-gradient(90% 70% at -10% 110%, rgba(255,196,0,.05), transparent 55%),
+    var(--bg);
+}
+.slide.active{opacity:1;visibility:visible;transform:none;}
+.slide::after{ /* hairline frame */
+  content:"";position:absolute;inset:3.2vmin;border:1px solid var(--line);
+  border-radius:14px;pointer-events:none;
+}
+
+/* ---------- SHARED TYPE ---------- */
+.kicker{
+  font-family:var(--display);font-weight:600;letter-spacing:.32em;
+  text-transform:uppercase;font-size:1.35vmin;color:var(--amber);
+  display:flex;align-items:center;gap:1.1vmin;
+}
+.kicker .dot{width:.8vmin;height:.8vmin;background:var(--amber);border-radius:50%}
+h1{font-family:var(--display);font-weight:800;line-height:1.02;letter-spacing:-.02em;}
+h2{font-family:var(--display);font-weight:700;line-height:1.06;letter-spacing:-.015em;}
+.lead{color:var(--muted);font-weight:400;line-height:1.5;}
+.amber{color:var(--amber)}
+.serif{font-family:Georgia,"Times New Roman",serif;font-style:italic;}
+em.hl{font-style:normal;color:var(--amber);font-weight:600}
+
+/* ---------- CHROME (counter / progress / brand) ---------- */
+.brandmark{position:fixed;top:3.6vmin;left:5vmin;display:flex;align-items:center;gap:1.4vmin;z-index:30}
+.brandmark img{height:3.4vmin;width:auto;display:block}
+.brandmark span{font-family:var(--display);font-weight:700;font-size:1.5vmin;letter-spacing:.02em}
+.brandmark small{color:var(--faint);font-size:1.2vmin;font-weight:500}
+.counter{position:fixed;bottom:3.4vmin;right:5vmin;font-family:var(--display);
+  font-size:1.4vmin;color:var(--faint);z-index:30;letter-spacing:.05em}
+.counter b{color:var(--ink);font-weight:700}
+.progress{position:fixed;left:0;bottom:0;height:3px;background:var(--amber);
+  width:0;transition:width .5s ease;z-index:40;box-shadow:0 0 18px rgba(255,196,0,.6)}
+.hint{position:fixed;bottom:3.4vmin;left:5vmin;color:var(--faint);font-size:1.25vmin;z-index:30;display:flex;gap:.8vmin;align-items:center}
+.hint kbd{border:1px solid var(--line2);border-radius:5px;padding:.2vmin .9vmin;font-family:var(--body);font-size:1.1vmin;color:var(--muted)}
+.hide-chrome .brandmark,.hide-chrome .counter,.hide-chrome .hint{display:none}
+
+/* ---------- COVER ---------- */
+.cover{justify-content:center}
+.cover .mark{height:11vmin;width:auto;margin-bottom:4vmin;filter:drop-shadow(0 8px 40px rgba(255,196,0,.12))}
+.cover h1{font-size:6.6vmin;max-width:20ch}
+.cover .quotemark{color:var(--amber)}
+.cover .sub{margin-top:3vmin;font-size:2.1vmin;max-width:62ch;color:var(--muted)}
+.cover .meta{margin-top:5vmin;display:flex;gap:3vmin;align-items:center;flex-wrap:wrap}
+.cover .meta .who{font-family:var(--display);font-weight:700;font-size:2vmin}
+.cover .meta .sep{width:1px;height:2.4vmin;background:var(--line2)}
+.cover .meta .inst{color:var(--faint);font-size:1.5vmin;line-height:1.4}
+
+/* ---------- STATEMENT ---------- */
+.statement h1{font-size:5.6vmin;max-width:24ch}
+.statement .lead{font-size:2.1vmin;max-width:60ch;margin-top:3.2vmin}
+.statement .tag{margin-top:4vmin}
+.pill{display:inline-block;border:1px solid var(--line2);color:var(--muted);
+  font-family:var(--display);font-weight:600;font-size:1.5vmin;padding:1vmin 2.2vmin;
+  border-radius:999px;background:rgba(255,255,255,.02)}
+.pill.amberpill{border-color:rgba(255,196,0,.5);color:var(--amber);background:rgba(255,196,0,.06)}
+
+/* ---------- BIG STATS ---------- */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3vmin;margin-top:5vmin}
+.stat{border-left:2px solid var(--amber);padding-left:2.4vmin}
+.stat .num{font-family:var(--display);font-weight:800;font-size:7vmin;line-height:1;letter-spacing:-.03em}
+.stat .lbl{color:var(--muted);font-size:1.7vmin;margin-top:1.4vmin;line-height:1.4;max-width:24ch}
+.src{margin-top:4vmin;color:var(--faint);font-size:1.4vmin}
+
+/* ---------- STEPS (3 estágios) ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2.6vmin;margin-top:5vmin}
+.step{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));
+  border:1px solid var(--line);border-radius:16px;padding:3.4vmin 3vmin;position:relative;overflow:hidden}
+.step .n{font-family:var(--display);font-weight:800;font-size:2vmin;color:var(--bg);
+  background:var(--amber);width:5vmin;height:5vmin;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.step h3{font-family:var(--display);font-weight:700;font-size:2.6vmin;margin-top:2.6vmin}
+.step p{color:var(--muted);font-size:1.65vmin;line-height:1.45;margin-top:1.4vmin}
+.step .ghost{position:absolute;right:-1vmin;bottom:-4vmin;font-family:var(--display);
+  font-weight:800;font-size:14vmin;color:rgba(255,255,255,.03);line-height:1}
+.arrowrow{display:flex;align-items:center;justify-content:center;gap:1vmin;color:var(--faint);font-size:2.4vmin}
+
+/* ---------- FIVE AXES ---------- */
+.axes{display:grid;grid-template-columns:repeat(5,1fr);gap:2vmin;margin-top:5vmin}
+.axis{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:2.8vmin 2vmin;text-align:left}
+.axis .ax-n{font-family:var(--display);font-weight:800;color:var(--amber);font-size:2.2vmin}
+.axis h4{font-family:var(--display);font-weight:600;font-size:1.85vmin;margin-top:1.6vmin;line-height:1.2}
+.axis p{color:var(--faint);font-size:1.35vmin;margin-top:1vmin;line-height:1.35}
+
+/* ---------- TIMELINE ---------- */
+.timeline{display:grid;grid-template-columns:1fr auto 1fr;gap:3vmin;align-items:stretch;margin-top:5vmin}
+.tl-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:3.4vmin}
+.tl-card .when{font-family:var(--display);font-weight:700;color:var(--amber);font-size:1.6vmin;letter-spacing:.05em}
+.tl-card h3{font-family:var(--display);font-weight:700;font-size:3vmin;margin-top:1.4vmin}
+.tl-card p{color:var(--muted);font-size:1.7vmin;line-height:1.45;margin-top:1.6vmin}
+.tl-arrow{display:flex;align-items:center;font-size:4vmin;color:var(--amber)}
+.tl-card.solid{background:linear-gradient(160deg,rgba(255,196,0,.14),rgba(255,196,0,.02));border-color:rgba(255,196,0,.35)}
+
+/* ---------- SCREENSHOT SHOWCASE ---------- */
+.demo{display:grid;grid-template-columns:0.82fr 1.18fr;gap:5vmin;align-items:center}
+.demo .copy h2{font-size:4.4vmin}
+.demo .copy .lead{font-size:1.9vmin;margin-top:2.4vmin;max-width:34ch}
+.demo .copy .feat{margin-top:3vmin;display:flex;flex-direction:column;gap:1.4vmin}
+.demo .copy .feat div{display:flex;gap:1.4vmin;align-items:flex-start;color:var(--muted);font-size:1.6vmin;line-height:1.35}
+.demo .copy .feat .tick{color:var(--amber);font-weight:700}
+.window{background:#1c1c20;border:1px solid var(--line2);border-radius:12px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);}
+.window .bar{display:flex;align-items:center;gap:1vmin;padding:1.4vmin 1.8vmin;background:#202024;border-bottom:1px solid var(--line)}
+.window .bar i{width:1.4vmin;height:1.4vmin;border-radius:50%;display:block}
+.window .bar .r{background:#ff5f57}.window .bar .y{background:#febc2e}.window .bar .g{background:#28c840}
+.window .bar .url{margin-left:1.4vmin;font-size:1.25vmin;color:var(--faint);background:#16161a;
+  padding:.5vmin 1.6vmin;border-radius:6px;flex:1;max-width:46ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.window .shot{display:block;width:100%;height:62vmin;object-fit:cover;object-position:top center;background:#fff}
+
+/* ---------- TOUR / GALLERY (real screenshots) ---------- */
+.tour{padding-top:1vmin}
+.tour .head{margin-bottom:2.4vmin}
+.tour .head h2{font-size:3.8vmin;margin-top:1.4vmin}
+.tour .head .lead{font-size:1.65vmin;margin-top:1.1vmin;max-width:74ch}
+.tour .head .lead em.hl{font-style:normal}
+.shots{display:grid;gap:1.8vmin}
+.shots.solo{grid-template-columns:1fr}
+.shots.two{grid-template-columns:1fr 1fr}
+.shots.quad{grid-template-columns:1fr 1fr}
+.frame{background:#1c1c20;border:1px solid var(--line2);border-radius:10px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.frame .cap{font-family:var(--display);font-weight:600;font-size:1.25vmin;color:var(--muted);
+  padding:.85vmin 1.6vmin;background:#202024;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:.8vmin;letter-spacing:.02em}
+.frame .cap .d{width:.7vmin;height:.7vmin;border-radius:50%;background:var(--amber);flex:none}
+.frame img{display:block;width:100%;background:#0f0f12}
+.shots.solo .frame img{height:63vmin;object-fit:contain}
+.shots.two  .frame img{height:43vmin;object-fit:cover;object-position:top center}
+.shots.quad .frame img{height:27.5vmin;object-fit:cover;object-position:top center}
+
+/* ---------- TOURBIG (texto à esquerda · print grande à direita, sem barras) ---------- */
+.tourbig{display:grid;grid-template-columns:31% 1fr;gap:4.5vmin;align-items:center}
+.tourbig .copy .kicker{margin-bottom:1.6vmin}
+.tourbig .copy h2{font-family:var(--display);font-weight:700;font-size:3.4vmin;line-height:1.08;letter-spacing:-.01em}
+.tourbig .copy .lead{font-size:1.65vmin;margin-top:2vmin;line-height:1.55;color:var(--muted);max-width:34ch}
+.tourbig .copy .lead em.hl{font-style:normal}
+.tourbig .win{align-self:center}
+.window.tall{box-shadow:0 26px 70px rgba(0,0,0,.6)}
+.window.tall .shot{height:auto;object-fit:contain;object-position:center}
+
+/* ---------- AI layer ---------- */
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:3vmin;margin-top:4.5vmin}
+.ai-card{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.3));border:1px solid var(--line);border-radius:16px;padding:3.4vmin}
+.ai-card .ic{font-size:3.4vmin}
+.ai-card h3{font-family:var(--display);font-weight:700;font-size:2.6vmin;margin-top:1.6vmin}
+.ai-card p{color:var(--muted);font-size:1.65vmin;line-height:1.5;margin-top:1.4vmin}
+
+/* ---------- COMPARISON TABLE ---------- */
+.cmp{width:100%;border-collapse:collapse;margin-top:4vmin;font-size:1.7vmin}
+.cmp th,.cmp td{text-align:left;padding:2vmin 2.2vmin;border-bottom:1px solid var(--line)}
+.cmp th{font-family:var(--display);font-weight:600;color:var(--faint);font-size:1.4vmin;text-transform:uppercase;letter-spacing:.08em}
+.cmp td:first-child{font-family:var(--display);font-weight:700;color:var(--ink)}
+.cmp tr.me td{background:rgba(255,196,0,.07)}
+.cmp tr.me td:first-child{color:var(--amber)}
+.cmp .muted{color:var(--muted)}
+
+/* ---------- RESULTS / 3 produtos ---------- */
+.prod{display:grid;grid-template-columns:repeat(3,1fr);gap:2.6vmin;margin-top:5vmin}
+.prod .p{border:1px solid var(--line);border-radius:16px;padding:3.2vmin;background:var(--panel)}
+.prod .p .stage{font-family:var(--display);font-weight:600;font-size:1.4vmin;color:var(--amber);letter-spacing:.06em;text-transform:uppercase}
+.prod .p h3{font-family:var(--display);font-weight:700;font-size:2.8vmin;margin-top:1.6vmin}
+.prod .p p{color:var(--muted);font-size:1.55vmin;line-height:1.45;margin-top:1.4vmin}
+
+/* ---------- CLOSING ---------- */
+.closing{align-items:center;text-align:center}
+.closing .mark{height:9vmin;margin-bottom:4vmin;filter:drop-shadow(0 8px 40px rgba(255,196,0,.14))}
+.closing h1{font-size:7vmin}
+.closing .lead{font-size:2vmin;margin-top:3vmin;max-width:50ch}
+.closing .foot{margin-top:5vmin;color:var(--faint);font-size:1.6vmin;font-family:var(--display);letter-spacing:.04em}
+
+.center{align-items:center;text-align:center}
+.maxw{max-width:1500px;margin:0 auto;width:100%}
+
+@media (max-width:760px){
+  .stats-grid,.steps,.axes,.prod,.ai-grid{grid-template-columns:1fr}
+  .demo,.timeline{grid-template-columns:1fr}
+  .cover h1{font-size:9vmin}
+}
+</style>
+</head>
+<body>
+
+<div class="brandmark">
+  <img src="img/ark-mark.png" alt="ARK">
+  <span>WorkFlow<span class="amber">Ark</span></span>
+  <small>· ARK Content</small>
+</div>
+<div class="counter"><b id="cur">01</b> / <span id="tot">26</span></div>
+<div class="hint"><kbd>←</kbd><kbd>→</kbd> navegar · <kbd>F</kbd> tela cheia</div>
+<div class="progress" id="bar"></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 — CAPA -->
+  <section class="slide cover active">
+    <div class="maxw">
+      <img class="mark" src="img/ark-mark.png" alt="ARK">
+      <div class="kicker"><span class="dot"></span> CEUB · Publicidade e Propaganda · 2026</div>
+      <h1 style="margin-top:2.6vmin">Método dos <span class="amber">5 Eixos</span></h1>
+      <p class="sub" style="margin-top:2.4vmin;font-size:2.4vmin;color:var(--ink)">Profissionalização institucional de agências regionais de marketing digital.</p>
+      <p class="sub" style="margin-top:1.4vmin">Da tese do gestor-operador à plataforma de gestão <b style="color:var(--ink)">WorkFlowArk</b>, construída para a agência ARK Content.</p>
+      <div class="meta">
+        <span class="who">Gabriel Andrade</span>
+        <span class="sep"></span>
+        <span class="inst">Trabalho de Conclusão de Curso<br>Centro Universitário de Brasília — CEUB</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 — PROVOCAÇÃO -->
+  <section class="slide statement">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> A provocação</div>
+      <h1 style="margin-top:3vmin;font-size:5vmin">
+        <span class="quotemark serif amber">“</span>Para ser dono da borracharia,<br>é preciso saber <span class="amber">trocar o pneu</span>.<span class="quotemark serif amber">”</span>
+      </h1>
+      <p class="lead">O dono que não conhece o ofício precifica no escuro, não consegue padronizar a entrega e vira refém da própria equipe. <em class="hl">Não há gestão de uma operação técnica sem compreensão técnica da operação.</em></p>
+    </div>
+  </section>
+
+  <!-- 3 — O MERCADO -->
+  <section class="slide statement">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> O cenário</div>
+      <h1 style="margin-top:3vmin;font-size:5vmin">Um mercado <span class="amber">vasto</span> — e, ao mesmo tempo, <span class="amber">frágil</span>.</h1>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="num">R$ 10–50 mil</div>
+          <div class="lbl">faturamento mensal típico da agência regional brasileira</div>
+        </div>
+        <div class="stat">
+          <div class="num">micro</div>
+          <div class="lbl">o porte da maioria — baixa barreira de entrada e mercado pulverizado</div>
+        </div>
+        <div class="stat">
+          <div class="num">1 pessoa</div>
+          <div class="lbl">o sócio acumula comercial, criativo, operacional e financeiro</div>
+        </div>
+      </div>
+      <p class="src">Base: capítulo 2 do TCC — panorama setorial e pulverização do mercado.</p>
+    </div>
+  </section>
+
+  <!-- 4 — DADOS SEBRAE -->
+  <section class="slide statement">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> A fragilidade em números</div>
+      <h1 style="margin-top:3vmin;font-size:5vmin">A fragilidade vira <span class="amber">encerramento</span>.</h1>
+      <div class="stats-grid">
+        <div class="stat"><div class="num">~29%</div><div class="lbl">dos MEI — porte sob o qual nasce a maioria das agências — fecham em até 5 anos</div></div>
+        <div class="stat"><div class="num">44–81%</div><div class="lbl">faixa de sobrevivência no setor de serviços: depende da maturidade gerencial</div></div>
+        <div class="stat"><div class="num">26%</div><div class="lbl">de encerramento em serviços (comércio 30% · indústria 27%)</div></div>
+      </div>
+      <p class="src">Fonte: SEBRAE, Sobrevivência das Empresas no Brasil (2023) — citado no capítulo 2 do TCC.</p>
+    </div>
+  </section>
+
+  <!-- 5 — GESTOR-OPERADOR -->
+  <section class="slide statement center">
+    <div class="maxw">
+      <div class="kicker" style="justify-content:center"><span class="dot"></span> A tese</div>
+      <h1 style="margin-top:3.4vmin;font-size:5vmin;max-width:32ch;margin-left:auto;margin-right:auto">
+        O domínio técnico do gestor é <span class="amber">condição prévia</span><br>para precificar, delegar e crescer.
+      </h1>
+      <p class="lead" style="margin-top:3vmin;max-width:52ch;margin-left:auto;margin-right:auto">Não é etapa superável à medida que a agência cresce — é <em class="hl">infraestrutura cognitiva permanente</em>.</p>
+      <div class="tag" style="margin-top:4vmin"><span class="pill amberpill">A tese: o gestor-operador</span></div>
+    </div>
+  </section>
+
+  <!-- 5b — TEÓRICOS -->
+  <section class="slide">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> Fundamentação teórica</div>
+      <h2 style="margin-top:2.4vmin;font-size:4vmin">Quatro autores sustentam a tese</h2>
+      <div class="ai-grid" style="grid-template-columns:repeat(4,1fr);gap:2vmin;margin-top:4vmin">
+        <div class="ai-card">
+          <h3 style="color:var(--amber)">Maister</h3>
+          <p>Empresas profissionais de serviços: a competência gerencial nasce da <b style="color:var(--ink)">senioridade técnica</b>.</p>
+        </div>
+        <div class="ai-card">
+          <h3 style="color:var(--amber)">Mintzberg</h3>
+          <p>Configurações organizacionais e a crítica à <b style="color:var(--ink)">gestão desconectada da prática</b>.</p>
+        </div>
+        <div class="ai-card">
+          <h3 style="color:var(--amber)">Sennett</h3>
+          <p>O saber técnico <b style="color:var(--ink)">encarnado na prática</b> — a dignidade do ofício como base da decisão.</p>
+        </div>
+        <div class="ai-card">
+          <h3 style="color:var(--amber)">Nonaka &amp; Takeuchi</h3>
+          <p>O ciclo <b style="color:var(--ink)">SECI</b> de criação do conhecimento: do tácito ao explícito — e do explícito ao sistema.</p>
+        </div>
+      </div>
+      <p class="src" style="margin-top:3.6vmin">Base metodológica: <b style="color:var(--muted)">pesquisa-ação</b> (Thiollent), com observação participante na ARK Content entre ago/2025 e jun/2026.</p>
+    </div>
+  </section>
+
+  <!-- 6 — 3 ESTÁGIOS -->
+  <section class="slide">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> A hipótese · um caminho em três estágios</div>
+      <h2 style="margin-top:2.4vmin;font-size:4.2vmin">Como uma agência se profissionaliza</h2>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><h3>Domínio técnico</h3><p>O dono compreende, na prática, o ofício de cada área. A base de tudo.</p><div class="ghost">01</div></div>
+        <div class="step"><div class="n">2</div><h3>Externalização</h3><p>O conhecimento sai da cabeça e vira documento: processos escritos e transmissíveis.</p><div class="ghost">02</div></div>
+        <div class="step"><div class="n">3</div><h3>Materialização</h3><p>O documento vira sistema: o conhecimento passa a operar a empresa sozinho.</p><div class="ghost">03</div></div>
+      </div>
+      <p class="src">Base teórica: modelo SECI de Nonaka &amp; Takeuchi (1997) — conhecimento tácito → explícito → internalizado em sistema. <b style="color:var(--muted)">O 3º estágio só é alcançável por quem percorreu os dois primeiros.</b></p>
+    </div>
+  </section>
+
+  <!-- 7 — POR QUE NÃO COMPRAR PRONTO -->
+  <section class="slide statement">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> Por que não comprar um software pronto?</div>
+      <h1 style="margin-top:3vmin;font-size:4.6vmin">Ferramentas genéricas são<br><span class="amber">flexíveis e vazias</span>.</h1>
+      <p class="lead" style="margin-top:3vmin">Operand, Runrun.it, ClickUp, Monday, Asana, Workfront… entregam quadros e listas, mas <em class="hl">não trazem embutido o modelo de operação de uma agência audiovisual</em>. Você precisa construir a lógica do seu negócio dentro delas — o que exige, de novo, alguém que já domine essa lógica.</p>
+      <div class="tag" style="margin-top:3.6vmin"><span class="pill">Software aderente precisa ser <b style="color:var(--amber)">&nbsp;especificado por quem domina o ofício</b></span></div>
+    </div>
+  </section>
+
+  <!-- 8 — CINCO EIXOS -->
+  <section class="slide">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> A contribuição do trabalho</div>
+      <h2 style="margin-top:2.4vmin;font-size:4.4vmin">O Método dos <span class="amber">Cinco Eixos</span></h2>
+      <div class="axes">
+        <div class="axis"><div class="ax-n">01</div><h4>Identidade</h4><p>marca e posicionamento institucional</p></div>
+        <div class="axis"><div class="ax-n">02</div><h4>Cultura</h4><p>valores e rituais da operação</p></div>
+        <div class="axis"><div class="ax-n">03</div><h4>Estratégia</h4><p>planejamento e finanças · precificação e metas</p></div>
+        <div class="axis"><div class="ax-n">04</div><h4>Pessoas</h4><p>papéis, equipe e plano de carreira</p></div>
+        <div class="axis"><div class="ax-n">05</div><h4>Processos</h4><p>mapeamento e padronização (POPs)</p></div>
+      </div>
+      <p class="lead" style="margin-top:3.4vmin;font-size:1.8vmin;max-width:78ch">Cinco dimensões interdependentes que amadurecem juntas — todas assentadas sobre uma <em class="hl">premissa transversal</em>: o gestor-operador. Sem domínio técnico do ofício, nenhum dos eixos se sustenta.</p>
+      <p class="src" style="margin-top:2vmin">A originalidade não está em inventar dimensões, mas em articulá-las em sistema coerente para a pequena agência regional brasileira. (cap. 5 do TCC)</p>
+    </div>
+  </section>
+
+  <!-- 9 — JORNADA ARK -->
+  <section class="slide">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> Aplicação piloto · ARK Content</div>
+      <h2 style="margin-top:2.2vmin;font-size:4.2vmin">Da documentação ao sistema</h2>
+      <p class="lead" style="font-size:1.75vmin;margin-top:1.4vmin;max-width:82ch">Não foi só escrever processos. Foram <em class="hl">dez meses de pesquisa-ação</em> na ARK — diagnóstico, aplicação dos cinco eixos e transformações reais na agência, em duas fases.</p>
+      <div class="timeline" style="margin-top:3.4vmin">
+        <div class="tl-card">
+          <div class="when">FASE 1 · AGO/25 – ABR/26</div>
+          <h3>A Apresentação</h3>
+          <p>O conhecimento tácito da agência externalizado pela primeira vez em 33 slides. Um avanço real — mas um documento <b style="color:var(--ink)">não opera</b>: depende de alguém lembrar, achar e aplicar.</p>
+        </div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-card solid">
+          <div class="when">FASE 2 · MAI – JUN/26</div>
+          <h3>O WorkFlowArk</h3>
+          <p>A documentação vira ambiente vivo: organograma, processos, cliente e inteligência num só lugar — conduzindo a operação em tempo real.</p>
+        </div>
+      </div>
+      <p class="src" style="margin-top:2.8vmin">Resultados na ARK: estrutura comercial montada, site reconstruído, campanhas próprias no ar, Instagram crescendo, integrantes que viraram gestores plenos e <b style="color:var(--muted)">22 POPs</b> consolidados.</p>
+    </div>
+  </section>
+
+  <!-- 10 — WORKFLOWARK INTRO -->
+  <section class="slide center">
+    <div class="maxw">
+      <div class="kicker" style="justify-content:center"><span class="dot"></span> O ápice empírico do trabalho</div>
+      <h1 style="margin-top:3vmin;font-size:9vmin;font-family:var(--display);font-weight:800;letter-spacing:-.03em">WorkFlow<span class="amber">Ark</span></h1>
+      <p class="lead" style="font-size:2.2vmin;margin-top:2.6vmin;max-width:54ch;margin-left:auto;margin-right:auto">O conhecimento da agência convertido em sistema.<br><b style="color:var(--ink)">Em produção, hospedado em nuvem, com usuários reais.</b></p>
+      <div style="margin-top:4vmin;display:flex;gap:1.6vmin;justify-content:center;flex-wrap:wrap">
+        <span class="pill">Em nuvem</span><span class="pill">Multiusuário</span><span class="pill">Inteligência artificial integrada</span><span class="pill">Especificado pelo gestor-operador</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — TOUR: MEU DIA -->
+  <section class="slide">
+    <div class="maxw tourbig">
+      <div class="copy">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 01</div>
+        <h2>Meu Dia · o comando da operação</h2>
+        <p class="lead">A primeira tela de quem entra: tarefas do dia, agenda, alertas e o resumo do JARVIS — tudo num só lugar.</p>
+      </div>
+      <div class="window tall">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="url">workflowark.arkcontent.workers.dev/app · Meu Dia</span></div>
+        <img class="shot" src="img/sys-meudia.png" alt="Meu Dia">
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 — TOUR: CLIENTES -->
+  <section class="slide">
+    <div class="maxw tourbig">
+      <div class="copy">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 02 · Clientes</div>
+        <h2>A carteira de clientes</h2>
+        <p class="lead">Toda a base num só lugar — clientes ativos, receita recorrente, squads e a saúde de cada conta. <em class="hl" style="color:var(--faint)">(valores financeiros ocultos nesta apresentação)</em></p>
+      </div>
+      <div class="window tall">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="url">workflowark.arkcontent.workers.dev/app · Lista de Clientes</span></div>
+        <img class="shot" src="img/sys-clientes.png" alt="Carteira de clientes">
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 — TOUR: JORNADA -->
+  <section class="slide">
+    <div class="maxw tourbig">
+      <div class="copy">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 03 · Sucesso do cliente</div>
+        <h2>A jornada do cliente · 20 sprints</h2>
+        <p class="lead">Cada cliente percorre <em class="hl">20 sprints semanais</em> até a renovação — do onboarding ao fim do ciclo, visível num quadro só.</p>
+      </div>
+      <div class="window tall">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="url">workflowark.arkcontent.workers.dev/app · Jornada · Sprints</span></div>
+        <img class="shot" src="img/sys-jornada.png" alt="Jornada do cliente em sprints">
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 — TOUR: COMERCIAL -->
+  <section class="slide">
+    <div class="maxw tourbig">
+      <div class="copy">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 04 · Comercial</div>
+        <h2>O funil comercial</h2>
+        <p class="lead">Leads, reuniões e fechamentos do mês, com as fontes de pipeline, o diagnóstico por período e a meta de captação.</p>
+      </div>
+      <div class="window tall">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="url">workflowark.arkcontent.workers.dev/app · Comercial</span></div>
+        <img class="shot" src="img/sys-comercial.png" alt="Funil comercial">
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 — TOUR: ATIVIDADES (4 visões) -->
+  <section class="slide">
+    <div class="maxw tour">
+      <div class="head">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 05 · Atividades</div>
+        <h2>A operação, por todos os ângulos</h2>
+        <p class="lead">A mesma esteira de mais de 200 tarefas vista de quatro formas — para planejar, distribuir e medir.</p>
+      </div>
+      <div class="shots quad">
+        <div class="frame"><div class="cap"><span class="d"></span> Kanban · backlog → concluído</div><img src="img/sys-ativ-kanban.png" alt="Kanban"></div>
+        <div class="frame"><div class="cap"><span class="d"></span> Calendário do mês</div><img src="img/sys-ativ-calendario.png" alt="Calendário"></div>
+        <div class="frame"><div class="cap"><span class="d"></span> Por pessoa · a carga de cada um</div><img src="img/sys-ativ-pessoa.png" alt="Por pessoa"></div>
+        <div class="frame"><div class="cap"><span class="d"></span> Painel · função, atraso e capacidade</div><img src="img/sys-ativ-painel.png" alt="Painel de demandas"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 — TOUR: ORGANOGRAMA -->
+  <section class="slide">
+    <div class="maxw tourbig">
+      <div class="copy">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 06 · Conhecimento</div>
+        <h2>Organograma · quem faz o quê</h2>
+        <p class="lead">As 5 áreas da ARK, as pessoas de cada uma e o time de edição transversal — a estrutura da agência, explícita.</p>
+      </div>
+      <div class="window tall">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="url">workflowark.arkcontent.workers.dev/app · Organograma</span></div>
+        <img class="shot" src="img/sys-organograma.png" alt="Organograma">
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 — TOUR: POPs POR FUNÇÃO -->
+  <section class="slide">
+    <div class="maxw tour">
+      <div class="head">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 07 · Conhecimento</div>
+        <h2>O ofício de cada função, documentado</h2>
+        <p class="lead">Procedimentos permanentes por papel — <em class="hl">Account, Tráfego, Produtor, Edição e Comercial</em>. A rotina que não muda semana a semana.</p>
+      </div>
+      <div class="shots two">
+        <div class="frame"><div class="cap"><span class="d"></span> POPs · Account (Régua dos 15)</div><img src="img/sys-pops-account.png" alt="POPs Account"></div>
+        <div class="frame"><div class="cap"><span class="d"></span> POPs · Tráfego (performance)</div><img src="img/sys-pops-trafego.png" alt="POPs Tráfego"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 — TOUR: PROCESSOS POR ÁREA -->
+  <section class="slide">
+    <div class="maxw tourbig">
+      <div class="copy">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 08 · Conhecimento</div>
+        <h2>22 processos · 8 áreas · 98 passos</h2>
+        <p class="lead">O passo a passo de cada operação da agência — do "atender lead no WhatsApp" ao "fechamento do mês" — padronizado por área.</p>
+      </div>
+      <div class="window tall">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="url">workflowark.arkcontent.workers.dev/app · Processos por área</span></div>
+        <img class="shot" src="img/sys-processos.png" alt="Processos por área">
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 — TOUR: TUTORIAL -->
+  <section class="slide">
+    <div class="maxw tourbig">
+      <div class="copy">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 09 · Conhecimento</div>
+        <h2>O sistema ensina a usar o sistema</h2>
+        <p class="lead">Primeiros passos por área e um guia de "como fazer cada coisa" — para qualquer novo integrante operar sem depender do dono.</p>
+      </div>
+      <div class="window tall">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="url">workflowark.arkcontent.workers.dev/app · Tutorial / POPs</span></div>
+        <img class="shot" src="img/sys-tutorial.png" alt="Tutorial e POPs">
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 — TOUR: AGENDA + MEU MÊS -->
+  <section class="slide">
+    <div class="maxw tour">
+      <div class="head">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 10 · Visão do mês</div>
+        <h2>O mês inteiro: planejado e medido</h2>
+        <p class="lead">A agenda do mês mostra o volume real de execuções; o "Meu Mês" fecha o ciclo com contexto, conquistas e direção.</p>
+      </div>
+      <div class="shots two">
+        <div class="frame"><div class="cap"><span class="d"></span> Agenda de Junho · execuções do mês</div><img src="img/sys-agenda.png" alt="Agenda de Junho"></div>
+        <div class="frame"><div class="cap"><span class="d"></span> Meu Mês · fechamento e direção</div><img src="img/sys-meumes.png" alt="Meu Mês"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 21 — TOUR: AGENTES DE IA -->
+  <section class="slide">
+    <div class="maxw tour">
+      <div class="head">
+        <div class="kicker"><span class="dot"></span> Tour do sistema · 11 · A última camada · Eixo 5</div>
+        <h2>Inteligência artificial na operação</h2>
+        <p class="lead">A IA não substitui o gestor — <em class="hl">amplifica o conhecimento que ele externalizou</em>. O Conselho lê o contexto de cada cliente e propõe planos; o Planejamento vira calendário de conteúdo num clique.</p>
+      </div>
+      <div class="shots two">
+        <div class="frame"><div class="cap"><span class="d"></span> Conselho de IA · debate por cliente</div><img src="img/sys-conselho.png" alt="Conselho de IA"></div>
+        <div class="frame"><div class="cap"><span class="d"></span> Planejamento · calendário de conteúdo</div><img src="img/sys-planejamento.png" alt="Planejamento de conteúdo"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 — COMPARATIVO -->
+  <section class="slide">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> WorkFlowArk vs. o mercado</div>
+      <h2 style="margin-top:2vmin;font-size:3.8vmin">O que muda quando o software<br>é especificado por quem opera</h2>
+      <table class="cmp">
+        <tr><th>Solução</th><th>Foco</th><th>Limite para a agência audiovisual</th></tr>
+        <tr><td>Operand</td><td class="muted">Gestão de agências</td><td class="muted">Robusto, mas não embute a esteira de conteúdo</td></tr>
+        <tr><td>ClickUp / Monday / Asana</td><td class="muted">Projetos genéricos</td><td class="muted">Flexíveis e vazios: você constrói o modelo do zero</td></tr>
+        <tr><td>Workfront / eKyte</td><td class="muted">Marketing / projetos</td><td class="muted">Para grandes estruturas: complexo e caro p/ o porte regional</td></tr>
+        <tr class="me"><td>WorkFlowArk</td><td>Operação da ARK Content</td><td>Embute organograma, processos por área e inteligência própria</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 19 — RESULTADOS / 3 PRODUTOS -->
+  <section class="slide">
+    <div class="maxw">
+      <div class="kicker"><span class="dot"></span> O que este trabalho entrega</div>
+      <h2 style="margin-top:2.4vmin;font-size:4.2vmin">Três produtos de um mesmo percurso</h2>
+      <div class="prod">
+        <div class="p"><div class="stage">Externalização</div><h3>A Apresentação</h3><p>O conhecimento tácito da agência, escrito e organizado pela primeira vez.</p></div>
+        <div class="p"><div class="stage">Sistematização</div><h3>O Método dos 5 Eixos</h3><p>Um modelo replicável de profissionalização para outras agências regionais.</p></div>
+        <div class="p"><div class="stage">Materialização</div><h3>O WorkFlowArk</h3><p>O software em produção — o conhecimento operando a empresa em tempo real.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 — CONCLUSÃO -->
+  <section class="slide statement center">
+    <div class="maxw">
+      <div class="kicker" style="justify-content:center"><span class="dot"></span> Conclusão</div>
+      <h1 style="margin-top:3.2vmin;font-size:4.6vmin;max-width:32ch;margin-left:auto;margin-right:auto">
+        Externalizar o conhecimento — primeiro em <span class="amber">documento</span>, depois em <span class="amber">sistema</span> — é um caminho replicável de profissionalização.
+      </h1>
+      <p class="lead" style="font-size:2vmin;margin-top:3.4vmin;max-width:50ch;margin-left:auto;margin-right:auto">E reduz o risco que mais mata agências: a dependência do dono.</p>
+      <div class="tag" style="margin-top:4vmin"><span class="pill amberpill">Para ser dono da agência, é preciso saber fazer do jeito certo.</span></div>
+    </div>
+  </section>
+
+  <!-- 21 — OBRIGADO -->
+  <section class="slide closing">
+    <div class="maxw">
+      <img class="mark" src="img/ark-mark.png" alt="ARK">
+      <h1>Obrigado.</h1>
+      <p class="lead">Perguntas são bem-vindas.</p>
+      <div class="foot">Gabriel Andrade · CEUB · Publicidade e Propaganda · 2026<br>workflowark.arkcontent.workers.dev</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const total=slides.length;
+  let i=0;
+  const cur=document.getElementById('cur');
+  const tot=document.getElementById('tot');
+  const bar=document.getElementById('bar');
+  tot.textContent=String(total).padStart(2,'0');
+
+  function show(n){
+    i=Math.max(0,Math.min(total-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    cur.textContent=String(i+1).padStart(2,'0');
+    bar.style.width=((i)/(total-1)*100)+'%';
+    document.body.classList.toggle('hide-chrome', i===0 || i===total-1);
+  }
+  function next(){show(i+1)} function prev(){show(i-1)}
+
+  window.addEventListener('keydown',e=>{
+    if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();next();}
+    else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();prev();}
+    else if(e.key==='Home'){show(0);}
+    else if(e.key==='End'){show(total-1);}
+    else if(e.key==='f'||e.key==='F'){
+      if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}
+      else{document.exitFullscreen&&document.exitFullscreen();}
+    }
+  });
+  // click to advance (ignore clicks on links)
+  document.getElementById('deck').addEventListener('click',e=>{
+    if(e.target.closest('a'))return;
+    if(e.clientX < window.innerWidth*0.18) prev(); else next();
+  });
+  // touch
+  let tx=0;
+  addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+  addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx; if(Math.abs(dx)>40){dx<0?next():prev();}},{passive:true});
+
+  show(0);
+})();
+</script>
+</body>
+</html>

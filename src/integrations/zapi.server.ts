@@ -236,6 +236,29 @@ export async function evoFetchAvatar(numberOrJid: string): Promise<string> {
   }
 }
 
+// Marca mensagens como LIDAS no WhatsApp real (Evolution). Best-effort: nunca lança,
+// só devolve quantas marcou. `keys` = chaves de mensagens recebidas (id/remoteJid/fromMe).
+export async function evoMarkRead(
+  keys: Array<{ id: string; remoteJid: string; fromMe?: boolean }>,
+): Promise<number> {
+  try {
+    const { url, key, instance } = evoConfig();
+    if (!url || !key || !instance || !keys.length) return 0;
+    const readMessages = keys
+      .filter((k) => k && k.id && k.remoteJid)
+      .map((k) => ({ id: k.id, remoteJid: k.remoteJid, fromMe: !!k.fromMe }));
+    if (!readMessages.length) return 0;
+    const resp = await fetch(`${url}/chat/markMessageAsRead/${instance}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: key },
+      body: JSON.stringify({ readMessages }),
+    });
+    return resp.ok ? readMessages.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
 // Nome (subject) de um grupo pela Evolution. "" se falhar.
 export async function evoGroupSubject(jid: string): Promise<string> {
   try {
@@ -336,7 +359,7 @@ export async function appendWhatsapp(
     }
     if (!c.nome) c.nome = "Grupo";
   } else {
-    if (msg.name) c.nome = msg.name;
+    if (msg.name && msg.name !== phone) c.nome = msg.name;
     if (!c.nome) c.nome = phone;
   }
   if (msg.jid) c.jid = msg.jid;

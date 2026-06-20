@@ -60,6 +60,7 @@ function AppPage() {
     <iframe
       src="/workflowark.html"
       title="WorkFlowArk"
+      allow="clipboard-write; clipboard-read; microphone; autoplay; encrypted-media"
       style={{ border: 0, width: "100vw", height: "100vh", display: "block" }}
     />
   );

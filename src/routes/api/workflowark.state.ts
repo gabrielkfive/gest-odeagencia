@@ -23,6 +23,7 @@ const STATE_KEYS = new Set([
   "wfa-conselho-briefings",
   "wfa-drive",
   "wfa-brand",
+  "wfa-widgets",
   "wfa-deleted-ids",
   // Config que o CLIENTE é dono e precisa sincronizar (faltavam aqui -> o save-state
   // devolvia 400 "Bloco inválido" e o sistema mostrava "Erro ao sincronizar", além de
@@ -526,6 +527,34 @@ export const Route = createFileRoute("/api/workflowark/state")({
           }
         }
 
+        // Preenche a foto de perfil dos contatos DIRETOS que ainda não têm (conversas
+        // antigas, criadas antes do webhook buscar avatar). Limita por chamada pra não
+        // estourar timeout; marca avatarTried pra não re-tentar quem não tem foto.
+        if (action === "wa-sync-avatars") {
+          try {
+            const { evoFetchAvatar } = await import("@/integrations/zapi.server");
+            const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-whatsapp").maybeSingle();
+            const st: any = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : { conversas: {} };
+            if (!st.conversas) st.conversas = {};
+            const pendentes = Object.entries(st.conversas)
+              .filter(([, c]: [string, any]) => !c.isGroup && !c.avatar && !c.avatarTried)
+              .sort((a: any, b: any) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0))
+              .slice(0, 25);
+            let n = 0;
+            for (const [pk, c] of pendentes as [string, any][]) {
+              const alvo = c.jid || String(c.phone || pk);
+              const a = await evoFetchAvatar(alvo).catch(() => "");
+              c.avatarTried = true;
+              if (a) { c.avatar = a; n++; }
+            }
+            await ctx.db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: st });
+            const restam = Object.values(st.conversas).filter((c: any) => !c.isGroup && !c.avatar && !c.avatarTried).length;
+            return json({ ok: true, updated: n, restam });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao sincronizar fotos" }, { status: 502 });
+          }
+        }
+
         // Envia mídia (imagem/vídeo/áudio/documento) a partir de base64.
         if (action === "send-whatsapp-media") {
           const phone = String(body.phone ?? "").replace(/\D/g, "");
@@ -853,20 +882,57 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
           }
         }
 
-        // Marca uma conversa como LIDA (zera não-lidas) — persiste na nuvem.
+        // Marca uma conversa como LIDA (zera não-lidas) — persiste na nuvem E no WhatsApp real.
         if (action === "wa-mark-read") {
           const phone = String(body.phone ?? "").replace(/\D/g, "");
           if (!phone) return json({ error: "phone obrigatório" }, { status: 400 });
           try {
             const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-whatsapp").maybeSingle();
             const st: any = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : { conversas: {} };
-            if (st.conversas && st.conversas[phone]) {
-              st.conversas[phone].unread = 0;
+            const c = st.conversas && st.conversas[phone];
+            if (c) {
+              c.unread = 0;
               await ctx.db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: st });
+              // reflete no WhatsApp real (best-effort): marca as recebidas como lidas
+              try {
+                const { evoMarkRead } = await import("@/integrations/zapi.server");
+                const keys = (c.msgs || [])
+                  .filter((m: any) => m && m.dir === "in" && m.mkey && m.mkey.id)
+                  .slice(-30)
+                  .map((m: any) => ({ id: m.mkey.id, remoteJid: m.mkey.remoteJid || c.jid || phone, fromMe: false }));
+                await evoMarkRead(keys);
+              } catch { /* best-effort */ }
             }
             return json({ ok: true });
           } catch (e) {
             return json({ error: (e as Error)?.message || "Falha ao marcar como lido" }, { status: 502 });
+          }
+        }
+
+        // Marca TODAS as conversas como lidas (botão "marcar todas") — nuvem + WhatsApp real.
+        if (action === "wa-mark-all-read") {
+          try {
+            const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-whatsapp").maybeSingle();
+            const st: any = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : { conversas: {} };
+            const convs = Object.values(st.conversas || {}) as any[];
+            let n = 0;
+            convs.forEach((c) => { if (c.unread) { c.unread = 0; n++; } });
+            await ctx.db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: st });
+            // WhatsApp real (best-effort, só nas que tinham não-lidas, limita p/ não estourar)
+            try {
+              const { evoMarkRead } = await import("@/integrations/zapi.server");
+              const naoLidas = convs.filter((c) => (c.msgs || []).some((m: any) => m && m.dir === "in" && m.mkey)).slice(0, 40);
+              for (const c of naoLidas) {
+                const keys = (c.msgs || [])
+                  .filter((m: any) => m && m.dir === "in" && m.mkey && m.mkey.id)
+                  .slice(-10)
+                  .map((m: any) => ({ id: m.mkey.id, remoteJid: m.mkey.remoteJid || c.jid || c.phone, fromMe: false }));
+                await evoMarkRead(keys);
+              }
+            } catch { /* best-effort */ }
+            return json({ ok: true, marcadas: n });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao marcar todas" }, { status: 502 });
           }
         }
 

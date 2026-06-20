@@ -21,7 +21,8 @@ export async function processWaWebhook(body: any): Promise<void> {
     const isGroup = jid.includes("@g.us");
     const phone = jid.replace(/@.*/, "").replace(/\D/g, "");
     const fromMe = !!body.isFromMe;
-    const name = String(body.sender || "").split("@")[0] || phone;
+    const pushName = String(body.senderName || "").trim();
+    const name = pushName || "";
     let text = String(body.content || "");
     const messageId = String(body.messageId || "");
     const ts = Date.now();
