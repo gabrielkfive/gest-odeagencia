@@ -2689,6 +2689,7 @@ function iniciarAutoSync(){
           <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
             <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="legGerar()">✍️ Gerar legendas</button>
             <button class="tb-btn" onclick="legCopiar()">⧉ Copiar</button>
+            <button class="tb-btn" onclick="legSalvarNoDrive()">💾 Salvar no Drive</button>
             <span id="leg-status" style="font-size:12px;color:var(--mute)"></span>
           </div>
         </div>
@@ -7446,6 +7447,15 @@ async function legGerar(){
   }catch(e){if(out)out.textContent='⚠ '+(e.message||'Falha ao gerar');if(st)st.textContent='';}
 }
 function legCopiar(){const t=document.getElementById('leg-out').textContent||'';navigator.clipboard?.writeText(t).then(()=>toast('Legendas copiadas'),()=>toast('Não consegui copiar'));}
+function legSalvarNoDrive(){
+  const cliente=(document.getElementById('leg-cliente').value||'').trim();
+  const texto=(document.getElementById('leg-out').textContent||'').trim();
+  if(!cliente){toast&&toast('Diga o cliente pra salvar no Drive dele');return;}
+  if(!texto||texto.length<15){toast&&toast('Gere a legenda primeiro');return;}
+  const titulo='Legenda · '+new Date().toLocaleDateString('pt-BR');
+  const ok=driveSalvarDoc(cliente,'Legendas',titulo,texto);
+  toast&&toast(ok?('💾 Salvo no Drive › '+cliente+' › Legendas'):'Não consegui salvar');
+}
 function legDeTema(tema,cliente){
   const t=document.getElementById('leg-tema');const c=document.getElementById('leg-cliente');
   if(t)t.value=tema||'';if(c&&cliente)c.value=cliente;
