@@ -443,6 +443,10 @@ table.t tr.high{background:var(--yel-bg)}
 .tc-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}
 .tc-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;background:var(--bg);color:var(--ink-2);border:1px solid var(--line);text-transform:uppercase;letter-spacing:.03em}
 .tc-check-prog{font-size:9px;color:var(--mute);font-family:var(--mono);margin-top:4px}
+.tc-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.tc-badge{font-size:9.5px;font-weight:700;color:var(--mute);display:inline-flex;align-items:center;gap:3px;font-variant-numeric:tabular-nums}
+.tc-badge.done{color:var(--green,#19b36b)}
+.tc-badge.run{color:#b36200}
 /* checklist in modal */
 .cl-list{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
 .cl-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink)}
@@ -3410,32 +3414,95 @@ function iniciarAutoSync(){
 
 <!-- MODAL: Detalhes da Tarefa -->
 <div class="modal-bg" id="modal-detail">
-  <div class="modal">
+  <div class="modal" style="max-width:880px;width:95vw">
+    <style>
+      #modal-detail .td2-grid{display:flex;gap:20px;align-items:flex-start}
+      #modal-detail .td2-main{flex:1.7;min-width:0;display:flex;flex-direction:column;gap:18px}
+      #modal-detail .td2-side{flex:0 0 244px;display:flex;flex-direction:column;gap:11px}
+      #modal-detail .td2-h{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:0 0 8px;display:flex;align-items:center;gap:6px}
+      #modal-detail .td2-h svg{width:13px;height:13px;stroke-width:2.2}
+      #modal-detail .td2-title{width:100%;border:none;background:transparent;font-size:19px;font-weight:800;color:var(--ink);font-family:inherit;padding:2px 0;outline:none}
+      #modal-detail .td2-title:focus{box-shadow:0 2px 0 var(--yel)}
+      #modal-detail .td2-timer{background:var(--ink);color:#fff;border-radius:13px;padding:13px 14px;transition:box-shadow .25s}
+      #modal-detail .td2-timer.running{box-shadow:0 0 0 2px var(--yel),0 8px 22px rgba(0,0,0,.22)}
+      #modal-detail .td2-time{font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em;line-height:1.1}
+      #modal-detail .td2-tlabel{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.55);font-weight:700;margin-bottom:3px}
+      #modal-detail .td2-trow{display:flex;gap:7px;margin-top:11px}
+      #modal-detail .td2-tbtn{flex:1;border:none;border-radius:9px;padding:9px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;background:var(--yel);color:#1a1a1a;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:38px;transition:transform .08s}
+      #modal-detail .td2-tbtn:active{transform:scale(.96)}
+      #modal-detail .td2-tbtn.on{background:#fff;color:#1a1a1a}
+      #modal-detail .td2-treset{flex:0 0 38px;background:rgba(255,255,255,.12);color:#fff}
+      #modal-detail .td2-fld{display:flex;flex-direction:column;gap:4px}
+      #modal-detail .td2-fld label{font-size:10.5px;font-weight:700;color:var(--mute)}
+      #modal-detail .td2-att-list{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+      #modal-detail .td2-att{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:11.5px;font-weight:600;color:var(--ink);max-width:230px;text-decoration:none}
+      #modal-detail .td2-att:hover{border-color:var(--ink)}
+      #modal-detail .td2-att-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      #modal-detail .td2-att-x{color:var(--mute);font-weight:700;padding:0 2px;cursor:pointer}
+      #modal-detail .td2-att-x:hover{color:var(--red)}
+      #modal-detail .td2-cmt-list{display:flex;flex-direction:column;gap:11px;margin-bottom:11px;max-height:230px;overflow-y:auto}
+      #modal-detail .td2-cmt{display:flex;gap:9px;align-items:flex-start}
+      #modal-detail .td2-cav{flex:0 0 28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center}
+      #modal-detail .td2-cbody{flex:1;min-width:0}
+      #modal-detail .td2-cmeta{display:flex;align-items:baseline;gap:7px;font-size:11px;color:var(--mute);margin-bottom:2px}
+      #modal-detail .td2-cmeta b{color:var(--ink);font-size:12px}
+      #modal-detail .td2-ctext{font-size:13px;color:var(--ink);line-height:1.45;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 11px;white-space:pre-wrap;word-break:break-word}
+      #modal-detail .td2-cbox{display:flex;gap:7px;align-items:flex-end}
+      #modal-detail .td2-empty{font-size:12px;color:var(--mute);padding:4px 0}
+      @media(max-width:680px){#modal-detail .td2-grid{flex-direction:column}#modal-detail .td2-side{flex-basis:auto;width:100%;order:-1}}
+    </style>
     <div class="modal-head"><h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span>Detalhes da tarefa</h3><span class="x" onclick="closeModal('modal-detail')">✕</span></div>
     <div class="modal-body">
       <input type="hidden" id="td-id">
-      <div class="form-group"><label class="form-label">Título</label><input class="form-input" id="td-title"></div>
-      <div class="form-group"><label class="form-label">Descrição / observações</label><textarea class="form-input" id="td-desc" rows="3" placeholder="Detalhes, links, contexto..."></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="td-status"><option value="backlog">Backlog</option><option value="andamento">Em Andamento</option><option value="aprovacao">Aprovação</option><option value="concluido">Concluído</option></select></div>
-        <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="td-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Responsável <a onclick="colabOpen()" style="color:#a07e00;cursor:pointer;font-weight:700">+ pessoa</a></label><select class="form-select" id="td-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Márcio</option><option>Henrique</option><option>Nicolas</option><option>Anderson</option><option>João Gabriel</option><option>Maria Clara</option><option>Luckas Gomes</option><option>Kaique</option><option>Lush</option></select></div>
-        <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="td-data" type="date"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Cliente</label><select class="form-select" id="td-cliente"></select></div>
-        <div class="form-group"><label class="form-label">Função</label><select class="form-select" id="td-funcao"><option>Account Manager</option><option>Gestor de Tráfego</option><option>Criador</option><option>Editor</option><option>Designer</option><option>Captação</option></select></div>
-      </div>
-      <div class="form-group"><label class="form-label">Tags <span style="color:var(--mute);font-weight:400">(separe por vírgula)</span></label><input class="form-input" id="td-tags" placeholder="Ex: criativo, urgente, copa"></div>
-      <div class="form-group" style="margin-top:8px">
-        <label class="form-label" style="margin-bottom:6px">Checklist</label>
-        <div class="cl-prog-wrap"><div class="cl-prog-fill" id="cl-prog-fill" style="width:0%"></div></div>
-        <div class="cl-list" id="cl-list"></div>
-        <div style="display:flex;gap:6px">
-          <input class="form-input" id="cl-new-item" placeholder="Adicionar item..." style="flex:1" onkeydown="if(event.key==='Enter'){adicionarCheckItem();event.preventDefault();}">
-          <button class="tb-btn" onclick="adicionarCheckItem()">+</button>
+      <div class="td2-grid">
+        <div class="td2-main">
+          <input class="td2-title" id="td-title" placeholder="Título da tarefa">
+          <div>
+            <div class="td2-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Descrição</div>
+            <textarea class="form-input" id="td-desc" rows="3" placeholder="Detalhes, links, contexto..."></textarea>
+          </div>
+          <div>
+            <div class="td2-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Checklist</div>
+            <div class="cl-prog-wrap"><div class="cl-prog-fill" id="cl-prog-fill" style="width:0%"></div></div>
+            <div class="cl-list" id="cl-list"></div>
+            <div style="display:flex;gap:6px">
+              <input class="form-input" id="cl-new-item" placeholder="Adicionar item..." style="flex:1" onkeydown="if(event.key==='Enter'){adicionarCheckItem();event.preventDefault();}">
+              <button class="tb-btn" onclick="adicionarCheckItem()">+</button>
+            </div>
+          </div>
+          <div>
+            <div class="td2-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>Anexos</div>
+            <div class="td2-att-list" id="td-att-list"></div>
+            <div style="display:flex;gap:6px">
+              <input class="form-input" id="td-att-input" placeholder="Cole um link (Drive, Canva, imagem...)" style="flex:1" onkeydown="if(event.key==='Enter'){tdAddAttachment();event.preventDefault();}">
+              <button class="tb-btn" onclick="tdAddAttachment()">Anexar</button>
+            </div>
+          </div>
+          <div>
+            <div class="td2-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comentários &amp; atividade</div>
+            <div class="td2-cmt-list" id="td-cmt-list"></div>
+            <div class="td2-cbox">
+              <textarea class="form-input" id="td-cmt-input" rows="1" placeholder="Escreva um comentário..." style="flex:1;resize:none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){tdAddComment();event.preventDefault();}"></textarea>
+              <button class="tb-btn" onclick="tdAddComment()">Comentar</button>
+            </div>
+          </div>
+        </div>
+        <div class="td2-side">
+          <div class="td2-timer" id="td-timer-card">
+            <div class="td2-tlabel">Tempo na tarefa</div>
+            <div class="td2-time" id="td-time">0:00</div>
+            <div class="td2-trow">
+              <button class="td2-tbtn" id="td-timer-btn" onclick="tdTimerToggle()">▶ Iniciar</button>
+              <button class="td2-tbtn td2-treset" onclick="tdResetTimer()" title="Zerar tempo">↺</button>
+            </div>
+          </div>
+          <div class="td2-fld"><label>Status</label><select class="form-select" id="td-status"><option value="backlog">Backlog</option><option value="andamento">Em Andamento</option><option value="aprovacao">Aprovação</option><option value="concluido">Concluído</option></select></div>
+          <div class="td2-fld"><label>Prioridade</label><select class="form-select" id="td-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
+          <div class="td2-fld"><label>Responsável <a onclick="colabOpen()" style="color:#a07e00;cursor:pointer;font-weight:700">+ pessoa</a></label><select class="form-select" id="td-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Márcio</option><option>Henrique</option><option>Nicolas</option><option>Anderson</option><option>João Gabriel</option><option>Maria Clara</option><option>Luckas Gomes</option><option>Kaique</option><option>Lush</option></select></div>
+          <div class="td2-fld"><label>Vencimento</label><input class="form-input" id="td-data" type="date"></div>
+          <div class="td2-fld"><label>Cliente</label><select class="form-select" id="td-cliente"></select></div>
+          <div class="td2-fld"><label>Função</label><select class="form-select" id="td-funcao"><option>Account Manager</option><option>Gestor de Tráfego</option><option>Criador</option><option>Editor</option><option>Designer</option><option>Captação</option></select></div>
+          <div class="td2-fld"><label>Tags <span style="color:var(--mute);font-weight:400">(vírgula)</span></label><input class="form-input" id="td-tags" placeholder="criativo, urgente"></div>
         </div>
       </div>
     </div>
@@ -5268,7 +5335,14 @@ function taskCard(t){
   const tagsHtml=tags.length?`<div class="tc-tags">${tags.map(tg=>`<span class="tc-tag">${escapeHtml(tg)}</span>`).join('')}</div>`:'';
   const cl=t.checklist||[];
   const clDone=cl.filter(x=>x.done).length;
-  const clHtml=cl.length?`<div class="tc-check-prog">☑ ${clDone}/${cl.length}</div>`:'';
+  const nCmt=(t.comments||[]).length, nAtt=(t.attachments||[]).length;
+  const tSpent=(t.timeSpent||0)+(t.timerSince?(Date.now()-new Date(t.timerSince).getTime())/1000:0);
+  const badges=[];
+  if(cl.length)badges.push(`<span class="tc-badge${clDone===cl.length?' done':''}">☑ ${clDone}/${cl.length}</span>`);
+  if(tSpent>=1)badges.push(`<span class="tc-badge${t.timerSince?' run':''}">⏱ ${fmtDur(tSpent)}</span>`);
+  if(nCmt)badges.push(`<span class="tc-badge">💬 ${nCmt}</span>`);
+  if(nAtt)badges.push(`<span class="tc-badge">🔗 ${nAtt}</span>`);
+  const clHtml=badges.length?`<div class="tc-badges">${badges.join('')}</div>`:'';
   const dateStyle=late?'color:var(--red);font-weight:700':venceHoje?'color:#b36200;font-weight:700':'';
   return `<div class="task-card priority-${t.prio||'media'}" draggable="true" data-tid="${t.id}" onclick="openTaskDetail('${t.id}')" style="cursor:pointer">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;margin-bottom:2px">
@@ -5516,8 +5590,62 @@ function openTaskDetail(id){
   document.getElementById('td-funcao').value=t.funcao||'Account Manager';
   document.getElementById('td-tags').value=(t.tags||[]).join(', ');
   renderChecklist(t.checklist||[]);
+  renderTdTimer(t);renderTdComments(t);renderTdAttachments(t);
+  const ci=document.getElementById('td-cmt-input');if(ci)ci.value='';
+  const ai=document.getElementById('td-att-input');if(ai)ai.value='';
+  if(!WFA_TD_TICK)WFA_TD_TICK=setInterval(()=>{
+    const md=document.getElementById('modal-detail');
+    if(md&&md.classList.contains('open')){const tt=tdCurrentTask();if(tt&&tt.timerSince){const d=document.getElementById('td-time');if(d)d.textContent=fmtDur(tdElapsed(tt));}}
+  },1000);
   document.getElementById('modal-detail').classList.add('open');
 }
+/* ---- Timer / tempo na tarefa ---- */
+let WFA_TD_TICK=null;
+function tdCurrentTask(){const id=document.getElementById('td-id').value;return state.tarefas.find(x=>x.id===id);}
+function fmtDur(sec){sec=Math.max(0,Math.floor(sec));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return (h?h+':'+String(m).padStart(2,'0'):String(m))+':'+String(s).padStart(2,'0');}
+function tdElapsed(t){let base=t.timeSpent||0;if(t.timerSince){base+=(Date.now()-new Date(t.timerSince).getTime())/1000;}return base;}
+function renderTdTimer(t){
+  const disp=document.getElementById('td-time');if(disp)disp.textContent=fmtDur(tdElapsed(t));
+  const run=!!t.timerSince;
+  const btn=document.getElementById('td-timer-btn');if(btn){btn.innerHTML=run?'❚❚ Pausar':'▶ Iniciar';btn.classList.toggle('on',run);}
+  const card=document.getElementById('td-timer-card');if(card)card.classList.toggle('running',run);
+}
+function tdTimerToggle(){
+  const t=tdCurrentTask();if(!t)return;
+  if(t.timerSince){t.timeSpent=(t.timeSpent||0)+(Date.now()-new Date(t.timerSince).getTime())/1000;t.timerSince=null;}
+  else{t.timerSince=new Date().toISOString();}
+  saveTarefas();renderTdTimer(t);
+}
+function tdResetTimer(){const t=tdCurrentTask();if(!t)return;if(!confirm('Zerar o tempo cronometrado desta tarefa?'))return;t.timeSpent=0;t.timerSince=null;saveTarefas();renderTdTimer(t);}
+/* ---- Comentários ---- */
+function tdAuthor(){const m=(typeof WFA_MEMBER!=='undefined')?WFA_MEMBER:null;return (m&&m.full_name)||(m&&m.email&&m.email.split('@')[0])||'Eu';}
+function tdWhen(iso){try{const d=new Date(iso),now=new Date(),diff=(now-d)/1000;if(diff<60)return 'agora';if(diff<3600)return Math.floor(diff/60)+'min';const sameDay=d.toDateString()===now.toDateString();if(sameDay)return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
+function renderTdComments(t){
+  const wrap=document.getElementById('td-cmt-list');if(!wrap)return;
+  const cs=t.comments||[];
+  wrap.innerHTML=cs.length?cs.slice().reverse().map(c=>`<div class="td2-cmt"><div class="td2-cav">${taskInitials(c.author)}</div><div class="td2-cbody"><div class="td2-cmeta"><b>${escapeHtml(c.author)}</b><span>${tdWhen(c.at)}</span></div><div class="td2-ctext">${escapeHtml(c.text)}</div></div></div>`).join(''):'<div class="td2-empty">Nenhum comentário ainda.</div>';
+}
+function tdAddComment(){
+  const ta=document.getElementById('td-cmt-input');const txt=(ta.value||'').trim();if(!txt)return;
+  const t=tdCurrentTask();if(!t)return;if(!t.comments)t.comments=[];
+  t.comments.push({id:'cm'+Date.now(),author:tdAuthor(),text:txt,at:new Date().toISOString()});
+  ta.value='';saveTarefas();renderTdComments(t);
+}
+/* ---- Anexos (links) ---- */
+function renderTdAttachments(t){
+  const wrap=document.getElementById('td-att-list');if(!wrap)return;
+  const as=t.attachments||[];
+  wrap.innerHTML=as.map(a=>`<a class="td2-att" href="${escapeHtml(a.url)}" target="_blank" rel="noopener" title="${escapeHtml(a.url)}"><span>🔗</span><span class="td2-att-nm">${escapeHtml(a.name||a.url)}</span><span class="td2-att-x" onclick="tdDelAttachment(event,'${a.id}')">✕</span></a>`).join('');
+}
+function tdAddAttachment(){
+  const inp=document.getElementById('td-att-input');let url=(inp.value||'').trim();if(!url)return;
+  if(!/^https?:\/\//i.test(url))url='https://'+url;
+  let name=url;try{const u=new URL(url);name=(u.hostname.replace(/^www\./,'')+u.pathname).replace(/\/$/,'').slice(0,38)||u.hostname;}catch(e){}
+  const t=tdCurrentTask();if(!t)return;if(!t.attachments)t.attachments=[];
+  t.attachments.push({id:'at'+Date.now(),name,url,at:new Date().toISOString()});
+  inp.value='';saveTarefas();renderTdAttachments(t);
+}
+function tdDelAttachment(e,id){e.preventDefault();e.stopPropagation();const t=tdCurrentTask();if(!t)return;t.attachments=(t.attachments||[]).filter(a=>a.id!==id);saveTarefas();renderTdAttachments(t);}
 function saveTaskDetail(){
   const id=document.getElementById('td-id').value;
   const t=state.tarefas.find(x=>x.id===id);if(!t)return;
@@ -7939,6 +8067,8 @@ const CRM_STAGES=[
 ];
 function loadCrm(){return JSON.parse(localStorage.getItem('wfa-crm')||'[]');}
 function saveCrm(arr){localStorage.setItem('wfa-crm',JSON.stringify(arr));renderCrm();updateCrmBadge();}
+// data ISO (aaaa-mm-dd) -> padrão BR (dd/mm/aaaa)
+function crmFmtDate(iso){if(!iso)return'';const p=String(iso).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso;}
 function updateCrmBadge(){
   const arr=loadCrm();
   const today=new Date().toISOString().split('T')[0];
@@ -8065,23 +8195,41 @@ function renderCrm(){
   pEl.innerHTML=CRM_STAGES.map((st,si)=>{
     const cards=filtered.filter(l=>l.stage===si);
     const totalV=cards.reduce((s,l)=>s+(l.val||0),0);
-    return `<div class="crm-col">
+    return `<div class="crm-col" data-stage="${si}">
       <div class="crm-col-head">
         <h4 style="color:${st.color}">${st.label}</h4>
         <span class="ct" style="background:${st.color}22;color:${st.color}">${cards.length}${totalV?' · R$'+totalV.toLocaleString('pt-BR'):''}</span>
       </div>
       <div class="crm-cards">${cards.map(l=>{
         const overdue=l.due&&l.due<today&&l.stage<4;
-        return `<div class="crm-card stage-${si}${overdue?' crm-overdue':''}" onclick="crmOpenModal('${l.id}')">
+        return `<div class="crm-card stage-${si}${overdue?' crm-overdue':''}" draggable="true" data-lead="${l.id}" onclick="crmOpenModal('${l.id}')">
           <div class="nm">${escapeHtml(l.nm)}</div>
           <div class="meta"><span class="crm-source-badge">${l.source||'—'}</span>${l.resp?`<span>${l.resp}</span>`:''}</div>
           ${l.val?`<div class="val">R$ ${Number(l.val).toLocaleString('pt-BR')}</div>`:''}
-          ${l.next?`<div class="next">${escapeHtml(l.next)}${l.due?` <span style="color:${overdue?'var(--red)':'var(--mute)'}">· ${l.due}</span>`:''}</div>`:''}
+          ${l.next?`<div class="next">${escapeHtml(l.next)}${l.due?` <span style="color:${overdue?'var(--red)':'var(--mute)'}">· ${crmFmtDate(l.due)}</span>`:''}</div>`:''}
         </div>`;
       }).join('')}</div>
       ${si<4?`<div class="crm-add-btn" onclick="crmOpenModal()">+ Novo lead nesta etapa</div>`:''}
     </div>`;
   }).join('');
+  // drag-and-drop · arraste leads entre as etapas (e de volta), igual Trello
+  pEl.querySelectorAll('.crm-card').forEach(card=>{
+    card.addEventListener('dragstart',e=>{e.stopPropagation();e.dataTransfer.setData('lead',card.dataset.lead);e.dataTransfer.effectAllowed='move';card.style.opacity='.4';});
+    card.addEventListener('dragend',()=>{card.style.opacity='1';});
+  });
+  pEl.querySelectorAll('.crm-col').forEach(col=>{
+    col.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';col.style.background='rgba(212,163,0,.10)';});
+    col.addEventListener('dragleave',()=>{col.style.background='';});
+    col.addEventListener('drop',e=>{
+      e.preventDefault();col.style.background='';
+      const lid=e.dataTransfer.getData('lead');const to=parseInt(col.dataset.stage);
+      if(!lid||isNaN(to))return;
+      const arr=loadCrm();const lead=arr.find(l=>l.id===lid);
+      if(!lead||lead.stage===to)return;
+      lead.stage=to;saveCrm(arr);
+      toast('Lead movido para '+CRM_STAGES[to].label);
+    });
+  });
 }
 
 /* ============ AGENDA EDITÁVEL ============ */
