@@ -42,7 +42,9 @@ entre sessões. Cada item: o que é, status e (quando subiu) a versão/commit.
 > banco de criativos) + onboarding eram desta lista e foram concluídos/subidos ontem.
 > O que sobrou de ontem, ainda ABERTO:
 
-- [ ] **Aprovação de conteúdo pelo cliente (por link)** — cliente aprova sem precisar do grupo. (Buildável agora.)
+- [x] **Aprovação de conteúdo pelo cliente (por link)** ✅ no ar (commit `5521dd8`) — botão "Link de aprovação"
+  no Planejamento gera URL pública `/aprovar?t=…`; cliente aprova/pede ajuste sem login.
+  ⚠️ **Falta o Gabriel testar em prod** (gerar link logado → abrir → aprovar) — ver `PENDENCIAS-GABRIEL.md`.
 - [ ] **Roteirista autônomo** — ler a base real (Docs da Vivenda + planejamento) e gerar os 12 roteiros sozinho, sem caixinha de prompt. (Buildável; depende de acesso ao Drive/Docs já plugado.)
 - [ ] **JARVIS: barge-in real** — interromper o JARVIS falando por cima (precisa cancelamento de eco). (Mais técnico, áudio.)
 - [ ] **JARVIS: wake word / 2 palmas** — acordar o JARVIS por voz de qualquer tela.

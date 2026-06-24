@@ -26,6 +26,16 @@ depois Fase 2 (power dialer + log automático no CRM). Detalhes em `docs/PLANO-P
 
 ---
 
+### 2. Testar a Aprovação por link (em prod) — 1 min
+**Por que:** o fluxo de gerar link é autenticado e o login local é quebrado (gotcha do service_role),
+então só dá pra confirmar 100% logado em produção.
+- [ ] Abrir **workflowark.arkcontent.workers.dev** logado → página **Planejamento**.
+- [ ] Gerar/abrir um plano → clicar **"🔗 Link de aprovação"** (copia a URL).
+- [ ] Abrir a URL numa aba anônima → conferir se o plano aparece e dá pra **Aprovar / Pedir ajuste**.
+- [ ] Me dizer se funcionou (ou colar o erro). Se rolar, eu mostro o status da aprovação dentro do app também.
+
+---
+
 ## ✅ Resolvido
 _(nada ainda)_
 
