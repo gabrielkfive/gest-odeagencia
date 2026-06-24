@@ -2567,6 +2567,7 @@ function iniciarAutoSync(){
           <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
             <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="rotGerar()">🎬 Gerar roteiros</button>
             <button class="tb-btn" onclick="rotCopiar()">⧉ Copiar</button>
+            <button class="tb-btn" onclick="rotSalvarNoDrive()">💾 Salvar no Drive</button>
             <button class="tb-btn" onclick="legDeTema((document.getElementById('rot-out').textContent||document.getElementById('rot-tema').value||'').trim(),document.getElementById('rot-cliente').value||'')">✍️ Virar legenda</button>
             <span id="rot-status" style="font-size:12px;color:var(--mute)"></span>
           </div>
@@ -2604,25 +2605,74 @@ function iniciarAutoSync(){
           #page-planejamento .plc-chip.story{background:#f6eeff;border-left-color:#9b5cff}
           #page-planejamento .plc-chip.foto{background:#e9f9ef;border-left-color:#19b36b}
           #page-planejamento .pl-vbtn.on{background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700}
+          /* ---- design premium ---- */
+          #page-planejamento .pl-gen{background:linear-gradient(180deg,#fff,#fcfcfa);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+          #page-planejamento .pl-gen-hd{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+          #page-planejamento .pl-gen-ic{width:40px;height:40px;border-radius:12px;background:var(--yel,#ffd400);display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 12px rgba(255,200,0,.35)}
+          #page-planejamento .pl-gen-ic svg{width:21px;height:21px;stroke:#111}
+          #page-planejamento .pl-gen-hd h3{font-size:15px;font-weight:800;color:var(--ink);margin:0}
+          #page-planejamento .pl-gen-hd p{font-size:12px;color:var(--mute);margin:2px 0 0}
+          #page-planejamento .pl-form{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+          #page-planejamento .pl-form .full{grid-column:1/-1}
+          #page-planejamento .pl-gen-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px;flex-wrap:wrap}
+          #page-planejamento .pl-cta{background:var(--ink,#111);color:#fff;border:none;border-radius:11px;padding:11px 20px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;transition:transform .08s,box-shadow .2s}
+          #page-planejamento .pl-cta:hover{box-shadow:0 8px 20px rgba(0,0,0,.18)}
+          #page-planejamento .pl-cta:active{transform:scale(.97)}
+          #page-planejamento #pl-views{flex-direction:column}
+          #page-planejamento .pl-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+          #page-planejamento .pl-seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+          #page-planejamento .pl-seg button{border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--mute);padding:6px 13px;border-radius:8px;cursor:pointer}
+          #page-planejamento .pl-seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1);font-weight:700}
+          #page-planejamento .pl-save{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+          #page-planejamento .pl-save:hover{border-color:var(--ink)}
+          #page-planejamento .pl-legend{display:flex;gap:15px;flex-wrap:wrap;margin:11px 2px 0}
+          #page-planejamento .pl-legend span{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--mute)}
+          #page-planejamento .pl-legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+          #page-planejamento .plc-chip{box-shadow:0 1px 2px rgba(0,0,0,.05);transition:transform .12s,box-shadow .12s}
+          #page-planejamento .plc-chip:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.1);filter:none}
+          #page-planejamento .plc{box-shadow:0 1px 3px rgba(0,0,0,.05)}
+          #page-planejamento .pl-card{transition:transform .2s,box-shadow .2s}
+          #page-planejamento .pl-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.08)}
+          #page-planejamento .tb-btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+          #page-planejamento .pl-emptybox{text-align:center;padding:48px 20px;color:var(--mute)}
+          #page-planejamento .pl-emptybox .e{font-size:40px;margin-bottom:10px}
+          #page-planejamento .pl-emptybox b{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
         </style>
-        <div class="page-head"><div class="page-title"><h1>Planejamento de Conteúdo</h1><p>Monta o calendário do mês por cliente · cada ideia vira roteiro num clique (usa o cérebro do cliente).</p></div></div>
-        <div class="card" style="padding:16px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div><label class="form-label" style="font-size:11px">Cliente</label><input id="pl-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda"></div>
-          <div><label class="form-label" style="font-size:11px">Período</label><input id="pl-periodo" class="form-input" placeholder="Ex: Junho 2026 · semana da Copa"></div>
-          <div style="grid-column:1/-1"><label class="form-label" style="font-size:11px">Foco especial (opcional)</label><input id="pl-foco" class="form-input" placeholder="Ex: creme de ureia em promoção, NAC, Copa"></div>
-          <div style="display:flex;gap:8px;align-items:end"><div style="flex:1"><label class="form-label" style="font-size:11px">Qtd de ideias</label><input id="pl-qtd" class="form-input" type="number" value="8" min="3" max="16"></div></div>
-          <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
-            <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="planGerar()">🗓️ Montar planejamento</button>
+        <div class="page-head"><div class="page-title"><h1>Planejamento de Conteúdo</h1><p>Monta o calendário do mês por cliente · cada ideia vira roteiro, legenda ou tarefa num clique.</p></div></div>
+        <div class="pl-gen">
+          <div class="pl-gen-hd">
+            <div class="pl-gen-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div><h3>Montar calendário do mês</h3><p>A IA usa o cérebro do cliente pra sugerir os posts.</p></div>
+          </div>
+          <div class="pl-form">
+            <div><label class="form-label" style="font-size:11px">Cliente</label><input id="pl-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda"></div>
+            <div><label class="form-label" style="font-size:11px">Período</label><input id="pl-periodo" class="form-input" placeholder="Ex: Junho 2026 · semana da Copa"></div>
+            <div class="full"><label class="form-label" style="font-size:11px">Foco especial (opcional)</label><input id="pl-foco" class="form-input" placeholder="Ex: creme de ureia em promoção, NAC, Copa"></div>
+            <div><label class="form-label" style="font-size:11px">Qtd de ideias</label><input id="pl-qtd" class="form-input" type="number" value="8" min="3" max="16"></div>
+          </div>
+          <div class="pl-gen-foot">
             <span id="pl-status" style="font-size:12px;color:var(--mute)"></span>
+            <button class="pl-cta" onclick="planGerar()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3l2.4 6.6L22 12l-6.6 2.4L13 21l-2.4-6.6L4 12l6.6-2.4z"/><path d="M5 3v4M3 5h4"/></svg>Montar planejamento</button>
           </div>
         </div>
-        <div id="pl-views" style="display:none;gap:6px;margin-bottom:12px">
-          <button class="tb-btn pl-vbtn on" id="pl-view-cal" onclick="planSetView('cal')">🗓️ Calendário</button>
-          <button class="tb-btn pl-vbtn" id="pl-view-list" onclick="planSetView('list')">☰ Lista</button>
+        <div id="pl-views" style="display:none;margin-bottom:6px">
+          <div class="pl-bar">
+            <div class="pl-seg">
+              <button class="on" id="pl-view-cal" onclick="planSetView('cal')">🗓️ Calendário</button>
+              <button id="pl-view-list" onclick="planSetView('list')">☰ Lista</button>
+            </div>
+            <button class="pl-save" onclick="planSalvarNoDrive()">💾 Salvar no Drive</button>
+          </div>
+          <div class="pl-legend">
+            <span><i style="background:#ffd400"></i>Reels</span>
+            <span><i style="background:#4a90ff"></i>Carrossel</span>
+            <span><i style="background:#9b5cff"></i>Story</span>
+            <span><i style="background:#19b36b"></i>Foto</span>
+          </div>
         </div>
-        <div id="pl-cal"></div>
-        <div id="pl-out" class="pl-grid" style="display:none"></div>
-        <div id="pl-empty" class="card" style="padding:18px;font-size:13.5px;color:var(--mute)">O calendário de conteúdo aparece aqui. 🗓️ Diga o cliente e o período.</div>
+        <div id="pl-cal" style="margin-top:12px"></div>
+        <div id="pl-out" class="pl-grid" style="display:none;margin-top:12px"></div>
+        <div id="pl-empty" class="card pl-emptybox"><div class="e">🗓️</div><b>Seu calendário de conteúdo aparece aqui</b>Diga o cliente e o período, e a IA monta o mês.</div>
       </div>
 
       <!-- =================== LEGENDAS =================== -->
@@ -7211,6 +7261,16 @@ function rotFileChosen(input){
   reader.readAsText(file);
 }
 function rotCopiar(){const t=document.getElementById('rot-out').textContent||'';navigator.clipboard?.writeText(t).then(()=>toast('Roteiros copiados'),()=>toast('Não consegui copiar'));}
+function rotSalvarNoDrive(){
+  const cliente=(document.getElementById('rot-cliente').value||'').trim();
+  const texto=(document.getElementById('rot-out').textContent||'').trim();
+  const tema=(document.getElementById('rot-tema').value||'').trim();
+  if(!cliente){toast&&toast('Diga o cliente pra salvar no Drive dele');return;}
+  if(!texto||texto.length<20){toast&&toast('Gere o roteiro primeiro');return;}
+  const titulo=(tema?tema.slice(0,60):'Roteiro')+' · '+new Date().toLocaleDateString('pt-BR');
+  const ok=driveSalvarDoc(cliente,'Roteiros',titulo,texto);
+  toast&&toast(ok?('💾 Salvo no Drive › '+cliente+' › Roteiros'):'Não consegui salvar');
+}
 /* ============ PLANEJAMENTO DE CONTEÚDO ============ */
 let _planIdeias=[];let _planCliente='';let _planView='cal';
 // Plano concreto da Vivenda (cronograma da Copa + produtos) — carrega de exemplo se nao houver plano salvo.
@@ -7233,6 +7293,16 @@ function planSalvar(cliente,periodo,ideias){
   state.planejamento=state.planejamento||{};
   state.planejamento[planKey(cliente)]={cliente,periodo,ideias,updatedAt:Date.now()};
   try{localStorage.setItem('wfa-planejamento',JSON.stringify(state.planejamento));}catch(e){}
+  // arquiva também na pasta do cliente no Drive (se tiver cliente nomeado)
+  try{if(cliente&&typeof driveSalvarPlanejamento==='function')driveSalvarPlanejamento(cliente,periodo,ideias);}catch(e){}
+}
+// Botão manual "Salvar no Drive" da página de planejamento
+function planSalvarNoDrive(){
+  if(!_planCliente){toast&&toast('Diga o nome do cliente pra salvar no Drive dele');return;}
+  if(!_planIdeias||!_planIdeias.length){toast&&toast('Gere o planejamento primeiro');return;}
+  const periodo=(document.getElementById('pl-periodo')&&document.getElementById('pl-periodo').value)||'';
+  const ok=driveSalvarPlanejamento(_planCliente,periodo,_planIdeias);
+  toast&&toast(ok?('💾 Salvo no Drive › '+_planCliente+' › Planejamentos'):'Não consegui salvar');
 }
 function planOpen(){
   if(_planIdeias.length)return; // ja tem algo na tela
@@ -7278,7 +7348,7 @@ function planFmtClass(f){const s=(f||'').toLowerCase();if(s.includes('carro'))re
 function planParseDate(s){const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);if(!m)return null;const d=new Date(+m[1],+m[2]-1,+m[3]);return isNaN(d.getTime())?null:d;}
 function planCardHtml(i,idx){
   const tema=mdEsc(i.tema||'');const ang=mdEsc(i.angulo||'');const leg=mdEsc(i.legenda||'');const dia=mdEsc(i.dia||'');const fmt=mdEsc(i.formato||'');const prod=mdEsc(i.produto||'');
-  return `<div class="pl-card"><div class="pl-top">${dia?`<span class="pl-dia">${dia}</span>`:''}${fmt?`<span class="pl-fmt">${fmt}</span>`:''}${prod?`<span class="pl-fmt">${prod}</span>`:''}</div><div class="pl-tema">${tema}</div>${ang?`<div class="pl-ang">${ang}</div>`:''}${leg?`<div class="pl-leg">“${leg}”</div>`:''}<div class="pl-acts"><button class="tb-btn" onclick="planParaRoteirista(${idx})">🎬 Roteirizar</button></div></div>`;
+  return `<div class="pl-card"><div class="pl-top">${dia?`<span class="pl-dia">${dia}</span>`:''}${fmt?`<span class="pl-fmt">${fmt}</span>`:''}${prod?`<span class="pl-fmt">${prod}</span>`:''}</div><div class="pl-tema">${tema}</div>${ang?`<div class="pl-ang">${ang}</div>`:''}${leg?`<div class="pl-leg">“${leg}”</div>`:''}<div class="pl-acts"><button class="tb-btn" onclick="planParaRoteirista(${idx})">🎬 Roteirizar</button><button class="tb-btn ghost" onclick="planParaTarefa(${idx})">＋ Tarefa</button></div></div>`;
 }
 function planRenderLista(){document.getElementById('pl-out').innerHTML=_planIdeias.map((i,idx)=>planCardHtml(i,idx)).join('');}
 function planRenderCalendar(){
@@ -7312,7 +7382,7 @@ function planDetalhe(idx){
     <div style="font-weight:800;font-size:18px;letter-spacing:-.01em;margin-bottom:8px">${mdEsc(i.tema||'')}</div>
     ${i.angulo?`<div style="font-size:13.5px;color:var(--txt);line-height:1.55;margin-bottom:10px">${mdEsc(i.angulo)}</div>`:''}
     ${i.legenda?`<div style="font-size:13px;color:var(--mute);font-style:italic;border-left:2px solid var(--line);padding-left:10px;margin-bottom:16px">“${mdEsc(i.legenda)}”</div>`:''}
-    <div style="display:flex;gap:8px"><button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="planParaRoteirista(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">🎬 Roteirizar</button><button class="tb-btn" onclick="planParaLegenda(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">✍️ Legenda</button><button class="tb-btn" onclick="var m=document.getElementById('pl-modal');m&&m.remove()">Fechar</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="planParaRoteirista(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">🎬 Roteirizar</button><button class="tb-btn" onclick="planParaLegenda(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">✍️ Legenda</button><button class="tb-btn" onclick="planParaTarefa(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">＋ Tarefa</button><button class="tb-btn" onclick="var m=document.getElementById('pl-modal');m&&m.remove()">Fechar</button></div>
   </div>`;
 }
 function planParaRoteirista(idx){
@@ -7328,6 +7398,37 @@ function planParaLegenda(idx){
   const i=_planIdeias[idx];if(!i)return;
   const tema=(i.tema||'')+(i.angulo?' — '+i.angulo:'')+(i.legenda?'\nLegenda base: '+i.legenda:'');
   legDeTema(tema,_planCliente);
+}
+// Transforma uma ideia do planejamento numa TAREFA real (planejamento -> execução)
+function planClienteId(){
+  const nm=(_planCliente||'').toLowerCase().trim();if(!nm)return '';
+  const c=CLIENTES.find(x=>(x.nm||'').toLowerCase()===nm)||CLIENTES.find(x=>nm.includes((x.nm||'').toLowerCase())||(x.nm||'').toLowerCase().includes(nm));
+  return c?c.id:'';
+}
+function planParaTarefa(idx){
+  const i=_planIdeias[idx];if(!i)return;
+  const fmt=i.formato||'Conteúdo';
+  const title=fmt+': '+(i.tema||'Sem tema');
+  const data=(planParseDate(i.data)?i.data.slice(0,10):'')||'';
+  const resp=(typeof RESPONSAVEIS_FN!=='undefined'&&RESPONSAVEIS_FN['Criador'])||'';
+  state.tarefas=state.tarefas||[];
+  state.tarefas.push({
+    id:'pl'+Date.now()+'_'+idx,
+    title:title.slice(0,140),
+    desc:(i.angulo||'')+(i.legenda?'\n\nLegenda base: '+i.legenda:''),
+    funcao:'Criador',
+    clienteId:planClienteId(),
+    resp,
+    data,
+    prio:'media',
+    status:'backlog',
+    tags:['conteúdo',(i.formato||'').toLowerCase()].filter(Boolean),
+    checklist:[],sprintN:null,
+    origem:'planejamento',
+    criadaEm:new Date().toISOString()
+  });
+  if(typeof saveTarefas==='function')saveTarefas();else localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));
+  toast&&toast('✓ Virou tarefa · ver em Atividades › Tarefas');
 }
 /* ============ LEGENDAS ============ */
 async function legGerar(){
@@ -7529,6 +7630,47 @@ function renderConselhoDoc(sub){
     </div>`;
   }).join('');
 }
+// Salva o planejamento de conteúdo na pasta "Planejamentos" do cliente no Drive.
+function driveSalvarPlanejamento(cliente,periodo,ideias){
+  if(!cliente||!ideias||!ideias.length)return false;
+  DRIVE=driveLoad();
+  const cli=String(cliente).trim();
+  if(!DRIVE[cli])DRIVE[cli]={ico:driveMono(cli),pastas:{}};
+  if(!DRIVE[cli].pastas)DRIVE[cli].pastas={};
+  DRIVE[cli].pastas['Planejamentos']={ico:'PL',tipo:'planejamento',meta:ideias.length+' ideias'+(periodo?' · '+periodo:''),plano:{cliente:cli,periodo:periodo||'',ideias,updatedAt:Date.now()}};
+  driveSave();
+  return true;
+}
+// Salva um roteiro/legenda gerado num "doc" do cliente no Drive (mesma estrutura, reutilizável).
+function driveSalvarDoc(cliente,pasta,titulo,conteudo){
+  if(!cliente||!conteudo)return false;
+  DRIVE=driveLoad();const cli=String(cliente).trim();
+  if(!DRIVE[cli])DRIVE[cli]={ico:driveMono(cli),pastas:{}};
+  if(!DRIVE[cli].pastas)DRIVE[cli].pastas={};
+  const folder=DRIVE[cli].pastas[pasta]&&DRIVE[cli].pastas[pasta].tipo==='textos'?DRIVE[cli].pastas[pasta]:{ico:driveMono(pasta),tipo:'textos',items:[]};
+  folder.items=Array.isArray(folder.items)?folder.items:[];
+  folder.items.unshift({id:'d'+Date.now(),titulo:titulo||'Documento',texto:String(conteudo),at:new Date().toISOString()});
+  folder.items=folder.items.slice(0,60);folder.meta=folder.items.length+' documentos';
+  DRIVE[cli].pastas[pasta]=folder;driveSave();return true;
+}
+function renderPlanejamentoDoc(sub){
+  const p=sub.plano||{};const ideias=Array.isArray(p.ideias)?p.ideias:[];
+  if(!ideias.length)return '<div class="card" style="padding:24px;color:var(--mute)">Nenhum planejamento salvo ainda. Gere um em Conteúdo › Planejamento.</div>';
+  return ideias.map(i=>`<div class="card" style="padding:13px 15px;margin-bottom:9px;border-left:3px solid var(--yel,#ffd400)">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:5px">${i.dia?`<span class="pl-dia">${mdEsc(i.dia)}</span>`:''}${i.formato?`<span class="pl-fmt">${mdEsc(i.formato)}</span>`:''}${i.produto?`<span class="pl-fmt">${mdEsc(i.produto)}</span>`:''}</div>
+    <div style="font-weight:800;font-size:14px;color:var(--ink)">${mdEsc(i.tema||'')}</div>
+    ${i.angulo?`<div style="font-size:12.5px;color:var(--txt);line-height:1.5;margin-top:3px">${mdEsc(i.angulo)}</div>`:''}
+    ${i.legenda?`<div style="font-size:12px;color:var(--mute);font-style:italic;margin-top:5px">“${mdEsc(i.legenda)}”</div>`:''}
+  </div>`).join('');
+}
+function renderTextosDoc(sub){
+  const items=Array.isArray(sub.items)?sub.items:[];
+  if(!items.length)return '<div class="card" style="padding:24px;color:var(--mute)">Nenhum documento salvo aqui ainda.</div>';
+  return items.map(it=>`<div class="card" style="padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--yel,#ffd400)">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:6px"><div style="font-size:14px;font-weight:800;color:var(--ink)">${mdEsc(it.titulo||'Documento')}</div><div style="font-size:11px;color:var(--mute);font-family:var(--mono);white-space:nowrap">${mdEsc((it.at||'').slice(0,10).split('-').reverse().join('/'))}</div></div>
+    <div style="font-size:12.5px;color:var(--txt);line-height:1.6;white-space:pre-wrap">${mdEsc(it.texto||'')}</div>
+  </div>`).join('');
+}
 function driveNovaBtn(label){return `<div class="dz-card dz-add" onclick="driveNovaPasta()"><div class="dz-ico" style="background:#fff;border:1.5px dashed var(--line-2);color:var(--mute-2)">+</div><div class="dz-nm">${label}</div><div class="dz-meta">criar nova</div></div>`;}
 function renderDrive(){
   const body=document.getElementById('dz-body');const cr=document.getElementById('dz-crumbs');if(!body)return;
@@ -7551,6 +7693,10 @@ function renderDrive(){
     body.innerHTML=`<div class="dz-doc-head"><h2>Roteiros Vivenda — Junho 2026</h2><button class="tb-btn" onclick="driveCopiarRoteiros()">Copiar tudo</button></div>${renderRoteirosVivenda()}`;
   }else if(subAtual&&subAtual.tipo==='conselho'){
     body.innerHTML=`<div class="dz-doc-head"><h2>Ideias do Conselho — ${mdEsc(DRIVE_PATH[0])}</h2><button class="tb-btn" onclick="driveSyncConselhoBtn()">↻ Atualizar</button></div>${renderConselhoDoc(subAtual)}`;
+  }else if(subAtual&&subAtual.tipo==='planejamento'){
+    body.innerHTML=`<div class="dz-doc-head"><h2>Planejamento — ${mdEsc(DRIVE_PATH[0])}</h2><span style="font-size:12px;color:var(--mute);font-weight:600">${mdEsc((subAtual.plano&&subAtual.plano.periodo)||'')}</span></div>${renderPlanejamentoDoc(subAtual)}`;
+  }else if(subAtual&&subAtual.tipo==='textos'){
+    body.innerHTML=`<div class="dz-doc-head"><h2>${mdEsc(DRIVE_PATH[1])} — ${mdEsc(DRIVE_PATH[0])}</h2></div>${renderTextosDoc(subAtual)}`;
   }else{
     body.innerHTML=`<div class="card" style="padding:24px;color:var(--mute)">Pasta vazia por enquanto. Use "Enviar arquivo" lá em cima pra subir documentos aqui.</div>`;
   }
