@@ -274,6 +274,21 @@ export const Route = createFileRoute("/api/workflowark/state")({
           return json({ ok: true, token });
         }
 
+        // Portal do cliente: gera um link público PERSISTENTE por cliente. O portal mostra
+        // dados AO VIVO (plano de conteúdo atual) e deixa o cliente abrir demandas.
+        if (action === "create-portal") {
+          const cliente = String(body.cliente ?? "").trim();
+          const planKey = String(body.planKey ?? "").trim();
+          if (!cliente) return json({ error: "Diga o cliente." }, { status: 400 });
+          const token = ((globalThis.crypto?.randomUUID?.() ?? (Date.now() + "" + Math.random())) + "").replace(/[^a-zA-Z0-9]/g, "");
+          const data = { cliente, planKey, agency: "ARK Content", createdAt: new Date().toISOString() };
+          const { error } = await ctx.db
+            .from("workflowark_state")
+            .upsert({ key: `wfa-portal-${token}`, data, updated_by: ctx.user.id });
+          if (error) return json({ error: "Não foi possível gerar o portal." }, { status: 500 });
+          return json({ ok: true, token });
+        }
+
         if (action === "add-member") {
           if (!ctx.isAdmin) return json({ error: "Apenas admin pode alterar acessos." }, { status: 403 });
           const email = String(body.email ?? "").trim().toLowerCase();

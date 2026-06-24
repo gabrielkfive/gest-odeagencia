@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SistemaRouteImport } from './routes/sistema'
+import { Route as PortalRouteImport } from './routes/portal'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AprovarRouteImport } from './routes/aprovar'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -19,6 +20,7 @@ import { Route as ApiIaRouteImport } from './routes/api/ia'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
 import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowark.sheet'
+import { Route as ApiWorkflowarkPortalRouteImport } from './routes/api/workflowark.portal'
 import { Route as ApiWorkflowarkApproveRouteImport } from './routes/api/workflowark.approve'
 import { Route as ApiWorkflowarkAiCheckRouteImport } from './routes/api/workflowark.ai-check'
 import { Route as ApiWorkflowarkAgentsRunRouteImport } from './routes/api/workflowark.agents-run'
@@ -34,6 +36,11 @@ import { Route as ApiWorkflowarkWhatsappWebhookSplatRouteImport } from './routes
 const SistemaRoute = SistemaRouteImport.update({
   id: '/sistema',
   path: '/sistema',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalRoute = PortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -78,6 +85,11 @@ const ApiWorkflowarkStateRoute = ApiWorkflowarkStateRouteImport.update({
 const ApiWorkflowarkSheetRoute = ApiWorkflowarkSheetRouteImport.update({
   id: '/api/workflowark/sheet',
   path: '/api/workflowark/sheet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWorkflowarkPortalRoute = ApiWorkflowarkPortalRouteImport.update({
+  id: '/api/workflowark/portal',
+  path: '/api/workflowark/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWorkflowarkApproveRoute = ApiWorkflowarkApproveRouteImport.update({
@@ -144,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
+  '/portal': typeof PortalRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
@@ -155,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
+  '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
@@ -166,6 +180,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
+  '/portal': typeof PortalRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
@@ -177,6 +192,7 @@ export interface FileRoutesByTo {
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
+  '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
@@ -190,6 +206,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
+  '/portal': typeof PortalRoute
   '/sistema': typeof SistemaRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/api/ia': typeof ApiIaRoute
@@ -201,6 +218,7 @@ export interface FileRoutesById {
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
+  '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
@@ -214,6 +232,7 @@ export interface FileRouteTypes {
     | '/'
     | '/aprovar'
     | '/auth'
+    | '/portal'
     | '/sistema'
     | '/app'
     | '/api/ia'
@@ -225,6 +244,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
+    | '/api/workflowark/portal'
     | '/api/workflowark/sheet'
     | '/api/workflowark/state'
     | '/api/workflowark/whatsapp/qr'
@@ -236,6 +256,7 @@ export interface FileRouteTypes {
     | '/'
     | '/aprovar'
     | '/auth'
+    | '/portal'
     | '/sistema'
     | '/app'
     | '/api/ia'
@@ -247,6 +268,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
+    | '/api/workflowark/portal'
     | '/api/workflowark/sheet'
     | '/api/workflowark/state'
     | '/api/workflowark/whatsapp/qr'
@@ -259,6 +281,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/aprovar'
     | '/auth'
+    | '/portal'
     | '/sistema'
     | '/_authenticated/app'
     | '/api/ia'
@@ -270,6 +293,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
+    | '/api/workflowark/portal'
     | '/api/workflowark/sheet'
     | '/api/workflowark/state'
     | '/api/workflowark/whatsapp/qr'
@@ -283,6 +307,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AprovarRoute: typeof AprovarRoute
   AuthRoute: typeof AuthRoute
+  PortalRoute: typeof PortalRoute
   SistemaRoute: typeof SistemaRoute
   ApiIaRoute: typeof ApiIaRoute
   TccApresentacaoRoute: typeof TccApresentacaoRoute
@@ -293,6 +318,7 @@ export interface RootRouteChildren {
   ApiWorkflowarkAgentsRunRoute: typeof ApiWorkflowarkAgentsRunRoute
   ApiWorkflowarkAiCheckRoute: typeof ApiWorkflowarkAiCheckRoute
   ApiWorkflowarkApproveRoute: typeof ApiWorkflowarkApproveRoute
+  ApiWorkflowarkPortalRoute: typeof ApiWorkflowarkPortalRoute
   ApiWorkflowarkSheetRoute: typeof ApiWorkflowarkSheetRoute
   ApiWorkflowarkStateRoute: typeof ApiWorkflowarkStateRoute
   ApiWorkflowarkWhatsappQrRoute: typeof ApiWorkflowarkWhatsappQrRoute
@@ -307,6 +333,13 @@ declare module '@tanstack/react-router' {
       path: '/sistema'
       fullPath: '/sistema'
       preLoaderRoute: typeof SistemaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal': {
+      id: '/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof PortalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -370,6 +403,13 @@ declare module '@tanstack/react-router' {
       path: '/api/workflowark/sheet'
       fullPath: '/api/workflowark/sheet'
       preLoaderRoute: typeof ApiWorkflowarkSheetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/portal': {
+      id: '/api/workflowark/portal'
+      path: '/api/workflowark/portal'
+      fullPath: '/api/workflowark/portal'
+      preLoaderRoute: typeof ApiWorkflowarkPortalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/workflowark/approve': {
@@ -483,6 +523,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AprovarRoute: AprovarRoute,
   AuthRoute: AuthRoute,
+  PortalRoute: PortalRoute,
   SistemaRoute: SistemaRoute,
   ApiIaRoute: ApiIaRoute,
   TccApresentacaoRoute: TccApresentacaoRoute,
@@ -493,6 +534,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWorkflowarkAgentsRunRoute: ApiWorkflowarkAgentsRunRoute,
   ApiWorkflowarkAiCheckRoute: ApiWorkflowarkAiCheckRoute,
   ApiWorkflowarkApproveRoute: ApiWorkflowarkApproveRoute,
+  ApiWorkflowarkPortalRoute: ApiWorkflowarkPortalRoute,
   ApiWorkflowarkSheetRoute: ApiWorkflowarkSheetRoute,
   ApiWorkflowarkStateRoute: ApiWorkflowarkStateRoute,
   ApiWorkflowarkWhatsappQrRoute: ApiWorkflowarkWhatsappQrRoute,

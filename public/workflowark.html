@@ -2678,6 +2678,7 @@ function iniciarAutoSync(){
             <button class="pl-save" onclick="planSalvarNoDrive()">💾 Salvar no Drive</button>
             <button class="pl-save" onclick="planGerarAprovacao(this)">🔗 Link de aprovação</button>
             <button class="pl-save" onclick="planRoteirizarTudo(this)">🎬 Roteirizar tudo</button>
+            <button class="pl-save" onclick="planGerarPortal(this)">🌐 Portal do cliente</button>
           </div>
           <div class="pl-legend">
             <span><i style="background:#ffd400"></i>Reels</span>
@@ -7583,6 +7584,22 @@ async function planGerarAprovacao(btn){
     toast&&toast('🔗 Link de aprovação copiado — manda pro cliente');
   }catch(e){toast&&toast('⚠ '+(e.message||'Não consegui gerar o link'));}
   finally{if(btn){btn.disabled=false;btn.textContent=old||'🔗 Link de aprovação';}}
+}
+// Gera (uma vez por cliente) o link PERSISTENTE do Portal do Cliente e copia.
+async function planGerarPortal(btn){
+  const cliente=(document.getElementById('pl-cliente')&&document.getElementById('pl-cliente').value)||_planCliente||'';
+  if(!cliente){toast&&toast('Diga o nome do cliente primeiro');return;}
+  const pk=(typeof planKey==='function')?planKey(cliente):String(cliente).toLowerCase();
+  const old=btn&&btn.textContent;if(btn){btn.disabled=true;btn.textContent='🌐 Gerando...';}
+  try{
+    const r=await cloudCall('save',{action:'create-portal',cliente,planKey:pk});
+    if(!r||!r.token)throw new Error((r&&r.error)||'Falha ao gerar');
+    const url=location.origin+'/portal?t='+r.token;
+    try{await navigator.clipboard.writeText(url);}catch(e){}
+    if(typeof prompt==='function')prompt('Portal do cliente '+cliente+' (link copiado · mande pra ele):',url);
+    toast&&toast('🌐 Portal do cliente gerado e copiado');
+  }catch(e){toast&&toast('⚠ '+(e.message||'Não consegui gerar o portal'));}
+  finally{if(btn){btn.disabled=false;btn.textContent=old||'🌐 Portal do cliente';}}
 }
 function planOpen(){
   if(_planIdeias.length)return; // ja tem algo na tela
