@@ -2140,8 +2140,8 @@ function wfaMergeById(remoteArr,localArr,localPrevalece){
   (Array.isArray(localArr)?localArr:[]).forEach(o=>{if(o&&o.id){if(!(o.id in byId)){order.push(o.id);byId[o.id]=o;}else if(localPrevalece)byId[o.id]=o;}});
   return order.map(id=>byId[id]);
 }
-const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes'];
-const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events']; // itens apagados nunca voltam
+const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes','wfa-crm'];
+const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-crm']; // itens apagados nunca voltam
 /* LÁPIDE DE EXCLUSÃO: ids apagados ficam em wfa-deleted-ids (sincronizado). A mescla
    nunca ressuscita um id que está na lápide. Resolve "excluo e a tarefa volta". */
 function loadDeleted(){try{return new Set(JSON.parse(localStorage.getItem('wfa-deleted-ids')||'[]'));}catch(e){return new Set();}}
@@ -8661,6 +8661,7 @@ function crmSaveLead(){
 }
 function crmDeleteLead(){
   const id=document.getElementById('crm-edit-id').value;if(!id||!confirm('Excluir este lead permanentemente?'))return;
+  if(typeof addDeleted==='function')addDeleted(id); // lápide: a mescla nunca ressuscita um lead apagado
   saveCrm(loadCrm().filter(l=>l.id!==id));crmCloseModal();toast('Lead excluído');
 }
 function crmExportCSV(){
