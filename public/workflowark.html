@@ -7388,8 +7388,11 @@ function renderWhatsapp(){
   // se estiver gravando áudio, mantém o botão no estado "gravando" após o redesenho
   if(typeof WPP_REC!=='undefined'&&WPP_REC&&WPP_REC.state==='recording')wppMicBtnState(true);
   // restaura digitação/busca após o redesenho
-  const _ni=document.getElementById('wpp-input');if(_ni&&_ipVal){_ni.value=_ipVal;if(_ipFoc){_ni.focus();try{_ni.setSelectionRange(_ipVal.length,_ipVal.length);}catch(e){}}}
-  const _ns=document.getElementById('wpp-search');if(_ns&&_seVal){_ns.value=_seVal;if(_seFoc){_ns.focus();}wppFilter();}
+  // Restaura valor E FOCO. Antes só restaurava se houvesse texto (_ipVal) — então um campo
+  // VAZIO porém focado perdia o foco no re-render de 3,5s, e o Ctrl+V (texto ou print) não
+  // tinha onde cair. Agora o foco volta sempre que o campo estava focado, mesmo vazio.
+  const _ni=document.getElementById('wpp-input');if(_ni){if(_ipVal)_ni.value=_ipVal;if(_ipFoc){_ni.focus();try{_ni.setSelectionRange(_ni.value.length,_ni.value.length);}catch(e){}}}
+  const _ns=document.getElementById('wpp-search');if(_ns){if(_seVal)_ns.value=_seVal;if(_seFoc)_ns.focus();if(_seVal)wppFilter();}
   if(active.unread){active.unread=0;try{cloudCall('save',{action:'wa-mark-read',phone:active.phone});}catch(e){}if(typeof updateBadges==='function')updateBadges();}
   // 1ª vez: se há grupos sem nome real, sincroniza sozinho (sem o Gabriel precisar clicar)
   if(WFA_CLOUD_READY && !WPP_AUTOSYNC && list.some(c=>c.isGroup&&!c.subjFetched)){WPP_AUTOSYNC=true;setTimeout(wppSyncGroups,800);}
