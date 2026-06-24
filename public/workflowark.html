@@ -6026,14 +6026,20 @@ setInterval(()=>{try{renderMonthPill();renderMeuDia();}catch(e){}},60000);
 try{restoreLastPage();}catch(e){} // tenta restaurar a aba já no boot (retenta após sync se RBAC ainda não liberou)
 
 /* Restaura a última aba aberta ao recarregar (chamada após o sync/RBAC; roda 1x) */
-let WFA_PAGE_RESTORED=false;
+// var (não let): é chamada no boot ANTES desta linha; com let dava temporal dead zone,
+// a função estourava e a aba nunca era restaurada (caía sempre no painel).
+var WFA_PAGE_RESTORED=false;
 function restoreLastPage(){
   if(WFA_PAGE_RESTORED)return;
-  // HOME = Meu Painel (escolha do Gabriel). Ao abrir/recarregar sempre cai no painel,
-  // que já é a página ativa no HTML — então aqui só marcamos como feito e garantimos
-  // que os widgets renderizem (não há clique de nav no boot pra disparar isso).
-  WFA_PAGE_RESTORED=true;
-  try{ if(typeof renderWidgets==='function')renderWidgets(); }catch(e){}
+  try{
+    const _lp=localStorage.getItem('wfa-current-page');
+    // Abertura nova (sem aba salva) OU já estava no painel → home = Meu Painel (já ativo no HTML).
+    if(!_lp || _lp==='painel'){ WFA_PAGE_RESTORED=true; return; }
+    // Recarregou trabalhando em outra aba → volta pra onde estava (não força o painel).
+    const _el=document.querySelector('[data-nav="'+_lp+'"]');
+    if(_el && _el.style.display!=='none'){ _el.click(); WFA_PAGE_RESTORED=true; }
+    // se a aba ainda está escondida (RBAC não liberou), NÃO marca feito: retenta após o sync.
+  }catch(e){}
 }
 
 /* ============ HELPERS ============ */
