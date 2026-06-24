@@ -3622,6 +3622,31 @@ function iniciarAutoSync(){
   </div>
 </div>
 
+<!-- =================== ONBOARDING DE NOVO CLIENTE =================== -->
+<div class="modal-bg" id="modal-onboarding">
+  <div class="modal" style="max-width:560px;width:95vw">
+    <style>
+      #modal-onboarding .onb-bar{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin:4px 0 16px}
+      #modal-onboarding .onb-bar i{display:block;height:100%;background:var(--yel,#ffd400);transition:width .3s}
+      #modal-onboarding .onb-row{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line)}
+      #modal-onboarding .onb-row:last-child{border-bottom:none}
+      #modal-onboarding .onb-check{width:24px;height:24px;flex-shrink:0;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:#fff;cursor:pointer;font-weight:800;font-size:13px;display:grid;place-items:center}
+      #modal-onboarding .onb-row.done .onb-check{background:var(--green,#19b36b);border-color:var(--green,#19b36b)}
+      #modal-onboarding .onb-row.done .onb-lb{text-decoration:line-through;color:var(--mute)}
+      #modal-onboarding .onb-mid{flex:1;min-width:0}
+      #modal-onboarding .onb-lb{font-size:13.5px;font-weight:600;color:var(--ink)}
+      #modal-onboarding .onb-sub{font-size:11px;color:var(--mute);margin-top:1px}
+    </style>
+    <div class="modal-head"><h3><span class="ic">🚀</span>Onboarding · <span id="onb-cli-nome"></span></h3><span class="x" onclick="closeModal('modal-onboarding')">✕</span></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--mute);font-weight:700"><span>Progresso da entrada do cliente</span><span id="onb-pct">0/0</span></div>
+      <div class="onb-bar"><i id="onb-prog" style="width:0%"></i></div>
+      <div id="onb-list"></div>
+    </div>
+    <div class="modal-foot"><button class="icobtn" onclick="closeModal('modal-onboarding')">Fechar</button><div style="flex:1"></div><button class="tb-btn" onclick="var n=document.querySelector('[data-nav=tarefas]');n&&n.click();closeModal('modal-onboarding')">Ver no Kanban</button></div>
+  </div>
+</div>
+
 <!-- =================== BANCO DE CRIATIVOS =================== -->
 <div class="modal-bg" id="modal-criativos">
   <div class="modal" style="max-width:700px;width:95vw">
@@ -3853,7 +3878,9 @@ function cliSave(){
     let id=cliSlug(nm); const all=CLIENTES_BASE.concat(arr);
     while(all.some(x=>x.id===id)) id=id+'-'+Math.floor(Math.random()*99);
     arr.push({id,nm,tipo,plano,valor,cap,status,meta,extra:meta});
-    saveClientesCustom(arr);toast('Cliente "'+nm+'" adicionado ✓');
+    saveClientesCustom(arr);
+    let _onb=0;try{_onb=onboardingGerar(id,true);}catch(e){}
+    toast('Cliente "'+nm+'" adicionado ✓'+(_onb?(' · '+_onb+' tarefas de onboarding'):''));
   }
   closeModal('modal-cliente');
 }
@@ -4451,6 +4478,7 @@ function cliCard(c){
       <button class="cli-btn pri" onclick="event.stopPropagation();cliDetalhe('${c.id}')">Abrir ficha</button>
       <button class="cli-btn" onclick="event.stopPropagation();relatorioCliente('${c.id}')">📄 Relatório</button>
       <button class="cli-btn" onclick="event.stopPropagation();abrirCriativos('${c.id}')">📈 Criativos</button>
+      <button class="cli-btn" onclick="event.stopPropagation();abrirOnboarding('${c.id}')">🚀 Onboarding</button>
       ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
       ${c.custom?`<button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">Editar</button>`:''}
     </div>
@@ -4504,6 +4532,64 @@ function criDel(id){
 function criParaTexto(id){
   const arr=criGet(id);if(!arr.length)return '';
   return 'CRIATIVOS QUE JÁ PERFORMARAM (inspire-se no que funcionou):\n'+arr.map(it=>`- [${it.formato}] ${it.nota||it.url}${it.nota?(' — '+it.url):''}`).join('\n');
+}
+/* ============ ONBOARDING DE NOVO CLIENTE ============ */
+const ONBOARDING_STEPS=[
+  {label:'Assinar contrato e formalizar',funcao:'Account Manager'},
+  {label:'Coletar acessos (Meta, Instagram, Google)',funcao:'Account Manager'},
+  {label:'Reunião de kickoff / briefing',funcao:'Account Manager'},
+  {label:'Definir posicionamento e pilares de conteúdo',funcao:'Account Manager'},
+  {label:'Agendar primeira captação',funcao:'Captação'},
+  {label:'Montar primeiro planejamento do mês',funcao:'Account Manager'},
+  {label:'Subir primeiro criativo',funcao:'Criador'},
+  {label:'Configurar campanha de tráfego',funcao:'Gestor de Tráfego'}
+];
+let ONB_CID=null;
+function onbKey(id,i){return 'onb:'+id+':'+i;}
+function onboardingGerar(id,silent){
+  const c=CLIENTES.find(x=>x.id===id);if(!c)return 0;
+  state.tarefas=state.tarefas||[];
+  let criadas=0;const hoje=new Date().toISOString().split('T')[0];
+  ONBOARDING_STEPS.forEach((s,i)=>{
+    const key=onbKey(id,i);
+    if(state.tarefas.some(t=>t.onbKey===key))return;
+    state.tarefas.push({id:'onb'+Date.now()+'_'+i,title:s.label+' · '+c.nm,desc:'',funcao:s.funcao,clienteId:id,resp:RESPONSAVEIS_FN[s.funcao]||'',data:hoje,prio:i<3?'alta':'media',status:'backlog',tags:['onboarding'],checklist:[],sprintN:0,onbKey:key,origem:'onboarding',criadaEm:new Date().toISOString()});
+    criadas++;
+  });
+  if(criadas){if(typeof saveTarefas==='function')saveTarefas();else localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));}
+  if(!silent)toast&&toast(criadas?(criadas+' tarefas de onboarding criadas ✓'):'Onboarding já estava criado');
+  return criadas;
+}
+function abrirOnboarding(id){
+  const c=CLIENTES.find(x=>x.id===id);if(!c)return;ONB_CID=id;
+  const nm=document.getElementById('onb-cli-nome');if(nm)nm.textContent=c.nm;
+  if(!state.tarefas.some(t=>t.onbKey&&t.onbKey.startsWith('onb:'+id+':')))onboardingGerar(id,true);
+  renderOnboarding();
+  document.getElementById('modal-onboarding').classList.add('open');
+}
+function renderOnboarding(){
+  const wrap=document.getElementById('onb-list');if(!wrap)return;const id=ONB_CID;
+  wrap.innerHTML=ONBOARDING_STEPS.map((s,i)=>{
+    const t=state.tarefas.find(x=>x.onbKey===onbKey(id,i));
+    const done=t&&t.status==='concluido';
+    return `<div class="onb-row ${done?'done':''}">
+      <button class="onb-check" onclick="onbToggle('${id}',${i})" title="${done?'Concluído':'Marcar como feito'}">${done?'✓':''}</button>
+      <div class="onb-mid"><div class="onb-lb">${escapeHtml(s.label)}</div><div class="onb-sub">${escapeHtml(s.funcao)} · ${escapeHtml((t&&t.resp)||RESPONSAVEIS_FN[s.funcao]||'—')}</div></div>
+    </div>`;
+  }).join('');
+  const total=ONBOARDING_STEPS.length;
+  const doneN=ONBOARDING_STEPS.filter((s,i)=>{const t=state.tarefas.find(x=>x.onbKey===onbKey(id,i));return t&&t.status==='concluido';}).length;
+  const f=document.getElementById('onb-prog');if(f)f.style.width=Math.round(doneN/total*100)+'%';
+  const p=document.getElementById('onb-pct');if(p)p.textContent=doneN+'/'+total;
+}
+function onbToggle(id,i){
+  const key=onbKey(id,i);let t=state.tarefas.find(x=>x.onbKey===key);
+  if(!t){onboardingGerar(id,true);t=state.tarefas.find(x=>x.onbKey===key);}
+  if(!t)return;
+  t.status=t.status==='concluido'?'backlog':'concluido';
+  if(t.status==='concluido')t.criadaEm=new Date().toISOString();
+  if(typeof saveTarefas==='function')saveTarefas();else localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));
+  renderOnboarding();
 }
 /* ============ ALERTA DE SAÚDE DOS CLIENTES ============ */
 // Não é flood automático: é um card honesto no topo da página Clientes que
