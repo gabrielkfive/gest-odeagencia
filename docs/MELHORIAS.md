@@ -37,5 +37,19 @@ entre sessões. Cada item: o que é, status e (quando subiu) a versão/commit.
   > **Bloqueio único:** Gabriel abrir conta Twilio + número (passo-a-passo em `docs/PLANO-POWER-DIALER.md`).
   > Assim que houver SID + API Key + número, construo e verifico a Fase 1.
 
-### Abertas (livres pra pegar)
-- [ ] (adicione aqui o que vier na próxima conversa)
+### Backlog de ONTEM (06-23) — recuperado do transcript da sessão `26224ad4`
+> Os itens 1–6 acima (modal tarefas, relatório, saúde, planejamento/calendário, legendas,
+> banco de criativos) + onboarding eram desta lista e foram concluídos/subidos ontem.
+> O que sobrou de ontem, ainda ABERTO:
+
+- [ ] **Aprovação de conteúdo pelo cliente (por link)** — cliente aprova sem precisar do grupo. (Buildável agora.)
+- [ ] **Roteirista autônomo** — ler a base real (Docs da Vivenda + planejamento) e gerar os 12 roteiros sozinho, sem caixinha de prompt. (Buildável; depende de acesso ao Drive/Docs já plugado.)
+- [ ] **JARVIS: barge-in real** — interromper o JARVIS falando por cima (precisa cancelamento de eco). (Mais técnico, áudio.)
+- [ ] **JARVIS: wake word / 2 palmas** — acordar o JARVIS por voz de qualquer tela.
+- [ ] **JARVIS: ampliar cobertura/confiabilidade do executor de tarefas por voz.**
+- [ ] **Portal do cliente externo** — portal de verdade (cliente entra, vê entregas, abre demanda). "Build grande".
+- [ ] _(verificar se já saíram: botões adicionar cliente E colaborador · régua dos 15 gerar tarefas na jornada · concluir tarefa no Meu Dia)_
+
+### Abertas (sugeridas hoje — track de vendas/UX)
+- [ ] CRM ↔ WhatsApp · Lembrete de follow quente · Cobrança em 1 clique · Importar leads em massa
+- [ ] Painel de vendas · Busca global · Dark mode · Atalhos · Templates WhatsApp · Relatório semanal
