@@ -35,6 +35,8 @@ entre sessões. Cada item: o que é, status e (quando subiu) a versão/commit.
 - [ ] CRM: IA em tempo real transcrevendo a call + sugerindo resposta pro SDR + bip de contexto
   > Ambas exigem telefonia de verdade (ex.: Twilio/Zenvia) com credenciais e custo por minuto.
   > Antes de codar: o Gabriel decide o provedor e abre conta. Aí a gente engata.
+  > **Plano técnico pronto em `docs/PLANO-POWER-DIALER.md`** (arquitetura Twilio + Cloudflare,
+  > fases, custos a verificar e as 3 decisões que faltam).
 
 ### Abertas (livres pra pegar)
 - [ ] (adicione aqui o que vier na próxima conversa)
