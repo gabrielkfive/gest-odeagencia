@@ -3515,6 +3515,40 @@ function iniciarAutoSync(){
   </div>
 </div>
 
+<!-- =================== RELATÓRIO DO CLIENTE =================== -->
+<div class="modal-bg" id="modal-relatorio">
+  <div class="modal" style="max-width:680px;width:95vw">
+    <style>
+      #modal-relatorio .rel-head{display:flex;align-items:center;gap:13px;padding:4px 0 16px;border-bottom:1px solid var(--line);margin-bottom:18px}
+      #modal-relatorio .rel-av{width:46px;height:46px;border-radius:13px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;flex-shrink:0}
+      #modal-relatorio .rel-htxt h2{font-size:20px;font-weight:800;color:var(--ink);margin:0;line-height:1.15}
+      #modal-relatorio .rel-htxt p{font-size:12px;color:var(--mute);margin:3px 0 0}
+      #modal-relatorio .rel-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:18px}
+      #modal-relatorio .rel-kpi{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:13px 11px;text-align:center}
+      #modal-relatorio .rel-kpi .v{font-size:24px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
+      #modal-relatorio .rel-kpi .l{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin-top:5px}
+      #modal-relatorio .rel-kpi.yel .v{color:#b36200}#modal-relatorio .rel-kpi.green .v{color:var(--green,#19b36b)}#modal-relatorio .rel-kpi.red .v{color:var(--red,#e0364f)}
+      #modal-relatorio .rel-sec{margin-bottom:16px}
+      #modal-relatorio .rel-sec h3{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:0 0 9px}
+      #modal-relatorio .rel-bar{height:9px;border-radius:6px;background:var(--line);overflow:hidden;margin-bottom:6px}
+      #modal-relatorio .rel-bar i{display:block;height:100%;background:var(--yel);border-radius:6px}
+      #modal-relatorio .rel-list{display:flex;flex-direction:column;gap:6px}
+      #modal-relatorio .rel-item{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+      #modal-relatorio .rel-item .ok{color:var(--green,#19b36b);font-weight:800}
+      #modal-relatorio .rel-empty{font-size:12.5px;color:var(--mute);padding:6px 0}
+      @media(max-width:560px){#modal-relatorio .rel-kpis{grid-template-columns:repeat(2,1fr)}}
+    </style>
+    <div class="modal-head"><h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Relatório do cliente</h3><span class="x" onclick="closeModal('modal-relatorio')">✕</span></div>
+    <div class="modal-body" id="rel-body"></div>
+    <div class="modal-foot">
+      <button class="icobtn" onclick="closeModal('modal-relatorio')">Fechar</button>
+      <div style="flex:1"></div>
+      <button class="icobtn" onclick="relatorioCopiar()">📋 Copiar resumo</button>
+      <button class="tb-btn" onclick="relatorioImprimir()">🖨 Imprimir / PDF</button>
+    </div>
+  </div>
+</div>
+
 <!-- =================== CONFIGURAÇÕES =================== -->
 <div class="modal-bg" id="modal-settings">
   <div class="modal" style="max-width:660px">
@@ -4306,10 +4340,91 @@ function cliCard(c){
     <div class="cli-act2"><span class="ai">▸</span><span>${c.meta}</span></div>
     <div class="cli-btns">
       <button class="cli-btn pri" onclick="event.stopPropagation();cliDetalhe('${c.id}')">Abrir ficha</button>
+      <button class="cli-btn" onclick="event.stopPropagation();relatorioCliente('${c.id}')">📄 Relatório</button>
       ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
       ${c.custom?`<button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">Editar</button>`:''}
     </div>
   </div>`;
+}
+/* ============ RELATÓRIO DO CLIENTE (1 clique) ============ */
+let REL_CID=null;
+function relMesLabel(){const d=new Date();const m=d.toLocaleDateString('pt-BR',{month:'long'});return m.charAt(0).toUpperCase()+m.slice(1)+' '+d.getFullYear();}
+function relClienteTarefas(c){return (state.tarefas||[]).filter(t=>t.clienteId===c.id || (c.nm && String(t.title||'').toLowerCase().includes(String(c.nm).toLowerCase())));}
+function relDados(id){
+  const c=CLIENTES.find(x=>x.id===id);if(!c)return null;
+  const today=new Date().toISOString().split('T')[0];const ym=today.slice(0,7);
+  const ts=relClienteTarefas(c);
+  const concl=ts.filter(t=>t.status==='concluido');
+  const conclMes=concl.filter(t=>String(t.criadaEm||'').startsWith(ym));
+  const andamento=ts.filter(t=>t.status==='andamento'||t.status==='aprovacao');
+  const atras=ts.filter(t=>t.data&&t.data<today&&t.status!=='concluido');
+  const tempo=ts.reduce((s,t)=>s+(t.timeSpent||0)+(t.timerSince?(Date.now()-new Date(t.timerSince).getTime())/1000:0),0);
+  const reguaRow=(state.regua&&state.regua[id])||{};const reguaOk=[0,1,2,3,4,5].filter(i=>reguaRow[i]==='ok').length;
+  return {c,ts,concl,conclMes,andamento,atras,tempo,reguaOk,reguaTotal:6};
+}
+function relatorioCliente(id){
+  const d=relDados(id);if(!d)return;REL_CID=id;const c=d.c;
+  const stLabel={r:'Urgente',y:'Em ajuste',gr:'Saudável',churn:'Churn'}[c.status]||'—';
+  const entregas=(d.conclMes.length?d.conclMes:d.concl).slice(-12).reverse();
+  const entregasHtml=entregas.length?entregas.map(t=>`<div class="rel-item"><span class="ok">✓</span><span>${escapeHtml(t.title)}</span></div>`).join(''):'<div class="rel-empty">Nenhuma entrega registrada ainda neste mês.</div>';
+  const pct=Math.round(d.reguaOk/d.reguaTotal*100);
+  document.getElementById('rel-body').innerHTML=`
+    <div class="rel-head">
+      <div class="rel-av">${cliInitials(c.nm).toUpperCase()}</div>
+      <div class="rel-htxt"><h2>${escapeHtml(c.nm)}</h2><p>${escapeHtml(c.plano||'—')} · ${stLabel} · ${relMesLabel()}</p></div>
+    </div>
+    <div class="rel-kpis">
+      <div class="rel-kpi green"><div class="v">${d.conclMes.length}</div><div class="l">Entregue no mês</div></div>
+      <div class="rel-kpi yel"><div class="v">${d.andamento.length}</div><div class="l">Em andamento</div></div>
+      <div class="rel-kpi red"><div class="v">${d.atras.length}</div><div class="l">Atrasadas</div></div>
+      <div class="rel-kpi"><div class="v">${c.cap||0}</div><div class="l">Captações/mês</div></div>
+    </div>
+    <div class="rel-sec"><h3>Régua dos 15 · ${d.reguaOk}/${d.reguaTotal} cumprido</h3><div class="rel-bar"><i style="width:${pct}%"></i></div></div>
+    <div class="rel-sec"><h3>Tempo investido pela equipe · ${fmtDur(d.tempo)}</h3></div>
+    <div class="rel-sec"><h3>Entregas</h3><div class="rel-list">${entregasHtml}</div></div>`;
+  document.getElementById('modal-relatorio').classList.add('open');
+}
+function relatorioResumoTexto(){
+  const d=relDados(REL_CID);if(!d)return '';const c=d.c;const L=[];
+  L.push(`*${c.nm}* — Relatório ${relMesLabel()}`);
+  L.push(`✅ Entregue no mês: ${d.conclMes.length}`);
+  L.push(`🔄 Em andamento: ${d.andamento.length}`);
+  if(d.atras.length)L.push(`⚠️ Atrasadas: ${d.atras.length}`);
+  L.push(`📋 Régua dos 15: ${d.reguaOk}/${d.reguaTotal}`);
+  if(d.tempo>=60)L.push(`⏱ Tempo investido: ${fmtDur(d.tempo)}`);
+  const ent=(d.conclMes.length?d.conclMes:d.concl).slice(-8).reverse();
+  if(ent.length){L.push('');L.push('*Entregas:*');ent.forEach(t=>L.push(`• ${t.title}`));}
+  return L.join('\n');
+}
+function relatorioCopiar(){
+  const txt=relatorioResumoTexto();if(!txt)return;
+  const ok=()=>toast('Resumo copiado · cole no grupo do cliente ✓');
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok).catch(()=>relFallbackCopy(txt));}else relFallbackCopy(txt);
+}
+function relFallbackCopy(txt){const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Resumo copiado ✓');}catch(e){toast('Não consegui copiar');}ta.remove();}
+function relatorioImprimir(){
+  const html=document.getElementById('rel-body').innerHTML;
+  const c=CLIENTES.find(x=>x.id===REL_CID);
+  const w=window.open('','_blank','width=720,height=900');
+  if(!w){toast('Permita pop-ups para imprimir/gerar PDF');return;}
+  w.document.write(`<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><title>Relatório ${escapeHtml(c?c.nm:'')}</title><style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111;padding:34px;max-width:680px;margin:0 auto}
+    .rel-head{display:flex;align-items:center;gap:13px;padding-bottom:16px;border-bottom:1px solid #e6e6e6;margin-bottom:18px}
+    .rel-av{width:46px;height:46px;border-radius:13px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px}
+    .rel-htxt h2{font-size:20px}.rel-htxt p{font-size:12px;color:#888;margin-top:3px}
+    .rel-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:18px}
+    .rel-kpi{background:#faf9f6;border:1px solid #e6e6e6;border-radius:12px;padding:13px 11px;text-align:center}
+    .rel-kpi .v{font-size:24px;font-weight:800}.rel-kpi .l{font-size:9.5px;font-weight:700;text-transform:uppercase;color:#888;margin-top:5px}
+    .rel-sec{margin-bottom:16px}.rel-sec h3{font-size:10.5px;font-weight:800;text-transform:uppercase;color:#888;margin-bottom:9px}
+    .rel-bar{height:9px;border-radius:6px;background:#eee;overflow:hidden;margin-bottom:6px}.rel-bar i{display:block;height:100%;background:#ffd400}
+    .rel-list{display:flex;flex-direction:column;gap:6px}
+    .rel-item{display:flex;gap:9px;font-size:13px;background:#faf9f6;border:1px solid #e6e6e6;border-radius:9px;padding:8px 11px}
+    .rel-item .ok{color:#19b36b;font-weight:800}.rel-empty{font-size:12.5px;color:#888}
+    .rel-foot{margin-top:24px;font-size:10.5px;color:#aaa;text-align:center}
+  </style></head><body>${html}<div class="rel-foot">Gerado pelo WorkFlowArk · ARK Content</div></body></html>`);
+  w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(e){}},350);
 }
 function renderClientesKPIs(){
   const el=document.getElementById('cli-kpis'); if(!el)return;
