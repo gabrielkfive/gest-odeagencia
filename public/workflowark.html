@@ -724,11 +724,11 @@ h1,h2,h3,h4{letter-spacing:-.02em}
 
     <div class="nav-label">Menu</div>
     <nav class="nav" id="nav">
-      <div class="navitem active" data-nav="dashboard">
+      <div class="navitem" data-nav="dashboard">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Meu Dia</span>
       </div>
-      <div class="navitem" data-nav="painel">
+      <div class="navitem active" data-nav="painel">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
         <span>Meu Painel</span>
       </div>
@@ -980,7 +980,7 @@ h1,h2,h3,h4{letter-spacing:-.02em}
         .md-person .pblock{font-size:10px;color:#d4d0c4;margin-top:6px;line-height:1.4;border-top:1px solid #2a2a2a;padding-top:6px}
         .md-person .pblock .x{color:var(--yel)}
       </style>
-      <div class="page active" id="page-dashboard">
+      <div class="page" id="page-dashboard">
         <div class="page-head">
           <div class="page-title">
             <h1 id="md-greet">Meu Dia</h1>
@@ -991,13 +991,18 @@ h1,h2,h3,h4{letter-spacing:-.02em}
 
         <!-- ====== CSS do PAINEL DE WIDGETS (usado na aba "Meu Painel") ====== -->
         <style>
-          #mdw-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:16px;align-items:start;margin-bottom:8px}
-          @media(max-width:760px){#mdw-board{grid-template-columns:1fr 1fr}}
-          @media(max-width:520px){#mdw-board{grid-template-columns:1fr}}
-          .mdw{position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:16px 17px;min-height:150px;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow var(--t) var(--ease,ease),transform var(--t) var(--ease,ease)}
+          /* Desktop: grid opinativo de 4 colunas (cada widget grande de verdade, não 7 coluninhas) */
+          #mdw-board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:start;margin-bottom:8px}
+          @media(max-width:1180px){#mdw-board{grid-template-columns:repeat(2,1fr)}}
+          @media(max-width:560px){#mdw-board{grid-template-columns:1fr}}
+          .mdw{position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:16px 17px;min-height:172px;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow var(--t) var(--ease,ease),transform var(--t) var(--ease,ease)}
           .mdw:hover{box-shadow:var(--shadow-2)}
-          .mdw.s-g{grid-column:span 2}.mdw.s-p{min-height:118px}.mdw.s-m{min-height:172px}
-          @media(max-width:520px){.mdw.s-g{grid-column:span 1}}
+          /* 3 tamanhos = LARGURA em colunas: P=1, M=2, G=tela cheia */
+          .mdw.s-p{grid-column:span 1}
+          .mdw.s-m{grid-column:span 2}
+          .mdw.s-g{grid-column:span 4}
+          @media(max-width:1180px){.mdw.s-m{grid-column:span 2}.mdw.s-g{grid-column:span 2}}
+          @media(max-width:560px){.mdw.s-p,.mdw.s-m,.mdw.s-g{grid-column:span 1}}
           .mdw-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-shrink:0}
           .mdw-hd .ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:#f5f5f7;color:var(--ink);flex-shrink:0}
           .mdw-hd .tt{font-size:12px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
@@ -1017,19 +1022,25 @@ h1,h2,h3,h4{letter-spacing:-.02em}
           .mdw-row .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
           .mdw-row .tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;cursor:pointer}
           .mdw-row .mt{font-size:10px;color:var(--mute);font-family:var(--mono);flex-shrink:0}
+          .mdw-subhd{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mute);margin:9px 0 1px;padding-top:7px;border-top:1px solid var(--line)}
+          .mdw-bd .mdw-subhd:first-child{border-top:none;padding-top:0;margin-top:0}
+          .mdw-chk{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--line-2);background:#fff;color:transparent;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0;display:grid;place-items:center;line-height:1;padding:0;transition:all var(--t) ease}
+          .mdw-chk:hover{background:var(--green);border-color:var(--green);color:#fff}
           .mdw-empty{color:var(--mute);font-size:12px;text-align:center;margin:auto;padding:10px}
           /* kpi mini grid */
           .mdw-kpis{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+          .mdw.s-g .mdw-kpis{grid-template-columns:repeat(4,1fr)} /* Resumo do dia em banner: 4 KPIs lado a lado */
+          @media(max-width:1180px){.mdw.s-g .mdw-kpis{grid-template-columns:1fr 1fr}}
           .mdw-kpi{background:#f7f7f8;border-radius:13px;padding:10px 11px}
           .mdw-kpi .v{font-size:24px;font-weight:780;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
           .mdw-kpi .l{font-size:10.5px;color:var(--mute);font-weight:600;margin-top:3px}
           .mdw-kpi.r .v{color:var(--red)}.mdw-kpi.g .v{color:var(--green)}.mdw-kpi.y .v{color:var(--yel-d)}
           /* nota */
           .mdw-nota{flex:1;border:none;outline:none;resize:none;background:transparent;font-family:inherit;font-size:13px;line-height:1.5;color:var(--ink);width:100%}
-          .mdw.nota-y{background:linear-gradient(135deg,#fff7d6,#ffefb0);border-color:#f3e2a0}
+          .mdw.nota-y{background:linear-gradient(135deg,#ffe9a6,#ffdc6b);border-color:#eccb5e}
           .mdw.nota-y .mdw-hd .ic{background:rgba(0,0,0,.06)}
           /* agenda iframe */
-          .mdw-agenda{flex:1;border:none;width:100%;min-height:130px;border-radius:10px}
+          .mdw-agenda{flex:1;border:none;width:100%;min-height:320px;border-radius:10px}
           /* edit mode (jiggle + controles) */
           #mdw-board.editing .mdw{animation:mdwJiggle .35s infinite ease-in-out}
           #mdw-board.editing .mdw:nth-child(even){animation-delay:-.18s}
@@ -1122,7 +1133,7 @@ h1,h2,h3,h4{letter-spacing:-.02em}
       </div>
 
       <!-- =================== MEU PAINEL (widgets personalizáveis) =================== -->
-      <div class="page" id="page-painel">
+      <div class="page active" id="page-painel">
         <div class="page-head">
           <div class="page-title">
             <h1>Meu Painel</h1>
@@ -2187,6 +2198,7 @@ function applyCloudState(remote){
   if(typeof rebuildPeople==='function')rebuildPeople();if(typeof fillRespSelects==='function')fillRespSelects();
   renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function'&&!(typeof planIsEditing==='function'&&planIsEditing()))renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function')renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
   if(typeof renderCrm==='function')renderCrm();
+  if(typeof renderWidgets==='function')renderWidgets(); // Meu Painel é a home: widgets refletem os dados sincronizados
   if(typeof renderAgenda==='function')renderAgenda();
   if(typeof renderComercialMes==='function')renderComercialMes();
   if(typeof restoreLastPage==='function')restoreLastPage(); // volta p/ a aba que estava (1x, após RBAC)
@@ -5102,11 +5114,11 @@ function mdTaskRow(kind,t){
     </div>
   </div>`;
 }
-function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;t.status='concluido';t.criadaEm=new Date().toISOString();saveTarefas();renderMeuDia();toast('✓ Tarefa concluída · boa!');}
+function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;t.status='concluido';t.criadaEm=new Date().toISOString();saveTarefas();renderMeuDia();if(typeof renderWidgets==='function')renderWidgets();toast('✓ Tarefa concluída · boa!');}
 function mdSnooze(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;const d=new Date();d.setDate(d.getDate()+1);t.data=d.toISOString().split('T')[0];saveTarefas();renderMeuDia();toast('↻ Adiada para amanhã');}
 /* ====== PAINEL DE WIDGETS PERSONALIZÁVEIS (estilo Apple) ====== */
 const MDW_TYPES={
-  relogio:{e:'🕐',label:'Relógio',dark:true,size:'m'},
+  relogio:{e:'',label:'Relógio',dark:true,size:'m'},
   kpis:{e:'📊',label:'Resumo do dia',size:'g'},
   tarefas:{e:'✅',label:'Minhas tarefas',size:'m'},
   agenda:{e:'📅',label:'Agenda de hoje',size:'m'},
@@ -5114,7 +5126,8 @@ const MDW_TYPES={
   whatsapp:{e:'💬',label:'WhatsApp',size:'p'},
   jarvis:{e:'🧠',label:'JARVIS',dark:true,size:'m'}
 };
-const MDW_DEFAULT=[{t:'relogio',s:'m'},{t:'kpis',s:'g'},{t:'tarefas',s:'m'},{t:'agenda',s:'m'},{t:'nota',s:'p'},{t:'whatsapp',s:'p'}];
+// Ordem que preenche o grid de 4 colunas sem buracos: banner full + duas linhas 2+2 e 2+1+1
+const MDW_DEFAULT=[{t:'kpis',s:'g'},{t:'relogio',s:'m'},{t:'tarefas',s:'m'},{t:'agenda',s:'m'},{t:'nota',s:'p'},{t:'whatsapp',s:'p'}];
 let MDW_EDIT=false;
 function mdwLoad(){let s=null;try{s=JSON.parse(localStorage.getItem('wfa-widgets')||'null');}catch(e){}if(!s||!Array.isArray(s.layout)||!s.layout.length)s={layout:MDW_DEFAULT.slice(),nota:(s&&s.nota)||''};if(typeof s.nota!=='string')s.nota='';return s;}
 function mdwPut(s){try{localStorage.setItem('wfa-widgets',JSON.stringify(s));}catch(e){}}
@@ -5133,7 +5146,7 @@ function mdwBuckets(){
 function mdwRowTask(t,kind){
   const cor=kind==='late'?'var(--red)':kind==='today'?'var(--yel)':'var(--mute-2)';
   const d=t.data?t.data.split('-').reverse().slice(0,2).join('/'):'';
-  return `<div class="mdw-row"><span class="dot" style="background:${cor}"></span><span class="tx" onclick="openTaskDetail('${t.id}')">${mdEsc(t.title||'Sem título')}</span>${d?`<span class="mt">${kind==='late'?'⚠ ':''}${d}</span>`:''}</div>`;
+  return `<div class="mdw-row"><button class="mdw-chk" title="Concluir" onclick="event.stopPropagation();mdDone('${t.id}')">✓</button><span class="tx" onclick="openTaskDetail('${t.id}')">${mdEsc(t.title||'Sem título')}</span>${d?`<span class="mt">${kind==='late'?'⚠ ':''}${d}</span>`:''}</div>`;
 }
 function mdwBody(w,B){
   if(w.t==='relogio'){return {body:`<div style="margin-top:auto"><div class="mdw-clock" data-clock>--:--</div><div class="mdw-clock-d" data-clock-d></div></div>`,count:null};}
@@ -5145,9 +5158,10 @@ function mdwBody(w,B){
   </div>`,count:null};}
   if(w.t==='tarefas'){
     let h='';
-    B.late.slice(0,5).forEach(t=>h+=mdwRowTask(t,'late'));
-    B.todayT.slice(0,5).forEach(t=>h+=mdwRowTask(t,'today'));
-    B.pend.slice(0,5).forEach(t=>h+=mdwRowTask(t,'soon'));
+    const sec=(label,arr,kind,lim)=>{if(!arr.length)return;h+=`<div class="mdw-subhd">${label} · ${arr.length}</div>`;arr.slice(0,lim).forEach(t=>h+=mdwRowTask(t,kind));};
+    sec('⚠ Atrasadas',B.late,'late',6);
+    sec('📅 Hoje',B.todayT,'today',6);
+    sec('➜ Próximas',B.pend,'soon',5);
     if(!h)h='<div class="mdw-empty">Nada pendente. Dia livre 🎯</div>';
     return {body:h,count:(B.late.length+B.todayT.length+B.pend.length)||null};
   }
@@ -5174,7 +5188,7 @@ function mdwCard(idx,w,B){
   const r=mdwBody(w,B);
   return `<div class="mdw s-${w.s||meta.size||'m'}${cls}" draggable="${MDW_EDIT?'true':'false'}" data-idx="${idx}">
     <div class="mdw-ctrl"><button title="Mudar tamanho" onclick="mdwCycleSize(${idx})">⤢</button><button class="rm" title="Remover" onclick="mdwRemove(${idx})">✕</button></div>
-    <div class="mdw-hd"><span class="ic">${meta.e}</span><span class="tt">${mdEsc(meta.label)}</span>${r.count!=null?`<span class="ct">${r.count}</span>`:''}</div>
+    <div class="mdw-hd">${meta.e?`<span class="ic">${meta.e}</span>`:''}<span class="tt">${mdEsc(meta.label)}</span>${r.count!=null?`<span class="ct">${r.count}</span>`:''}</div>
     <div class="mdw-bd">${r.body}</div>
   </div>`;
 }
@@ -5951,6 +5965,7 @@ if(state.tarefas.length===0){
 
 /* Meu Dia: render inicial + auto-atualização a cada minuto */
 try{renderMonthPill();renderIdentity();renderMeuDia();applyAccess();}catch(e){console.warn('renderMeuDia',e);}
+try{renderWidgets();}catch(e){console.warn('renderWidgets',e);} // Meu Painel é a home: renderiza os widgets já no boot (não depende do sync)
 setInterval(()=>{try{renderMonthPill();renderMeuDia();}catch(e){}},60000);
 try{restoreLastPage();}catch(e){} // tenta restaurar a aba já no boot (retenta após sync se RBAC ainda não liberou)
 
@@ -5958,12 +5973,11 @@ try{restoreLastPage();}catch(e){} // tenta restaurar a aba já no boot (retenta 
 let WFA_PAGE_RESTORED=false;
 function restoreLastPage(){
   if(WFA_PAGE_RESTORED)return;
-  try{
-    const _lp=localStorage.getItem('wfa-current-page');
-    if(!_lp || _lp==='dashboard'){WFA_PAGE_RESTORED=true;return;}
-    const _el=document.querySelector('[data-nav="'+_lp+'"]');
-    if(_el && _el.style.display!=='none'){ _el.click(); WFA_PAGE_RESTORED=true; } // só marca feito se trocou (senão tenta após sync)
-  }catch(e){}
+  // HOME = Meu Painel (escolha do Gabriel). Ao abrir/recarregar sempre cai no painel,
+  // que já é a página ativa no HTML — então aqui só marcamos como feito e garantimos
+  // que os widgets renderizem (não há clique de nav no boot pra disparar isso).
+  WFA_PAGE_RESTORED=true;
+  try{ if(typeof renderWidgets==='function')renderWidgets(); }catch(e){}
 }
 
 /* ============ HELPERS ============ */
