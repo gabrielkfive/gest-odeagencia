@@ -57,6 +57,13 @@ entre sessões. Cada item: o que é, status e (quando subiu) a versão/commit.
   entregas/Drive do cliente, status das demandas pro cliente, login próprio (hoje é link/token).
 - [ ] _(verificar se já saíram: botões adicionar cliente E colaborador · régua dos 15 gerar tarefas na jornada · concluir tarefa no Meu Dia)_
 
+### Feito hoje — fora do backlog de ontem
+- [x] **Squad Alpha: réplica editável da planilha** (commit `74fc6ce`) — aba Clientes › Squad Alpha,
+  tabela editável (36 colunas/8 grupos), checks, flags coloridas, KPIs, export CSV, sincronizada.
+  Inclui os 10 clientes Alpha (Bellato e Valhalla, que faltavam). Próximas fatias possíveis:
+  abas Business Score e grids semanais (Gestor de Tráfego/Criador) da planilha original.
+- [x] **UI premium** nas páginas do cliente (Aprovação + Portal) e ícones SVG no Meu Painel.
+
 ### Abertas (sugeridas hoje — track de vendas/UX)
 - [ ] CRM ↔ WhatsApp · Lembrete de follow quente · Cobrança em 1 clique · Importar leads em massa
 - [ ] Painel de vendas · Busca global · Dark mode · Atalhos · Templates WhatsApp · Relatório semanal
