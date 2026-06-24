@@ -5124,7 +5124,11 @@ const MDW_TYPES={
   agenda:{e:'📅',label:'Agenda de hoje',size:'m'},
   nota:{e:'📝',label:'Nota rápida',size:'p'},
   whatsapp:{e:'💬',label:'WhatsApp',size:'p'},
-  jarvis:{e:'🧠',label:'JARVIS',dark:true,size:'m'}
+  jarvis:{e:'🧠',label:'JARVIS',dark:true,size:'m'},
+  clientes:{e:'👥',label:'Clientes & saúde',size:'m'},
+  cobranca:{e:'💰',label:'Cobrança do mês',size:'p'},
+  conselho:{e:'🧩',label:'Conselho de IA',size:'m'},
+  captacoes:{e:'🎬',label:'Próximas captações',size:'m'}
 };
 // Ordem que preenche o grid de 4 colunas sem buracos: banner full + duas linhas 2+2 e 2+1+1
 const MDW_DEFAULT=[{t:'kpis',s:'g'},{t:'relogio',s:'m'},{t:'tarefas',s:'m'},{t:'agenda',s:'m'},{t:'nota',s:'p'},{t:'whatsapp',s:'p'}];
@@ -5179,6 +5183,41 @@ function mdwBody(w,B){
   if(w.t==='jarvis'){
     const msg=B.late.length?`Você tem ${B.late.length} tarefa(s) atrasada(s) e ${B.todayT.length} para hoje. Bora destravar?`:B.todayT.length?`${B.todayT.length} tarefa(s) para hoje. Foco total.`:'Dia tranquilo no seu nome. Ótimo momento pra puxar algo do time.';
     return {body:`<div style="display:flex;flex-direction:column;height:100%"><div style="font-size:13px;line-height:1.55">${mdEsc(msg)}</div><button onclick="if(typeof jarvisOpen==='function')jarvisOpen()" style="margin-top:auto;align-self:flex-start;background:var(--yel);color:#000;border:none;border-radius:9px;padding:7px 13px;font-weight:700;font-size:12px;cursor:pointer">Conversar →</button></div>`,count:null};
+  }
+  if(w.t==='clientes'){
+    const all=(typeof CLIENTES!=='undefined'?CLIENTES:[]);
+    const items=(typeof clienteSaudeReasons==='function'?all.map(c=>clienteSaudeReasons(c.id)).filter(Boolean):[]).sort((a,b)=>b.sev-a.sev);
+    if(!items.length)return {body:'<div class="mdw-empty">Todos os clientes saudáveis ✓</div>',count:null};
+    const h=items.slice(0,6).map(it=>`<div class="mdw-row"><span class="dot" style="background:${it.sev>=3?'var(--red)':it.sev>=2?'var(--yel)':'var(--mute-2)'}"></span><span class="tx" onclick="if(typeof relatorioCliente==='function')relatorioCliente('${it.c.id}')">${mdEsc(it.c.nm)}</span><span class="mt">${mdEsc(it.reasons[0].t)}</span></div>`).join('');
+    return {body:h,count:items.length};
+  }
+  if(w.t==='conselho'){
+    let brfs=[];try{brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){}
+    const hoje=new Date().toISOString().split('T')[0];
+    const list=(brfs.filter(b=>b.date===hoje).length?brfs.filter(b=>b.date===hoje):brfs).slice(0,5);
+    if(!list.length)return {body:'<div class="mdw-empty">Sem debates do conselho ainda</div>',count:null};
+    const h=list.map(b=>`<div class="mdw-row"><span class="dot" style="background:var(--yel)"></span><span class="tx" title="${mdEsc(b.decisao||'')}" onclick="document.querySelector('[data-nav=conselho]')?.click()"><b>${mdEsc(b.cliente||'ARK')}</b> · ${mdEsc(b.decisao||'—')}</span></div>`).join('');
+    return {body:h,count:list.length};
+  }
+  if(w.t==='cobranca'){
+    const reais=(typeof CLIENTES!=='undefined'?CLIENTES:[]).filter(c=>c.tipo==='ARK'&&c.valor>0&&c.status!=='churn');
+    const mesKey=(typeof cobMesKey==='function')?cobMesKey():'';
+    const pend=reais.filter(c=>{const d=(typeof cobData==='function')?cobData(c):{};return d.cobradoMes!==mesKey;});
+    const totalReceber=pend.reduce((s,c)=>s+(c.valor||0),0);
+    const body=`<div class="mdw-kpis" style="grid-template-columns:1fr 1fr">
+      <div class="mdw-kpi y"><div class="v">${pend.length}</div><div class="l">A cobrar</div></div>
+      <div class="mdw-kpi g"><div class="v">${reais.length-pend.length}</div><div class="l">Cobrados</div></div>
+      <div class="mdw-kpi" style="grid-column:1/-1;cursor:pointer" onclick="document.querySelector('[data-nav=cobranca]')?.click()"><div class="v" style="font-size:18px">${totalReceber?'R$ '+totalReceber.toLocaleString('pt-BR'):'R$ 0'}</div><div class="l">A receber este mês${pend.length?' · ver cobrança':''}</div></div>
+    </div>`;
+    return {body,count:pend.length||null};
+  }
+  if(w.t==='captacoes'){
+    const today=new Date().toISOString().split('T')[0];
+    let evs=[];try{evs=(typeof loadAgendaEvents==='function')?loadAgendaEvents():[];}catch(e){}
+    const up=(Array.isArray(evs)?evs:[]).filter(e=>e&&e.date&&e.date>=today).sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(0,6);
+    if(!up.length)return {body:'<div class="mdw-empty">Nada nos próximos dias</div>',count:null};
+    const h=up.map(e=>{const d=String(e.date).split('-').reverse().slice(0,2).join('/');const isCap=/cap[\.\s]/i.test(e.title||'');return `<div class="mdw-row"><span class="dot" style="background:${isCap?'var(--yel)':'var(--mute-2)'}"></span><span class="tx" onclick="document.querySelector('[data-nav=reunioes]')?.click()">${mdEsc(e.title||'Evento')}</span><span class="mt">${d}</span></div>`;}).join('');
+    return {body:h,count:up.length};
   }
   return {body:'<div class="mdw-empty">—</div>',count:null};
 }
