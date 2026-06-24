@@ -39,3 +39,8 @@ _BACKUP*/
 *.njsproj
 *.sln
 *.sw?
+
+# artefatos locais (nao versionar)
+__pycache__/
+*.pyc
+.superpowers/
