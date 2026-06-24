@@ -25,10 +25,16 @@ entre sessões. Cada item: o que é, status e (quando subiu) a versão/commit.
    home no painel, widgets afinados) — commit `7c9d709`
 9. ✅ **(2026-06-24)** Meu Painel: 4 widgets novos — Clientes & saúde, Conselho de IA,
    Cobrança do mês, Próximas captações (todos com dado real) — commit `e5e63f0`
+10. ✅ **(2026-06-24)** CRM: Follow quente — faixa dedicada no topo (leads marcados 🔥
+    ou com próxima ação vencida/pra hoje) + toggle 🔥 em cada card
 
-## Próximas (abertas — pendentes de brainstorm/priorização)
+## Próximas (abertas)
 
-- [ ] CRM: coluna dedicada de follow-up ("follow quente")
-- [ ] CRM: power dialer (discagem paralela, descarta quem não atende)
-- [ ] CRM: IA em tempo real transcrevendo call + sugerindo resposta pro SDR + bip de contexto
+### Bloqueadas — precisam de decisão de telefonia (provedor + conta + custo/min)
+- [ ] CRM: power dialer (discagem paralela de listas, descarta quem não atende)
+- [ ] CRM: IA em tempo real transcrevendo a call + sugerindo resposta pro SDR + bip de contexto
+  > Ambas exigem telefonia de verdade (ex.: Twilio/Zenvia) com credenciais e custo por minuto.
+  > Antes de codar: o Gabriel decide o provedor e abre conta. Aí a gente engata.
+
+### Abertas (livres pra pegar)
 - [ ] (adicione aqui o que vier na próxima conversa)

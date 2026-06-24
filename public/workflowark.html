@@ -3007,6 +3007,21 @@ function iniciarAutoSync(){
           .crm-hist-item .hi-del:hover{color:var(--red)}
           .crm-source-badge{font-size:9.5px;font-weight:700;font-family:var(--mono);padding:1px 6px;border-radius:4px;background:var(--blue-soft);color:#444;border:1px solid var(--line)}
           .crm-overdue{background:var(--red-soft);border-color:#fca5a5}
+          /* Follow quente: faixa dedicada no topo do CRM */
+          .crm-fh{background:linear-gradient(135deg,#fff4ed,#ffe8d6);border:1px solid #f6c89a;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+          .crm-fh-hd{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#9a3412;margin-bottom:10px;letter-spacing:.02em;flex-wrap:wrap}
+          .crm-fh-hd small{font-weight:600;color:#b06a3c;font-size:10.5px;letter-spacing:0}
+          .crm-fh-cards{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+          .crm-fh-card{flex:0 0 218px;background:#fff;border:1px solid #f6c89a;border-left:3px solid #f97316;border-radius:7px;padding:9px 11px;cursor:pointer;transition:all .12s}
+          .crm-fh-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.08)}
+          .crm-fh-card .nm{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:3px}
+          .crm-fh-card .mt{font-size:10px;color:var(--mute);display:flex;justify-content:space-between;gap:6px}
+          .crm-fh-card .nx{font-size:10.5px;color:var(--txt);margin-top:5px;padding-top:5px;border-top:1px solid #f3e3d3;line-height:1.35}
+          .crm-fh-card .due-late{color:var(--red);font-weight:700}
+          .crm-card{position:relative}
+          .crm-hot-btn{position:absolute;top:6px;right:6px;border:none;background:none;cursor:pointer;font-size:13px;line-height:1;opacity:.28;filter:grayscale(1);transition:all .12s;padding:2px}
+          .crm-hot-btn:hover{opacity:.85}
+          .crm-hot-btn.on{opacity:1;filter:none}
         </style>
 
         <div class="page-head">
@@ -3047,6 +3062,7 @@ function iniciarAutoSync(){
           </select>
         </div>
 
+        <div id="crm-followhot"></div>
         <div class="crm-pipeline" id="crm-pipeline"></div>
       </div>
 
@@ -8712,6 +8728,11 @@ function crmSaveLead(){
   else arr.unshift(payload);
   saveCrm(arr);crmCloseModal();toast(editId?'Lead atualizado':'Lead criado');
 }
+function crmToggleHot(id){
+  const arr=loadCrm();const l=arr.find(x=>x.id===id);if(!l)return;
+  l.hot=!l.hot;saveCrm(arr);
+  toast(l.hot?'🔥 Follow quente':'Removido do follow quente');
+}
 function crmDeleteLead(){
   const id=document.getElementById('crm-edit-id').value;if(!id||!confirm('Excluir este lead permanentemente?'))return;
   if(typeof addDeleted==='function')addDeleted(id); // lápide: a mescla nunca ressuscita um lead apagado
@@ -8754,6 +8775,25 @@ function renderCrm(){
       <div class="kpi dk"><div class="l">Total de leads</div><div class="v">${arr.length}</div><div class="d">${perdidos.length} perdidos</div></div>
     `;
   }
+  // Follow quente: faixa dedicada (leads marcados 🔥 ou com próxima ação vencida/pra hoje)
+  const fhEl=document.getElementById('crm-followhot');
+  if(fhEl){
+    const hot=filtered.filter(l=>l.stage<4 && (l.hot || (l.due && l.due<=today)))
+      .sort((a,b)=>((a.due||'9999')+'').localeCompare((b.due||'9999')+''));
+    if(!hot.length){fhEl.innerHTML='';}
+    else{
+      const cards=hot.map(l=>{
+        const late=l.due&&l.due<today;
+        const dtxt=l.due?crmFmtDate(l.due):'';
+        return `<div class="crm-fh-card" onclick="crmOpenModal('${l.id}')">
+          <div class="nm">${l.hot?'🔥 ':''}${escapeHtml(l.nm)}</div>
+          <div class="mt"><span>${escapeHtml(CRM_STAGES[l.stage]?.label||'')}</span>${l.resp?`<span>${escapeHtml(l.resp)}</span>`:''}</div>
+          ${(l.next||dtxt)?`<div class="nx">${escapeHtml(l.next||'Próxima ação')}${dtxt?` · <span class="${late?'due-late':''}">${late?'⚠ ':''}${dtxt}</span>`:''}</div>`:''}
+        </div>`;
+      }).join('');
+      fhEl.innerHTML=`<div class="crm-fh"><div class="crm-fh-hd">🔥 Follow quente · ${hot.length} <small>marcados com 🔥 ou com próxima ação vencida/pra hoje</small></div><div class="crm-fh-cards">${cards}</div></div>`;
+    }
+  }
   // Pipeline columns
   const pEl=document.getElementById('crm-pipeline');if(!pEl)return;
   pEl.innerHTML=CRM_STAGES.map((st,si)=>{
@@ -8767,6 +8807,7 @@ function renderCrm(){
       <div class="crm-cards">${cards.map(l=>{
         const overdue=l.due&&l.due<today&&l.stage<4;
         return `<div class="crm-card stage-${si}${overdue?' crm-overdue':''}" draggable="true" data-lead="${l.id}" onclick="crmOpenModal('${l.id}')">
+          <button class="crm-hot-btn${l.hot?' on':''}" title="Marcar como follow quente" onclick="event.stopPropagation();crmToggleHot('${l.id}')">🔥</button>
           <div class="nm">${escapeHtml(l.nm)}</div>
           <div class="meta"><span class="crm-source-badge">${l.source||'—'}</span>${l.resp?`<span>${l.resp}</span>`:''}</div>
           ${l.val?`<div class="val">R$ ${Number(l.val).toLocaleString('pt-BR')}</div>`:''}
