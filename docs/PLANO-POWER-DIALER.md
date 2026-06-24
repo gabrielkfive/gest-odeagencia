@@ -8,6 +8,17 @@ ligação pra **celular no Brasil é o item caro**).
 
 ---
 
+## ✅ DECISÕES TRAVADAS (2026-06-24)
+- SDR liga **do navegador** (softphone, Twilio Voice JS SDK).
+- Volume **~50 ligações/dia** (operação enxuta).
+- **NÃO gravar / não transcrever** → a **Parte 2 (IA em tempo real na call) sai do escopo** por
+  ora. Foco 100% no **power dialer**. (Se um dia liberar transcrição, a Parte 2 volta — a
+  arquitetura com Media Streams + Durable Object continua válida.)
+
+**Escopo ativo = Fases 1, 2 e (depois) 3.** Parte 2 / Fases 4-5 ficam arquivadas abaixo como referência.
+
+---
+
 ## TL;DR
 - **Provider recomendado:** Twilio (mais documentado e robusto pra dialer + áudio em tempo real).
 - **Encaixa na nossa stack:** os endpoints viram Cloudflare Workers; o áudio ao vivo entra num
@@ -75,13 +86,18 @@ respostas na tela.
 
 ---
 
-## O que eu preciso de você pra destravar
-1. **Conta Twilio** (upgrade pra pagar, sair do trial) + iniciar o **número BR** (bundle regulatório).
-2. **Teto de orçamento/mês** (pra eu dimensionar volume e provider de STT).
-3. **3 decisões:**
-   - SDR liga **do navegador** (assumi que sim) ou de celular/PABX?
-   - Quantas ligações/dia, aproximadamente?
-   - Pode **gravar/transcrever** (com aviso de consentimento)?
+## O que trava hoje (passo-a-passo da conta Twilio — ~10 min seus)
+O código do dialer fala com a API da Twilio, então **sem conta não dá pra construir nem testar**.
+Pra destravar a Fase 1:
 
-Quando você responder isso, eu começo pela **Fase 1** (softphone no navegador) — é o "prova de vida"
-mais rápido e barato.
+1. Criar conta em **twilio.com** e fazer **upgrade** (sair do trial / colocar cartão).
+2. **Console → Account → API keys & tokens:** me passar `Account SID` + criar uma **API Key**
+   (Key SID + Secret). (Guardo como segredo do Worker, nunca no código/GitHub.)
+3. **Iniciar um número BR** (Phone Numbers → Buy a number). O Brasil exige **bundle regulatório**
+   (CNPJ + endereço da ARK) e leva alguns dias pra aprovar.
+   - Atalho pra começar a testar **hoje**: usar um **número trial dos EUA** (sai na hora) e
+     trocar pelo BR quando aprovar. Funciona pra provar a Fase 1.
+4. Definir um **teto de gasto/mês** (pra eu travar limites e evitar susto na fatura).
+
+Assim que eu tiver SID + API Key + número, **construo e VERIFICO a Fase 1** (clicar no lead e
+ligar pelo navegador) — e seguimos pra Fase 2 (power dialer + log automático no CRM).

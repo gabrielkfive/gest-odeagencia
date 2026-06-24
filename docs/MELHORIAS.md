@@ -30,13 +30,12 @@ entre sessões. Cada item: o que é, status e (quando subiu) a versão/commit.
 
 ## Próximas (abertas)
 
-### Bloqueadas — precisam de decisão de telefonia (provedor + conta + custo/min)
-- [ ] CRM: power dialer (discagem paralela de listas, descarta quem não atende)
-- [ ] CRM: IA em tempo real transcrevendo a call + sugerindo resposta pro SDR + bip de contexto
-  > Ambas exigem telefonia de verdade (ex.: Twilio/Zenvia) com credenciais e custo por minuto.
-  > Antes de codar: o Gabriel decide o provedor e abre conta. Aí a gente engata.
-  > **Plano técnico pronto em `docs/PLANO-POWER-DIALER.md`** (arquitetura Twilio + Cloudflare,
-  > fases, custos a verificar e as 3 decisões que faltam).
+### CRM Power Dialer — spec travado, aguardando conta Twilio
+- [ ] CRM: power dialer (softphone no navegador, ~50 lig./dia, sem gravação) — **Fase 1 pronta pra começar**
+  > Decisões travadas (2026-06-24): liga do navegador · ~50/dia · NÃO gravar.
+  > Escopo = power dialer puro (a IA em tempo real na call saiu por ora — depende de transcrição).
+  > **Bloqueio único:** Gabriel abrir conta Twilio + número (passo-a-passo em `docs/PLANO-POWER-DIALER.md`).
+  > Assim que houver SID + API Key + número, construo e verifico a Fase 1.
 
 ### Abertas (livres pra pegar)
 - [ ] (adicione aqui o que vier na próxima conversa)
