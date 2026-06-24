@@ -1952,7 +1952,7 @@ h1,h2,h3,h4{letter-spacing:-.02em}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-deleted-ids'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-deleted-ids'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -2180,6 +2180,7 @@ function applyCloudState(remote){
   if(!wfaLocalAuth('wfa-whatsapp'))state.whatsapp=JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}');
   state.notificacoes=JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]');
   state.planejamento=JSON.parse(localStorage.getItem('wfa-planejamento')||'{}');
+  state.criativos=JSON.parse(localStorage.getItem('wfa-criativos')||'{}');
   state.gcal=JSON.parse(localStorage.getItem('wfa-gcal')||'{}');
   const jornada=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
   if(jornada&&typeof jornada==='object')SPRINTS.forEach(sp=>{sp.clis=jornada[sp.n]||[];});
@@ -2566,6 +2567,7 @@ function iniciarAutoSync(){
           </div>
           <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
             <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="rotGerar()">🎬 Gerar roteiros</button>
+            <button class="tb-btn" onclick="rotPuxarCriativos()">📈 Criativos que deram certo</button>
             <button class="tb-btn" onclick="rotCopiar()">⧉ Copiar</button>
             <button class="tb-btn" onclick="rotSalvarNoDrive()">💾 Salvar no Drive</button>
             <button class="tb-btn" onclick="legDeTema((document.getElementById('rot-out').textContent||document.getElementById('rot-tema').value||'').trim(),document.getElementById('rot-cliente').value||'')">✍️ Virar legenda</button>
@@ -3620,6 +3622,40 @@ function iniciarAutoSync(){
   </div>
 </div>
 
+<!-- =================== BANCO DE CRIATIVOS =================== -->
+<div class="modal-bg" id="modal-criativos">
+  <div class="modal" style="max-width:700px;width:95vw">
+    <style>
+      #modal-criativos .cri-add{display:grid;grid-template-columns:1fr 150px;gap:8px;margin-bottom:8px}
+      #modal-criativos .cri-add .full{grid-column:1/-1}
+      #modal-criativos .cri-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:11px;margin-top:14px;max-height:46vh;overflow-y:auto}
+      #modal-criativos .cri-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+      #modal-criativos .cri-thumb{height:108px;background-color:#111;background-position:center;background-size:cover;background-repeat:no-repeat;color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+      #modal-criativos .cri-thumb.cri-link{background-image:linear-gradient(135deg,#1a1a1a,#3a3a3a)}
+      #modal-criativos .cri-body{padding:9px 11px;display:flex;flex-direction:column;gap:5px}
+      #modal-criativos .cri-top{display:flex;align-items:center;justify-content:space-between}
+      #modal-criativos .cri-fmt{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#b36200;background:var(--yel-soft,#fff8e0);border:1px solid #f0d68a;padding:2px 7px;border-radius:20px}
+      #modal-criativos .cri-x{background:none;border:none;color:var(--mute);cursor:pointer;font-size:12px}
+      #modal-criativos .cri-x:hover{color:var(--red,#e0364f)}
+      #modal-criativos .cri-nota{font-size:12px;color:var(--ink);line-height:1.4}
+      #modal-criativos .cri-open{font-size:11px;color:var(--mute);font-weight:600;text-decoration:none}
+      #modal-criativos .cri-empty{grid-column:1/-1;font-size:12.5px;color:var(--mute);padding:18px;text-align:center}
+    </style>
+    <div class="modal-head"><h3><span class="ic">📈</span>Banco de criativos · <span id="cri-cli-nome"></span></h3><span class="x" onclick="closeModal('modal-criativos')">✕</span></div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--mute);margin:0 0 12px">Guarde os Reels e artes que <b>deram certo</b> — o Roteirista usa de inspiração no que já funcionou.</p>
+      <div class="cri-add">
+        <input class="form-input full" id="cri-url" placeholder="Link do criativo (Reel, arte, Drive...)">
+        <input class="form-input" id="cri-nota" placeholder="Por que funcionou / métrica" style="grid-column:1">
+        <select class="form-select" id="cri-fmt"><option>Reels</option><option>Carrossel</option><option>Story</option><option>Foto</option><option>Anúncio</option></select>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><button class="tb-btn" onclick="criAdd()">＋ Adicionar ao banco</button></div>
+      <div class="cri-list" id="cri-list"></div>
+    </div>
+    <div class="modal-foot"><button class="icobtn" onclick="closeModal('modal-criativos')">Fechar</button></div>
+  </div>
+</div>
+
 <!-- =================== CONFIGURAÇÕES =================== -->
 <div class="modal-bg" id="modal-settings">
   <div class="modal" style="max-width:660px">
@@ -4059,6 +4095,7 @@ let state = {
   whatsapp: JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}'),
   notificacoes: JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]'),
   planejamento: JSON.parse(localStorage.getItem('wfa-planejamento')||'{}'),
+  criativos: JSON.parse(localStorage.getItem('wfa-criativos')||'{}'),
   gcal: JSON.parse(localStorage.getItem('wfa-gcal')||'{}'),
   currentSprint: null,
   currentCliente: null,
@@ -4413,10 +4450,60 @@ function cliCard(c){
     <div class="cli-btns">
       <button class="cli-btn pri" onclick="event.stopPropagation();cliDetalhe('${c.id}')">Abrir ficha</button>
       <button class="cli-btn" onclick="event.stopPropagation();relatorioCliente('${c.id}')">📄 Relatório</button>
+      <button class="cli-btn" onclick="event.stopPropagation();abrirCriativos('${c.id}')">📈 Criativos</button>
       ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
       ${c.custom?`<button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">Editar</button>`:''}
     </div>
   </div>`;
+}
+/* ============ BANCO DE CRIATIVOS QUE PERFORMARAM ============ */
+let CRI_CID=null;
+function criGet(id){return (state.criativos&&state.criativos[id])||[];}
+function criSave(){try{localStorage.setItem('wfa-criativos',JSON.stringify(state.criativos||{}));}catch(e){}}
+function criIsImg(u){return /\.(png|jpe?g|gif|webp|avif)(\?|$)/i.test(u||'');}
+function abrirCriativos(id){
+  const c=CLIENTES.find(x=>x.id===id);if(!c)return;CRI_CID=id;
+  const nm=document.getElementById('cri-cli-nome');if(nm)nm.textContent=c.nm;
+  ['cri-url','cri-nota'].forEach(k=>{const e=document.getElementById(k);if(e)e.value='';});
+  const sel=document.getElementById('cri-fmt');if(sel)sel.value='Reels';
+  renderCriativos();
+  document.getElementById('modal-criativos').classList.add('open');
+}
+function renderCriativos(){
+  const wrap=document.getElementById('cri-list');if(!wrap)return;
+  const arr=criGet(CRI_CID);
+  if(!arr.length){wrap.innerHTML='<div class="cri-empty">Nenhum criativo salvo ainda. Adicione os que performaram pra alimentar o Roteirista.</div>';return;}
+  wrap.innerHTML=arr.slice().reverse().map(it=>`<div class="cri-card">
+    ${criIsImg(it.url)?`<a href="${escapeHtml(it.url)}" target="_blank" rel="noopener" class="cri-thumb" style="background-image:url('${escapeHtml(it.url)}')"></a>`:`<a href="${escapeHtml(it.url)}" target="_blank" rel="noopener" class="cri-thumb cri-link">▶</a>`}
+    <div class="cri-body">
+      <div class="cri-top"><span class="cri-fmt">${escapeHtml(it.formato||'')}</span><button class="cri-x" onclick="criDel('${it.id}')" title="Remover">✕</button></div>
+      <div class="cri-nota">${escapeHtml(it.nota||'(sem nota)')}</div>
+      <a href="${escapeHtml(it.url)}" target="_blank" rel="noopener" class="cri-open">abrir ↗</a>
+    </div>
+  </div>`).join('');
+}
+function criAdd(){
+  let url=(document.getElementById('cri-url').value||'').trim();
+  const nota=(document.getElementById('cri-nota').value||'').trim();
+  const formato=(document.getElementById('cri-fmt').value||'Reels');
+  if(!url){toast&&toast('Cole o link do criativo');return;}
+  if(!/^https?:\/\//i.test(url))url='https://'+url;
+  state.criativos=state.criativos||{};
+  state.criativos[CRI_CID]=state.criativos[CRI_CID]||[];
+  state.criativos[CRI_CID].push({id:'cr'+Date.now(),url,formato,nota,at:new Date().toISOString()});
+  criSave();renderCriativos();
+  document.getElementById('cri-url').value='';document.getElementById('cri-nota').value='';
+  toast&&toast('Criativo salvo no banco ✓');
+}
+function criDel(id){
+  if(!state.criativos||!state.criativos[CRI_CID])return;
+  state.criativos[CRI_CID]=state.criativos[CRI_CID].filter(x=>x.id!==id);
+  criSave();renderCriativos();
+}
+// vira texto de inspiração pro Roteirista
+function criParaTexto(id){
+  const arr=criGet(id);if(!arr.length)return '';
+  return 'CRIATIVOS QUE JÁ PERFORMARAM (inspire-se no que funcionou):\n'+arr.map(it=>`- [${it.formato}] ${it.nota||it.url}${it.nota?(' — '+it.url):''}`).join('\n');
 }
 /* ============ ALERTA DE SAÚDE DOS CLIENTES ============ */
 // Não é flood automático: é um card honesto no topo da página Clientes que
@@ -7262,6 +7349,16 @@ function rotFileChosen(input){
   reader.readAsText(file);
 }
 function rotCopiar(){const t=document.getElementById('rot-out').textContent||'';navigator.clipboard?.writeText(t).then(()=>toast('Roteiros copiados'),()=>toast('Não consegui copiar'));}
+function rotPuxarCriativos(){
+  const nm=(document.getElementById('rot-cliente').value||'').trim().toLowerCase();
+  if(!nm){toast&&toast('Diga o cliente primeiro');return;}
+  const c=CLIENTES.find(x=>(x.nm||'').toLowerCase()===nm)||CLIENTES.find(x=>nm.includes((x.nm||'').toLowerCase())||(x.nm||'').toLowerCase().includes(nm));
+  if(!c){toast&&toast('Cliente não encontrado na lista');return;}
+  const txt=criParaTexto(c.id);
+  if(!txt){toast&&toast('Esse cliente ainda não tem criativos no banco (abra a aba Clientes › 📈 Criativos)');return;}
+  const ta=document.getElementById('rot-ref');
+  if(ta){ta.value=(ta.value?ta.value+'\n\n':'')+txt;toast&&toast('Criativos que performaram adicionados às referências 📈');}
+}
 function rotSalvarNoDrive(){
   const cliente=(document.getElementById('rot-cliente').value||'').trim();
   const texto=(document.getElementById('rot-out').textContent||'').trim();
