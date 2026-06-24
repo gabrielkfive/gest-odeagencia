@@ -307,6 +307,24 @@ table.t tr.high{background:var(--yel-bg)}
 .cli-hbar{display:flex;height:5px;border-radius:3px;overflow:hidden;margin-top:7px;gap:2px}
 .cli-hbar span{display:block;border-radius:2px}
 @media(max-width:900px){.cli-kpis{grid-template-columns:1fr 1fr}}
+.csa-card{background:#fff;border:1px solid var(--line);border-left:3px solid var(--yel);border-radius:13px;padding:13px 15px;margin-bottom:16px;box-shadow:var(--sh-2,0 1px 2px rgba(0,0,0,.04))}
+.csa-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.csa-ttl{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:7px}
+.csa-bell{font-size:14px}
+.csa-x{background:none;border:none;color:var(--mute);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:6px}
+.csa-x:hover{background:var(--bg);color:var(--ink)}
+.csa-list{display:flex;flex-direction:column;gap:7px}
+.csa-row{display:flex;align-items:center;gap:9px;padding:7px 9px;background:var(--bg);border:1px solid var(--line);border-radius:9px}
+.csa-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.csa-dot.red{background:var(--red,#e0364f)}.csa-dot.yel{background:var(--yel-d,#b36200)}.csa-dot.gray{background:#bbb}
+.csa-nm{font-size:13px;font-weight:700;color:var(--ink);flex-shrink:0}
+.csa-tags{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+.csa-tag{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em;border:1px solid var(--line);color:var(--mute);background:#fff}
+.csa-tag.red{color:var(--red,#e0364f);border-color:#f3b4b4;background:var(--red-soft,#fdeef0)}
+.csa-tag.yel{color:var(--yel-d,#b36200);border-color:#f0d68a;background:var(--yel-soft,#fff8e0)}
+.csa-go{flex-shrink:0;font-size:11px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:7px;padding:5px 11px;cursor:pointer}
+.csa-go:hover{border-color:var(--ink)}
+@media(max-width:560px){.csa-row{flex-wrap:wrap}}
 
 /* régua matrix */
 .regua-wrap{background:#fff;border:1px solid var(--line);border-radius:7px;overflow-x:auto}
@@ -1180,6 +1198,8 @@ h1,h2,h3,h4{letter-spacing:-.02em}
         </div>
 
         <div class="cli-kpis" id="cli-kpis"></div>
+
+        <div id="cli-health"></div>
 
         <div class="tabs" data-tabs>
           <div class="tab active" data-sub="todos">Todos <span class="ct">14</span></div>
@@ -4319,6 +4339,7 @@ function renderClientes(){
   ['ark-clientes','ark-clientes-2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=ark.map(cliCard).join('');});
   ['alpha-clientes','alpha-clientes-2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=alpha.map(cliCard).join('');});
   renderClientesKPIs();
+  try{renderClienteSaude();}catch(e){console.warn('saude',e);}
   // popular select da modal nova
   const sel=document.getElementById('nt-cliente');
   if(sel) sel.innerHTML=CLIENTES.filter(c=>c.status!=='churn').map(c=>`<option value="${c.id}">${c.nm}</option>`).join('');
@@ -4344,6 +4365,41 @@ function cliCard(c){
       ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
       ${c.custom?`<button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">Editar</button>`:''}
     </div>
+  </div>`;
+}
+/* ============ ALERTA DE SAÚDE DOS CLIENTES ============ */
+// Não é flood automático: é um card honesto no topo da página Clientes que
+// reflete o estado real e some quando está tudo saudável. Dispensável por sessão.
+function clienteSaudeReasons(id){
+  const d=relDados(id);if(!d)return null;const c=d.c;
+  if(c.status==='churn')return null;
+  const r=[];let sev=0;
+  if(d.atras.length){r.push({t:`${d.atras.length} atrasada${d.atras.length>1?'s':''}`,k:'red'});sev=Math.max(sev,3);}
+  if(c.status==='r'){r.push({t:'marcado urgente',k:'red'});sev=Math.max(sev,3);}
+  if(c.status==='y'){r.push({t:'em ajuste',k:'yel'});sev=Math.max(sev,2);}
+  if(d.conclMes.length===0 && d.ts.length>0){r.push({t:'sem entrega no mês',k:'yel'});sev=Math.max(sev,2);}
+  if(d.reguaOk<=1 && d.ts.length>0){r.push({t:`régua ${d.reguaOk}/6`,k:'gray'});sev=Math.max(sev,1);}
+  if(!r.length)return null;
+  return {c,reasons:r,sev};
+}
+function renderClienteSaude(){
+  const box=document.getElementById('cli-health');if(!box)return;
+  if(sessionStorage.getItem('wfa-saude-dismiss')==='1'){box.innerHTML='';return;}
+  const items=CLIENTES.map(c=>clienteSaudeReasons(c.id)).filter(Boolean).sort((a,b)=>b.sev-a.sev);
+  if(!items.length){box.innerHTML='';return;}
+  const rows=items.map(it=>`<div class="csa-row">
+      <span class="csa-dot ${it.sev>=3?'red':it.sev>=2?'yel':'gray'}"></span>
+      <span class="csa-nm">${escapeHtml(it.c.nm)}</span>
+      <span class="csa-tags">${it.reasons.map(r=>`<span class="csa-tag ${r.k}">${escapeHtml(r.t)}</span>`).join('')}</span>
+      <button class="csa-go" onclick="relatorioCliente('${it.c.id}')">Ver</button>
+    </div>`).join('');
+  const nUrg=items.filter(i=>i.sev>=3).length;
+  box.innerHTML=`<div class="csa-card">
+    <div class="csa-head">
+      <div class="csa-ttl"><span class="csa-bell">⚠️</span>Saúde dos clientes · ${items.length} ${items.length>1?'precisam':'precisa'} de atenção${nUrg?` · <b style="color:var(--red,#e0364f)">${nUrg} urgente${nUrg>1?'s':''}</b>`:''}</div>
+      <button class="csa-x" title="Dispensar até a próxima sessão" onclick="sessionStorage.setItem('wfa-saude-dismiss','1');renderClienteSaude();">✕</button>
+    </div>
+    <div class="csa-list">${rows}</div>
   </div>`;
 }
 /* ============ RELATÓRIO DO CLIENTE (1 clique) ============ */
