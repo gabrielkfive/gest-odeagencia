@@ -2676,6 +2676,7 @@ function iniciarAutoSync(){
               <button id="pl-view-list" onclick="planSetView('list')">☰ Lista</button>
             </div>
             <button class="pl-save" onclick="planSalvarNoDrive()">💾 Salvar no Drive</button>
+            <button class="pl-save" onclick="planGerarAprovacao(this)">🔗 Link de aprovação</button>
           </div>
           <div class="pl-legend">
             <span><i style="background:#ffd400"></i>Reels</span>
@@ -7556,6 +7557,22 @@ function planSalvarNoDrive(){
   const periodo=(document.getElementById('pl-periodo')&&document.getElementById('pl-periodo').value)||'';
   const ok=driveSalvarPlanejamento(_planCliente,periodo,_planIdeias);
   toast&&toast(ok?('💾 Salvo no Drive › '+_planCliente+' › Planejamentos'):'Não consegui salvar');
+}
+// Gera o link público de aprovação do plano atual e copia pra área de transferência.
+async function planGerarAprovacao(btn){
+  if(!_planIdeias||!_planIdeias.length){toast&&toast('Gere o planejamento primeiro');return;}
+  const cliente=(document.getElementById('pl-cliente')&&document.getElementById('pl-cliente').value)||_planCliente||'';
+  const periodo=(document.getElementById('pl-periodo')&&document.getElementById('pl-periodo').value)||'';
+  const old=btn&&btn.textContent;if(btn){btn.disabled=true;btn.textContent='🔗 Gerando...';}
+  try{
+    const r=await cloudCall('save',{action:'create-approval',cliente,periodo,ideias:_planIdeias});
+    if(!r||!r.token)throw new Error((r&&r.error)||'Falha ao gerar');
+    const url=location.origin+'/aprovar?t='+r.token;
+    try{await navigator.clipboard.writeText(url);}catch(e){}
+    if(typeof prompt==='function')prompt('Link de aprovação do cliente (copiado):',url);
+    toast&&toast('🔗 Link de aprovação copiado — manda pro cliente');
+  }catch(e){toast&&toast('⚠ '+(e.message||'Não consegui gerar o link'));}
+  finally{if(btn){btn.disabled=false;btn.textContent=old||'🔗 Link de aprovação';}}
 }
 function planOpen(){
   if(_planIdeias.length)return; // ja tem algo na tela

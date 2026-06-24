@@ -249,6 +249,31 @@ export const Route = createFileRoute("/api/workflowark/state")({
           return json({ ok: true, saved: rows.length });
         }
 
+        // Gera um link público de aprovação de conteúdo (só a agência logada cria).
+        // Guarda um snapshot do plano sob wfa-approval-<token> (fora do estado sincronizado
+        // do cliente). O cliente abre /aprovar?t=<token> e decide sem login.
+        if (action === "create-approval") {
+          const cliente = String(body.cliente ?? "").trim();
+          const ideias = Array.isArray(body.ideias) ? body.ideias : [];
+          if (!ideias.length) return json({ error: "Não há ideias para aprovar." }, { status: 400 });
+          const token = ((globalThis.crypto?.randomUUID?.() ?? (Date.now() + "" + Math.random())) + "").replace(/[^a-zA-Z0-9]/g, "");
+          const data = {
+            cliente,
+            periodo: String(body.periodo ?? ""),
+            ideias,
+            status: "pending",
+            items: {},
+            feedback: "",
+            agency: "ARK Content",
+            createdAt: new Date().toISOString(),
+          };
+          const { error } = await ctx.db
+            .from("workflowark_state")
+            .upsert({ key: `wfa-approval-${token}`, data, updated_by: ctx.user.id });
+          if (error) return json({ error: "Não foi possível gerar o link." }, { status: 500 });
+          return json({ ok: true, token });
+        }
+
         if (action === "add-member") {
           if (!ctx.isAdmin) return json({ error: "Apenas admin pode alterar acessos." }, { status: 403 });
           const email = String(body.email ?? "").trim().toLowerCase();
