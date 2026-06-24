@@ -2677,6 +2677,7 @@ function iniciarAutoSync(){
             </div>
             <button class="pl-save" onclick="planSalvarNoDrive()">💾 Salvar no Drive</button>
             <button class="pl-save" onclick="planGerarAprovacao(this)">🔗 Link de aprovação</button>
+            <button class="pl-save" onclick="planRoteirizarTudo(this)">🎬 Roteirizar tudo</button>
           </div>
           <div class="pl-legend">
             <span><i style="background:#ffd400"></i>Reels</span>
@@ -7660,6 +7661,37 @@ function planDetalhe(idx){
     ${i.legenda?`<div style="font-size:13px;color:var(--mute);font-style:italic;border-left:2px solid var(--line);padding-left:10px;margin-bottom:16px">“${mdEsc(i.legenda)}”</div>`:''}
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="planParaRoteirista(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">🎬 Roteirizar</button><button class="tb-btn" onclick="planParaLegenda(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">✍️ Legenda</button><button class="tb-btn" onclick="planParaTarefa(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">＋ Tarefa</button><button class="tb-btn" onclick="var m=document.getElementById('pl-modal');m&&m.remove()">Fechar</button></div>
   </div>`;
+}
+// Roteirista AUTÔNOMO: lê o planejamento do cliente e gera o roteiro de TODAS as ideias
+// de uma vez (sem caixinha de prompt). O brief real do cliente já entra no servidor
+// (clienteBrief no agente-roteirista). Junta tudo na saída do Roteirista pra copiar/salvar.
+async function planRoteirizarTudo(btn){
+  if(!_planIdeias||!_planIdeias.length){toast&&toast('Gere o planejamento primeiro');return;}
+  const cliente=(document.getElementById('pl-cliente')&&document.getElementById('pl-cliente').value)||_planCliente||'';
+  const ideias=_planIdeias.slice(0,12); // teto de segurança
+  if(btn)btn.disabled=true;
+  const nav=document.querySelector('[data-nav="roteirista"]');if(nav)nav.click();
+  const out=document.getElementById('rot-out');const st=document.getElementById('rot-status');
+  const cEl=document.getElementById('rot-cliente');if(cEl)cEl.value=cliente;
+  const tEl=document.getElementById('rot-tema');if(tEl)tEl.value='Roteiros do planejamento'+(cliente?' · '+cliente:'');
+  let acc='';
+  for(let n=0;n<ideias.length;n++){
+    const i=ideias[n];
+    const tema=(i.tema||'')+(i.angulo?' — '+i.angulo:'')+(i.produto?' ('+i.produto+')':'');
+    if(st)st.textContent='🎬 Roteirizando '+(n+1)+'/'+ideias.length+'...';
+    if(out)out.textContent=acc+(acc?'\n\n':'')+'⏳ Gerando '+(n+1)+' de '+ideias.length+' — '+(i.tema||'')+'...';
+    try{
+      const r=await cloudCall('save',{action:'agente-roteirista',tema,cliente,plataforma:'Instagram Reels',qtd:'1'});
+      const txt=(r&&r.text)||'(sem resposta)';
+      acc+=(acc?'\n\n═══════════\n\n':'')+'📅 '+(i.dia||i.data||('Ideia '+(n+1)))+' · '+(i.tema||'')+'\n\n'+txt;
+    }catch(e){
+      acc+=(acc?'\n\n═══════════\n\n':'')+'⚠ '+(i.tema||('Ideia '+(n+1)))+': '+((e&&e.message)||'falhou');
+    }
+    if(out)out.textContent=acc;
+  }
+  if(st)st.textContent='Pronto ✓ '+ideias.length+' roteiros';
+  if(btn)btn.disabled=false;
+  toast&&toast('🎬 '+ideias.length+' roteiros gerados do planejamento — revise e salve no Drive');
 }
 function planParaRoteirista(idx){
   const i=_planIdeias[idx];if(!i)return;
