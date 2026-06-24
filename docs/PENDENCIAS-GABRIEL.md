@@ -34,6 +34,11 @@ então só dá pra confirmar 100% logado em produção.
 - [ ] Abrir a URL numa aba anônima → conferir se o plano aparece e dá pra **Aprovar / Pedir ajuste**.
 - [ ] Me dizer se funcionou (ou colar o erro). Se rolar, eu mostro o status da aprovação dentro do app também.
 
+### 3. Testar o Portal do cliente (em prod) — 1 min
+- [ ] Logado → **Planejamento** → gerar/abrir um plano → **"🌐 Portal do cliente"** (copia o link).
+- [ ] Abrir o link numa aba anônima → ver o plano do cliente e testar **abrir uma demanda**.
+- [ ] Conferir se a demanda aparece no app (aba Demandas) com o nome do cliente. Me avisar se rolou.
+
 ---
 
 ## ✅ Resolvido

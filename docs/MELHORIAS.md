@@ -51,7 +51,10 @@ entre sessões. Cada item: o que é, status e (quando subiu) a versão/commit.
 - [ ] **JARVIS: barge-in real** — interromper o JARVIS falando por cima (precisa cancelamento de eco). (Mais técnico, áudio.)
 - [ ] **JARVIS: wake word / 2 palmas** — acordar o JARVIS por voz de qualquer tela.
 - [ ] **JARVIS: ampliar cobertura/confiabilidade do executor de tarefas por voz.**
-- [ ] **Portal do cliente externo** — portal de verdade (cliente entra, vê entregas, abre demanda). "Build grande".
+- [~] **Portal do cliente externo** — **slice 1 no ar** (commit `535402e`): link público por cliente
+  (`/portal?t=…`, botão "Portal do cliente" no Planejamento) onde o cliente vê o plano de conteúdo ao
+  vivo e abre demanda (cai em wfa-demandas). ⚠️ testar em prod (ver PENDENCIAS). Próximas fatias:
+  entregas/Drive do cliente, status das demandas pro cliente, login próprio (hoje é link/token).
 - [ ] _(verificar se já saíram: botões adicionar cliente E colaborador · régua dos 15 gerar tarefas na jornada · concluir tarefa no Meu Dia)_
 
 ### Abertas (sugeridas hoje — track de vendas/UX)
