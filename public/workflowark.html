@@ -759,6 +759,10 @@ h1,h2,h3,h4{letter-spacing:-.02em}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           <span>Comercial</span>
         </div>
+        <div class="subitem" data-nav="alpha">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="9" width="3" height="9"/><rect x="12" y="5" width="3" height="13"/><rect x="17" y="12" width="3" height="6"/></svg>
+          <span>Squad Alpha</span>
+        </div>
       </div>
 
       <div class="navitem" data-nav="tarefas">
@@ -1146,6 +1150,51 @@ h1,h2,h3,h4{letter-spacing:-.02em}
         </div>
         <div id="mdw-board"></div>
         <div id="mdw-addmenu"></div>
+      </div>
+
+      <!-- =================== SQUAD ALPHA (replica editável da planilha) =================== -->
+      <div class="page" id="page-alpha">
+        <style>
+          #page-alpha .al-sub{font-size:12px;color:var(--mute);margin-top:2px}
+          #alpha-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+          .al-kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+          .al-kpi .v{font-size:23px;font-weight:780;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+          .al-kpi .l{font-size:11px;color:var(--mute);font-weight:600;margin-top:4px}
+          .al-kpi.red .v{color:var(--red)}.al-kpi.yel .v{color:var(--yel-d)}.al-kpi.green .v{color:var(--green)}
+          .al-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff;max-height:72vh}
+          table.al-tbl{border-collapse:separate;border-spacing:0;font-size:12px;white-space:nowrap;min-width:1700px}
+          table.al-tbl th,table.al-tbl td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:middle}
+          table.al-tbl thead .grp{background:#0b0b0c;color:#fff;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;text-align:center;position:sticky;top:0;z-index:3}
+          table.al-tbl thead .col{background:#f5f5f7;color:var(--ink);font-size:10.5px;font-weight:700;position:sticky;top:25px;z-index:2}
+          table.al-tbl td.sticky,table.al-tbl th.sticky{position:sticky;left:0;z-index:1;background:#fff;border-right:2px solid var(--line-2);min-width:190px;white-space:normal}
+          table.al-tbl thead th.sticky{z-index:4;background:#f5f5f7}
+          table.al-tbl tbody tr:hover td{background:#fcfbf7}
+          table.al-tbl tbody tr:hover td.sticky{background:#fcfbf7}
+          .al-cell{min-width:70px;border:none;background:transparent;font:inherit;color:var(--ink);width:100%;outline:none;padding:2px 3px;border-radius:5px}
+          .al-cell:focus{background:var(--yel-soft);box-shadow:0 0 0 1.5px var(--yel)}
+          .al-num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+          .al-chk{width:18px;height:18px;cursor:pointer;accent-color:var(--green)}
+          .al-flag{font-size:10px;font-weight:800;border-radius:6px;padding:3px 7px;border:1px solid;cursor:pointer;font-family:inherit}
+          .al-flag.CRITICAL,.al-flag.DANGER{background:var(--red-soft);color:#991b1b;border-color:#fca5a5}
+          .al-flag.CARE{background:var(--yel-bg);color:var(--yel-d);border-color:var(--yel)}
+          .al-flag.HEALTHY,.al-flag.OK{background:var(--green-soft);color:#166534;border-color:#86efac}
+          .al-plano{font-size:10px;font-weight:800;border-radius:6px;padding:2px 7px;border:1px solid;font-family:inherit;background:transparent}
+          .al-del{color:var(--red);background:none;border:none;cursor:pointer;font-size:13px;padding:2px 6px;border-radius:6px}
+          .al-del:hover{background:var(--red-soft)}
+        </style>
+        <div class="page-head">
+          <div class="page-title">
+            <h1>Squad Alpha · Acompanhamento</h1>
+            <p class="al-sub">Réplica viva da planilha do Alpha Senior — edite as células, marque os checks e exporte. Para operação semanal e investidores.</p>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <button class="icobtn" onclick="alphaAddRow()" title="Adicionar cliente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Cliente</button>
+            <button class="icobtn" onclick="alphaExportCSV()" title="Exportar CSV (abre no Excel/Sheets)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar</button>
+            <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSoAmx0vLIFqzqe73ILwKUKyNdC7iOGjPkRPBT5KUIzjlYC11cbOSU8dzmNpEb8V-o6r6DCWIzbg9q7/pubhtml" target="_blank" rel="noopener" class="icobtn" style="text-decoration:none" title="Abrir a planilha original">↗ Planilha</a>
+          </div>
+        </div>
+        <div id="alpha-summary"></div>
+        <div class="al-wrap"><table class="al-tbl" id="alpha-tbl"></table></div>
       </div>
 
       <!-- =================== MEU MÊS (contexto p/ All Hands) =================== -->
@@ -1963,7 +2012,7 @@ h1,h2,h3,h4{letter-spacing:-.02em}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-deleted-ids'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-deleted-ids'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -2199,6 +2248,7 @@ function applyCloudState(remote){
   renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function'&&!(typeof planIsEditing==='function'&&planIsEditing()))renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function')renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
   if(typeof renderCrm==='function')renderCrm();
   if(typeof renderWidgets==='function')renderWidgets(); // Meu Painel é a home: widgets refletem os dados sincronizados
+  if(typeof renderAlpha==='function'&&document.getElementById('page-alpha')&&document.getElementById('page-alpha').classList.contains('active'))renderAlpha();
   if(typeof renderAgenda==='function')renderAgenda();
   if(typeof renderComercialMes==='function')renderComercialMes();
   if(typeof restoreLastPage==='function')restoreLastPage(); // volta p/ a aba que estava (1x, após RBAC)
@@ -4191,6 +4241,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     document.getElementById('page-'+p)?.classList.add('active');
     if(p==='painel'&&typeof renderWidgets==='function'){try{renderWidgets();}catch(e){console.warn('painel',e);}}
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
+    if(p==='alpha'&&typeof renderAlpha==='function'){try{renderAlpha();}catch(e){console.warn('alpha',e);}}
     if(p==='tutorial'&&typeof renderTutorial==='function'){try{renderTutorial();}catch(e){console.warn('tut',e);}}
     if(p==='conselho'&&typeof consPopular==='function'){try{consPopular();}catch(e){}}
     if(p==='agentes'){try{agPolish();agLive();}catch(e){}}
@@ -8455,6 +8506,106 @@ function renderDemandas(){
   el.innerHTML=arr.map(d=>`<div class="card" style="padding:11px"><div style="display:flex;justify-content:space-between;align-items:start;gap:6px"><strong style="font-size:13px">${escapeHtml(d.titulo||'(sem título)')}</strong><span class="tag ${d.status==='resolvida'?'yel':''}">${d.status}</span></div><div class="muted" style="font-size:10px;margin:4px 0">${new Date(d.criadaEm).toLocaleString('pt-BR')}</div>${d.mensagem?`<p style="font-size:12px;white-space:pre-wrap;margin-bottom:8px">${escapeHtml(d.mensagem)}</p>`:''}<div style="display:flex;gap:6px">${d.status==='resolvida'?`<button class="icobtn" onclick="setDemStatus('${d.id}','aberta')">Reabrir</button>`:`<button class="icobtn" onclick="setDemStatus('${d.id}','resolvida')">Resolver</button>`}<button class="icobtn" style="color:var(--red)" onclick="delDem('${d.id}')">Excluir</button></div></div>`).join('');
 }
 
+/* ============ SQUAD ALPHA · réplica editável da planilha ============ */
+const ALPHA_GROUPS=[
+  {g:'Contrato',cols:[
+    {k:'nome',l:'Cliente',t:'text',sticky:true},{k:'account',l:'Account',t:'text'},
+    {k:'plano',l:'Plano',t:'plano'},{k:'status',l:'Status',t:'text'},
+    {k:'tipoContrato',l:'Tipo contrato',t:'text'},{k:'valorContrato',l:'Valor contrato',t:'text'},
+    {k:'inicioContrato',l:'Início',t:'text'},{k:'fimContrato',l:'Fim/Renov.',t:'text'},
+  ]},
+  {g:'Onboarding',cols:[{k:'onbInicio',l:'Início onb.',t:'text'},{k:'onbFim',l:'Fim onb.',t:'text'},{k:'onbTempo',l:'Tempo',t:'text'}]},
+  {g:'Mensal / LTV',cols:[{k:'valorMensal',l:'Valor mensal',t:'text'},{k:'lt',l:'LT (m)',t:'text'},{k:'ltv',l:'LTV',t:'text'}]},
+  {g:'Meta / Performance',cols:[
+    {k:'nsmTipo',l:'NSM',t:'text'},{k:'nsmMeta',l:'Meta',t:'text'},{k:'nsmReal',l:'Realizado',t:'text'},{k:'pctMeta',l:'% meta',t:'text'},
+    {k:'budgetMidia',l:'Budget mídia',t:'text'},{k:'investTrafego',l:'Invest. tráfego',t:'text'},{k:'pctBudget',l:'% budget',t:'text'},{k:'roas',l:'ROAS',t:'text'},
+  ]},
+  {g:'Gestão de Risco',cols:[
+    {k:'entregasPrazo',l:'Entregas no prazo',t:'bool'},{k:'entregasQual',l:'Entregas c/ qualidade',t:'bool'},
+    {k:'relacionamento',l:'Relacionamento',t:'bool'},{k:'flag',l:'Flag',t:'flag'},{k:'obs',l:'Observação',t:'text'},
+  ]},
+  {g:'ROPRE',cols:[{k:'r1',l:'R1',t:'bool'},{k:'r2',l:'R2',t:'bool'},{k:'ropreAcao',l:'Plano de ação',t:'text'}]},
+];
+const ALPHA_FLAGS=['HEALTHY','CARE','DANGER','CRITICAL'];
+const ALPHA_COLS=ALPHA_GROUPS.reduce((a,g)=>a.concat(g.cols),[]);
+const ALPHA_SEED=[
+  {id:'al-brisa',nome:'Brisa Doce Café & Sorveteria',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Anual',valorContrato:'R$ 25.000,00',inicioContrato:'04/02/2026',fimContrato:'04/02/2027',onbInicio:'02/03/2026',onbFim:'06/03',onbTempo:'4',valorMensal:'R$ 2.083,33',lt:'12',ltv:'R$ 25.000,00',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:false,entregasQual:false,relacionamento:false,flag:'CRITICAL',obs:'Melhorar qualidade do criativo.',r1:false,r2:false,ropreAcao:''},
+  {id:'al-babbo',nome:'Babbo Giovanni Vila Mascote',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Semestral',valorContrato:'R$ 18.000,00',inicioContrato:'02/05/2026',fimContrato:'02/11/2026',onbInicio:'09/09/2024',onbFim:'20/09',onbTempo:'11',valorMensal:'R$ 3.000,00',lt:'6',ltv:'R$ 18.000,00',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
+  {id:'al-bellato',nome:'Bellato Pizzaria',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Trimestral',valorContrato:'',inicioContrato:'',fimContrato:'',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'',nsmReal:'',pctMeta:'',budgetMidia:'',investTrafego:'',pctBudget:'',roas:'',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
+  {id:'al-dom',nome:'Dom Baruka (CAC 0)',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Trimestral',valorContrato:'R$ 6.000,00',inicioContrato:'16/04/2026',fimContrato:'16/07/2026',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
+  {id:'al-cachu',nome:'Cachu Restaurante',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Anual',valorContrato:'R$ 24.000,00',inicioContrato:'02/04/2026',fimContrato:'02/04/2027',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
+  {id:'al-attra',nome:'Attraversiamo Café',account:'Rosiron',plano:'Silver',status:'Ativo',tipoContrato:'Anual',valorContrato:'R$ 19.200,00',inicioContrato:'19/05/2026',fimContrato:'19/05/2027',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
+  {id:'al-valhalla',nome:'Valhalla',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Semestral',valorContrato:'R$ 12.000,00',inicioContrato:'08/05/2026',fimContrato:'08/11/2026',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
+  {id:'al-vaca',nome:'Vaca Velha',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Anual',valorContrato:'R$ 24.000,00',inicioContrato:'13/03/2026',fimContrato:'13/03/2027',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
+  {id:'al-4b',nome:'4B Burguer',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Trimestral',valorContrato:'R$ 6.000,00',inicioContrato:'08/06/2026',fimContrato:'08/09/2026',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
+  {id:'al-stray',nome:'Stray House',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Semestral',valorContrato:'',inicioContrato:'',fimContrato:'',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'Faturamento',nsmMeta:'R$ 70.000,00',nsmReal:'R$ 10.000,00',pctMeta:'14,29%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'14,00%',roas:'3',entregasPrazo:false,entregasQual:true,relacionamento:true,flag:'DANGER',obs:'',r1:false,r2:false,ropreAcao:''},
+];
+function loadAlpha(){let a=null;try{a=JSON.parse(localStorage.getItem('wfa-alpha')||'null');}catch(e){}return Array.isArray(a)?a:null;}
+function saveAlpha(arr){try{localStorage.setItem('wfa-alpha',JSON.stringify(arr));}catch(e){}}
+function alphaRows(){let a=loadAlpha();if(!a){a=JSON.parse(JSON.stringify(ALPHA_SEED));saveAlpha(a);}return a;}
+function alphaNum(v){if(typeof v==='number')return v;const s=String(v||'').replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isNaN(n)?0:n;}
+function alphaSet(id,k,v){const a=alphaRows();const r=a.find(x=>x.id===id);if(!r)return;r[k]=v;saveAlpha(a);if(k==='flag'||typeof v==='boolean')renderAlpha();else renderAlphaSummary();}
+function alphaAddRow(){const a=alphaRows();a.push({id:'al'+Date.now(),nome:'Novo cliente',account:'',plano:'Gold',status:'Ativo',flag:'CARE',entregasPrazo:false,entregasQual:false,relacionamento:false,r1:false,r2:false});saveAlpha(a);renderAlpha();const w=document.querySelector('#page-alpha .al-wrap');if(w)w.scrollTop=w.scrollHeight;if(typeof toast==='function')toast('Cliente Alpha adicionado');}
+function alphaDelRow(id){if(!confirm('Remover este cliente da planilha Alpha?'))return;saveAlpha(alphaRows().filter(x=>x.id!==id));renderAlpha();if(typeof toast==='function')toast('Removido');}
+function alphaCell(r,c){
+  const v=r[c.k];
+  if(c.t==='bool'){return `<td style="text-align:center"><input type="checkbox" class="al-chk" ${v?'checked':''} onchange="alphaSet('${r.id}','${c.k}',this.checked)"></td>`;}
+  if(c.t==='flag'){const fv=ALPHA_FLAGS.includes(v)?v:'CARE';return `<td><select class="al-flag ${fv}" onchange="alphaSet('${r.id}','flag',this.value)">${ALPHA_FLAGS.map(f=>`<option ${f===fv?'selected':''}>${f}</option>`).join('')}</select></td>`;}
+  if(c.t==='plano'){const opts=['Gold','Silver','Bronze','Alpha Senior'];const pv=opts.includes(v)?v:(v||'Gold');return `<td><select class="al-plano" onchange="alphaSet('${r.id}','plano',this.value)">${(opts.includes(pv)?opts:[pv].concat(opts)).map(o=>`<option ${o===pv?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select></td>`;}
+  const cls='al-cell'+(c.t==='num'?' al-num':'');
+  const stick=c.sticky?' class="sticky"':'';
+  return `<td${stick}><input class="${cls}" value="${escapeHtml(v==null?'':String(v))}" onchange="alphaSet('${r.id}','${c.k}',this.value)"></td>`;
+}
+function renderAlpha(){
+  const tbl=document.getElementById('alpha-tbl');if(!tbl)return;
+  const wrap=tbl.closest('.al-wrap');const sl=wrap?wrap.scrollLeft:0,st=wrap?wrap.scrollTop:0;
+  const rows=alphaRows();
+  let h='<thead><tr><th class="grp sticky" rowspan="2">Cliente</th>';
+  ALPHA_GROUPS.forEach(g=>{const n=g.cols.filter(c=>!c.sticky).length;if(n>0)h+=`<th class="grp" colspan="${n}">${escapeHtml(g.g)}</th>`;});
+  h+='<th class="grp" rowspan="2"></th></tr><tr>';
+  ALPHA_GROUPS.forEach(g=>g.cols.forEach(c=>{if(!c.sticky)h+=`<th class="col">${escapeHtml(c.l)}</th>`;}));
+  h+='</tr></thead><tbody>';
+  rows.forEach(r=>{
+    h+='<tr>';
+    ALPHA_COLS.forEach(c=>{h+=alphaCell(r,c);});
+    h+=`<td style="text-align:center"><button class="al-del" title="Remover" onclick="alphaDelRow('${r.id}')">✕</button></td>`;
+    h+='</tr>';
+  });
+  if(!rows.length)h+=`<tr><td colspan="30" style="text-align:center;color:var(--mute);padding:24px">Sem clientes. Clique em <b>+ Cliente</b>.</td></tr>`;
+  h+='</tbody>';
+  tbl.innerHTML=h;
+  if(wrap){wrap.scrollLeft=sl;wrap.scrollTop=st;}
+  renderAlphaSummary();
+}
+function renderAlphaSummary(){
+  const el=document.getElementById('alpha-summary');if(!el)return;
+  const rows=alphaRows();
+  const ativos=rows.filter(r=>String(r.status||'').toLowerCase().startsWith('ativo'));
+  const risco=rows.filter(r=>r.flag==='CRITICAL'||r.flag==='DANGER');
+  const care=rows.filter(r=>r.flag==='CARE');
+  const mrr=rows.reduce((s,r)=>s+alphaNum(r.valorMensal),0);
+  const contratado=rows.reduce((s,r)=>s+alphaNum(r.valorContrato),0);
+  const brl=n=>'R$ '+Math.round(n).toLocaleString('pt-BR');
+  el.innerHTML=[
+    `<div class="al-kpi"><div class="v">${rows.length}</div><div class="l">Clientes Alpha</div></div>`,
+    `<div class="al-kpi green"><div class="v">${ativos.length}</div><div class="l">Ativos</div></div>`,
+    `<div class="al-kpi red"><div class="v">${risco.length}</div><div class="l">Em risco (Critical/Danger)</div></div>`,
+    `<div class="al-kpi yel"><div class="v">${care.length}</div><div class="l">Em atenção (Care)</div></div>`,
+    `<div class="al-kpi"><div class="v" style="font-size:18px">${brl(mrr)}</div><div class="l">MRR somado</div></div>`,
+    `<div class="al-kpi"><div class="v" style="font-size:18px">${brl(contratado)}</div><div class="l">Contratado total</div></div>`,
+  ].join('');
+}
+function alphaExportCSV(){
+  const rows=alphaRows();
+  const esc=v=>'"'+String(v==null?'':(typeof v==='boolean'?(v?'TRUE':'FALSE'):v)).replace(/"/g,'""')+'"';
+  const head=['Cliente'].concat(ALPHA_COLS.filter(c=>!c.sticky).map(c=>c.l));
+  const lines=[head.map(esc).join(',')];
+  rows.forEach(r=>{const line=[r.nome].concat(ALPHA_COLS.filter(c=>!c.sticky).map(c=>r[c.k])).map(esc).join(',');lines.push(line);});
+  const csv='﻿'+lines.join('\r\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='squad-alpha-acompanhamento.csv';a.click();
+  if(typeof toast==='function')toast('CSV exportado · abre no Excel/Sheets');
+}
 /* ============ ROTINAS ============ */
 function loadRot(){return JSON.parse(localStorage.getItem('wfa-rotinas')||'[]');}
 function saveRot(a){localStorage.setItem('wfa-rotinas',JSON.stringify(a));renderRotinas();}
