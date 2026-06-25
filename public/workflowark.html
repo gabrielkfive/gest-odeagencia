@@ -1225,6 +1225,10 @@ h1,h2,h3,h4{letter-spacing:-.022em}
           .al-plano{font-size:10px;font-weight:800;border-radius:6px;padding:2px 7px;border:1px solid;font-family:inherit;background:transparent}
           .al-del{color:var(--red);background:none;border:none;cursor:pointer;font-size:13px;padding:2px 6px;border-radius:6px}
           .al-del:hover{background:var(--red-soft)}
+          .al-tabbar{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 4px;border-bottom:1px solid var(--line);padding-bottom:10px}
+          .al-tab{font-size:12.5px;font-weight:600;color:var(--mute);background:rgba(118,118,128,.06);border:1px solid transparent;border-radius:980px;padding:7px 14px;cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1)}
+          .al-tab:hover{color:var(--ink);background:rgba(118,118,128,.12)}
+          .al-tab.on{background:var(--ink);color:#fff}
         </style>
         <div class="page-head">
           <div class="page-title">
@@ -1237,8 +1241,14 @@ h1,h2,h3,h4{letter-spacing:-.022em}
             <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSoAmx0vLIFqzqe73ILwKUKyNdC7iOGjPkRPBT5KUIzjlYC11cbOSU8dzmNpEb8V-o6r6DCWIzbg9q7/pubhtml" target="_blank" rel="noopener" class="icobtn" style="text-decoration:none" title="Abrir a planilha original">↗ Planilha</a>
           </div>
         </div>
-        <div id="alpha-summary"></div>
-        <div class="al-wrap"><table class="al-tbl" id="alpha-tbl"></table></div>
+        <div class="al-tabbar" id="alpha-tabbar"></div>
+        <div id="alpha-view-acomp">
+          <div id="alpha-summary"></div>
+          <div class="al-wrap"><table class="al-tbl" id="alpha-tbl"></table></div>
+        </div>
+        <div id="alpha-view-grid" style="display:none">
+          <div class="al-wrap"><table class="al-tbl" id="alpha-grid"></table></div>
+        </div>
       </div>
 
       <!-- =================== MEU MÊS (contexto p/ All Hands) =================== -->
@@ -2056,7 +2066,7 @@ h1,h2,h3,h4{letter-spacing:-.022em}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-deleted-ids'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-deleted-ids'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -8593,7 +8603,9 @@ function saveAlpha(arr){try{localStorage.setItem('wfa-alpha',JSON.stringify(arr)
 function alphaRows(){let a=loadAlpha();if(!a){a=JSON.parse(JSON.stringify(ALPHA_SEED));saveAlpha(a);}return a;}
 function alphaNum(v){if(typeof v==='number')return v;const s=String(v||'').replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isNaN(n)?0:n;}
 function alphaSet(id,k,v){const a=alphaRows();const r=a.find(x=>x.id===id);if(!r)return;r[k]=v;saveAlpha(a);if(k==='flag'||typeof v==='boolean')renderAlpha();else renderAlphaSummary();}
-function alphaAddRow(){const a=alphaRows();a.push({id:'al'+Date.now(),nome:'Novo cliente',account:'',plano:'Gold',status:'Ativo',flag:'CARE',entregasPrazo:false,entregasQual:false,relacionamento:false,r1:false,r2:false});saveAlpha(a);renderAlpha();const w=document.querySelector('#page-alpha .al-wrap');if(w)w.scrollTop=w.scrollHeight;if(typeof toast==='function')toast('Cliente Alpha adicionado');}
+function alphaAddRow(){
+  if(typeof ALPHA_ACTIVE!=='undefined'&&ALPHA_ACTIVE!=='acomp'){gridAddRow(ALPHA_ACTIVE);return;}
+  const a=alphaRows();a.push({id:'al'+Date.now(),nome:'Novo cliente',account:'',plano:'Gold',status:'Ativo',flag:'CARE',entregasPrazo:false,entregasQual:false,relacionamento:false,r1:false,r2:false});saveAlpha(a);renderAlpha();const w=document.querySelector('#page-alpha .al-wrap');if(w)w.scrollTop=w.scrollHeight;if(typeof toast==='function')toast('Cliente Alpha adicionado');}
 function alphaDelRow(id){if(!confirm('Remover este cliente da planilha Alpha?'))return;saveAlpha(alphaRows().filter(x=>x.id!==id));renderAlpha();if(typeof toast==='function')toast('Removido');}
 function alphaCell(r,c){
   const v=r[c.k];
@@ -8617,6 +8629,10 @@ function alphaMigrate(){
   }catch(e){}
 }
 function renderAlpha(){
+  if(typeof renderAlphaTabbar==='function')renderAlphaTabbar();
+  const va=document.getElementById('alpha-view-acomp'),vg=document.getElementById('alpha-view-grid');
+  if(typeof ALPHA_ACTIVE!=='undefined'&&ALPHA_ACTIVE!=='acomp'){ if(va)va.style.display='none'; if(vg)vg.style.display=''; if(typeof gridRender==='function')gridRender(ALPHA_ACTIVE); return; }
+  if(va)va.style.display=''; if(vg)vg.style.display='none';
   const tbl=document.getElementById('alpha-tbl');if(!tbl)return;
   alphaMigrate();
   const wrap=tbl.closest('.al-wrap');const sl=wrap?wrap.scrollLeft:0,st=wrap?wrap.scrollTop:0;
@@ -8659,6 +8675,7 @@ function renderAlphaSummary(){
 // Exporta um .xls de verdade (HTML-table que o Excel abre formatado): cabeçalhos
 // agrupados, flags coloridas e checks — "pique a planilha original", pros investidores.
 function alphaExportCSV(){
+  if(typeof ALPHA_ACTIVE!=='undefined'&&ALPHA_ACTIVE!=='acomp'){gridExport(ALPHA_ACTIVE);return;}
   const rows=alphaRows();
   const flagBg={CRITICAL:'#fde2e2',DANGER:'#fde2e2',CARE:'#fff3cd',HEALTHY:'#d8f5dd',OK:'#d8f5dd'};
   const flagFg={CRITICAL:'#991b1b',DANGER:'#991b1b',CARE:'#8a6d00',HEALTHY:'#166534',OK:'#166534'};
@@ -8685,6 +8702,63 @@ function alphaExportCSV(){
   a.href='data:application/vnd.ms-excel;charset=utf-8,'+encodeURIComponent('﻿'+html);
   a.download='squad-alpha-acompanhamento.xls';a.click();
   if(typeof toast==='function')toast('Exportado pra Excel (com cores) ✓');
+}
+/* ---- Squad Alpha: sub-abas (replica as abas da planilha) + grades genéricas ---- */
+const ALPHA_CLIENTES_NOMES=['Brisa Doce Café & Sorveteria','Babbo Giovanni Vila Mascote','Dom Baruka (CAC 0)','Cachu Restaurante','Attraversiamo Café','Valhalla','Vaca Velha','4B Burguer','Stray House'];
+function alphaSeedRows(prefix,defaults){return ALPHA_CLIENTES_NOMES.map((nm,i)=>Object.assign({id:prefix+i,cliente:nm},defaults));}
+const ALPHA_GRIDS={
+  am:{title:'Account Manager',cols:[
+    {k:'cliente',l:'Cliente',sticky:true},{k:'reuniao',l:'Reunião Mensal'},{k:'ligacao',l:'Ligação Semanal'},
+    {k:'seg',l:'Seg · Relatório',t:'bool'},{k:'ter',l:'Ter · Card. Dig.',t:'bool'},{k:'qua',l:'Qua · Ideia/Otm',t:'bool'},
+    {k:'quaqui',l:'Qua-Qui · Criativo',t:'bool'},{k:'sex',l:'Sex · Retrospec',t:'bool'},{k:'demandas',l:'Demandas'},
+    {k:'relatorio',l:'Relatório',t:'bool'},{k:'cpa',l:'Resultado (CPA)'},{k:'otimizacao',l:'Otimização',t:'bool'},
+    {k:'copy',l:'Copy',t:'bool'},{k:'criativo',l:'Criativo',t:'bool'},{k:'campanha',l:'Campanha Subida',t:'bool'},
+  ],seed:alphaSeedRows('am',{reuniao:'Pendente',ligacao:'Pendente',seg:false,ter:false,qua:false,quaqui:false,sex:false,demandas:'7',relatorio:false,cpa:'',otimizacao:false,copy:false,criativo:false,campanha:false})},
+  gt:{title:'Gestor de Tráfego',cols:[
+    {k:'cliente',l:'Cliente',sticky:true},{k:'cpa',l:'Resultado (CPA)'},{k:'relatorio',l:'Relatório',t:'bool'},
+    {k:'seg',l:'Seg',t:'bool'},{k:'ter',l:'Ter',t:'bool'},{k:'qua',l:'Qua',t:'bool'},{k:'qui',l:'Qui',t:'bool'},{k:'sex',l:'Sex',t:'bool'},
+    {k:'otm',l:'Otimização Semanal',t:'bool'},{k:'criativoSubido',l:'Criativo Subido',t:'bool'},{k:'totalDem',l:'Total de demandas'},
+  ],seed:alphaSeedRows('gt',{cpa:'',relatorio:false,seg:false,ter:false,qua:false,qui:false,sex:false,otm:false,criativoSubido:false,totalDem:'8'})},
+  cr:{title:'Criador',cols:[
+    {k:'cliente',l:'Cliente',sticky:true},{k:'copyFeita',l:'Copy Feita',t:'bool'},{k:'copy',l:'Copy'},
+    {k:'checkCoord',l:'Check Coordenador',t:'bool'},{k:'criativoFeito',l:'Criativo Feito',t:'bool'},{k:'alteracoes',l:'Alterações'},{k:'totalCriativos',l:'Total de Criativos'},
+  ],seed:alphaSeedRows('cr',{copyFeita:false,copy:'',checkCoord:false,criativoFeito:false,alteracoes:'',totalCriativos:'1'})},
+};
+const ALPHA_TABS=[{id:'acomp',name:'Acompanhamento'},{id:'am',name:'Account Manager'},{id:'gt',name:'Gestor de Tráfego'},{id:'cr',name:'Criador'}];
+let ALPHA_ACTIVE='acomp';
+function renderAlphaTabbar(){const el=document.getElementById('alpha-tabbar');if(!el)return;el.innerHTML=ALPHA_TABS.map(t=>`<button class="al-tab ${t.id===ALPHA_ACTIVE?'on':''}" onclick="alphaTab('${t.id}')">${escapeHtml(t.name)}</button>`).join('');}
+function alphaTab(id){ALPHA_ACTIVE=id;renderAlpha();}
+const ALPHA_GRID_KEY={am:'wfa-alpha-am',gt:'wfa-alpha-gt',cr:'wfa-alpha-cr'};
+function gridLoad(id){let a=null;try{a=JSON.parse(localStorage.getItem(ALPHA_GRID_KEY[id])||'null');}catch(e){}return Array.isArray(a)?a:null;}
+function gridSave(id,arr){try{localStorage.setItem(ALPHA_GRID_KEY[id],JSON.stringify(arr));}catch(e){}}
+function gridRows(id){let a=gridLoad(id);if(!a){a=JSON.parse(JSON.stringify(ALPHA_GRIDS[id].seed));gridSave(id,a);}return a;}
+function gridSet(id,rid,k,v){const a=gridRows(id);const r=a.find(x=>x.id===rid);if(!r)return;r[k]=v;gridSave(id,a);}
+function gridAddRow(id){const a=gridRows(id);const row={id:'g'+Date.now()};ALPHA_GRIDS[id].cols.forEach(c=>{row[c.k]=(c.t==='bool'?false:'');});row[ALPHA_GRIDS[id].cols[0].k]='Novo cliente';a.push(row);gridSave(id,a);gridRender(id);}
+function gridDelRow(id,rid){if(!confirm('Remover esta linha?'))return;gridSave(id,gridRows(id).filter(x=>x.id!==rid));gridRender(id);}
+function gridCell(id,r,c){
+  const v=r[c.k];
+  if(c.t==='bool')return `<td style="text-align:center"><input type="checkbox" class="al-chk" ${v?'checked':''} onchange="gridSet('${id}','${r.id}','${c.k}',this.checked)"></td>`;
+  const st=c.sticky?' class="sticky"':'';
+  return `<td${st}><input class="al-cell" value="${escapeHtml(v==null?'':String(v))}" onchange="gridSet('${id}','${r.id}','${c.k}',this.value)"></td>`;
+}
+function gridRender(id){
+  const tbl=document.getElementById('alpha-grid');if(!tbl)return;
+  const cfg=ALPHA_GRIDS[id];const rows=gridRows(id);
+  const wrap=tbl.closest('.al-wrap');const sl=wrap?wrap.scrollLeft:0;
+  let h='<thead><tr>';
+  cfg.cols.forEach(c=>{h+=`<th class="col${c.sticky?' sticky':''}" style="top:0">${escapeHtml(c.l)}</th>`;});
+  h+='<th class="col" style="top:0"></th></tr></thead><tbody>';
+  rows.forEach(r=>{h+='<tr>';cfg.cols.forEach(c=>{h+=gridCell(id,r,c);});h+=`<td style="text-align:center"><button class="al-del" title="Remover" onclick="gridDelRow('${id}','${r.id}')">✕</button></td></tr>`;});
+  if(!rows.length)h+='<tr><td colspan="20" style="text-align:center;color:var(--mute);padding:24px">Sem linhas. Clique em <b>+ Cliente</b>.</td></tr>';
+  h+='</tbody>';tbl.innerHTML=h;if(wrap)wrap.scrollLeft=sl;
+}
+function gridExport(id){
+  const cfg=ALPHA_GRIDS[id];const rows=gridRows(id);
+  let body='<tr>'+cfg.cols.map(c=>`<th style="background:#0b0b0c;color:#fff;border:1px solid #777;padding:6px 8px;font-family:Arial">${escapeHtml(c.l)}</th>`).join('')+'</tr>';
+  rows.forEach(r=>{body+='<tr>'+cfg.cols.map(c=>{const v=r[c.k];if(c.t==='bool')return `<td style="border:1px solid #ccc;padding:5px;text-align:center;color:#16a34a;font-weight:bold;font-family:Arial">${v?'✔':''}</td>`;return `<td style="border:1px solid #ccc;padding:5px 7px;font-family:Arial;font-size:11px">${escapeHtml(v==null?'':String(v))}</td>`;}).join('')+'</tr>';});
+  const html='<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>'+escapeHtml(cfg.title)+'</x:Name></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border="1" style="border-collapse:collapse">'+body+'</table></body></html>';
+  const a=document.createElement('a');a.href='data:application/vnd.ms-excel;charset=utf-8,'+encodeURIComponent('﻿'+html);a.download='squad-alpha-'+id+'.xls';a.click();
+  if(typeof toast==='function')toast('Exportado pra Excel ✓');
 }
 // Se a aba Alpha foi a página restaurada no boot, o renderAlpha do nav-click rodou ANTES
 // destes const (TDZ) e falhou silenciosamente. Agora que existem, renderiza se está ativa.
