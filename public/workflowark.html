@@ -650,6 +650,50 @@ h1,h2,h3,h4{letter-spacing:-.02em}
 .form-input:focus,.form-select:focus{border-color:var(--mute-2);outline:none}
 /* alerts mais suaves */
 .alert{border-radius:16px}
+
+/* =====================================================================
+   APPLE REFORM · camada final coesa (vence as camadas anteriores).
+   Tipografia SF, fundo/cinzas Apple, profundidade suave, controles iOS,
+   vidro fosco no topo, sidebar grafite, foco e física de movimento Apple.
+   Escopo cuidadoso: NÃO mexe em inputs especiais (ex: células .al-cell).
+   ===================================================================== */
+:root{
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Inter',system-ui,'Segoe UI',sans-serif;
+  --bg:#f5f5f7;            /* cinza de fundo Apple */
+  --ink:#1d1d1f;--ink-2:#1d1d1f;--txt:#1d1d1f;  /* preto Apple (não #000) */
+  --mute:#6e6e73;--mute-2:#8e8e93;              /* cinzas secundários iOS */
+  --line:#e5e5ea;--line-2:#d1d1d6;              /* hairlines iOS */
+}
+html,body{font-family:var(--sans);letter-spacing:-.011em}
+h1,h2,h3,h4{letter-spacing:-.022em}
+.view{background:var(--bg)}
+
+/* Cartões — cantos contínuos, hairline, sombra de profundidade suave */
+.card,.kpi,.mdw,.al-kpi{border-radius:18px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 28px -18px rgba(0,0,0,.20);transition:box-shadow .3s var(--ease-out,cubic-bezier(.16,1,.3,1)),transform .3s var(--ease-out,cubic-bezier(.16,1,.3,1))}
+.card:hover,.mdw:hover{box-shadow:0 1px 2px rgba(0,0,0,.05),0 16px 38px -18px rgba(0,0,0,.26);transform:translateY(-1px)}
+
+/* Topo — vidro fosco translúcido (iOS) */
+.topbar{background:rgba(245,245,247,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.07)}
+
+/* Sidebar — grafite Apple (não preto chapado) + hairline translúcido */
+.side{background:#1c1c1e;border-right:1px solid rgba(255,255,255,.07)}
+.navitem,.subitem{border-radius:10px;font-weight:500;transition:background .2s ease,color .2s ease,transform .18s cubic-bezier(.16,1,.3,1)}
+.navitem:hover{background:rgba(255,255,255,.06);transform:none}
+.navitem.active{background:rgba(255,199,0,.16);color:#ffd60a}
+.navitem.active svg{color:#ffd60a}
+
+/* Botões — iOS: primário pill cheio; ícone-botão cinza translúcido */
+.tb-btn{border-radius:980px;font-weight:600;letter-spacing:-.01em;padding:8px 16px;transition:transform .14s cubic-bezier(.16,1,.3,1),filter .2s ease,background .2s ease,border-color .2s ease}
+.tb-btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.tb-btn:active,.icobtn:active{transform:scale(.96)}
+.icobtn{border-radius:980px;border:1px solid rgba(0,0,0,.08);background:rgba(118,118,128,.06);color:var(--ink);font-weight:600;transition:background .2s ease,transform .14s cubic-bezier(.16,1,.3,1)}
+.icobtn:hover{background:rgba(118,118,128,.12);color:var(--ink)}
+
+/* Inputs de formulário — preenchimento limpo e foco com anel da marca (só .form-*) */
+.form-input,.form-select{border-radius:11px;border:1px solid rgba(0,0,0,.10);transition:border-color .2s ease,box-shadow .2s ease}
+.form-input:focus,.form-select:focus{border-color:var(--yel);box-shadow:0 0 0 4px rgba(255,199,0,.18);outline:none}
+
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important;animation-duration:.01s!important}}
 </style>
 </head>
 <body>
@@ -8642,6 +8686,9 @@ function alphaExportCSV(){
   a.download='squad-alpha-acompanhamento.xls';a.click();
   if(typeof toast==='function')toast('Exportado pra Excel (com cores) ✓');
 }
+// Se a aba Alpha foi a página restaurada no boot, o renderAlpha do nav-click rodou ANTES
+// destes const (TDZ) e falhou silenciosamente. Agora que existem, renderiza se está ativa.
+try{if(document.getElementById('page-alpha')&&document.getElementById('page-alpha').classList.contains('active'))renderAlpha();}catch(e){}
 /* ============ ROTINAS ============ */
 function loadRot(){return JSON.parse(localStorage.getItem('wfa-rotinas')||'[]');}
 function saveRot(a){localStorage.setItem('wfa-rotinas',JSON.stringify(a));renderRotinas();}
