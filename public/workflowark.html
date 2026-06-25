@@ -1189,7 +1189,7 @@ h1,h2,h3,h4{letter-spacing:-.02em}
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             <button class="icobtn" onclick="alphaAddRow()" title="Adicionar cliente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Cliente</button>
-            <button class="icobtn" onclick="alphaExportCSV()" title="Exportar CSV (abre no Excel/Sheets)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar</button>
+            <button class="icobtn" onclick="alphaExportCSV()" title="Exportar para Excel (.xls, com cores e tabelas)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar</button>
             <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSoAmx0vLIFqzqe73ILwKUKyNdC7iOGjPkRPBT5KUIzjlYC11cbOSU8dzmNpEb8V-o6r6DCWIzbg9q7/pubhtml" target="_blank" rel="noopener" class="icobtn" style="text-decoration:none" title="Abrir a planilha original">↗ Planilha</a>
           </div>
         </div>
@@ -8612,16 +8612,35 @@ function renderAlphaSummary(){
     `<div class="al-kpi"><div class="v" style="font-size:18px">${brl(contratado)}</div><div class="l">Contratado total</div></div>`,
   ].join('');
 }
+// Exporta um .xls de verdade (HTML-table que o Excel abre formatado): cabeçalhos
+// agrupados, flags coloridas e checks — "pique a planilha original", pros investidores.
 function alphaExportCSV(){
   const rows=alphaRows();
-  const esc=v=>'"'+String(v==null?'':(typeof v==='boolean'?(v?'TRUE':'FALSE'):v)).replace(/"/g,'""')+'"';
-  const head=['Cliente'].concat(ALPHA_COLS.filter(c=>!c.sticky).map(c=>c.l));
-  const lines=[head.map(esc).join(',')];
-  rows.forEach(r=>{const line=[r.nome].concat(ALPHA_COLS.filter(c=>!c.sticky).map(c=>r[c.k])).map(esc).join(',');lines.push(line);});
-  const csv='﻿'+lines.join('\r\n');
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download='squad-alpha-acompanhamento.csv';a.click();
-  if(typeof toast==='function')toast('CSV exportado · abre no Excel/Sheets');
+  const flagBg={CRITICAL:'#fde2e2',DANGER:'#fde2e2',CARE:'#fff3cd',HEALTHY:'#d8f5dd',OK:'#d8f5dd'};
+  const flagFg={CRITICAL:'#991b1b',DANGER:'#991b1b',CARE:'#8a6d00',HEALTHY:'#166534',OK:'#166534'};
+  let h='<tr><th rowspan="2" style="background:#0b0b0c;color:#fff;border:1px solid #777;padding:6px 8px;font-family:Arial;text-align:left">Cliente</th>';
+  ALPHA_GROUPS.forEach(g=>{const n=g.cols.filter(c=>!c.sticky).length;if(n>0)h+=`<th colspan="${n}" style="background:#0b0b0c;color:#fff;border:1px solid #777;padding:6px 8px;font-family:Arial;text-align:center">${escapeHtml(g.g)}</th>`;});
+  h+='</tr><tr>';
+  ALPHA_GROUPS.forEach(g=>g.cols.forEach(c=>{if(!c.sticky)h+=`<th style="background:#efeff2;border:1px solid #999;padding:5px 7px;font-family:Arial;font-size:11px;text-align:left">${escapeHtml(c.l)}</th>`;}));
+  h+='</tr>';
+  rows.forEach(r=>{
+    h+='<tr>';
+    ALPHA_COLS.forEach(c=>{
+      const v=r[c.k];
+      if(c.t==='bool'){h+=`<td style="border:1px solid #ccc;padding:5px;text-align:center;font-family:Arial;color:#16a34a;font-weight:bold">${v?'✔':''}</td>`;return;}
+      if(c.t==='flag'){const fv=ALPHA_FLAGS.includes(v)?v:'CARE';h+=`<td style="border:1px solid #ccc;padding:5px 7px;text-align:center;font-family:Arial;font-weight:bold;background:${flagBg[fv]||'#fff'};color:${flagFg[fv]||'#000'}">${fv}</td>`;return;}
+      const stick=c.sticky?'font-weight:bold;background:#fafafa;':'';
+      h+=`<td style="border:1px solid #ccc;padding:5px 7px;font-family:Arial;font-size:11px;${stick}mso-number-format:'\\@'">${escapeHtml(v==null?'':String(v))}</td>`;
+    });
+    h+='</tr>';
+  });
+  const html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8">'+
+    '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Squad Alpha</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->'+
+    '</head><body><table border="1" style="border-collapse:collapse">'+h+'</table></body></html>';
+  const a=document.createElement('a');
+  a.href='data:application/vnd.ms-excel;charset=utf-8,'+encodeURIComponent('﻿'+html);
+  a.download='squad-alpha-acompanhamento.xls';a.click();
+  if(typeof toast==='function')toast('Exportado pra Excel (com cores) ✓');
 }
 /* ============ ROTINAS ============ */
 function loadRot(){return JSON.parse(localStorage.getItem('wfa-rotinas')||'[]');}
