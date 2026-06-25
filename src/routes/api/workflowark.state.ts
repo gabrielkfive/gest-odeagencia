@@ -28,6 +28,7 @@ const STATE_KEYS = new Set([
   "wfa-alpha-am",
   "wfa-alpha-gt",
   "wfa-alpha-cr",
+  "wfa-alpha-bs",
   "wfa-deleted-ids",
   // Config que o CLIENTE é dono e precisa sincronizar (faltavam aqui -> o save-state
   // devolvia 400 "Bloco inválido" e o sistema mostrava "Erro ao sincronizar", além de

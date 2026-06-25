@@ -1229,6 +1229,29 @@ h1,h2,h3,h4{letter-spacing:-.022em}
           .al-tab{font-size:12.5px;font-weight:600;color:var(--mute);background:rgba(118,118,128,.06);border:1px solid transparent;border-radius:980px;padding:7px 14px;cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1)}
           .al-tab:hover{color:var(--ink);background:rgba(118,118,128,.12)}
           .al-tab.on{background:var(--ink);color:#fff}
+          /* Business Score */
+          .bs-top{display:flex;flex-wrap:wrap;gap:18px;align-items:center;background:linear-gradient(135deg,#0b0b0c,#1d1a14);color:#fff;border-radius:18px;padding:22px 26px;margin:16px 0}
+          .bs-score{font-size:46px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+          .bs-score small{font-size:18px;color:var(--yel)}
+          .bs-top .lab{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--yel);font-weight:700}
+          .bs-top .sub{font-size:12.5px;color:#b8b4ab;margin-top:3px}
+          .bs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+          .bs-pilar{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--sh-1)}
+          .bs-ph{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;gap:8px}
+          .bs-ph .nm{font-size:14px;font-weight:700;color:var(--ink)}
+          .bs-ph .pz{font-size:10.5px;color:var(--mute);font-weight:600}
+          .bs-ph .pr{font-size:20px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+          .bs-bar{height:6px;border-radius:4px;background:#eee;overflow:hidden;margin-bottom:13px}
+          .bs-bar i{display:block;height:100%;border-radius:4px;background:var(--yel);transition:width .4s var(--ease-out,ease)}
+          .bs-met{display:grid;grid-template-columns:1fr 64px 64px 46px;gap:7px;align-items:center;padding:5px 0;border-top:1px solid var(--line)}
+          .bs-met:first-of-type{border-top:none}
+          .bs-met .ml{font-size:11.5px;color:var(--txt)}
+          .bs-met input{width:100%;border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:11.5px;text-align:right;font-variant-numeric:tabular-nums}
+          .bs-met input:focus{outline:none;border-color:var(--yel);box-shadow:0 0 0 3px rgba(255,199,0,.18)}
+          .bs-met .pc{font-size:11.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+          .bs-met .pc.ok{color:var(--green)}.bs-met .pc.mid{color:var(--yel-d)}.bs-met .pc.low{color:var(--red)}
+          .bs-head{display:grid;grid-template-columns:1fr 64px 64px 46px;gap:7px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);margin-bottom:4px}
+          .bs-head span:not(:first-child){text-align:right}
         </style>
         <div class="page-head">
           <div class="page-title">
@@ -1249,6 +1272,7 @@ h1,h2,h3,h4{letter-spacing:-.022em}
         <div id="alpha-view-grid" style="display:none">
           <div class="al-wrap"><table class="al-tbl" id="alpha-grid"></table></div>
         </div>
+        <div id="alpha-view-bs" style="display:none"></div>
       </div>
 
       <!-- =================== MEU MÊS (contexto p/ All Hands) =================== -->
@@ -2066,7 +2090,7 @@ h1,h2,h3,h4{letter-spacing:-.022em}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-deleted-ids'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-deleted-ids'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -8630,9 +8654,11 @@ function alphaMigrate(){
 }
 function renderAlpha(){
   if(typeof renderAlphaTabbar==='function')renderAlphaTabbar();
-  const va=document.getElementById('alpha-view-acomp'),vg=document.getElementById('alpha-view-grid');
-  if(typeof ALPHA_ACTIVE!=='undefined'&&ALPHA_ACTIVE!=='acomp'){ if(va)va.style.display='none'; if(vg)vg.style.display=''; if(typeof gridRender==='function')gridRender(ALPHA_ACTIVE); return; }
-  if(va)va.style.display=''; if(vg)vg.style.display='none';
+  const va=document.getElementById('alpha-view-acomp'),vg=document.getElementById('alpha-view-grid'),vb=document.getElementById('alpha-view-bs');
+  const act=(typeof ALPHA_ACTIVE!=='undefined')?ALPHA_ACTIVE:'acomp';
+  if(act==='bs'){ if(va)va.style.display='none'; if(vg)vg.style.display='none'; if(vb)vb.style.display=''; if(typeof renderBusinessScore==='function')renderBusinessScore(); return; }
+  if(act!=='acomp'){ if(va)va.style.display='none'; if(vg)vg.style.display=''; if(vb)vb.style.display='none'; if(typeof gridRender==='function')gridRender(act); return; }
+  if(va)va.style.display=''; if(vg)vg.style.display='none'; if(vb)vb.style.display='none';
   const tbl=document.getElementById('alpha-tbl');if(!tbl)return;
   alphaMigrate();
   const wrap=tbl.closest('.al-wrap');const sl=wrap?wrap.scrollLeft:0,st=wrap?wrap.scrollTop:0;
@@ -8724,7 +8750,48 @@ const ALPHA_GRIDS={
     {k:'checkCoord',l:'Check Coordenador',t:'bool'},{k:'criativoFeito',l:'Criativo Feito',t:'bool'},{k:'alteracoes',l:'Alterações'},{k:'totalCriativos',l:'Total de Criativos'},
   ],seed:alphaSeedRows('cr',{copyFeita:false,copy:'',checkCoord:false,criativoFeito:false,alteracoes:'',totalCriativos:'1'})},
 };
-const ALPHA_TABS=[{id:'acomp',name:'Acompanhamento'},{id:'am',name:'Account Manager'},{id:'gt',name:'Gestor de Tráfego'},{id:'cr',name:'Criador'}];
+const ALPHA_TABS=[{id:'acomp',name:'Acompanhamento'},{id:'bs',name:'Business Score'},{id:'am',name:'Account Manager'},{id:'gt',name:'Gestor de Tráfego'},{id:'cr',name:'Criador'}];
+const ALPHA_BS=[
+  {pilar:'Geral',peso:.20,metricas:[
+    {k:'rev_churn',l:'Revenue Churn',meta:''},{k:'rev_churn_rate',l:'Revenue Churn Rate (%)',meta:''},
+    {k:'logo_churn',l:'Logo Churn',meta:''},{k:'logo_churn_rate',l:'Logo Churn Rate (%)',meta:''},{k:'nrr',l:'NRR',meta:''}]},
+  {pilar:'Equipe',peso:.10,metricas:[{k:'receita_gerada',l:'Receita Gerada p/ Clientes',meta:''},{k:'roas_medio',l:'ROAS médio',meta:''}]},
+  {pilar:'Expansão',peso:.20,metricas:[{k:'indicacoes',l:'Indicações',meta:''},{k:'venda_produto',l:'Venda de Produto',meta:''}]},
+  {pilar:'Qualidade',peso:.20,metricas:[
+    {k:'nps_resp',l:'Taxa de Resposta NPS (%)',meta:'70'},{k:'nps_qtd',l:'Qtd de Respostas NPS',meta:'60'},
+    {k:'csat',l:'CSAT',meta:'60'},{k:'dqs',l:'DQS',meta:'60'},{k:'vdqs',l:'VDQS',meta:'60'},{k:'rqs',l:'RQS',meta:'60'}]},
+];
+function bsLoad(){let o=null;try{o=JSON.parse(localStorage.getItem('wfa-alpha-bs')||'null');}catch(e){}return (o&&typeof o==='object')?o:{};}
+function bsSave(o){try{localStorage.setItem('wfa-alpha-bs',JSON.stringify(o));}catch(e){}}
+function bsVal(k){const o=bsLoad();const def=(ALPHA_BS.find(p=>p.metricas.some(m=>m.k===k))||{metricas:[]}).metricas.find(m=>m.k===k)||{};return Object.assign({a:'',m:(def.meta||'')},o[k]||{});}
+function bsSet(k,field,v){const o=bsLoad();o[k]=Object.assign(bsVal(k),o[k]||{});o[k][field]=v;bsSave(o);renderBusinessScore();}
+function bsNum(v){const n=parseFloat(String(v==null?'':v).replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.'));return isNaN(n)?null:n;}
+function bsMetPct(k){const v=bsVal(k);const a=bsNum(v.a),m=bsNum(v.m);if(a==null||m==null||m===0)return null;return Math.max(0,Math.min(100,a/m*100));}
+function bsPilarPct(p){const ps=p.metricas.map(m=>bsMetPct(m.k)).filter(x=>x!=null);if(!ps.length)return null;return ps.reduce((s,x)=>s+x,0)/ps.length;}
+function bsOverall(){let acc=0,wsum=0;ALPHA_BS.forEach(p=>{const pr=bsPilarPct(p);if(pr!=null){acc+=pr*p.peso;wsum+=p.peso;}});return wsum?acc/wsum:null;}
+function bsPcClass(x){return x==null?'':x>=80?'ok':x>=50?'mid':'low';}
+function renderBusinessScore(){
+  const el=document.getElementById('alpha-view-bs');if(!el)return;
+  const overall=bsOverall();
+  let h=`<div class="bs-top"><div><div class="lab">Business Score · Alpha Senior</div><div class="bs-score">${overall==null?'—':Math.round(overall)+'<small>%</small>'}</div><div class="sub">Score geral ponderado pelos pilares · preencha Atingido e Meta abaixo</div></div></div>`;
+  h+='<div class="bs-grid">';
+  ALPHA_BS.forEach(p=>{
+    const pr=bsPilarPct(p);
+    h+=`<div class="bs-pilar"><div class="bs-ph"><div><div class="nm">${escapeHtml(p.pilar)}</div><div class="pz">Peso ${Math.round(p.peso*100)}%</div></div><div class="pr ${bsPcClass(pr)?'pc '+bsPcClass(pr):''}" style="color:${pr==null?'var(--mute)':pr>=80?'var(--green)':pr>=50?'var(--yel-d)':'var(--red)'}">${pr==null?'—':Math.round(pr)+'%'}</div></div>`;
+    h+=`<div class="bs-bar"><i style="width:${pr==null?0:Math.round(pr)}%;background:${pr==null?'#ccc':pr>=80?'var(--green)':pr>=50?'var(--yel)':'var(--red)'}"></i></div>`;
+    h+=`<div class="bs-head"><span>Métrica</span><span>Atingido</span><span>Meta</span><span>%</span></div>`;
+    p.metricas.forEach(m=>{
+      const v=bsVal(m.k),pc=bsMetPct(m.k);
+      h+=`<div class="bs-met"><span class="ml">${escapeHtml(m.l)}</span>`+
+         `<input value="${escapeHtml(v.a==null?'':String(v.a))}" placeholder="—" onchange="bsSet('${m.k}','a',this.value)">`+
+         `<input value="${escapeHtml(v.m==null?'':String(v.m))}" placeholder="—" onchange="bsSet('${m.k}','m',this.value)">`+
+         `<span class="pc ${bsPcClass(pc)}">${pc==null?'—':Math.round(pc)+'%'}</span></div>`;
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
 let ALPHA_ACTIVE='acomp';
 function renderAlphaTabbar(){const el=document.getElementById('alpha-tabbar');if(!el)return;el.innerHTML=ALPHA_TABS.map(t=>`<button class="al-tab ${t.id===ALPHA_ACTIVE?'on':''}" onclick="alphaTab('${t.id}')">${escapeHtml(t.name)}</button>`).join('');}
 function alphaTab(id){ALPHA_ACTIVE=id;renderAlpha();}
