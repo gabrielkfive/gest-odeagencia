@@ -19,6 +19,7 @@ import { Route as TccApresentacaoRouteImport } from './routes/tcc.apresentacao'
 import { Route as ApiIaRouteImport } from './routes/api/ia'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
+import { Route as ApiWorkflowarkSocialRunRouteImport } from './routes/api/workflowark.social-run'
 import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowark.sheet'
 import { Route as ApiWorkflowarkPortalRouteImport } from './routes/api/workflowark.portal'
 import { Route as ApiWorkflowarkApproveRouteImport } from './routes/api/workflowark.approve'
@@ -80,6 +81,11 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
 const ApiWorkflowarkStateRoute = ApiWorkflowarkStateRouteImport.update({
   id: '/api/workflowark/state',
   path: '/api/workflowark/state',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWorkflowarkSocialRunRoute = ApiWorkflowarkSocialRunRouteImport.update({
+  id: '/api/workflowark/social-run',
+  path: '/api/workflowark/social-run',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWorkflowarkSheetRoute = ApiWorkflowarkSheetRouteImport.update({
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
+  '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
   '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
+  '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
   '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
+  '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
   '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/approve'
     | '/api/workflowark/portal'
     | '/api/workflowark/sheet'
+    | '/api/workflowark/social-run'
     | '/api/workflowark/state'
     | '/api/workflowark/whatsapp/qr'
     | '/api/workflowark/whatsapp/send'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/approve'
     | '/api/workflowark/portal'
     | '/api/workflowark/sheet'
+    | '/api/workflowark/social-run'
     | '/api/workflowark/state'
     | '/api/workflowark/whatsapp/qr'
     | '/api/workflowark/whatsapp/send'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/approve'
     | '/api/workflowark/portal'
     | '/api/workflowark/sheet'
+    | '/api/workflowark/social-run'
     | '/api/workflowark/state'
     | '/api/workflowark/whatsapp/qr'
     | '/api/workflowark/whatsapp/send'
@@ -320,6 +332,7 @@ export interface RootRouteChildren {
   ApiWorkflowarkApproveRoute: typeof ApiWorkflowarkApproveRoute
   ApiWorkflowarkPortalRoute: typeof ApiWorkflowarkPortalRoute
   ApiWorkflowarkSheetRoute: typeof ApiWorkflowarkSheetRoute
+  ApiWorkflowarkSocialRunRoute: typeof ApiWorkflowarkSocialRunRoute
   ApiWorkflowarkStateRoute: typeof ApiWorkflowarkStateRoute
   ApiWorkflowarkWhatsappQrRoute: typeof ApiWorkflowarkWhatsappQrRoute
   ApiWorkflowarkWhatsappSendRoute: typeof ApiWorkflowarkWhatsappSendRoute
@@ -396,6 +409,13 @@ declare module '@tanstack/react-router' {
       path: '/api/workflowark/state'
       fullPath: '/api/workflowark/state'
       preLoaderRoute: typeof ApiWorkflowarkStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/social-run': {
+      id: '/api/workflowark/social-run'
+      path: '/api/workflowark/social-run'
+      fullPath: '/api/workflowark/social-run'
+      preLoaderRoute: typeof ApiWorkflowarkSocialRunRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/workflowark/sheet': {
@@ -536,6 +556,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWorkflowarkApproveRoute: ApiWorkflowarkApproveRoute,
   ApiWorkflowarkPortalRoute: ApiWorkflowarkPortalRoute,
   ApiWorkflowarkSheetRoute: ApiWorkflowarkSheetRoute,
+  ApiWorkflowarkSocialRunRoute: ApiWorkflowarkSocialRunRoute,
   ApiWorkflowarkStateRoute: ApiWorkflowarkStateRoute,
   ApiWorkflowarkWhatsappQrRoute: ApiWorkflowarkWhatsappQrRoute,
   ApiWorkflowarkWhatsappSendRoute: ApiWorkflowarkWhatsappSendRoute,
