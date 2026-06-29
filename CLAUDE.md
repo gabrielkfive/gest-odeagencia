@@ -1,5 +1,37 @@
 # Agency Sync Hub — WorkFlowArk
 
+## ⚠️ REGRAS DE OPERAÇÃO (guardrails — ler antes de qualquer mudança)
+
+Estamos numa fase de grandes melhorias. Estas regras existem para NÃO vacilar:
+o sistema está em produção sendo usado pela equipe da ARK todos os dias.
+
+### 1. O sistema NUNCA pode sair do ar (regra nº1, acima de tudo)
+- Nenhuma mudança vale derrubar produção. Na dúvida entre "rápido" e "seguro", escolha seguro.
+- `npm run build` TEM que passar antes de qualquer deploy. Build quebrado = não deploya.
+- Mudanças grandes vão em fatias pequenas e verificadas, nunca num bloco só.
+- Feature nova vai em rota React, não no monolito `public/workflowark.html` (9.6k linhas,
+  congelado como legado — refatorar só aos poucos e com cuidado).
+
+### 2. Deploy = SEMPRE commit + push junto (gotcha de durabilidade)
+- O CI (`.github/workflows/deploy.yml`) faz deploy a cada push e RECONSTRÓI do git.
+- `npx wrangler deploy` manual SEM commit é revertido no próximo push de qualquer pessoa.
+- Portanto: todo deploy manual vem acompanhado de commit + push na hora. Nunca deixar
+  o estado "no ar" diferente do que está no git.
+
+### 3. Equilíbrio de tokens (custo sob controle)
+- Toda chamada de IA com prompt caching no `system` (~80% menos custo de input).
+- Rate-limit por usuário nos agentes de geração; nada de Sonnet liberado pra qualquer role.
+- Trabalho do Claude também: não ler arquivos gigantes sem precisar, não disparar agentes
+  à toa. Economia é parte do "não vacilar".
+
+### 4. Tudo registrado no Obsidian
+- Decisões, melhorias e o que rodou vão pro vault `Documents\Obsidian Vault`
+  (Diário do dia + nota da frente correspondente). O Gabriel acompanha por lá.
+
+### 5. Antes de afirmar "pronto/funcionando"
+- Verificar de verdade (build, e quando dá, Playwright). Evidência antes de afirmar.
+- Correções de segurança e de perda de dado têm prioridade sobre feature nova.
+
 ## Dono do projeto
 Gabriel Andrade — dono da ARK Content (agência de marketing de gastronomia). Não é desenvolvedor. Quer o software funcionando em produção, sem precisar entender o código. Falar sempre em português, linguagem simples e direta.
 
