@@ -17,7 +17,6 @@ import { Route as AprovarRouteImport } from './routes/aprovar'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TccApresentacaoRouteImport } from './routes/tcc.apresentacao'
-import { Route as ApiIaRouteImport } from './routes/api/ia'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
 import { Route as ApiWorkflowarkSocialRunRouteImport } from './routes/api/workflowark.social-run'
@@ -72,11 +71,6 @@ const IndexRoute = IndexRouteImport.update({
 const TccApresentacaoRoute = TccApresentacaoRouteImport.update({
   id: '/tcc/apresentacao',
   path: '/tcc/apresentacao',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiIaRoute = ApiIaRouteImport.update({
-  id: '/api/ia',
-  path: '/api/ia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
@@ -172,7 +166,6 @@ export interface FileRoutesByFullPath {
   '/postagens': typeof PostagensRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
-  '/api/ia': typeof ApiIaRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
@@ -198,7 +191,6 @@ export interface FileRoutesByTo {
   '/postagens': typeof PostagensRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
-  '/api/ia': typeof ApiIaRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
@@ -226,7 +218,6 @@ export interface FileRoutesById {
   '/postagens': typeof PostagensRoute
   '/sistema': typeof SistemaRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
-  '/api/ia': typeof ApiIaRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
@@ -254,7 +245,6 @@ export interface FileRouteTypes {
     | '/postagens'
     | '/sistema'
     | '/app'
-    | '/api/ia'
     | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
@@ -280,7 +270,6 @@ export interface FileRouteTypes {
     | '/postagens'
     | '/sistema'
     | '/app'
-    | '/api/ia'
     | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
@@ -307,7 +296,6 @@ export interface FileRouteTypes {
     | '/postagens'
     | '/sistema'
     | '/_authenticated/app'
-    | '/api/ia'
     | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
@@ -334,7 +322,6 @@ export interface RootRouteChildren {
   PortalRoute: typeof PortalRoute
   PostagensRoute: typeof PostagensRoute
   SistemaRoute: typeof SistemaRoute
-  ApiIaRoute: typeof ApiIaRoute
   TccApresentacaoRoute: typeof TccApresentacaoRoute
   ApiAuthSeedEvaluatorsRoute: typeof ApiAuthSeedEvaluatorsRoute
   ApiAuthSignupRoute: typeof ApiAuthSignupRoute
@@ -408,13 +395,6 @@ declare module '@tanstack/react-router' {
       path: '/tcc/apresentacao'
       fullPath: '/tcc/apresentacao'
       preLoaderRoute: typeof TccApresentacaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ia': {
-      id: '/api/ia'
-      path: '/api/ia'
-      fullPath: '/api/ia'
-      preLoaderRoute: typeof ApiIaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app': {
@@ -566,7 +546,6 @@ const rootRouteChildren: RootRouteChildren = {
   PortalRoute: PortalRoute,
   PostagensRoute: PostagensRoute,
   SistemaRoute: SistemaRoute,
-  ApiIaRoute: ApiIaRoute,
   TccApresentacaoRoute: TccApresentacaoRoute,
   ApiAuthSeedEvaluatorsRoute: ApiAuthSeedEvaluatorsRoute,
   ApiAuthSignupRoute: ApiAuthSignupRoute,

@@ -1,13 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// SEGURANÇA: /sistema servia o sistema inteiro (iframe do workflowark.html) SEM login.
+// A entrada correta é /app (autenticada, repassa o token via postMessage). Aqui só
+// redirecionamos pra lá — quem não estiver logado cai na tela de login do /app.
 export const Route = createFileRoute("/sistema")({
-  head: () => ({ meta: [{ title: "Sistema legado · WorkFlowArk" }] }),
-  component: () => (
-    <iframe
-      src="/workflowark.html"
-      title="WorkFlowArk"
-      allow="clipboard-write; clipboard-read; microphone; autoplay; encrypted-media"
-      style={{ border: 0, width: "100vw", height: "100vh", display: "block" }}
-    />
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: "/app" });
+  },
 });

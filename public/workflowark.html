@@ -939,6 +939,10 @@ h1,h2,h3,h4{letter-spacing:-.022em}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="22"/><line x1="15" y1="10" x2="15" y2="22"/></svg>
         <span>Meu Mês</span>
       </div>
+      <div class="navitem" data-nav="warroom">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>War Room</span>
+      </div>
 
       <div class="navitem nav-wpp" data-nav="whatsapp" style="margin-top:10px;border-top:1px solid var(--line);padding-top:14px">
         <img src="/whatsapp.svg" alt="WhatsApp" style="width:18px;height:18px;object-fit:contain;flex-shrink:0">
@@ -1336,6 +1340,23 @@ h1,h2,h3,h4{letter-spacing:-.022em}
           <div class="st"><div class="stn">Semana 15–22</div><div class="stt">Apresentar planejamentos</div><div class="std">100% dos planejamentos apresentados até dia 15. Reuniões mensais marcadas e realizadas.</div></div>
           <div class="st"><div class="stn">Semana 22–30</div><div class="stt">Captações concentradas</div><div class="std">Vivenda 3×, Vaca Velha 25/06, Lunna's 26/06, Martino 24/06, Attraversiamo 25/06. Janela da Copa abre 18/06.</div></div>
         </div>
+      </div>
+
+      <!-- =================== WAR ROOM (cockpit operacional) =================== -->
+      <div class="page" id="page-warroom">
+        <div class="page-head">
+          <div class="page-title">
+            <h1>War Room · Cockpit da Operação</h1>
+            <p>Todos os clientes (ARK + Alpha) numa tela só · temperatura e plano de ação da semana. Clique para editar.</p>
+          </div>
+          <div id="wr-kpis" style="display:flex;gap:8px"></div>
+        </div>
+        <div class="explainer">
+          <h4>Como usar</h4>
+          <h3>Semáforo da operação: 🔴 crítico · 🟡 atenção · 🟢 ok.</h3>
+          <p>Defina a <strong>temperatura</strong> de cada cliente, anote o <strong>CPA</strong> e o <strong>plano de ação da semana</strong>. Os 🔴 sobem pro topo. Salva sozinho e sincroniza entre todos.</p>
+        </div>
+        <div id="wr-board"></div>
       </div>
 
       <!-- =================== LISTA DE CLIENTES =================== -->
@@ -2100,7 +2121,7 @@ h1,h2,h3,h4{letter-spacing:-.022em}
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-deleted-ids'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-deleted-ids'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -4330,6 +4351,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='painel'&&typeof renderWidgets==='function'){try{renderWidgets();}catch(e){console.warn('painel',e);}}
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     if(p==='alpha'&&typeof renderAlpha==='function'){try{renderAlpha();}catch(e){console.warn('alpha',e);}}
+    if(p==='warroom'&&typeof renderWarroom==='function'){try{renderWarroom();}catch(e){console.warn('warroom',e);}}
     if(p==='tutorial'&&typeof renderTutorial==='function'){try{renderTutorial();}catch(e){console.warn('tut',e);}}
     if(p==='conselho'&&typeof consPopular==='function'){try{consPopular();}catch(e){}}
     if(p==='agentes'){try{agPolish();agLive();}catch(e){}}
@@ -8353,6 +8375,10 @@ async function renderFin(force){
   const sub=document.getElementById('fin-sub');
   try{
     if(!FIN_SHEETS){
+      // TODO-SEGURANÇA (Fase 1, item 2): este endpoint expõe a DFC sem login.
+      // Fix correto = adicionar auth no servidor (sheet.ts) E mandar o token aqui
+      // (Bearer, igual ao cloudCall ~linha 2166). Precisa testar LOGADO antes de subir,
+      // senão quebra o Financeiro da equipe. Não aplicado às cegas (login local quebrado).
       const lr=await fetch('/api/workflowark/sheet?list=1');
       const lj=await lr.json().catch(()=>({}));
       FIN_SHEETS=(lj.sheets&&lj.sheets.length)?lj.sheets:[];
@@ -9159,6 +9185,44 @@ function renderProcessos(){
     finally{sendBtn.disabled=false;inputEl.focus();}
   });
 })();
+
+/* ============ WAR ROOM (cockpit operacional) ============ */
+const WR_TEMPS=[{k:'red',e:'🔴',l:'Crítico',o:0},{k:'yel',e:'🟡',l:'Atenção',o:1},{k:'grn',e:'🟢',l:'OK',o:2}];
+function loadWarroom(){try{return JSON.parse(localStorage.getItem('wfa-warroom')||'{}');}catch(e){return {};}}
+function saveWarroom(o){try{localStorage.setItem('wfa-warroom',JSON.stringify(o||{}));}catch(e){}}
+function wrTempOrder(t){const x=WR_TEMPS.find(z=>z.k===t);return x?x.o:1;}
+function wrSet(id,campo,val){const o=loadWarroom();o[id]=o[id]||{};o[id][campo]=val;saveWarroom(o);if(campo==='temp')renderWarroom();else wrRenderKpis();}
+function wrRenderKpis(){
+  const o=loadWarroom();const list=(typeof CLIENTES!=='undefined'?CLIENTES:[]);
+  let r=0,y=0,g=0;list.forEach(c=>{const t=(o[c.id]&&o[c.id].temp)||'grn';if(t==='red')r++;else if(t==='yel')y++;else g++;});
+  const el=document.getElementById('wr-kpis');if(!el)return;
+  el.innerHTML='<div class="kpi red" style="min-width:62px"><div class="l">🔴 Crítico</div><div class="v">'+r+'</div></div>'+
+    '<div class="kpi yel" style="min-width:62px"><div class="l">🟡 Atenção</div><div class="v">'+y+'</div></div>'+
+    '<div class="kpi green" style="min-width:62px"><div class="l">🟢 OK</div><div class="v">'+g+'</div></div>';
+}
+function renderWarroom(){
+  const board=document.getElementById('wr-board');if(!board)return;
+  const o=loadWarroom();const list=(typeof CLIENTES!=='undefined'?CLIENTES.slice():[]);
+  list.sort((a,b)=>{const ta=wrTempOrder((o[a.id]&&o[a.id].temp)||'grn');const tb=wrTempOrder((o[b.id]&&o[b.id].temp)||'grn');return ta-tb || String(a.nm).localeCompare(String(b.nm));});
+  board.innerHTML=list.map(function(c){
+    const d=o[c.id]||{};const temp=d.temp||'grn';
+    const tinfo=WR_TEMPS.find(z=>z.k===temp)||WR_TEMPS[2];
+    const tag=(c.tipo==='Alpha')?'<span style="background:#fff3cd;color:#7a5b00;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700">Alpha</span>':(c.tipo==='ARK'?'<span style="background:#e6f0ff;color:#0050b3;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700">ARK</span>':'<span style="color:var(--mute);font-size:10px">'+(c.tipo||'')+'</span>');
+    const borda=temp==='red'?'#dc2626':(temp==='yel'?'#d4a300':'#16a34a');
+    const opts=WR_TEMPS.map(z=>'<option value="'+z.k+'" '+(z.k===temp?'selected':'')+'>'+z.e+' '+z.l+'</option>').join('');
+    const cpaV=String(d.cpa||'').replace(/"/g,'&quot;');
+    const planoV=String(d.plano||'').replace(/</g,'&lt;');
+    return '<div class="alert" style="border-left:5px solid '+borda+';display:grid;grid-template-columns:170px 120px 1fr;gap:12px;align-items:start;margin-bottom:8px">'+
+      '<div><div style="font-weight:800;font-size:13px">'+tinfo.e+' '+c.nm+'</div><div style="margin-top:3px">'+tag+'</div>'+
+      '<select class="form-select" style="margin-top:6px;font-size:12px" onchange="wrSet(\''+c.id+'\',\'temp\',this.value)">'+opts+'</select></div>'+
+      '<div><label style="font-size:10px;color:var(--mute)">CPA / Resultado</label>'+
+      '<input class="form-input" style="font-size:12px" value="'+cpaV+'" oninput="wrSet(\''+c.id+'\',\'cpa\',this.value)" placeholder="—"></div>'+
+      '<div><label style="font-size:10px;color:var(--mute)">Plano de ação da semana</label>'+
+      '<textarea class="form-input" rows="2" style="font-size:12px;resize:vertical" oninput="wrSet(\''+c.id+'\',\'plano\',this.value)" placeholder="O que fazer essa semana...">'+planoV+'</textarea></div>'+
+      '</div>';
+  }).join('')||'<p class="muted">Sem clientes carregados.</p>';
+  wrRenderKpis();
+}
 
 /* ============ CRM PROFISSIONAL ============ */
 const CRM_STAGES=[
