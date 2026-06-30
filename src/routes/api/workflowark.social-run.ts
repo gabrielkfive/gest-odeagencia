@@ -60,8 +60,14 @@ export const Route = createFileRoute("/api/workflowark/social-run")({
               }),
             });
             const d: any = await r.json().catch(() => ({}));
-            return r.ok ? (d?.content?.[0]?.text || "") : "";
+            if (!r.ok) { lastAiErr = `HTTP ${r.status}: ${d?.error?.message || JSON.stringify(d).slice(0, 200)}`; return ""; }
+            const txt = d?.content?.[0]?.text || "";
+            if (!txt) lastAiErr = `resposta sem texto (stop_reason: ${d?.stop_reason || "?"})`;
+            lastRaw = txt;
+            return txt;
           };
+          let lastAiErr = ""; let lastRaw = "";
+          const debug = u.searchParams.get("debug") === "1";
           const parseJSON = (txt: string) => {
             if (!txt) return null;
             const s = String(txt).replace(/```json|```/g, "").trim();
@@ -173,7 +179,7 @@ export const Route = createFileRoute("/api/workflowark/social-run")({
           if (!soCliente && faltam > 0 && novas.length > 0) {
             try { fetch(`${u.origin}/api/workflowark/social-run?key=${RUN_KEY}${force ? "&force=1" : ""}`).catch(() => {}); } catch { /* ignore */ }
           }
-          return Response.json({ ok: true, clientes: alvos.length, propostas: novas.length, salvou, faltam });
+          return Response.json({ ok: true, clientes: alvos.length, propostas: novas.length, salvou, faltam, ...(debug ? { aiErr: lastAiErr, raw: lastRaw.slice(0, 1500) } : {}) });
         } catch (e) {
           return Response.json({ error: (e as Error)?.message || "falha" }, { status: 500 });
         }
