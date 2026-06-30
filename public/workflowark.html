@@ -54,6 +54,12 @@ a{color:inherit;text-decoration:none}
 .crm-pill .badge{background:var(--red);color:#fff;font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:9px;font-family:var(--mono)}
 
 .nav-label{padding:14px 14px 5px;font-size:9.5px;font-weight:600;color:var(--mute-2);letter-spacing:.1em;text-transform:uppercase}
+.nav-label.collap{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;border-radius:6px;transition:background .1s}
+.nav-label.collap:hover{background:var(--bg)}
+.nav-label.collap .chev{font-size:8px;transition:transform .18s;opacity:.55}
+.nav-label.collap.closed .chev{transform:rotate(-90deg)}
+.nav-grp{display:flex;flex-direction:column;overflow:hidden;transition:max-height .22s ease;max-height:600px}
+.nav-grp.closed{max-height:0}
 .nav{display:flex;flex-direction:column;padding:0 8px;flex:1;overflow-y:auto}
 .nav::-webkit-scrollbar{width:4px}.nav::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
 .navitem{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:6px;font-size:12.5px;color:var(--txt);font-weight:500;cursor:pointer;transition:all .1s}
@@ -914,7 +920,8 @@ h1,h2,h3,h4{letter-spacing:-.022em}
         </div>
       </div>
 
-      <div class="nav-label">Conhecimento</div>
+      <div class="nav-label collap closed" data-grp="conhecimento" onclick="navGrpToggle('conhecimento')">Conhecimento <span class="chev">▼</span></div>
+      <div class="nav-grp closed" id="navgrp-conhecimento">
       <div class="navitem" data-nav="organograma">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         <span>Organograma</span>
@@ -931,6 +938,9 @@ h1,h2,h3,h4{letter-spacing:-.022em}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         <span>Processos por área</span>
       </div>
+      </div>
+      <div class="nav-label collap closed" data-grp="mes" onclick="navGrpToggle('mes')">Gestão do mês <span class="chev">▼</span></div>
+      <div class="nav-grp closed" id="navgrp-mes">
       <div class="navitem" data-nav="agenda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span id="nav-agenda-label">Agenda Junho</span>
@@ -942,6 +952,7 @@ h1,h2,h3,h4{letter-spacing:-.022em}
       <div class="navitem" data-nav="warroom">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         <span>War Room</span>
+      </div>
       </div>
 
       <div class="navitem nav-wpp" data-nav="whatsapp" style="margin-top:10px;border-top:1px solid var(--line);padding-top:14px">
@@ -1309,7 +1320,7 @@ h1,h2,h3,h4{letter-spacing:-.022em}
         <div class="g3">
           <div class="alert green"><h4>ARK · resultado R$ 4.418</h4>Receita R$ 22.200 · margem 19,9% (acima da saudável 12–15%). Clientes: Vivenda, Fercon, Bella Vita, Lunna's, Shopping Uniformes, Vaca Velha, Growth Hub.</div>
           <div class="alert green"><h4>Alpha · resultado R$ 1.771</h4>Receita R$ 11.881 · margem 14,9%. Maior despesa: Taxa de Franquia R$ 5.000. Consolidado do Grupo: R$ 34k de receita, R$ 6,2k de resultado (18,2%).</div>
-          <div class="alert green"><h4>Pipeline fechado em junho</h4>5 vendas fechadas (Juscelino, Sal e Fumaça, SPA Rio, Sistema, Lá em Casa) a converter em receita. Alpha trouxe kopi coffee R$20k, 4B Burguer e Sabor a Lenha. Mídia: R$1.500 no Growth Hub.</div>
+          <div class="alert green"><h4>🎯 2 entradas CAC ZERO + pipeline</h4><strong>4B Burger</strong> e <strong>Pizzaria Sabor e Lenha</strong> entraram <strong>sem custo de aquisição</strong> (indicação / canal Alpha). Fechamentos de junho a faturar: Lá em Casa, SPA, Juvenal e +1 a confirmar. Em negociação: tráfego pago p/ uma empresa de tecnologia (avulso, fora do nicho). Alpha trouxe kopi coffee R$20k. Mídia: R$1.500 no Growth Hub.</div>
         </div>
 
         <div class="sect-title">
@@ -4831,6 +4842,27 @@ function aplicarMesAtual(){
   set('nav-agenda-label', 'Agenda '+mes);
 }
 window.addEventListener('DOMContentLoaded',()=>{setTimeout(aplicarMesAtual,60);});
+// GRUPOS RECOLHÍVEIS do menu (desafoga a UX): Conhecimento e Gestão do mês começam
+// fechados; o estado fica salvo por dispositivo (não polui a nuvem).
+function navGrpToggle(g){
+  const h=document.querySelector('.nav-label.collap[data-grp="'+g+'"]');
+  const b=document.getElementById('navgrp-'+g);
+  if(!h||!b)return;
+  const closed=b.classList.toggle('closed');
+  h.classList.toggle('closed',closed);
+  try{localStorage.setItem('wfa-navgrp-'+g, closed?'1':'0');}catch(e){}
+}
+function navGrpRestore(){
+  ['conhecimento','mes'].forEach(g=>{
+    let v=null;try{v=localStorage.getItem('wfa-navgrp-'+g);}catch(e){}
+    const open=(v==='0'); // padrão: fechado. Só abre se o usuário já tinha aberto.
+    const h=document.querySelector('.nav-label.collap[data-grp="'+g+'"]');
+    const b=document.getElementById('navgrp-'+g);
+    if(b)b.classList.toggle('closed',!open);
+    if(h)h.classList.toggle('closed',!open);
+  });
+}
+window.addEventListener('DOMContentLoaded',()=>{setTimeout(navGrpRestore,40);});
 function relClienteTarefas(c){return (state.tarefas||[]).filter(t=>t.clienteId===c.id || (c.nm && String(t.title||'').toLowerCase().includes(String(c.nm).toLowerCase())));}
 function relDados(id){
   const c=CLIENTES.find(x=>x.id===id);if(!c)return null;
