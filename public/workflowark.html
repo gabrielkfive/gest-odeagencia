@@ -9157,16 +9157,23 @@ function renderProcessos(){
       if(n.querySelector('*'))return; // só folhas com texto puro
       if(!n.textContent.trim())return;
       const id=sel.slice(6)+'-'+i;
+      const orig=n.textContent; // texto do HTML = fonte da verdade quando a gente atualiza
       n.dataset.editId=id;
+      n.dataset.origText=orig;
       n.setAttribute('contenteditable','true');
       n.style.outline='none';
       n.addEventListener('focus',()=>{n.style.background='var(--yel-soft)';});
       n.addEventListener('blur',()=>{
         n.style.background='';
         const d=JSON.parse(localStorage.getItem(KEY)||'{}');
-        d[id]=n.textContent;localStorage.setItem(KEY,JSON.stringify(d));
+        if(n.textContent===n.dataset.origText){ delete d[id]; } // voltou ao padrão: limpa
+        else { d[id]={o:n.dataset.origText, v:n.textContent}; } // guarda original + editado
+        localStorage.setItem(KEY,JSON.stringify(d));
       });
-      if(saved[id]!=null) n.textContent=saved[id];
+      // Só restaura a edição se o HTML naquele ponto NÃO mudou (e.o===orig). Edições no formato
+      // antigo (string) ou de trechos que a gente atualizou no HTML são ignoradas => mostra o novo.
+      const e=saved[id];
+      if(e && typeof e==='object' && e.o===orig && typeof e.v==='string'){ n.textContent=e.v; }
     });
   });
 })();
