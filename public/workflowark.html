@@ -1297,12 +1297,12 @@ h1,h2,h3,h4{letter-spacing:-.022em}
             <h1>Meu Mês · Junho 2026</h1>
             <p>Contexto geral do mês para a All Hands · fechamento, conquistas e direção</p>
           </div>
-          <span class="md-count" style="background:var(--yel-bg);color:var(--yel-d);border:1px solid var(--yel);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap">✎ Clique em qualquer texto para editar</span>
+          <span class="md-count" style="background:var(--ink);color:#fff;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap">All Hands · 30/06/2026</span>
         </div>
 
         <div class="explainer">
-          <h4>O Momento · 03/06/2026 · 14h</h4>
-          <h3>Maio fechou. Junho começa com a casa sob controle.</h3>
+          <h4>O Momento · All Hands · 30/06/2026</h4>
+          <h3>Junho fechou. Julho começa com a casa em ordem.</h3>
           <p>Em cinco meses saímos de quatro clientes para quinze, abrimos a frente Squad Alpha Senior e triplicamos a receita. O que travou agora é o que sempre trava nessa transição: <strong>o conhecimento que estava na cabeça dos sócios não cabe mais lá</strong>. Este sistema é a externalização disso — manual de bordo aberto, rituais documentados, tarefas que geram tarefas.</p>
           <p style="font-style:italic;color:var(--mute);font-size:11.5px">"Para ser dono da borracharia, é preciso saber trocar o pneu."</p>
         </div>
@@ -9148,7 +9148,7 @@ function renderProcessos(){
 /* ============ EDIT-IN-PLACE para Campanhas e Comercial ============ */
 (function initInlineEdit(){
   const KEY='wfa-inline-edits';
-  const targets=['#page-campanhas','#page-comercial','#page-meumes'];
+  const targets=['#page-campanhas','#page-comercial']; // Meu Mês é APRESENTAÇÃO (read-only), não editável
   const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
   targets.forEach(sel=>{
     const root=document.querySelector(sel);if(!root)return;
