@@ -254,6 +254,28 @@ export const Route = createFileRoute("/api/workflowark/state")({
           return json({ ok: true, saved: rows.length });
         }
 
+        // AGENTE SOCIAL MEDIA: aprovar/recusar uma proposta da fila (wfa-social-fila).
+        // A fila é SERVER-OWNED (escrita pelo agente social-run); aqui o gestor só muda o
+        // STATUS de UM item — nunca sobrescreve a fila inteira (evita perder propostas).
+        if (action === "social-decide") {
+          const id = String(body.id ?? "");
+          const decisao = String(body.decisao ?? "");
+          if (!id || !["aprovada", "recusada", "pendente", "agendada"].includes(decisao)) {
+            return json({ error: "Parâmetros inválidos." }, { status: 400 });
+          }
+          const { data: row, error: rErr } = await ctx.db
+            .from("workflowark_state").select("data").eq("key", "wfa-social-fila").maybeSingle();
+          if (rErr) return json({ error: "Não foi possível ler a fila." }, { status: 500 });
+          const fila: any[] = Array.isArray(row?.data) ? row.data.slice() : [];
+          const idx = fila.findIndex((p: any) => p?.id === id);
+          if (idx < 0) return json({ error: "Proposta não encontrada." }, { status: 404 });
+          fila[idx] = { ...fila[idx], status: decisao, decididoPor: ctx.member.email, decididoEm: new Date().toISOString() };
+          const { error } = await ctx.db
+            .from("workflowark_state").upsert({ key: "wfa-social-fila", data: fila, updated_by: ctx.user.id });
+          if (error) return json({ error: "Não foi possível salvar a decisão." }, { status: 500 });
+          return json({ ok: true });
+        }
+
         // Gera um link público de aprovação de conteúdo (só a agência logada cria).
         // Guarda um snapshot do plano sob wfa-approval-<token> (fora do estado sincronizado
         // do cliente). O cliente abre /aprovar?t=<token> e decide sem login.
