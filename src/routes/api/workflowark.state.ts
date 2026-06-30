@@ -29,6 +29,10 @@ const STATE_KEYS = new Set([
   "wfa-alpha-gt",
   "wfa-alpha-cr",
   "wfa-alpha-bs",
+  // Banco de criativos que performaram: o cliente é dono e JÁ está em WFA_CLOUD_KEYS,
+  // mas faltava aqui -> save-state devolvia 400 "Bloco inválido" e os criativos não
+  // saíam de um aparelho pro outro (sumiam entre dispositivos). Mesmo caso do wfa-crm.
+  "wfa-criativos",
   "wfa-deleted-ids",
   // Config que o CLIENTE é dono e precisa sincronizar (faltavam aqui -> o save-state
   // devolvia 400 "Bloco inválido" e o sistema mostrava "Erro ao sincronizar", além de
