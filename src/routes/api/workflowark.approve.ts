@@ -53,6 +53,28 @@ export const Route = createFileRoute("/api/workflowark/approve")({
         cur.decidedAt = new Date().toISOString();
         const { error } = await db.from("workflowark_state").upsert({ key: keyFor(token), data: cur });
         if (error) return json({ error: "Não foi possível salvar sua resposta." }, { status: 500 });
+
+        // FECHA O LOOP: numa decisão final, avisa a equipe (1 notificação, sem flood).
+        // A decisão do cliente já está salva acima; isto nunca pode derrubar a resposta.
+        if (body.status === "approved" || body.status === "changes") {
+          try {
+            const decidiu = body.status === "approved" ? "aprovou ✅" : "pediu ajustes ✏️";
+            const cliente = String(cur.cliente || "Cliente");
+            const fb = (typeof cur.feedback === "string" && cur.feedback.trim())
+              ? ` — "${cur.feedback.trim().slice(0, 140)}"` : "";
+            const { data: nRow, error: nErr } = await db
+              .from("workflowark_state").select("data").eq("key", "wfa-notificacoes").maybeSingle();
+            if (!nErr) {
+              const arr = Array.isArray(nRow?.data) ? nRow.data : [];
+              arr.unshift({
+                id: "aprov" + Date.now() + Math.floor(Math.random() * 999),
+                ts: Date.now(), lido: false, tipo: "aprovacao",
+                texto: `📝 ${cliente} ${decidiu} o plano${cur.periodo ? " de " + cur.periodo : ""}${fb}`,
+              });
+              await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) });
+            }
+          } catch {}
+        }
         return json({ ok: true });
       },
     },
