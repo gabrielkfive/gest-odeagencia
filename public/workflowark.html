@@ -9242,12 +9242,20 @@ function wrRenderKpis(){
     '<div class="kpi yel" style="min-width:62px"><div class="l">🟡 Atenção</div><div class="v">'+y+'</div></div>'+
     '<div class="kpi green" style="min-width:62px"><div class="l">🟢 OK</div><div class="v">'+g+'</div></div>';
 }
+// Sinais REAIS por cliente (puxa as tarefas ao vivo, não muda nada sozinho — só mostra).
+function wrSinais(c){
+  const today=new Date().toISOString().split('T')[0];
+  const ts=(typeof relClienteTarefas==='function')?relClienteTarefas(c):[];
+  let abertas=0,atras=0;
+  ts.forEach(t=>{ if(t&&t.status==='concluido')return; abertas++; if(t&&t.data&&t.data<today)atras++; });
+  return {abertas:abertas,atras:atras};
+}
 function renderWarroom(){
   const board=document.getElementById('wr-board');if(!board)return;
   const o=loadWarroom();const list=(typeof CLIENTES!=='undefined'?CLIENTES.slice():[]);
   list.sort((a,b)=>{const ta=wrTempOrder((o[a.id]&&o[a.id].temp)||'grn');const tb=wrTempOrder((o[b.id]&&o[b.id].temp)||'grn');return ta-tb || String(a.nm).localeCompare(String(b.nm));});
   board.innerHTML=list.map(function(c){
-    const d=o[c.id]||{};const temp=d.temp||'grn';
+    const d=o[c.id]||{};const temp=d.temp||'grn';const sig=wrSinais(c);
     const tinfo=WR_TEMPS.find(z=>z.k===temp)||WR_TEMPS[2];
     const tag=(c.tipo==='Alpha')?'<span style="background:#fff3cd;color:#7a5b00;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700">Alpha</span>':(c.tipo==='ARK'?'<span style="background:#e6f0ff;color:#0050b3;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700">ARK</span>':'<span style="color:var(--mute);font-size:10px">'+(c.tipo||'')+'</span>');
     const borda=temp==='red'?'#dc2626':(temp==='yel'?'#d4a300':'#16a34a');
@@ -9256,6 +9264,7 @@ function renderWarroom(){
     const planoV=String(d.plano||'').replace(/</g,'&lt;');
     return '<div class="alert" style="border-left:5px solid '+borda+';display:grid;grid-template-columns:170px 120px 1fr;gap:12px;align-items:start;margin-bottom:8px">'+
       '<div><div style="font-weight:800;font-size:13px">'+tinfo.e+' '+c.nm+'</div><div style="margin-top:3px">'+tag+'</div>'+
+      '<div style="margin-top:5px;font-size:10.5px;font-family:var(--mono);color:'+(sig.atras>0?'#dc2626':'var(--mute)')+'">📋 '+sig.abertas+' abertas'+(sig.atras>0?' · ⚠️ '+sig.atras+' atrasadas':'')+'</div>'+
       '<select class="form-select" style="margin-top:6px;font-size:12px" onchange="wrSet(\''+c.id+'\',\'temp\',this.value)">'+opts+'</select></div>'+
       '<div><label style="font-size:10px;color:var(--mute)">CPA / Resultado</label>'+
       '<input class="form-input" style="font-size:12px" value="'+cpaV+'" oninput="wrSet(\''+c.id+'\',\'cpa\',this.value)" placeholder="—"></div>'+
