@@ -8353,6 +8353,10 @@ async function renderFin(force){
   const sub=document.getElementById('fin-sub');
   try{
     if(!FIN_SHEETS){
+      // TODO-SEGURANÇA (Fase 1, item 2): este endpoint expõe a DFC sem login.
+      // Fix correto = adicionar auth no servidor (sheet.ts) E mandar o token aqui
+      // (Bearer, igual ao cloudCall ~linha 2166). Precisa testar LOGADO antes de subir,
+      // senão quebra o Financeiro da equipe. Não aplicado às cegas (login local quebrado).
       const lr=await fetch('/api/workflowark/sheet?list=1');
       const lj=await lr.json().catch(()=>({}));
       FIN_SHEETS=(lj.sheets&&lj.sheets.length)?lj.sheets:[];
