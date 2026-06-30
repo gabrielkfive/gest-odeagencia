@@ -13,6 +13,18 @@ export const Route = createFileRoute("/api/workflowark/whatsapp/send")({
         const { data: u } = await db.auth.getUser(token);
         if (!u?.user) return Response.json({ error: "Sessão inválida" }, { status: 401 });
 
+        // Fase 1, item 3: usuário SUSPENSO (active=false) não pode disparar WhatsApp.
+        // Bloqueia só quem está explicitamente suspenso; se não houver registro, mantém o
+        // comportamento atual (fail-open) pra não travar usuário legítimo por engano.
+        const { data: member } = await db
+          .from("workflowark_members")
+          .select("active")
+          .eq("user_id", u.user.id)
+          .maybeSingle();
+        if (member && member.active === false) {
+          return Response.json({ error: "Usuário suspenso não pode enviar mensagens." }, { status: 403 });
+        }
+
         const body: any = await request.json().catch(() => ({}));
         const phone = String(body.phone || "").replace(/\D/g, "");
         const message = String(body.message || "").trim();
