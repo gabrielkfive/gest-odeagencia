@@ -5488,14 +5488,15 @@ const MDW_TYPES={
 const MDW_DEFAULT=[{t:'kpis',s:'g'},{t:'relogio',s:'m'},{t:'tarefas',s:'m'},{t:'agenda',s:'m'},{t:'nota',s:'p'},{t:'whatsapp',s:'p'}];
 // Painel por papel (Camada 1 da "Experiência por Persona"): cada pessoa entra vendo
 // só os widgets que importam pro trabalho dela. Menos ruído, mais foco.
+// Presets enxutos: KPIs do dia + só os 3 widgets que importam pra função. Menos ruído.
 const MDW_PRESETS={
-  admin:    [{t:'kpis',s:'g'},{t:'comercial',s:'m'},{t:'rotina',s:'m'},{t:'clientes',s:'m'},{t:'cobranca',s:'p'},{t:'conselho',s:'m'}],
-  gestor:   [{t:'kpis',s:'g'},{t:'clientes',s:'m'},{t:'rotina',s:'m'},{t:'cobranca',s:'p'},{t:'captacoes',s:'m'},{t:'conselho',s:'m'}],
-  comercial:[{t:'kpis',s:'g'},{t:'comercial',s:'m'},{t:'rotina',s:'m'},{t:'tarefas',s:'m'},{t:'whatsapp',s:'p'},{t:'nota',s:'p'}],
-  operacao: [{t:'kpis',s:'g'},{t:'rotina',s:'m'},{t:'tarefas',s:'m'},{t:'clientes',s:'m'},{t:'captacoes',s:'m'},{t:'nota',s:'p'}],
-  marketing:[{t:'kpis',s:'g'},{t:'rotina',s:'m'},{t:'tarefas',s:'m'},{t:'captacoes',s:'m'},{t:'agenda',s:'m'},{t:'nota',s:'p'}],
-  financeiro:[{t:'kpis',s:'g'},{t:'cobranca',s:'p'},{t:'clientes',s:'m'},{t:'tarefas',s:'m'},{t:'agenda',s:'m'},{t:'nota',s:'p'}],
-  viewer:   MDW_DEFAULT
+  admin:    [{t:'kpis',s:'g'},{t:'comercial',s:'m'},{t:'rotina',s:'m'},{t:'clientes',s:'m'}],
+  gestor:   [{t:'kpis',s:'g'},{t:'clientes',s:'m'},{t:'rotina',s:'m'},{t:'cobranca',s:'p'}],
+  comercial:[{t:'kpis',s:'g'},{t:'comercial',s:'m'},{t:'rotina',s:'m'},{t:'tarefas',s:'m'}],
+  operacao: [{t:'kpis',s:'g'},{t:'rotina',s:'m'},{t:'tarefas',s:'m'},{t:'clientes',s:'m'}],
+  marketing:[{t:'kpis',s:'g'},{t:'rotina',s:'m'},{t:'tarefas',s:'m'},{t:'captacoes',s:'m'}],
+  financeiro:[{t:'kpis',s:'g'},{t:'cobranca',s:'p'},{t:'clientes',s:'m'},{t:'tarefas',s:'m'}],
+  viewer:   [{t:'kpis',s:'g'},{t:'tarefas',s:'m'},{t:'agenda',s:'m'},{t:'nota',s:'p'}]
 };
 function mdwRole(){return (typeof WFA_MEMBER!=='undefined'&&WFA_MEMBER&&WFA_MEMBER.role)?WFA_MEMBER.role:null;}
 function mdwPresetFor(role){const p=MDW_PRESETS[role]||MDW_DEFAULT;return p.map(w=>({t:w.t,s:w.s}));}
