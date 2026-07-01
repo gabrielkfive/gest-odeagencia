@@ -1361,8 +1361,21 @@ h1,h2,h3,h4{letter-spacing:-.022em}
           #allhands-stage{display:flex;flex-direction:column;gap:22px;padding-bottom:40px}
           .ahd{background:#0a0a0b;color:#f5f5f2;border-radius:22px;overflow:hidden;font-family:'Inter',system-ui,sans-serif;
             border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 70px rgba(0,0,0,.22);position:relative;min-height:560px;
-            display:flex;flex-direction:column;justify-content:center;padding:54px 64px}
-          .ahd::after{content:attr(data-n);position:absolute;right:30px;bottom:22px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:#3a3a42;letter-spacing:.1em}
+            display:flex;flex-direction:column;padding:34px 56px 26px}
+          .ahd::after{display:none}
+          /* chrome premium (logo + linhas + numeração) */
+          .ahd .ah-chrome{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.10);flex-shrink:0}
+          .ahd .ah-brand{display:flex;align-items:center;gap:11px}
+          .ahd .ah-brand img{height:26px;width:auto;display:block}
+          .ahd .ah-brand span{font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:.24em;color:#e8e8ea}
+          .ahd .ah-brand b{color:#ffc400;margin:0 5px;font-weight:700}
+          .ahd .ah-pageno{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em;color:#6a6a72}
+          .ahd .ah-pageno i{color:#3a3a42;font-style:normal;margin:0 3px}
+          .ahd .ah-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:26px 0;min-height:0}
+          .ahd .ah-base{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid rgba(255,255,255,.10);font-family:'Sora',sans-serif;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#4a4a52;flex-shrink:0}
+          .ahd .ah-body h2::after{content:"";display:block;width:52px;height:3px;background:#ffc400;border-radius:3px;margin-top:14px}
+          .ahd .cover .cover-mark{display:none}
+          .ahd .cover .ah-cover-logo{width:96px;height:96px;margin-bottom:8px}
           .ahd .ah-kick{font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#ffc400}
           .ahd h1{font-family:'Sora',sans-serif;font-size:62px;line-height:.98;letter-spacing:-.035em;font-weight:800;margin:16px 0 0}
           .ahd h1 .y{color:#ffc400}
@@ -1402,7 +1415,15 @@ h1,h2,h3,h4{letter-spacing:-.022em}
           .ah-present{position:fixed;inset:0;z-index:6000;background:#000;display:flex;align-items:center;justify-content:center}
           .ah-present .ah-stagewrap{width:100%;height:100%;display:flex;align-items:stretch;justify-content:center}
           .ah-present .ahd{border-radius:0;border:none;box-shadow:none;width:100%;min-height:100vh;justify-content:center;padding:7vh 9vw;animation:ahfade .45s ease}
-          .ah-present .ahd{padding:5vh 6vw;overflow:auto}
+          .ah-present .ahd{padding:4vh 6vw 3vh;overflow:auto}
+          .ah-present .ahd .ah-brand img{height:2.6vw}
+          .ah-present .ahd .ah-brand span{font-size:1.05vw}
+          .ah-present .ahd .ah-pageno{font-size:1.15vw}
+          .ah-present .ahd .ah-base{font-size:.95vw;padding-top:1.4vh}
+          .ah-present .ahd .ah-chrome{padding-bottom:1.6vh}
+          .ah-present .ahd .ah-body{padding:2vh 0}
+          .ah-present .ahd .ah-body h2::after{width:4vw;height:.35vw;margin-top:1.4vh}
+          .ah-present .ahd .cover .ah-cover-logo{width:9vw;height:9vw}
           .ah-present .ahd .ah-kick{font-size:1.25vw}
           .ah-present .ahd h1{font-size:7vw}
           .ah-present .ahd h2{font-size:3.6vw;margin-bottom:2vh}
@@ -10118,8 +10139,8 @@ function ahBuildSlides(edit){
   const cardR=(t,b)=>'<div class="note red" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
 
   // 1 · Capa
-  S.push('<div class="cover"><div class="cover-mark">● ARK CONTENT · ALL HANDS</div>'+
-    '<h1 style="margin-top:26px">All Hands<br><span class="y">'+mes+'</span></h1>'+
+  S.push('<div class="cover"><img class="ah-cover-logo" src="/ark-logo.png" alt="ARK">'+
+    '<h1 style="margin-top:14px">All Hands<br><span class="y">'+mes+'</span></h1>'+
     '<p class="lead" style="margin-top:20px">Onde chegamos, o que cada área entregou e o que cada um vai puxar em julho. Reunião de gente e execução. Caixa fica pro fim, com os sócios.</p>'+
     '<div style="margin-top:22px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">Comercial · Social · Tráfego · CS · Captação · Design</span><span class="pill">'+hoje+'</span></div></div>');
 
@@ -10176,6 +10197,25 @@ function ahBuildSlides(edit){
     '</div>'+
     '<table><thead><tr><th>Pessoa</th><th>Função</th><th style="text-align:right">Entregas (mês)</th><th style="text-align:right">Em andamento</th></tr></thead><tbody>'+ppRows+'</tbody></table>'+
     '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Entregas do mês são estimativas por função. Em andamento vem ao vivo de quem usa o sistema, quem não usa (Portela, Henrique) tem ainda mais fora do quadro. Motivo de sobra pra ter processo e todo mundo dentro.</p></div>');
+
+  // 6b · O sistema (WorkFlowArk)
+  S.push('<div><div class="ah-kick">O que construímos</div><h2>WorkFlowArk: a casa num lugar só</h2>'+
+    '<p class="lead">'+ahTxt('sistema_intro','O maior projeto do período. Trello, planilha do Alpha, cobrança, agenda e relatórios viraram um sistema só, no ar, usado todo dia. O que estava na cabeça dos sócios virou processo que a equipe opera.',edit)+'</p>'+
+    '<div class="ah-grid g3" style="margin-top:16px">'+
+    card('Operação','Kanban de tarefas, CRM de pipeline, Jornada e Sprints por cliente.')+
+    card('Rotina & caixa','Cobrança e Acerto, Agenda por pessoa, Financeiro ao vivo e War Room com semáforo.')+
+    card('IA a favor','Planejamento, Roteirista e Legendas, Conselho de IA, JARVIS e portal do cliente.')+
+    '</div></div>');
+
+  // 6c · Como usar
+  S.push('<div><div class="ah-kick">Como usar no dia a dia</div><h2>O combinado com o sistema</h2>'+
+    '<div class="ah-grid g2" style="margin-top:14px">'+
+    card('Mexeu, moveu o card',ahTxt('uso1','Kanban: Backlog, Semana, Execução, Aprovação, Concluído. Se não está no Kanban, não aconteceu.',edit))+
+    card('Toda tarefa com dono',ahTxt('uso2','Marque o responsável. É isso que faz o quadro de execução da equipe ser real.',edit))+
+    card('CRM sempre vivo',ahTxt('uso3','Todo lead e conversa registrados. O comercial mora aqui.',edit))+
+    card('Cliente no link',ahTxt('uso4','Aprovação de conteúdo e portal do cliente por link, sem WhatsApp solto.',edit))+
+    '</div>'+
+    '<div class="note" style="margin-top:14px"><h3>Regra de ouro</h3><p>Se não está no sistema, não foi feito. Quanto mais a equipe usa, mais o próprio All Hands se preenche sozinho.</p></div></div>');
 
   // 7 · O que destravou
   S.push('<div><div class="ah-kick">O que funcionou</div><h2>O que destravou no mês</h2>'+
@@ -10247,15 +10287,24 @@ function ahBuildSlides(edit){
   return S;
 }
 window.ahIdx=0;window.ahSlides=[];
+function ahWrap(html,i,total){
+  const nn=String(i+1).padStart(2,'0'),tt=String(total).padStart(2,'0');
+  const mes=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,x=>x.toUpperCase());
+  return '<div class="ahd">'+
+    '<div class="ah-chrome"><div class="ah-brand"><img src="/ark-logo.png" alt="ARK"><span>ARK<b>·</b>ALL HANDS</span></div><div class="ah-pageno">'+nn+' <i>/</i> '+tt+'</div></div>'+
+    '<div class="ah-body">'+html+'</div>'+
+    '<div class="ah-base"><span>ARK Content</span><span>'+mes+'</span></div>'+
+  '</div>';
+}
 function renderAllhands(){
   const stage=document.getElementById('allhands-stage');if(!stage)return;
   const slides=ahBuildSlides(true);
-  stage.innerHTML=slides.map((html,i)=>'<div class="ahd" data-n="'+(i+1)+' / '+slides.length+'">'+html+'</div>').join('');
+  stage.innerHTML=slides.map((html,i)=>ahWrap(html,i,slides.length)).join('');
 }
 function ahRenderCurrent(){
   const slide=document.getElementById('ah-slide');if(!slide)return;
   const n=window.ahSlides.length;
-  slide.innerHTML='<div class="ahd" data-n="'+(window.ahIdx+1)+' / '+n+'">'+window.ahSlides[window.ahIdx]+'</div>';
+  slide.innerHTML=ahWrap(window.ahSlides[window.ahIdx],window.ahIdx,n);
   const bar=document.getElementById('ah-bar-i');if(bar)bar.style.width=((window.ahIdx+1)/n*100)+'%';
   const ct=document.getElementById('ah-counter');if(ct)ct.textContent=(window.ahIdx+1)+' / '+n;
   const dots=document.getElementById('ah-dots');if(dots)dots.innerHTML=window.ahSlides.map((_,i)=>'<span class="'+(i===window.ahIdx?'on':'')+'" onclick="ahGo('+i+')"></span>').join('');
