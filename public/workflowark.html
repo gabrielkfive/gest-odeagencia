@@ -1402,7 +1402,28 @@ h1,h2,h3,h4{letter-spacing:-.022em}
           .ah-present{position:fixed;inset:0;z-index:6000;background:#000;display:flex;align-items:center;justify-content:center}
           .ah-present .ah-stagewrap{width:100%;height:100%;display:flex;align-items:stretch;justify-content:center}
           .ah-present .ahd{border-radius:0;border:none;box-shadow:none;width:100%;min-height:100vh;justify-content:center;padding:7vh 9vw;animation:ahfade .45s ease}
-          .ah-present .ahd h1{font-size:8vw}.ah-present .ahd h2{font-size:4.4vw}.ah-present .ahd .stat .num{font-size:3.6vw}
+          .ah-present .ahd{padding:5vh 6vw;overflow:auto}
+          .ah-present .ahd .ah-kick{font-size:1.25vw}
+          .ah-present .ahd h1{font-size:7vw}
+          .ah-present .ahd h2{font-size:3.6vw;margin-bottom:2vh}
+          .ah-present .ahd h3{font-size:1.75vw}
+          .ah-present .ahd p{font-size:1.55vw;line-height:1.5}
+          .ah-present .ahd p.lead{font-size:2.1vw}
+          .ah-present .ahd .ah-grid{gap:1.4vw}
+          .ah-present .ahd .note{padding:1.8vh 1.6vw}
+          .ah-present .ahd .note h3{font-size:1.7vw;margin-bottom:.6vh}
+          .ah-present .ahd .note p{font-size:1.45vw;line-height:1.4}
+          .ah-present .ahd .stat{padding:2.2vh 1.6vw}
+          .ah-present .ahd .stat .num{font-size:3.6vw}
+          .ah-present .ahd .stat .lab{font-size:1.1vw;margin-top:1vh}
+          .ah-present .ahd .stat .det{font-size:.98vw}
+          .ah-present .ahd table{font-size:1.4vw}
+          .ah-present .ahd th{font-size:1.02vw;padding:1.1vh 1vw}
+          .ah-present .ahd td{padding:1.05vh 1vw}
+          .ah-present .ahd td.n{font-size:1.35vw}
+          .ah-present .ahd .pill{font-size:1.12vw;padding:1vh 1.4vw}
+          .ah-present .ahd .funfill{font-size:1.7vw}
+          .ah-present .ahd .funbar{height:5vh}
           @keyframes ahfade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
           .ah-bar{position:fixed;top:0;left:0;height:4px;background:#ffc400;z-index:6010;transition:width .35s ease}
           .ah-navbar{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;
@@ -4366,7 +4387,7 @@ const RESPONSAVEIS_FN = {
   'Criador':'Maria Luiza',
   'Designer':'M. Portela',
   'Editor':'Samuel Magalhães',
-  'Captação':'Omar'
+  'Captação':'Samuel Magalhães'
 };
 
 const SPRINTS = [
@@ -9949,20 +9970,21 @@ function ahGridSum(id,key){try{return (gridRows(id)||[]).reduce((s,r)=>s+mmNum(r
 function ahCaptacoes(){try{const evs=loadAgendaEvents()||[];const mk=(typeof cobMesKey==='function')?cobMesKey():'2026-06';
   return evs.filter(e=>/capta/i.test(((e.title||'')+' '+(e.type||'')))&&String(e.date||'').slice(0,7)===mk).length;}catch(e){return 0;}}
 function ahPerPessoa(){
-  const ts=state.tarefas||[];const mk=(typeof cobMesKey==='function')?cobMesKey():'2026-06';
+  const ts=state.tarefas||[];
   const nz=s=>String(s||'').trim().toLowerCase();
-  const roster=[{nm:'Gabriel Andrade',fn:'CEO · Closer'},{nm:'Saulo',fn:'BDR · Comercial'},
-    {nm:'Lucas Rosi',fn:'Account · CS'},{nm:'Danilo de Lima',fn:'Tráfego · COO'},
-    {nm:'Maria Luiza',fn:'Social · Criadora'},{nm:'Omar',fn:'Captação'},{nm:'Nicolas',fn:'Captação'},
-    {nm:'M. Portela',fn:'Designer'},{nm:'Samuel Magalhães',fn:'Editor'}];
-  roster.forEach(p=>{const meus=ts.filter(t=>nz(t.resp)===nz(p.nm));
-    p.feitas=meus.filter(t=>t.status==='concluido'&&String(t.concluidaEm||'').slice(0,7)===mk).length;
-    p.andamento=meus.filter(t=>t.status!=='concluido').length;p.dest='';});
-  const f=nm=>roster.find(r=>r.nm===nm);
-  let x;const amd=ahGridSum('am','demandas');if((x=f('Lucas Rosi'))&&amd)x.dest=amd+' demandas (Alpha)';
-  const gtd=ahGridSum('gt','totalDem');if((x=f('Danilo de Lima'))&&gtd)x.dest=gtd+' demandas tráfego';
-  const crd=ahGridSum('cr','totalCriativos');if((x=f('Maria Luiza'))&&crd)x.dest=crd+' criativos (Alpha)';
-  const cap=ahCaptacoes();if((x=f('Omar'))&&cap)x.dest=cap+' captações no mês';
+  // Roster consolidado. "Concluídas" = parâmetros do Gabriel (a gente não tem o número exato no sistema).
+  // "Em andamento" = puxado AO VIVO do sistema por responsável (quem está cadastrado).
+  const roster=[
+    {nm:'Danilo de Lima',fn:'Tráfego · COO',feitas:'72+'},
+    {nm:'Lucas Rosi',fn:'Account · CS',feitas:'60+'},
+    {nm:'Maria Luiza',fn:'Social · Criação',feitas:'20+'},
+    {nm:'Samuel Magalhães',fn:'Edição · Captação',feitas:'20+'},
+    {nm:'M. Portela',fn:'Design',feitas:'~20'},
+    {nm:'Bruno',fn:'Design · Estrategista',feitas:'10+'},
+    {nm:'Saulo',fn:'Comercial · BDR',feitas:'3 rotas'},
+    {nm:'Gabriel Andrade',fn:'CEO · Closer',feitas:'—'},
+  ];
+  roster.forEach(p=>{p.andamento=ts.filter(t=>t.status!=='concluido'&&nz(t.resp)===nz(p.nm)).length;});
   return roster;
 }
 function ahData(){
@@ -9981,13 +10003,13 @@ function ahData(){
   let alpha=[];try{alpha=alphaRows()||[];}catch(e){}
   const an=v=>(typeof alphaNum==='function')?alphaNum(v):mmNum(v);
   const alMRR=alpha.reduce((s,x)=>s+an(x.valorMensal),0),alContr=alpha.reduce((s,x)=>s+an(x.valorContrato),0);
-  const alRisco=alpha.filter(x=>/CRITICAL|DANGER/i.test(x.flag||''));
-  let bs=null;try{if(typeof bsOverall==='function'){const b=bsOverall();bs=(b==null?null:Math.round(b));}}catch(e){}
-  const arkN=(typeof CLIENTES!=='undefined'&&CLIENTES)?CLIENTES.length:0;
+  // Carteira consolidada: ARK reais (tipo ARK, sem o cliente interno) + Alpha ativos (mín. 11, número do Gabriel).
+  let arkN=7;try{arkN=(CLIENTES||[]).filter(x=>x.tipo==='ARK').length||7;}catch(e){}
+  const alphaN=Math.max(alpha.length,11);
+  const carteira=arkN+alphaN;
   const pp=ahPerPessoa();
-  const totFeitas=pp.reduce((s,p)=>s+p.feitas,0),totAnd=pp.reduce((s,p)=>s+p.andamento,0);
-  return {c,leads,fech,reun,conv,fin,alpha,alMRR,alContr,alRisco,bs,arkN,carteira:arkN+alpha.length,pp,
-    cap:ahCaptacoes(),demAlpha:ahGridSum('am','demandas')+ahGridSum('gt','totalDem'),criativos:ahGridSum('cr','totalCriativos'),totFeitas,totAnd};
+  const totAnd=pp.reduce((s,p)=>s+(p.andamento||0),0);
+  return {c,leads,fech,reun,conv,fin,alpha,alMRR,alContr,arkN,alphaN,carteira,pp,totAnd};
 }
 function ahStat(num,lab,det,cls){return '<div class="stat '+(cls||'')+'"><div class="num '+(cls==='y'?'':(cls||''))+'">'+num+'</div><div class="lab">'+lab+'</div>'+(det?'<div class="det">'+det+'</div>':'')+'</div>';}
 function ahBuildSlides(edit){
@@ -9997,125 +10019,135 @@ function ahBuildSlides(edit){
   const c=d.c,fin=d.fin;
   const S=[];
   const card=(t,b)=>'<div class="note" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
+  const cardG=(t,b)=>'<div class="note green" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
+  const cardR=(t,b)=>'<div class="note red" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
 
   // 1 · Capa
   S.push('<div class="cover"><div class="cover-mark">● ARK CONTENT · ALL HANDS</div>'+
-    '<h1 style="margin-top:30px">All Hands<br><span class="y">'+mes+'</span></h1>'+
-    '<p class="lead" style="margin-top:22px">Onde chegamos, como cada área entregou e o que cada um vai puxar em julho. Nossa reunião de gente e execução, números de caixa no fim, pra fechar com os sócios.</p>'+
-    '<div style="margin-top:24px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">Comercial · Social · Tráfego · CS · Captação · Edição</span><span class="pill">'+hoje+'</span></div></div>');
+    '<h1 style="margin-top:26px">All Hands<br><span class="y">'+mes+'</span></h1>'+
+    '<p class="lead" style="margin-top:20px">Onde chegamos, o que cada área entregou e o que cada um vai puxar em julho. Reunião de gente e execução. Caixa fica pro fim, com os sócios.</p>'+
+    '<div style="margin-top:22px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">Comercial · Social · Tráfego · CS · Captação · Design</span><span class="pill">'+hoje+'</span></div></div>');
 
-  // 2 · De onde viemos (Método dos 5 Eixos)
+  // 2 · De onde viemos
   S.push('<div><div class="ah-kick">De onde viemos</div><h2>Em ~10 meses a casa virou outra</h2>'+
-    '<p class="lead">'+ahTxt('vinda','Saímos de 4 para 15 clientes, abrimos a frente Squad Alpha Senior e formalizamos o que estava só na cabeça dos sócios: organograma claro, 22 POPs e o Método dos 5 Eixos. A virada do mês é essa: parar de depender de talento solto e passar a rodar no processo.',edit)+'</p>'+
-    '<div class="ah-grid g3" style="margin-top:18px">'+
-    card('Identidade','Foco em gastronomia de Brasília consolidado, narrativa institucional explícita.')+
-    card('Estratégia','Plano comercial, campanhas próprias de captação e a frente Alpha.')+
-    card('Pessoas & Processos','Organograma em 5 áreas, trilha Júnior/Pleno/Sênior e 22 POPs no sistema.')+
+    '<p class="lead">'+ahTxt('vinda','Saímos de 4 para uma carteira grande, abrimos a frente Squad Alpha e formalizamos o que estava só na cabeça dos sócios: organograma, 22 POPs e o Método dos 5 Eixos. A virada é essa: parar de depender de talento solto e passar a rodar no processo.',edit)+'</p>'+
+    '<div class="ah-grid g3" style="margin-top:16px">'+
+    card('Identidade','Foco em gastronomia de Brasília, narrativa institucional explícita.')+
+    card('Estratégia','Plano comercial, campanhas de captação e a frente Alpha.')+
+    card('Pessoas & Processos','5 áreas, trilha Júnior/Pleno/Sênior e 22 POPs no sistema.')+
     '</div></div>');
 
-  // 3 · Junho em uma tela (pulso operacional, sem dinheiro)
+  // 3 · Pulso da operação
   S.push('<div><div class="ah-kick">Junho em uma tela</div><h2>O pulso da operação</h2>'+
-    '<div class="ah-grid g4" style="margin-top:16px">'+
-    ahStat(d.carteira,'Clientes na carteira',d.arkN+' ARK · '+d.alpha.length+' Alpha','y')+
-    ahStat(d.totFeitas||'—','Entregas concluídas','tarefas fechadas no mês','green')+
-    ahStat((d.cap||'—'),'Captações','gravações no mês','amber')+
-    ahStat(d.alRisco.length,'Clientes em risco','semáforo vermelho/amarelo',(d.alRisco.length?'red':'green'))+
+    '<div class="ah-grid g4" style="margin-top:14px">'+
+    ahStat(d.carteira,'Clientes na carteira',d.arkN+' ARK · '+d.alphaN+' Alpha','y')+
+    ahStat(ahTxt('pulse_entregas','100+',edit),'Entregas no mês','edições, criativos e demandas','green')+
+    ahStat(ahTxt('pulse_capt','12',edit),'Captações','gravações no mês','amber')+
+    ahStat(ahTxt('pulse_risco','2',edit),'Clientes em risco','Dom Baruka e Valhalla (Alpha)','red')+
     '</div>'+
-    '<p style="margin-top:16px;color:#9a9aa2;font-size:14px">Leitura rápida: a carteira cresceu e a operação está rodando. O desafio do mês não é vender, é <b style="color:#fff">entregar com qualidade</b> sem deixar conta esfriar.</p></div>');
+    '<p style="margin-top:14px;color:#9a9aa2;font-size:14px">Leitura rápida: a carteira cresceu e o time está entregando muito. O desafio do mês não é vender, é <b style="color:#fff">entregar com qualidade</b> e não deixar conta esfriar.</p></div>');
 
-  // 4 · Comercial no mês
+  // 4 · Comercial + pipeline
   const fmax=Math.max(d.leads,1);
   const fun=[['Leads gerados',d.leads,'#ffc400'],['Reuniões (estim.)',d.reun,'#9a9aa2'],['Fechamentos',d.fech,'#30d158']]
-    .map(s=>'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:160px;font-size:13px;color:#bdbdc4">'+s[0]+'</div><div class="funbar"><div class="funfill" style="width:'+Math.max(s[1]/fmax*100,8)+'%;background:'+s[2]+'">'+s[1]+'</div></div></div>').join('');
+    .map(s=>'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:170px;font-size:13px;color:#bdbdc4">'+s[0]+'</div><div class="funbar"><div class="funfill" style="width:'+Math.max(s[1]/fmax*100,8)+'%;background:'+s[2]+'">'+s[1]+'</div></div></div>').join('');
   S.push('<div><div class="ah-kick">Comercial · Saulo + Gabriel</div><h2>Pipeline e o que já está vendido</h2>'+
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px"><h3 style="margin:0">Funil do mês</h3><span style="color:#30d158;font-weight:800;font-family:Sora">'+d.conv+'% lead para fechamento</span></div>'+fun+
-    '<div class="ah-grid g2" style="margin-top:16px">'+
-    card('🔥 Já vendido, fatura em julho','Lá em Casa, Spa, Juvenal e +1 a confirmar. Esse pipeline é onde mora 80% da meta de julho: não é prospectar, é fazer onboarding e faturar.')+
-    card('🆓 Motor CAC zero','4B Burger e Sabor e Lenha entraram sem custo de aquisição, via canal Alpha e indicação. É isso que a gente vai sistematizar.')+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 6px"><h3 style="margin:0">Funil do mês</h3><span style="color:#30d158;font-weight:800;font-family:Sora">'+d.conv+'% lead para fechamento</span></div>'+fun+
+    '<div class="ah-grid g3" style="margin-top:14px">'+
+    card('✅ Vendido / assinatura',ahTxt('pipe_vendido','Lá em Casa fechado. Spa em assinatura. É a receita nova que entra em julho.',edit))+
+    card('💬 Em conversa',ahTxt('pipe_conversa','Presatec, Sal e Fumaça, Estação do Lanche e mais oportunidades quentes no CRM.',edit))+
+    card('🎯 CAC zero é escolha',ahTxt('pipe_cac','Entradas de baixo custo de aquisição. O preço a pagar é atender muito bem e entregar diferencial nos primeiros meses.',edit))+
     '</div></div>');
 
   // 5 · Cada área no mês
   S.push('<div><div class="ah-kick">Cada área no mês</div><h2>O que cada frente entregou</h2>'+
-    '<div class="ah-grid g3" style="margin-top:14px">'+
-    card('Comercial · Saulo','3 rotas no início do mês, pipeline de 4 contas fechadas e 2 entradas CAC zero. Foco: discovery antes do closer e ritmo de rota semanal.')+
-    card('Social & Criação · Maria Luiza / Bruno / Portela','Linha editorial rodando na carteira. Attraversiamo bombou (+1.000 seguidores em 3 dias) e virou case de captação.')+
-    card('Tráfego · Danilo / Giuseppe','Campanha de 15/06 com o melhor custo por conversa do mês (R$16,99). A estrutura a escalar já existe.')+
-    card('Account & CS · Lucas','Onboarding das contas novas e régua de acompanhamento. A meta é segurar NPS alto e zero churn enquanto a base cresce.')+
-    card('Captação · Omar / Nicolas','Captação distribuída com produtor fixo; a Rede Alpha entra como respiro pro volume de gravação.')+
-    card('Edição · Samuel / Luckas','Volume de cortes da carteira em dia. É a frente que mais sente o crescimento, ponto de atenção pra julho.')+
-    '</div>'+
-    '<p style="margin-top:12px;color:#5a5a62;font-size:12px">Edite cada bloco com os números reais da sua área antes da reunião.</p></div>');
+    '<div class="ah-grid g3" style="margin-top:12px">'+
+    card('Comercial · Saulo',ahTxt('area_com','3 rotas no início do mês. Travou um pouco na rota, mas ativou muita gente: conduz o pipeline do CRM e falou com 4 a 5 dos 9 leads Alpha comprados.',edit))+
+    card('Account & CS · Lucas',ahTxt('area_cs','Segura onboarding e a régua de 11 a 12 clientes por dia. Muito bem. Foco: delegar, ter processo próprio e voltar a ativação diária nos grupos da Alpha.',edit))+
+    card('Social & Criação · Maria Luiza + Samuel',ahTxt('area_social','Dividem criação e edição, mais de 100 entregas no mês. A virada do Attraversiamo foi mérito da Maria Luiza. Linha editorial rodando na carteira.',edit))+
+    card('Tráfego · Danilo',ahTxt('area_traf','Danilo toca o tráfego 100%. A campanha de 15/06 teve o melhor custo por conversa do mês, R$16,99. A estrutura a escalar já existe.',edit))+
+    card('Captação · Samuel + Henrique',ahTxt('area_capt','Samuel assume como pilar da captação, com Henrique. Foco: montar time de produtores (Maria Clara, Alana, Duda + rede Alpha) e automatizar o agendamento das gravações.',edit))+
+    card('Design · Bruno + Portela',ahTxt('area_design','Bruno toca a Fercon, Portela os outros projetos. Premissa do mês: formalizar o Bruno in-house como designer.',edit))+
+    '</div></div>');
 
   // 6 · Execução por pessoa
-  const ppRows=d.pp.map(p=>'<tr><td style="font-weight:600;color:#f5f5f2">'+p.nm+'</td><td style="color:#9a9aa2">'+p.fn+'</td><td class="n">'+p.feitas+'</td><td class="n">'+p.andamento+'</td><td style="color:#ffc400;font-size:12px">'+(p.dest||'')+'</td></tr>').join('');
+  const ppRows=d.pp.map(p=>'<tr><td style="font-weight:600;color:#f5f5f2">'+p.nm+'</td><td style="color:#9a9aa2">'+p.fn+'</td><td class="n">'+p.feitas+'</td><td class="n">'+(p.andamento||0)+'</td></tr>').join('');
   S.push('<div><div class="ah-kick">Execução por profissional</div><h2>Quem entregou o quê</h2>'+
-    '<div class="ah-grid g4" style="margin:14px 0">'+
-    ahStat(d.totFeitas,'Concluídas no mês','tarefas finalizadas','green')+
-    ahStat(d.totAnd,'Em andamento','no Kanban')+
-    ahStat(d.demAlpha||'—','Demandas Alpha','meta: AM 7 · GT 8 por cliente','amber')+
-    ahStat(d.criativos||'—','Criativos','produção do mês')+
+    '<div class="ah-grid g4" style="margin:12px 0">'+
+    ahStat(ahTxt('exec_total','100+',edit),'Entregas no mês','soma das frentes','green')+
+    ahStat(d.totAnd,'Em andamento','ao vivo, no sistema')+
+    ahStat(ahTxt('exec_traf','72+',edit),'Demandas de tráfego','Danilo','amber')+
+    ahStat(ahTxt('exec_acc','60+',edit),'Atendimentos','Lucas na carteira')+
     '</div>'+
-    '<table><thead><tr><th>Pessoa</th><th>Função</th><th style="text-align:right">Concluídas</th><th style="text-align:right">Em and.</th><th>Destaque</th></tr></thead><tbody>'+ppRows+'</tbody></table>'+
-    '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Cadência Alpha de referência: Account 7 demandas/cliente, Tráfego 8/cliente, Criador por total de criativos com check do coordenador. Quanto mais o time marca responsável nas tarefas, mais fiel fica este quadro.</p></div>');
+    '<table><thead><tr><th>Pessoa</th><th>Função</th><th style="text-align:right">Entregas (mês)</th><th style="text-align:right">Em andamento</th></tr></thead><tbody>'+ppRows+'</tbody></table>'+
+    '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Entregas do mês são estimativas por função. Em andamento vem ao vivo de quem usa o sistema, quem não usa (Portela, Henrique) tem ainda mais fora do quadro. Motivo de sobra pra ter processo e todo mundo dentro.</p></div>');
 
   // 7 · O que destravou
   S.push('<div><div class="ah-kick">O que funcionou</div><h2>O que destravou no mês</h2>'+
-    '<div class="ah-grid g2" style="margin-top:14px">'+
-    '<div class="note green"><h3>Crescimento sem gastar pra captar</h3><p>'+ahTxt('conq1','4B Burger e Sabor e Lenha entraram a custo zero (canal Alpha + indicação). Prova de que reputação no nicho gera lead quente de graça.',edit)+'</p></div>'+
-    '<div class="note green"><h3>Conteúdo que vira case</h3><p>'+ahTxt('conq2','Attraversiamo cresceu +1.000 seguidores em 3 dias. Virou argumento de venda novo pro comercial.',edit)+'</p></div>'+
-    '<div class="note green"><h3>Casa em ordem</h3><p>'+ahTxt('conq3','Organograma, 22 POPs e o sistema rodando todo dia. O conhecimento dos sócios virou processo que a equipe usa.',edit)+'</p></div>'+
-    '<div class="note green"><h3>Mídia mais eficiente</h3><p>'+ahTxt('conq4','A campanha de 15/06 bateu R$16,99 por conversa, o melhor do mês. Já sabemos qual estrutura escalar.',edit)+'</p></div>'+
+    '<div class="ah-grid g2" style="margin-top:12px">'+
+    cardG('Máquina de conteúdo rodando',ahTxt('conq1','Maria Luiza e Samuel dividem mais de 100 entregas no mês, com linha editorial rodando na carteira.',edit))+
+    cardG('Case orgânico',ahTxt('conq2','Attraversiamo bombou nas redes, mérito da Maria Luiza. Virou argumento de venda novo.',edit))+
+    cardG('Casa em ordem',ahTxt('conq3','Organograma, 22 POPs e o sistema rodando todo dia. O conhecimento dos sócios virou processo.',edit))+
+    cardG('Mídia mais eficiente',ahTxt('conq4','A campanha de 15/06 bateu R$16,99 por conversa, o melhor do mês. Já sabemos o que escalar.',edit))+
     '</div></div>');
 
-  // 8 · O que trava (gargalos reais com dono)
+  // 8 · Gargalos reais
   S.push('<div><div class="ah-kick">O que ainda trava</div><h2>Gargalos reais, com dono e ação</h2>'+
-    '<div class="ah-grid g2" style="margin-top:14px">'+
-    '<div class="note red"><h3>Edição é ponto único · Samuel</h3><p>'+ahTxt('garg1','Cada Gold são 15 vídeos, Plano X são 20. Se entrar o pipeline de julho são +75 a 100 vídeos. Ação: definir gatilho de freela de edição e dividir carga (Luckas, Kaique).',edit)+'</p></div>'+
-    '<div class="note red"><h3>Account aperta com a base crescendo · Lucas</h3><p>'+ahTxt('garg2','Com +4 a 5 clientes, onboarding ≤5 dias e NPS ≥85 ficam em risco. Ação: escalonar as entradas, não lotar a semana.',edit)+'</p></div>'+
-    '<div class="note red"><h3>Captação no limite · Omar / Nicolas</h3><p>'+ahTxt('garg3','4 a 5 entradas juntas lotam a agenda de gravação. Ação: acionar a Rede Alpha pros clientes novos.',edit)+'</p></div>'+
-    '<div class="note red"><h3>Repasse Alpha atrasado</h3><p>'+ahTxt('garg4','Faltam ~R$10 a 14k de repasse (Babbo e Valhalla não pagos + estornos). É caixa que já é nosso. Ação: cobrar e conciliar até 15/07.',edit)+'</p></div>'+
-    '<div class="note red"><h3>Bellato deu churn</h3><p>'+ahTxt('garg5','Perda de cliente no lado Alpha. Sinal de alerta: crescer e perder é crescimento falso. Ação: check-in nas contas-âncora.',edit)+'</p></div>'+
-    '<div class="note red"><h3>Deploy do sistema travado</h3><p>'+ahTxt('garg6','O CI está quebrado desde 24/06 (token Cloudflare). Toda melhoria sobe no manual. Ação: gerar token novo, 2 minutos.',edit)+'</p></div>'+
+    '<div class="ah-grid g3" style="margin-top:12px">'+
+    cardR('Criação sob pressão · Malu + Samuel',ahTxt('garg1','Mais de 100 entregas por mês nos dois. Precisa aliviar a Maria Luiza pra ela puxar linha editorial nos grupos da Alpha.',edit))+
+    cardR('Account precisa delegar · Lucas',ahTxt('garg2','Ativa 11 a 12 clientes por dia sozinho. Precisa delegar, com o Danilo complementar e alguém novo perto da operação.',edit))+
+    cardR('Ativação diária dos grupos Alpha',ahTxt('garg3','O volume dos grupos não pode passar batido. Ativação diária sem falha. Danilo e Lucas precisam de reforço.',edit))+
+    cardR('Captação depende de fora',ahTxt('garg4','Hoje a captação depende de agenda de terceiros. O plano é o Samuel virar pilar, com produtores próprios e a rede Alpha.',edit))+
+    cardR('Repasse Alpha atrasado',ahTxt('garg5','Faltam ~R$10 a 14k de repasse (Babbo e Valhalla). É caixa que já é nosso. Cobrar até 15/07.',edit))+
+    cardR('Deploy do sistema travado',ahTxt('garg6','CI quebrado desde 24/06. Toda melhoria sobe no manual. Ação: token novo do Cloudflare, 2 minutos.',edit))+
     '</div></div>');
 
-  // 9 · Julho · plano de crescimento
+  // 9 · Time (debate)
+  S.push('<div><div class="ah-kick">Time · pra puxar o debate</div><h2>O que vamos destravar juntos</h2>'+
+    '<p class="lead">'+ahTxt('time_debate','O time está entregando muito, e é hora de estruturar. Três frentes que a gente abre aqui e aprofunda nas one on ones.',edit)+'</p>'+
+    '<div class="ah-grid g3" style="margin-top:14px">'+
+    card('Design in-house',ahTxt('time_bruno','Formalizar o Bruno como designer interno, com mais disponibilidade e presença.',edit))+
+    card('Captação como pilar',ahTxt('time_samuel','Samuel à frente da captação, estreitando a relação com os produtores e a rede Alpha.',edit))+
+    card('Reforço na operação',ahTxt('time_op','Alguém perto do operacional pra sustentar a ativação diária dos clientes e das linhas editoriais.',edit))+
+    '</div></div>');
+
+  // 10 · Julho · alavancas
   S.push('<div><div class="ah-kick">Para onde vamos · Julho</div><h2>As alavancas do mês</h2>'+
-    '<div class="ah-grid g2" style="margin-top:14px">'+
-    card('🥇 Faturar o que já vendemos','Lá em Casa, Spa, Juvenal e +1. Start do plano e 1ª captação na primeira semana. É o maior impacto com o menor esforço.')+
-    card('🥈 Replicar o CAC zero','1 indicação por cliente ativo no momento do resultado, e cobrar os clientes que faltam do acordo Alpha (faltam ~5 de 8).')+
-    card('🥉 Upsell na base','Lunna\'s e Bella Vita são candidatos a subir de plano. Cada Silver para Gold são +R$1.000 sem captar cliente novo.')+
-    card('🛡️ Proteger a base','Vivenda, Fercon e Bella Vita são metade da receita. Check-in de retenção e pauta de 2º semestre pra blindar do fim de Copa.')+
-    '</div>'+
-    '<p style="margin-top:14px;color:#9a9aa2;font-size:14px">'+ahTxt('plano_extra','A meta de julho não depende de prospecção nova agressiva. Depende de faturar o pipeline e blindar a entrega. O limite do mês não é vender, é entregar.',edit)+'</p></div>');
-
-  // 10 · OKRs por função
-  S.push('<div><div class="ah-kick">OKRs de julho · por função</div><h2>O que cada um vai puxar</h2>'+
-    '<div class="ah-grid g2" style="margin-top:14px">'+
-    '<div class="note"><h3>Comercial · Saulo + Gabriel</h3><p>'+ahTxt('okr_com','Converter o pipeline de junho em receita recorrente, ≥3 contratos novos, conversão acima de 20%, 5 reuniões qualificadas e 1 indicação por cliente.',edit)+'</p></div>'+
-    '<div class="note"><h3>Account & CS · Lucas</h3><p>'+ahTxt('okr_cs','Onboarding em até 5 dias, NPS ≥85, 0% de churn e reembolso, upsell em ≥30% da base.',edit)+'</p></div>'+
-    '<div class="note"><h3>Tráfego · Danilo / Giuseppe</h3><p>'+ahTxt('okr_traf','Start estratégico em 100% dos clientes, 80% da base no verde, nenhum criativo ruim rodando mais de 1 semana, nenhuma conta desabastecida.',edit)+'</p></div>'+
-    '<div class="note"><h3>Criação & Edição · Maria Luiza / Samuel / Portela</h3><p>'+ahTxt('okr_creator','95% das entregas no prazo, criativos sempre quinta 12h, retrabalho abaixo de 15%, qualidade ≥8/10 e kit inicial no onboarding.',edit)+'</p></div>'+
+    '<div class="ah-grid g2" style="margin-top:12px">'+
+    card('🥇 Faturar o que já vendemos',ahTxt('alav1','Lá em Casa e Spa entram em julho. Start do plano e 1ª captação na primeira semana. Maior impacto, menor esforço.',edit))+
+    card('🥈 Fechar as conversas quentes',ahTxt('alav2','Presatec, Sal e Fumaça, Estação do Lanche. Manter o CRM ativo e converter o que já está em pauta.',edit))+
+    card('🥉 Upsell na base',ahTxt('alav3','Subir contas de plano na carteira. Receita nova sem precisar captar cliente novo.',edit))+
+    card('🛡️ Proteger a base',ahTxt('alav4','Retenção e ativação diária dos grupos. Crescer e perder cliente é crescimento falso.',edit))+
     '</div></div>');
 
-  // 11 · Compromisso
-  S.push('<div class="cover"><div class="ah-kick">Compromisso do mês</div>'+
-    '<h2 style="font-size:46px;max-width:1000px;margin-top:10px">'+ahTxt('compromisso','Em julho a gente fatura o que já vendeu, protege a base e blinda a entrega. Cada um sai daqui com um compromisso.',edit)+'</h2>'+
-    '<div style="margin-top:22px"><span class="pill y">Faturar o pipeline</span><span class="pill y">0% churn</span><span class="pill y">Entrega no prazo</span><span class="pill y">1 indicação por cliente</span></div>'+
-    '<p style="margin-top:28px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffc400">VAMOS JUNTOS ●</p></div>');
+  // 11 · OKRs por função
+  S.push('<div><div class="ah-kick">OKRs de julho · por função</div><h2>O que cada um vai puxar</h2>'+
+    '<div class="ah-grid g2" style="margin-top:12px">'+
+    card('Comercial · Saulo + Gabriel',ahTxt('okr_com','Converter o pipeline em receita, conversão acima de 20%, reuniões qualificadas e 1 indicação por cliente.',edit))+
+    card('Account & CS · Lucas',ahTxt('okr_cs','Onboarding em até 5 dias, NPS ≥85, 0% de churn, ativação diária dos grupos e upsell em ≥30% da base.',edit))+
+    card('Tráfego · Danilo',ahTxt('okr_traf','Start estratégico em 100% dos clientes, 80% da base no verde, nenhum criativo ruim rodando mais de 1 semana.',edit))+
+    card('Criação, Edição & Captação · Malu, Samuel, Portela',ahTxt('okr_creator','Entregas no prazo, retrabalho abaixo de 15%, qualidade alta e captações agendadas com time próprio.',edit))+
+    '</div></div>');
 
-  // 12 · (Sócios) Fechamento financeiro
+  // 12 · Compromisso
+  S.push('<div class="cover"><div class="ah-kick">Compromisso do mês</div>'+
+    '<h2 style="font-size:44px;max-width:1000px;margin-top:10px">'+ahTxt('compromisso','Em julho a gente fatura o que já vendeu, protege a base e estrutura o time. Cada um sai daqui com um compromisso.',edit)+'</h2>'+
+    '<div style="margin-top:20px"><span class="pill y">Faturar o pipeline</span><span class="pill y">0% churn</span><span class="pill y">Entrega no prazo</span><span class="pill y">Ativação diária</span></div>'+
+    '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffc400">VAMOS JUNTOS ●</p></div>');
+
+  // 13 · Financeiro (sócios)
   const topRec=fin.rec.slice().sort((a,b)=>mmNum(b.valor)-mmNum(a.valor)).slice(0,5)
     .map(x=>'<tr><td>'+(x.nome||'—')+'</td><td class="n">'+mmBRL(mmNum(x.valor))+'</td></tr>').join('')||'<tr><td>Sem dados</td><td class="n">—</td></tr>';
   S.push('<div><div class="ah-kick">Fechamento financeiro · sócios</div><h2>O caixa do mês</h2>'+
-    '<div class="ah-grid g4" style="margin:14px 0">'+
+    '<div class="ah-grid g4" style="margin:12px 0">'+
     ahStat(mmBRL(fin.tRec),'A receber','','green')+
     ahStat(mmBRL(fin.tPag),'A pagar','','red')+
     ahStat(mmBRL(fin.resultado),'Resultado','margem '+fin.margem+'%',(fin.resultado>=0?'green':'red'))+
-    ahStat(mmK(d.alMRR),'MRR Alpha',d.alpha.length+' clientes','amber')+
+    ahStat(mmK(d.alMRR),'MRR Alpha',d.alphaN+' clientes','amber')+
     '</div>'+
     '<div class="ah-grid g2"><div><h3>Maiores a receber</h3><table>'+topRec+'</table></div>'+
-    '<div class="note" style="align-self:start"><h3>Atenção de caixa</h3><p>Repasse Alpha atrasado de ~R$10 a 14k (Babbo e Valhalla) é caixa que já é nosso, cobrar até 15/07. Margem saudável da casa fica entre 12% e 15%, junho fechou acima disso.</p></div></div>'+
-    '<p style="margin-top:12px;color:#5a5a62;font-size:12px">Números ao vivo da Minha Planilha do sistema. Detalhe completo na aba Financeiro.</p></div>');
+    '<div class="note" style="align-self:start"><h3>Atenção de caixa</h3><p>Repasse Alpha atrasado de ~R$10 a 14k (Babbo e Valhalla) é caixa que já é nosso, cobrar até 15/07. Margem saudável fica entre 12% e 15%.</p></div></div>'+
+    '<p style="margin-top:10px;color:#5a5a62;font-size:12px">Números ao vivo da Minha Planilha. Detalhe completo na aba Financeiro.</p></div>');
 
   return S;
 }
