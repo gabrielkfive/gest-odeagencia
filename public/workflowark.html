@@ -10099,7 +10099,7 @@ function ahPerPessoa(){
     {nm:'M. Portela',fn:'Design',feitas:'~20'},
     {nm:'Bruno',fn:'Design · Estrategista',feitas:'10+'},
     {nm:'Saulo',fn:'Comercial · BDR',feitas:'3 rotas'},
-    {nm:'Gabriel Andrade',fn:'CEO · Closer',feitas:'—'},
+    {nm:'Gabriel Andrade',fn:'CEO · Operação · Closer',feitas:'Sistema+Fechamentos'},
   ];
   roster.forEach(p=>{p.andamento=ts.filter(t=>t.status!=='concluido'&&nz(t.resp)===nz(p.nm)).length;});
   return roster;
@@ -10142,7 +10142,7 @@ function ahBuildSlides(edit){
   // 1 · Capa
   S.push('<div class="cover"><img class="ah-cover-logo" src="/ark-logo.png" alt="ARK">'+
     '<h1 style="margin-top:14px">All Hands<br><span class="y">'+mes+'</span></h1>'+
-    '<p class="lead" style="margin-top:20px">Onde chegamos, o que cada área entregou e o que cada um vai puxar em julho. Reunião de gente e execução. Caixa fica pro fim, com os sócios.</p>'+
+    '<p class="lead" style="margin-top:20px">Onde chegamos, o que cada área entregou e o que cada um vai puxar em julho.</p>'+
     '<div style="margin-top:22px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">Comercial · Social · Tráfego · CS · Captação · Design</span><span class="pill">'+hoje+'</span></div></div>');
 
   // 2 · De onde viemos
@@ -10154,8 +10154,8 @@ function ahBuildSlides(edit){
     card('Pessoas & Processos','5 áreas, trilha Júnior/Pleno/Sênior e 22 POPs no sistema.')+
     '</div></div>');
 
-  // 3 · Pulso da operação
-  S.push('<div><div class="ah-kick">Junho em uma tela</div><h2>O pulso da operação</h2>'+
+  // 3 · Termômetro do mês
+  S.push('<div><div class="ah-kick">Junho em uma tela</div><h2>Os números do mês</h2>'+
     '<div class="ah-grid g4" style="margin-top:14px">'+
     ahStat(d.carteira,'Clientes na carteira',d.arkN+' ARK · '+d.alphaN+' Alpha','y')+
     ahStat(ahTxt('pulse_entregas','100+',edit),'Entregas no mês','edições, criativos e demandas','green')+
@@ -10171,9 +10171,9 @@ function ahBuildSlides(edit){
   S.push('<div><div class="ah-kick">Comercial · Saulo + Gabriel</div><h2>Pipeline e o que já está vendido</h2>'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 6px"><h3 style="margin:0">Funil do mês</h3><span style="color:#30d158;font-weight:800;font-family:Sora">'+d.conv+'% lead para fechamento</span></div>'+fun+
     '<div class="ah-grid g3" style="margin-top:14px">'+
-    card('✅ Vendido / assinatura',ahTxt('pipe_vendido','Lá em Casa fechado. Spa em assinatura. É a receita nova que entra em julho.',edit))+
-    card('💬 Em conversa',ahTxt('pipe_conversa','Presatec, Sal e Fumaça, Estação do Lanche e mais oportunidades quentes no CRM.',edit))+
-    card('🎯 CAC zero é escolha',ahTxt('pipe_cac','Entradas de baixo custo de aquisição. O preço a pagar é atender muito bem e entregar diferencial nos primeiros meses.',edit))+
+    card('✅ 3 fechamentos confirmados',ahTxt('pipe_vendido','Lá em Casa, SPA e Juvenal fechados. Receita nova que entra em julho. 4B Burger e Pizzaria Sabor e Lenha chegaram via indicação — CAC zero.',edit))+
+    card('🎯 3 no gol · fechar em julho',ahTxt('pipe_conversa','+1 a confirmar, empresa de tecnologia (tráfego avulso) e pipeline Alpha. Foco comercial até o dia 15.',edit))+
+    card('📊 40 leads · 9 reuniões',ahTxt('pipe_cac','9 leads qualificados vieram da Alpha. O restante dos 40 veio do tráfego pago ARK. Máquina rodando com previsibilidade crescente.',edit))+
     '</div></div>');
 
   // 5 · Cada área no mês
@@ -10230,12 +10230,11 @@ function ahBuildSlides(edit){
   // 8 · Gargalos reais
   S.push('<div><div class="ah-kick">O que ainda trava</div><h2>Gargalos reais, com dono e ação</h2>'+
     '<div class="ah-grid g3" style="margin-top:12px">'+
-    cardR('Criação sob pressão · Malu + Samuel',ahTxt('garg1','Mais de 100 entregas por mês nos dois. Precisa aliviar a Maria Luiza pra ela puxar linha editorial nos grupos da Alpha.',edit))+
-    cardR('Account precisa delegar · Lucas',ahTxt('garg2','Ativa 11 a 12 clientes por dia sozinho. Precisa delegar, com o Danilo complementar e alguém novo perto da operação.',edit))+
-    cardR('Ativação diária dos grupos Alpha',ahTxt('garg3','O volume dos grupos não pode passar batido. Ativação diária sem falha. Danilo e Lucas precisam de reforço.',edit))+
+    cardR('Ativação · clientes precisam de mais calor',ahTxt('garg1','Entregar o conteúdo não é suficiente — a régua exige presença, reunião e resultado percebido. Ativação não é opcional na ARK.',edit))+
+    cardR('Delegação · o time precisa assumir de verdade',ahTxt('garg2','"E se você fosse seu líder, você estaria contente de ser liderado por você?" A ARK só escala se cada um assumir sua faixa com autonomia. Esse é o convite — não a cobrança.',edit))+
+    cardR('Criação sob pressão · Malu + Samuel',ahTxt('garg3','Mais de 100 entregas por mês nos dois. Precisa aliviar a Maria Luiza pra ela puxar linha editorial nos grupos da Alpha.',edit))+
     cardR('Captação depende de fora',ahTxt('garg4','Hoje a captação depende de agenda de terceiros. O plano é o Samuel virar pilar, com produtores próprios e a rede Alpha.',edit))+
-    cardR('Repasse Alpha atrasado',ahTxt('garg5','Faltam ~R$10 a 14k de repasse (Babbo e Valhalla). É caixa que já é nosso. Cobrar até 15/07.',edit))+
-    cardR('Deploy do sistema travado',ahTxt('garg6','CI quebrado desde 24/06. Toda melhoria sobe no manual. Ação: token novo do Cloudflare, 2 minutos.',edit))+
+    cardR('Cachu · ROAS 1,37',ahTxt('garg5','Resultado abaixo do esperado. Em tratativa com gestor de tráfego da Alpha. Resolver antes da renovação.',edit))+
     '</div></div>');
 
   // 9 · Time (debate)
@@ -10244,7 +10243,7 @@ function ahBuildSlides(edit){
     '<div class="ah-grid g3" style="margin-top:14px">'+
     card('Design in-house',ahTxt('time_bruno','Formalizar o Bruno como designer interno, com mais disponibilidade e presença.',edit))+
     card('Captação como pilar',ahTxt('time_samuel','Samuel à frente da captação, estreitando a relação com os produtores e a rede Alpha.',edit))+
-    card('Reforço na operação',ahTxt('time_op','Alguém perto do operacional pra sustentar a ativação diária dos clientes e das linhas editoriais.',edit))+
+    card('Onboarding dos novos',ahTxt('time_op','Lá em Casa, SPA, Juvenal e 4B Burger em onboarding até dia 15/07. POP de onboarding seguido à risca — primeira impressão define retenção.',edit))+
     '</div></div>');
 
   // 10 · Julho · alavancas
@@ -10271,7 +10270,43 @@ function ahBuildSlides(edit){
     '<div style="margin-top:20px"><span class="pill y">Faturar o pipeline</span><span class="pill y">0% churn</span><span class="pill y">Entrega no prazo</span><span class="pill y">Ativação diária</span></div>'+
     '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffc400">VAMOS JUNTOS ●</p></div>');
 
-  // 13 · Financeiro (sócios)
+  // 13 · Organograma & Estrutura
+  S.push('<div><div class="ah-kick">Quem faz o quê</div><h2>Organograma · 5 áreas, 2 frentes</h2>'+
+    '<p class="lead">ARK Content opera com 5 áreas. Squad Alpha Senior espelha a mesma estrutura com foco regional.</p>'+
+    '<div class="ah-grid g3" style="margin-top:16px">'+
+    card('🧠 Coordenação Geral · Gabriel','Visão de produto, metodologia, WorkFlowArk, recursos e fechamentos estratégicos. Decide o que — não executa o como.')+
+    card('📢 Comercial · Saulo + Gabriel','Prospecção, discovery e funil (Saulo). Closing estratégico (Gabriel). Meta: 9 reuniões/mês mínimo.')+
+    card('📋 Account & CS · Lucas','Régua dos 15, planejamentos mensais, reuniões de resultado e relação diária. Dono da carteira, não secretário do cliente.')+
+    card('🎯 Tráfego · Danilo','Gestão de campanhas, ROAS, leads pagos e otimização de verbas. Meta: ROAS médio acima de 3.')+
+    card('🎬 Conteúdo · Malu + Samuel + Portela','Produção, captação e entrega. Padrão de qualidade ARK em todos os clientes.')+
+    card('⚡ Squad Alpha Senior','6 clientes ativos, operação semi-autônoma. Canal de leads qualificados e receita adicional para a ARK.')+
+    '</div></div>');
+
+  // 14 · Método 5 Eixos
+  S.push('<div><div class="ah-kick">A metodologia que sustenta tudo</div><h2>Método dos 5 Eixos</h2>'+
+    '<p>Cinco dimensões interdependentes — todas assentadas sobre uma premissa central: <b style="color:#fff">o gestor-operador precisa dominar o ofício</b>. Sem domínio técnico, nenhum eixo se sustenta.</p>'+
+    '<div class="ah-grid g3" style="margin-top:16px">'+
+    card('01 · Identidade Estratégica','Posicionamento claro, proposta de valor definida, nicho e diferencial. Sem isso a agência compete por preço — e perde sempre.')+
+    card('02 · Pessoas & Cultura','Time com papéis claros, metas individuais e cultura de dono. Cada um sabe o que entrega e por que isso importa.')+
+    card('03 · Processos & POPs','22 POPs documentados, rituais semanais e mensais, sistema rodando. O que funciona uma vez funciona sempre.')+
+    card('04 · Comercial & Pipeline','Máquina de captação previsível: SDR + closer + tráfego próprio. Meta de receita com funil visível toda semana.')+
+    card('05 · Inteligência & Sistema','WorkFlowArk como plataforma de decisão: dados, tarefas, clientes, JARVIS e integrações — tudo em um lugar só.')+
+    card('A virada','A ARK cresceu +143% em 6 meses porque aplicou o método. Não por acidente — por processo.')+
+    '</div></div>');
+
+  // 15 · Reconhecimentos
+  S.push('<div class="cover"><div class="ah-kick">Junho foi de vocês</div>'+
+    '<h2 style="font-size:44px;max-width:1000px;margin-top:10px">'+ahTxt('reconhec','Cada um de vocês é parte desse crescimento. Nenhuma empresa cresce +143% em 6 meses sem um time que acredita e executa.',edit)+'</h2>'+
+    '<div style="margin-top:22px">'+
+    '<span class="pill y">🏆 Attraversiamo · +1k seguidores em 3 dias</span>'+
+    '<span class="pill y">🎯 2 entradas CAC zero · reputação funcionando</span>'+
+    '<span class="pill y">📊 R$34k · margem 18,2%</span>'+
+    '<span class="pill">WorkFlowArk no ar</span>'+
+    '<span class="pill">3 fechamentos confirmados</span>'+
+    '</div>'+
+    '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffc400">OBRIGADO ●</p></div>');
+
+  // 16 · Financeiro (sócios)
   const topRec=fin.rec.slice().sort((a,b)=>mmNum(b.valor)-mmNum(a.valor)).slice(0,5)
     .map(x=>'<tr><td>'+(x.nome||'—')+'</td><td class="n">'+mmBRL(mmNum(x.valor))+'</td></tr>').join('')||'<tr><td>Sem dados</td><td class="n">—</td></tr>';
   S.push('<div><div class="ah-kick">Fechamento financeiro · sócios</div><h2>O caixa do mês</h2>'+
@@ -10282,7 +10317,7 @@ function ahBuildSlides(edit){
     ahStat(mmK(d.alMRR),'MRR Alpha',d.alphaN+' clientes','amber')+
     '</div>'+
     '<div class="ah-grid g2"><div><h3>Maiores a receber</h3><table>'+topRec+'</table></div>'+
-    '<div class="note" style="align-self:start"><h3>Atenção de caixa</h3><p>Repasse Alpha atrasado de ~R$10 a 14k (Babbo e Valhalla) é caixa que já é nosso, cobrar até 15/07. Margem saudável fica entre 12% e 15%.</p></div></div>'+
+    '<div class="note" style="align-self:start"><h3>Saúde financeira</h3><p>Margem saudável fica entre 12% e 15%. Estamos acima — crescendo com resultado real, não só com receita.</p></div></div>'+
     '<p style="margin-top:10px;color:#5a5a62;font-size:12px">Números ao vivo da Minha Planilha. Detalhe completo na aba Financeiro.</p></div>');
 
   return S;
