@@ -779,8 +779,8 @@ h1,h2,h3,h4{letter-spacing:-.022em}
         <span>Meu Dia</span>
       </div>
       <div class="navitem active" data-nav="painel">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Meu Dia</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span>Meu Painel</span>
       </div>
       <div class="navitem" data-nav="reunioes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -1203,8 +1203,8 @@ h1,h2,h3,h4{letter-spacing:-.022em}
       <div class="page active" id="page-painel">
         <div class="page-head">
           <div class="page-title">
-            <h1 id="mdw-greet">Meu Dia</h1>
-            <p id="mdw-sub">Os widgets certos pro seu papel. Personalize à vontade.</p>
+            <h1>Meu Painel</h1>
+            <p>Os widgets certos pro seu papel. Arraste, redimensione e personalize do seu jeito.</p>
           </div>
           <div style="display:flex;gap:6px;align-items:center">
             <button class="icobtn" id="mdw-preset" onclick="mdwApplyPreset()" title="Montar o painel com os widgets certos pro seu papel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>Painel do meu papel</button>
@@ -5699,14 +5699,6 @@ function mdwCard(idx,w,B){
 }
 function renderWidgets(){
   const board=document.getElementById('mdw-board');if(!board)return;
-  // saudação da home unificada (Meu Dia = painel personalizável)
-  try{
-    const nm=(WFA_MEMBER&&WFA_MEMBER.full_name)?WFA_MEMBER.full_name:null;
-    const g=document.getElementById('mdw-greet');
-    if(g&&typeof mdGreeting==='function')g.textContent=mdGreeting()+(nm&&typeof mdFirst==='function'?', '+mdFirst(nm):'');
-    const sub=document.getElementById('mdw-sub');
-    if(sub){const dt=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});sub.textContent=dt.charAt(0).toUpperCase()+dt.slice(1);}
-  }catch(e){}
   const s=mdwLoad();const B=mdwBuckets();
   board.classList.toggle('editing',MDW_EDIT);
   const eb=document.getElementById('mdw-edit-btn');if(eb)eb.textContent=MDW_EDIT?'✓ Pronto':'✎ Editar';
@@ -5918,8 +5910,7 @@ function memberAccess(m){
 }
 // Abas escondidas do menu (ainda existem p/ o JS, mas não poluem a navegação até terem dados).
 // Gabriel pediu: esconder Reuniões·Agenda, Performance (OKRs/Campanhas) e tirar Demandas/Rotinas das Atividades.
-// 'dashboard' (Meu Dia antigo) foi fundido no 'painel' (agora a home "Meu Dia"): esconde a aba duplicada.
-const HIDDEN_NAV=new Set(['dashboard','reunioes','okrs','campanhas','demandas','rotinas']);
+const HIDDEN_NAV=new Set(['reunioes','okrs','campanhas','demandas','rotinas']);
 // Abas opcionais: escondidas por padrão, o gestor liga/desliga nas Configurações.
 function prefHidden(){const s=new Set();if(localStorage.getItem('wfa-show-regua')!=='1')s.add('regua');return s;}
 function togglePrefRegua(on){try{localStorage.setItem('wfa-show-regua',on?'1':'0');}catch(e){}applyAccess();}
@@ -5933,7 +5924,7 @@ function applyAccess(){
     if(parent&&parent.hasAttribute('data-toggle'))parent.style.display=anyVis?'':'none';
   });
   const ap=document.querySelector('.page.active');
-  if(ap){const id=ap.id.replace('page-','');if(acc[id]===false){const d=document.querySelector('[data-nav="painel"]');d&&d.click();}}
+  if(ap){const id=ap.id.replace('page-','');if(acc[id]===false){const d=document.querySelector('[data-nav="dashboard"]');d&&d.click();}}
 }
 function renderIdentity(){
   const m=WFA_MEMBER;
@@ -7319,7 +7310,7 @@ function jarvisExecute(raw){
   const re=(p)=>new RegExp(p).test(t);
   const ehPergunta=/^(o que|oque|qual|quais|quanto|quantos|quantas|como|quem|quando|onde|por que|porque|pra que)\b/.test(t);
   // fechar o JARVIS
-  if(re('^(fecha|fechar|sair|tchau|valeu|obrigad)')){const d=document.querySelector('[data-nav="painel"]');if(d)d.click();return 'Pronto. Estou aqui em Agentes de IA quando precisar.';}
+  if(re('^(fecha|fechar|sair|tchau|valeu|obrigad)')){const d=document.querySelector('[data-nav="dashboard"]');if(d)d.click();return 'Pronto. Estou aqui em Agentes de IA quando precisar.';}
   // rodar o conselho — qualquer "conselho" + verbo de ação (e não sendo pergunta)
   if(has('conselho') && !ehPergunta && re('rod|reun|reún|cham|debat|dispar|ativ|liga|executa|junta|começa|comeca|bora')){
     jarvisGo('conselho'); if(typeof consRodarAuto==='function')setTimeout(()=>consRodarAuto(),300);
