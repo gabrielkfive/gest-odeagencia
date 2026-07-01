@@ -28,6 +28,15 @@ entre sessões. Cada item: o que é, status e (quando subiu) a versão/commit.
 10. ✅ **(2026-06-24)** CRM: Follow quente — faixa dedicada no topo (leads marcados 🔥
     ou com próxima ação vencida/pra hoje) + toggle 🔥 em cada card
 
+### (2026-06-30) Experiência por papel — em VERSÃO DE TESTE (aguarda aprovação do Gabriel)
+Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcontent.workers.dev` · produção intacta.
+11. ✅ **Painel por papel automático** — cada ROLE entra com preset de widgets certo pra função (`MDW_PRESETS`, `mdwPresetFor`, botão `mdwApplyPreset`).
+12. ✅ **Widget Comercial · pipeline** — lê o CRM real: quem ativar/follow hoje, cotar (proposta), fechar (negociação) + valor. Pedido de Gabriel/Saulo.
+13. ✅ **Widget Minha Rotina por papel** — `ROTINA_POPS` derivado dos 22 POPs, com cadência e check diário que reseta sozinho (foge do "só Kanban").
+14. ✅ **Meu Dia + Meu Painel fundidos** numa home só ("Meu Dia" = painel personalizável com saudação); aba duplicada escondida (`HIDDEN_NAV`).
+> Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
+> Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
+
 ## Próximas (abertas)
 
 ### CRM Power Dialer — spec travado, aguardando conta Twilio
