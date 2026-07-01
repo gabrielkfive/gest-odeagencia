@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="/ark-mark.png?v=2">
 <link rel="apple-touch-icon" href="/ark-mark.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -949,6 +949,10 @@ h1,h2,h3,h4{letter-spacing:-.022em}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="22"/><line x1="15" y1="10" x2="15" y2="22"/></svg>
         <span>Meu Mês</span>
       </div>
+      <div class="navitem" data-nav="allhands">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        <span>All Hands</span>
+      </div>
       <div class="navitem" data-nav="warroom">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         <span>War Room</span>
@@ -1200,9 +1204,10 @@ h1,h2,h3,h4{letter-spacing:-.022em}
         <div class="page-head">
           <div class="page-title">
             <h1>Meu Painel</h1>
-            <p>Seus widgets — arraste, redimensione e personalize do seu jeito</p>
+            <p>Os widgets certos pro seu papel. Arraste, redimensione e personalize do seu jeito.</p>
           </div>
           <div style="display:flex;gap:6px;align-items:center">
+            <button class="icobtn" id="mdw-preset" onclick="mdwApplyPreset()" title="Montar o painel com os widgets certos pro seu papel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>Painel do meu papel</button>
             <button class="icobtn" id="mdw-add" onclick="mdwAddOpen(event)" title="Adicionar widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button>
             <button class="icobtn" id="mdw-edit-btn" onclick="mdwToggleEdit()" title="Reorganizar, redimensionar e remover widgets">✎ Editar</button>
           </div>
@@ -1290,67 +1295,190 @@ h1,h2,h3,h4{letter-spacing:-.022em}
         <div id="alpha-view-bs" style="display:none"></div>
       </div>
 
-      <!-- =================== MEU MÊS (contexto p/ All Hands) =================== -->
+      <!-- =================== MEU MÊS (contexto p/ All Hands · AO VIVO) =================== -->
       <div class="page" id="page-meumes">
+        <style>
+          /* ===== MEU MÊS · deck embutido (estética TCC: Sora + âmbar sobre quase-preto) ===== */
+          #page-meumes .mm-deck{background:#0a0a0b;border-radius:22px;overflow:hidden;color:#f5f5f2;
+            box-shadow:0 30px 90px rgba(0,0,0,.28);font-family:'Inter',system-ui,sans-serif;
+            background-image:radial-gradient(1200px 400px at 85% -10%,rgba(255,196,0,.10),transparent 60%)}
+          #page-meumes .mm-sec{padding:34px 44px;border-top:1px solid rgba(255,255,255,.07)}
+          #page-meumes .mm-sec:first-child{border-top:none}
+          #page-meumes h1,#page-meumes h2,#page-meumes h3,#page-meumes .num,#page-meumes .kick,#page-meumes .mm-big{font-family:'Sora','Inter',sans-serif}
+          #page-meumes .kick{font-size:11px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#ffc400}
+          #page-meumes .mm-hero h1{font-size:52px;line-height:.98;letter-spacing:-.03em;font-weight:800;margin:14px 0 0}
+          #page-meumes .mm-hero h1 .y{color:#ffc400}
+          #page-meumes .mm-hero p{color:#9a9aa2;font-size:16px;max-width:640px;margin-top:14px;line-height:1.5}
+          #page-meumes .mm-pill{display:inline-block;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+            color:#f5f5f2;font-size:11px;font-weight:600;padding:6px 13px;border-radius:100px;margin:4px 6px 0 0}
+          #page-meumes .mm-pill.y{background:#ffc400;color:#000;border-color:#ffc400;font-weight:700}
+          #page-meumes .sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
+          #page-meumes .sec-h h2{font-size:26px;font-weight:700;letter-spacing:-.02em}
+          #page-meumes .sec-h .sub{font-size:12px;color:#5a5a62;font-weight:500}
+          #page-meumes .sec-h .live{font-size:9.5px;font-weight:800;letter-spacing:.12em;color:#0a0a0b;background:#30d158;padding:3px 8px;border-radius:6px;text-transform:uppercase}
+          #page-meumes .grid{display:grid;gap:14px}
+          #page-meumes .g2{grid-template-columns:repeat(2,1fr)}
+          #page-meumes .g3{grid-template-columns:repeat(3,1fr)}
+          #page-meumes .g4{grid-template-columns:repeat(4,1fr)}
+          @media(max-width:1100px){#page-meumes .g4{grid-template-columns:repeat(2,1fr)}#page-meumes .g3{grid-template-columns:repeat(2,1fr)}}
+          @media(max-width:680px){#page-meumes .g2,#page-meumes .g3,#page-meumes .g4{grid-template-columns:1fr}#page-meumes .mm-hero h1{font-size:38px}#page-meumes .mm-sec{padding:26px 22px}}
+          #page-meumes .stat{background:#16161a;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:22px}
+          #page-meumes .stat.y{background:#ffc400;border-color:#ffc400}
+          #page-meumes .stat .num{font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+          #page-meumes .stat.y .num{color:#000}
+          #page-meumes .stat .lab{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#9a9aa2;margin-top:10px;font-weight:600}
+          #page-meumes .stat.y .lab{color:#5c4600}
+          #page-meumes .stat .det{font-size:11.5px;color:#5a5a62;margin-top:5px}
+          #page-meumes .stat.y .det{color:#7a5c00}
+          #page-meumes .stat .num.green{color:#30d158}#page-meumes .stat .num.red{color:#ff5a4d}#page-meumes .stat .num.amber{color:#ffc400}
+          #page-meumes .panel{background:#16161a;border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden}
+          #page-meumes .panel .ph{font-size:13px;font-weight:700;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between}
+          #page-meumes table{width:100%;border-collapse:collapse;font-size:12.5px}
+          #page-meumes th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#5a5a62;font-weight:700;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+          #page-meumes td{padding:9px 16px;border-bottom:1px solid rgba(255,255,255,.05);color:#d8d8db}
+          #page-meumes td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;font-size:11.5px}
+          #page-meumes tr:last-child td{border-bottom:none}
+          #page-meumes .tfoot td{font-weight:800;color:#fff;border-top:2px solid rgba(255,255,255,.18)}
+          #page-meumes .funnel .bar{background:#16161a;border-radius:100px;height:38px;overflow:hidden;flex:1}
+          #page-meumes .funnel .fill{height:100%;border-radius:100px;display:flex;align-items:center;padding:0 16px;color:#000;font-weight:800;font-size:16px;font-family:'Sora',sans-serif;min-width:54px}
+          #page-meumes .flag{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:middle}
+          #page-meumes .chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,.08);color:#c8c8cc}
+          #page-meumes .note{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-left:3px solid #ffc400;border-radius:12px;padding:16px 18px}
+          #page-meumes .note.red{border-left-color:#ff5a4d}
+          #page-meumes .note.green{border-left-color:#30d158}
+          #page-meumes .note h4{font-size:13px;font-weight:700;color:#fff;margin-bottom:5px;font-family:'Sora',sans-serif}
+          #page-meumes .note p{font-size:12.5px;color:#9a9aa2;line-height:1.5}
+          #page-meumes .mm-foot{padding:26px 44px;text-align:center;color:#5a5a62;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-family:'Sora',sans-serif;font-weight:600}
+        </style>
+        <div id="meumes-root"></div>
+      </div>
+
+      <!-- =================== ALL HANDS (apresentação mensal) =================== -->
+      <div class="page" id="page-allhands">
+        <style>
+          /* ===== ALL HANDS · deck (estética TCC: Sora + âmbar sobre quase-preto) ===== */
+          #page-allhands .ah-toolbar{display:flex;gap:8px;align-items:center}
+          #allhands-stage{display:flex;flex-direction:column;gap:22px;padding-bottom:40px}
+          .ahd{background:#0a0a0b;color:#f5f5f2;border-radius:22px;overflow:hidden;font-family:'Inter',system-ui,sans-serif;
+            border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 70px rgba(0,0,0,.22);position:relative;min-height:560px;
+            display:flex;flex-direction:column;padding:34px 56px 26px}
+          .ahd::after{display:none}
+          /* chrome premium (logo + linhas + numeração) */
+          .ahd .ah-chrome{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.10);flex-shrink:0}
+          .ahd .ah-brand{display:flex;align-items:center;gap:11px}
+          .ahd .ah-brand img{height:26px;width:auto;display:block}
+          .ahd .ah-brand span{font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:.24em;color:#e8e8ea}
+          .ahd .ah-brand b{color:#ffc400;margin:0 5px;font-weight:700}
+          .ahd .ah-pageno{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em;color:#6a6a72}
+          .ahd .ah-pageno i{color:#3a3a42;font-style:normal;margin:0 3px}
+          .ahd .ah-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:26px 0;min-height:0}
+          .ahd .ah-base{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid rgba(255,255,255,.10);font-family:'Sora',sans-serif;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#4a4a52;flex-shrink:0}
+          .ahd .ah-body h2::after{content:"";display:block;width:52px;height:3px;background:#ffc400;border-radius:3px;margin-top:14px}
+          .ahd .cover .cover-mark{display:none}
+          .ahd .cover .ah-cover-logo{width:96px;height:96px;margin-bottom:8px}
+          .ahd .ah-kick{font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#ffc400}
+          .ahd h1{font-family:'Sora',sans-serif;font-size:62px;line-height:.98;letter-spacing:-.035em;font-weight:800;margin:16px 0 0}
+          .ahd h1 .y{color:#ffc400}
+          .ahd h2{font-family:'Sora',sans-serif;font-size:38px;line-height:1.02;letter-spacing:-.025em;font-weight:700;margin:8px 0 6px}
+          .ahd h3{font-family:'Sora',sans-serif;font-size:18px;font-weight:600;margin-bottom:6px}
+          .ahd p{font-size:16px;line-height:1.55;color:#bdbdc4;max-width:880px}
+          .ahd p.lead{font-size:20px;color:#d8d8db;max-width:820px;margin-top:18px}
+          .ahd .ah-edit{outline:none;border-radius:8px;transition:background .15s}
+          .ahd .ah-edit:focus{background:rgba(255,196,0,.10);box-shadow:0 0 0 2px rgba(255,196,0,.4)}
+          .ahd .ah-grid{display:grid;gap:16px;margin-top:8px}
+          .ahd .g2{grid-template-columns:repeat(2,1fr)}.ahd .g3{grid-template-columns:repeat(3,1fr)}.ahd .g4{grid-template-columns:repeat(4,1fr)}
+          .ahd .stat{background:#16161a;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px}
+          .ahd .stat.y{background:#ffc400;border-color:#ffc400}
+          .ahd .stat .num{font-family:'Sora',sans-serif;font-size:46px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+          .ahd .stat.y .num{color:#000}
+          .ahd .stat .num.green{color:#30d158}.ahd .stat .num.red{color:#ff5a4d}.ahd .stat .num.amber{color:#ffc400}
+          .ahd .stat .lab{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#9a9aa2;margin-top:12px;font-weight:600}
+          .ahd .stat.y .lab{color:#5c4600}
+          .ahd .stat .det{font-size:12px;color:#5a5a62;margin-top:5px}.ahd .stat.y .det{color:#7a5c00}
+          .ahd table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+          .ahd th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5a5a62;font-weight:700;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+          .ahd td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05);color:#dcdce0}
+          .ahd td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;font-size:13px}
+          .ahd tr:last-child td{border-bottom:none}
+          .ahd .tfoot td{font-weight:800;color:#fff;border-top:2px solid rgba(255,255,255,.18)}
+          .ahd .note{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-left:3px solid #ffc400;border-radius:14px;padding:18px 20px}
+          .ahd .note.red{border-left-color:#ff5a4d}.ahd .note.green{border-left-color:#30d158}
+          .ahd .note h3{color:#fff;margin-bottom:4px}.ahd .note p{font-size:14px}
+          .ahd .flag{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:middle}
+          .ahd .chip{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;background:rgba(255,255,255,.08);color:#c8c8cc}
+          .ahd .pill{display:inline-block;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#f5f5f2;font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;margin:5px 7px 0 0}
+          .ahd .pill.y{background:#ffc400;color:#000;border-color:#ffc400;font-weight:700}
+          .ahd .funbar{background:#16161a;border-radius:100px;height:42px;overflow:hidden;flex:1}
+          .ahd .funfill{height:100%;border-radius:100px;display:flex;align-items:center;padding:0 18px;color:#000;font-weight:800;font-size:18px;font-family:'Sora',sans-serif;min-width:60px}
+          .ahd .cover-mark{display:inline-flex;align-items:center;gap:10px;background:#ffc400;color:#000;padding:8px 16px;border-radius:100px;font-family:'Sora',sans-serif;font-weight:700;font-size:12px;letter-spacing:.16em}
+          /* ===== modo apresentação (tela cheia) ===== */
+          .ah-present{position:fixed;inset:0;z-index:6000;background:#000;display:flex;align-items:center;justify-content:center}
+          .ah-present .ah-stagewrap{width:100%;height:100%;display:flex;align-items:stretch;justify-content:center}
+          .ah-present .ahd{border-radius:0;border:none;box-shadow:none;width:100%;min-height:100vh;justify-content:center;padding:7vh 9vw;animation:ahfade .45s ease}
+          .ah-present .ahd{padding:4vh 6vw 3vh;overflow:auto}
+          .ah-present .ahd .ah-brand img{height:2.6vw}
+          .ah-present .ahd .ah-brand span{font-size:1.05vw}
+          .ah-present .ahd .ah-pageno{font-size:1.15vw}
+          .ah-present .ahd .ah-base{font-size:.95vw;padding-top:1.4vh}
+          .ah-present .ahd .ah-chrome{padding-bottom:1.6vh}
+          .ah-present .ahd .ah-body{padding:2vh 0}
+          .ah-present .ahd .ah-body h2::after{width:4vw;height:.35vw;margin-top:1.4vh}
+          .ah-present .ahd .cover .ah-cover-logo{width:9vw;height:9vw}
+          .ah-present .ahd .ah-kick{font-size:1.25vw}
+          .ah-present .ahd h1{font-size:7vw}
+          .ah-present .ahd h2{font-size:3.6vw;margin-bottom:2vh}
+          .ah-present .ahd h3{font-size:1.75vw}
+          .ah-present .ahd p{font-size:1.55vw;line-height:1.5}
+          .ah-present .ahd p.lead{font-size:2.1vw}
+          .ah-present .ahd .ah-grid{gap:1.4vw}
+          .ah-present .ahd .note{padding:1.8vh 1.6vw}
+          .ah-present .ahd .note h3{font-size:1.7vw;margin-bottom:.6vh}
+          .ah-present .ahd .note p{font-size:1.45vw;line-height:1.4}
+          .ah-present .ahd .stat{padding:2.2vh 1.6vw}
+          .ah-present .ahd .stat .num{font-size:3.6vw}
+          .ah-present .ahd .stat .lab{font-size:1.1vw;margin-top:1vh}
+          .ah-present .ahd .stat .det{font-size:.98vw}
+          .ah-present .ahd table{font-size:1.4vw}
+          .ah-present .ahd th{font-size:1.02vw;padding:1.1vh 1vw}
+          .ah-present .ahd td{padding:1.05vh 1vw}
+          .ah-present .ahd td.n{font-size:1.35vw}
+          .ah-present .ahd .pill{font-size:1.12vw;padding:1vh 1.4vw}
+          .ah-present .ahd .funfill{font-size:1.7vw}
+          .ah-present .ahd .funbar{height:5vh}
+          @keyframes ahfade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+          .ah-bar{position:fixed;top:0;left:0;height:4px;background:#ffc400;z-index:6010;transition:width .35s ease}
+          .ah-navbar{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;
+            background:rgba(20,20,24,.86);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:9px 13px;z-index:6010}
+          .ah-navbar button{width:40px;height:40px;border-radius:50%;background:#1c1c22;border:1px solid rgba(255,255,255,.12);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+          .ah-navbar button:hover{background:#ffc400;color:#000;border-color:#ffc400}
+          .ah-navbar .ah-counter{font-family:'Sora',sans-serif;font-weight:700;color:#fff;font-size:14px;min-width:64px;text-align:center;letter-spacing:.06em}
+          .ah-dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:6010}
+          .ah-dots span{width:7px;height:7px;border-radius:50%;background:#444;cursor:pointer;transition:.15s}
+          .ah-dots span.on{background:#ffc400;transform:scale(1.5)}
+          @media(max-width:900px){.ahd{padding:34px 26px;min-height:460px}.ahd h1{font-size:40px}.ahd h2{font-size:28px}.ahd .g4,.ahd .g3{grid-template-columns:repeat(2,1fr)}.ah-present .ahd h1{font-size:13vw}}
+        </style>
         <div class="page-head">
-          <div class="page-title">
-            <h1>Meu Mês · Junho 2026</h1>
-            <p>Contexto geral do mês para a All Hands · fechamento, conquistas e direção</p>
+          <div class="page-title"><h1>All Hands</h1><p>Apresentação mensal ao vivo · puxa os dados do sistema · edite os textos e conduza a reunião</p></div>
+          <div class="ah-toolbar">
+            <button class="tb-btn" onclick="renderAllhands()">↻ Atualizar</button>
+            <button class="tb-btn dk" style="background:#ffc400;color:#000;border-color:#ffc400;font-weight:700" onclick="ahPresent(0)">▶ Apresentar</button>
           </div>
-          <span class="md-count" style="background:var(--ink);color:#fff;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap">All Hands · 30/06/2026</span>
         </div>
+        <div id="allhands-stage"></div>
+      </div>
 
-        <div class="explainer">
-          <h4>O Momento · All Hands · 30/06/2026</h4>
-          <h3>Junho fechou. Julho começa com a casa em ordem.</h3>
-          <p>Em cinco meses saímos de quatro clientes para quinze, abrimos a frente Squad Alpha Senior e triplicamos a receita. O que travou agora é o que sempre trava nessa transição: <strong>o conhecimento que estava na cabeça dos sócios não cabe mais lá</strong>. Este sistema é a externalização disso — manual de bordo aberto, rituais documentados, tarefas que geram tarefas.</p>
-          <p style="font-style:italic;color:var(--mute);font-size:11.5px">"Para ser dono da borracharia, é preciso saber trocar o pneu."</p>
+      <!-- modo apresentação tela cheia (fora do fluxo) -->
+      <div id="ah-present" class="ah-present" style="display:none">
+        <div class="ah-bar" id="ah-bar-i" style="width:0"></div>
+        <div class="ah-stagewrap"><div id="ah-slide"></div></div>
+        <div class="ah-navbar">
+          <button onclick="ahGo(window.ahIdx-1)" title="Anterior">‹</button>
+          <span class="ah-counter" id="ah-counter">1 / 1</span>
+          <button onclick="ahGo(window.ahIdx+1)" title="Próximo">›</button>
+          <button onclick="ahFull()" title="Tela cheia">⛶</button>
+          <button onclick="ahExit()" title="Sair (Esc)">✕</button>
         </div>
-
-        <div class="g4" style="margin-bottom:16px">
-          <div class="kpi yel"><div class="l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Carteira ativa</div><div class="v">14</div><div class="d">8 ARK · 6 Alpha · 1 churn</div></div>
-          <div class="kpi"><div class="l">Receita Mai/26</div><div class="v">R$ 36k</div><div class="d">ARK 22k + Alpha 14k</div></div>
-          <div class="kpi dk"><div class="l">Receita Jun realizada</div><div class="v">R$ 34k</div><div class="d">ARK 22k + Alpha 12k</div></div>
-          <div class="kpi green"><div class="l">Crescimento Fev→Jun</div><div class="v">+143%</div><div class="d">R$14k → R$34k</div></div>
-        </div>
-
-        <div class="sect-title">
-          <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Fechamento de junho (números reais)</h2>
-        </div>
-        <div class="g3">
-          <div class="alert green"><h4>ARK · resultado R$ 4.418</h4>Receita R$ 22.200 · margem 19,9% (acima da saudável 12–15%). Clientes: Vivenda, Fercon, Bella Vita, Lunna's, Shopping Uniformes, Vaca Velha, Growth Hub.</div>
-          <div class="alert green"><h4>Alpha · resultado R$ 1.771</h4>Receita R$ 11.881 · margem 14,9%. Maior despesa: Taxa de Franquia R$ 5.000. Consolidado do Grupo: R$ 34k de receita, R$ 6,2k de resultado (18,2%).</div>
-          <div class="alert green"><h4>🎯 2 entradas CAC ZERO + pipeline</h4><strong>4B Burger</strong> e <strong>Pizzaria Sabor e Lenha</strong> entraram <strong>sem custo de aquisição</strong> (indicação / canal Alpha). Fechamentos de junho a faturar: Lá em Casa, SPA, Juvenal e +1 a confirmar. Em negociação: tráfego pago p/ uma empresa de tecnologia (avulso, fora do nicho). Alpha trouxe kopi coffee R$20k. Mídia: R$1.500 no Growth Hub.</div>
-        </div>
-
-        <div class="sect-title">
-          <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>O que destravou em maio</h2>
-        </div>
-        <div class="g3">
-          <div class="alert green"><h4>Receita por cliente subiu</h4>Cachu R$8k anual, Sasse Gifts R$4.500/mês, Fonseca & Cavalcanti R$2.500/mês, Fercon ampliou para R$4.200, Vaca Velha em ramp-up.</div>
-          <div class="alert green"><h4>Captação distribuída</h4>Henrique entrou como produtor fixo, Maria Clara cobriu retoques. Divisão de carga liberou Omar para ações estratégicas.</div>
-          <div class="alert green"><h4>Attraversiamo bombando</h4>+1.000 seguidores em 3 dias. Aceitação muito boa, virou case para captação comercial nova.</div>
-        </div>
-
-        <div class="sect-title">
-          <h2><span class="ic" style="background:var(--red-soft);color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>O que ainda trava</h2>
-        </div>
-        <div class="g3">
-          <div class="alert red"><h4>Ferramentas paralelas</h4>Trello da ARK e planilha do Squad Alpha não conversam. Este sistema é a integração: tudo aqui, em um lugar só.</div>
-          <div class="alert red"><h4>Bellato virou churn</h4>Cliente saiu mesmo após recuperação em 19/05. Documentado. Devolução estimada ~R$8k a acertar.</div>
-          <div class="alert red"><h4>Cachu com ROAS 1,37</h4>Resultado abaixo do esperado. Em tratativa com gestor de tráfego da Alpha — não é métrica para escalar.</div>
-          <div class="alert red"><h4>Repasse Alpha atrasado</h4>~R$10–14k de repasse a receber da Alpha (Babbo e Valhalla não pagos + estornos pendentes). Cobrança em aberto — conciliação mensal via agente PO.</div>
-        </div>
-
-        <div class="sect-title">
-          <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Três movimentos de junho</h2>
-        </div>
-        <div class="flow">
-          <div class="st"><div class="stn">Semana 03–07</div><div class="stt">Preparação</div><div class="std">Alinhamento por área, leitura do método, todos no sistema. Reuniões internas com pauta única: Régua dos 15.</div></div>
-          <div class="st"><div class="stn">Semana 08–14</div><div class="stt">Montar planejamentos</div><div class="std">Cada Account constrói o plano mensal de cada cliente. Bruno apoia Plano X. Apresentações no calendário.</div></div>
-          <div class="st"><div class="stn">Semana 15–22</div><div class="stt">Apresentar planejamentos</div><div class="std">100% dos planejamentos apresentados até dia 15. Reuniões mensais marcadas e realizadas.</div></div>
-          <div class="st"><div class="stn">Semana 22–30</div><div class="stt">Captações concentradas</div><div class="std">Vivenda 3×, Vaca Velha 25/06, Lunna's 26/06, Martino 24/06, Attraversiamo 25/06. Janela da Copa abre 18/06.</div></div>
-        </div>
+        <div class="ah-dots" id="ah-dots"></div>
       </div>
 
       <!-- =================== WAR ROOM (cockpit operacional) =================== -->
@@ -4280,7 +4408,7 @@ const RESPONSAVEIS_FN = {
   'Criador':'Maria Luiza',
   'Designer':'M. Portela',
   'Editor':'Samuel Magalhães',
-  'Captação':'Omar'
+  'Captação':'Samuel Magalhães'
 };
 
 const SPRINTS = [
@@ -4362,6 +4490,8 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='painel'&&typeof renderWidgets==='function'){try{renderWidgets();}catch(e){console.warn('painel',e);}}
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     if(p==='alpha'&&typeof renderAlpha==='function'){try{renderAlpha();}catch(e){console.warn('alpha',e);}}
+    if(p==='meumes'&&typeof renderMeumes==='function'){try{renderMeumes();}catch(e){console.warn('meumes',e);}}
+    if(p==='allhands'&&typeof renderAllhands==='function'){try{renderAllhands();}catch(e){console.warn('allhands',e);}}
     if(p==='warroom'&&typeof renderWarroom==='function'){try{renderWarroom();}catch(e){console.warn('warroom',e);}}
     if(p==='tutorial'&&typeof renderTutorial==='function'){try{renderTutorial();}catch(e){console.warn('tut',e);}}
     if(p==='conselho'&&typeof consPopular==='function'){try{consPopular();}catch(e){}}
@@ -5350,12 +5480,94 @@ const MDW_TYPES={
   clientes:{e:'👥',label:'Clientes & saúde',size:'m'},
   cobranca:{e:'💰',label:'Cobrança do mês',size:'p'},
   conselho:{e:'🧩',label:'Conselho de IA',size:'m'},
-  captacoes:{e:'🎬',label:'Próximas captações',size:'m'}
+  captacoes:{e:'🎬',label:'Próximas captações',size:'m'},
+  comercial:{e:'🎯',label:'Comercial · pipeline',size:'m'},
+  rotina:{e:'🧭',label:'Minha rotina',size:'m'}
 };
 // Ordem que preenche o grid de 4 colunas sem buracos: banner full + duas linhas 2+2 e 2+1+1
 const MDW_DEFAULT=[{t:'kpis',s:'g'},{t:'relogio',s:'m'},{t:'tarefas',s:'m'},{t:'agenda',s:'m'},{t:'nota',s:'p'},{t:'whatsapp',s:'p'}];
+// Painel por papel (Camada 1 da "Experiência por Persona"): cada pessoa entra vendo
+// só os widgets que importam pro trabalho dela. Menos ruído, mais foco.
+// Presets enxutos: KPIs do dia + só os 3 widgets que importam pra função. Menos ruído.
+const MDW_PRESETS={
+  admin:    [{t:'kpis',s:'g'},{t:'comercial',s:'m'},{t:'rotina',s:'m'},{t:'clientes',s:'m'}],
+  gestor:   [{t:'kpis',s:'g'},{t:'clientes',s:'m'},{t:'rotina',s:'m'},{t:'cobranca',s:'p'}],
+  comercial:[{t:'kpis',s:'g'},{t:'comercial',s:'m'},{t:'rotina',s:'m'},{t:'tarefas',s:'m'}],
+  operacao: [{t:'kpis',s:'g'},{t:'rotina',s:'m'},{t:'tarefas',s:'m'},{t:'clientes',s:'m'}],
+  marketing:[{t:'kpis',s:'g'},{t:'rotina',s:'m'},{t:'tarefas',s:'m'},{t:'captacoes',s:'m'}],
+  financeiro:[{t:'kpis',s:'g'},{t:'cobranca',s:'p'},{t:'clientes',s:'m'},{t:'tarefas',s:'m'}],
+  viewer:   [{t:'kpis',s:'g'},{t:'tarefas',s:'m'},{t:'agenda',s:'m'},{t:'nota',s:'p'}]
+};
+function mdwRole(){return (typeof WFA_MEMBER!=='undefined'&&WFA_MEMBER&&WFA_MEMBER.role)?WFA_MEMBER.role:null;}
+function mdwPresetFor(role){const p=MDW_PRESETS[role]||MDW_DEFAULT;return p.map(w=>({t:w.t,s:w.s}));}
 let MDW_EDIT=false;
-function mdwLoad(){let s=null;try{s=JSON.parse(localStorage.getItem('wfa-widgets')||'null');}catch(e){}if(!s||!Array.isArray(s.layout)||!s.layout.length)s={layout:MDW_DEFAULT.slice(),nota:(s&&s.nota)||''};if(typeof s.nota!=='string')s.nota='';return s;}
+function mdwLoad(){let s=null;try{s=JSON.parse(localStorage.getItem('wfa-widgets')||'null');}catch(e){}if(!s||!Array.isArray(s.layout)||!s.layout.length)s={layout:mdwPresetFor(mdwRole()),nota:(s&&s.nota)||''};if(typeof s.nota!=='string')s.nota='';return s;}
+function mdwApplyPreset(){
+  const role=mdwRole();
+  const label=(typeof ROLE_LABEL!=='undefined'&&ROLE_LABEL[role])?ROLE_LABEL[role]:'seu papel';
+  if(!confirm('Montar o Meu Painel com os widgets recomendados para '+label+'?\n\nIsso substitui o layout atual (a sua nota rápida é mantida).'))return;
+  const cur=mdwLoad();
+  mdwPut({layout:mdwPresetFor(role),nota:cur.nota||''});
+  MDW_EDIT=false;renderWidgets();
+  if(typeof toast==='function')toast('Painel ajustado para '+label);
+}
+/* ====== MINHA ROTINA por papel (rotina funcional derivada dos 22 POPs) ======
+   Tira a pessoa do "só Kanban": mostra, por função, o que precisa ser feito no dia,
+   com a cadência de cada passo. Check some no fim do dia (reseta sozinho a cada dia). */
+const ROTINA_POPS={
+  comercial:{label:'Comercial · Closing',owner:'Gabriel · Saulo',items:[
+    {t:'Diagnóstico antes da call (perfil, redes, concorrência)',tag:'Pré'},
+    {t:'Qualificar o lead (ICP, faturamento, capacidade de investir)',tag:'Filtro'},
+    {t:'Reunião consultiva: ouvir a dor antes de apresentar solução',tag:'Call'},
+    {t:'Apresentar o plano certo (Silver 2.500 · Gold 3.500 · Plano X)',tag:'Call'},
+    {t:'Fechar contrato e passar pro Account em 24h',tag:'Fecha'},
+    {t:'Pedir indicação qualificada',tag:'Pós'},
+    {t:'Registrar tudo no CRM (sem registro, não aconteceu)',tag:'CRM'}
+  ]},
+  account:{label:'Account · Régua dos 15',owner:'Lucas Rosi',items:[
+    {t:'Toque com cada cliente (ao menos 1 mensagem de andamento)',tag:'Diário'},
+    {t:'Relatório de performance enviado às segundas até 12h',tag:'Seg 12h'},
+    {t:'Planejamento estratégico apresentado até o dia 15',tag:'Dia 15'},
+    {t:'Captação alinhada com produtores · roteiro 48h antes',tag:'D-2'},
+    {t:'Onboarding de cliente novo em ≤ 5 dias',tag:'Novo'},
+    {t:'Oportunidade de upsell mapeada (Silver → Gold → Plano X)',tag:'Mês'},
+    {t:'Sistema sempre atualizado: toda demanda passa por aqui',tag:'Diário'}
+  ]},
+  trafego:{label:'Tráfego · Performance',owner:'Danilo · Giuseppe',items:[
+    {t:'CPA conferido em todos os clientes com campanha no ar',tag:'Diário'},
+    {t:'Campanha sem retorno pausada (não queimar verba)',tag:'Diário'},
+    {t:'Teste A/B rodando onde faz sentido',tag:'Rotina'},
+    {t:'Criativo orgânico que performou vira anúncio',tag:'Rotina'},
+    {t:'Otimização semanal documentada · toda sexta',tag:'Sexta'},
+    {t:'Relatório dos 15 enviado ao Account até segunda 11h',tag:'Segunda'},
+    {t:'Verba de mídia confirmada antes da virada do mês',tag:'Mês'}
+  ]},
+  produtor:{label:'Produtor · Captação',owner:'Márcio · equipe',items:[
+    {t:'Roteiro recebido 48h antes (sem roteiro, não grava)',tag:'D-2'},
+    {t:'Equipamento conferido na véspera',tag:'D-1'},
+    {t:'Confirmar com o cliente: horário, local, pratos',tag:'D-1'},
+    {t:'Padrão técnico ARK: áudio, luz, foco, composição',tag:'Dia D'},
+    {t:'Cobertura 30% além do roteiro + backup em duas cópias',tag:'Dia D'},
+    {t:'Pastas organizadas (Cliente_Data_Tipo no Drive ARK)',tag:'Dia D'},
+    {t:'Material entregue à edição em até 24h',tag:'D+1'}
+  ]},
+  edicao:{label:'Edição · Pós-produção',owner:'Maria Luiza · equipe',items:[
+    {t:'Roteiro conferido contra o material captado',tag:'Pré'},
+    {t:'Gancho nos 3 primeiros segundos + CTA claro',tag:'Corte'},
+    {t:'Colorização e áudio no padrão ARK',tag:'Final'},
+    {t:'Identidade visual aplicada (preto/amarelo, tipografia)',tag:'Final'},
+    {t:'Formato correto da plataforma (9:16, 1:1)',tag:'Export'},
+    {t:'Check do coordenador antes do envio',tag:'Check'},
+    {t:'Tarefa movida para Aprovação no sistema',tag:'Sistema'}
+  ]}
+};
+const ROLE_TO_AREA={admin:'comercial',gestor:'account',comercial:'comercial',operacao:'account',marketing:'trafego',financeiro:'account',viewer:'account'};
+function rotinaArea(){let a=null;try{a=localStorage.getItem('wfa-rotina-area');}catch(e){}if(a&&ROTINA_POPS[a])return a;return ROLE_TO_AREA[mdwRole()]||'account';}
+function rotinaSetArea(a){try{localStorage.setItem('wfa-rotina-area',a);}catch(e){}renderWidgets();}
+function rotinaKeyToday(){return new Date().toISOString().split('T')[0];}
+function rotinaChecks(){let o={};try{o=JSON.parse(localStorage.getItem('wfa-rotina-checks')||'{}');}catch(e){}return o;}
+function rotinaDoneSet(area){const o=rotinaChecks();const d=o[rotinaKeyToday()]||{};return new Set(d[area]||[]);}
+function rotinaToggle(area,i){const o=rotinaChecks();const k=rotinaKeyToday();o[k]=o[k]||{};const set=new Set(o[k][area]||[]);if(set.has(i))set.delete(i);else set.add(i);o[k][area]=[...set];try{localStorage.setItem('wfa-rotina-checks',JSON.stringify(o));}catch(e){}renderWidgets();}
 function mdwPut(s){try{localStorage.setItem('wfa-widgets',JSON.stringify(s));}catch(e){}}
 function mdwBuckets(){
   const today=new Date().toISOString().split('T')[0];
@@ -5441,6 +5653,40 @@ function mdwBody(w,B){
     const h=up.map(e=>{const d=String(e.date).split('-').reverse().slice(0,2).join('/');const isCap=/cap[\.\s]/i.test(e.title||'');return `<div class="mdw-row"><span class="dot" style="background:${isCap?'var(--yel)':'var(--mute-2)'}"></span><span class="tx" onclick="document.querySelector('[data-nav=reunioes]')?.click()">${mdEsc(e.title||'Evento')}</span><span class="mt">${d}</span></div>`;}).join('');
     return {body:h,count:up.length};
   }
+  if(w.t==='comercial'){
+    let arr=[];try{arr=(typeof loadCrm==='function')?loadCrm():[];}catch(e){}
+    const today=new Date().toISOString().split('T')[0];
+    const active=arr.filter(l=>l&&(l.stage==null||l.stage<4)); // fora de Fechado/Perdido
+    const isHot=l=>l.quente||l.hot||l.fire;
+    const follow=active.filter(l=>isHot(l)||(l.due&&String(l.due)<=today)).sort((a,b)=>String(a.due||'').localeCompare(String(b.due||'')));
+    const cotar=active.filter(l=>l.stage===2);
+    const fechar=active.filter(l=>l.stage===3);
+    const val=active.reduce((s,l)=>s+(+l.val||0),0);
+    const goCrm="document.querySelector('[data-nav=crm]')?.click()";
+    const row=(l,extra)=>`<div class="mdw-row"><span class="dot" style="background:${extra||'var(--yel)'}"></span><span class="tx" onclick="${goCrm}">${mdEsc(l.nm||'Lead')}</span>${l.val?`<span class="mt">R$${(+l.val).toLocaleString('pt-BR')}</span>`:(l.due?`<span class="mt">${String(l.due).split('-').reverse().slice(0,2).join('/')}</span>`:'')}</div>`;
+    let h=`<div class="mdw-kpis" style="grid-template-columns:1fr 1fr;margin-bottom:4px">
+      <div class="mdw-kpi y" style="cursor:pointer" onclick="${goCrm}"><div class="v">${active.length}</div><div class="l">Em pipeline</div></div>
+      <div class="mdw-kpi g"><div class="v" style="font-size:17px">${val?'R$'+(val/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+'k':'R$ 0'}</div><div class="l">Valor estimado</div></div>
+    </div>`;
+    const sec=(label,items,color)=>{if(!items.length)return;h+=`<div class="mdw-subhd">${label} · ${items.length}</div>`+items.slice(0,4).map(l=>row(l,color)).join('');};
+    sec('🔥 Ativar / follow hoje',follow,'var(--red)');
+    sec('Cotar (proposta)',cotar,'#d4a300');
+    sec('Fechar (negociação)',fechar,'#ea580c');
+    if(follow.length+cotar.length+fechar.length===0)h+='<div class="mdw-empty">Pipeline em dia. Prospecte 🎯</div>';
+    return {body:h,count:follow.length||null};
+  }
+  if(w.t==='rotina'){
+    const area=(typeof rotinaArea==='function')?rotinaArea():'account';
+    const pop=ROTINA_POPS[area]||ROTINA_POPS.account;
+    const done=(typeof rotinaDoneSet==='function')?rotinaDoneSet(area):new Set();
+    const tot=pop.items.length,ok=pop.items.filter((_,i)=>done.has(i)).length;
+    const pct=tot?Math.round(ok/tot*100):0;
+    const opts=Object.entries(ROTINA_POPS).map(([k,v])=>`<option value="${k}"${k===area?' selected':''}>${mdEsc(v.label)}</option>`).join('');
+    let h=`<select onchange="rotinaSetArea(this.value)" onclick="event.stopPropagation()" style="width:100%;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 7px;margin-bottom:8px;background:#fff">${opts}</select>`;
+    h+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;height:6px;background:#eee;border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--green);transition:width .3s"></div></div><span class="mt" style="font-family:var(--mono);font-size:10px;color:var(--mute)">${ok}/${tot}</span></div>`;
+    h+=pop.items.map((it,i)=>{const d=done.has(i);return `<div class="mdw-row" style="align-items:flex-start"><button class="mdw-chk" style="${d?'background:var(--green);border-color:var(--green);color:#fff':''}" onclick="event.stopPropagation();rotinaToggle('${area}',${i})">✓</button><span class="tx" style="white-space:normal;line-height:1.35;${d?'opacity:.5;text-decoration:line-through':''}" onclick="rotinaToggle('${area}',${i})">${mdEsc(it.t)}</span><span class="mt">${mdEsc(it.tag)}</span></div>`;}).join('');
+    return {body:h,count:ok<tot?(tot-ok):null};
+  }
   return {body:'<div class="mdw-empty">—</div>',count:null};
 }
 // Ícones SVG dos widgets (traço consistente, sem emoji — padrão profissional). Relógio fica sem ícone.
@@ -5455,7 +5701,9 @@ function mdwIcon(t){
     clientes:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
     cobranca:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
     conselho:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-    captacoes:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>'
+    captacoes:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
+    comercial:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    rotina:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'
   };
   const p=P[t];if(!p)return '';
   return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>';
@@ -9686,6 +9934,397 @@ function renderAgenda(){
 if(!localStorage.getItem('wfa-agenda-events')){saveAgendaEvents(AGENDA_INITIAL_EVENTS);}
 renderAgenda();
 
+/* ============ MEU MÊS · painel AO VIVO p/ All Hands ============ */
+function mmNum(v){const m=String(v==null?'':v).replace(',','.').match(/-?[\d.]+/);return m?parseFloat(m[0]):0;}
+function mmBRL(v){return (typeof finBRL==='function')?finBRL(v):'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function mmK(v){v=Number(v||0);if(Math.abs(v)>=1000)return 'R$ '+(v/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'k';return mmBRL(v);}
+function mmComercial(){
+  const all=(typeof loadComercialData==='function')?loadComercialData():{};
+  const key=(typeof cobMesKey==='function')?cobMesKey():'2026-06';
+  const base=(typeof COMERCIAL_DEFAULTS!=='undefined')?COMERCIAL_DEFAULTS:{};
+  return Object.assign({},base,all[key]||all['2026-06']||{});
+}
+function renderMeumes(){
+  const root=document.getElementById('meumes-root');if(!root)return;
+  const mesLabel=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
+  const hoje=new Date().toLocaleDateString('pt-BR');
+
+  /* ---- COMERCIAL (live) ---- */
+  const c=mmComercial(),g=k=>mmNum(c[k]);
+  const leads=Math.round(g('leads_growth')+g('leads_trafego')+g('fonte_indicacao'));
+  const fech=Math.round(g('fechamentos_ark')+g('fechamentos_alpha'));
+  const reun=Math.max(fech, Math.round((g('fechamentos_ark')+g('fechamentos_alpha'))*2.2)||Math.round(leads*0.4));
+  const convPct=leads?Math.round(fech/leads*100):0;
+  const stages=[{l:'Leads gerados',v:leads,bg:'#ffc400',sub:'Tráfego + Growth + Indicação'},
+    {l:'Reuniões (estim.)',v:reun,bg:'#9a9aa2',sub:'~10 reuniões por fechamento'},
+    {l:'Fechamentos',v:fech,bg:'#30d158',sub:'meta '+(c.meta_fecha||'—')}];
+  const fmax=Math.max(leads,1);
+  const funnelHtml=stages.map((s,i)=>{const w=Math.max(s.v/fmax*100,7);const nx=stages[i+1];
+    const drop=nx&&s.v?Math.round(nx.v/s.v*100):null;
+    return `<div style="margin-bottom:${i<stages.length-1?'12px':'0'}">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="font-weight:600;color:#f5f5f2">${s.l}</span><span style="color:#5a5a62">${s.sub}</span></div>
+      <div style="display:flex;align-items:center;gap:12px"><div class="bar"><div class="fill" style="width:${w}%;background:${s.bg}">${s.v}</div></div>
+      <div style="width:46px;text-align:right;font-size:11px;color:#5a5a62">${drop!=null?'↓ '+drop+'%':''}</div></div></div>`;}).join('');
+  const fontes=[['Indicação',c.fonte_indicacao,c.fonte_indicacao_d],['Tráfego ARK',c.fonte_trafego,c.fonte_trafego_d],['Growth Hub',c.fonte_growth,c.fonte_growth_d],['Saulo (rotas)',c.fonte_saulo,c.fonte_saulo_d]];
+  const fontesHtml=fontes.map(f=>`<tr><td style="font-weight:600;color:#f5f5f2">${f[0]}</td><td class="n">${f[1]||'—'}</td><td style="color:#9a9aa2">${f[2]||''}</td></tr>`).join('');
+
+  /* ---- FINANCEIRO (live, da Minha Planilha) ---- */
+  let fin={tRec:0,tPag:0,tCusto:0,resultado:0,rec:[],pag:[],cobOk:0,cobN:0,cobVal:0,aceOk:0,aceN:0,nome:''};
+  try{if(typeof planActive==='function'){const m=planActive();const s=planSums(m);
+    fin.tRec=s.tRec;fin.tPag=s.tPag;fin.tCusto=s.tCusto;fin.resultado=s.resultado;fin.nome=m.nome||'';
+    fin.rec=(m.receitas||[]).filter(x=>(x.nome||'').trim()||x.valor);
+    fin.pag=(m.pagar||[]).filter(x=>(x.nome||'').trim()||x.valor);
+    fin.cobN=fin.rec.length;fin.aceN=fin.pag.length;
+    fin.rec.forEach(x=>{if(typeof finRecCobrado==='function'&&finRecCobrado(x.nome)){fin.cobOk++;}else{fin.cobVal+=mmNum(x.valor);}});
+    fin.pag.forEach(x=>{if(typeof finPagPago==='function'&&finPagPago(x.nome))fin.aceOk++;});
+  }}catch(e){console.warn('mm fin',e);}
+  const margem=fin.tRec>0?Math.round(fin.resultado/fin.tRec*100):0;
+  const topRec=fin.rec.slice().sort((a,b)=>mmNum(b.valor)-mmNum(a.valor)).slice(0,6);
+  const recHtml=topRec.map(x=>{const cob=(typeof finRecCobrado==='function'&&finRecCobrado(x.nome));
+    return `<tr><td style="font-weight:600;color:#f5f5f2">${(x.nome||'—')}</td><td class="n">${mmBRL(mmNum(x.valor))}</td><td style="text-align:center"><span class="chip" style="${cob?'background:rgba(48,209,88,.18);color:#30d158':''}">${cob?'cobrado':'a cobrar'}</span></td></tr>`;}).join('')||'<tr><td colspan="3" style="color:#5a5a62">Sem clientes na planilha do mês</td></tr>';
+  const pagTop=fin.pag.slice().sort((a,b)=>mmNum(b.valor)-mmNum(a.valor)).slice(0,6);
+  const pagHtml=pagTop.map(x=>{const pg=(typeof finPagPago==='function'&&finPagPago(x.nome));
+    return `<tr><td style="font-weight:600;color:#f5f5f2">${(x.nome||'—')}</td><td class="n">${mmBRL(mmNum(x.valor))}</td><td style="text-align:center"><span class="chip" style="${pg?'background:rgba(48,209,88,.18);color:#30d158':''}">${pg?'pago':'a pagar'}</span></td></tr>`;}).join('')||'<tr><td colspan="3" style="color:#5a5a62">Sem despesas na planilha do mês</td></tr>';
+
+  /* ---- SQUAD ALPHA (live) ---- */
+  let alpha=[];try{if(typeof alphaRows==='function')alpha=alphaRows()||[];}catch(e){}
+  const an=v=>(typeof alphaNum==='function')?alphaNum(v):mmNum(v);
+  const alAtivos=alpha.filter(x=>!/inativo|churn/i.test(x.status||''));
+  const alMRR=alpha.reduce((s,x)=>s+an(x.valorMensal),0);
+  const alContr=alpha.reduce((s,x)=>s+an(x.valorContrato),0);
+  const alRisco=alpha.filter(x=>/CRITICAL|DANGER/i.test(x.flag||''));
+  const flagCor={CRITICAL:'#ff5a4d',DANGER:'#ff5a4d',CARE:'#ffc400',HEALTHY:'#30d158',OK:'#30d158'};
+  const alphaHtml=alpha.map(x=>{const cor=flagCor[(x.flag||'').toUpperCase()]||'#5a5a62';
+    return `<tr><td style="font-weight:600;color:#f5f5f2"><span class="flag" style="background:${cor}"></span>${(x.nome||'—')}</td><td><span class="chip">${x.plano||'—'}</span></td><td class="n">${x.valorContrato||'—'}</td><td style="color:#9a9aa2;font-size:11px">${x.account||''}</td></tr>`;}).join('')||'<tr><td colspan="4" style="color:#5a5a62">Sem clientes na aba Squad Alpha</td></tr>';
+
+  /* ---- CARTEIRA total ---- */
+  const arkN=(typeof CLIENTES!=='undefined'&&CLIENTES)?CLIENTES.length:0;
+  const carteira=arkN+alpha.length;
+
+  /* ---- DRE do grupo (ARK planilha + Alpha) ---- */
+  const grpReceber=fin.tRec, grpPagar=fin.tPag, grpResult=fin.resultado;
+
+  root.innerHTML=`<div class="mm-deck">
+    <div class="mm-sec mm-hero">
+      <div class="kick">ARK Content · All Hands · ${hoje}</div>
+      <h1>Meu Mês<span class="y">.</span> <span style="color:#5a5a62;font-weight:600;font-size:30px">${mesLabel}</span></h1>
+      <p>Painel ao vivo do grupo para a All Hands. Comercial, Financeiro e Squad Alpha puxados em tempo real do sistema, sem planilha paralela, sem número desatualizado.</p>
+      <div style="margin-top:18px">
+        <span class="mm-pill y">${carteira} clientes na carteira</span>
+        <span class="mm-pill">${arkN} ARK direto</span>
+        <span class="mm-pill">${alpha.length} Squad Alpha</span>
+        <span class="mm-pill">Dados ao vivo</span>
+      </div>
+      <div class="grid g4" style="margin-top:24px">
+        <div class="stat y"><div class="num">${carteira}</div><div class="lab">Carteira ativa</div><div class="det">${arkN} ARK · ${alpha.length} Alpha</div></div>
+        <div class="stat"><div class="num green">${mmK(grpReceber)}</div><div class="lab">A receber no mês</div><div class="det">${fin.cobN} clientes · ${fin.cobOk} já cobrados</div></div>
+        <div class="stat"><div class="num red">${mmK(grpPagar)}</div><div class="lab">A pagar no mês</div><div class="det">${fin.aceN} acertos · ${fin.aceOk} pagos</div></div>
+        <div class="stat"><div class="num ${grpResult>=0?'green':'red'}">${mmK(grpResult)}</div><div class="lab">Resultado do mês</div><div class="det">margem ${margem}%</div></div>
+      </div>
+    </div>
+
+    <div class="mm-sec">
+      <div class="sec-h"><h2>Comercial</h2><span class="live">live</span><span class="sub">replicado da aba Funil Comercial · ${mesLabel}</span></div>
+      <div class="grid g4" style="margin-bottom:18px">
+        <div class="stat"><div class="num amber">${c.leads_growth||'—'}</div><div class="lab">Leads Growth Hub</div><div class="det">${c.leads_growth_d||''}</div></div>
+        <div class="stat"><div class="num amber">${c.leads_trafego||'—'}</div><div class="lab">Leads Tráfego ARK</div><div class="det">${c.leads_trafego_d||''}</div></div>
+        <div class="stat"><div class="num">${c.fechamentos_ark||'0'}</div><div class="lab">Fechamentos ARK</div><div class="det">${c.fechamentos_ark_d||''}</div></div>
+        <div class="stat"><div class="num">${c.fechamentos_alpha||'0'}</div><div class="lab">Fechamento Alpha</div><div class="det">${c.fechamentos_alpha_d||''}</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="panel"><div class="ph">Funil de conversão<span style="color:#30d158;font-weight:800">${convPct}% lead→fechamento</span></div><div class="funnel" style="padding:18px 16px">${funnelHtml}</div></div>
+        <div class="panel"><div class="ph">Fontes de pipeline</div><table><thead><tr><th>Fonte</th><th style="text-align:right">Volume</th><th>Diagnóstico</th></tr></thead><tbody>${fontesHtml}</tbody></table></div>
+      </div>
+    </div>
+
+    <div class="mm-sec">
+      <div class="sec-h"><h2>Financeiro</h2><span class="live">live</span><span class="sub">Minha Planilha${fin.nome?' · '+fin.nome:''} · cobranças e acertos sincronizados</span></div>
+      <div class="grid g4" style="margin-bottom:18px">
+        <div class="stat"><div class="num green">${mmBRL(fin.tRec)}</div><div class="lab">A receber</div><div class="det">${fin.cobOk}/${fin.cobN} cobrados</div></div>
+        <div class="stat"><div class="num red">${mmBRL(fin.tPag)}</div><div class="lab">A pagar (acertos)</div><div class="det">${fin.aceOk}/${fin.aceN} pagos</div></div>
+        <div class="stat ${fin.resultado>=0?'':'y'}"><div class="num ${fin.resultado>=0?'green':'red'}">${mmBRL(fin.resultado)}</div><div class="lab">Resultado</div><div class="det">margem ${margem}%</div></div>
+        <div class="stat"><div class="num amber">${mmBRL(fin.cobVal)}</div><div class="lab">Ainda em aberto</div><div class="det">a entrar este mês</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="panel"><div class="ph">💚 A receber · maiores clientes</div><table><thead><tr><th>Cliente</th><th style="text-align:right">Valor</th><th style="text-align:center">Status</th></tr></thead><tbody>${recHtml}</tbody><tfoot><tr class="tfoot"><td>Total</td><td class="n">${mmBRL(fin.tRec)}</td><td></td></tr></tfoot></table></div>
+        <div class="panel"><div class="ph">🟡 A acertar · equipe & despesas</div><table><thead><tr><th>Quem / o quê</th><th style="text-align:right">Valor</th><th style="text-align:center">Status</th></tr></thead><tbody>${pagHtml}</tbody><tfoot><tr class="tfoot"><td>Total</td><td class="n">${mmBRL(fin.tPag)}</td><td></td></tr></tfoot></table></div>
+      </div>
+    </div>
+
+    <div class="mm-sec">
+      <div class="sec-h"><h2>Squad Alpha · DRE</h2><span class="live">live</span><span class="sub">puxado da aba Squad Alpha · ${alpha.length} clientes</span></div>
+      <div class="grid g4" style="margin-bottom:18px">
+        <div class="stat y"><div class="num">${alpha.length}</div><div class="lab">Clientes Alpha</div><div class="det">${alAtivos.length} ativos</div></div>
+        <div class="stat"><div class="num amber">${mmK(alMRR)}</div><div class="lab">MRR Alpha</div><div class="det">recorrência mensal</div></div>
+        <div class="stat"><div class="num">${mmK(alContr)}</div><div class="lab">Contratado (LTV)</div><div class="det">soma dos contratos</div></div>
+        <div class="stat"><div class="num ${alRisco.length?'red':'green'}">${alRisco.length}</div><div class="lab">Em risco</div><div class="det">flag crítica/danger</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="panel"><div class="ph">Carteira Alpha<span style="color:#5a5a62;font-weight:500">${alpha.length} clientes</span></div><div style="max-height:340px;overflow:auto"><table><thead><tr><th>Cliente</th><th>Plano</th><th style="text-align:right">Contrato</th><th>Account</th></tr></thead><tbody>${alphaHtml}</tbody></table></div></div>
+        <div class="panel"><div class="ph">DRE consolidada do grupo</div><table>
+          <tbody>
+            <tr><td>Receita a receber (ARK · planilha)</td><td class="n" style="color:#30d158">${mmBRL(grpReceber)}</td></tr>
+            <tr><td>Despesas / acertos a pagar</td><td class="n" style="color:#ff5a4d">${mmBRL(grpPagar)}</td></tr>
+            <tr><td>MRR Squad Alpha</td><td class="n">${mmBRL(alMRR)}</td></tr>
+            <tr><td>Contratado Alpha (LTV)</td><td class="n">${mmBRL(alContr)}</td></tr>
+          </tbody>
+          <tfoot><tr class="tfoot"><td>Resultado do mês (ARK)</td><td class="n" style="color:${grpResult>=0?'#30d158':'#ff5a4d'}">${mmBRL(grpResult)}</td></tr></tfoot>
+        </table>
+        <div class="note" style="margin:14px;border-radius:12px"><h4>DRE detalhada da Alpha</h4><p>Para abrir taxa de franquia, repasse da matriz e estornos por linha, basta lançar esses itens na aba Squad Alpha / planilha, o consolidado acima atualiza sozinho.</p></div></div>
+      </div>
+    </div>
+
+    <div class="mm-foot">ARK Content · All Hands ${mesLabel} · construído pra escalar</div>
+  </div>`;
+}
+
+/* ============ ALL HANDS · apresentação mensal ao vivo ============ */
+function ahNarr(){try{return JSON.parse(localStorage.getItem('wfa-allhands')||'{}');}catch(e){return {};}}
+function ahSaveNarr(o){try{localStorage.setItem('wfa-allhands',JSON.stringify(o));}catch(e){}}
+function ahTxt(key,def,edit){const n=ahNarr();const v=(n[key]!=null&&n[key]!=='')?n[key]:def;
+  return edit?'<span class="ah-edit" contenteditable="true" data-ah-key="'+key+'">'+v+'</span>':v;}
+function ahGridSum(id,key){try{return (gridRows(id)||[]).reduce((s,r)=>s+mmNum(r[key]),0);}catch(e){return 0;}}
+function ahCaptacoes(){try{const evs=loadAgendaEvents()||[];const mk=(typeof cobMesKey==='function')?cobMesKey():'2026-06';
+  return evs.filter(e=>/capta/i.test(((e.title||'')+' '+(e.type||'')))&&String(e.date||'').slice(0,7)===mk).length;}catch(e){return 0;}}
+function ahPerPessoa(){
+  const ts=state.tarefas||[];
+  const nz=s=>String(s||'').trim().toLowerCase();
+  // Roster consolidado. "Concluídas" = parâmetros do Gabriel (a gente não tem o número exato no sistema).
+  // "Em andamento" = puxado AO VIVO do sistema por responsável (quem está cadastrado).
+  const roster=[
+    {nm:'Danilo de Lima',fn:'Tráfego · COO',feitas:'72+'},
+    {nm:'Lucas Rosi',fn:'Account · CS',feitas:'60+'},
+    {nm:'Maria Luiza',fn:'Social · Criação',feitas:'20+'},
+    {nm:'Samuel Magalhães',fn:'Edição · Captação',feitas:'20+'},
+    {nm:'M. Portela',fn:'Design',feitas:'~20'},
+    {nm:'Bruno',fn:'Design · Estrategista',feitas:'10+'},
+    {nm:'Saulo',fn:'Comercial · BDR',feitas:'3 rotas'},
+    {nm:'Gabriel Andrade',fn:'CEO · Closer',feitas:'—'},
+  ];
+  roster.forEach(p=>{p.andamento=ts.filter(t=>t.status!=='concluido'&&nz(t.resp)===nz(p.nm)).length;});
+  return roster;
+}
+function ahData(){
+  const c=mmComercial(),g=k=>mmNum(c[k]);
+  const leads=Math.round(g('leads_growth')+g('leads_trafego')+g('fonte_indicacao'));
+  const fech=Math.round(g('fechamentos_ark')+g('fechamentos_alpha'));
+  const reun=Math.max(fech,Math.round((g('fechamentos_ark')+g('fechamentos_alpha'))*2.2)||Math.round(leads*0.4));
+  const conv=leads?Math.round(fech/leads*100):0;
+  let fin={tRec:0,tPag:0,resultado:0,rec:[],pag:[],cobOk:0,cobN:0,aceOk:0,aceN:0,nome:''};
+  try{const m=planActive();const s=planSums(m);fin.tRec=s.tRec;fin.tPag=s.tPag;fin.resultado=s.resultado;fin.nome=m.nome||'';
+    fin.rec=(m.receitas||[]).filter(x=>(x.nome||'').trim()||x.valor);fin.pag=(m.pagar||[]).filter(x=>(x.nome||'').trim()||x.valor);
+    fin.cobN=fin.rec.length;fin.aceN=fin.pag.length;
+    fin.rec.forEach(x=>{if(typeof finRecCobrado==='function'&&finRecCobrado(x.nome))fin.cobOk++;});
+    fin.pag.forEach(x=>{if(typeof finPagPago==='function'&&finPagPago(x.nome))fin.aceOk++;});}catch(e){}
+  fin.margem=fin.tRec>0?Math.round(fin.resultado/fin.tRec*100):0;
+  let alpha=[];try{alpha=alphaRows()||[];}catch(e){}
+  const an=v=>(typeof alphaNum==='function')?alphaNum(v):mmNum(v);
+  const alMRR=alpha.reduce((s,x)=>s+an(x.valorMensal),0),alContr=alpha.reduce((s,x)=>s+an(x.valorContrato),0);
+  // Carteira consolidada: ARK reais (tipo ARK, sem o cliente interno) + Alpha ativos (mín. 11, número do Gabriel).
+  let arkN=7;try{arkN=(CLIENTES||[]).filter(x=>x.tipo==='ARK').length||7;}catch(e){}
+  const alphaN=Math.max(alpha.length,11);
+  const carteira=arkN+alphaN;
+  const pp=ahPerPessoa();
+  const totAnd=pp.reduce((s,p)=>s+(p.andamento||0),0);
+  return {c,leads,fech,reun,conv,fin,alpha,alMRR,alContr,arkN,alphaN,carteira,pp,totAnd};
+}
+function ahStat(num,lab,det,cls){return '<div class="stat '+(cls||'')+'"><div class="num '+(cls==='y'?'':(cls||''))+'">'+num+'</div><div class="lab">'+lab+'</div>'+(det?'<div class="det">'+det+'</div>':'')+'</div>';}
+function ahBuildSlides(edit){
+  const d=ahData();
+  const mes=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,x=>x.toUpperCase());
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const c=d.c,fin=d.fin;
+  const S=[];
+  const card=(t,b)=>'<div class="note" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
+  const cardG=(t,b)=>'<div class="note green" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
+  const cardR=(t,b)=>'<div class="note red" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
+
+  // 1 · Capa
+  S.push('<div class="cover"><img class="ah-cover-logo" src="/ark-logo.png" alt="ARK">'+
+    '<h1 style="margin-top:14px">All Hands<br><span class="y">'+mes+'</span></h1>'+
+    '<p class="lead" style="margin-top:20px">Onde chegamos, o que cada área entregou e o que cada um vai puxar em julho. Reunião de gente e execução. Caixa fica pro fim, com os sócios.</p>'+
+    '<div style="margin-top:22px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">Comercial · Social · Tráfego · CS · Captação · Design</span><span class="pill">'+hoje+'</span></div></div>');
+
+  // 2 · De onde viemos
+  S.push('<div><div class="ah-kick">De onde viemos</div><h2>Em ~10 meses a casa virou outra</h2>'+
+    '<p class="lead">'+ahTxt('vinda','Saímos de 4 para uma carteira grande, abrimos a frente Squad Alpha e formalizamos o que estava só na cabeça dos sócios: organograma, 22 POPs e o Método dos 5 Eixos. A virada é essa: parar de depender de talento solto e passar a rodar no processo.',edit)+'</p>'+
+    '<div class="ah-grid g3" style="margin-top:16px">'+
+    card('Identidade','Foco em gastronomia de Brasília, narrativa institucional explícita.')+
+    card('Estratégia','Plano comercial, campanhas de captação e a frente Alpha.')+
+    card('Pessoas & Processos','5 áreas, trilha Júnior/Pleno/Sênior e 22 POPs no sistema.')+
+    '</div></div>');
+
+  // 3 · Pulso da operação
+  S.push('<div><div class="ah-kick">Junho em uma tela</div><h2>O pulso da operação</h2>'+
+    '<div class="ah-grid g4" style="margin-top:14px">'+
+    ahStat(d.carteira,'Clientes na carteira',d.arkN+' ARK · '+d.alphaN+' Alpha','y')+
+    ahStat(ahTxt('pulse_entregas','100+',edit),'Entregas no mês','edições, criativos e demandas','green')+
+    ahStat(ahTxt('pulse_capt','12',edit),'Captações','gravações no mês','amber')+
+    ahStat(ahTxt('pulse_risco','2',edit),'Clientes em risco','Dom Baruka e Valhalla (Alpha)','red')+
+    '</div>'+
+    '<p style="margin-top:14px;color:#9a9aa2;font-size:14px">Leitura rápida: a carteira cresceu e o time está entregando muito. O desafio do mês não é vender, é <b style="color:#fff">entregar com qualidade</b> e não deixar conta esfriar.</p></div>');
+
+  // 4 · Comercial + pipeline
+  const fmax=Math.max(d.leads,1);
+  const fun=[['Leads gerados',d.leads,'#ffc400'],['Reuniões (estim.)',d.reun,'#9a9aa2'],['Fechamentos',d.fech,'#30d158']]
+    .map(s=>'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:170px;font-size:13px;color:#bdbdc4">'+s[0]+'</div><div class="funbar"><div class="funfill" style="width:'+Math.max(s[1]/fmax*100,8)+'%;background:'+s[2]+'">'+s[1]+'</div></div></div>').join('');
+  S.push('<div><div class="ah-kick">Comercial · Saulo + Gabriel</div><h2>Pipeline e o que já está vendido</h2>'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 6px"><h3 style="margin:0">Funil do mês</h3><span style="color:#30d158;font-weight:800;font-family:Sora">'+d.conv+'% lead para fechamento</span></div>'+fun+
+    '<div class="ah-grid g3" style="margin-top:14px">'+
+    card('✅ Vendido / assinatura',ahTxt('pipe_vendido','Lá em Casa fechado. Spa em assinatura. É a receita nova que entra em julho.',edit))+
+    card('💬 Em conversa',ahTxt('pipe_conversa','Presatec, Sal e Fumaça, Estação do Lanche e mais oportunidades quentes no CRM.',edit))+
+    card('🎯 CAC zero é escolha',ahTxt('pipe_cac','Entradas de baixo custo de aquisição. O preço a pagar é atender muito bem e entregar diferencial nos primeiros meses.',edit))+
+    '</div></div>');
+
+  // 5 · Cada área no mês
+  S.push('<div><div class="ah-kick">Cada área no mês</div><h2>O que cada frente entregou</h2>'+
+    '<div class="ah-grid g3" style="margin-top:12px">'+
+    card('Comercial · Saulo',ahTxt('area_com','3 rotas no início do mês. Travou um pouco na rota, mas ativou muita gente: conduz o pipeline do CRM e falou com 4 a 5 dos 9 leads Alpha comprados.',edit))+
+    card('Account & CS · Lucas',ahTxt('area_cs','Segura onboarding e a régua de 11 a 12 clientes por dia. Muito bem. Foco: delegar, ter processo próprio e voltar a ativação diária nos grupos da Alpha.',edit))+
+    card('Social & Criação · Maria Luiza + Samuel',ahTxt('area_social','Dividem criação e edição, mais de 100 entregas no mês. A virada do Attraversiamo foi mérito da Maria Luiza. Linha editorial rodando na carteira.',edit))+
+    card('Tráfego · Danilo',ahTxt('area_traf','Danilo toca o tráfego 100%. A campanha de 15/06 teve o melhor custo por conversa do mês, R$16,99. A estrutura a escalar já existe.',edit))+
+    card('Captação · Samuel + Henrique',ahTxt('area_capt','Samuel assume como pilar da captação, com Henrique. Foco: montar time de produtores (Maria Clara, Alana, Duda + rede Alpha) e automatizar o agendamento das gravações.',edit))+
+    card('Design · Bruno + Portela',ahTxt('area_design','Bruno toca a Fercon, Portela os outros projetos. Premissa do mês: formalizar o Bruno in-house como designer.',edit))+
+    '</div></div>');
+
+  // 6 · Execução por pessoa
+  const ppRows=d.pp.map(p=>'<tr><td style="font-weight:600;color:#f5f5f2">'+p.nm+'</td><td style="color:#9a9aa2">'+p.fn+'</td><td class="n">'+p.feitas+'</td><td class="n">'+(p.andamento||0)+'</td></tr>').join('');
+  S.push('<div><div class="ah-kick">Execução por profissional</div><h2>Quem entregou o quê</h2>'+
+    '<div class="ah-grid g4" style="margin:12px 0">'+
+    ahStat(ahTxt('exec_total','100+',edit),'Entregas no mês','soma das frentes','green')+
+    ahStat(d.totAnd,'Em andamento','ao vivo, no sistema')+
+    ahStat(ahTxt('exec_traf','72+',edit),'Demandas de tráfego','Danilo','amber')+
+    ahStat(ahTxt('exec_acc','60+',edit),'Atendimentos','Lucas na carteira')+
+    '</div>'+
+    '<table><thead><tr><th>Pessoa</th><th>Função</th><th style="text-align:right">Entregas (mês)</th><th style="text-align:right">Em andamento</th></tr></thead><tbody>'+ppRows+'</tbody></table>'+
+    '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Entregas do mês são estimativas por função. Em andamento vem ao vivo de quem usa o sistema, quem não usa (Portela, Henrique) tem ainda mais fora do quadro. Motivo de sobra pra ter processo e todo mundo dentro.</p></div>');
+
+  // 6b · O sistema (WorkFlowArk)
+  S.push('<div><div class="ah-kick">O que construímos</div><h2>WorkFlowArk: a casa num lugar só</h2>'+
+    '<p class="lead">'+ahTxt('sistema_intro','O maior projeto do período. Trello, planilha do Alpha, cobrança, agenda e relatórios viraram um sistema só, no ar, usado todo dia. O que estava na cabeça dos sócios virou processo que a equipe opera.',edit)+'</p>'+
+    '<div class="ah-grid g3" style="margin-top:16px">'+
+    card('Operação','Kanban de tarefas, CRM de pipeline, Jornada e Sprints por cliente.')+
+    card('Rotina & caixa','Cobrança e Acerto, Agenda por pessoa, Financeiro ao vivo e War Room com semáforo.')+
+    card('IA a favor','Planejamento, Roteirista e Legendas, Conselho de IA, JARVIS e portal do cliente.')+
+    '</div></div>');
+
+  // 6c · Como usar
+  S.push('<div><div class="ah-kick">Como usar no dia a dia</div><h2>O combinado com o sistema</h2>'+
+    '<div class="ah-grid g2" style="margin-top:14px">'+
+    card('Mexeu, moveu o card',ahTxt('uso1','Kanban: Backlog, Semana, Execução, Aprovação, Concluído. Se não está no Kanban, não aconteceu.',edit))+
+    card('Toda tarefa com dono',ahTxt('uso2','Marque o responsável. É isso que faz o quadro de execução da equipe ser real.',edit))+
+    card('CRM sempre vivo',ahTxt('uso3','Todo lead e conversa registrados. O comercial mora aqui.',edit))+
+    card('Cliente no link',ahTxt('uso4','Aprovação de conteúdo e portal do cliente por link, sem WhatsApp solto.',edit))+
+    '</div>'+
+    '<div class="note" style="margin-top:14px"><h3>Regra de ouro</h3><p>Se não está no sistema, não foi feito. Quanto mais a equipe usa, mais o próprio All Hands se preenche sozinho.</p></div></div>');
+
+  // 7 · O que destravou
+  S.push('<div><div class="ah-kick">O que funcionou</div><h2>O que destravou no mês</h2>'+
+    '<div class="ah-grid g2" style="margin-top:12px">'+
+    cardG('Máquina de conteúdo rodando',ahTxt('conq1','Maria Luiza e Samuel dividem mais de 100 entregas no mês, com linha editorial rodando na carteira.',edit))+
+    cardG('Case orgânico',ahTxt('conq2','Attraversiamo bombou nas redes, mérito da Maria Luiza. Virou argumento de venda novo.',edit))+
+    cardG('Casa em ordem',ahTxt('conq3','Organograma, 22 POPs e o sistema rodando todo dia. O conhecimento dos sócios virou processo.',edit))+
+    cardG('Mídia mais eficiente',ahTxt('conq4','A campanha de 15/06 bateu R$16,99 por conversa, o melhor do mês. Já sabemos o que escalar.',edit))+
+    '</div></div>');
+
+  // 8 · Gargalos reais
+  S.push('<div><div class="ah-kick">O que ainda trava</div><h2>Gargalos reais, com dono e ação</h2>'+
+    '<div class="ah-grid g3" style="margin-top:12px">'+
+    cardR('Criação sob pressão · Malu + Samuel',ahTxt('garg1','Mais de 100 entregas por mês nos dois. Precisa aliviar a Maria Luiza pra ela puxar linha editorial nos grupos da Alpha.',edit))+
+    cardR('Account precisa delegar · Lucas',ahTxt('garg2','Ativa 11 a 12 clientes por dia sozinho. Precisa delegar, com o Danilo complementar e alguém novo perto da operação.',edit))+
+    cardR('Ativação diária dos grupos Alpha',ahTxt('garg3','O volume dos grupos não pode passar batido. Ativação diária sem falha. Danilo e Lucas precisam de reforço.',edit))+
+    cardR('Captação depende de fora',ahTxt('garg4','Hoje a captação depende de agenda de terceiros. O plano é o Samuel virar pilar, com produtores próprios e a rede Alpha.',edit))+
+    cardR('Repasse Alpha atrasado',ahTxt('garg5','Faltam ~R$10 a 14k de repasse (Babbo e Valhalla). É caixa que já é nosso. Cobrar até 15/07.',edit))+
+    cardR('Deploy do sistema travado',ahTxt('garg6','CI quebrado desde 24/06. Toda melhoria sobe no manual. Ação: token novo do Cloudflare, 2 minutos.',edit))+
+    '</div></div>');
+
+  // 9 · Time (debate)
+  S.push('<div><div class="ah-kick">Time · pra puxar o debate</div><h2>O que vamos destravar juntos</h2>'+
+    '<p class="lead">'+ahTxt('time_debate','O time está entregando muito, e é hora de estruturar. Três frentes que a gente abre aqui e aprofunda nas one on ones.',edit)+'</p>'+
+    '<div class="ah-grid g3" style="margin-top:14px">'+
+    card('Design in-house',ahTxt('time_bruno','Formalizar o Bruno como designer interno, com mais disponibilidade e presença.',edit))+
+    card('Captação como pilar',ahTxt('time_samuel','Samuel à frente da captação, estreitando a relação com os produtores e a rede Alpha.',edit))+
+    card('Reforço na operação',ahTxt('time_op','Alguém perto do operacional pra sustentar a ativação diária dos clientes e das linhas editoriais.',edit))+
+    '</div></div>');
+
+  // 10 · Julho · alavancas
+  S.push('<div><div class="ah-kick">Para onde vamos · Julho</div><h2>As alavancas do mês</h2>'+
+    '<div class="ah-grid g2" style="margin-top:12px">'+
+    card('🥇 Faturar o que já vendemos',ahTxt('alav1','Lá em Casa e Spa entram em julho. Start do plano e 1ª captação na primeira semana. Maior impacto, menor esforço.',edit))+
+    card('🥈 Fechar as conversas quentes',ahTxt('alav2','Presatec, Sal e Fumaça, Estação do Lanche. Manter o CRM ativo e converter o que já está em pauta.',edit))+
+    card('🥉 Upsell na base',ahTxt('alav3','Subir contas de plano na carteira. Receita nova sem precisar captar cliente novo.',edit))+
+    card('🛡️ Proteger a base',ahTxt('alav4','Retenção e ativação diária dos grupos. Crescer e perder cliente é crescimento falso.',edit))+
+    '</div></div>');
+
+  // 11 · OKRs por função
+  S.push('<div><div class="ah-kick">OKRs de julho · por função</div><h2>O que cada um vai puxar</h2>'+
+    '<div class="ah-grid g2" style="margin-top:12px">'+
+    card('Comercial · Saulo + Gabriel',ahTxt('okr_com','Converter o pipeline em receita, conversão acima de 20%, reuniões qualificadas e 1 indicação por cliente.',edit))+
+    card('Account & CS · Lucas',ahTxt('okr_cs','Onboarding em até 5 dias, NPS ≥85, 0% de churn, ativação diária dos grupos e upsell em ≥30% da base.',edit))+
+    card('Tráfego · Danilo',ahTxt('okr_traf','Start estratégico em 100% dos clientes, 80% da base no verde, nenhum criativo ruim rodando mais de 1 semana.',edit))+
+    card('Criação, Edição & Captação · Malu, Samuel, Portela',ahTxt('okr_creator','Entregas no prazo, retrabalho abaixo de 15%, qualidade alta e captações agendadas com time próprio.',edit))+
+    '</div></div>');
+
+  // 12 · Compromisso
+  S.push('<div class="cover"><div class="ah-kick">Compromisso do mês</div>'+
+    '<h2 style="font-size:44px;max-width:1000px;margin-top:10px">'+ahTxt('compromisso','Em julho a gente fatura o que já vendeu, protege a base e estrutura o time. Cada um sai daqui com um compromisso.',edit)+'</h2>'+
+    '<div style="margin-top:20px"><span class="pill y">Faturar o pipeline</span><span class="pill y">0% churn</span><span class="pill y">Entrega no prazo</span><span class="pill y">Ativação diária</span></div>'+
+    '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffc400">VAMOS JUNTOS ●</p></div>');
+
+  // 13 · Financeiro (sócios)
+  const topRec=fin.rec.slice().sort((a,b)=>mmNum(b.valor)-mmNum(a.valor)).slice(0,5)
+    .map(x=>'<tr><td>'+(x.nome||'—')+'</td><td class="n">'+mmBRL(mmNum(x.valor))+'</td></tr>').join('')||'<tr><td>Sem dados</td><td class="n">—</td></tr>';
+  S.push('<div><div class="ah-kick">Fechamento financeiro · sócios</div><h2>O caixa do mês</h2>'+
+    '<div class="ah-grid g4" style="margin:12px 0">'+
+    ahStat(mmBRL(fin.tRec),'A receber','','green')+
+    ahStat(mmBRL(fin.tPag),'A pagar','','red')+
+    ahStat(mmBRL(fin.resultado),'Resultado','margem '+fin.margem+'%',(fin.resultado>=0?'green':'red'))+
+    ahStat(mmK(d.alMRR),'MRR Alpha',d.alphaN+' clientes','amber')+
+    '</div>'+
+    '<div class="ah-grid g2"><div><h3>Maiores a receber</h3><table>'+topRec+'</table></div>'+
+    '<div class="note" style="align-self:start"><h3>Atenção de caixa</h3><p>Repasse Alpha atrasado de ~R$10 a 14k (Babbo e Valhalla) é caixa que já é nosso, cobrar até 15/07. Margem saudável fica entre 12% e 15%.</p></div></div>'+
+    '<p style="margin-top:10px;color:#5a5a62;font-size:12px">Números ao vivo da Minha Planilha. Detalhe completo na aba Financeiro.</p></div>');
+
+  return S;
+}
+window.ahIdx=0;window.ahSlides=[];
+function ahWrap(html,i,total){
+  const nn=String(i+1).padStart(2,'0'),tt=String(total).padStart(2,'0');
+  const mes=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,x=>x.toUpperCase());
+  return '<div class="ahd">'+
+    '<div class="ah-chrome"><div class="ah-brand"><img src="/ark-logo.png" alt="ARK"><span>ARK<b>·</b>ALL HANDS</span></div><div class="ah-pageno">'+nn+' <i>/</i> '+tt+'</div></div>'+
+    '<div class="ah-body">'+html+'</div>'+
+    '<div class="ah-base"><span>ARK Content</span><span>'+mes+'</span></div>'+
+  '</div>';
+}
+function renderAllhands(){
+  const stage=document.getElementById('allhands-stage');if(!stage)return;
+  const slides=ahBuildSlides(true);
+  stage.innerHTML=slides.map((html,i)=>ahWrap(html,i,slides.length)).join('');
+}
+function ahRenderCurrent(){
+  const slide=document.getElementById('ah-slide');if(!slide)return;
+  const n=window.ahSlides.length;
+  slide.innerHTML=ahWrap(window.ahSlides[window.ahIdx],window.ahIdx,n);
+  const bar=document.getElementById('ah-bar-i');if(bar)bar.style.width=((window.ahIdx+1)/n*100)+'%';
+  const ct=document.getElementById('ah-counter');if(ct)ct.textContent=(window.ahIdx+1)+' / '+n;
+  const dots=document.getElementById('ah-dots');if(dots)dots.innerHTML=window.ahSlides.map((_,i)=>'<span class="'+(i===window.ahIdx?'on':'')+'" onclick="ahGo('+i+')"></span>').join('');
+}
+function ahPresent(i){
+  window.ahSlides=ahBuildSlides(false);window.ahIdx=Math.max(0,Math.min(i||0,window.ahSlides.length-1));
+  const ov=document.getElementById('ah-present');if(!ov)return;
+  if(ov.parentElement!==document.body)document.body.appendChild(ov); // garante tela cheia (sem ancestral com transform)
+  ov.style.display='flex';ahRenderCurrent();
+}
+function ahGo(i){if(!window.ahSlides.length)return;window.ahIdx=Math.max(0,Math.min(i,window.ahSlides.length-1));ahRenderCurrent();}
+function ahExit(){const ov=document.getElementById('ah-present');if(ov)ov.style.display='none';if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}
+function ahFull(){const ov=document.getElementById('ah-present');if(!ov)return;if(!document.fullscreenElement)ov.requestFullscreen&&ov.requestFullscreen().catch(()=>{});else document.exitFullscreen().catch(()=>{});}
+document.addEventListener('keydown',e=>{const ov=document.getElementById('ah-present');if(!ov||ov.style.display==='none')return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();ahGo(window.ahIdx+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();ahGo(window.ahIdx-1);}
+  else if(e.key==='Escape'){ahExit();}else if(e.key==='f'||e.key==='F'){ahFull();}});
+document.addEventListener('blur',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.ahKey){const o=ahNarr();o[t.dataset.ahKey]=t.textContent;ahSaveNarr(o);}},true);
+
 /* ============ COMERCIAL POR MÊS ============ */
 const COMERCIAL_DEFAULTS={
   leads_growth:'4',leads_growth_d:'~R$700–900 invest.',
@@ -9773,6 +10412,8 @@ updateCrmBadge();
 renderCrm();
 renderAgenda();
 renderComercialMes();
+try{renderMeumes();}catch(e){console.warn('meumes boot',e);}
+try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
 </script>
 </body>
 </html>
