@@ -8,7 +8,7 @@ import { createFileRoute } from "@tanstack/react-router";
 // - notifica em wfa-notificacoes
 // Chamável por cron (Cloudflare/cron-job.org). Protegido por ?key=. ?force=1 força.
 //   /api/workflowark/agents-run?key=<segredo RUN_KEY> (cron) ou Authorization: Bearer (UI)
-import { isRunAuthorized, runSecret } from "@/integrations/run-auth.server";
+// (auth em @/integrations/run-auth.server, importado dinamicamente no handler)
 
 // Mapeia a área/função sugerida pela IA para a PESSOA responsável (organograma da ARK).
 // Assim o conselho atribui a tarefa a quem executa, não a um "agente".
@@ -52,6 +52,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
     handlers: {
       GET: async ({ request }) => {
         const u = new URL(request.url);
+        const { isRunAuthorized, runSecret } = await import("@/integrations/run-auth.server");
         if (!(await isRunAuthorized(request, u))) return Response.json({ error: "unauthorized" }, { status: 401 });
         const force = u.searchParams.get("force") === "1";
         // ?cliente=vivenda roda só um cliente (e ignora idempotência) — útil pro botão "rodar agora"
@@ -263,7 +264,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           // AUTO-ENCADEIA: se ainda faltam clientes e este lote produziu algo, dispara o
           // próximo lote em background (best-effort) — assim 1 chamada do cron cobre todos.
           if (!soCliente && faltam > 0 && criadas > 0) {
-            try { fetch(`${u.origin}/api/workflowark/agents-run?key=${runSecret()}`).catch(() => {}); } catch { /* ignore */ }
+            try { fetch(`${u.origin}/api/workflowark/agents-run?key=${await runSecret()}`).catch(() => {}); } catch { /* ignore */ }
           }
           return Response.json({ ok: true, ran: true, clientes: alvos.length, faltam, tarefas: criadas, tarefasSalvas: salvouTarefas, notificacoes: notifs.length });
         } catch (e) {

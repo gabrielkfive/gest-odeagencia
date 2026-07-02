@@ -1,18 +1,22 @@
-// Autorização das rotas de agente (agents-run, social-run).
+// Autorização das rotas de agente (agents-run, social-run) e manutenção (seed-evaluators).
 // Antes: chave fixa "ark-2026" no código (repo público + HTML servido = qualquer
 // pessoa podia disparar os agentes e gastar crédito de IA). Agora:
 //   1) cron/servidor usa ?key= igual ao segredo RUN_KEY (wrangler secret put RUN_KEY);
 //   2) a UI usa o Bearer token da sessão, validado como membro ATIVO.
-import { env as cfEnv } from "cloudflare:workers";
+// IMPORTANTE: importar este módulo só DINAMICAMENTE dentro do handler (padrão do
+// projeto, igual client.server.ts) — cloudflare:workers não existe no dev local.
 
-export function runSecret(): string {
-  const fromCf = (cfEnv as Record<string, string | undefined>)?.RUN_KEY;
-  if (fromCf) return fromCf;
-  return typeof process !== "undefined" ? process.env?.RUN_KEY ?? "" : "";
+export async function runSecret(): Promise<string> {
+  try {
+    const { env } = await import("cloudflare:workers");
+    const v = (env as Record<string, string | undefined>)?.RUN_KEY;
+    if (v) return String(v);
+  } catch { /* dev local (Node): módulo cloudflare:workers não existe */ }
+  return (typeof process !== "undefined" ? process.env?.RUN_KEY : "") ?? "";
 }
 
 export async function isRunAuthorized(request: Request, url: URL): Promise<boolean> {
-  const secret = runSecret();
+  const secret = await runSecret();
   const key = url.searchParams.get("key");
   if (secret && key && key === secret) return true;
 
