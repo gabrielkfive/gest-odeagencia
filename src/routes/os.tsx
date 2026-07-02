@@ -1,12 +1,13 @@
-// ARK OS V2 · Mission Control — camada visual premium (refs: motion.dev, iOS folder, Mintlify)
-// Regras: luz ambiente em vez de caixas; profundidade por camadas; amarelo só como acento;
-// nada aparece, tudo chega; clicar num agente o expande no lugar (shared layout, estilo pasta iOS).
+// ARK OS V2 · Mission Control. Réplica fiel das referências do Figma (docs/ARKOS-V2-TOKENS.md):
+// shell claro lavanda + cards brancos (SaaS Dashboard UI Kit), herói e meta em preto brilhante com
+// pílula ativa preta na sidebar (Dashboard Marketing "Vision"), vidro escuro só no overlay de agente
+// (Apple Vision Pro HR). Marca ARK: amarelo #FFC700 no lugar do accent das refs.
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Sparkles, Hexagon, Activity, BrainCircuit, Users, MessageCircle,
-  PenLine, Wallet, Command, ArrowLeft, X,
+  PenLine, Wallet, Command, ArrowLeft, X, Search, Bell, LayoutGrid,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,223 +26,242 @@ export const Route = createFileRoute("/os")({
   component: ArkOS,
 });
 
-/* ── Design tokens ──────────────────────────────────────── */
+/* Design tokens (ver docs/ARKOS-V2-TOKENS.md) */
 const CSS = `
-html:has(.arkos),body:has(.arkos){background:#FAFAF7; margin:0}
+html:has(.arkos),body:has(.arkos){background:#F1F2F7; margin:0}
 .arkos{
-  --void:#FAFAF7; --ink:#1D1D1F; --mute:#6E6E76; --dim:#A2A2AA;
-  --yel:#FFC700; --yel-glow:rgba(255,199,0,.16);
-  --ok:#16A34A; --warn:#C2760A; --bad:#DC2626;
-  --glass:rgba(0,0,0,.025); --glass2:rgba(0,0,0,.045);
-  --hair:rgba(0,0,0,.07); --hair2:rgba(0,0,0,.12);
-  --card:#FFFFFF;
-  --ink-dark:#F5F4F0; --mute-dark:#9C9CA6; --hair-dark:rgba(255,255,255,.09);
+  --bg:#F1F2F7; --card:#FFFFFF; --ink:#16181D; --mute:#6E7280; --dim:#A6AAB8;
+  --black:#131316; --black2:#1C1C21;
+  --yel:#FFC700; --yel-soft:rgba(255,199,0,.14);
+  --ok:#3DD9A4; --ok-ink:#0F8A61; --bad:#F4645C; --hold:#FFC145;
+  --hair:rgba(22,24,29,.07); --hair2:rgba(22,24,29,.13);
+  --w06:rgba(255,255,255,.06); --w12:rgba(255,255,255,.12); --w-hair:rgba(255,255,255,.10);
   --sans:'Inter',system-ui,sans-serif; --disp:'Sora',var(--sans); --mono:'JetBrains Mono',monospace;
-  background:var(--void); color:var(--ink); font-family:var(--sans);
+  background:var(--bg); color:var(--ink); font-family:var(--sans);
   min-height:100vh; overflow:hidden; position:relative;
   -webkit-font-smoothing:antialiased;
 }
 .arkos *{box-sizing:border-box; margin:0}
-.arkos ::selection{background:var(--yel-glow)}
+.arkos ::selection{background:var(--yel-soft)}
 .arkos .mono{font-family:var(--mono)}
-
-/* luz ambiente viva: sobre fundo claro, a atmosfera é quase sussurrada, nunca parada */
-.arkos .aurora{position:fixed; inset:0; pointer-events:none; z-index:0; mix-blend-mode:multiply}
-.arkos .aurora::before{content:''; position:absolute; width:820px; height:520px;
-  top:-260px; left:14%; border-radius:50%;
-  background:radial-gradient(closest-side, rgba(255,199,0,.10), transparent 70%);
-  animation:drift 26s ease-in-out infinite alternate}
-.arkos .aurora::after{content:''; position:absolute; width:700px; height:500px;
-  bottom:-240px; right:-120px; border-radius:50%;
-  background:radial-gradient(closest-side, rgba(120,140,255,.05), transparent 70%);
-  animation:drift 32s ease-in-out infinite alternate-reverse}
-@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.12)}}
-@media (prefers-reduced-motion:reduce){.arkos .aurora::before,.arkos .aurora::after{animation:none}}
-
 .arkos button{cursor:pointer; font-family:var(--sans)}
 .arkos :focus-visible{outline:2px solid var(--yel); outline-offset:2px; border-radius:10px}
-.arkos .status-pill{display:inline-flex; align-items:center; gap:7px; margin-left:auto;
-  font-size:10.5px; color:var(--mute); background:var(--glass2); border-radius:99px; padding:5px 12px}
-.arkos .status-pill .dot{width:6px; height:6px; border-radius:50%; background:var(--ok); box-shadow:0 0 9px var(--ok)}
+.arkos ::-webkit-scrollbar{width:6px}
+.arkos ::-webkit-scrollbar-thumb{background:var(--hair2); border-radius:8px}
+.arkos ::-webkit-scrollbar-track{background:transparent}
 
-/* camadas: cartão branco denso, sombra em duas voltas (perto + longe), sem "caixa de admin" */
-.arkos .mod{position:relative; border-radius:18px; background:var(--card);
-  border:1px solid var(--hair);
-  box-shadow:0 1px 1px rgba(0,0,0,.03), 0 14px 30px -18px rgba(20,20,25,.14);
-  transition:box-shadow .25s, transform .25s;
-}
-.arkos .mod:hover{box-shadow:0 1px 1px rgba(0,0,0,.03), 0 22px 42px -18px rgba(20,20,25,.20)}
+/* shell: sidebar branca + palco, tudo dentro do fundo lavanda (ref Vision) */
+.arkos .shell{display:grid; grid-template-columns:236px minmax(0,1fr); gap:16px;
+  height:100vh; padding:16px; position:relative; z-index:1}
+@media (max-width:1100px){.arkos .shell{grid-template-columns:76px minmax(0,1fr)}
+  .arkos .side-label,.arkos .side-sec,.arkos .side-foot{display:none}
+  .arkos .side-it{justify-content:center; padding:11px 0}}
 
-/* shell: chrome escuro (rail) segurando um palco claro, como dock sobre mesa iluminada */
-.arkos .grid-shell{display:grid; grid-template-rows:56px 1fr; height:100vh; position:relative; z-index:1}
-.arkos .grid-body{display:grid; grid-template-columns:224px 1fr 330px; min-height:0;
-  gap:14px; padding:14px 16px 18px}
-.arkos .pane{border-radius:22px; background:var(--card);
-  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 24px 50px -28px rgba(20,20,25,.16)}
-.arkos .pane.rail{background:linear-gradient(180deg,#1C1C1E,#141416);
-  box-shadow:0 24px 50px -24px rgba(0,0,0,.35)}
-.arkos .pane.ops{background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.78));
-  backdrop-filter:blur(20px) saturate(1.2)}
-@media (max-width:1180px){.arkos .grid-body{grid-template-columns:70px 1fr 300px}
-  .arkos .rail-label,.arkos .rail-sec{display:none}}
-@media (max-width:860px){.arkos .grid-body{grid-template-columns:70px 1fr}
-  .arkos .ops{display:none}}
+/* sidebar: card branco, item ativo = pílula preta (ref Vision) */
+.arkos .side{background:var(--card); border-radius:24px; padding:22px 14px;
+  display:flex; flex-direction:column; gap:2px;
+  box-shadow:0 1px 2px rgba(22,24,29,.04), 0 16px 40px -28px rgba(22,24,29,.18)}
+.arkos .side-logo{display:flex; align-items:center; gap:10px; padding:2px 10px 22px}
+.arkos .side-logo .orb{width:30px; height:30px; border-radius:10px; display:grid; place-items:center;
+  color:#131316; background:linear-gradient(135deg,#FFD84D,#E9AE00);
+  box-shadow:0 6px 16px -6px rgba(255,199,0,.55)}
+.arkos .side-logo b{font-family:var(--disp); font-weight:800; font-size:15px; letter-spacing:.04em}
+.arkos .side-sec{font-size:10px; letter-spacing:.18em; color:var(--dim); padding:14px 12px 10px;
+  text-transform:uppercase}
+.arkos .side-it{position:relative; display:flex; align-items:center; gap:11px; padding:11px 14px;
+  border-radius:99px; font-size:13px; font-weight:500; color:var(--mute); border:0; background:none;
+  width:100%; text-align:left; font-family:var(--sans); transition:color .18s; text-decoration:none}
+.arkos .side-it:hover{color:var(--ink)}
+.arkos .side-it.on{color:#FFFFFF}
+.arkos .side-pill{position:absolute; inset:0; border-radius:99px; background:var(--black);
+  box-shadow:0 10px 22px -10px rgba(19,19,22,.5)}
+.arkos .side-ic{position:relative; z-index:1; display:grid; place-items:center}
+.arkos .side-label{position:relative; z-index:1; white-space:nowrap}
+.arkos .side-badge{position:relative; z-index:1; margin-left:auto; min-width:20px; height:20px;
+  border-radius:99px; background:var(--bad); color:#fff; font-size:10.5px; font-weight:600;
+  display:grid; place-items:center; padding:0 6px}
+.arkos .side-foot{padding:12px 12px 4px; font-size:10.5px; color:var(--dim)}
 
-/* barra: vidro claro sobre o palco */
-.arkos .bar{display:flex; align-items:center; gap:18px; padding:0 22px;
-  background:rgba(250,250,247,.72); backdrop-filter:blur(18px) saturate(1.3);
-  border-bottom:1px solid var(--hair); z-index:6}
-.arkos .mark{font-family:var(--disp); font-weight:800; letter-spacing:.16em; font-size:13px}
-.arkos .mark b{color:var(--yel); -webkit-text-stroke:.4px rgba(0,0,0,.15)}
-.arkos .bar-int{display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--mute)}
-.arkos .bar-dot{width:5px;height:5px;border-radius:50%; box-shadow:0 0 8px currentColor}
-.arkos .bar-clock{margin-left:auto; font-size:11.5px; color:var(--dim)}
-.arkos .bar-demo{font-size:9.5px; letter-spacing:.18em; color:#8A6200;
-  background:var(--yel-glow); border-radius:99px; padding:4px 12px}
+/* palco */
+.arkos .main{min-width:0; overflow-y:auto; padding:6px 8px 8px 2px}
+.arkos .stage{max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:16px}
 
-/* rail: grafite, texto claro, luz âmbar no ativo (a identidade do resto do sistema) */
-.arkos .rail{padding:20px 12px; display:flex; flex-direction:column; gap:2px}
-.arkos .rail-sec{font-family:var(--mono); font-size:9.5px; letter-spacing:.24em; color:var(--mute-dark); padding:0 12px 12px}
-.arkos .rail-it{position:relative; display:flex; align-items:center; gap:11px; padding:10px 12px;
-  border-radius:11px; font-size:13px; color:var(--mute-dark); cursor:pointer; border:0; background:none;
-  width:100%; text-align:left; font-family:var(--sans); transition:color .18s}
-.arkos .rail-it:hover{color:var(--ink-dark)}
-.arkos .rail-it.on{color:var(--ink-dark); font-weight:500}
-.arkos .rail-pill{position:absolute; inset:0; border-radius:11px; background:rgba(255,255,255,.07);
-  box-shadow:0 1px 0 rgba(255,255,255,.07) inset}
-.arkos .rail-glow{position:absolute; left:0; top:50%; width:2px; height:16px; transform:translateY(-50%);
-  border-radius:2px; background:var(--yel); box-shadow:0 0 12px var(--yel)}
-.arkos .rail-ic{position:relative; z-index:1; display:grid; place-items:center; opacity:.85}
-.arkos .rail-label{position:relative; z-index:1}
-
-/* palco central */
-.arkos .main{padding:44px 52px; overflow-y:auto; min-width:0}
-.arkos .stage{max-width:980px; margin:0 auto}
-.arkos .eyebrow{display:flex; align-items:center; gap:9px;
-  font-family:var(--mono); font-size:10px; letter-spacing:.26em; color:var(--dim)}
-.arkos .eyebrow i{width:14px; height:1px; background:var(--yel); display:inline-block}
-.arkos h1{font-family:var(--disp); font-size:clamp(28px,3.4vw,38px); font-weight:700;
-  letter-spacing:-.035em; line-height:1.12; margin-top:14px;
-  background:linear-gradient(180deg,#1D1D1F 45%, rgba(29,29,31,.62));
-  -webkit-background-clip:text; background-clip:text; color:transparent}
-.arkos h1 em{font-style:normal; background:linear-gradient(180deg,var(--yel),#D9A800);
-  -webkit-background-clip:text; background-clip:text; color:transparent}
-.arkos .sub{margin-top:10px; font-size:14px; color:var(--mute); font-weight:400}
-
-/* comando: o objeto principal do palco */
-.arkos .cmd{margin-top:30px; display:flex; align-items:center; gap:14px;
-  border-radius:16px; padding:17px 20px; cursor:text;
-  background:var(--glass2); border:1px solid var(--hair);
-  transition:box-shadow .25s, border-color .25s}
-.arkos .cmd:focus-within{border-color:transparent; box-shadow:0 0 0 1px var(--yel-glow), 0 0 44px -8px rgba(255,199,0,.3),
-  0 1px 0 rgba(255,255,255,.6) inset}
+/* barra superior: busca larga + pílula de data + sino + avatar (ref Vision) */
+.arkos .top{display:flex; align-items:center; gap:12px}
+.arkos .cmd{flex:1; display:flex; align-items:center; gap:12px; background:var(--card);
+  border-radius:16px; padding:0 8px 0 18px; height:52px;
+  box-shadow:0 1px 2px rgba(22,24,29,.04); transition:box-shadow .25s}
+.arkos .cmd:focus-within{box-shadow:0 0 0 2px var(--yel-soft), 0 10px 30px -16px rgba(255,199,0,.5)}
 .arkos .cmd input{flex:1; background:none; border:0; outline:0; color:var(--ink);
-  font-size:14.5px; font-family:var(--sans)}
+  font-size:13.5px; font-family:var(--sans); min-width:0}
 .arkos .cmd input::placeholder{color:var(--dim)}
-/* CTA primário: dourado com brilho e varredura de luz (Landingfolio) */
-.arkos .cmd .go{position:relative; overflow:hidden; border:0; border-radius:11px;
-  padding:10px 18px; font-size:12.5px; font-weight:600; color:#0A0A0C; white-space:nowrap;
-  background:linear-gradient(180deg,#FFD84D,#E9AE00);
-  box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 8px 24px -8px rgba(255,199,0,.45);
-  transition:transform .18s, box-shadow .25s}
-.arkos .cmd .go:hover{transform:translateY(-1px);
-  box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 12px 34px -8px rgba(255,199,0,.6)}
-.arkos .cmd .go:active{transform:translateY(0) scale(.98)}
-.arkos .cmd .go::after{content:''; position:absolute; top:0; bottom:0; width:44px; left:-60px;
-  transform:skewX(-20deg); background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent)}
-.arkos .cmd .go:hover::after{animation:shine .7s ease}
-@keyframes shine{to{left:130%}}
-@media (prefers-reduced-motion:reduce){.arkos .cmd .go:hover::after{animation:none}}
+.arkos .cmd .go{border:0; border-radius:12px; padding:9px 16px; font-size:12px; font-weight:600;
+  color:#131316; white-space:nowrap; background:linear-gradient(180deg,#FFD84D,#E9AE00);
+  box-shadow:0 8px 20px -8px rgba(255,199,0,.55); transition:transform .18s}
+.arkos .cmd .go:hover{transform:translateY(-1px)}
+.arkos .cmd .go:active{transform:scale(.97)}
+.arkos .date-pill{display:flex; align-items:center; height:52px; padding:0 20px;
+  background:var(--card); border-radius:16px; font-size:12.5px; color:var(--mute); white-space:nowrap;
+  box-shadow:0 1px 2px rgba(22,24,29,.04)}
+.arkos .icon-btn{width:52px; height:52px; border-radius:16px; border:0; background:var(--card);
+  display:grid; place-items:center; color:var(--ink); position:relative;
+  box-shadow:0 1px 2px rgba(22,24,29,.04)}
+.arkos .icon-btn .ping{position:absolute; top:15px; right:15px; width:7px; height:7px;
+  border-radius:50%; background:var(--bad); border:1.5px solid #fff}
+.arkos .avatar-top{width:52px; height:52px; border-radius:16px; display:grid; place-items:center;
+  font-family:var(--disp); font-weight:700; font-size:14px; color:#131316;
+  background:linear-gradient(135deg,#FFD84D,#E9AE00); box-shadow:0 1px 2px rgba(22,24,29,.04)}
+@media (max-width:900px){.arkos .date-pill{display:none}}
 
-/* KPIs: tiles com tendência (refs: SaaS Dashboard UI Kit, mindcloud) */
-.arkos .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:34px}
-@media (max-width:1280px){.arkos .kpis{grid-template-columns:repeat(2,1fr)}}
-.arkos .kpi{padding:16px 18px 14px}
-.arkos .kpi .l{font-size:11px; color:var(--dim); letter-spacing:.02em}
-.arkos .kpi .row{display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-top:8px}
-.arkos .kpi .n{font-family:var(--disp); font-size:28px; font-weight:700; letter-spacing:-.03em; line-height:1;
+/* fileira herói: card preto + meta (ref Vision) */
+.arkos .hero-row{display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:16px}
+@media (max-width:1180px){.arkos .hero-row{grid-template-columns:1fr}}
+.arkos .hero{position:relative; overflow:hidden; border-radius:24px; padding:34px 36px 30px;
+  background:radial-gradient(120% 160% at 85% -20%, #33333B 0%, #131316 55%);
+  color:#fff; box-shadow:0 30px 60px -30px rgba(19,19,22,.55)}
+.arkos .hero .sphere{position:absolute; top:-70px; right:40px; width:260px; height:260px;
+  border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle at 32% 28%, #4A4A54 0%, #202024 42%, #0C0C0E 78%);
+  box-shadow:inset -20px -28px 60px rgba(0,0,0,.6), inset 14px 18px 40px rgba(255,255,255,.08),
+  0 40px 80px -30px rgba(0,0,0,.8)}
+.arkos .hero .eyebrow{font-size:12.5px; color:rgba(255,255,255,.55); position:relative}
+.arkos .hero h1{font-family:var(--disp); font-size:clamp(28px,3.2vw,40px); font-weight:700;
+  letter-spacing:-.03em; line-height:1.1; margin-top:8px; position:relative}
+.arkos .hero-cards{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:26px; position:relative}
+@media (max-width:640px){.arkos .hero-cards{grid-template-columns:1fr}}
+.arkos .hcard{border-radius:16px; padding:18px 20px 16px; background:var(--w06);
+  border:1px solid var(--w-hair); backdrop-filter:blur(6px)}
+.arkos .hcard .hc-top{display:flex; align-items:center; gap:10px}
+.arkos .hcard .hc-ic{width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
+  background:var(--w12); color:#fff}
+.arkos .hcard .hc-l{margin-left:auto; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:rgba(255,255,255,.55)}
+.arkos .hcard .hc-n{font-family:var(--disp); font-size:34px; font-weight:700; letter-spacing:-.02em;
+  margin-top:12px; font-variant-numeric:tabular-nums}
+.arkos .hcard .hc-s{font-size:11.5px; color:rgba(255,255,255,.5); margin-top:6px; text-align:right}
+
+/* meta: donut amarelo sobre preto (ref Vision, accent ARK) */
+.arkos .goal{position:relative; overflow:hidden; border-radius:24px; padding:26px 26px 24px;
+  background:radial-gradient(130% 150% at 15% 110%, #2A2A31 0%, #131316 60%);
+  color:#fff; display:flex; flex-direction:column; align-items:center;
+  box-shadow:0 30px 60px -30px rgba(19,19,22,.55)}
+.arkos .goal .gt{font-family:var(--disp); font-size:15px; font-weight:600; align-self:flex-start}
+.arkos .goal .donut-wrap{position:relative; margin-top:18px}
+.arkos .goal .donut-pct{position:absolute; inset:0; display:grid; place-items:center;
+  font-family:var(--disp); font-size:30px; font-weight:700; letter-spacing:-.02em}
+.arkos .goal .gv{font-family:var(--disp); font-size:22px; font-weight:700; margin-top:16px;
   font-variant-numeric:tabular-nums}
-.arkos .kpi.hot .n{color:var(--yel); text-shadow:0 0 26px rgba(255,199,0,.35)}
-.arkos .kpi .spark{flex-shrink:0; opacity:.9}
-.arkos .kpi .delta{margin-top:9px; font-family:var(--mono); font-size:10px; color:var(--mute)}
-.arkos .kpi .delta b{color:var(--ok); font-weight:500}
-.arkos .kpi .delta b.down{color:var(--bad)}
+.arkos .goal .gs{font-size:11.5px; color:rgba(255,255,255,.55); margin-top:6px; text-align:center}
+.arkos .goal .gbtn{margin-top:16px; border:0; border-radius:12px; background:#fff; color:#131316;
+  font-size:12.5px; font-weight:600; padding:11px 22px; text-decoration:none; transition:transform .18s}
+.arkos .goal .gbtn:hover{transform:translateY(-1px)}
 
-/* grade de conteúdo: Hoje + Aprovação/Clientes */
-.arkos .grid2{display:grid; grid-template-columns:1.5fr 1fr; gap:12px; margin-top:12px}
-@media (max-width:1280px){.arkos .grid2{grid-template-columns:1fr}}
-.arkos .card{padding:18px 20px}
-.arkos .card .ct{font-family:var(--disp); font-size:13px; font-weight:600; display:flex;
-  align-items:center; justify-content:space-between}
-.arkos .card .ct a{font-size:11px; color:var(--dim); text-decoration:none; font-family:var(--sans); font-weight:400}
-.arkos .card .ct a:hover{color:var(--yel)}
-.arkos .li{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--hair)}
-.arkos .li:last-child{border-bottom:0; padding-bottom:2px}
-.arkos .li .tick{width:16px; height:16px; border-radius:6px; border:1.5px solid var(--hair2); flex-shrink:0}
-.arkos .li .tx{flex:1; min-width:0}
-.arkos .li .tt{font-size:12.5px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.arkos .li .cc{font-size:10.5px; color:var(--dim); margin-top:2px}
-.arkos .chip{font-family:var(--mono); font-size:9.5px; padding:3px 8px; border-radius:99px;
-  background:var(--glass2); color:var(--mute); white-space:nowrap}
-.arkos .chip.due{color:var(--warn)}
-.arkos .cli-strip{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
-.arkos .avatar{display:flex; align-items:center; gap:8px; padding:7px 12px 7px 8px; border-radius:99px;
-  background:var(--glass2); font-size:11.5px; color:var(--mute)}
-.arkos .avatar i{width:22px; height:22px; border-radius:50%; display:grid; place-items:center;
-  font-style:normal; font-family:var(--disp); font-size:9px; font-weight:700; color:#0A0A0C;
-  background:linear-gradient(135deg,#FFD84D,#E3A800)}
-.arkos .apr{display:flex; align-items:center; gap:14px; margin-top:14px}
-.arkos .apr .big{font-family:var(--disp); font-size:30px; font-weight:700; color:var(--yel);
-  text-shadow:0 0 26px rgba(255,199,0,.3)}
-.arkos .apr p{font-size:12px; color:var(--mute); line-height:1.5}
+/* fileira de conteúdo: tabela + coluna direita */
+.arkos .body-row{display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:16px; align-items:start}
+@media (max-width:1180px){.arkos .body-row{grid-template-columns:1fr}}
+.arkos .panel{background:var(--card); border-radius:24px; padding:22px 24px;
+  box-shadow:0 1px 2px rgba(22,24,29,.04), 0 16px 40px -30px rgba(22,24,29,.16)}
+.arkos .panel .pt{font-family:var(--disp); font-size:15px; font-weight:600;
+  display:flex; align-items:center; justify-content:space-between}
+.arkos .panel .pt a{font-size:11.5px; color:var(--dim); text-decoration:none; font-family:var(--sans); font-weight:500}
+.arkos .panel .pt a:hover{color:var(--ink)}
 
-.arkos .sec-t{display:flex; align-items:baseline; gap:12px; margin:52px 0 18px}
-.arkos .sec-t h2{font-family:var(--disp); font-size:15px; font-weight:600; letter-spacing:-.01em}
+/* tabela de tarefas (ref Vision "Latest Transaction") */
+.arkos table.tt{width:100%; border-collapse:collapse; margin-top:14px}
+.arkos .tt th{font-size:11px; font-weight:500; color:var(--dim); text-align:left;
+  padding:8px 10px; border-bottom:1px solid var(--hair)}
+.arkos .tt td{font-size:12.5px; padding:13px 10px; border-bottom:1px solid var(--hair); vertical-align:middle}
+.arkos .tt tr:last-child td{border-bottom:0}
+.arkos .tt .t-name{font-weight:500; color:var(--ink); max-width:340px; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis}
+.arkos .tt .t-cli{color:var(--mute)}
+.arkos .chip{display:inline-block; font-size:10.5px; font-weight:600; color:#fff;
+  border-radius:6px; padding:4px 10px; white-space:nowrap}
+.arkos .chip.ok{background:var(--ok)}
+.arkos .chip.hold{background:var(--hold); color:#131316}
+.arkos .chip.bad{background:var(--bad)}
+.arkos .tbtn{border:0; border-radius:8px; background:var(--black); color:#fff; font-size:11px;
+  font-weight:500; padding:7px 14px; text-decoration:none; display:inline-block}
+.arkos .tbtn:hover{background:var(--black2)}
+@media (max-width:760px){.arkos .tt .hide-sm{display:none}}
+
+/* aprovações (ref Vision Pro "Waiting For Approval" + "Sales History") */
+.arkos .ap-it{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--hair)}
+.arkos .ap-it:last-child{border-bottom:0}
+.arkos .ap-ic{width:40px; height:40px; border-radius:14px; display:grid; place-items:center;
+  color:#131316; flex-shrink:0}
+.arkos .ap-tx{flex:1; min-width:0}
+.arkos .ap-t{font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.arkos .ap-s{font-size:11px; color:var(--mute); margin-top:2px; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis}
+.arkos .ap-chip{border-radius:8px; background:var(--ok); color:#fff; font-size:11px; font-weight:600;
+  padding:6px 12px; white-space:nowrap; border:0; text-decoration:none}
+.arkos .ap-chip.yel{background:var(--yel); color:#131316}
+
+/* feed de operações */
+.arkos .feed{display:flex; flex-direction:column}
+.arkos .feed-h{display:flex; align-items:center; gap:9px}
+.arkos .live{width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 10px var(--ok)}
+.arkos .op{display:flex; gap:11px; padding:11px 0; border-bottom:1px solid var(--hair); align-items:flex-start}
+.arkos .op:last-child{border-bottom:0}
+.arkos .op-dot{width:7px; height:7px; border-radius:50%; background:var(--yel); margin-top:5px; flex-shrink:0;
+  box-shadow:0 0 8px rgba(255,199,0,.5)}
+.arkos .op .who{font-size:10px; letter-spacing:.12em; color:var(--dim); font-weight:600}
+.arkos .op .what{font-size:12px; color:var(--ink); margin-top:3px; line-height:1.5}
+.arkos .op .when{font-size:10.5px; color:var(--dim); margin-top:3px; font-family:var(--mono)}
+
+/* KPIs claros com gráfico menta (ref SaaS UI Kit) */
+.arkos .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+@media (max-width:1180px){.arkos .kpis{grid-template-columns:repeat(2,1fr)}}
+.arkos .kpi{background:var(--card); border-radius:20px; padding:18px 20px 14px;
+  box-shadow:0 1px 2px rgba(22,24,29,.04)}
+.arkos .kpi .l{font-size:11.5px; color:var(--mute)}
+.arkos .kpi .row{display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-top:8px}
+.arkos .kpi .n{font-family:var(--disp); font-size:30px; font-weight:700; letter-spacing:-.03em;
+  line-height:1; font-variant-numeric:tabular-nums}
+.arkos .kpi .delta{margin-top:8px; font-size:10.5px; color:var(--mute)}
+.arkos .kpi .delta b{color:var(--ok-ink); font-weight:600}
+
+/* sociedade de agentes: cards brancos, expansão em vidro (ref Vision Pro) */
+.arkos .sec-t{display:flex; align-items:baseline; gap:12px; margin-top:6px}
+.arkos .sec-t h2{font-family:var(--disp); font-size:15px; font-weight:600}
 .arkos .sec-t span{font-size:11px; color:var(--dim)}
-
-/* agentes: objetos táteis */
-.arkos .agents{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px}
-.arkos .ag{padding:18px 18px 16px; cursor:pointer}
+.arkos .agents{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px}
+.arkos .ag{background:var(--card); border-radius:20px; padding:18px 18px 16px; cursor:pointer;
+  box-shadow:0 1px 2px rgba(22,24,29,.04); transition:box-shadow .25s}
+.arkos .ag:hover{box-shadow:0 18px 40px -24px rgba(22,24,29,.3)}
 .arkos .ag-top{display:flex; align-items:center; gap:12px}
-.arkos .orb{width:38px; height:38px; border-radius:12px; display:grid; place-items:center;
-  background:linear-gradient(180deg, var(--glass2), var(--glass));
-  box-shadow:0 1px 0 rgba(255,255,255,.6) inset; color:var(--mute)}
-.arkos .ag.online .orb{color:#B37E00; background:linear-gradient(180deg, var(--yel-glow), rgba(255,199,0,.06))}
+.arkos .orb{width:40px; height:40px; border-radius:14px; display:grid; place-items:center;
+  background:var(--bg); color:var(--mute)}
+.arkos .ag.online .orb{color:#131316; background:linear-gradient(135deg,#FFD84D,#E9AE00);
+  box-shadow:0 8px 18px -8px rgba(255,199,0,.6)}
 .arkos .ag-name{font-family:var(--disp); font-size:13.5px; font-weight:600; letter-spacing:-.01em}
 .arkos .ag-role{font-size:11px; color:var(--dim); margin-top:1px}
-.arkos .ag-st{margin-top:14px; font-family:var(--mono); font-size:10.5px; color:var(--mute);
+.arkos .ag-st{margin-top:14px; font-size:11px; color:var(--mute);
   display:flex; align-items:center; gap:8px; min-height:15px}
 .arkos .ag-st .dot{width:5px; height:5px; border-radius:50%; box-shadow:0 0 9px currentColor}
 
-/* expandido (pasta iOS): mesmo objeto, maior */
-.arkos .veil{position:fixed; inset:0; z-index:30; background:rgba(5,5,7,.55);
+/* expandido: painel de vidro escuro (ref Vision Pro HR) */
+.arkos .veil{position:fixed; inset:0; z-index:30; background:rgba(10,10,14,.5);
   backdrop-filter:blur(16px) saturate(1.2)}
-.arkos .ag-x{position:fixed; z-index:31; left:50%; top:50%; width:min(560px,92vw);
-  transform:translate(-50%,-50%); padding:30px; border-radius:24px}
-.arkos .ag-x .close{position:absolute; top:18px; right:18px; background:var(--glass2); border:0;
-  color:var(--mute); width:30px; height:30px; border-radius:9px; cursor:pointer; display:grid; place-items:center}
-.arkos .ag-x .desc{margin-top:18px; font-size:13.5px; color:var(--mute); line-height:1.65}
+.arkos .ag-x-wrap{position:fixed; inset:0; z-index:31; display:grid; place-items:center; pointer-events:none}
+.arkos .ag-x{position:relative; pointer-events:auto; width:min(560px,92vw);
+  padding:30px; border-radius:24px;
+  background:rgba(28,28,33,.78); backdrop-filter:blur(28px) saturate(1.4);
+  border:1px solid var(--w-hair); color:#fff;
+  box-shadow:0 50px 100px -40px rgba(0,0,0,.7)}
+.arkos .ag-x .ag-name{color:#fff}
+.arkos .ag-x .ag-role{color:rgba(255,255,255,.55)}
+.arkos .ag-x .orb{background:var(--w12); color:#fff}
+.arkos .ag-x .close{position:absolute; top:18px; right:18px; background:var(--w12); border:0;
+  color:#fff; width:30px; height:30px; border-radius:9px; display:grid; place-items:center}
+.arkos .ag-x .desc{margin-top:18px; font-size:13.5px; color:rgba(255,255,255,.7); line-height:1.65}
 .arkos .ag-x .hist{margin-top:22px; display:flex; flex-direction:column; gap:10px}
-.arkos .ag-x .hist .h-it{display:flex; gap:11px; font-size:12.5px; color:var(--mute); align-items:baseline}
-.arkos .ag-x .hist .h-t{font-family:var(--mono); font-size:10px; color:var(--dim); min-width:44px}
+.arkos .ag-x .hist .h-it{display:flex; gap:11px; font-size:12.5px; color:rgba(255,255,255,.65); align-items:baseline}
+.arkos .ag-x .hist .h-t{font-family:var(--mono); font-size:10px; color:rgba(255,255,255,.4); min-width:44px}
 
-/* operações: linha do tempo viva */
-.arkos .ops{display:flex; flex-direction:column; min-height:0}
-.arkos .ops-h{padding:22px 24px 14px}
-.arkos .ops-h .t{font-family:var(--disp); font-size:13px; font-weight:600; display:flex; align-items:center; gap:9px}
-.arkos .live{width:6px; height:6px; border-radius:50%; background:var(--ok); box-shadow:0 0 10px var(--ok)}
-.arkos .ops-list{flex:1; overflow-y:auto; padding:6px 24px 24px; position:relative}
-.arkos .ops-line{position:absolute; left:35px; top:0; bottom:0; width:1px;
-  background:linear-gradient(180deg, var(--hair2), transparent)}
-.arkos .op{position:relative; padding:2px 0 20px 32px}
-.arkos .op-dot{position:absolute; left:8px; top:6px; width:7px; height:7px; border-radius:50%;
-  background:var(--yel); box-shadow:0 0 10px rgba(255,199,0,.5)}
-.arkos .op .who{font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; color:var(--dim)}
-.arkos .op .what{font-size:12.5px; color:var(--ink); margin-top:5px; line-height:1.5; font-weight:400}
-.arkos .op .when{font-family:var(--mono); font-size:10px; color:var(--dim); margin-top:5px}
-
-/* boot: único momento escuro de propósito, o palco liga como uma tela acordando */
-.arkos .boot{position:fixed; inset:0; background:#08080A; z-index:50; display:grid; place-items:center}
+/* boot: tela acordando */
+.arkos .boot{position:fixed; inset:0; background:#0B0B0D; z-index:50; display:grid; place-items:center}
 .arkos .boot-mark{font-family:var(--disp); font-weight:800; font-size:clamp(44px,8vw,84px);
   letter-spacing:.08em; display:flex;
   background:linear-gradient(180deg,#FFF 30%, rgba(255,255,255,.4));
@@ -249,20 +269,19 @@ html:has(.arkos),body:has(.arkos){background:#FAFAF7; margin:0}
 .arkos .boot-mark .os{background:linear-gradient(180deg,var(--yel),#D9A800);
   -webkit-background-clip:text; background-clip:text; color:transparent}
 .arkos .boot-lines{position:absolute; bottom:14vh; left:50%; transform:translateX(-50%);
-  font-family:var(--mono); font-size:11.5px; color:var(--mute-dark); display:flex;
+  font-family:var(--mono); font-size:11.5px; color:#8B8B95; display:flex;
   flex-direction:column; gap:7px; align-items:center}
 .arkos .boot-lines .ok{color:var(--ok)}
-.arkos ::-webkit-scrollbar{width:6px}
-.arkos ::-webkit-scrollbar-thumb{background:var(--hair2); border-radius:8px}
-.arkos ::-webkit-scrollbar-track{background:transparent}
+.arkos .demo-tag{font-size:9.5px; letter-spacing:.18em; color:#8A6200;
+  background:var(--yel-soft); border-radius:99px; padding:5px 12px; white-space:nowrap}
 `;
 
-/* ── Física (AML) ───────────────────────────────────────── */
+/* Física */
 const spring = { type: "spring" as const, stiffness: 400, damping: 34, mass: 0.8 };
 const springSoft = { type: "spring" as const, stiffness: 200, damping: 26, mass: 1.1 };
 const morph = { type: "spring" as const, stiffness: 300, damping: 30, mass: 0.9 };
 
-/* ── Dados ──────────────────────────────────────────────── */
+/* Dados */
 type Agent = {
   id: string; Icon: any; nome: string; papel: string; desc: string;
   status: "online" | "idle"; fazendo: string[];
@@ -301,18 +320,17 @@ const BOOT_LINES = [
   "Conectando memória…",
   "Acordando agentes…",
   "Sincronizando estado…",
-  "Verificando integrações…",
   "Workspace pronto.",
 ];
 
-/* ── Boot ───────────────────────────────────────────────── */
+/* Boot */
 function Boot({ done }: { done: () => void }) {
   const reduced = useReducedMotion();
   const [line, setLine] = useState(0);
   useEffect(() => {
     if (reduced) { done(); return; }
-    const iv = setInterval(() => setLine((l) => l + 1), 420);
-    const end = setTimeout(done, 420 * BOOT_LINES.length + 500);
+    const iv = setInterval(() => setLine((l) => l + 1), 380);
+    const end = setTimeout(done, 380 * BOOT_LINES.length + 420);
     return () => { clearInterval(iv); clearTimeout(end); };
   }, [reduced, done]);
   return (
@@ -341,7 +359,7 @@ function Boot({ done }: { done: () => void }) {
   );
 }
 
-/* ── Dados reais com sessão, demo sem ───────────────────── */
+/* Dados reais com sessão, demo sem */
 function useArkData() {
   const [demo, setDemo] = useState(true);
   const [nome, setNome] = useState("Senhor");
@@ -376,11 +394,11 @@ function useArkData() {
         const abertasList = tarefas
           .filter((t) => t && !t.done && !t.concluida)
           .sort((a, b) => String(a.prazo || "9999").localeCompare(String(b.prazo || "9999")))
-          .slice(0, 5)
+          .slice(0, 6)
           .map((t) => ({
             tt: String(t.titulo || t.nome || t.texto || "Tarefa"),
             cc: [t.cliente, t.area || t.responsavel].filter(Boolean).join(" · ") || "ARK",
-            due: t.prazo === hoje ? "hoje" : String(t.prazo || "").slice(5) || "sem prazo",
+            due: t.prazo === hoje ? "hoje" : t.prazo && t.prazo < hoje ? "atrasada" : String(t.prazo || "").slice(5) || "sem prazo",
           }));
         const first = (j.member?.full_name || "").split(" ")[0];
         setNome(first || "Senhor");
@@ -395,46 +413,64 @@ function useArkData() {
   return { demo, nome, stats, ops, tarefasTop };
 }
 
-/* ── Peças ──────────────────────────────────────────────── */
-/* Sparkline: série única por tile, traço 2px, tinta neutra (amarelo só no tile quente) */
-function Spark({ pts, hot }: { pts: number[]; hot?: boolean }) {
-  const w = 92, h = 30, min = Math.min(...pts), max = Math.max(...pts) || 1;
+/* Sparkline em menta (ref SaaS UI Kit): linha + área com gradiente */
+function Spark({ pts, id }: { pts: number[]; id: string }) {
+  const w = 92, h = 32, min = Math.min(...pts), max = Math.max(...pts) || 1;
   const xy = pts.map((v, i) => [
     (i / (pts.length - 1)) * (w - 4) + 2,
-    h - 4 - ((v - min) / (max - min || 1)) * (h - 10),
+    h - 5 - ((v - min) / (max - min || 1)) * (h - 12),
   ]);
   const d = xy.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
-  const cor = hot ? "#FFC700" : "rgba(245,244,240,.55)";
-  const [lx, ly] = xy[xy.length - 1];
+  const [lx] = xy[xy.length - 1];
   return (
-    <svg className="spark" width={w} height={h} aria-hidden>
-      <path d={`${d} L${lx},${h} L2,${h} Z`} fill={cor} opacity={0.08} />
-      <motion.path d={d} fill="none" stroke={cor} strokeWidth={2} strokeLinecap="round"
+    <svg width={w} height={h} aria-hidden>
+      <defs>
+        <linearGradient id={`sg-${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3DD9A4" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#3DD9A4" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${d} L${lx},${h} L2,${h} Z`} fill={`url(#sg-${id})`} />
+      <motion.path d={d} fill="none" stroke="#3DD9A4" strokeWidth={2} strokeLinecap="round"
         initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
         transition={{ duration: 0.9, ease: [0.3, 0, 0.2, 1] }} />
-      <circle cx={lx} cy={ly} r={2.5} fill={cor} />
     </svg>
   );
 }
 
-const CLIENTES = ["Vivenda", "Fercon", "Sasse", "Cachu", "Attra", "Brisa", "Dom", "Babbo"];
+/* Donut da meta: amarelo ARK sobre trilha translúcida (ref Vision "Marketing Goal") */
+function Donut({ pct }: { pct: number }) {
+  const R = 56, C = 2 * Math.PI * R;
+  return (
+    <div className="donut-wrap">
+      <svg width={150} height={150} viewBox="0 0 150 150" aria-hidden>
+        <circle cx={75} cy={75} r={R} fill="none" stroke="rgba(255,255,255,.14)" strokeWidth={16} />
+        <motion.circle cx={75} cy={75} r={R} fill="none" stroke="#FFC700" strokeWidth={16}
+          strokeLinecap="round" strokeDasharray={C} transform="rotate(-90 75 75)"
+          initial={{ strokeDashoffset: C }}
+          animate={{ strokeDashoffset: C * (1 - Math.min(1, Math.max(0, pct / 100))) }}
+          transition={{ duration: 1.1, ease: [0.3, 0, 0.2, 1], delay: 0.3 }} />
+      </svg>
+      <div className="donut-pct">{Math.round(pct)}%</div>
+    </div>
+  );
+}
+
 const TAREFAS_DEMO = [
   { tt: "Aprovar plano de conteúdo de julho da Vivenda", cc: "Vivenda · Conselho de IA", due: "hoje" },
   { tt: "Gravar captação do creme de ureia (plano Copa)", cc: "Vivenda · Captação", due: "hoje" },
   { tt: "Revisar régua de cobrança da semana", cc: "Financeiro · Cobrança", due: "amanhã" },
   { tt: "Responder demanda do portal da Fercon", cc: "Fercon · Portal do cliente", due: "amanhã" },
   { tt: "Postar carrossel aprovado do Cachu", cc: "Cachu · Social Media", due: "qui" },
+  { tt: "Fechar relatório mensal da Sasse", cc: "Sasse · Relatórios", due: "sex" },
 ];
 
-function Clock() {
-  const [t, setT] = useState(() => new Date());
-  useEffect(() => { const iv = setInterval(() => setT(new Date()), 1000); return () => clearInterval(iv); }, []);
-  return (
-    <span className="bar-clock mono">
-      {t.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" })} · {t.toLocaleTimeString("pt-BR")}
-    </span>
-  );
-}
+const APROVACOES_DEMO = [
+  { t: "Carrossel · 5 motivos para amassar o burger", s: "Cachu · Social Media", cor: "#FFD84D" },
+  { t: "Reel · bastidores da cozinha da Vivenda", s: "Vivenda · Roteirista", cor: "#7DD8D8" },
+  { t: "Post único · promoção de quarta", s: "Babbo · Social Media", cor: "#F4A0C0" },
+  { t: "Resposta sugerida no WhatsApp", s: "Fercon · Atendente", cor: "#B6A5F5" },
+];
 
 function StatusLine({ a, i }: { a: Agent; i: number }) {
   const [fase, setFase] = useState(0);
@@ -442,7 +478,7 @@ function StatusLine({ a, i }: { a: Agent; i: number }) {
     const iv = setInterval(() => setFase((f) => f + 1), 3600 + i * 340);
     return () => clearInterval(iv);
   }, [i]);
-  const cor = a.status === "online" ? "var(--ok)" : "var(--dim)";
+  const cor = a.status === "online" ? "var(--ok-ink)" : "var(--dim)";
   return (
     <div className="ag-st">
       <span className="dot" style={{ background: cor, color: cor }} />
@@ -456,24 +492,22 @@ function StatusLine({ a, i }: { a: Agent; i: number }) {
   );
 }
 
-/* Card de agente: objeto tátil que expande no lugar (pasta iOS) */
+/* Card de agente: expande no lugar (pasta iOS) */
 function AgentCard({ a, i, open }: { a: Agent; i: number; open: (id: string) => void }) {
   const reduced = useReducedMotion();
   return (
-    <motion.div layoutId={`ag-${a.id}`} className={`mod ag ${a.status}`}
-      initial={{ y: 26, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-      transition={{ ...spring, delay: 0.05 * i }}
+    <motion.div layoutId={`ag-${a.id}`} className={`ag ${a.status}`}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      transition={{ duration: reduced ? 0 : 0.4, delay: 0.05 * i }}
       whileHover={{ y: -4, scale: 1.015, transition: spring }}
       whileTap={{ scale: 0.98 }}
       onClick={() => open(a.id)}>
       <div className="ag-top">
-        <motion.div layoutId={`orb-${a.id}`} className="orb"
-          animate={reduced || a.status !== "online" ? {} : { scale: [1, 1.05, 1] }}
-          transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: i * 0.3 }}>
+        <div className="orb">
           <a.Icon size={17} strokeWidth={1.8} />
-        </motion.div>
+        </div>
         <div>
-          <motion.div layoutId={`nm-${a.id}`} className="ag-name">{a.nome}</motion.div>
+          <div className="ag-name">{a.nome}</div>
           <div className="ag-role">{a.papel}</div>
         </div>
       </div>
@@ -497,14 +531,15 @@ function AgentExpanded({ a, close }: { a: Agent; close: () => void }) {
     <>
       <motion.div className="veil" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
         exit={{ opacity: 0 }} transition={{ duration: 0.25 }} onClick={close} />
-      <motion.div layoutId={`ag-${a.id}`} className={`mod ag-x ${a.status}`} transition={morph}>
+      <div className="ag-x-wrap">
+      <motion.div layoutId={`ag-${a.id}`} className={`ag-x ${a.status}`} transition={morph}>
         <button className="close" onClick={close} aria-label="Fechar"><X size={15} /></button>
         <div className="ag-top">
-          <motion.div layoutId={`orb-${a.id}`} className="orb" style={{ width: 48, height: 48, borderRadius: 14 }}>
+          <div className="orb" style={{ width: 48, height: 48, borderRadius: 14 }}>
             <a.Icon size={21} strokeWidth={1.8} color={a.status === "online" ? "#FFC700" : undefined} />
-          </motion.div>
+          </div>
           <div>
-            <motion.div layoutId={`nm-${a.id}`} className="ag-name" style={{ fontSize: 17 }}>{a.nome}</motion.div>
+            <div className="ag-name" style={{ fontSize: 17 }}>{a.nome}</div>
             <div className="ag-role">{a.papel} · {a.status === "online" ? "online agora" : "em espera"}</div>
           </div>
         </div>
@@ -520,26 +555,26 @@ function AgentExpanded({ a, close }: { a: Agent; close: () => void }) {
           ))}
         </motion.div>
       </motion.div>
+      </div>
     </>
   );
 }
 
 const RAIL = [
-  { id: "missao", Icon: Sparkles, label: "Mission Control" },
+  { id: "missao", Icon: LayoutGrid, label: "Mission Control" },
   { id: "agentes", Icon: Hexagon, label: "Agentes" },
   { id: "operacoes", Icon: Activity, label: "Operações" },
   { id: "memoria", Icon: BrainCircuit, label: "Memória" },
   { id: "clientes", Icon: Users, label: "Clientes" },
 ];
 
-const INTEGRACOES = [
-  { nome: "Supabase", cor: "var(--ok)" },
-  { nome: "Anthropic", cor: "var(--ok)" },
-  { nome: "WhatsApp", cor: "var(--ok)" },
-  { nome: "Google", cor: "var(--warn)" },
-];
+function chipClass(due: string) {
+  if (due === "atrasada") return "chip bad";
+  if (due === "hoje") return "chip hold";
+  return "chip ok";
+}
 
-/* ── ARK OS ─────────────────────────────────────────────── */
+/* ARK OS */
 function ArkOS() {
   const reduced = useReducedMotion();
   const [booted, setBooted] = useState(false);
@@ -559,181 +594,214 @@ function ArkOS() {
       const item = fonte[feedIdx.current];
       if (!item) return;
       feedIdx.current += 1;
-      setFeed((f) => [item, ...f].slice(0, 20));
+      setFeed((f) => [item, ...f].slice(0, 12));
     };
     push();
     const iv = setInterval(push, 1700);
     return () => clearInterval(iv);
   }, [booted, ops]);
 
-  const hora = new Date().getHours();
+  const agora = new Date();
+  const hora = agora.getHours();
   const saud = hora < 5 ? "Boa madrugada" : hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
   const agAberto = AGENTES.find((a) => a.id === openAg);
 
+  const abertas = demo ? 23 : stats.abertas;
+  const atrasadas = demo ? 3 : stats.atrasadas;
+  const fila = demo ? 4 : stats.fila;
+  const briefings = demo ? 12 : stats.briefings;
+  const emDia = abertas > 0 ? Math.round(100 * (abertas - atrasadas) / abertas) : 100;
+
   const shell = useMemo(() => ({
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : 0.08, delayChildren: 0.05 } },
+    show: { transition: { staggerChildren: reduced ? 0 : 0.07, delayChildren: 0.05 } },
   }), [reduced]);
   const chega = { hidden: { y: 24, opacity: 0 }, show: { y: 0, opacity: 1, transition: spring } };
 
   return (
     <div className="arkos">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <div className="aurora" aria-hidden />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
       {booted && (
-        <div className="grid-shell">
-          <motion.header className="bar" initial={{ y: -56 }} animate={{ y: 0 }} transition={springSoft}>
-            <span className="mark">ARK<b>OS</b></span>
-            {INTEGRACOES.map((s, i) => (
-              <motion.span key={s.nome} className="bar-int" initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.25 + i * 0.07 }}>
-                <span className="bar-dot" style={{ background: s.cor, color: s.cor }} />{s.nome}
-              </motion.span>
+        <div className="shell">
+          <motion.nav className="side" initial={{ x: -240, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
+            transition={{ ...springSoft, delay: 0.05 }}>
+            <div className="side-logo">
+              <span className="orb"><Sparkles size={16} strokeWidth={2} /></span>
+              <b>ARK OS</b>
+            </div>
+            <div className="side-sec">Operação</div>
+            {RAIL.map((r) => (
+              <button key={r.id} className={`side-it ${nav === r.id ? "on" : ""}`} onClick={() => setNav(r.id)}>
+                {nav === r.id && <motion.span className="side-pill" layoutId="sidepill" transition={spring} />}
+                <span className="side-ic"><r.Icon size={16} strokeWidth={1.8} /></span>
+                <span className="side-label">{r.label}</span>
+                {r.id === "operacoes" && fila > 0 && <span className="side-badge">{fila}</span>}
+              </button>
             ))}
-            {demo && <span className="bar-demo mono">MODO DEMONSTRAÇÃO</span>}
-            <Clock />
-          </motion.header>
+            <div style={{ flex: 1 }} />
+            <div className="side-sec">Sistema</div>
+            <a className="side-it" href="/app">
+              <span className="side-ic"><ArrowLeft size={15} strokeWidth={1.8} /></span>
+              <span className="side-label">WorkFlowArk V1</span>
+            </a>
+            <div className="side-foot">© ARK Content 2026</div>
+          </motion.nav>
 
-          <div className="grid-body">
-            <motion.nav className="rail pane" initial={{ x: -240, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
-              transition={{ ...springSoft, delay: 0.08 }}>
-              <div className="rail-sec">ESPAÇOS</div>
-              {RAIL.map((r) => (
-                <button key={r.id} className={`rail-it ${nav === r.id ? "on" : ""}`} onClick={() => setNav(r.id)}>
-                  {nav === r.id && (
-                    <>
-                      <motion.span className="rail-pill" layoutId="railpill" transition={spring} />
-                      <motion.span className="rail-glow" layoutId="railglow" transition={spring} />
-                    </>
-                  )}
-                  <span className="rail-ic"><r.Icon size={16} strokeWidth={1.8} /></span>
-                  <span className="rail-label">{r.label}</span>
-                </button>
-              ))}
-              <div style={{ flex: 1 }} />
-              <a className="rail-it" href="/app" style={{ textDecoration: "none" }}>
-                <span className="rail-ic"><ArrowLeft size={15} strokeWidth={1.8} /></span>
-                <span className="rail-label">WorkFlowArk V1</span>
-              </a>
-            </motion.nav>
-
-            <motion.main className="main pane" variants={shell} initial="hidden" animate="show">
-              <div className="stage">
-                <motion.div variants={chega} className="eyebrow" style={{ display: "flex", width: "100%" }}>
-                  <i />MISSION CONTROL · ARK CONTENT
-                  <span className="status-pill"><span className="dot" />Todos os sistemas operacionais</span>
-                </motion.div>
-                <motion.h1 variants={chega}>{saud}, <em>{nome}</em>.<br />A operação está viva.</motion.h1>
-                <motion.p variants={chega} className="sub">
-                  {AGENTES.filter((a) => a.status === "online").length} agentes trabalhando agora. Tudo que acontece está na linha do tempo à direita.
-                </motion.p>
-
-                <motion.label variants={chega} className="cmd">
-                  <Sparkles size={16} color="#FFC700" strokeWidth={1.8} />
+          <motion.main className="main" variants={shell} initial="hidden" animate="show">
+            <div className="stage">
+              <motion.div variants={chega} className="top">
+                <label className="cmd">
+                  <Search size={16} color="#A6AAB8" strokeWidth={2} />
                   <input value={cmd} onChange={(e) => setCmd(e.target.value)}
                     placeholder="Declare um objetivo. Ex.: preparar o lançamento da Vivenda…" />
-                  <button className="go" type="button">Lançar missão</button>
-                </motion.label>
+                  <button className="go" type="button"><Sparkles size={13} style={{ marginRight: 6, verticalAlign: -2 }} />Lançar missão</button>
+                </label>
+                <span className="date-pill">
+                  {agora.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                </span>
+                {demo && <span className="demo-tag mono">DEMO</span>}
+                <button className="icon-btn" aria-label="Notificações">
+                  <Bell size={17} strokeWidth={1.8} />
+                  {fila > 0 && <span className="ping" />}
+                </button>
+                <span className="avatar-top">{nome.slice(0, 1).toUpperCase()}</span>
+              </motion.div>
 
-                <motion.div variants={chega} className="kpis">
-                  {[
-                    { n: demo ? 23 : stats.abertas, l: "Tarefas abertas", d: "+4 esta semana", hot: false,
-                      pts: [12, 14, 13, 17, 16, 19, 18, 21, 20, 23] },
-                    { n: demo ? 3 : stats.atrasadas, l: "Atrasadas", d: "2 a menos que ontem", hot: false,
-                      pts: [8, 7, 7, 6, 5, 6, 5, 4, 4, 3] },
-                    { n: demo ? 6 : stats.fila, l: "Aguardando seu aval", d: "fila de aprovação", hot: (demo ? 6 : stats.fila) > 0,
-                      pts: [1, 2, 2, 3, 2, 4, 3, 5, 4, 6] },
-                    { n: demo ? 12 : stats.briefings, l: "Briefings do conselho", d: "últimos 14 dias", hot: false,
-                      pts: [4, 5, 6, 6, 8, 7, 9, 10, 11, 12] },
-                  ].map((s) => (
-                    <div className={`mod kpi ${s.hot ? "hot" : ""}`} key={s.l}>
-                      <div className="l">{s.l}</div>
-                      <div className="row">
-                        <div className="n">{s.n}</div>
-                        <Spark pts={s.pts} hot={s.hot} />
+              <motion.div variants={chega} className="hero-row">
+                <div className="hero">
+                  <div className="sphere" aria-hidden />
+                  <div className="eyebrow">Mission Control · ARK Content</div>
+                  <h1>{saud}, {nome} 👋</h1>
+                  <div className="hero-cards">
+                    <div className="hcard">
+                      <div className="hc-top">
+                        <span className="hc-ic"><Activity size={14} strokeWidth={2} /></span>
+                        <span className="hc-l">Tarefas abertas</span>
                       </div>
-                      <div className="delta"><b>●</b> {s.d}</div>
+                      <div className="hc-n">{abertas}</div>
+                      <div className="hc-s">na operação agora</div>
                     </div>
-                  ))}
-                </motion.div>
+                    <div className="hcard">
+                      <div className="hc-top">
+                        <span className="hc-ic"><Hexagon size={14} strokeWidth={2} /></span>
+                        <span className="hc-l">Briefings do conselho</span>
+                      </div>
+                      <div className="hc-n">{briefings}</div>
+                      <div className="hc-s">últimos 14 dias</div>
+                    </div>
+                  </div>
+                </div>
 
-                <motion.div variants={chega} className="grid2">
-                  <div className="mod card">
-                    <div className="ct">Hoje na operação <a href="/app">abrir tarefas →</a></div>
-                    <div style={{ marginTop: 6 }}>
+                <div className="goal">
+                  <div className="gt">Operação em dia</div>
+                  <Donut pct={emDia} />
+                  <div className="gv">{atrasadas} atrasada{atrasadas === 1 ? "" : "s"}</div>
+                  <div className="gs">de {abertas} tarefas abertas. {fila} proposta{fila === 1 ? "" : "s"} esperando o seu aval.</div>
+                  <a className="gbtn" href="/postagens">Revisar fila</a>
+                </div>
+              </motion.div>
+
+              <motion.div variants={chega} className="body-row">
+                <div className="panel">
+                  <div className="pt">Hoje na operação <a href="/app">abrir tarefas →</a></div>
+                  <table className="tt">
+                    <thead>
+                      <tr>
+                        <th>Tarefa</th>
+                        <th className="hide-sm">Cliente · Área</th>
+                        <th>Prazo</th>
+                        <th aria-label="Ação" />
+                      </tr>
+                    </thead>
+                    <tbody>
                       {(tarefasTop.length ? tarefasTop : TAREFAS_DEMO).map((t, i) => (
-                        <motion.div className="li" key={i} initial={{ x: -14, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }} transition={{ ...spring, delay: 0.3 + i * 0.05 }}>
-                          <span className="tick" />
-                          <div className="tx">
-                            <div className="tt">{t.tt}</div>
-                            <div className="cc">{t.cc}</div>
+                        <motion.tr key={i} initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }}
+                          transition={{ ...spring, delay: 0.25 + i * 0.05 }}>
+                          <td className="t-name">{t.tt}</td>
+                          <td className="t-cli hide-sm">{t.cc}</td>
+                          <td><span className={chipClass(t.due)}>{t.due}</span></td>
+                          <td style={{ textAlign: "right" }}><a className="tbtn" href="/app">Abrir</a></td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div className="panel">
+                    <div className="pt">Fila de aprovação <a href="/postagens">ver todas →</a></div>
+                    <div style={{ marginTop: 8 }}>
+                      {APROVACOES_DEMO.slice(0, demo ? 4 : Math.max(1, Math.min(4, fila))).map((p, i) => (
+                        <motion.div className="ap-it" key={i} initial={{ opacity: 0, x: 14 }}
+                          animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.3 + i * 0.06 }}>
+                          <span className="ap-ic" style={{ background: p.cor }}>
+                            <PenLine size={16} strokeWidth={1.8} />
+                          </span>
+                          <div className="ap-tx">
+                            <div className="ap-t">{p.t}</div>
+                            <div className="ap-s">{p.s}</div>
                           </div>
-                          <span className={`chip ${t.due === "hoje" ? "due" : ""}`}>{t.due}</span>
+                          <a className="ap-chip" href="/postagens">Revisar</a>
                         </motion.div>
                       ))}
                     </div>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div className="mod card">
-                      <div className="ct">Fila de aprovação <a href="/postagens">revisar →</a></div>
-                      <div className="apr">
-                        <div className="big">{demo ? 6 : stats.fila}</div>
-                        <p>propostas prontas dos agentes esperando o seu aval para ir ao ar.</p>
-                      </div>
+
+                  <div className="panel feed">
+                    <div className="pt feed-h">
+                      <motion.span className="live" animate={reduced ? {} : { opacity: [1, 0.35, 1] }}
+                        transition={{ duration: 1.8, repeat: Infinity }} />
+                      Operações ao vivo
                     </div>
-                    <div className="mod card">
-                      <div className="ct">Clientes ativos</div>
-                      <div className="cli-strip">
-                        {CLIENTES.map((c, i) => (
-                          <motion.span className="avatar" key={c} initial={{ scale: 0.7, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }} transition={{ ...spring, delay: 0.35 + i * 0.04 }}>
-                            <i>{c.slice(0, 2).toUpperCase()}</i>{c}
-                          </motion.span>
+                    <div style={{ marginTop: 6 }}>
+                      <AnimatePresence initial={false}>
+                        {feed.slice(0, 6).map((o) => (
+                          <motion.div key={o.id} className="op" layout
+                            initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
+                            exit={{ opacity: 0 }} transition={spring}>
+                            <span className="op-dot" />
+                            <div>
+                              <div className="who">{o.who}</div>
+                              <div className="what">{o.what}</div>
+                              <div className="when">{o.when}</div>
+                            </div>
+                          </motion.div>
                         ))}
-                      </div>
+                      </AnimatePresence>
                     </div>
                   </div>
-                </motion.div>
-
-                <motion.div variants={chega} className="sec-t">
-                  <h2>Sociedade de agentes</h2>
-                  <span>toque para abrir</span>
-                </motion.div>
-                <div className="agents">
-                  {AGENTES.map((a, i) => <AgentCard key={a.id} a={a} i={i} open={setOpenAg} />)}
                 </div>
-              </div>
-            </motion.main>
+              </motion.div>
 
-            <motion.aside className="ops pane" initial={{ x: 340, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
-              transition={{ ...springSoft, delay: 0.14 }}>
-              <div className="ops-h">
-                <div className="t">
-                  <motion.span className="live" animate={reduced ? {} : { opacity: [1, 0.35, 1] }}
-                    transition={{ duration: 1.8, repeat: Infinity }} />
-                  Operações ao vivo
-                </div>
+              <motion.div variants={chega} className="kpis">
+                {[
+                  { n: abertas, l: "Tarefas abertas", d: "+4 esta semana", pts: [12, 14, 13, 17, 16, 19, 18, 21, 20, 23] },
+                  { n: atrasadas, l: "Atrasadas", d: "2 a menos que ontem", pts: [8, 7, 7, 6, 5, 6, 5, 4, 4, 3] },
+                  { n: fila, l: "Aguardando seu aval", d: "fila de aprovação", pts: [1, 2, 2, 3, 2, 4, 3, 5, 4, 6] },
+                  { n: briefings, l: "Briefings do conselho", d: "últimos 14 dias", pts: [4, 5, 6, 6, 8, 7, 9, 10, 11, 12] },
+                ].map((s, i) => (
+                  <div className="kpi" key={s.l}>
+                    <div className="l">{s.l}</div>
+                    <div className="row">
+                      <div className="n">{s.n}</div>
+                      <Spark pts={s.pts} id={String(i)} />
+                    </div>
+                    <div className="delta"><b>●</b> {s.d}</div>
+                  </div>
+                ))}
+              </motion.div>
+
+              <motion.div variants={chega} className="sec-t">
+                <h2>Sociedade de agentes</h2>
+                <span>toque para abrir</span>
+              </motion.div>
+              <div className="agents" style={{ paddingBottom: 24 }}>
+                {AGENTES.map((a, i) => <AgentCard key={a.id} a={a} i={i} open={setOpenAg} />)}
               </div>
-              <div className="ops-list">
-                <div className="ops-line" aria-hidden />
-                <AnimatePresence initial={false}>
-                  {feed.map((o) => (
-                    <motion.div key={o.id} className="op" layout
-                      initial={{ x: 44, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
-                      exit={{ opacity: 0 }} transition={spring}>
-                      <span className="op-dot" />
-                      <div className="who">{o.who}</div>
-                      <div className="what">{o.what}</div>
-                      <div className="when">{o.when}</div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </motion.aside>
-          </div>
+            </div>
+          </motion.main>
         </div>
       )}
 
