@@ -2041,7 +2041,7 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
               <option value="2026-03">Mar 2026</option>
               <option value="2026-04">Abr 2026</option>
               <option value="2026-05">Mai 2026</option>
-              <option value="2026-06" selected>Jun 2026</option>
+              <option value="2026-06">Jun 2026</option>
               <option value="2026-07">Jul 2026</option>
               <option value="2026-08">Ago 2026</option>
               <option value="2026-09">Set 2026</option>
@@ -10365,7 +10365,10 @@ function mmComercial(){
   const all=(typeof loadComercialData==='function')?loadComercialData():{};
   const key=(typeof cobMesKey==='function')?cobMesKey():'2026-06';
   const base=(typeof COMERCIAL_DEFAULTS!=='undefined')?COMERCIAL_DEFAULTS:{};
-  return Object.assign({},base,all[key]||all['2026-06']||{});
+  const defMes=(typeof COMERCIAL_DEFAULTS_MES!=='undefined')?COMERCIAL_DEFAULTS_MES:'2026-06';
+  // Sem o fallback pra junho: mês corrente sem dados salvos mostra vazio (não os números
+  // de junho sob o cabeçalho do mês novo, com selo "ao vivo"). Defaults só no mês deles.
+  return Object.assign({},key===defMes?base:{},all[key]||{});
 }
 function renderMeumes(){
   const root=document.getElementById('meumes-root');if(!root)return;
@@ -10812,22 +10815,31 @@ function comercialSalvarMes(){
   saveComercialData(all);
   toast('Dados de '+mes+' salvos');
 }
+// Os COMERCIAL_DEFAULTS são os números REAIS de junho/2026 (Sasse, Fonseca…). Só devem
+// aparecer no mês a que pertencem. Antes, qualquer mês vazio mostrava junho, e "Salvar
+// dados do mês" podia gravar junho como se fosse o mês novo. Fora de junho: mês vazio = '—'.
+const COMERCIAL_DEFAULTS_MES='2026-06';
+let _comercialMesInit=false;
 function renderComercialMes(){
-  const mes=document.getElementById('comercial-mes').value;
+  const sel=document.getElementById('comercial-mes');if(!sel)return;
+  // 1ª renderização: seleciona o mês corrente (não o junho fixo). Depois respeita a escolha do usuário.
+  if(!_comercialMesInit){const cm=(typeof cobMesKey==='function')?cobMesKey():'';if(cm&&sel.querySelector('option[value="'+cm+'"]'))sel.value=cm;_comercialMesInit=true;}
+  const mes=sel.value;
   const all=loadComercialData();
   const data=all[mes]||{};
-  const isCurrent=mes==='2026-06';
+  const useDef=(mes===COMERCIAL_DEFAULTS_MES); // defaults só no mês deles
+  const isCurrent=mes===((typeof cobMesKey==='function')?cobMesKey():COMERCIAL_DEFAULTS_MES);
   const banner=document.getElementById('comercial-mes-banner');
   if(banner)banner.style.display=isCurrent?'none':'';
   document.querySelectorAll('[data-com-key]').forEach(el=>{
     const key=el.dataset.comKey;
-    el.textContent=data[key]!==undefined?data[key]:(COMERCIAL_DEFAULTS[key]||'—');
+    el.textContent=data[key]!==undefined?data[key]:(useDef?(COMERCIAL_DEFAULTS[key]||'—'):'—');
   });
-  renderComercialFunil(data);
+  renderComercialFunil(data,useDef);
 }
-function renderComercialFunil(data){
+function renderComercialFunil(data,useDef){
   const box=document.getElementById('comercial-funil');if(!box)return;
-  const g=k=>{const v=data[k]!==undefined?data[k]:COMERCIAL_DEFAULTS[k];const m=String(v||'').replace(',','.').match(/[\d.]+/);return m?parseFloat(m[0]):0;};
+  const g=k=>{const v=data[k]!==undefined?data[k]:(useDef?COMERCIAL_DEFAULTS[k]:undefined);const m=String(v||'').replace(',','.').match(/[\d.]+/);return m?parseFloat(m[0]):0;};
   const leads=Math.round(g('leads_growth')+g('leads_trafego')+g('fonte_indicacao'));
   const reunioes=Math.round((g('fechamentos_ark')+g('fechamentos_alpha'))*2.2)||Math.round(leads*0.4); // estimativa (10 reuniões ~ 1 fechamento)
   const fech=Math.round(g('fechamentos_ark')+g('fechamentos_alpha'));
