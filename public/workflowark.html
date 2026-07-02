@@ -2654,7 +2654,11 @@ function applyCloudState(remote){
   try{ let rd=remote['wfa-deleted-ids']; if(typeof rd==='string')rd=JSON.parse(rd); if(Array.isArray(rd))rd.forEach(i=>deletedSet.add(i)); }catch(e){}
   WFA_LS_SET('wfa-deleted-ids',JSON.stringify([...deletedSet].slice(-3000)));
   Object.entries(remote||{}).forEach(([key,value])=>{
-    if(!isWfaCloudKey(key)||value==null||key==='wfa-deleted-ids')return;
+    if(!isWfaCloudKey(key)||key==='wfa-deleted-ids')return;
+    // DELEÇÃO propaga entre dispositivos: removeItem grava null no servidor. Ao ver null aqui
+    // (reset de brand, checklist etc.), apaga o valor local. Sem isto, a deleção ressuscitava.
+    // Protege se o usuário acabou de recriar a chave (dirty/janela recente).
+    if(value==null){ if(!wfaLocalAuth(key))WFA_LS_REMOVE(key); return; }
     // Listas append-heavy (server + cliente escrevem): MESCLA por id (nunca sobrescreve cego)
     if(WFA_MERGE_KEYS.includes(key)){
       let rArr=value; if(typeof rArr==='string'){try{rArr=JSON.parse(rArr);}catch(e){rArr=[];}}
@@ -2759,7 +2763,9 @@ async function bootCloudSync(){
     const remote=res.state||{};
     WFA_MEMBER=res.member||null;WFA_MEMBERS=res.members||[];
     const upload={};
-    Object.entries(local).forEach(([key,value])=>{if(isEmptyCloudValue(remote[key])&&!isEmptyCloudValue(value))upload[key]=value;});
+    // Semeia o servidor com dados locais quando a chave NUNCA existiu lá (ou está vazia mas
+    // não nula). null no servidor = deleção explícita: NÃO ressuscita (senão a exclusão volta).
+    Object.entries(local).forEach(([key,value])=>{if(remote[key]!==null&&isEmptyCloudValue(remote[key])&&!isEmptyCloudValue(value))upload[key]=value;});
     if(Object.keys(upload).length){
       await cloudCall('save',{action:'save-many',entries:upload});
       Object.assign(remote,upload);
@@ -2826,7 +2832,13 @@ function atualizarBadgeSync(ok){
     // 1-2 falhas: não mexe no badge (provavelmente só um blip — os dados estão a salvo)
   }
 }
+let _autoSyncStarted=false;
 function iniciarAutoSync(){
+  // bootCloudSync roda a cada sucesso E é chamado por ações do WhatsApp (avatares, marcar
+  // lido) que se auto-encadeiam a cada 1,2s. Sem esta trava, cada chamada empilhava mais um
+  // par de intervalos 6s/3,5s, disparando dezenas de GETs concorrentes e piorando as corridas.
+  if(_autoSyncStarted)return;
+  _autoSyncStarted=true;
   setInterval(()=>{if(WFA_CLOUD_READY&&document.visibilityState!=='hidden'){wfaFlush();sincronizarAgora(true);}},6000);
   // WhatsApp aberto = mensagens chegam mais rápido: puxa a cada 3,5s enquanto a aba está ativa.
   setInterval(()=>{const wp=document.getElementById('page-whatsapp');if(WFA_CLOUD_READY&&document.visibilityState!=='hidden'&&wp&&wp.classList.contains('active')){sincronizarAgora(true);}},3500);
