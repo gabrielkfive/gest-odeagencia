@@ -741,15 +741,15 @@ h1,h2,h3,h4{letter-spacing:-.022em}
   .side.compact .navitem .chev,.side.compact .navitem .badge{display:none}
   .side.compact .crm-pill{justify-content:center;padding:8px}
   /* peek do dock: encostar o mouse expande por cima do conteúdo, sem empurrar o layout */
-  .side.compact:hover{width:240px;position:absolute;left:0;top:12px;bottom:12px;z-index:80;
+  .side.compact:hover:not(.no-peek){width:240px;position:absolute;left:0;top:12px;bottom:12px;z-index:80;
     border-radius:0 22px 22px 0;box-shadow:0 34px 64px -20px rgba(0,0,0,.55)}
-  .side.compact:hover .side-head{justify-content:flex-start}
-  .side.compact:hover .side-collapse-btn{margin-left:auto}
-  .side.compact:hover .nav-label,.side.compact:hover .navitem span,.side.compact:hover .subitem span,
-  .side.compact:hover .brand-info,.side.compact:hover .side-foot .info,.side.compact:hover .crm-pill span{
+  .side.compact:hover:not(.no-peek) .side-head{justify-content:flex-start}
+  .side.compact:hover:not(.no-peek) .side-collapse-btn{margin-left:auto}
+  .side.compact:hover:not(.no-peek) .nav-label,.side.compact:hover:not(.no-peek) .navitem span,.side.compact:hover:not(.no-peek) .subitem span,
+  .side.compact:hover:not(.no-peek) .brand-info,.side.compact:hover:not(.no-peek) .side-foot .info,.side.compact:hover:not(.no-peek) .crm-pill span{
     opacity:1;width:auto;pointer-events:auto}
-  .side.compact:hover .navitem .chev,.side.compact:hover .navitem .badge{display:flex}
-  .side.compact:hover .crm-pill{justify-content:space-between;padding:8px 11px}
+  .side.compact:hover:not(.no-peek) .navitem .chev,.side.compact:hover:not(.no-peek) .navitem .badge{display:flex}
+  .side.compact:hover:not(.no-peek) .crm-pill{justify-content:space-between;padding:8px 11px}
 }
 @media (prefers-reduced-motion:reduce){.app,.side,.side-collapse-btn svg{transition:none!important}}
 
@@ -1087,10 +1087,6 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
       </div>
       <div class="tb-right">
         <div class="tb-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="gsearch" placeholder="Buscar cliente, tarefa, processo, página…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onkeydown="if(event.key==='Escape')gsearchClose()"><div id="gsearch-res"></div></div>
-        <button class="tb-btn tb-ic" data-nav="whatsapp" title="WhatsApp" style="position:relative;padding:6px">
-          <img src="/whatsapp.svg" alt="WhatsApp" style="width:21px;height:21px;display:block">
-          <span id="wpp-badge-top" style="display:none;position:absolute;top:-4px;right:-4px;background:#25D366;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:10px;align-items:center;justify-content:center;padding:0 3px">0</span>
-        </button>
         <button class="tb-btn tb-ic" data-nav="notificacoes" title="Notificações" style="position:relative;padding:6px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></svg>
           <span id="notif-badge-top" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red,#e5484d);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:10px;align-items:center;justify-content:center;padding:0 3px">0</span>
@@ -4691,6 +4687,14 @@ function toggleSideCompact(){
   side.classList.toggle('compact',on);
   app.classList.toggle('side-compact',on);
   try{localStorage.setItem('wfa-side-compact',on?'1':'0');}catch(e){}
+  // O botão de recolher fica dentro da própria barra: sem isso, o mouse continua em cima dela
+  // depois do clique e o "peek" (hover expande) dispara na hora, parecendo que travou/voltou.
+  // Trava o peek até o mouse realmente sair da barra pelo menos uma vez.
+  if(on){
+    side.classList.add('no-peek');
+    const clear=()=>{side.classList.remove('no-peek');side.removeEventListener('mouseleave',clear);};
+    side.addEventListener('mouseleave',clear);
+  }
 }
 (function(){
   try{
@@ -6150,7 +6154,9 @@ const ROLE_ACCESS={
 function roleAccessList(role){return ROLE_ACCESS[role]||ROLE_ACCESS.viewer;}
 function memberAccess(m){
   const acc={};
-  if(!m){_ALL_NAV.forEach(k=>acc[k]=true);return acc;}
+  // FECHA por padrão quando o membro ainda não carregou (evita vazar WhatsApp/Acerto/Notificações
+  // pra quem tá vendo o sistema antes do RBAC real resolver — bug relatado pelo Gabriel).
+  if(!m){_ALL_NAV.forEach(k=>acc[k]=true);acc.whatsapp=false;acc.acerto=false;acc.notificacoes=false;return acc;}
   const allow=roleAccessList(m.role);
   _ALL_NAV.forEach(k=>acc[k]=allow.includes(k));
   const ov=m.permissions&&m.permissions.nav;
