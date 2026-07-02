@@ -619,7 +619,7 @@ function ArkOS() {
   const chega = { hidden: { y: 24, opacity: 0 }, show: { y: 0, opacity: 1, transition: spring } };
 
   return (
-    <div className="arkos">
+    <div className="arkos" data-build="arkos-v2-20260702-1720">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
