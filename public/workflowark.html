@@ -5265,7 +5265,7 @@ function relDados(id){
   const andamento=ts.filter(t=>t.status==='andamento'||t.status==='aprovacao');
   const atras=ts.filter(t=>t.data&&t.data<today&&t.status!=='concluido');
   const tempo=ts.reduce((s,t)=>s+(t.timeSpent||0)+(t.timerSince?(Date.now()-new Date(t.timerSince).getTime())/1000:0),0);
-  const reguaRow=(state.regua&&state.regua[id])||{};const reguaOk=[0,1,2,3,4,5].filter(i=>reguaRow[i]==='ok').length;
+  const reguaRow=(state.regua&&state.regua[reguaBucket(id)])||{};const reguaOk=[0,1,2,3,4,5].filter(i=>reguaRow[i]==='ok').length;
   return {c,ts,concl,conclMes,andamento,atras,tempo,reguaOk,reguaTotal:6};
 }
 function relatorioCliente(id){
@@ -6698,7 +6698,7 @@ function renderRegua(){
   const ativos=CLIENTES.filter(c=>c.status!=='churn');
   const tbody=document.getElementById('regua-body');
   tbody.innerHTML=ativos.map(c=>{
-    const row=state.regua[c.id]||{};
+    const row=state.regua[reguaBucket(c.id)]||{};
     const cells=[0,1,2,3,4,5].map(i=>{
       const v=row[i]||'';
       const cls=v==='ok'?'ok':v==='no'?'no':v==='na'?'na':'';
@@ -6709,10 +6709,11 @@ function renderRegua(){
   }).join('');
 }
 function cycleRegua(id,i){
-  if(!state.regua[id]) state.regua[id]={};
-  const cur=state.regua[id][i]||'';
+  const b=reguaBucket(id);
+  if(!state.regua[b]) state.regua[b]={};
+  const cur=state.regua[b][i]||'';
   const next=cur===''?'ok':cur==='ok'?'no':cur==='no'?'na':'';
-  state.regua[id][i]=next;
+  state.regua[b][i]=next;
   saveRegua();renderRegua();
   // marcar ✓ conclui a tarefa correspondente; "não se aplica" remove
   const key=reguaKey(id,i);
@@ -6723,7 +6724,7 @@ function cycleRegua(id,i){
     else if(next===''||next==='no'){ t.status='backlog'; saveTarefas(); }
   }
 }
-function resetRegua(){if(confirm('Resetar régua do mês?')){state.regua={};saveRegua();renderRegua();toast('Régua resetada');}}
+function resetRegua(){if(confirm('Resetar régua do mês?')){const mk=reguaMesKey();Object.keys(state.regua||{}).forEach(k=>{if(k.indexOf(mk+':')===0)delete state.regua[k];});saveRegua();renderRegua();toast('Régua resetada');}}
 
 /* ====== Régua → Tarefas reais ====== */
 const REGUA_ITENS=[
@@ -6735,14 +6736,18 @@ const REGUA_ITENS=[
   {label:'Relatório semanal (seg)',funcao:'Gestor de Tráfego'}
 ];
 function reguaMesKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
-function reguaKey(cliId,i){return 'regua:'+reguaMesKey()+':'+cliId+':'+i;}
+// Os checkmarks da régua agora são POR MÊS. Sem isso, os ✓ de junho continuavam verdes
+// em julho e gerarTarefasRegua pulava os itens já marcados, então as recorrentes mensais
+// (reunião, relatório etc.) não eram criadas no mês novo. O dado antigo (chave só com o id
+// do cliente) vira histórico inerte e cada mês começa limpo.
+function reguaBucket(cliId){return reguaMesKey()+':'+cliId;}
 function gerarTarefasRegua(){
   if(!confirm('Isso cria UMA tarefa para cada item pendente da régua de TODOS os clientes (pode ser muita coisa). Quer continuar?'))return;
   const ativos=CLIENTES.filter(c=>c.status!=='churn');
   const today=hojeSP();
   let criadas=0;
   ativos.forEach(c=>{
-    const row=state.regua[c.id]||{};
+    const row=state.regua[reguaBucket(c.id)]||{};
     REGUA_ITENS.forEach((it,i)=>{
       const v=row[i]||'';
       if(v==='ok'||v==='na') return;              // já feito ou não se aplica → não vira tarefa
