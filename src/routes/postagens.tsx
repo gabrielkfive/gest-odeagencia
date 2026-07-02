@@ -97,11 +97,16 @@ function Postagens() {
     catch { setErr("Não consegui copiar. Selecione o texto manualmente."); }
   }
 
-  // Gera mais propostas agora (chama o agente — protegido por key no servidor).
+  // Gera mais propostas agora (chama o agente — autenticado pela sessão do usuário;
+  // a antiga key fixa "ark-2026" virou segredo de servidor só pra cron).
   async function gerarAgora() {
     setGerando(true); setErr("");
     try {
-      const r = await fetch(`/api/workflowark/social-run?key=ark-2026&force=1`);
+      let { data } = await supabase.auth.getSession();
+      let token = data.session?.access_token;
+      if (!token) { const rr = await supabase.auth.refreshSession(); token = rr.data.session?.access_token; }
+      if (!token) throw new Error("Sessão expirada. Entre novamente.");
+      const r = await fetch(`/api/workflowark/social-run?force=1`, { headers: { Authorization: `Bearer ${token}` } });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(d?.error || "Falha ao gerar.");
       await carregar();

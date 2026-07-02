@@ -9,10 +9,10 @@ import { createFileRoute } from "@tanstack/react-router";
 //
 // Autônomo: chamável por cron, protegido por ?key=. Idempotente por dia. Incremental
 // (poucos clientes por chamada pra não estourar o tempo da request no Cloudflare).
-//   /api/workflowark/social-run?key=ark-2026            -> roda o lote do dia
-//   /api/workflowark/social-run?key=ark-2026&cliente=vivenda  -> só um cliente (botão "gerar agora")
-//   /api/workflowark/social-run?key=ark-2026&force=1    -> ignora idempotência
-const RUN_KEY = "ark-2026";
+//   /api/workflowark/social-run?key=<RUN_KEY>            -> roda o lote do dia
+//   /api/workflowark/social-run?key=<RUN_KEY>&cliente=vivenda  -> só um cliente (botão "gerar agora")
+//   /api/workflowark/social-run?key=<RUN_KEY>&force=1    -> ignora idempotência
+import { isRunAuthorized, runSecret } from "@/integrations/run-auth.server";
 
 // Quantos clientes processar por chamada (limite de tempo da request).
 const MAX_POR_CHAMADA = 3;
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/workflowark/social-run")({
     handlers: {
       GET: async ({ request }) => {
         const u = new URL(request.url);
-        if (u.searchParams.get("key") !== RUN_KEY) return Response.json({ error: "unauthorized" }, { status: 401 });
+        if (!(await isRunAuthorized(request, u))) return Response.json({ error: "unauthorized" }, { status: 401 });
         const force = u.searchParams.get("force") === "1";
         const soCliente = u.searchParams.get("cliente") || "";
         try {
@@ -177,7 +177,7 @@ export const Route = createFileRoute("/api/workflowark/social-run")({
           if (!soCliente && faltam === 0) await db.from("workflowark_state").upsert({ key: "wfa-social-lastrun", data: { date: hoje, ts: Date.now() } });
           // auto-encadeia o próximo lote (best-effort), como o conselho faz
           if (!soCliente && faltam > 0 && novas.length > 0) {
-            try { fetch(`${u.origin}/api/workflowark/social-run?key=${RUN_KEY}${force ? "&force=1" : ""}`).catch(() => {}); } catch { /* ignore */ }
+            try { fetch(`${u.origin}/api/workflowark/social-run?key=${runSecret()}${force ? "&force=1" : ""}`).catch(() => {}); } catch { /* ignore */ }
           }
           return Response.json({ ok: true, clientes: alvos.length, propostas: novas.length, salvou, faltam, ...(debug ? { aiErr: lastAiErr, raw: lastRaw.slice(0, 1500) } : {}) });
         } catch (e) {

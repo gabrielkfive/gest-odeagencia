@@ -1,4 +1,4 @@
-<!-- build 2026-07-02T15:02 -->
+<!-- build 2026-07-02T16:05 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -2650,7 +2650,10 @@ async function arkDailyAgentsKick(){
     const hoje=new Date().toISOString().split('T')[0];
     if(localStorage.getItem('wfa-agents-kick-date')===hoje)return;
     localStorage.setItem('wfa-agents-kick-date',hoje);
-    const r=await fetch('/api/workflowark/agents-run?key=ark-2026');
+    // Autentica pela sessão (a antiga key fixa "ark-2026" virou segredo de servidor, só cron)
+    const {data:{session}}=await _wfaSb.auth.getSession();
+    if(!session||!session.access_token)return;
+    const r=await fetch('/api/workflowark/agents-run',{headers:{Authorization:'Bearer '+session.access_token}});
     if(!r.ok)return;
     // dá um tempinho pro auto-encadeamento e puxa os briefings novos
     setTimeout(async()=>{try{await sincronizarAgora();if(typeof renderMeuDia==='function')renderMeuDia();if(typeof consAutoRender==='function')consAutoRender();}catch(e){}},9000);
@@ -7432,7 +7435,9 @@ async function consRodarAuto(){
   if(btn){btn.disabled=true;btn.textContent='⏳ Debatendo...';}
   if(st)st.textContent='Os agentes estão debatendo cliente por cliente — pode levar ~1 min.';
   try{
-    const r=await fetch('/api/workflowark/agents-run?key=ark-2026&force=1');
+    const {data:{session}}=await _wfaSb.auth.getSession();
+    if(!session||!session.access_token)throw new Error('Sessão expirada. Entre novamente.');
+    const r=await fetch('/api/workflowark/agents-run?force=1',{headers:{Authorization:'Bearer '+session.access_token}});
     const j=await r.json().catch(()=>({}));
     if(!r.ok||j.error)throw new Error(j.error||'falha');
     if(st)st.textContent=`✓ Conselho rodou: ${j.clientes||0} clientes, ${j.tarefas||0} tarefas criadas.`;
