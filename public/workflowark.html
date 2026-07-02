@@ -818,9 +818,281 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
 .regua-cell:active{transform:scale(.9)}
 
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important;animation-duration:.01s!important}}
+
+/* =====================================================================
+   AURA DARK · camada piloto (02/07/2026). Referência: aurasoftware.cloud
+   com o azul trocado pelo amarelo ARK (#FFC700). Tokens reais extraídos
+   do site: fundo #000, card rgba(255,255,255,.025), borda rgba(255,255,255,.10),
+   hovers translateY(-3px) + glow, navbar vidro rgba(5,6,10,.35) blur(10px)
+   que some no scroll pra baixo e volta no scroll pra cima.
+   ESCOPO: body.aura-dark. Rollback total = tirar a classe do <body>.
+   A tentativa anterior de dark global quebrou telas não testadas; esta
+   camada sobe tela a tela, piloto = Meu Painel.
+   ===================================================================== */
+body.aura-dark{
+  --bg:#000000;--surface:rgba(255,255,255,.04);
+  --ink:#ffffff;--ink-2:#f4f5f7;--txt:#eef0f3;
+  --mute:#a6adba;--mute-2:#7b8494;
+  --line:rgba(255,255,255,.12);--line-2:rgba(255,255,255,.18);
+  --yel-soft:rgba(255,199,0,.14);--yel-bg:rgba(255,199,0,.09);
+  --blue-soft:rgba(255,255,255,.06);
+  --red-soft:rgba(220,38,38,.16);--green-soft:rgba(22,163,74,.16);--orange-soft:rgba(234,88,12,.18);
+  --sh-1:0 1px 0 rgba(255,255,255,.03) inset;
+  --sh-2:0 1px 0 rgba(255,255,255,.04) inset,0 8px 20px -12px rgba(0,0,0,.6);
+  --sh-3:0 12px 28px -6px rgba(0,0,0,.55);
+  --sh-4:0 28px 60px -12px rgba(0,0,0,.65);
+  --sh-yel:0 8px 40px rgba(255,199,0,.35);
+  background:#000;color:var(--txt);
+}
+body.aura-dark .app{background:#000}
+body.aura-dark .view{background:transparent}
+body.aura-dark h1,body.aura-dark h2,body.aura-dark h3,body.aura-dark h4{color:var(--ink)}
+
+/* Painel principal: PRETO ABSOLUTO #000 (pedido do Gabriel) com glows âmbar vivos por trás (o "movimento") */
+body.aura-dark .main{position:relative;background:#000;border:1px solid rgba(255,255,255,.08)}
+body.aura-dark .main::before,body.aura-dark .main::after{
+  content:'';position:absolute;width:56vw;height:56vw;border-radius:50%;
+  pointer-events:none;z-index:0;will-change:transform;
+  background:radial-gradient(circle closest-side,rgba(255,199,0,.13),rgba(255,199,0,0) 72%);
+  filter:blur(70px)}
+body.aura-dark .main::before{top:-34vw;right:-22vw;animation:auraDriftA 26s ease-in-out infinite alternate}
+body.aura-dark .main::after{bottom:-32vw;left:-20vw;width:44vw;height:44vw;
+  background:radial-gradient(circle closest-side,rgba(255,168,0,.09),rgba(255,168,0,0) 72%);
+  animation:auraDriftB 34s ease-in-out infinite alternate}
+@keyframes auraDriftA{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-9vw,7vw,0) scale(1.18)}}
+@keyframes auraDriftB{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(10vw,-8vw,0) scale(1.14)}}
+@media (prefers-reduced-motion:reduce){body.aura-dark .main::before,body.aura-dark .main::after{animation:none}}
+body.aura-dark .topbar,body.aura-dark .view{position:relative;z-index:1}
+
+/* Navbar Aura: vidro escuro translúcido flutuando sobre o conteúdo, some ao descer, volta ao subir */
+body.aura-dark .topbar{position:absolute;top:0;left:0;right:0;z-index:30;
+  background:rgba(5,6,10,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.10);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform}
+body.aura-dark .main.tb-hidden .topbar{transform:translateY(-100%)}
+body.aura-dark .view{padding-top:52px}
+body.aura-dark .crumbs,body.aura-dark .crumbs .sep{color:var(--mute)}
+body.aura-dark .crumbs .here{color:var(--ink)}
+body.aura-dark .tb-pill{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--txt)}
+body.aura-dark .tb-search input{background:rgba(255,255,255,.05);border-color:var(--line);color:var(--ink)}
+body.aura-dark .tb-search input::placeholder{color:var(--mute-2)}
+body.aura-dark .tb-search svg{color:var(--mute)}
+body.aura-dark #gsearch-res{background:#0b0c10;border:1px solid var(--line);color:var(--txt);box-shadow:0 28px 60px -12px rgba(0,0,0,.7)}
+body.aura-dark .icobtn,body.aura-dark .tb-btn.tb-ic{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--ink)}
+body.aura-dark .icobtn:hover,body.aura-dark .tb-btn.tb-ic:hover{background:rgba(255,255,255,.12);color:#fff}
+
+/* CTA amarelo com o glow triplo do botão Aura */
+body.aura-dark .tb-btn:not(.tb-ic){background:var(--yel);color:#000;border-color:transparent;
+  box-shadow:0 8px 40px rgba(255,199,0,.35),inset 0 0 10px 1px rgba(255,255,255,.10),0 0 0 1px rgba(255,199,0,.15)}
+body.aura-dark .tb-btn:not(.tb-ic):hover{transform:translateY(-1px);
+  box-shadow:0 12px 50px rgba(255,199,0,.5),0 0 0 1px rgba(255,199,0,.25)}
+
+/* Sidebar: ilha flutuante no formato do print do ARK OS, com profundidade real na divisa
+   (canto arredondado nos 4 lados, respiro em volta, luz interna e sombra pro palco) */
+body.aura-dark .app{padding:12px;gap:14px;background:#000}
+body.aura-dark .side{height:100%;border-radius:22px;border:1px solid rgba(255,255,255,.09);border-right:1px solid rgba(255,255,255,.09);
+  background:radial-gradient(130% 90% at 0% 0%,#17181d 0%,#0a0a0d 58%,#050506 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 34px 70px -30px rgba(0,0,0,.9),18px 0 60px -34px rgba(255,199,0,.10)}
+body.aura-dark .side.compact.peek{border-radius:22px}
+@media (max-width:900px){body.aura-dark .app{padding:0;gap:0}body.aura-dark .side{border-radius:0}}
+
+/* ============ MISTURA ARK OS (print LAST DANCE) sobre o palco Aura ============ */
+/* Fileira herói Mission Control: só existe no tema aura-dark */
+.aura-hero-row{display:none}
+body.aura-dark .aura-hero-row{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;margin-bottom:16px}
+@media (max-width:1180px){body.aura-dark .aura-hero-row{grid-template-columns:1fr}}
+body.aura-dark .aura-hero{position:relative;overflow:hidden;border-radius:28px;padding:34px 36px 30px;
+  border:1px solid rgba(255,255,255,.08);color:#fff;
+  background:radial-gradient(120% 160% at 85% -20%,#2e2f36 0%,#0a0a0c 55%);
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+body.aura-dark .aura-hero .sphere{position:absolute;top:-70px;right:40px;width:260px;height:260px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 32% 28%,#4a4a54 0%,#202024 42%,#0c0c0e 78%);
+  box-shadow:inset -20px -28px 60px rgba(0,0,0,.6),inset 14px 18px 40px rgba(255,255,255,.08),
+    0 40px 80px -30px rgba(0,0,0,.8),0 0 90px -20px rgba(255,199,0,.22);
+  animation:auraSphere 9s ease-in-out infinite alternate}
+@keyframes auraSphere{from{transform:translateY(0)}to{transform:translateY(14px)}}
+body.aura-dark .aura-hero .eyebrow{font-size:12.5px;color:rgba(255,255,255,.55);position:relative}
+body.aura-dark .aura-hero h1{font-family:'Sora',var(--sans);font-size:clamp(28px,3.2vw,40px);font-weight:600;
+  letter-spacing:-.03em;line-height:1.1;margin-top:8px;position:relative;padding:0}
+body.aura-dark .aura-hero h1::after{display:none}
+body.aura-dark .aura-hero .ah-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px;position:relative}
+@media (max-width:640px){body.aura-dark .aura-hero .ah-cards{grid-template-columns:1fr}}
+body.aura-dark .ahc{border-radius:16px;padding:16px 18px 14px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(6px)}
+body.aura-dark .ahc .top{display:flex;align-items:center;gap:10px}
+body.aura-dark .ahc .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.12);color:#fff;flex-shrink:0}
+body.aura-dark .ahc .l{margin-left:auto;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+body.aura-dark .ahc .n{font-family:'Sora',var(--sans);font-size:34px;font-weight:700;letter-spacing:-.02em;margin-top:10px;font-variant-numeric:tabular-nums}
+body.aura-dark .ahc .s{font-size:11.5px;color:rgba(255,255,255,.5);margin-top:4px;text-align:right}
+/* Meta: donut amarelo sobre preto */
+body.aura-dark .aura-goal{position:relative;overflow:hidden;border-radius:28px;padding:26px 26px 24px;
+  border:1px solid rgba(255,255,255,.08);color:#fff;display:flex;flex-direction:column;align-items:center;
+  background:radial-gradient(130% 150% at 15% 110%,#26262c 0%,#0a0a0c 60%);
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+body.aura-dark .aura-goal .gt{font-family:'Sora',var(--sans);font-size:15px;font-weight:600;align-self:flex-start}
+body.aura-dark .aura-goal .donut-wrap{position:relative;width:132px;height:132px;margin-top:18px}
+body.aura-dark .aura-goal .donut{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(var(--yel) calc(var(--p,100)*1%),rgba(255,255,255,.10) 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 15px),#000 calc(100% - 14px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 15px),#000 calc(100% - 14px))}
+body.aura-dark .aura-goal .donut-wrap .pct{position:absolute;inset:0;display:grid;place-items:center;
+  font-family:'Sora',var(--sans);font-size:27px;font-weight:700;letter-spacing:-.02em}
+body.aura-dark .aura-goal .gv{font-family:'Sora',var(--sans);font-size:20px;font-weight:700;margin-top:14px;font-variant-numeric:tabular-nums}
+body.aura-dark .aura-goal .gs{font-size:11.5px;color:rgba(255,255,255,.55);margin-top:5px;text-align:center}
+body.aura-dark .aura-goal .gbtn{margin-top:14px;border:0;border-radius:12px;background:#fff;color:#131316;
+  font-size:12.5px;font-weight:600;padding:11px 22px;cursor:pointer;transition:transform .18s ease}
+body.aura-dark .aura-goal .gbtn:hover{transform:translateY(-1px)}
+/* Ícones parrudos: moedinhas squircle na sidebar e item ativo em pill amarelo sólido */
+body.aura-dark .navitem svg,body.aura-dark .subitem svg{width:26px;height:26px;padding:5px;border-radius:9px;
+  background:rgba(255,255,255,.06);flex-shrink:0;transition:background .2s ease,color .2s ease}
+body.aura-dark #nav-indicator{background:var(--yel);box-shadow:0 6px 18px -6px rgba(255,199,0,.55)}
+body.aura-dark .navitem.active,body.aura-dark .subitem.active{color:#131316;font-weight:650}
+body.aura-dark .navitem.active svg,body.aura-dark .subitem.active svg{color:#131316;background:rgba(0,0,0,.14)}
+body.aura-dark .navitem.active .badge{background:#131316;color:#fff}
+
+/* Cartões no padrão Aura: quase invisíveis em repouso, acendem no hover */
+body.aura-dark .card,body.aura-dark .kpi,body.aura-dark .mdw,body.aura-dark .al-kpi,
+body.aura-dark .md-card,body.aura-dark table.t,body.aura-dark .alert,body.aura-dark .regua-wrap,
+body.aura-dark .role-block,body.aura-dark .cal-wrap,body.aura-dark .barpanel,body.aura-dark #gcal-wrap{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10);color:var(--txt);
+  box-shadow:0 1px 0 rgba(255,255,255,.03) inset}
+body.aura-dark .card:hover,body.aura-dark .mdw:hover,body.aura-dark .kpi:hover{
+  transform:translateY(-3px);border-color:rgba(255,199,0,.30);
+  box-shadow:0 26px 70px -30px rgba(255,199,0,.35),0 1px 0 rgba(255,255,255,.05) inset}
+body.aura-dark .md-card .md-hd{background:rgba(255,255,255,.05);border-bottom:1px solid var(--line)}
+body.aura-dark .md-task{background:rgba(255,255,255,.03);border-color:var(--line)}
+body.aura-dark .md-task:hover{box-shadow:0 10px 22px -16px rgba(255,199,0,.35)}
+body.aura-dark .mdb{background:rgba(255,255,255,.03);border-color:var(--line)}
+
+/* Formulários e modais */
+body.aura-dark .form-input,body.aura-dark .form-select,body.aura-dark textarea{
+  background:rgba(255,255,255,.04);border-color:var(--line);color:var(--ink)}
+body.aura-dark .form-input::placeholder{color:var(--mute-2)}
+body.aura-dark .modal,body.aura-dark .crm-mbox{background:#0b0c10;border:1px solid var(--line);color:var(--txt)}
+
+/* Scrollbar discreta no preto */
+body.aura-dark .view::-webkit-scrollbar{width:10px}
+body.aura-dark .view::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
+body.aura-dark .view::-webkit-scrollbar-track{background:transparent}
+
+/* ============ IMERSIVIDADE (rodada 2, pedido do Gabriel) ============ */
+/* Título de página vira display: grande, fino, apertado, com traço de luz âmbar */
+body.aura-dark .page-head h1{
+  font-family:'Sora',var(--sans);font-size:clamp(30px,3.2vw,44px);font-weight:400;
+  letter-spacing:-.045em;line-height:1.04;color:#fff;position:relative;padding-bottom:12px}
+body.aura-dark .page-head h1::after{
+  content:'';position:absolute;left:1px;bottom:0;width:56px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,var(--yel),rgba(255,199,0,0))}
+body.aura-dark .page-head p,body.aura-dark .page-title p{color:var(--mute);font-size:14px}
+
+/* Vidro de verdade: os cartões deixam os glows em movimento vazarem por dentro */
+body.aura-dark .mdw,body.aura-dark .kpi,body.aura-dark .md-card,body.aura-dark .card{
+  background:rgba(13,14,17,.55);backdrop-filter:blur(22px) saturate(1.25);-webkit-backdrop-filter:blur(22px) saturate(1.25)}
+
+/* Spotlight: a luz segue o mouse dentro do cartão (JS alimenta as vars --mx/--my) */
+body.aura-dark .mdw,body.aura-dark .kpi,body.aura-dark .md-card{position:relative;overflow:hidden}
+body.aura-dark .mdw::after,body.aura-dark .kpi::after,body.aura-dark .md-card::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;z-index:0;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),rgba(255,199,0,.12),transparent 62%);
+  transition:opacity .35s ease}
+body.aura-dark .mdw:hover::after,body.aura-dark .kpi:hover::after,body.aura-dark .md-card:hover::after{opacity:1}
+
+/* Entrada em cascata quando a página abre (classe .aura-enter posta pelo JS) */
+@keyframes arIn{from{opacity:0;transform:translateY(26px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+body.aura-dark .view.aura-enter .page.active .mdw,body.aura-dark .view.aura-enter .page.active .kpi,
+body.aura-dark .view.aura-enter .page.active .md-card,body.aura-dark .view.aura-enter .page.active .card{
+  animation:arIn .85s cubic-bezier(.16,.6,.28,1) both}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(2){animation-delay:.07s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(3){animation-delay:.14s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(4){animation-delay:.21s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(5){animation-delay:.28s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(6){animation-delay:.35s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(7){animation-delay:.42s}
+body.aura-dark .view.aura-enter .page.active .page-head{animation:arIn .7s cubic-bezier(.16,.6,.28,1) both}
+
+/* Troca de página com desfoque que assenta (motion blur da Aura) */
+body.aura-dark .page.active{animation:auraPageIn .55s cubic-bezier(.16,.6,.28,1)}
+@keyframes auraPageIn{from{opacity:0;transform:translateY(20px) scale(.992);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
+
+/* Grain de filme por cima de tudo: mata o chapado do preto digital */
+body.aura-dark .app::after{
+  content:'';position:fixed;inset:0;z-index:200;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E")}
+
+/* Glows mais presentes, com um terceiro varrendo o centro */
+body.aura-dark .view::before{
+  content:'';position:absolute;left:30%;top:30%;width:38vw;height:38vw;border-radius:50%;
+  pointer-events:none;z-index:-1;
+  background:radial-gradient(circle closest-side,rgba(255,199,0,.05),rgba(255,199,0,0) 70%);
+  filter:blur(60px);animation:auraDriftC 40s ease-in-out infinite alternate}
+@keyframes auraDriftC{from{transform:translate3d(-6vw,4vw,0) scale(.9)}to{transform:translate3d(8vw,-6vw,0) scale(1.25)}}
+@media (prefers-reduced-motion:reduce){
+  body.aura-dark .view::before{animation:none}
+  body.aura-dark .page.active,body.aura-dark .page.aura-enter .mdw{animation:none!important}}
+
+/* Relógio como peça de display */
+body.aura-dark .mdw .mdw-clock,body.aura-dark #mdw-board [id^="mdwclock"]{font-family:'Sora',var(--sans)}
+
+/* Widgets do Meu Painel: KPIs e checks saem do branco chumbado */
+body.aura-dark .mdw-kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}
+body.aura-dark .mdw-kpi .v{color:var(--ink)}
+body.aura-dark .mdw-kpi.y .v{color:var(--yel)}
+body.aura-dark .mdw-chk{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
+body.aura-dark .mdw-hd .ic{background:rgba(255,199,0,.10);color:var(--yel)}
+body.aura-dark .mdw-hd .ct{background:rgba(255,255,255,.08);color:var(--mute)}
+body.aura-dark .mdw-chk:hover{background:var(--green);border-color:var(--green)}
+/* Iframes claros (Google Calendar) viram escuros por inversão, único jeito de estilizar iframe externo */
+body.aura-dark .mdw-agenda,body.aura-dark .md-agwrap iframe,body.aura-dark #gcal-wrap iframe{
+  filter:invert(.92) hue-rotate(180deg) saturate(.85);border-radius:12px}
+
+/* ============ VARREDURA GERAL: telas legadas com branco chumbado viram ilhas escuras ============ */
+/* Containers e cartões */
+body.aura-dark .ag-card,body.aura-dark .agenda-mbox,body.aura-dark .al-kpi,body.aura-dark .al-wrap,
+body.aura-dark .barpanel,body.aura-dark .brf,body.aura-dark .brf-foot,body.aura-dark .bs-pilar,
+body.aura-dark .cal-d,body.aura-dark .ckl,body.aura-dark .cli,body.aura-dark .cli-kpi,
+body.aura-dark .cli-stat,body.aura-dark .cli-wrap,body.aura-dark .cri-card,body.aura-dark .crm-card,
+body.aura-dark .crm-fh-card,body.aura-dark .csa-card,body.aura-dark .db-card,body.aura-dark .dz-card,
+body.aura-dark .flow,body.aura-dark .ob,body.aura-dark .okr-table,body.aura-dark .org-area,
+body.aura-dark .pl-card,body.aura-dark .plc,body.aura-dark .pop,body.aura-dark .proc-card,
+body.aura-dark .qadd-box,body.aura-dark .regua-mtx,body.aura-dark .rot-doc,body.aura-dark .set-acc,
+body.aura-dark .sprint-card,body.aura-dark .step,body.aura-dark .task-card,body.aura-dark .tcal,
+body.aura-dark .tl-table,body.aura-dark .tp-card,body.aura-dark .activity-suggestion,
+body.aura-dark .onb-check,body.aura-dark .md-act,body.aura-dark .mdb{
+  background:rgba(13,14,17,.6);border-color:var(--line);color:var(--txt)}
+/* Poços e colunas (Kanban, sprints, CRM) mais fundos que os cards */
+body.aura-dark .crm-col,body.aura-dark .sprint-col,body.aura-dark .task-col-head,body.aura-dark .task-col{
+  background:rgba(255,255,255,.025);border-color:var(--line);color:var(--txt)}
+/* Chips e botões pequenos */
+body.aura-dark .cli-btn,body.aura-dark .csa-go,body.aura-dark .csa-tag,body.aura-dark .proc-chip,
+body.aura-dark .tcal-chip,body.aura-dark .pl-seg,body.aura-dark .pl-save,body.aura-dark .dz-del,
+body.aura-dark .set-accbtn,body.aura-dark .tv-btn,body.aura-dark .td2-tbtn,body.aura-dark .mob-menu,
+body.aura-dark .agenda-nav,body.aura-dark .rot-tab,body.aura-dark .cli-chip,body.aura-dark .proc-search{
+  background:rgba(255,255,255,.07);border-color:var(--line);color:var(--txt)}
+/* Tabelas: célula, cabeçalho e divisas legíveis no escuro */
+body.aura-dark table td,body.aura-dark table th{border-color:var(--line)}
+body.aura-dark table.t td,body.aura-dark table.t th,body.aura-dark .tl-table td,body.aura-dark .tl-table th,
+body.aura-dark .okr-table td,body.aura-dark .okr-table th{color:var(--txt);background:transparent}
+body.aura-dark table.t thead th,body.aura-dark .tl-table thead th{background:rgba(255,255,255,.04);color:var(--mute)}
+/* Inline whites que sobraram em markup e em HTML gerado por JS */
+body.aura-dark [style*="background:#fff"]{background:rgba(13,14,17,.6)!important;color:var(--txt)}
+body.aura-dark [style*="background:#fffbeb"],body.aura-dark [style*="background:#fff7d6"],
+body.aura-dark [style*="background:#fff8dc"]{background:rgba(255,199,0,.09)!important;color:var(--txt)}
+/* Títulos e textos fortes herdando tinta clara */
+body.aura-dark .sect-title h2,body.aura-dark .pt,body.aura-dark .stat{color:var(--ink)}
+/* Banner explicativo (Jornada e afins): sai do degradê amarelo-pra-branco, vira ilha âmbar escura */
+body.aura-dark .explainer{background:linear-gradient(180deg,rgba(255,199,0,.10) 0%,rgba(13,14,17,.6) 100%);
+  border-color:rgba(255,199,0,.35);border-radius:16px}
+body.aura-dark .explainer h4{color:var(--yel)}
+body.aura-dark .explainer h3{color:var(--ink)}
+/* Botões de troca de visão do Kanban: a regra original usa ID e ganha da camada, precisa do ID junto */
+body.aura-dark #page-tarefas .tv-btn{background:rgba(255,255,255,.07);border-color:var(--line);color:var(--txt)}
+body.aura-dark #page-tarefas .tv-btn.on{background:var(--yel);border-color:var(--yel);color:#131316}
 </style>
 </head>
-<body>
+<!-- build AURA-DARK-OS-MIX 20260702-1800 -->
+<body class="aura-dark">
 
 <!-- ============== BOOT CINEMATOGRÁFICO (estilo Apple) ============== -->
 <div id="ark-boot" aria-hidden="true">
@@ -1331,6 +1603,33 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
             <button class="icobtn" id="mdw-preset" onclick="mdwApplyPreset()" title="Montar o painel com os widgets certos pro seu papel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>Painel do meu papel</button>
             <button class="icobtn" id="mdw-add" onclick="mdwAddOpen(event)" title="Adicionar widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button>
             <button class="icobtn" id="mdw-edit-btn" onclick="mdwToggleEdit()" title="Reorganizar, redimensionar e remover widgets">✎ Editar</button>
+          </div>
+        </div>
+        <!-- AURA/OS: fileira herói Mission Control (só aparece no tema aura-dark) -->
+        <div class="aura-hero-row">
+          <div class="aura-hero">
+            <div class="sphere" aria-hidden="true"></div>
+            <div class="eyebrow">Mission Control · ARK Content</div>
+            <h1 id="aura-saud">Boa tarde, Senhor 👋</h1>
+            <div class="ah-cards">
+              <div class="ahc">
+                <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="l">Tarefas abertas</span></div>
+                <div class="n" id="aura-n-abertas">0</div>
+                <div class="s">na operação agora</div>
+              </div>
+              <div class="ahc">
+                <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span class="l">Vencem hoje</span></div>
+                <div class="n" id="aura-n-hoje">0</div>
+                <div class="s">até o fim do dia</div>
+              </div>
+            </div>
+          </div>
+          <div class="aura-goal">
+            <div class="gt">Operação em dia</div>
+            <div class="donut-wrap"><div class="donut" id="aura-donut" style="--p:100"></div><span class="pct" id="aura-donut-pct">100%</span></div>
+            <div class="gv" id="aura-goal-late">0 atrasadas</div>
+            <div class="gs" id="aura-goal-sub">de 0 tarefas abertas</div>
+            <button class="gbtn" data-aura-keep onclick="document.querySelector('[data-nav=tarefas]')&&document.querySelector('[data-nav=tarefas]').click()">Revisar fila</button>
           </div>
         </div>
         <div id="mdw-board"></div>
@@ -10817,6 +11116,138 @@ renderAgenda();
 renderComercialMes();
 try{renderMeumes();}catch(e){console.warn('meumes boot',e);}
 try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
+
+/* AURA DARK: navbar de vidro some ao rolar pra baixo e volta ao subir (padrão aurasoftware.cloud) */
+(function(){
+  var v=document.getElementById('view');if(!v)return;
+  var m=document.querySelector('.main');var last=0;
+  v.addEventListener('scroll',function(){
+    if(!document.body.classList.contains('aura-dark')){m.classList.remove('tb-hidden');return}
+    var y=v.scrollTop;
+    if(y>last&&y>120)m.classList.add('tb-hidden');
+    else if(y<last||y<=120)m.classList.remove('tb-hidden');
+    last=y;
+  },{passive:true});
+})();
+
+/* AURA DARK imersividade: spotlight segue o mouse nos cartões + cascata na troca de página */
+(function(){
+  if(!document.body.classList.contains('aura-dark'))return;
+  var raf=null;
+  document.addEventListener('mousemove',function(e){
+    var c=e.target.closest&&e.target.closest('.mdw,.kpi,.md-card');
+    if(!c)return;
+    if(raf)return;
+    raf=requestAnimationFrame(function(){
+      raf=null;
+      var r=c.getBoundingClientRect();
+      c.style.setProperty('--mx',(e.clientX-r.left)+'px');
+      c.style.setProperty('--my',(e.clientY-r.top)+'px');
+    });
+  },{passive:true});
+  var enterTimer=null;
+  function auraEnter(){
+    /* a classe fica no #view: os handlers de nav re-setam as classes das .page e apagariam a marca */
+    var v=document.getElementById('view');if(!v)return;
+    v.classList.remove('aura-enter');
+    void v.offsetWidth;
+    v.classList.add('aura-enter');
+    clearTimeout(enterTimer);
+    enterTimer=setTimeout(function(){v.classList.remove('aura-enter')},1700);
+  }
+  /* captura: o handler de nav do app corta a propagação, no bubble o clique nunca chega aqui */
+  document.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-nav],[data-subnav]')){requestAnimationFrame(auraEnter);requestAnimationFrame(auraHero);}
+  },true);
+  auraEnter();
+
+  /* Hero Mission Control: saudação por hora + números reais de mdwBuckets */
+  function auraHero(){
+    var el=document.getElementById('aura-saud');if(!el)return;
+    var h=new Date().getHours();
+    var s=h<5?'Boa madrugada':h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+    el.textContent=s+', Senhor 👋';
+    try{
+      if(typeof mdwBuckets!=='function')return;
+      var B=mdwBuckets();
+      var abertas=B.late.length+B.todayT.length+B.pend.length;
+      document.getElementById('aura-n-abertas').textContent=abertas;
+      document.getElementById('aura-n-hoje').textContent=B.todayT.length;
+      var pct=abertas?Math.round(100*(abertas-B.late.length)/abertas):100;
+      document.getElementById('aura-donut').style.setProperty('--p',pct);
+      document.getElementById('aura-donut-pct').textContent=pct+'%';
+      document.getElementById('aura-goal-late').textContent=B.late.length+' atrasada'+(B.late.length===1?'':'s');
+      document.getElementById('aura-goal-sub').textContent='de '+abertas+' tarefas abertas na sua fila';
+    }catch(err){}
+  }
+  auraHero();
+  setInterval(auraHero,60000);
+
+  /* Normalizador AURA: o sistema tem dezenas de tons claros chumbados (CSS e HTML gerado por JS).
+     Em vez de caçar um a um, mede a cor computada e escurece fundo claro PRESERVANDO o matiz.
+     Protegido por saturação: amarelo da marca (#ffc700 etc.) e cores fortes não são tocados.
+     Opt-out pontual: data-aura-keep no elemento. */
+  function auraParse(c){
+    var m=c&&c.match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\)/);
+    if(!m)return null;
+    return {r:+m[1],g:+m[2],b:+m[3],a:m[4]===undefined?1:+m[4]};
+  }
+  function auraNormalize(){
+    if(!document.body.classList.contains('aura-dark'))return;
+    var t0=performance.now();
+    var els=document.querySelectorAll('.main *:not(svg):not(path):not(circle):not(rect):not(line):not(iframe):not(img):not([data-aura-keep])');
+    var darkened=new WeakSet();
+    els.forEach(function(el){
+      var cs=getComputedStyle(el);
+      var bg=auraParse(cs.backgroundColor);
+      if(!bg||bg.a<.5)return;
+      var mx=Math.max(bg.r,bg.g,bg.b),mn=Math.min(bg.r,bg.g,bg.b);
+      var L=(0.299*bg.r+0.587*bg.g+0.114*bg.b)/255;
+      if(L>0.62&&(mx-mn)<70){
+        var h=0,d=mx-mn;
+        if(d){
+          if(mx===bg.r)h=60*(((bg.g-bg.b)/d)%6);
+          else if(mx===bg.g)h=60*((bg.b-bg.r)/d+2);
+          else h=60*((bg.r-bg.g)/d+4);
+          if(h<0)h+=360;
+        }
+        var s=d?Math.min(45,Math.round(100*d/mx)):0;
+        el.style.backgroundColor='hsla('+Math.round(h)+','+s+'%,10%,.92)';
+        if(cs.borderColor&&auraParse(cs.borderColor)&&(function(b){return (0.299*b.r+0.587*b.g+0.114*b.b)/255>0.75})(auraParse(cs.borderColor))){
+          el.style.borderColor='rgba(255,255,255,.12)';
+        }
+        darkened.add(el);
+      }
+    });
+    /* segunda passada: texto escuro que ficou em cima de fundo escurecido sobe pra tinta clara */
+    els.forEach(function(el){
+      var cs=getComputedStyle(el);
+      var col=auraParse(cs.color);
+      if(!col)return;
+      var mx=Math.max(col.r,col.g,col.b),mn=Math.min(col.r,col.g,col.b);
+      var L=(0.299*col.r+0.587*col.g+0.114*col.b)/255;
+      if(L>=0.4||(mx-mn)>90)return;
+      var p=el;
+      while(p&&p!==document.body){
+        var pb=auraParse(getComputedStyle(p).backgroundColor);
+        if(pb&&pb.a>=.5){
+          var pl=(0.299*pb.r+0.587*pb.g+0.114*pb.b)/255;
+          if(pl<0.35)el.style.color='#eef0f3';
+          break;
+        }
+        p=p.parentElement;
+      }
+    });
+    if(performance.now()-t0>200)console.warn('auraNormalize lento',Math.round(performance.now()-t0)+'ms');
+  }
+  var normT=null;
+  function auraNormalizeSoon(){clearTimeout(normT);normT=setTimeout(auraNormalize,320)}
+  new MutationObserver(auraNormalizeSoon).observe(document.getElementById('view')||document.body,{childList:true,subtree:true});
+  document.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-nav],[data-subnav]'))auraNormalizeSoon();
+  },true);
+  setTimeout(auraNormalize,600);
+})();
 </script>
 </body>
 </html>
