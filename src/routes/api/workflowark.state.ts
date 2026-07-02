@@ -341,7 +341,8 @@ export const Route = createFileRoute("/api/workflowark/state")({
           if (!ctx.isAdmin) return json({ error: "Apenas admin pode alterar acessos." }, { status: 403 });
           const id = String(body.id ?? "");
           const patch: Record<string, unknown> = {};
-          if (VALID_ROLES.has(String(body.role))) patch.role = String(body.role);
+          // Não deixa o admin rebaixar/desativar a si mesmo (evita se trancar pra fora sozinho).
+          if (VALID_ROLES.has(String(body.role)) && body.id !== ctx.member.id) patch.role = String(body.role);
           if (typeof body.active === "boolean") patch.active = body.id === ctx.member.id ? true : body.active;
           if (typeof body.full_name === "string") patch.full_name = body.full_name.trim() || null;
           if (body.permissions && typeof body.permissions === "object") patch.permissions = body.permissions;
@@ -356,9 +357,14 @@ export const Route = createFileRoute("/api/workflowark/state")({
           if (id === ctx.member.id) return json({ error: "Você não pode remover a si mesmo." }, { status: 400 });
           const { data: m } = await ctx.db
             .from("workflowark_members")
-            .select("user_id")
+            .select("user_id,email")
             .eq("id", id)
             .maybeSingle();
+          // Nunca remover o dono: apagar a conta de auth dele o tranca pra fora de vez
+          // (o auto-conserto do getContext não roda porque ele nem consegue mais logar).
+          if (m?.email && OWNER_EMAILS.has(String(m.email).toLowerCase())) {
+            return json({ error: "O dono da conta não pode ser removido." }, { status: 403 });
+          }
           const { error } = await ctx.db.from("workflowark_members").delete().eq("id", id);
           if (error) return json({ error: "Não foi possível remover o membro." }, { status: 500 });
           if (m?.user_id) {
@@ -678,6 +684,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
 
         // Meta: salva o token (só no servidor, key fora de WFA_CLOUD_KEYS — não vaza pro front).
         if (action === "set-meta-config") {
+          if (!ctx.isAdmin) return json({ error: "Apenas admin pode alterar a conexão do Meta." }, { status: 403 });
           const token = String(body.token ?? "").trim();
           try {
             await ctx.db.from("workflowark_state").upsert({ key: "wfa-meta-secret", data: { token } });

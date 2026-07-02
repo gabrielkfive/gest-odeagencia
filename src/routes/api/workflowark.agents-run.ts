@@ -227,6 +227,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             };
             // PRESERVA o histórico: cada debate é ADICIONADO. Mantém os últimos 60.
             briefings.unshift(brief);
+            criadas++; // conta o que este lote produziu (destrava o auto-encadeamento e o retorno)
             // Apenas as REUNIÕES/ALINHAMENTOS entram direto NA AGENDA (não no Kanban)
             (Array.isArray(j.reunioes) ? j.reunioes : []).slice(0, 1).forEach((rm: any, i: number) => {
               if (String(rm || "").length < 4) return;

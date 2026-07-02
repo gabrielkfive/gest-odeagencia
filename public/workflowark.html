@@ -2594,7 +2594,9 @@ async function wfaFlush(){
         // NÃO reenfileira — senão ela trava a fila e mantém o badge vermelho pra sempre.
         const permanente=/inv[áa]lido|bloco inv/i.test((e&&e.message)||'');
         if(permanente){ WFA_DIRTY.delete(key); continue; } // descarta e segue pras outras
-        WFA_PENDING.set(key,data);            // erro transitório: mantém na fila p/ próxima tentativa
+        // erro transitório: recoloca na fila SÓ se não chegou um valor mais novo enquanto
+        // esta gravação estava em voo — senão o retry sobrescreve a edição nova com a antiga.
+        if(!WFA_PENDING.has(key))WFA_PENDING.set(key,data);
         atualizarBadgeSync(false);
         break;                                 // para; tenta de novo no próximo tick
       }
@@ -2768,6 +2770,9 @@ async function bootCloudSync(){
     // aperta "Rodar conselho agora". // arkDailyAgentsKick();
     wfaLimpezaConselhoV1(); // limpeza única: tarefas do conselho/ressuscitadas -> Concluído
     wfaSeedClientesV1();     // adiciona 4B Burguer e Pizzaria Sabor e Lenha (1x, idempotente)
+    // Seeds que ANTES rodavam no parse (e apagavam dados em navegador novo): agora aqui,
+    // com a lista real do servidor já aplicada, então só ACRESCENTAM.
+    seedValhalla();seedSamuel();seedProcessos();
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
     WFA_CLOUD_READY=false;
@@ -4525,7 +4530,10 @@ function cliAddTask(id){
   cliDetalhe(id); // re-render da ficha com a nova tarefa
 }
 // Seed único da Valhalla (cliente pedido pelo Gabriel) — fica editável pelo botão Editar.
-(function seedValhalla(){
+// IMPORTANTE: NÃO roda no parse. É chamado no bootCloudSync, DEPOIS do applyCloudState,
+// senão num navegador novo o seed grava a lista só-com-Valhalla e a fila empurra isso,
+// apagando os clientes de todo mundo (a lista custom é chave de bloco único, não mescla).
+function seedValhalla(){
   try{
     if(localStorage.getItem('wfa-seed-valhalla'))return;
     const arr=loadClientesCustom();
@@ -4536,7 +4544,7 @@ function cliAddTask(id){
     localStorage.setItem('wfa-seed-valhalla','1');
     rebuildClientes();
   }catch(e){}
-})();
+}
 
 // ---- Equipe: base + colaboradores personalizados (nuvem · wfa-colab-custom) ----
 const TEAM_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Saulo','Bruno','Maria Luiza','Samuel Magalhães','M. Portela','Luckas Gomes','Omar','Henrique','Nicolas','Giuseppe','Márcio','Kaique','Lush','Anderson','João Gabriel','Maria Clara'];
@@ -4571,15 +4579,16 @@ function colabAdd(){
   arr.push(nm); saveColabCustom(arr); colabOpen(); toast('Pessoa adicionada ✓');
 }
 function colabRemove(nm){ saveColabCustom(loadColabCustom().filter(n=>n!==nm)); colabOpen(); toast('Removido'); }
-// Seed único do Samuel Magalhães (colaborador pedido pelo Gabriel)
-(function seedSamuel(){
+// Seed único do Samuel Magalhães (colaborador pedido pelo Gabriel).
+// Igual ao seedValhalla: só roda no bootCloudSync, depois do applyCloudState.
+function seedSamuel(){
   try{
     if(localStorage.getItem('wfa-seed-samuel'))return;
     const arr=loadColabCustom();
     if(!arr.some(n=>String(n).toLowerCase().includes('samuel'))){ arr.push('Samuel Magalhães'); localStorage.setItem('wfa-colab-custom',JSON.stringify(arr)); }
     localStorage.setItem('wfa-seed-samuel','1');
   }catch(e){}
-})();
+}
 
 const SPRINT_ATIVIDADES = {
   0:[{t:'Grupo de WhatsApp criado',f:'Account Manager'},{t:'Pasta de armazenamento (Drive)',f:'Account Manager'},{t:'Mensagem inicial enviada',f:'Account Manager'},{t:'Vídeo explicando a jornada',f:'Account Manager'},{t:'Instruções para gravações',f:'Account Manager'},{t:'Drive de referências',f:'Account Manager'}],
@@ -8259,7 +8268,12 @@ async function wppMarkAllRead(){
     if(typeof bootCloudSync==='function'){await bootCloudSync();}
     renderWhatsapp();if(typeof updateBadges==='function')updateBadges();
     toast('✓ '+((r&&r.marcadas)||naoLidas)+' marcada(s) como lida(s)');
-  }catch(e){toast('⚠ '+(e.message||'Falha ao marcar todas'));}
+  }catch(e){
+    // SEM o delete abaixo, a chave ficava "suja" pra sempre (wfa-whatsapp é NO_PUSH, o flush
+    // nunca a limpa), e aí toda puxada pulava a caixa: mensagem nova ficava invisível.
+    WFA_DIRTY.delete('wfa-whatsapp');
+    toast('⚠ '+(e.message||'Falha ao marcar todas'));
+  }
 }
 // Busca as fotos de perfil que faltam (em lotes). Reencadeia até esgotar.
 async function wppSyncAvatars(silent){
@@ -9061,7 +9075,11 @@ let PLAN_SAVE_T=null;
 function planSaveSoon(){try{if(typeof WFA_DIRTY!=='undefined')WFA_DIRTY.add('wfa-planilha');}catch(e){}clearTimeout(PLAN_SAVE_T);PLAN_SAVE_T=setTimeout(savePlanilha,600);}
 // está editando uma célula da planilha? (foco dentro do #plan-wrap) -> não re-renderizar por cima
 function planIsEditing(){const w=document.getElementById('plan-wrap');return !!(w&&document.activeElement&&w.contains(document.activeElement));}
-function planNum(s){if(s==null)return null;let t=String(s).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');if(t===''||isNaN(parseFloat(t)))return null;return parseFloat(t);}
+// planNum interpreta STRING no formato pt-BR ("2.083,33" -> 2083.33). Mas o valor gravado
+// já é NÚMERO (planLiveRec salva planNum(v)||0). Sem a guarda abaixo, chamar planNum sobre
+// o número 2083.33 vira String("2083.33") -> remove o ponto achando ser milhar -> 208333
+// (inflava os totais em 100x). Número entra e sai igual.
+function planNum(s){if(s==null)return null;if(typeof s==='number')return isFinite(s)?s:null;let t=String(s).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');if(t===''||isNaN(parseFloat(t)))return null;return parseFloat(t);}
 function planFmt(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});}
 function planNovoMes(nome,base){
   const id='pm'+Date.now()+Math.floor(Math.random()*999);
@@ -9680,7 +9698,9 @@ const PROCESSOS_SEED=[
   {area:'Gestão',titulo:'AllHands mensal',desc:'Time alinhado',passos:['Revisar resultados do mês anterior','Apresentar metas/OKRs do mês','Reconhecer entregas e destravar problemas','Definir prioridades por área']},
   {area:'Gestão',titulo:'Definir OKRs',desc:'A cada ciclo',passos:['Definir 1 objetivo claro por área','Criar 2-4 resultados-chave mensuráveis','Alinhar com os responsáveis','Acompanhar semanalmente na aba OKRs']},
 ];
-(function seedProcessos(){
+// Igual ao seedValhalla: só roda no bootCloudSync, depois do applyCloudState,
+// pra não apagar os processos de todo mundo num navegador novo.
+function seedProcessos(){
   try{
     if(localStorage.getItem('wfa-seed-processos'))return;
     const cur=JSON.parse(localStorage.getItem('wfa-processos')||'[]');
@@ -9689,7 +9709,7 @@ const PROCESSOS_SEED=[
     if(add.length){localStorage.setItem('wfa-processos',JSON.stringify(cur.concat(add)));}
     localStorage.setItem('wfa-seed-processos','1');
   }catch(e){}
-})();
+}
 function loadProc(){return JSON.parse(localStorage.getItem('wfa-processos')||'[]');}
 function saveProc(a){localStorage.setItem('wfa-processos',JSON.stringify(a));renderProcessos();}
 const PROC_AREA_ICO={'Comercial':'CM','Account/CS':'CS','Tráfego':'TR','Social/Conteúdo':'SO','Design':'DS','Edição/Captação':'ED','Financeiro':'FN','Gestão':'GE'};
