@@ -1,3 +1,4 @@
+<!-- build 2026-07-02T15:02 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -663,36 +664,57 @@ h1,h2,h3,h4{letter-spacing:-.02em}
 .alert{border-radius:16px}
 
 /* =====================================================================
-   APPLE REFORM · camada final coesa (vence as camadas anteriores).
-   Tipografia SF, fundo/cinzas Apple, profundidade suave, controles iOS,
-   vidro fosco no topo, sidebar grafite, foco e física de movimento Apple.
+   LINEAR REFORM · camada final coesa (vence as camadas anteriores).
+   02/07: sistema inteiro migrado de "Apple claro" pra "Linear escuro" —
+   decisão do Gabriel. Densidade é a natureza real deste produto (painel
+   operacional, não vitrine de marketing); o instrumento escuro da Linear
+   é a referência que bate com isso, não a página de produto da Apple.
+   Onyx/Charcoal/Obsidian, borda fina + sombra curta define o cartão (não
+   preenchimento vivo), Inter apertado, o amarelo ARK é o único acento
+   (mesmo papel do "acid lime" da Linear: raro, nunca decorativo).
    Escopo cuidadoso: NÃO mexe em inputs especiais (ex: células .al-cell).
    ===================================================================== */
 :root{
-  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Inter',system-ui,'Segoe UI',sans-serif;
-  --bg:#f5f5f7;            /* cinza de fundo Apple */
-  --ink:#1d1d1f;--ink-2:#1d1d1f;--txt:#1d1d1f;  /* preto Apple (não #000) */
-  --mute:#6e6e73;--mute-2:#8e8e93;              /* cinzas secundários iOS */
-  --line:#e5e5ea;--line-2:#d1d1d6;              /* hairlines iOS */
+  --sans:'Inter var','Inter',-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',sans-serif;
+  --bg:#0a0a0b;                    /* onyx Linear — quase preto, não preto puro */
+  --ink:#f7f8f8;--ink-2:#f7f8f8;--txt:#f7f8f8;   /* snow */
+  --mute:#8a8f98;--mute-2:#62666d;                /* fog / slate */
+  --line:#23252a;--line-2:#323334;                /* graphite / iron */
 }
-html,body{font-family:var(--sans);letter-spacing:-.011em}
-h1,h2,h3,h4{letter-spacing:-.022em}
+html,body{font-family:var(--sans);letter-spacing:-.011em;background:var(--bg)}
+h1,h2,h3,h4{letter-spacing:-.022em;color:var(--ink)}
 .view{background:var(--bg)}
+p,span,div{color:inherit}
 
-/* Cartões — referência Apple (macbook-neo): raio 28px, elevação por CONTRASTE DE VALOR
-   (branco sobre #f5f5f7), quase sem sombra em repouso — a sombra só entra como resposta
-   ao toque/hover, nunca como decoração parada. */
-.card,.kpi,.mdw,.al-kpi{border-radius:28px;border:1px solid rgba(0,0,0,.04);box-shadow:0 1px 1px rgba(0,0,0,.02);transition:box-shadow .34s ease,transform .34s ease}
-.card:hover,.mdw:hover{box-shadow:0 12px 28px -16px rgba(0,0,0,.16);transform:translateY(-2px)}
-
-/* Cartões ESCUROS — referência Linear (midnight command deck): raio mais fechado (14px, não
-   28px — instrumento denso, não vitrine), borda inset fina em vez de preenchimento chapado,
-   sombra curta e precisa. É a metade "escura" do sistema (sidebar, JARVIS) falando a língua
-   certa: painel de instrumento, não cartão de produto. */
-.card.dk,.kpi.dk,.mdw.dk,#md-jarvis{border-radius:14px!important;border:1px solid rgba(255,255,255,.08)!important;
-  box-shadow:0 0 0 1px rgba(0,0,0,.3),0 2px 4px rgba(0,0,0,.4)!important;background:#161718!important}
-.card.dk .l,.card.dk .d,.kpi.dk .l,.kpi.dk .d{color:#8a8f98!important}
-.card.dk:hover,.kpi.dk:hover,.mdw.dk:hover{box-shadow:0 0 0 1px rgba(255,255,255,.1),0 8px 20px rgba(0,0,0,.5)!important}
+/* Cartões — referência Linear: raio fechado (12px), borda fina + sombra curta e precisa,
+   nunca preenchimento vivo. Elevação por camada (Charcoal sobre Onyx), não por brilho. */
+/* !important aqui de propósito: o arquivo tem blocos de <style> por página/widget espalhados
+   MAIS ABAIXO no documento (ex: #mdw-board), que vencem esta camada por ordem de cascata só
+   com especificidade igual. Sem !important, widgets como os do Meu Painel voltavam pro branco
+   antigo e o texto (agora claro) ficava invisível em cima de fundo claro. */
+.card,.kpi,.mdw,.al-kpi,table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap,
+.crm-col,.crm-card,.sprint-col,.sprint-card,.task-col,.task-card,.md-card,.mdb,.mdw-addmenu,
+#page-agentes .ag-card,.modal,.crm-mbox,.set-acc,.mdw-kpi,.mdw-hd .ic,.mdw-hd .ct,#mdw-addmenu{
+  background:#161718!important;border-color:#23252a!important;color:#f7f8f8!important;
+  box-shadow:0 2px 4px rgba(0,0,0,.4)!important;transition:box-shadow .34s ease,transform .34s ease,border-color .2s ease}
+.card,.kpi,.mdw,.al-kpi{border-radius:12px!important;border:1px solid #23252a!important}
+.crm-col,.sprint-col,.task-col{background:#0f1011!important}
+.card:hover,.mdw:hover,.crm-card:hover,.sprint-card:hover,.task-card:hover{box-shadow:0 0 0 1px rgba(255,255,255,.1),0 8px 20px rgba(0,0,0,.5)!important;transform:translateY(-2px)}
+.kpi .l,.kpi .d,.card .m,.md-card .tk-m,.mute,.crm-card .meta,.mdw-hd .tt,.mdw-row .mt,.mdw-subhd,
+.mdw-empty,.mdw-kpi .l{color:#8a8f98!important}
+.kpi .v,.mdw-hd .tt,.mdw-row .tx,.mdw-clock{color:#f7f8f8!important}
+/* Sinalização por cor continua viva, só que como texto/borda (Linear), não fundo pastel chapado */
+.kpi.red .v,.kpi.red::after{color:#eb5757!important}.kpi.green .v,.kpi.green::after{color:#27a644!important}
+.kpi.yel .v{color:#ffd400!important}
+.md-task.late{background:#1f1414!important;border-color:#3a1f1f!important}
+.md-task.today{background:#1f1c10!important;border-color:#3a3216!important}
+table.t td,table.t th{border-color:#23252a!important}
+.form-input,.form-select,.tb-search,.tb-search input,.mdw-nota{background:#161718!important;color:#f7f8f8!important;border-color:#23252a!important}
+.form-input::placeholder{color:#62666d!important}
+.mdw-row{border-bottom-color:#23252a!important}
+.mdw.nota-y,.mdw.nota-y *{background:initial;color:initial}
+.mdw.nota-y{background:linear-gradient(135deg,#ffe9a6,#ffdc6b)!important;color:#1d1d1f!important}
+.mdw.nota-y .mdw-nota,.mdw.nota-y .mdw-hd .tt{color:#1d1d1f!important;background:transparent!important}
 
 /* CTA principal — mesmo brilho dourado do ARK OS (Mission Control), agora em todo botão primário do sistema */
 .tb-btn{position:relative; overflow:hidden; transition:transform .18s cubic-bezier(.16,1,.3,1),box-shadow .25s ease,filter .2s ease}
@@ -702,8 +724,14 @@ h1,h2,h3,h4{letter-spacing:-.022em}
 @keyframes tbShine{to{left:130%}}
 @media (prefers-reduced-motion:reduce){.tb-btn:hover::after{animation:none}}
 
-/* Topo — vidro fosco translúcido (iOS) */
-.topbar{background:rgba(245,245,247,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.07)}
+/* Topo — vidro fosco translúcido, agora escuro (Linear) */
+.topbar{background:rgba(15,16,17,.82);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid #23252a;color:#f7f8f8}
+.crumbs{color:#8a8f98}.crumbs .here{color:#f7f8f8}
+.tb-ic{color:#8a8f98}.tb-ic:hover{background:#23252a;color:#f7f8f8}
+.icobtn{background:#161718;border-color:#23252a;color:#d0d6e0}
+.icobtn:hover{background:#23252a;color:#f7f8f8}
+.main{background:#0f1011}
+.tb-pill{background:#23252a;color:#d0d6e0}
 
 /* Estrutura flutuante, ajustada (feedback do Gabriel: "borda grande demais na esquerda"):
    a sidebar cola na borda real da tela (cantos vivos à esquerda), só arredonda e ganha
@@ -713,8 +741,11 @@ h1,h2,h3,h4{letter-spacing:-.022em}
 .main{height:100%;border-radius:22px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.03),0 20px 44px -28px rgba(0,0,0,.14)}
 @media (max-width:900px){.app{padding:0;gap:0}.main{border-radius:0}.side{border-radius:0}}
 
-/* Sidebar — grafite Apple (não preto chapado) + hairline translúcido */
-.side{background:#1c1c1e;border-right:1px solid rgba(255,255,255,.07)}
+/* Sidebar — Charcoal Linear, alinhada aos mesmos tokens do resto do sistema agora escuro */
+.side{background:#0f1011;border-right:1px solid #23252a}
+.side-head{border-bottom-color:#23252a}
+.side-foot{border-top-color:#23252a}
+.crm-pill{background:#1a1608;border-color:#3a3216;color:#f7f8f8}
 #nav{position:relative}
 .navitem,.subitem{position:relative;border-radius:10px;font-weight:500;transition:background .2s ease,color .2s ease,transform .18s cubic-bezier(.16,1,.3,1)}
 .navitem:hover{background:rgba(255,255,255,.06);transform:none}
