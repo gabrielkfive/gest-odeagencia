@@ -127,3 +127,113 @@ Em ordem de gravidade:
 - **Grounding por cliente** (briefs) e disciplina de custo (pré-filtros, idempotência, Sonnet só onde vale).
 - **Identidade visual** (amarelo ARK + dark/gold cliente) e o boot splash.
 - **Pipeline de WhatsApp** com 3 transportes unificados, transcrição Whisper grátis e visão de imagem.
+
+---
+
+# PARTE 2 · OPORTUNIDADES E ARQUITETURA V2
+
+## 16. Opportunities
+
+1. **O design system já está instalado.** Ativar o shadcn/Tailwind morto com os tokens ARK (amarelo `#FFC700`, dark/gold do cliente) transforma 4.360 linhas de peso morto no coração da V2 sem instalar nada novo.
+2. **Prompt caching em todos os call sites** é ganho de custo imediato (o padrão já existe pronto em `social-run.ts`, é copiar para os outros ~14 pontos).
+3. **Streaming** nas ações de geração (roteirista, planejamento, conselho, JARVIS) muda a percepção de velocidade sem mudar modelo nem custo.
+4. **Cron nativo do Cloudflare** (`[triggers]` + handler `scheduled`) elimina o cron externo e o `?key=ark-2026` de uma vez.
+5. **O Supabase já é Postgres**: habilitar `pgvector` dá busca semântica (memória de verdade) sem novo fornecedor. Alternativa: Cloudflare Vectorize.
+6. **O conceito de Missão já existe embrionário** (conselho produz decisão → plano → tarefas → notificações). Falta só dar nome, tela e timeline.
+7. **jarvis-os provou o modelo de skills com runs.** Trazer o conceito (registry + execution log) para dentro do produto.
+8. **Duplicações públicas** (portal/aprovar/postagens) são a tela de ensaio perfeita para o design system antes de encarar o monólito.
+
+## 17. Proposed Architecture V2
+
+Mantém Workers + Supabase + TanStack Start. Nada de reescrita. A V2 é organizar o que existe em 5 camadas com contratos claros:
+
+```
+┌─ EXPERIÊNCIA ─────────────────────────────────────┐
+│ Rotas React + Ark Design System (shadcn ativado)  │
+│ Espaços: Meu Dia · Clientes · Agentes · Missões   │
+│ Motion: AML via Framer Motion + tokens            │
+├─ SINCRONIA ───────────────────────────────────────┤
+│ @ark/sync: o motor atual portado p/ módulo TS     │
+│ (dirty queue, tombstones, merge por id)           │
+├─ COGNIÇÃO ────────────────────────────────────────┤
+│ @ark/agents: registry de agentes + prompts        │
+│ @ark/ai: cliente Anthropic único (caching,        │
+│ streaming, retry, custo por chamada)              │
+│ Missions: objetivo → plano → execução → artefatos │
+├─ MEMÓRIA ─────────────────────────────────────────┤
+│ Supabase: tabelas por domínio (gradual) +         │
+│ pgvector p/ briefs, conselho, criativos, WhatsApp │
+├─ INFRA ───────────────────────────────────────────┤
+│ Workers: cron nativo, secrets, observability on,  │
+│ ark_runs (log de execução: tokens, custo, tempo)  │
+└───────────────────────────────────────────────────┘
+```
+
+Decisões estruturais:
+
+- **`src/agents/registry.ts`**: cada agente vira um objeto declarado (nome, papel, modelo, prompt, tools, gatilho, onde grava). Rotas apenas invocam o registry. Mata a duplicação de `CLIENTES_CTX` e dos prompts.
+- **`src/lib/ai.ts`**: função única `callClaude()` com caching sempre ligado, streaming opcional, modelo por parâmetro, registro automático em `ark_runs`.
+- **Tabela `ark_runs`** no Supabase (agente, gatilho, input resumido, output, tokens in/out, custo estimado, latência, status). Alimenta a tela "Operações" (observabilidade do Foundation Document).
+- **Missões**: tabela `ark_missions` (objetivo, timeline de etapas, artefatos, status). Conselho e Social passam a criar missões em vez de só notificações.
+- **Design tokens em um lugar só**: `src/styles.css` vira a fonte da verdade com as duas peles (ARK interno claro/amarelo, cliente dark/gold), consumido por rotas React e, durante a transição, pelo monólito via `<link>`.
+- **Estrangulamento do monólito** (strangler fig): cada tela extraída vira rota React usando `@ark/sync` e o design system. O iframe continua servindo as telas ainda não migradas. O usuário não percebe a troca.
+- **Dados de domínio saem do código**: catálogo de clientes e roteamento por pessoa migram para `wfa-clientes-ctx` (editável na UI) em vez de constantes em rota.
+
+## 18. Migration Strategy
+
+Filosofia: evoluir, extrair, substituir, repetir. Nunca big-bang.
+
+- **Fase 0 · Higiene (não muda produto):** remover `_BACKUP-*/` do repo e rotacionar qualquer credencial que estava no `.env` dele; `RUN_KEY` vira secret; cron nativo; prompt caching em todos os call sites; consolidar prompts/catálogo em módulos únicos; apagar arquivos soltos da raiz; um lockfile só.
+- **Fase 1 · Fundações V2:** ativar design system (tokens + 10 componentes base + motion), refazer as 3 páginas públicas com ele (baixo risco, alta visibilidade), criar `ark_runs` + tela Operações.
+- **Fase 2 · Cognição:** registry de agentes, streaming, Missões v1 (conselho e social criando missões observáveis com timeline).
+- **Fase 3 · Memória:** pgvector, indexar briefings do conselho + criativos + resumos de WhatsApp, agentes consultam memória antes de gerar.
+- **Fase 4 · Estrangulamento:** extrair telas do monólito por ordem de valor (Meu Dia → Central de Agentes → WhatsApp → Clientes → Financeiro → resto). Congelamento real do HTML: a partir da Fase 1, bug fix só, feature nova só em React.
+- **Critério de corte de cada tela:** a versão React só substitui a antiga quando estiver funcionalmente igual ou melhor E usando o mesmo `@ark/sync` (zero risco de perda de dados).
+
+## 19. Risks
+
+| Risco | Gravidade | Mitigação |
+|---|---|---|
+| Regressão no motor de sync ao portá-lo | Alta | Portar como módulo com os mesmos nomes de chave, rodar `deploy/test-sync-race.mjs` ampliado antes de cada corte |
+| Perda de dados na migração key/JSON → tabelas | Alta | Migrar leitura primeiro (dual-read), escrita depois, chave antiga vira backup por 30 dias |
+| Custo Anthropic subir com Missões/memória | Média | `ark_runs` mostra custo por agente desde o dia 1, caching total, Haiku como padrão |
+| Monólito continuar recebendo feature (congelamento furado) | Média | Regra no CLAUDE.md + checklist de PR, toda feature nova nasce em rota React |
+| Escopo infinito (a visão é grande) | Média | Milestones fechados abaixo, uma fase só começa quando a anterior está em produção |
+| Credenciais expostas no backup commitado | Alta | Rotacionar na Fase 0, verificar histórico do git |
+
+## 20. Priorities
+
+1. Segurança e higiene (Fase 0). Barato, urgente, invisível para o usuário.
+2. Custo de IA (caching) e cron nativo. Paga a migração.
+3. Design system + páginas públicas. Prova visual da V2.
+4. Observabilidade (`ark_runs` + Operações). Pré-requisito de confiança para agentes mais autônomos.
+5. Missões + streaming. O salto de percepção "isso é um OS".
+6. Memória vetorial. O salto de inteligência.
+7. Estrangulamento do monólito. O trabalho longo e contínuo.
+
+## 21. Epics
+
+- **E1 Higiene e Segurança**: backup fora, secrets rotacionados, RUN_KEY como secret, cron nativo, raiz limpa.
+- **E2 Plataforma de IA**: `@ark/ai` (caching, streaming, custo), registry de agentes, prompts unificados.
+- **E3 Ark Design System**: tokens únicos, shadcn ativado com pele ARK, biblioteca de motion (AML), dark mode.
+- **E4 Superfícies públicas V2**: portal, aprovar e postagens no design system.
+- **E5 Observabilidade**: `ark_runs`, tela Operações, custo por agente, saúde das integrações.
+- **E6 Missões**: modelo de missão, timeline, artefatos, conselho e social como produtores de missão.
+- **E7 Memória**: pgvector, indexação (conselho, criativos, WhatsApp, briefs), recuperação nos prompts.
+- **E8 Estrangulamento do monólito**: `@ark/sync` como módulo, extração tela a tela, aposentadoria do iframe.
+- **E9 Dados de domínio**: clientes e roteamento saindo do código para estado editável.
+
+## 22. Milestones
+
+- **M0 · Semana 1 a 2**: E1 completo + caching em 100% das chamadas + cron nativo. Métrica: custo por dia cai, nenhum endpoint com chave hardcoded.
+- **M1 · Mês 1**: E3 v1 + E4 no ar. Métrica: 3 páginas públicas sem estilo duplicado, tokens em arquivo único.
+- **M2 · Mês 2**: E2 + E5 no ar. Métrica: toda chamada de IA logada com custo, tela Operações mostrando execuções em tempo real.
+- **M3 · Mês 3**: E6 v1 + streaming. Métrica: conselho e social criando missões com timeline visível.
+- **M4 · Mês 4**: E7 v1. Métrica: roteirista consulta criativos que performaram via busca semântica.
+- **M5 · Mês 4 a 8**: E8 progressivo. Métrica: linhas do monólito só descem; meta de aposentar o iframe até o fim do período.
+- **M6 · contínuo**: E9 e refinamento de motion/UX conforme telas migram.
+
+---
+
+*Nenhuma implementação começa antes da aprovação deste plano. A ordem das fases protege produção: primeiro o invisível (segurança, custo), depois o novo ao lado do velho, e só então a substituição.*
+

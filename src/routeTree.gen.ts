@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SistemaRouteImport } from './routes/sistema'
 import { Route as PostagensRouteImport } from './routes/postagens'
 import { Route as PortalRouteImport } from './routes/portal'
+import { Route as OsRouteImport } from './routes/os'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AprovarRouteImport } from './routes/aprovar'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -47,6 +48,11 @@ const PostagensRoute = PostagensRouteImport.update({
 const PortalRoute = PortalRouteImport.update({
   id: '/portal',
   path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OsRoute = OsRouteImport.update({
+  id: '/os',
+  path: '/os',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
+  '/os': typeof OsRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
   '/sistema': typeof SistemaRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
+  '/os': typeof OsRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
   '/sistema': typeof SistemaRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
+  '/os': typeof OsRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
   '/sistema': typeof SistemaRoute
@@ -241,6 +250,7 @@ export interface FileRouteTypes {
     | '/'
     | '/aprovar'
     | '/auth'
+    | '/os'
     | '/portal'
     | '/postagens'
     | '/sistema'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/'
     | '/aprovar'
     | '/auth'
+    | '/os'
     | '/portal'
     | '/postagens'
     | '/sistema'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/aprovar'
     | '/auth'
+    | '/os'
     | '/portal'
     | '/postagens'
     | '/sistema'
@@ -319,6 +331,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AprovarRoute: typeof AprovarRoute
   AuthRoute: typeof AuthRoute
+  OsRoute: typeof OsRoute
   PortalRoute: typeof PortalRoute
   PostagensRoute: typeof PostagensRoute
   SistemaRoute: typeof SistemaRoute
@@ -360,6 +373,13 @@ declare module '@tanstack/react-router' {
       path: '/portal'
       fullPath: '/portal'
       preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/os': {
+      id: '/os'
+      path: '/os'
+      fullPath: '/os'
+      preLoaderRoute: typeof OsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -543,6 +563,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AprovarRoute: AprovarRoute,
   AuthRoute: AuthRoute,
+  OsRoute: OsRoute,
   PortalRoute: PortalRoute,
   PostagensRoute: PostagensRoute,
   SistemaRoute: SistemaRoute,

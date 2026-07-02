@@ -1,5 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+
+const spring = { type: "spring" as const, stiffness: 400, damping: 34, mass: 0.8 };
+const springSoft = { type: "spring" as const, stiffness: 200, damping: 26, mass: 1.1 };
 
 // Página PÚBLICA (sem login) onde o cliente aprova o plano de conteúdo.
 // Lê/grava via /api/workflowark/approve usando o token da URL (?t=).
@@ -30,6 +34,7 @@ const SERIF = "'Playfair Display', Georgia, serif";
 const SANS = "'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
 
 function Aprovar() {
+  const reduced = useReducedMotion();
   const { t } = Route.useSearch();
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -88,15 +93,22 @@ function Aprovar() {
   return (
     <div style={wrap}>
       <style>{globalCss}</style>
-      <header style={{ background: "linear-gradient(160deg,#1A1510 0%,#0C0A09 100%)", borderBottom: `1px solid ${BORDER}`, padding: "32px 0 26px" }}>
+      <motion.header initial={reduced ? undefined : { y: -18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={springSoft}
+        style={{ background: "linear-gradient(160deg,#1A1510 0%,#0C0A09 100%)", borderBottom: `1px solid ${BORDER}`, padding: "32px 0 26px" }}>
         <div style={inner}>
           <div style={{ fontSize: 11, letterSpacing: ".24em", textTransform: "uppercase", color: GOLD, fontWeight: 600 }}>{ap?.agency || "ARK Content"}</div>
           <h1 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 700, margin: "10px 0 6px", letterSpacing: "-.01em", lineHeight: 1.1 }}>Aprovação de conteúdo</h1>
           <p style={{ color: "#A8A29E", fontSize: 14.5 }}>
             {ap?.cliente ? <b style={{ color: "#F5F3F0", fontWeight: 600 }}>{ap.cliente}</b> : null}{ap?.periodo ? ` · ${ap.periodo}` : ""} · {ideias.length} ideia{ideias.length !== 1 ? "s" : ""}
           </p>
+          {!done && ideias.length > 0 && (
+            <div style={{ marginTop: 16, height: 4, borderRadius: 99, background: "#241F1B", overflow: "hidden" }}>
+              <motion.div style={{ height: "100%", background: `linear-gradient(90deg,${GOLD},#F5D67A)`, borderRadius: 99 }}
+                animate={{ width: `${((nApproved + nChanges) / ideias.length) * 100}%` }} transition={spring} />
+            </div>
+          )}
         </div>
-      </header>
+      </motion.header>
 
       <div style={inner}>
         {done ? (
@@ -115,7 +127,11 @@ function Aprovar() {
           const dec = items[String(idx)] || "";
           const ring = dec === "approved" ? "#2C5C28" : dec === "changes" ? "#7A5A1F" : BORDER;
           return (
-            <article key={idx} style={{ background: SURFACE, border: `1px solid ${ring}`, borderRadius: 16, padding: "18px 20px", marginBottom: 13, transition: "border-color .2s ease" }}>
+            <motion.article key={idx}
+              initial={reduced ? undefined : { y: 22, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+              transition={{ ...spring, delay: reduced ? 0 : Math.min(idx, 8) * 0.05 }}
+              whileHover={{ y: -3, transition: spring }}
+              style={{ background: SURFACE, border: `1px solid ${ring}`, borderRadius: 16, padding: "18px 20px", marginBottom: 13, transition: "border-color .2s ease", boxShadow: "0 14px 30px -20px rgba(0,0,0,.6)" }}>
               <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 9 }}>
                 {i.dia ? <span style={tag}>{i.dia}</span> : null}
                 {i.formato ? <span style={{ ...tag, background: "#211B0F", color: GOLD, borderColor: "#3A2F12" }}>{i.formato}</span> : null}
@@ -126,12 +142,19 @@ function Aprovar() {
               {i.legenda ? <p style={{ fontSize: 13.5, color: "#E7E3DD", fontStyle: "italic", borderLeft: `2px solid ${GOLD}`, paddingLeft: 12, marginBottom: 14 }}>“{i.legenda}”</p> : null}
               {!done && (
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button className="ark-btn" onClick={() => setItem(idx, "approved")} style={choice(dec === "approved", "#2F7A33")}><IconCheck size={15} /> Aprovar</button>
-                  <button className="ark-btn" onClick={() => setItem(idx, "changes")} style={choice(dec === "changes", "#9A6A1F")}><IconEdit size={15} /> Ajustar</button>
+                  <motion.button whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.015 }} className="ark-btn" onClick={() => setItem(idx, "approved")} style={choice(dec === "approved", "#2F7A33")}><IconCheck size={15} /> Aprovar</motion.button>
+                  <motion.button whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.015 }} className="ark-btn" onClick={() => setItem(idx, "changes")} style={choice(dec === "changes", "#9A6A1F")}><IconEdit size={15} /> Ajustar</motion.button>
                 </div>
               )}
-              {done && dec ? <div style={{ fontSize: 12.5, color: dec === "approved" ? "#6FD17A" : "#E0B34F", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>{dec === "approved" ? <IconCheck size={14} /> : <IconEdit size={14} />}{dec === "approved" ? "Aprovado" : "Pediu ajuste"}</div> : null}
-            </article>
+              <AnimatePresence>
+                {done && dec ? (
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={spring}
+                    style={{ fontSize: 12.5, color: dec === "approved" ? "#6FD17A" : "#E0B34F", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                    {dec === "approved" ? <IconCheck size={14} /> : <IconEdit size={14} />}{dec === "approved" ? "Aprovado" : "Pediu ajuste"}
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </motion.article>
           );
         })}
 
