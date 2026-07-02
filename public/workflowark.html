@@ -948,9 +948,12 @@ body.aura-dark .aura-goal .gbtn:hover{transform:translateY(-1px)}
 body.aura-dark .navitem svg,body.aura-dark .subitem svg{width:26px;height:26px;padding:5px;border-radius:9px;
   background:rgba(255,255,255,.06);flex-shrink:0;transition:background .2s ease,color .2s ease}
 body.aura-dark #nav-indicator{background:var(--yel);box-shadow:0 6px 18px -6px rgba(255,199,0,.55)}
-body.aura-dark .navitem.active,body.aura-dark .subitem.active{color:#131316;font-weight:650}
-body.aura-dark .navitem.active svg,body.aura-dark .subitem.active svg{color:#131316;background:rgba(0,0,0,.14)}
+body.aura-dark .navitem.active{color:#131316;font-weight:650}
+body.aura-dark .navitem.active svg{color:#131316;background:rgba(0,0,0,.14)}
 body.aura-dark .navitem.active .badge{background:#131316;color:#fff}
+/* Subitem ativo tem pill próprio: o indicador deslizante não cobre a sub-navegação */
+body.aura-dark .subitem.active{background:var(--yel);color:#131316;font-weight:650}
+body.aura-dark .subitem.active svg{color:#131316;background:rgba(0,0,0,.14)}
 
 /* Cartões no padrão Aura: quase invisíveis em repouso, acendem no hover */
 body.aura-dark .card,body.aura-dark .kpi,body.aura-dark .mdw,body.aura-dark .al-kpi,
@@ -1091,7 +1094,7 @@ body.aura-dark #page-tarefas .tv-btn{background:rgba(255,255,255,.07);border-col
 body.aura-dark #page-tarefas .tv-btn.on{background:var(--yel);border-color:var(--yel);color:#131316}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260702-1855 -->
+<!-- build AURA-DARK-OS-MIX 20260702-1910 -->
 <body class="aura-dark">
 
 <!-- ============== BOOT CINEMATOGRÁFICO (estilo Apple) ============== -->
