@@ -1091,7 +1091,7 @@ body.aura-dark #page-tarefas .tv-btn{background:rgba(255,255,255,.07);border-col
 body.aura-dark #page-tarefas .tv-btn.on{background:var(--yel);border-color:var(--yel);color:#131316}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260702-1800 -->
+<!-- build AURA-DARK-OS-MIX 20260702-1855 -->
 <body class="aura-dark">
 
 <!-- ============== BOOT CINEMATOGRÁFICO (estilo Apple) ============== -->
@@ -11223,7 +11223,7 @@ try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
     els.forEach(function(el){
       var cs=getComputedStyle(el);
       var col=auraParse(cs.color);
-      if(!col)return;
+      if(!col||col.a<.5)return; /* texto transparente é de propósito (ex.: check invisível até o hover) */
       var mx=Math.max(col.r,col.g,col.b),mn=Math.min(col.r,col.g,col.b);
       var L=(0.299*col.r+0.587*col.g+0.114*col.b)/255;
       if(L>=0.4||(mx-mn)>90)return;
