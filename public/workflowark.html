@@ -9141,10 +9141,39 @@ function finEnsurePagItem(x){if(!state.acerto)state.acerto={};const id=finPagAce
 function planToggleCob(i){const m=planActive();const x=m.receitas[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao cliente primeiro');return;}const id=finRecCobId(x.nome);const on=!finRecCobrado(x.nome);if(!state.cobranca[id]||!state.cobranca[id]._plan){const n=normName(x.nome);if(!CLIENTES.find(c=>normName(c.nm)===n)){state.cobranca[id]=Object.assign({resp:'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},state.cobranca[id]||{},{_plan:true,_nome:x.nome,_valor:Number(x.valor)||0});}}if(typeof cobToggle==='function')cobToggle(id,on);renderPlanilha();}
 function planTogglePag(i){const m=planActive();const x=m.pagar[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao pagamento primeiro');return;}finEnsurePagItem(x);const id=finPagAceId(x.nome);const on=!finPagPago(x.nome);if(typeof acertoToggle==='function')acertoToggle(id,on);renderPlanilha();}
 // Replica a planilha do mês ativo para Cobranças e Acerto (aditivo)
+// O financeiro ao vivo (Cobranças/Acerto) espelha SÓ o mês corrente da planilha.
+// Antes, clicar/editar uma aba de mês antigo sobrescrevia a cobrança e o acerto do
+// mês atual com valores velhos. Confia no mk estampado; senão, casa pelo nome do mês
+// (o seed batiza a aba com o nome vindo do Google, ex "Julho ARK", que contém "julho").
+function planMesEhCorrente(m){
+  if(!m)return false;
+  if(m.mk)return m.mk===cobMesKey();
+  const now=new Date();
+  const mesNome=now.toLocaleDateString('pt-BR',{month:'long'}).toLowerCase();
+  const nn=String(m.nome||'').toLowerCase();
+  if(!nn.includes(mesNome))return false;
+  const temAno=/\b20\d{2}\b/.test(nn);
+  return !temAno||nn.includes(String(now.getFullYear()));
+}
 function finSyncFromPlanilha(opts){opts=opts||{};if(typeof planEnsure==='function')planEnsure();const m=(typeof planActive==='function')?planActive():null;if(!m)return;if(!state.acerto)state.acerto={};if(!state.cobranca)state.cobranca={};
+  // Botão "Sincronizar abas" (opts.toast/force) é ação explícita e sempre roda. O caminho
+  // automático (salvar/trocar aba) só espelha o mês corrente, pra não clobar o financeiro.
+  const explic=!!(opts.force||opts.toast);
+  if(!explic&&!planMesEhCorrente(m))return;
+  if(planMesEhCorrente(m)&&!m.mk)m.mk=cobMesKey(); // estampa pra ficar robusto daqui pra frente
   (m.pagar||[]).forEach(x=>{if(!(x.nome||'').trim()&&!x.valor)return;finEnsurePagItem(x);});
   state.acerto.__seeded=true;
   (m.receitas||[]).forEach(x=>{const nm=(x.nome||'').trim();if(!nm)return;const n=normName(nm);if(CLIENTES.find(c=>normName(c.nm)===n))return;/* cliente real já aparece via CLIENTES */const id='plan-'+n.replace(/\s+/g,'-');const prev=state.cobranca[id]||{};state.cobranca[id]=Object.assign({resp:'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},prev,{_plan:true,_nome:nm,_valor:Number(x.valor)||0});});
+  // Remove cobrança plan-* de cliente que SAIU da planilha (não deixa cobrança fantasma pra
+  // sempre). Preserva quem já foi cobrado neste mês, pra não perder o registro do mês.
+  const nomesAtuais=new Set((m.receitas||[]).map(x=>normName(x.nome||'')).filter(Boolean));
+  Object.keys(state.cobranca||{}).forEach(id=>{
+    if(id.indexOf('plan-')!==0)return;
+    const d=state.cobranca[id];if(!d||!d._plan)return;
+    if(nomesAtuais.has(normName(d._nome||'')))return;
+    if(d.cobradoMes===cobMesKey())return;
+    delete state.cobranca[id];
+  });
   saveAcerto();saveCobranca();
   if(typeof renderAcerto==='function')renderAcerto();
   if(typeof renderCobranca==='function')renderCobranca();
