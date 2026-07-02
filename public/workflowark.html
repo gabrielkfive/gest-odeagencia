@@ -5181,8 +5181,7 @@ function onbToggle(id,i){
   const key=onbKey(id,i);let t=state.tarefas.find(x=>x.onbKey===key);
   if(!t){onboardingGerar(id,true);t=state.tarefas.find(x=>x.onbKey===key);}
   if(!t)return;
-  t.status=t.status==='concluido'?'backlog':'concluido';
-  if(t.status==='concluido')t.criadaEm=new Date().toISOString();
+  if(t.status==='concluido')taskReabrir(t,'backlog');else taskConcluir(t);
   if(typeof saveTarefas==='function')saveTarefas();else localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));
   renderOnboarding();
 }
@@ -5261,7 +5260,7 @@ function relDados(id){
   const today=hojeSP();const ym=today.slice(0,7);
   const ts=relClienteTarefas(c);
   const concl=ts.filter(t=>t.status==='concluido');
-  const conclMes=concl.filter(t=>String(t.criadaEm||'').startsWith(ym));
+  const conclMes=concl.filter(t=>String(t.concluidaEm||t.criadaEm||'').startsWith(ym)); // entrega = concluidaEm (fallback criadaEm p/ dado antigo)
   const andamento=ts.filter(t=>t.status==='andamento'||t.status==='aprovacao');
   const atras=ts.filter(t=>t.data&&t.data<today&&t.status!=='concluido');
   const tempo=ts.reduce((s,t)=>s+(t.timeSpent||0)+(t.timerSince?(Date.now()-new Date(t.timerSince).getTime())/1000:0),0);
@@ -5728,7 +5727,7 @@ function mdTaskRow(kind,t){
     </div>
   </div>`;
 }
-function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;t.status='concluido';if(typeof taskStopTimer==='function')taskStopTimer(t);t.criadaEm=new Date().toISOString();saveTarefas();renderMeuDia();if(typeof renderWidgets==='function')renderWidgets();toast('✓ Tarefa concluída · boa!');}
+function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;taskConcluir(t);saveTarefas();renderMeuDia();if(typeof renderWidgets==='function')renderWidgets();toast('✓ Tarefa concluída · boa!');}
 function mdSnooze(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;const d=new Date();d.setDate(d.getDate()+1);t.data=dataSP(d);saveTarefas();renderMeuDia();toast('↻ Adiada para amanhã');}
 /* ====== PAINEL DE WIDGETS PERSONALIZÁVEIS (estilo Apple) ====== */
 const MDW_TYPES={
@@ -5840,7 +5839,7 @@ function mdwBuckets(){
   const late=src.filter(t=>t.data&&t.data<today&&notDone(t)).sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   const todayT=src.filter(t=>t.data===today&&notDone(t));
   const pend=src.filter(t=>notDone(t)&&!(t.data&&t.data<today)&&t.data!==today).sort((a,b)=>((a.data||'9999')+'').localeCompare((b.data||'9999')+''));
-  const doneToday=src.filter(t=>t.status==='concluido'&&t.criadaEm&&t.criadaEm.startsWith(today));
+  const doneToday=src.filter(t=>t.status==='concluido'&&String(t.concluidaEm||t.criadaEm||'').startsWith(today));
   return {late,todayT,pend,doneToday};
 }
 function mdwRowTask(t,kind){
@@ -6060,7 +6059,7 @@ function renderMeuDia(){
   const todayT=src.filter(t=>t.data===today&&notDone(t));
   const pend=src.filter(t=>notDone(t)&&!(t.data&&t.data<today)&&t.data!==today)
     .sort((a,b)=>((a.data||'9999')+'').localeCompare((b.data||'9999')+''));
-  const doneToday=src.filter(t=>t.status==='concluido'&&t.criadaEm&&t.criadaEm.startsWith(today));
+  const doneToday=src.filter(t=>t.status==='concluido'&&String(t.concluidaEm||t.criadaEm||'').startsWith(today));
   // KPIs
   const kpis=document.getElementById('md-kpis');
   if(kpis)kpis.innerHTML=[
@@ -6435,7 +6434,7 @@ function renderTarefas(){
   document.getElementById('kpi-andamento').textContent=state.tarefas.filter(t=>t.status==='andamento').length;
   const today=hojeSP();
   document.getElementById('kpi-atrasadas').textContent=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
-  document.getElementById('kpi-concluidas').textContent=state.tarefas.filter(t=>t.status==='concluido'&&t.criadaEm&&t.criadaEm.startsWith(today)).length;
+  document.getElementById('kpi-concluidas').textContent=state.tarefas.filter(t=>t.status==='concluido'&&String(t.concluidaEm||t.criadaEm||'').startsWith(today)).length;
   // bind drag
   bindDrag();
   tarefaApplyView();
@@ -6632,7 +6631,7 @@ function bindDrag(){
       const id=e.dataTransfer.getData('id');const t=state.tarefas.find(x=>x.id===id);if(!t)return;
       const changedCol=t.status!==list.dataset.list;
       t.status=list.dataset.list;
-      if(t.status==='concluido')taskStopTimer(t);
+      if(t.status==='concluido')taskConcluir(t);else t.concluidaEm=null;
       [...list.querySelectorAll('.task-card')].forEach((el,idx)=>{const tt=state.tarefas.find(x=>x.id===el.dataset.tid);if(tt)tt.ord=idx;});
       saveTarefas();
       if(changedCol)toast('✓ Movida para '+taskStatusLabel(list.dataset.list));
@@ -6719,9 +6718,9 @@ function cycleRegua(id,i){
   const key=reguaKey(id,i);
   const t=state.tarefas.find(x=>x.reguaKey===key);
   if(t){
-    if(next==='ok'){ t.status='concluido'; t.criadaEm=t.criadaEm||new Date().toISOString(); saveTarefas(); }
+    if(next==='ok'){ taskConcluir(t); saveTarefas(); }
     else if(next==='na'){ state.tarefas=state.tarefas.filter(x=>x.reguaKey!==key); saveTarefas(); }
-    else if(next===''||next==='no'){ t.status='backlog'; saveTarefas(); }
+    else if(next===''||next==='no'){ taskReabrir(t,'backlog'); saveTarefas(); }
   }
 }
 function resetRegua(){if(confirm('Resetar régua do mês?')){const mk=reguaMesKey();Object.keys(state.regua||{}).forEach(k=>{if(k.indexOf(mk+':')===0)delete state.regua[k];});saveRegua();renderRegua();toast('Régua resetada');}}
@@ -6877,6 +6876,12 @@ function tdResetTimer(){const t=tdCurrentTask();if(!t)return;if(!confirm('Zerar 
 /* Cronômetro automático: toda tarefa nasce com o relógio correndo (pedido do Gabriel:
    "a tarefa foi criada, já dá play"). Ao concluir, o tempo congela — vira o "quanto demorou de fato". */
 function taskStopTimer(t){if(!t||!t.timerSince)return;t.timeSpent=(t.timeSpent||0)+(Date.now()-new Date(t.timerSince).getTime())/1000;t.timerSince=null;}
+// Conclusão consistente em TODOS os caminhos (Meu Dia, arrasto, modal, régua, onboarding):
+// para o cronômetro (senão o relatório do cliente conta horas correndo pra sempre) e carimba
+// concluidaEm = data de ENTREGA. NUNCA sobrescreve criadaEm (data de criação); antes o mdDone
+// fazia isso e as métricas de "entregue no mês" divergiam conforme o botão usado.
+function taskConcluir(t){if(!t)return;t.status='concluido';if(!t.concluidaEm)t.concluidaEm=new Date().toISOString();taskStopTimer(t);}
+function taskReabrir(t,st){if(!t)return;t.status=st||'backlog';t.concluidaEm=null;}
 /* ---- Comentários ---- */
 function tdAuthor(){const m=(typeof WFA_MEMBER!=='undefined')?WFA_MEMBER:null;return (m&&m.full_name)||(m&&m.email&&m.email.split('@')[0])||'Eu';}
 function tdWhen(iso){try{const d=new Date(iso),now=new Date(),diff=(now-d)/1000;if(diff<60)return 'agora';if(diff<3600)return Math.floor(diff/60)+'min';const sameDay=d.toDateString()===now.toDateString();if(sameDay)return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
@@ -6912,6 +6917,7 @@ function saveTaskDetail(){
   t.title=document.getElementById('td-title').value.trim()||t.title;
   t.desc=document.getElementById('td-desc').value;
   t.status=document.getElementById('td-status').value;
+  if(t.status==='concluido')taskConcluir(t);else t.concluidaEm=null; // congela o cronômetro e carimba/limpa a entrega
   t.prio=document.getElementById('td-prio').value;
   t.resp=document.getElementById('td-resp').value;
   t.data=document.getElementById('td-data').value;
