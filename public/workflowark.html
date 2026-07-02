@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
 <style>
 :root{
   --bg:#fafaf7;--surface:#fff;--ink:#0a0a0a;--ink-2:#1a1a1a;
@@ -1528,24 +1529,88 @@ h1,h2,h3,h4{letter-spacing:-.022em}
 
       <!-- =================== JORNADA / SPRINTS =================== -->
       <div class="page" id="page-jarvis">
-        <div class="page-head"><div class="page-title"><h1>JARVIS</h1><p>Seu assistente executor · converse, dê comandos e anexe documentos (txt, md, html, csv, json…).</p></div></div>
-        <div style="display:flex;flex-direction:column;height:calc(100vh - 180px);min-height:460px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#efeae2;max-width:1000px">
-          <div id="jarvis-msgs" style="flex:1;overflow:auto;min-height:0;padding:18px"></div>
-          <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-top:1px solid var(--line);background:#fff;flex-shrink:0">
-            <div id="jarvis-attach" style="display:none;align-items:center;gap:8px;background:var(--yel-bg,#fff7d6);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12px">
-              <span style="font-weight:700">📄 <span id="jarvis-attach-nm">documento</span></span>
-              <span id="jarvis-attach-meta" style="color:var(--mute);font-family:var(--mono)"></span>
-              <button class="icobtn" style="margin-left:auto;padding:2px 8px" onclick="jarvisClearAttach()">remover</button>
+        <style>
+        /* ===== JARVIS · command center (liquid glass + neumorfismo, tokens do sistema) ===== */
+        #page-jarvis .jv-shell{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:14px;height:calc(100vh - 168px);min-height:540px;border-radius:22px;padding:14px;overflow:hidden;
+          background:radial-gradient(1100px 480px at 75% -12%,rgba(255,199,0,.12),transparent 60%),linear-gradient(160deg,#0b0b0d 0%,#121215 55%,#0d0d10 100%)}
+        #page-jarvis .jv-shell::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+          background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 44px),repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px 44px);
+          -webkit-mask-image:radial-gradient(80% 80% at 60% 30%,#000 30%,transparent 100%);mask-image:radial-gradient(80% 80% at 60% 30%,#000 30%,transparent 100%)}
+        #page-jarvis .jv-glass{position:relative;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10);border-radius:16px;
+          backdrop-filter:blur(18px) saturate(1.35);-webkit-backdrop-filter:blur(18px) saturate(1.35);
+          box-shadow:0 12px 34px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.08)}
+        #page-jarvis .jv-neu{background:linear-gradient(145deg,#1a1a1e,#0e0e11);border:1px solid rgba(255,255,255,.06);border-radius:12px;color:#e9e9ec;cursor:pointer;
+          box-shadow:5px 5px 12px rgba(0,0,0,.55),-3px -3px 9px rgba(255,255,255,.045),inset 0 0 0 0 transparent;transition:box-shadow .15s,transform .12s}
+        #page-jarvis .jv-neu:hover{color:var(--yel)}
+        #page-jarvis .jv-neu:active{transform:scale(.97);box-shadow:inset 4px 4px 10px rgba(0,0,0,.6),inset -3px -3px 8px rgba(255,255,255,.04)}
+        #page-jarvis .jv-chatcol{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+        #page-jarvis #jarvis-msgs{flex:1;overflow:auto;min-height:0;padding:18px}
+        #page-jarvis .jv-b{max-width:82%;border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.55;white-space:pre-wrap;color:#f0f0f2}
+        #page-jarvis .jv-b.user{background:rgba(255,199,0,.15);border-color:rgba(255,199,0,.35)}
+        #page-jarvis .jv-b.ai{background:rgba(255,255,255,.07)}
+        #page-jarvis .jv-composer{display:flex;flex-direction:column;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,.09);flex-shrink:0;background:rgba(0,0,0,.25)}
+        #page-jarvis .jv-composer .form-input{background:rgba(255,255,255,.06);color:#f2f2f2;border:1px solid rgba(255,255,255,.13)}
+        #page-jarvis .jv-composer .form-input::placeholder{color:#9a9aa2}
+        #page-jarvis .jv-hudcol{display:flex;flex-direction:column;gap:14px;min-height:0;overflow:auto}
+        #page-jarvis .jv-core{padding:18px;text-align:center;flex-shrink:0}
+        #page-jarvis .jv-core-hd{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:#9a9aa2;text-transform:uppercase}
+        #page-jarvis #jv-core-dot{width:8px;height:8px;border-radius:50%;background:#666;box-shadow:0 0 8px transparent;transition:all .3s}
+        #page-jarvis #jv-core-dot.on{background:#30d158;box-shadow:0 0 10px rgba(48,209,88,.8)}
+        #page-jarvis .jv-orb-big{width:120px;height:120px;border-radius:50%;margin:18px auto 10px;
+          background:radial-gradient(circle at 35% 30%,#ffe680,var(--yel) 52%,#8f7000 100%);
+          box-shadow:0 0 0 8px rgba(255,199,0,.08),0 0 44px rgba(255,199,0,.35),inset -8px -10px 22px rgba(0,0,0,.35);animation:orbPulse 3s ease-in-out infinite}
+        #page-jarvis .jv-bignum{font-size:34px;font-weight:800;color:var(--yel);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+        #page-jarvis .jv-bignum-lb{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:#9a9aa2;text-transform:uppercase;margin-top:2px}
+        #page-jarvis .jv-chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+        #page-jarvis .jv-chip{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:11px;padding:8px 6px}
+        #page-jarvis .jv-chip b{display:block;font-size:17px;color:#fff;font-variant-numeric:tabular-nums}
+        #page-jarvis .jv-chip span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:#9a9aa2;text-transform:uppercase}
+        #page-jarvis .jv-skills{padding:14px;flex:1;min-height:120px}
+        #page-jarvis .jv-skills h4{margin:0 0 10px;font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:#9a9aa2;text-transform:uppercase}
+        #page-jarvis .jv-sk{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);margin-bottom:8px}
+        #page-jarvis .jv-sk .nm{flex:1;min-width:0}
+        #page-jarvis .jv-sk .nm b{display:block;font-size:12.5px;color:#f0f0f2}
+        #page-jarvis .jv-sk .nm i{display:block;font-style:normal;font-size:10.5px;color:#9a9aa2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        #page-jarvis .jv-sk .jv-neu{padding:7px 12px;font-size:10.5px;font-weight:800;letter-spacing:.08em;font-family:var(--mono)}
+        #page-jarvis .jv-sk.running{border-color:rgba(255,199,0,.45);box-shadow:0 0 14px rgba(255,199,0,.12) inset}
+        #page-jarvis .jv-off{padding:14px;font-size:12px;line-height:1.7;color:#c9c9cf}
+        #page-jarvis .jv-off code{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:6px;font-family:var(--mono);font-size:11px}
+        @media(max-width:1100px){#page-jarvis .jv-shell{grid-template-columns:1fr;height:auto}#page-jarvis .jv-chatcol{height:56vh}}
+        @media(prefers-reduced-motion:reduce){#page-jarvis .jv-orb-big{animation:none}}
+        </style>
+        <div class="page-head"><div class="page-title"><h1>JARVIS</h1><p>Seu assistente executor · converse, dê comandos, rode skills e acompanhe o núcleo local.</p></div></div>
+        <div class="jv-shell">
+          <section class="jv-glass jv-chatcol">
+            <div id="jarvis-msgs"></div>
+            <div class="jv-composer">
+              <div id="jarvis-attach" style="display:none;align-items:center;gap:8px;background:rgba(255,199,0,.12);border:1px solid rgba(255,199,0,.3);border-radius:9px;padding:6px 10px;font-size:12px;color:#f0f0f2">
+                <span style="font-weight:700">📄 <span id="jarvis-attach-nm">documento</span></span>
+                <span id="jarvis-attach-meta" style="color:#9a9aa2;font-family:var(--mono)"></span>
+                <button class="jv-neu" style="margin-left:auto;padding:3px 10px;font-size:11px" onclick="jarvisClearAttach()">remover</button>
+              </div>
+              <input type="file" id="jarvis-file" style="display:none" accept=".txt,.md,.markdown,.html,.htm,.csv,.json,.rtf,.srt,.vtt,text/*" onchange="jarvisFileChosen(this)">
+              <div style="display:flex;gap:8px;align-items:flex-end">
+                <button id="jarvis-conv" class="jv-neu" title="Modo conversa (voz)" style="flex-shrink:0;font-weight:700;padding:0 12px;height:40px" onclick="jarvisConversaToggle()">●</button>
+                <button id="jarvis-mic" class="jv-neu" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;flex-shrink:0;height:40px;padding:0 11px">🎙️</button>
+                <button class="jv-neu" onclick="jarvisAttach()" title="Anexar documento" style="font-size:17px;flex-shrink:0;height:40px;padding:0 11px">📎</button>
+                <textarea id="jarvis-input" class="form-input" placeholder="Fale, digite ou cole um documento…  (Enter envia · Shift+Enter pula linha)" rows="1" style="flex:1;border-radius:14px;resize:none;max-height:160px;min-height:40px;padding:9px 14px;line-height:1.4;font-family:inherit" oninput="jarvisAutoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();jarvisSend();}"></textarea>
+                <button class="jv-neu" style="flex-shrink:0;height:40px;padding:0 16px;color:var(--yel);font-weight:800" onclick="jarvisSend()">➤</button>
+              </div>
             </div>
-            <input type="file" id="jarvis-file" style="display:none" accept=".txt,.md,.markdown,.html,.htm,.csv,.json,.rtf,.srt,.vtt,text/*" onchange="jarvisFileChosen(this)">
-            <div style="display:flex;gap:8px;align-items:flex-end">
-              <button id="jarvis-conv" class="icobtn" title="Modo conversa (voz)" style="border-radius:20px;flex-shrink:0;font-weight:700;padding:0 12px;height:40px" onclick="jarvisConversaToggle()">●</button>
-              <button id="jarvis-mic" class="icobtn" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;border-radius:20px;flex-shrink:0;height:40px">🎙️</button>
-              <button class="icobtn" onclick="jarvisAttach()" title="Anexar documento" style="font-size:17px;border-radius:20px;flex-shrink:0;height:40px">📎</button>
-              <textarea id="jarvis-input" class="form-input" placeholder="Fale, digite ou cole um documento…  (Enter envia · Shift+Enter pula linha)" rows="1" style="flex:1;border-radius:18px;resize:none;max-height:160px;min-height:40px;padding:9px 14px;line-height:1.4;font-family:inherit" oninput="jarvisAutoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();jarvisSend();}"></textarea>
-              <button class="tb-btn dk" style="border-radius:20px;flex-shrink:0;height:40px" onclick="jarvisSend()">➤</button>
+          </section>
+          <aside class="jv-hudcol">
+            <div class="jv-glass jv-core">
+              <div class="jv-core-hd">Núcleo local · V.A.U.L.T. <span id="jv-core-dot"></span></div>
+              <div class="jv-orb-big" id="jv-orb"></div>
+              <div class="jv-bignum" id="jv-bignum">—</div>
+              <div class="jv-bignum-lb">palavras no vault</div>
+              <div class="jv-chips" id="jv-chips"></div>
             </div>
-          </div>
+            <div class="jv-glass jv-skills">
+              <h4>Skills</h4>
+              <div id="jv-skills-list"><div class="jv-off">Verificando o núcleo local…</div></div>
+            </div>
+          </aside>
         </div>
       </div>
 
@@ -4496,7 +4561,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='tutorial'&&typeof renderTutorial==='function'){try{renderTutorial();}catch(e){console.warn('tut',e);}}
     if(p==='conselho'&&typeof consPopular==='function'){try{consPopular();}catch(e){}}
     if(p==='agentes'){try{agPolish();agLive();}catch(e){}}
-    if(p==='jarvis'){try{jarvisPageEnter();}catch(e){}}
+    if(p==='jarvis'){try{jarvisPageEnter();}catch(e){} try{jvHudInit();}catch(e){console.warn('jvhud',e);}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
     if(p==='whatsapp'){try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
@@ -7270,9 +7335,75 @@ function jarvisAutoBrief(){
 }
 function jarvisRender(){
   const b=document.getElementById('jarvis-msgs'); if(!b)return;
-  if(!JARVIS_MSGS.length){b.innerHTML='<div style="text-align:center;color:var(--mute);font-size:12.5px;padding:24px;line-height:1.7">Fale ou digite. Eu <b>executo</b>:<br>"rodar conselho" · "planejar meu dia" · "criar tarefa ligar pra Vivenda"<br>"abrir cliente Vivenda" · "abrir financeiro" · "resumo do dia"<br><span style="opacity:.7">…ou pergunte qualquer coisa que eu respondo.</span></div>';return;}
-  b.innerHTML=JARVIS_MSGS.map(m=>`<div style="display:flex;justify-content:${m.role==='user'?'flex-end':'flex-start'};margin:5px 0"><div style="max-width:82%;background:${m.role==='user'?'#d9fdd3':'#fff'};border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:13px;line-height:1.5;white-space:pre-wrap">${mdEsc(m.content)}</div></div>`).join('');
+  if(!JARVIS_MSGS.length){b.innerHTML='<div style="text-align:center;color:#9a9aa2;font-size:12.5px;padding:24px;line-height:1.7">Fale ou digite. Eu <b style="color:#f0f0f2">executo</b>:<br>"rodar conselho" · "planejar meu dia" · "criar tarefa ligar pra Vivenda"<br>"abrir cliente Vivenda" · "abrir financeiro" · "resumo do dia"<br><span style="opacity:.7">…ou pergunte qualquer coisa que eu respondo.</span></div>';return;}
+  b.innerHTML=JARVIS_MSGS.map(m=>`<div style="display:flex;justify-content:${m.role==='user'?'flex-end':'flex-start'};margin:5px 0"><div class="jv-b ${m.role==='user'?'user':'ai'}">${mdEsc(m.content)}</div></div>`).join('');
   b.scrollTop=b.scrollHeight;
+}
+// ---- HUD do núcleo local (jarvis-os em localhost:8787) ----
+var JV_LOCAL='http://localhost:8787';
+var JV_HUD={timer:null,skills:null,lastWords:0};
+function jvVisible(){var p=document.getElementById('page-jarvis');return p&&p.offsetParent!==null;}
+function jvFetch(path,opt){
+  var ctl=new AbortController();var t=setTimeout(function(){ctl.abort();},2500);
+  return fetch(JV_LOCAL+path,Object.assign({signal:ctl.signal},opt||{})).then(function(r){clearTimeout(t);return r.ok?r.json():Promise.reject(r.status);});
+}
+function jvNum(el,to){
+  var from=Number((el.dataset.v||'0').replace(/\D/g,''))||0;el.dataset.v=String(to);
+  var A=window.anime&&window.anime.animate;
+  if(!A||from===to){el.textContent=to.toLocaleString('pt-BR');return;}
+  var o={v:from};A(o,{v:to,duration:1200,ease:'outExpo',onUpdate:function(){el.textContent=Math.round(o.v).toLocaleString('pt-BR');}});
+}
+function jvHudInit(){
+  jvHudTick();
+  if(!JV_HUD.timer)JV_HUD.timer=setInterval(function(){if(jvVisible())jvHudTick();},15000);
+}
+function jvHudTick(){
+  var dot=document.getElementById('jv-core-dot');
+  jvFetch('/api/status').then(function(st){
+    if(dot)dot.classList.add('on');
+    var big=document.getElementById('jv-bignum');if(big)jvNum(big,st.vault&&st.vault.words||0);
+    var chips=document.getElementById('jv-chips');
+    if(chips){chips.innerHTML=
+      '<div class="jv-chip"><b data-v="0" id="jv-c-notes">0</b><span>notas</span></div>'+
+      '<div class="jv-chip"><b data-v="0" id="jv-c-runs">0</b><span>runs hoje</span></div>'+
+      '<div class="jv-chip"><b data-v="0" id="jv-c-sk">0</b><span>skills</span></div>'+
+      '<div class="jv-chip"><b style="font-size:11px;line-height:2.1">'+String(st.model||'').replace('claude-','')+'</b><span>modelo</span></div>';
+      jvNum(document.getElementById('jv-c-notes'),st.vault&&st.vault.notes||0);
+      jvNum(document.getElementById('jv-c-runs'),st.runs_today||0);
+      jvNum(document.getElementById('jv-c-sk'),st.skills||0);
+    }
+    if(!JV_HUD.skills)jvLoadSkills();
+  }).catch(function(){
+    if(dot)dot.classList.remove('on');
+    JV_HUD.skills=null;
+    var l=document.getElementById('jv-skills-list');
+    if(l)l.innerHTML='<div class="jv-off">Núcleo local <b>offline</b>. No PC principal, abra a pasta <code>jarvis-os</code> e rode <code>.\\start.ps1</code>. O chat acima continua funcionando normalmente.</div>';
+    var big=document.getElementById('jv-bignum');if(big){big.textContent='—';big.dataset.v='0';}
+  });
+}
+function jvLoadSkills(){
+  jvFetch('/api/skills').then(function(res){
+    var sk=res.skills||res||[];JV_HUD.skills=sk;
+    var l=document.getElementById('jv-skills-list');if(!l)return;
+    l.innerHTML=sk.map(function(s){
+      return '<div class="jv-sk" data-slug="'+s.slug+'"><span style="font-size:16px">'+(s.emoji||'⚡')+'</span>'+
+        '<div class="nm"><b>'+mdEsc(s.name||s.slug)+'</b><i>'+mdEsc(s.description||'')+'</i></div>'+
+        '<button class="jv-neu" onclick="jvRun(\''+s.slug+'\',this)">RODAR</button></div>';
+    }).join('')||'<div class="jv-off">Nenhuma skill no núcleo.</div>';
+    var A=window.anime&&window.anime.animate;
+    if(A)A('#jv-skills-list .jv-sk',{opacity:[0,1],y:['10px','0px'],delay:function(el,i){return i*70;},duration:420,ease:'outQuad'});
+  }).catch(function(){});
+}
+function jvRun(slug,btn){
+  var input=prompt('Input pra skill "'+slug+'" (opcional):','')||'';
+  var card=btn.closest('.jv-sk');btn.disabled=true;btn.textContent='…';if(card)card.classList.add('running');
+  jvFetch('/api/skills/'+slug+'/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({input:input})})
+    .then(function(r){toast('Skill rodando no núcleo local. O resultado vira nota no vault (JARVIS Runs).');
+      var poll=setInterval(function(){jvFetch('/api/runs/'+r.run_id).then(function(run){
+        if(run.status!=='running'){clearInterval(poll);btn.disabled=false;btn.textContent='RODAR';if(card)card.classList.remove('running');
+          toast(run.status==='done'?'Skill "'+slug+'" concluída ✓ (nota no vault)':'Skill "'+slug+'" falhou');jvHudTick();}
+      }).catch(function(){clearInterval(poll);btn.disabled=false;btn.textContent='RODAR';if(card)card.classList.remove('running');});},4000);})
+    .catch(function(){btn.disabled=false;btn.textContent='RODAR';if(card)card.classList.remove('running');toast('Núcleo local offline');});
 }
 // ---- Anexar / colar documento no chat do JARVIS ----
 var JARVIS_ATTACH=null; // {nome, texto}
