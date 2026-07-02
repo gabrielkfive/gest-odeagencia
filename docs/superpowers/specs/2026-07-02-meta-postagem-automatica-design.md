@@ -28,9 +28,23 @@ Publicação **manual com 1 clique** depois de aprovado — não é a IA publica
 
 ## Design
 
-### 1. Cadastro de contas por cliente (aba Integrações)
+### 1. Cadastro de contas por cliente (dentro de `/postagens`, não no monólito)
 
-Novo bloco abaixo do token do Meta: para cada cliente do catálogo (`vivenda`, `fercon`, `vaca`, `cachu`, `attra`, `brisa`, `fonseca`), um campo pra colar o **Facebook Page ID** e o **Instagram Business Account ID**. Guardado no servidor numa nova STATE_KEY `wfa-meta-contas` (formato `{ [clienteId]: { pageId, igId } }`), no mesmo padrão server-only do `wfa-meta-secret` (nunca aparece de volta pro cliente depois de salvo, só um "✓ conectado").
+O token do Meta e o cadastro de contas de Ads continuam na aba Integrações do
+`public/workflowark.html`, sem mudança. Mas o cadastro de **Page ID / Instagram
+Business Account ID por cliente** (usado só pra publicar posts, não pra Ads) vai
+num painel novo dentro da própria rota React `/postagens`, não no monólito — há
+uma reforma visual grande (Apple→Linear) em andamento e não commitada em
+`workflowark.html`; misturar uma feature nova nesse arquivo agora arriscaria
+conflito com esse trabalho em paralelo, e a regra do projeto já pede feature
+nova em rota React.
+
+Painel "⚙️ Configurar contas" no topo de `/postagens` (colapsável), com um campo
+de Page ID e um de Instagram Business Account ID por cliente do catálogo
+(`vivenda`, `fercon`, `vaca`, `cachu`, `attra`, `brisa`, `fonseca`). Guardado no
+servidor numa nova STATE_KEY `wfa-meta-contas` (formato `{ [clienteId]: { pageId, igId } }`),
+no mesmo padrão server-only do `wfa-meta-secret` (nunca aparece de volta pro
+cliente depois de salvo, só um "✓ conectado").
 
 Novas actions em `workflowark.state.ts`:
 - `set-meta-contas` — salva/atualiza o mapa de contas por cliente. Ao salvar, o servidor já chama `GET /me/accounts` com o token do Meta pra obter o **token de página** daquele Page ID e guarda junto (`pageAccessToken`, server-only) — assim a publicação no passo 3 não precisa trocar token na hora.
