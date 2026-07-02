@@ -28,9 +28,9 @@ export const Route = createFileRoute("/os")({
 
 /* Design tokens (ver docs/ARKOS-V2-TOKENS.md) */
 const CSS = `
-html:has(.arkos),body:has(.arkos){background:#F1F2F7; margin:0}
+html:has(.arkos),body:has(.arkos){background:#E9EBF3; margin:0}
 .arkos{
-  --bg:#F1F2F7; --card:#FFFFFF; --ink:#16181D; --mute:#6E7280; --dim:#A6AAB8;
+  --bg:#E9EBF3; --card:#FFFFFF; --ink:#16181D; --mute:#565B69; --dim:#8B90A0;
   --black:#131316; --black2:#1C1C21;
   --yel:#FFC700; --yel-soft:rgba(255,199,0,.14);
   --ok:#3DD9A4; --ok-ink:#0F8A61; --bad:#F4645C; --hold:#FFC145;
@@ -57,30 +57,32 @@ html:has(.arkos),body:has(.arkos){background:#F1F2F7; margin:0}
   .arkos .side-label,.arkos .side-sec,.arkos .side-foot{display:none}
   .arkos .side-it{justify-content:center; padding:11px 0}}
 
-/* sidebar: card branco, item ativo = pílula preta (ref Vision) */
-.arkos .side{background:var(--card); border-radius:24px; padding:22px 14px;
+/* sidebar: grafite escuro com luz âmbar no ativo (formato do print do ARK OS), em contraste
+   com o palco claro. A profundidade vem da sombra longa e do arredondado forte. */
+.arkos .side{background:linear-gradient(180deg,#1C1C1E,#131316); border-radius:26px; padding:22px 14px;
   display:flex; flex-direction:column; gap:2px;
-  box-shadow:0 1px 2px rgba(22,24,29,.04), 0 16px 40px -28px rgba(22,24,29,.18)}
+  box-shadow:0 1px 0 rgba(255,255,255,.07) inset, 0 34px 64px -28px rgba(10,10,14,.55)}
 .arkos .side-logo{display:flex; align-items:center; gap:10px; padding:2px 10px 22px}
 .arkos .side-logo .orb{width:30px; height:30px; border-radius:10px; display:grid; place-items:center;
-  color:#131316; background:linear-gradient(135deg,#FFD84D,#E9AE00);
-  box-shadow:0 6px 16px -6px rgba(255,199,0,.55)}
-.arkos .side-logo b{font-family:var(--disp); font-weight:800; font-size:15px; letter-spacing:.04em}
-.arkos .side-sec{font-size:10px; letter-spacing:.18em; color:var(--dim); padding:14px 12px 10px;
-  text-transform:uppercase}
+  color:#131316; background:linear-gradient(135deg,#FFD84D,#E9AE00)}
+.arkos .side-logo b{font-family:var(--disp); font-weight:800; font-size:15px; letter-spacing:.04em; color:#F5F4F0}
+.arkos .side-sec{font-size:10px; letter-spacing:.18em; color:#777782; padding:14px 12px 10px;
+  text-transform:uppercase; font-family:var(--mono)}
 .arkos .side-it{position:relative; display:flex; align-items:center; gap:11px; padding:11px 14px;
-  border-radius:99px; font-size:13px; font-weight:500; color:var(--mute); border:0; background:none;
+  border-radius:12px; font-size:13px; font-weight:500; color:#9C9CA6; border:0; background:none;
   width:100%; text-align:left; font-family:var(--sans); transition:color .18s; text-decoration:none}
-.arkos .side-it:hover{color:var(--ink)}
-.arkos .side-it.on{color:#FFFFFF}
-.arkos .side-pill{position:absolute; inset:0; border-radius:99px; background:var(--black);
-  box-shadow:0 10px 22px -10px rgba(19,19,22,.5)}
+.arkos .side-it:hover{color:#F5F4F0}
+.arkos .side-it.on{color:#F5F4F0}
+.arkos .side-pill{position:absolute; inset:0; border-radius:12px; background:rgba(255,255,255,.08);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset}
+.arkos .side-glow{position:absolute; left:0; top:50%; width:2px; height:16px; transform:translateY(-50%);
+  border-radius:2px; background:var(--yel); box-shadow:0 0 12px var(--yel)}
 .arkos .side-ic{position:relative; z-index:1; display:grid; place-items:center}
 .arkos .side-label{position:relative; z-index:1; white-space:nowrap}
 .arkos .side-badge{position:relative; z-index:1; margin-left:auto; min-width:20px; height:20px;
   border-radius:99px; background:var(--bad); color:#fff; font-size:10.5px; font-weight:600;
   display:grid; place-items:center; padding:0 6px}
-.arkos .side-foot{padding:12px 12px 4px; font-size:10.5px; color:var(--dim)}
+.arkos .side-foot{padding:12px 12px 4px; font-size:10.5px; color:#6E6E76}
 
 /* palco */
 .arkos .main{min-width:0; overflow-y:auto; padding:6px 8px 8px 2px}
@@ -124,7 +126,7 @@ html:has(.arkos),body:has(.arkos){background:#F1F2F7; margin:0}
   background:radial-gradient(circle at 32% 28%, #4A4A54 0%, #202024 42%, #0C0C0E 78%);
   box-shadow:inset -20px -28px 60px rgba(0,0,0,.6), inset 14px 18px 40px rgba(255,255,255,.08),
   0 40px 80px -30px rgba(0,0,0,.8)}
-.arkos .hero .eyebrow{font-size:12.5px; color:rgba(255,255,255,.55); position:relative}
+.arkos .hero .eyebrow{font-size:12.5px; color:rgba(255,255,255,.68); position:relative}
 .arkos .hero h1{font-family:var(--disp); font-size:clamp(28px,3.2vw,40px); font-weight:700;
   letter-spacing:-.03em; line-height:1.1; margin-top:8px; position:relative}
 .arkos .hero-cards{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:26px; position:relative}
@@ -135,10 +137,10 @@ html:has(.arkos),body:has(.arkos){background:#F1F2F7; margin:0}
 .arkos .hcard .hc-ic{width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
   background:var(--w12); color:#fff}
 .arkos .hcard .hc-l{margin-left:auto; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
-  color:rgba(255,255,255,.55)}
+  color:rgba(255,255,255,.72)}
 .arkos .hcard .hc-n{font-family:var(--disp); font-size:34px; font-weight:700; letter-spacing:-.02em;
   margin-top:12px; font-variant-numeric:tabular-nums}
-.arkos .hcard .hc-s{font-size:11.5px; color:rgba(255,255,255,.5); margin-top:6px; text-align:right}
+.arkos .hcard .hc-s{font-size:11.5px; color:rgba(255,255,255,.62); margin-top:6px; text-align:right}
 
 /* meta: donut amarelo sobre preto (ref Vision, accent ARK) */
 .arkos .goal{position:relative; overflow:hidden; border-radius:24px; padding:26px 26px 24px;
@@ -151,7 +153,7 @@ html:has(.arkos),body:has(.arkos){background:#F1F2F7; margin:0}
   font-family:var(--disp); font-size:30px; font-weight:700; letter-spacing:-.02em}
 .arkos .goal .gv{font-family:var(--disp); font-size:22px; font-weight:700; margin-top:16px;
   font-variant-numeric:tabular-nums}
-.arkos .goal .gs{font-size:11.5px; color:rgba(255,255,255,.55); margin-top:6px; text-align:center}
+.arkos .goal .gs{font-size:11.5px; color:rgba(255,255,255,.68); margin-top:6px; text-align:center}
 .arkos .goal .gbtn{margin-top:16px; border:0; border-radius:12px; background:#fff; color:#131316;
   font-size:12.5px; font-weight:600; padding:11px 22px; text-decoration:none; transition:transform .18s}
 .arkos .goal .gbtn:hover{transform:translateY(-1px)}
@@ -170,16 +172,16 @@ html:has(.arkos),body:has(.arkos){background:#F1F2F7; margin:0}
 .arkos table.tt{width:100%; border-collapse:collapse; margin-top:14px}
 .arkos .tt th{font-size:11px; font-weight:500; color:var(--dim); text-align:left;
   padding:8px 10px; border-bottom:1px solid var(--hair)}
-.arkos .tt td{font-size:12.5px; padding:13px 10px; border-bottom:1px solid var(--hair); vertical-align:middle}
+.arkos .tt td{font-size:13px; padding:13px 10px; border-bottom:1px solid var(--hair); vertical-align:middle}
 .arkos .tt tr:last-child td{border-bottom:0}
-.arkos .tt .t-name{font-weight:500; color:var(--ink); max-width:340px; white-space:nowrap;
+.arkos .tt .t-name{font-weight:600; color:var(--ink); max-width:340px; white-space:nowrap;
   overflow:hidden; text-overflow:ellipsis}
 .arkos .tt .t-cli{color:var(--mute)}
-.arkos .chip{display:inline-block; font-size:10.5px; font-weight:600; color:#fff;
+.arkos .chip{display:inline-block; font-size:10.5px; font-weight:600;
   border-radius:6px; padding:4px 10px; white-space:nowrap}
-.arkos .chip.ok{background:var(--ok)}
-.arkos .chip.hold{background:var(--hold); color:#131316}
-.arkos .chip.bad{background:var(--bad)}
+.arkos .chip.ok{background:rgba(61,217,164,.16); color:#0B7A55}
+.arkos .chip.hold{background:rgba(255,193,69,.22); color:#8A6200}
+.arkos .chip.bad{background:rgba(244,100,92,.15); color:#C2372F}
 .arkos .tbtn{border:0; border-radius:8px; background:var(--black); color:#fff; font-size:11px;
   font-weight:500; padding:7px 14px; text-decoration:none; display:inline-block}
 .arkos .tbtn:hover{background:var(--black2)}
@@ -194,9 +196,9 @@ html:has(.arkos),body:has(.arkos){background:#F1F2F7; margin:0}
 .arkos .ap-t{font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .arkos .ap-s{font-size:11px; color:var(--mute); margin-top:2px; white-space:nowrap; overflow:hidden;
   text-overflow:ellipsis}
-.arkos .ap-chip{border-radius:8px; background:var(--ok); color:#fff; font-size:11px; font-weight:600;
+.arkos .ap-chip{border-radius:8px; background:var(--black); color:#fff; font-size:11px; font-weight:600;
   padding:6px 12px; white-space:nowrap; border:0; text-decoration:none}
-.arkos .ap-chip.yel{background:var(--yel); color:#131316}
+.arkos .ap-chip:hover{background:var(--black2)}
 
 /* feed de operações */
 .arkos .feed{display:flex; flex-direction:column}
@@ -233,8 +235,7 @@ html:has(.arkos),body:has(.arkos){background:#F1F2F7; margin:0}
 .arkos .ag-top{display:flex; align-items:center; gap:12px}
 .arkos .orb{width:40px; height:40px; border-radius:14px; display:grid; place-items:center;
   background:var(--bg); color:var(--mute)}
-.arkos .ag.online .orb{color:#131316; background:linear-gradient(135deg,#FFD84D,#E9AE00);
-  box-shadow:0 8px 18px -8px rgba(255,199,0,.6)}
+.arkos .ag.online .orb{color:#131316; background:linear-gradient(135deg,#FFD84D,#E9AE00)}
 .arkos .ag-name{font-family:var(--disp); font-size:13.5px; font-weight:600; letter-spacing:-.01em}
 .arkos .ag-role{font-size:11px; color:var(--dim); margin-top:1px}
 .arkos .ag-st{margin-top:14px; font-size:11px; color:var(--mute);
@@ -619,7 +620,7 @@ function ArkOS() {
   const chega = { hidden: { y: 24, opacity: 0 }, show: { y: 0, opacity: 1, transition: spring } };
 
   return (
-    <div className="arkos" data-build="arkos-v2-20260702-1720">
+    <div className="arkos" data-build="arkos-v2-20260702-b3">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
@@ -634,7 +635,12 @@ function ArkOS() {
             <div className="side-sec">Operação</div>
             {RAIL.map((r) => (
               <button key={r.id} className={`side-it ${nav === r.id ? "on" : ""}`} onClick={() => setNav(r.id)}>
-                {nav === r.id && <motion.span className="side-pill" layoutId="sidepill" transition={spring} />}
+                {nav === r.id && (
+                  <>
+                    <motion.span className="side-pill" layoutId="sidepill" transition={spring} />
+                    <motion.span className="side-glow" layoutId="sideglow" transition={spring} />
+                  </>
+                )}
                 <span className="side-ic"><r.Icon size={16} strokeWidth={1.8} /></span>
                 <span className="side-label">{r.label}</span>
                 {r.id === "operacoes" && fila > 0 && <span className="side-badge">{fila}</span>}
