@@ -729,27 +729,34 @@ h1,h2,h3,h4{letter-spacing:-.022em}
 .side-collapse-btn:active{transform:scale(.85)}
 .side.compact .side-collapse-btn svg{transform:rotate(180deg)}
 @media (min-width:901px){
-  .app{transition:grid-template-columns .34s cubic-bezier(.34,1.56,.64,1)}
+  .app{transition:grid-template-columns .4s cubic-bezier(.22,1,.36,1)}
   .app.side-compact{grid-template-columns:76px 1fr}
-  .side{transition:width .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease}
-  .side.compact .side-head{justify-content:center}
-  .side.compact .side-collapse-btn{margin-left:0}
+  .side{transition:width .4s cubic-bezier(.22,1,.36,1),box-shadow .3s ease}
+  /* Compacta: só a logo (menor, pra bater com o tamanho dos ícones), sem o botão de recolher
+     na mesma linha — ele só some porque não cabe junto da logo nos 76px, não é bug. */
+  .side.compact .side-head{justify-content:center;gap:0}
+  .side.compact .brand-mark{width:24px;height:24px}
+  .side.compact .side-collapse-btn{display:none}
+  .side.compact .side-head:hover .brand-mark{transform:none}
   .side.compact .nav-label,.side.compact .navitem span,.side.compact .subitem span,
   .side.compact .brand-info,.side.compact .side-foot .info,.side.compact .crm-pill span:not(.badge){
     opacity:0;width:0;pointer-events:none;overflow:hidden;white-space:nowrap}
   .side.compact .subnav{display:none!important}
   .side.compact .navitem .chev,.side.compact .navitem .badge{display:none}
   .side.compact .crm-pill{justify-content:center;padding:8px}
-  /* peek do dock: encostar o mouse expande por cima do conteúdo, sem empurrar o layout */
-  .side.compact:hover:not(.no-peek){width:240px;position:absolute;left:0;top:12px;bottom:12px;z-index:80;
-    border-radius:0 22px 22px 0;box-shadow:0 34px 64px -20px rgba(0,0,0,.55)}
-  .side.compact:hover:not(.no-peek) .side-head{justify-content:flex-start}
-  .side.compact:hover:not(.no-peek) .side-collapse-btn{margin-left:auto}
-  .side.compact:hover:not(.no-peek) .nav-label,.side.compact:hover:not(.no-peek) .navitem span,.side.compact:hover:not(.no-peek) .subitem span,
-  .side.compact:hover:not(.no-peek) .brand-info,.side.compact:hover:not(.no-peek) .side-foot .info,.side.compact:hover:not(.no-peek) .crm-pill span{
+  /* peek do dock: controlado por classe via JS (não :hover puro), com um respiro antes de
+     fechar de novo — sem isso, encostar de leve fazia abrir/fechar rápido demais e "tremer". */
+  .side.compact.peek{width:240px;position:absolute;left:0;top:12px;bottom:12px;z-index:80;
+    border-radius:0 22px 22px 0;box-shadow:0 34px 64px -20px rgba(0,0,0,.55);
+    transition:width .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease}
+  .side.compact.peek .side-head{justify-content:flex-start;gap:10px}
+  .side.compact.peek .brand-mark{width:38px;height:38px}
+  .side.compact.peek .side-collapse-btn{display:grid;margin-left:auto}
+  .side.compact.peek .nav-label,.side.compact.peek .navitem span,.side.compact.peek .subitem span,
+  .side.compact.peek .brand-info,.side.compact.peek .side-foot .info,.side.compact.peek .crm-pill span{
     opacity:1;width:auto;pointer-events:auto}
-  .side.compact:hover:not(.no-peek) .navitem .chev,.side.compact:hover:not(.no-peek) .navitem .badge{display:flex}
-  .side.compact:hover:not(.no-peek) .crm-pill{justify-content:space-between;padding:8px 11px}
+  .side.compact.peek .navitem .chev,.side.compact.peek .navitem .badge{display:flex}
+  .side.compact.peek .crm-pill{justify-content:space-between;padding:8px 11px}
 }
 @media (prefers-reduced-motion:reduce){.app,.side,.side-collapse-btn svg{transition:none!important}}
 
@@ -4679,7 +4686,24 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
 document.querySelectorAll('[data-toggle]').forEach(el=>{
   el.addEventListener('click',()=>{el.classList.toggle('open');document.getElementById(el.dataset.toggle)?.classList.toggle('open');if(window.navIndicatorSync)navIndicatorSync();});
 });
-/* Recolher/expandir sidebar (dock do Mac): estado persiste, hover expande temporariamente quando compacta */
+/* Recolher/expandir sidebar (dock do Mac): estado persiste. O "peek" (hover expande) é
+   controlado por JS com um pequeno atraso pra fechar — encostar de leve não deve abrir/fechar
+   tremendo, e clicar em recolher (o botão fica dentro da própria barra) não pode reabrir na hora
+   só porque o mouse ainda tá em cima. */
+(function(){
+  const side=document.querySelector('.side');if(!side)return;
+  let leaveTimer=null,suppressUntil=0;
+  side.addEventListener('mouseenter',()=>{
+    if(!side.classList.contains('compact')||Date.now()<suppressUntil)return;
+    clearTimeout(leaveTimer);
+    side.classList.add('peek');
+  });
+  side.addEventListener('mouseleave',()=>{
+    clearTimeout(leaveTimer);
+    leaveTimer=setTimeout(()=>side.classList.remove('peek'),200);
+  });
+  window.__sideSuppressPeek=(ms)=>{suppressUntil=Date.now()+(ms||500);side.classList.remove('peek');};
+})();
 function toggleSideCompact(){
   const app=document.querySelector('.app'),side=document.querySelector('.side');
   if(!app||!side)return;
@@ -4687,14 +4711,7 @@ function toggleSideCompact(){
   side.classList.toggle('compact',on);
   app.classList.toggle('side-compact',on);
   try{localStorage.setItem('wfa-side-compact',on?'1':'0');}catch(e){}
-  // O botão de recolher fica dentro da própria barra: sem isso, o mouse continua em cima dela
-  // depois do clique e o "peek" (hover expande) dispara na hora, parecendo que travou/voltou.
-  // Trava o peek até o mouse realmente sair da barra pelo menos uma vez.
-  if(on){
-    side.classList.add('no-peek');
-    const clear=()=>{side.classList.remove('no-peek');side.removeEventListener('mouseleave',clear);};
-    side.addEventListener('mouseleave',clear);
-  }
+  if(on&&window.__sideSuppressPeek)window.__sideSuppressPeek(500);
 }
 (function(){
   try{
