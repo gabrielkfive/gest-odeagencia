@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { hojeSP, dataSP } from "@/lib/datas";
 
 // Agentes autônomos 24/7 (idempotente, 1x/dia). Roda o "Conselho de IA" sozinho:
 // - resume o WhatsApp das últimas 24h
@@ -59,7 +60,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const db = supabaseAdmin as any;
-          const hoje = new Date().toISOString().split("T")[0];
+          const hoje = hojeSP();
           // CONSELHO AUTOMÁTICO DESLIGADO (pedido do Gabriel, 16/06): vinha enchendo o sistema
           // de notificação e tarefa. Agora o conselho SÓ roda manualmente — o botão "Rodar
           // conselho agora" chama com ?force=1 (ou ?cliente=). Qualquer chamada automática
@@ -163,7 +164,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           const agenda: any[] = Array.isArray(agRow?.data) ? agRow.data.slice() : [];
           const agendaBaseLen = agenda.length;
           // próximo dia útil a partir de amanhã
-          const proxDiaUtil = (offset: number) => { const d = new Date(); d.setDate(d.getDate() + 1 + offset); while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1); return d.toISOString().split("T")[0]; };
+          const proxDiaUtil = (offset: number) => { const d = new Date(); d.setDate(d.getDate() + 1 + offset); while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1); return dataSP(d); };
 
           // define quem o conselho vai debater AGORA
           const temHoje = (id: string) => briefings.some((b) => b.clienteId === id && b.date === hoje);

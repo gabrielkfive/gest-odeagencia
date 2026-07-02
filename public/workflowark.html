@@ -2479,9 +2479,14 @@ function limparFiltros(){
   document.getElementById('filt-limpar').style.display='none';
   renderTarefas();
 }
+// Data no fuso da ARK (America/Sao_Paulo). No navegador da equipe já é local, mas
+// .toISOString() converte pra UTC e das 21h em diante vira o dia seguinte, quebrando
+// prazos e a virada de mês. dataSP/hojeSP resolvem em qualquer fuso. en-CA = YYYY-MM-DD.
+function dataSP(d){return (d||new Date()).toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});}
+function hojeSP(){return dataSP(new Date());}
 function tarefaPassaFiltro(t){
-  const today=new Date().toISOString().split('T')[0];
-  const em7=new Date(Date.now()+7*86400000).toISOString().split('T')[0];
+  const today=hojeSP();
+  const em7=dataSP(new Date(Date.now()+7*86400000));
   if(WFA_FILTROS.busca&&!(t.title||'').toLowerCase().includes(WFA_FILTROS.busca))return false;
   if(WFA_FILTROS.prio&&t.prio!==WFA_FILTROS.prio)return false;
   if(WFA_FILTROS.resp&&t.resp!==WFA_FILTROS.resp)return false;
@@ -2618,7 +2623,7 @@ function collectLocalCloudState(){
 // e os briefings caem no Meu Dia. Funciona junto com o cron diário do servidor.
 async function arkDailyAgentsKick(){
   try{
-    const hoje=new Date().toISOString().split('T')[0];
+    const hoje=hojeSP();
     if(localStorage.getItem('wfa-agents-kick-date')===hoje)return;
     localStorage.setItem('wfa-agents-kick-date',hoje);
     const r=await fetch('/api/workflowark/agents-run?key=ark-2026');
@@ -4698,7 +4703,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='jarvis'){try{jarvisPageEnter();}catch(e){} try{jvHudInit();}catch(e){console.warn('jvhud',e);}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
-    if(p==='whatsapp'){try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
+    if(p==='whatsapp'){try{const _td=hojeSP();if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
@@ -4927,7 +4932,7 @@ function agPolish(){
 }
 function agLive(){
   const el=document.getElementById('ag-live');if(!el)return;
-  const hoje=new Date().toISOString().split('T')[0];
+  const hoje=hojeSP();
   let brfs=[];try{brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){}
   const hojeBrfs=brfs.filter(b=>b.date===hoje);
   const tAuto=(state.tarefas||[]).filter(t=>t.origem==='conselho-auto'&&String(t.criadaEm||'').startsWith(hoje)).length;
@@ -5139,7 +5144,7 @@ function onbKey(id,i){return 'onb:'+id+':'+i;}
 function onboardingGerar(id,silent){
   const c=CLIENTES.find(x=>x.id===id);if(!c)return 0;
   state.tarefas=state.tarefas||[];
-  let criadas=0;const hoje=new Date().toISOString().split('T')[0];
+  let criadas=0;const hoje=hojeSP();
   ONBOARDING_STEPS.forEach((s,i)=>{
     const key=onbKey(id,i);
     if(state.tarefas.some(t=>t.onbKey===key))return;
@@ -5253,7 +5258,7 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(navGrpRestore,40);});
 function relClienteTarefas(c){return (state.tarefas||[]).filter(t=>t.clienteId===c.id || (c.nm && String(t.title||'').toLowerCase().includes(String(c.nm).toLowerCase())));}
 function relDados(id){
   const c=CLIENTES.find(x=>x.id===id);if(!c)return null;
-  const today=new Date().toISOString().split('T')[0];const ym=today.slice(0,7);
+  const today=hojeSP();const ym=today.slice(0,7);
   const ts=relClienteTarefas(c);
   const concl=ts.filter(t=>t.status==='concluido');
   const conclMes=concl.filter(t=>String(t.criadaEm||'').startsWith(ym));
@@ -5659,7 +5664,7 @@ function openSprint(n,cliId){
   const spLabel=n===0?'Onboarding':'Sprint '+n;
   document.getElementById('modal-sprint-name').textContent=spLabel+(isCap?' 📹':'');
   document.getElementById('modal-sprint-cli').textContent=c.nm;
-  const today=new Date();const venc=new Date(today.getTime()+7*86400000).toISOString().split('T')[0];
+  const today=new Date();const venc=dataSP(new Date(today.getTime()+7*86400000));
   document.getElementById('modal-sprint-list').innerHTML=ativs.map((a,i)=>`
     <div class="activity-suggestion">
       <input type="checkbox" id="atv-${i}" checked>
@@ -5724,7 +5729,7 @@ function mdTaskRow(kind,t){
   </div>`;
 }
 function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;t.status='concluido';if(typeof taskStopTimer==='function')taskStopTimer(t);t.criadaEm=new Date().toISOString();saveTarefas();renderMeuDia();if(typeof renderWidgets==='function')renderWidgets();toast('✓ Tarefa concluída · boa!');}
-function mdSnooze(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;const d=new Date();d.setDate(d.getDate()+1);t.data=d.toISOString().split('T')[0];saveTarefas();renderMeuDia();toast('↻ Adiada para amanhã');}
+function mdSnooze(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;const d=new Date();d.setDate(d.getDate()+1);t.data=dataSP(d);saveTarefas();renderMeuDia();toast('↻ Adiada para amanhã');}
 /* ====== PAINEL DE WIDGETS PERSONALIZÁVEIS (estilo Apple) ====== */
 const MDW_TYPES={
   relogio:{e:'',label:'Relógio',dark:true,size:'m'},
@@ -5821,13 +5826,13 @@ const ROTINA_POPS={
 const ROLE_TO_AREA={admin:'comercial',gestor:'account',comercial:'comercial',operacao:'account',marketing:'trafego',financeiro:'account',viewer:'account'};
 function rotinaArea(){let a=null;try{a=localStorage.getItem('wfa-rotina-area');}catch(e){}if(a&&ROTINA_POPS[a])return a;return ROLE_TO_AREA[mdwRole()]||'account';}
 function rotinaSetArea(a){try{localStorage.setItem('wfa-rotina-area',a);}catch(e){}renderWidgets();}
-function rotinaKeyToday(){return new Date().toISOString().split('T')[0];}
+function rotinaKeyToday(){return hojeSP();}
 function rotinaChecks(){let o={};try{o=JSON.parse(localStorage.getItem('wfa-rotina-checks')||'{}');}catch(e){}return o;}
 function rotinaDoneSet(area){const o=rotinaChecks();const d=o[rotinaKeyToday()]||{};return new Set(d[area]||[]);}
 function rotinaToggle(area,i){const o=rotinaChecks();const k=rotinaKeyToday();o[k]=o[k]||{};const set=new Set(o[k][area]||[]);if(set.has(i))set.delete(i);else set.add(i);o[k][area]=[...set];try{localStorage.setItem('wfa-rotina-checks',JSON.stringify(o));}catch(e){}renderWidgets();}
 function mdwPut(s){try{localStorage.setItem('wfa-widgets',JSON.stringify(s));}catch(e){}}
 function mdwBuckets(){
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const tasks=(state.tarefas||[]);
   const myName=WFA_MEMBER&&WFA_MEMBER.full_name?WFA_MEMBER.full_name:null;
   const notDone=t=>t.status!=='concluido';
@@ -5884,7 +5889,7 @@ function mdwBody(w,B){
   }
   if(w.t==='conselho'){
     let brfs=[];try{brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){}
-    const hoje=new Date().toISOString().split('T')[0];
+    const hoje=hojeSP();
     const list=(brfs.filter(b=>b.date===hoje).length?brfs.filter(b=>b.date===hoje):brfs).slice(0,5);
     if(!list.length)return {body:'<div class="mdw-empty">Sem debates do conselho ainda</div>',count:null};
     const h=list.map(b=>`<div class="mdw-row"><span class="dot" style="background:var(--yel)"></span><span class="tx" title="${mdEsc(b.decisao||'')}" onclick="document.querySelector('[data-nav=conselho]')?.click()"><b>${mdEsc(b.cliente||'ARK')}</b> · ${mdEsc(b.decisao||'—')}</span></div>`).join('');
@@ -5903,7 +5908,7 @@ function mdwBody(w,B){
     return {body,count:pend.length||null};
   }
   if(w.t==='captacoes'){
-    const today=new Date().toISOString().split('T')[0];
+    const today=hojeSP();
     let evs=[];try{evs=(typeof loadAgendaEvents==='function')?loadAgendaEvents():[];}catch(e){}
     const up=(Array.isArray(evs)?evs:[]).filter(e=>e&&e.date&&e.date>=today).sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(0,6);
     if(!up.length)return {body:'<div class="mdw-empty">Nada nos próximos dias</div>',count:null};
@@ -5912,7 +5917,7 @@ function mdwBody(w,B){
   }
   if(w.t==='comercial'){
     let arr=[];try{arr=(typeof loadCrm==='function')?loadCrm():[];}catch(e){}
-    const today=new Date().toISOString().split('T')[0];
+    const today=hojeSP();
     const active=arr.filter(l=>l&&(l.stage==null||l.stage<4)); // fora de Fechado/Perdido
     const isHot=l=>l.quente||l.hot||l.fire;
     const follow=active.filter(l=>isHot(l)||(l.due&&String(l.due)<=today)).sort((a,b)=>String(a.due||'').localeCompare(String(b.due||'')));
@@ -6037,7 +6042,7 @@ function mdwAdd(t){const s=mdwLoad();s.layout.push({t,s:(MDW_TYPES[t]||{}).size|
 function renderMeuDia(){
   if(!document.getElementById('page-dashboard'))return;
   if(typeof applyCalendars==='function')applyCalendars();
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const tasks=(state.tarefas||[]);
   const myName=WFA_MEMBER&&WFA_MEMBER.full_name?WFA_MEMBER.full_name:null;
   const role=WFA_MEMBER&&WFA_MEMBER.role?WFA_MEMBER.role:null;
@@ -6129,7 +6134,7 @@ function mdRenderJarvis(nLate,nToday,nPend){
   if(nPend)partes.push(`${nPend} pendente${nPend>1?'s':''} no radar.`);
   let nBrf=0;
   try{
-    const hoje=new Date().toISOString().split('T')[0];
+    const hoje=hojeSP();
     nBrf=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]').filter(b=>b.date===hoje).length;
   }catch(e){}
   if(nBrf)partes.push(`O conselho preparou ${nBrf} ${nBrf>1?'debates':'debate'} com plano e tarefas.`);
@@ -6150,7 +6155,7 @@ function mdRenderBriefings(){
   const wrap=document.getElementById('md-briefings');if(!wrap)return;
   const bar=document.getElementById('md-council-bar');
   let brfs=[];try{brfs=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]');}catch(e){}
-  const hoje=new Date().toISOString().split('T')[0];
+  const hoje=hojeSP();
   const list=(brfs.filter(b=>b.date===hoje).length?brfs.filter(b=>b.date===hoje):brfs).slice(0,8);
   const nEl=document.getElementById('md-council-n');if(nEl)nEl.textContent=list.length;
   if(!list.length){wrap.innerHTML='';if(bar)bar.style.display='none';return;}
@@ -6338,7 +6343,7 @@ async function removerMembro(id){
 /* ============ TAREFAS DE EXEMPLO ============ */
 function popularExemplos(){
   const base=new Date();
-  const d=off=>new Date(base.getTime()+off*86400000).toISOString().split('T')[0];
+  const d=off=>dataSP(new Date(base.getTime()+off*86400000));
   const ex=[
     {title:'Aprovar planejamento de junho · Vivenda',funcao:'Account Manager',clienteId:'vivenda',resp:'Gabriel Andrade',data:d(0),prio:'alta',status:'andamento'},
     {title:'Fechar proposta comercial · lead REGIONAL',funcao:'Account Manager',clienteId:'',resp:'Gabriel Andrade',data:d(0),prio:'alta',status:'backlog'},
@@ -6372,7 +6377,7 @@ function exportarDados(){
   try{
     const blob=new Blob([json],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-    a.download='workflowark-dados-'+new Date().toISOString().split('T')[0]+'.json';
+    a.download='workflowark-dados-'+hojeSP()+'.json';
     document.body.appendChild(a);a.click();a.remove();
   }catch(e){}
   const ta=document.getElementById('set-import');if(ta)ta.value=json;
@@ -6400,8 +6405,8 @@ async function importarDados(){
 // Move TODAS as tarefas atrasadas (data < hoje e não concluídas) para AMANHÃ.
 // Reorganiza o board sem perder nada — o Gabriel aperta quando quer "zerar o atraso".
 function adiarAtrasadas(){
-  const today=new Date().toISOString().split('T')[0];
-  const amanha=new Date(Date.now()+86400000).toISOString().split('T')[0];
+  const today=hojeSP();
+  const amanha=dataSP(new Date(Date.now()+86400000));
   const atrasadas=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido');
   if(!atrasadas.length){toast('Nenhuma tarefa atrasada 👌');return;}
   if(!confirm('Mover '+atrasadas.length+' tarefa(s) atrasada(s) para amanhã ('+amanha.split('-').reverse().join('/')+')?'))return;
@@ -6428,7 +6433,7 @@ function renderTarefas(){
   // KPIs — "Ativas" = não concluídas (o total cru de 200+ assustava o time logo de cara)
   document.getElementById('kpi-total').textContent=state.tarefas.filter(t=>t.status!=='concluido').length;
   document.getElementById('kpi-andamento').textContent=state.tarefas.filter(t=>t.status==='andamento').length;
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   document.getElementById('kpi-atrasadas').textContent=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
   document.getElementById('kpi-concluidas').textContent=state.tarefas.filter(t=>t.status==='concluido'&&t.criadaEm&&t.criadaEm.startsWith(today)).length;
   // bind drag
@@ -6458,7 +6463,7 @@ function taskFiltradas(){return state.tarefas.filter(tarefaPassaFiltro);}
 function taskStatusLabel(s){return s==='backlog'?'Backlog':s==='andamento'?'Em Andamento':s==='aprovacao'?'Aprovação':s==='concluido'?'Concluído':s;}
 function taskInitials(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'?';}
 function renderTaskLista(){
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const ts=taskFiltradas().slice().sort((a,b)=>{const da=a.data||'9999',db=b.data||'9999';return da<db?-1:da>db?1:0;});
   const rows=ts.map(t=>{
     const c=CLIENTES.find(x=>x.id===t.clienteId);
@@ -6479,7 +6484,7 @@ function renderTaskCalendario(){
   const monthName=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   const dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   const byDay={};dated.forEach(x=>{if(x.d.getMonth()===month&&x.d.getFullYear()===year){(byDay[x.d.getDate()]=byDay[x.d.getDate()]||[]).push(x.t);}});
-  const todayStr=new Date().toISOString().split('T')[0];
+  const todayStr=hojeSP();
   let cells='';
   for(let b=0;b<startDow;b++)cells+='<div class="tcal-cell muted"></div>';
   for(let day=1;day<=days;day++){
@@ -6490,7 +6495,7 @@ function renderTaskCalendario(){
   document.getElementById('task-calendario').innerHTML=`<div class="tcal"><div class="tcal-head"><span>${monthName}</span><span style="font-size:12px;color:var(--mute)">${dated.length} com prazo</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`;
 }
 function renderTaskPessoas(){
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const ts=taskFiltradas();
   const byResp={};
   ts.forEach(t=>{const r=((t.resp||'').trim())||'Sem responsável';(byResp[r]=byResp[r]||[]).push(t);});
@@ -6509,8 +6514,8 @@ function renderTaskPessoas(){
   document.getElementById('task-pessoas').innerHTML=`<div class="tp-grid">${cards||'<div class="tp-sub">Nenhuma tarefa.</div>'}</div>`;
 }
 function renderTaskDashboard(){
-  const today=new Date().toISOString().split('T')[0];
-  const em7=new Date(Date.now()+7*86400000).toISOString().split('T')[0];
+  const today=hojeSP();
+  const em7=dataSP(new Date(Date.now()+7*86400000));
   const ts=taskFiltradas();
   const by=(arr,keyfn)=>{const m={};arr.forEach(t=>{const k=((keyfn(t)||'').toString().trim())||'—';m[k]=(m[k]||0)+1;});return m;};
   const kpi=(l,v,cls)=>`<div class="kpi ${cls||''}"><div class="l">${l}</div><div class="v">${v}</div></div>`;
@@ -6541,7 +6546,7 @@ function renderTaskDashboard(){
 }
 function taskCard(t){
   const c=CLIENTES.find(x=>x.id===t.clienteId);
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const late=t.data&&t.data<today&&t.status!=='concluido';
   const venceHoje=t.data===today&&t.status!=='concluido';
   const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';
@@ -6660,7 +6665,7 @@ function openNovaTarefa(status){
   if(typeof fillClienteSelects==='function')fillClienteSelects();
   const pr=document.getElementById('nt-prio');if(pr)pr.value='media';
   document.getElementById('nt-status').value=status||'backlog';
-  document.getElementById('nt-data').value=new Date(Date.now()+3*86400000).toISOString().split('T')[0];
+  document.getElementById('nt-data').value=dataSP(new Date(Date.now()+3*86400000));
   document.getElementById('modal-nova').classList.add('open');
   setTimeout(()=>{const t=document.getElementById('nt-title');if(t)t.focus();},80); // foco no título
 }
@@ -6734,7 +6739,7 @@ function reguaKey(cliId,i){return 'regua:'+reguaMesKey()+':'+cliId+':'+i;}
 function gerarTarefasRegua(){
   if(!confirm('Isso cria UMA tarefa para cada item pendente da régua de TODOS os clientes (pode ser muita coisa). Quer continuar?'))return;
   const ativos=CLIENTES.filter(c=>c.status!=='churn');
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   let criadas=0;
   ativos.forEach(c=>{
     const row=state.regua[c.id]||{};
@@ -6766,7 +6771,7 @@ function gerarTarefasRegua(){
 
 /* ============ BADGES ============ */
 function updateBadges(){
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const atrasadas=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
   updateCrmBadge();
   document.getElementById('tarefas-badge').textContent=state.tarefas.filter(t=>t.status!=='concluido').length;
@@ -7378,7 +7383,7 @@ function consPromoverIdeia(briefId,idx,checked){
 function consToggleDebate(id){const d=document.getElementById('brfd-'+id);if(d)d.classList.toggle('open');}
 function consAutoRender(){
   const wrap=document.getElementById('cons-auto');if(!wrap)return;
-  const hoje=new Date().toISOString().split('T')[0];
+  const hoje=hojeSP();
   const all=consBriefings();
   // mostra os de hoje primeiro; se não houver de hoje, mostra os mais recentes
   const list=(all.filter(b=>b.date===hoje).length?all.filter(b=>b.date===hoje):all).slice(0,12);
@@ -7433,7 +7438,7 @@ function consNarrar(){if(!_consData)return;jarvisSpeak('Decisão do conselho: '+
 function consCriarTarefas(){
   if(!_consData||!(_consData.plano||[]).length){toast('Sem plano pra virar tarefa');return;}
   const cliente=document.getElementById('cons-cliente').value||'';const cli=CLIENTES.find(c=>c.nm===cliente);const today=Date.now();
-  _consData.plano.forEach((p,i)=>{const d=new Date(today+(i+1)*86400000);state.tarefas.push({id:'cons'+Date.now()+i,title:String(p).slice(0,120),desc:'Gerado pelo Conselho de IA'+(cliente?(' · '+cliente):''),funcao:'',clienteId:cli?cli.id:'',resp:'',data:d.toISOString().split('T')[0],prio:'media',status:'backlog',tags:['conselho'],checklist:[],sprintN:null,origem:'conselho',criadaEm:new Date().toISOString()});});
+  _consData.plano.forEach((p,i)=>{const d=new Date(today+(i+1)*86400000);state.tarefas.push({id:'cons'+Date.now()+i,title:String(p).slice(0,120),desc:'Gerado pelo Conselho de IA'+(cliente?(' · '+cliente):''),funcao:'',clienteId:cli?cli.id:'',resp:'',data:dataSP(d),prio:'media',status:'backlog',tags:['conselho'],checklist:[],sprintN:null,origem:'conselho',criadaEm:new Date().toISOString()});});
   saveTarefas();toast('✓ '+_consData.plano.length+' tarefas criadas');
 }
 /* ============ INTEGRAÇÃO META (self-service) ============ */
@@ -7563,7 +7568,7 @@ function jarvisPageEnter(){
 }
 function jarvisAutoBrief(){
   try{
-    const hoje=new Date().toISOString().split('T')[0];
+    const hoje=hojeSP();
     const ts=state.tarefas||[]; const atras=ts.filter(t=>t.data&&t.data<hoje&&t.status!=='concluido').length; const hojeT=ts.filter(t=>t.data===hoje&&t.status!=='concluido').length;
     let brf=0;try{brf=JSON.parse(localStorage.getItem('wfa-conselho-briefings')||'[]').filter(b=>b.date===hoje).length;}catch(e){}
     const nome=(WFA_MEMBER&&WFA_MEMBER.full_name)?mdFirst(WFA_MEMBER.full_name):'';
@@ -7753,7 +7758,7 @@ function jarvisExecute(raw){
     if(!tk) return 'Não localizei a tarefa "'+alvo+'", Senhor.';
     return 'Não entendi para quem designar, Senhor. Diga o nome da pessoa.';
   }
-  const _hoje=new Date().toISOString().split('T')[0];
+  const _hoje=hojeSP();
   const _aberta=tk=>tk.status!=='concluido';
   const _nrm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   const _achaPessoa=()=>{const time=(typeof MD_PEOPLE!=='undefined')?MD_PEOPLE:[];return time.find(p=>{const f=_nrm(p).split(' ')[0];return f.length>=3&&t.includes(f);});};
@@ -7884,7 +7889,7 @@ function jarvisParseWhen(t){
     const wd={'domingo':0,'segunda':1,'terca':2,'terça':2,'quarta':3,'quinta':4,'sexta':5,'sabado':6,'sábado':6};
     for(const k in wd){ if(t.includes(k)){ let diff=(wd[k]-now.getDay()+7)%7; if(diff===0)diff=7; d.setDate(now.getDate()+diff); break; } }
   }
-  const date=d.toISOString().split('T')[0];
+  const date=dataSP(d);
   let time='';
   if(/meio[ -]?dia/.test(t)) time='12:00';
   else { const mt=t.match(/(?:as|às)?\s*(\d{1,2})(?:[:h](\d{2}))?\s*(?:h|hs|horas)?/); if(mt){ let hh=parseInt(mt[1],10); const mm=mt[2]||'00'; if(/da tarde|da noite/.test(t)&&hh<12)hh+=12; if(hh>=0&&hh<=23) time=String(hh).padStart(2,'0')+':'+mm; } }
@@ -7985,7 +7990,7 @@ async function jarvisAnalisaWpp(){
 }
 /* ===== JARVIS-AGENTE: contexto + despachante de ações (executa o que o Claude decidir) ===== */
 function jarvisContexto(){
-  const hoje=new Date().toISOString().split('T')[0];
+  const hoje=hojeSP();
   const ts=state.tarefas||[];
   const abertas=ts.filter(t=>t.status!=='concluido');
   const atrasadas=abertas.filter(t=>t.data&&t.data<hoje);
@@ -9620,7 +9625,7 @@ function genRotinaTarefas(silent){
   // Só geram quando ele aperta o botão "Gerar tarefas de hoje" (silent=false),
   // a menos que ele ligue a geração automática nas Rotinas.
   if(silent&&!autoTarefasOn())return;
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const rotinas=loadRot().filter(r=>r.ativo);
   let criadas=0;
   rotinas.forEach(r=>{
@@ -9883,7 +9888,7 @@ function wrRenderKpis(){
 }
 // Sinais REAIS por cliente (puxa as tarefas ao vivo, não muda nada sozinho — só mostra).
 function wrSinais(c){
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const ts=(typeof relClienteTarefas==='function')?relClienteTarefas(c):[];
   let abertas=0,atras=0;
   ts.forEach(t=>{ if(t&&t.status==='concluido')return; abertas++; if(t&&t.data&&t.data<today)atras++; });
@@ -9929,7 +9934,7 @@ function saveCrm(arr){localStorage.setItem('wfa-crm',JSON.stringify(arr));render
 function crmFmtDate(iso){if(!iso)return'';const p=String(iso).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso;}
 function updateCrmBadge(){
   const arr=loadCrm();
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const overdue=arr.filter(l=>l.stage<4&&l.due&&l.due<today).length;
   const badge=document.getElementById('crm-badge');
   if(badge)badge.textContent=overdue||arr.filter(l=>l.stage<4).length;
@@ -10030,7 +10035,7 @@ function renderCrm(){
   const search=(document.getElementById('crm-search')?.value||'').toLowerCase();
   const fSource=document.getElementById('crm-filter-source')?.value||'';
   const fResp=document.getElementById('crm-filter-resp')?.value||'';
-  const today=new Date().toISOString().split('T')[0];
+  const today=hojeSP();
   const filtered=arr.filter(l=>{
     if(search&&!l.nm.toLowerCase().includes(search))return false;
     if(fSource&&l.source!==fSource)return false;
@@ -10144,7 +10149,7 @@ function loadAgendaEvents(){
 let _jarvisPlan=[];
 function jarvisPlanAgenda(){
   const box=document.getElementById('jarvis-plan');if(!box)return;
-  const hoje=new Date().toISOString().split('T')[0];
+  const hoje=hojeSP();
   const prioRank={alta:0,media:1,baixa:2};
   const cand=(state.tarefas||[]).filter(t=>t.status!=='concluido' && (!t.data || t.data<hoje))
     .sort((a,b)=>(a.data?0:1)-(b.data?0:1)||(prioRank[a.prio]??1)-(prioRank[b.prio]??1));
@@ -10156,7 +10161,7 @@ function jarvisPlanAgenda(){
   _jarvisPlan=cand.slice(0,12).map((t,i)=>{
     const dia=dias[Math.floor(i/3)]||dias[dias.length-1];
     return {taskId:t.id,title:t.title,prio:t.prio,cli:mdClientName(t.clienteId),
-      date:dia.toISOString().split('T')[0],time:horas[i%3]};
+      date:dataSP(dia),time:horas[i%3]};
   });
   const fmtD=s=>s.split('-').reverse().slice(0,2).join('/');
   box.style.display='block';
@@ -10283,7 +10288,7 @@ function renderAgenda(){
   const events=loadAgendaEvents();
   const firstDay=new Date(ano,mes,1).getDay(); // 0=Sun
   const days=(new Date(ano,mes+1,0)).getDate();
-  const todayStr=new Date().toISOString().split('T')[0];
+  const todayStr=hojeSP();
   // Convert Sunday-first to Monday-first: Mon=0..Sun=6
   const startOffset=(firstDay===0?6:firstDay-1);
   const grid=document.getElementById('agenda-cal-grid');if(!grid)return;

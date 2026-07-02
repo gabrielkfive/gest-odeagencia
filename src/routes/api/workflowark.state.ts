@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { hojeSP } from "@/lib/datas";
 
 const STATE_KEYS = new Set([
   "wfa-tarefas",
@@ -459,7 +460,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
             "Responda SOMENTE com um JSON válido (nada fora dele): um objeto {\"ideias\":[...]}. Cada ideia: {\"data\":\"YYYY-MM-DD ou ''\",\"dia\":\"rótulo curto ex: Seg 16/06\",\"formato\":\"Reels|Carrossel|Story|Foto\",\"tema\":\"título curto e específico\",\"produto\":\"produto/serviço foco ou ''\",\"angulo\":\"o gancho/abordagem em 1 frase\",\"legenda\":\"primeira linha da legenda, no tom da marca\"}.",
             brief ? "CONTEXTO REAL DO CLIENTE (use de verdade — pessoas, produtos, tom, plano):\n" + brief : "",
           ].filter(Boolean).join("\n");
-          const hoje = new Date().toISOString().split("T")[0];
+          const hoje = hojeSP();
           const user = `Hoje é ${hoje}. Cliente: ${cliente || "(varejo genérico)"} · Período: ${periodo}${foco ? " · Foco especial: " + foco : ""}\nMonte ${qtd} ideias de conteúdo para o período, com datas concretas, em JSON.`;
           try {
             const r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -780,7 +781,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           try {
             const { data: trow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-tarefas").maybeSingle();
             const tarefas: any[] = Array.isArray(trow?.data) ? trow.data : [];
-            const hoje = new Date().toISOString().split("T")[0];
+            const hoje = hojeSP();
             const atras = tarefas.filter((t) => t.data && t.data < hoje && t.status !== "concluido").length;
             const abertas = tarefas.filter((t) => t.status !== "concluido").length;
             ctxInfo = `\n\nDADOS AGORA: ${abertas} tarefas abertas, ${atras} atrasadas.`;

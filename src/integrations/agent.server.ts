@@ -1,6 +1,7 @@
 // Assistente (JARVIS) — analisa mensagens do WhatsApp, cria tarefas e notifica.
 // Usa IA (Claude Haiku) quando ANTHROPIC_API_KEY está setada; cai para regras se falhar.
 import { zapiEnv } from "./zapi.server";
+import { dataSP } from "@/lib/datas";
 
 const AI_MODEL = "claude-haiku-4-5";
 const AI_SYS = `Você é o assistente operacional da ARK Content (agência de marketing gastronômico em Brasília). Recebe mensagens de WhatsApp (clientes, equipe, grupos) e decide a ação.
@@ -93,7 +94,7 @@ export function analyzeMessage(text: string, senderName?: string): Demanda {
 
 function todayPlus(days: number) {
   const d = new Date(Date.now() + days * 86400000);
-  return d.toISOString().split("T")[0];
+  return dataSP(d);
 }
 
 async function readBlock(db: any, key: string, fallback: any) {

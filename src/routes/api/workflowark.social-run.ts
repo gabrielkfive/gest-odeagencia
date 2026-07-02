@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { hojeSP } from "@/lib/datas";
 
 // AGENTE SOCIAL MEDIA AUTÔNOMO (pedido do Gabriel, 29/06).
 // Diferente do Conselho (que DEBATE): este agente PRODUZ. Trabalho complementar, não
@@ -41,7 +42,7 @@ export const Route = createFileRoute("/api/workflowark/social-run")({
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const db = supabaseAdmin as any;
-          const hoje = new Date().toISOString().split("T")[0];
+          const hoje = hojeSP();
 
           const { zapiEnv } = await import("@/integrations/zapi.server");
           const aiKey = zapiEnv("ANTHROPIC_API_KEY");
