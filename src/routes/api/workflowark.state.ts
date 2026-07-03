@@ -210,14 +210,32 @@ export const Route = createFileRoute("/api/workflowark/state")({
         const ctx = await getContext(request);
         if ("error" in ctx) return ctx.error;
 
+        // NUNCA devolve segredos/tokens ao cliente (Meta token, Google OAuth refresh token…)
+        const isSensitive = (k: string) => /-(secret|oauth)$/.test(k);
+        // BOOT LEVE: wfa-whatsapp (todas as conversas) é de longe o maior payload do estado
+        // e não é necessário pra pintar a primeira tela. Fica fora do load inicial e o app
+        // busca sob demanda com ?key=wfa-whatsapp (abaixo).
+        const isHeavy = (k: string) => k === "wfa-whatsapp";
+
+        const u = new URL(request.url);
+        const soKey = String(u.searchParams.get("key") || "");
+        if (soKey) {
+          if (isSensitive(soKey)) return json({ error: "chave reservada" }, { status: 403 });
+          const { data: row, error: e1 } = await ctx.db
+            .from("workflowark_state")
+            .select("key,data")
+            .eq("key", soKey)
+            .maybeSingle();
+          if (e1) return json({ error: "Não foi possível carregar os dados." }, { status: 500 });
+          return json({ state: { [soKey]: row?.data ?? null } });
+        }
+
         const { data: rows, error } = await ctx.db
           .from("workflowark_state")
           .select("key,data,updated_at");
         if (error) return json({ error: "Não foi possível carregar os dados." }, { status: 500 });
 
-        // NUNCA devolve segredos/tokens ao cliente (Meta token, Google OAuth refresh token…)
-        const isSensitive = (k: string) => /-(secret|oauth)$/.test(k);
-        const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key)).map((row: any) => [row.key, row.data]));
+        const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key)).map((row: any) => [row.key, row.data]));
         let members: WorkflowMember[] = [];
         if (ctx.isAdmin) {
           const result = await ctx.db

@@ -8,8 +8,9 @@
 <link rel="icon" type="image/png" href="/ark-mark.png?v=2">
 <link rel="apple-touch-icon" href="/ark-mark.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
 <style>
 :root{
@@ -1410,7 +1411,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-1230 -->
+<!-- build AURA-DARK-OS-MIX 20260703-1300 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -3161,7 +3162,8 @@ function wfaSetTheme(t){
           </table>
         </div>
 
-        <script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
 /* ============ CLOUD SYNC ============ */
 const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
@@ -3216,7 +3218,7 @@ async function directCloudCall(action,payload){
   const {data:{session}}=await _wfaSb.auth.getSession();
   const token=session?.access_token;
   if(!token)throw new Error('Faça login para usar o sistema.');
-  const isLoad=action==='load';
+  const isLoad=action==='load'||action==='load-key';
   // TIMEOUT: sem isso, uma rede travada deixa o fetch pendurado pra sempre — a mensagem
   // fica "enviando…" eterna e o sync nunca avisa. Com AbortController, vira erro limpo
   // (a mensagem vira "⚠ falhou · reenviar" e o badge de sync acende).
@@ -3224,7 +3226,7 @@ async function directCloudCall(action,payload){
   const to=setTimeout(()=>ctrl.abort(),25000);
   let resp;
   try{
-    resp=await fetch('/api/workflowark/state',{
+    resp=await fetch('/api/workflowark/state'+(action==='load-key'&&payload&&payload.key?('?key='+encodeURIComponent(payload.key)):''),{
       method:isLoad?'GET':'POST',
       headers:{...(!isLoad?{'Content-Type':'application/json'}:{}),Authorization:'Bearer '+token},
       body:isLoad?undefined:JSON.stringify(payload??{}),
@@ -3236,6 +3238,21 @@ async function directCloudCall(action,payload){
   if(!resp.ok)throw new Error(result.error||'Erro ao sincronizar');
   return result;
 }
+/* BOOT LEVE: o WhatsApp (todas as conversas) ficou FORA do load inicial (maior payload do
+   estado). Busca sob demanda ao abrir a aba, e em segundo plano ~8s após o boot pra
+   badges/resumo. O merge reusa o applyCloudState (mute + mescla). */
+let _wppCloudLoaded=false;
+async function wfaCarregarWhatsapp(){
+  if(_wppCloudLoaded)return;_wppCloudLoaded=true;
+  try{
+    const r=await cloudCall('load-key',{key:'wfa-whatsapp'});
+    const v=r&&r.state?r.state['wfa-whatsapp']:null;
+    if(v!=null)applyCloudState({'wfa-whatsapp':v});
+    if(typeof renderWhatsapp==='function')try{renderWhatsapp();}catch(e){}
+    if(typeof updateBadges==='function')try{updateBadges();}catch(e){}
+  }catch(e){_wppCloudLoaded=false;}
+}
+setTimeout(()=>{try{wfaCarregarWhatsapp();}catch(e){}},8000);
 // Pede ao app pai (React, que tem a sessão) via postMessage. Usado como FALLBACK.
 function cloudCallViaParent(action,payload,timeoutMs){
   return new Promise((resolve,reject)=>{
@@ -3467,6 +3484,33 @@ function wfaSeedClientesV1(){
     }
   }catch(e){/* nunca derruba o boot */}
 }
+/* ===== SEED de ROTINAS por area (pedido do Gabriel, 03/07): as rotinas semanais dos
+   meninos, correlatas aos processos de cada funcao (relatorio semanal, otimizacao
+   semanal, criativo semanal...). Idempotente por titulo; roda pos-sync junto do seed
+   de clientes. Elas viram tarefa no board automaticamente nos dias certos. */
+function wfaSeedRotinasV1(){
+  try{
+    if(localStorage.getItem('wfa-seed-rotinas-v1')==='1')return;
+    const novas=[
+      {titulo:'Otimização semanal das campanhas (todos os clientes)',freq:'Semanal',dia:'Segunda',hora:'09:00',resp:'Danilo de Lima'},
+      {titulo:'Relatório semanal de tráfego por cliente',freq:'Semanal',dia:'Sexta',hora:'16:00',resp:'Danilo de Lima'},
+      {titulo:'Criativo semanal: pauta e produção da semana',freq:'Semanal',dia:'Segunda',hora:'10:00',resp:'Maria Luiza'},
+      {titulo:'Relatório semanal pro cliente (entregas e resultados)',freq:'Semanal',dia:'Sexta',hora:'15:00',resp:'Lucas Rosi'},
+      {titulo:'Ativação diária dos grupos dos clientes',freq:'Diária',dia:'',hora:'09:30',resp:'Lucas Rosi'},
+      {titulo:'Fechamento semanal de edições (fila zerada)',freq:'Semanal',dia:'Quinta',hora:'14:00',resp:'Samuel Magalhães'},
+      {titulo:'Agenda de captações da semana confirmada',freq:'Semanal',dia:'Segunda',hora:'11:00',resp:'Samuel Magalhães'},
+      {titulo:'Artes e criativos da semana (demandas de design)',freq:'Semanal',dia:'Terça',hora:'10:00',resp:'M. Portela'},
+      {titulo:'Revisão semanal do pipeline comercial',freq:'Semanal',dia:'Segunda',hora:'14:00',resp:'Saulo'},
+    ];
+    const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+    const arr=loadRot();
+    const jaTem=new Set(arr.map(r=>norm(r.titulo)));
+    let add=0;
+    novas.forEach((n,i)=>{ if(!jaTem.has(norm(n.titulo))){ arr.push({id:'rseed'+Date.now()+i,ativo:true,...n}); add++; } });
+    localStorage.setItem('wfa-seed-rotinas-v1','1');
+    if(add){ saveRot(arr); if(typeof toast==='function')toast('✓ '+add+' rotinas da equipe adicionadas'); }
+  }catch(e){/* nunca derruba o boot */}
+}
 function isEmptyCloudValue(v){return v==null||(Array.isArray(v)&&v.length===0)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===0)||v==='';}
 async function bootCloudSync(){
   try{
@@ -3490,7 +3534,8 @@ async function bootCloudSync(){
     // dia — isso enchia o sistema de notificação e tarefa. O conselho só roda quando ele
     // aperta "Rodar conselho agora". // arkDailyAgentsKick();
     wfaLimpezaConselhoV1(); // limpeza única: tarefas do conselho/ressuscitadas -> Concluído
-    wfaSeedClientesV1();     // adiciona 4B Burguer e Pizzaria Sabor e Lenha (1x, idempotente)
+    wfaSeedClientesV1();     // clientes novos (1x, idempotente)
+    wfaSeedRotinasV1();      // rotinas semanais da equipe (1x, idempotente)
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
     WFA_CLOUD_READY=false;
@@ -5427,7 +5472,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='jarvis'){try{jarvisPageEnter();}catch(e){} try{jvHudInit();}catch(e){console.warn('jvhud',e);}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
-    if(p==='whatsapp'){try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
+    if(p==='whatsapp'){try{wfaCarregarWhatsapp();}catch(e){} try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
@@ -12054,8 +12099,9 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
     /* na troca de página normaliza ANTES do primeiro paint (mata o flash branco do Planejamento/POPs) */
     if(e.target.closest&&e.target.closest('[data-nav],[data-subnav]')){requestAnimationFrame(auraNormalize);auraNormalizeSoon();}
   },true);
-  requestAnimationFrame(auraNormalize);
-  setTimeout(auraNormalize,600);
+  /* boot leve: 1a passada so na pagina visivel (rapida); a varredura completa vai pro idle */
+  requestAnimationFrame(function(){auraNormalize(document.querySelector('.page.active')||undefined)});
+  setTimeout(auraNormalize,1500);
 })();
 </script>
 </body>
