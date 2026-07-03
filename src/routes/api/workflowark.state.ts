@@ -871,6 +871,41 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
           }
         }
 
+        // Chat individual com um membro do Conselho de IA (persona fixa, conversa multi-turno).
+        if (action === "agente-chat") {
+          const persona = String(body.persona ?? "").trim();
+          const msgs = Array.isArray(body.messages) ? body.messages.slice(-16) : [];
+          if (!persona || !msgs.length) return json({ error: "Diga com quem falar e o que perguntar." }, { status: 400 });
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const aiKey = zapiEnv("ANTHROPIC_API_KEY");
+          if (!aiKey) return json({ error: "IA não configurada (sem ANTHROPIC_API_KEY)." }, { status: 500 });
+          const PERSONAS: Record<string, string> = {
+            diretor: "o DIRETOR DE OPERAÇÕES: visão de dono, prioriza o que gera receita e destrava a operação, corta o que é perfumaria",
+            trafego: "o GESTOR DE TRÁFEGO: performance, Meta Ads, CAC/ROAS, verba de PME brasileira, teste rápido e corte do que não performa",
+            social: "o SOCIAL MEDIA: linha editorial, formatos que engajam em gastronomia/varejo, frequência realista pra equipe pequena",
+            roteirista: "o ROTEIRISTA VIRAL: ganchos de 3 segundos, retenção, roteiro pronto pra gravar, nada de clichê de IA",
+            designer: "o DESIGNER: identidade, criativo que para o scroll, hierarquia visual, o que dá pra produzir rápido sem perder padrão",
+            account: "o ACCOUNT/CS: relação com o cliente, expectativa, retenção e churn, o que prometer e o que não prometer",
+            comercial: "o ESTRATEGISTA COMERCIAL: pipeline, proposta, fechamento, upsell, o argumento que faz o dono do restaurante assinar",
+          };
+          const papel = PERSONAS[persona] || `o ${persona}`;
+          const cliente = String(body.cliente ?? "").trim();
+          let brief = "";
+          if (cliente) { try { const { clienteBrief } = await import("@/integrations/clientes"); brief = clienteBrief(cliente) || ""; } catch { /* ignore */ } }
+          const sys = `Você é ${papel} do Conselho de IA da ARK Content (agência de marketing gastronômico em Brasília). Converse como colega sênior: direto, prático, PT-BR, respostas curtas (até ~150 palavras), sempre terminando em decisão ou próximo passo concreto. Não invente números; se faltar dado, diga qual.${brief ? "\n\nCONTEXTO DO CLIENTE:\n" + brief : ""}`;
+          const messages = msgs
+            .map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 4000) }))
+            .filter((m: any) => m.content);
+          try {
+            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 900, system: sys, messages }) });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            return json({ text: data?.content?.[0]?.text || "(sem resposta)" });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha no chat." }, { status: 502 });
+          }
+        }
+
         // Resumo executivo das conversas de WhatsApp das últimas 24h (IA).
         if (action === "wa-resumo") {
           try {

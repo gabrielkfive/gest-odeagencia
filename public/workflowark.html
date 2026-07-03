@@ -1037,6 +1037,39 @@ body.aura-light .topbar{position:absolute;top:0;left:0;right:0;z-index:30;
   transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform}
 body.aura-light .main.tb-hidden .topbar{transform:translateY(-100%)}
 body.aura-light .view{padding-top:52px;background:transparent}
+/* Conselho: bancada de agentes + chat lateral */
+.cons-bancada{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin:12px 0 4px}
+.cons-agente{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--line);
+  border-radius:14px;background:rgba(255,255,255,.03);cursor:pointer;text-align:left;font-family:inherit;
+  transition:transform .2s cubic-bezier(.16,1,.3,1),border-color .2s ease,box-shadow .25s ease}
+.cons-agente:hover{transform:translateY(-2px);border-color:rgba(255,199,0,.35);box-shadow:0 16px 40px -24px rgba(255,199,0,.4)}
+.ca-coin{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;font:700 12px Inter,sans-serif}
+.ca-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ca-tx b{font-size:12.5px;color:var(--ink)}
+.ca-tx i{font-style:normal;font-size:10.5px;color:var(--mute)}
+.ca-go{font:600 10.5px Inter,sans-serif;color:var(--yel);flex-shrink:0}
+body.aura-light .cons-agente{background:#fff}
+.cons-chat{position:fixed;top:12px;right:12px;bottom:12px;width:min(400px,92vw);z-index:300;
+  display:flex;flex-direction:column;border-radius:20px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(12,13,17,.96);backdrop-filter:blur(26px) saturate(1.2);color:#eef0f3;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9);
+  transform:translateX(calc(100% + 24px));transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.cons-chat.open{transform:none}
+.cons-chat .cc-hd{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.cons-chat .cc-coin{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font:700 12px Inter,sans-serif}
+.cons-chat .cc-nm{font:600 13.5px 'Sora',Inter,sans-serif}
+.cons-chat .cc-fn{font-size:10.5px;color:#a6adba}
+.cons-chat .cc-x{margin-left:auto;border:0;background:rgba(255,255,255,.08);color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer}
+.cons-chat .cc-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.cons-chat .cc-msg{max-width:86%;padding:9px 12px;border-radius:13px;font-size:12.5px;line-height:1.5}
+.cons-chat .cc-msg.meu{align-self:flex-end;background:var(--yel);color:#131316;border-bottom-right-radius:4px}
+.cons-chat .cc-msg.dele{align-self:flex-start;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-bottom-left-radius:4px}
+.cons-chat .cc-vazio{color:#7b8494;font-size:12px;text-align:center;margin-top:30px;padding:0 20px;line-height:1.6}
+.cons-chat .cc-in{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,.1)}
+.cons-chat .cc-in input{flex:1;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff;
+  border-radius:11px;padding:10px 13px;font:400 12.5px Inter,sans-serif;outline:none}
+.cons-chat .cc-in button{border:0;background:var(--yel);color:#131316;border-radius:11px;padding:0 16px;cursor:pointer;font-size:14px}
+
 /* Barra Lançar missão no hero (ref /os): input pill + CTA amarelo acoplado */
 body.aura-dark .aura-missao,body.aura-light .aura-missao{display:flex;gap:0;margin-top:18px;position:relative;
   border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
@@ -1346,7 +1379,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-0500 -->
+<!-- build AURA-DARK-OS-MIX 20260703-0600 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -4317,21 +4350,31 @@ function iniciarAutoSync(){
           .brf-idea.on span{text-decoration:none;color:var(--ink)}
           .brf-idea input{margin-top:2px;flex-shrink:0;width:15px;height:15px;accent-color:var(--green)}
         </style>
-        <div id="cons-status" style="font-size:12px;color:var(--mute);margin-bottom:10px"></div>
-        <div id="cons-auto"></div>
-
-        <details style="margin-bottom:14px">
-          <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--mute)">⚖️ Quer perguntar algo específico pro conselho agora?</summary>
-          <div class="card" style="padding:16px;margin-top:10px">
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
-              <div style="flex:1;min-width:220px"><label class="form-label">O que o conselho deve resolver?</label><input id="cons-tema" class="form-input" placeholder="Ex: como aumentar agendamentos da Vivenda na Copa? / o que postar essa semana?"></div>
-              <div style="min-width:160px"><label class="form-label">Cliente (opcional)</label><select id="cons-cliente" class="form-select"></select></div>
-              <button class="tb-btn dk" onclick="consRodar()">⚖️ Reunir o conselho</button>
-            </div>
-            <div id="cons-status2" style="font-size:12px;color:var(--mute);margin-top:8px"></div>
+        <!-- Convocar reunião: sempre visível, é O jeito de usar o conselho -->
+        <div class="card" id="cons-reuniao" style="padding:16px;margin-bottom:16px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:1;min-width:220px"><label class="form-label">Convocar reunião · o que o conselho deve resolver?</label><input id="cons-tema" class="form-input" placeholder="Ex: como aumentar agendamentos da Vivenda na Copa? / o que postar essa semana?" onkeydown="if(event.key==='Enter')consRodar()"></div>
+            <div style="min-width:160px"><label class="form-label">Cliente (opcional)</label><select id="cons-cliente" class="form-select"></select></div>
+            <button class="tb-btn" onclick="consRodar()">⚖️ Reunir o conselho</button>
           </div>
-        </details>
+          <div id="cons-status2" style="font-size:12px;color:var(--mute);margin-top:8px"></div>
+        </div>
         <div id="cons-out"></div>
+
+        <!-- Bancada: os 7 do conselho, cada um com conversa individual -->
+        <div class="sect-title"><h2>Bancada do conselho</h2><span class="sub">clique pra conversar com um deles</span></div>
+        <div id="cons-bancada" class="cons-bancada"></div>
+
+        <div id="cons-status" style="font-size:12px;color:var(--mute);margin:14px 0 10px"></div>
+        <div id="cons-auto"></div>
+      </div>
+
+      <!-- Chat lateral com um membro do conselho -->
+      <div id="cons-chat" class="cons-chat">
+        <div class="cc-hd"><span class="cc-coin" id="cc-coin">D</span><div><div class="cc-nm" id="cc-nm">Agente</div><div class="cc-fn" id="cc-fn">função</div></div>
+          <button class="cc-x" onclick="consChatClose()">✕</button></div>
+        <div class="cc-body" id="cc-body"></div>
+        <div class="cc-in"><input id="cc-input" placeholder="Pergunta, pede plano, pede opinião…" onkeydown="if(event.key==='Enter')consChatSend()"><button onclick="consChatSend()">➤</button></div>
       </div>
 
       <!-- =================== TUTORIAL / POPs =================== -->
@@ -11488,6 +11531,75 @@ renderAgenda();
 renderComercialMes();
 try{renderMeumes();}catch(e){console.warn('meumes boot',e);}
 try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
+
+/* ============ CONSELHO DE IA: bancada + chat individual ============ */
+var CONS_AGENTES=[
+  {id:'diretor',nm:'Diretor de Operações',fn:'prioriza o que gera receita',cor:'#ffc700'},
+  {id:'trafego',nm:'Gestor de Tráfego',fn:'Meta Ads · CAC · ROAS',cor:'#5b8cff'},
+  {id:'social',nm:'Social Media',fn:'linha editorial e formatos',cor:'#ff7ab8'},
+  {id:'roteirista',nm:'Roteirista Viral',fn:'ganchos e retenção',cor:'#a78bfa'},
+  {id:'designer',nm:'Designer',fn:'criativo que para o scroll',cor:'#2dd4bf'},
+  {id:'account',nm:'Account / CS',fn:'relação e retenção',cor:'#30d158'},
+  {id:'comercial',nm:'Estrategista Comercial',fn:'pipeline e fechamento',cor:'#ff9f0a'},
+];
+var _consChatId=null;
+function consBancadaRender(){
+  var box=document.getElementById('cons-bancada');if(!box||box.childElementCount)return;
+  box.innerHTML=CONS_AGENTES.map(function(a){
+    var ini=a.nm.split(/\s+/).map(function(w){return w[0]}).join('').slice(0,2).toUpperCase();
+    return '<button class="cons-agente" onclick="consChatOpen(\''+a.id+'\')">'
+      +'<span class="ca-coin" style="background:'+a.cor+'22;color:'+a.cor+';border:1px solid '+a.cor+'55">'+ini+'</span>'
+      +'<span class="ca-tx"><b>'+a.nm+'</b><i>'+a.fn+'</i></span>'
+      +'<span class="ca-go">Conversar</span></button>';
+  }).join('');
+}
+function consChatHist(id){try{return JSON.parse(localStorage.getItem('wfa-cons-chat-'+id)||'[]')}catch(e){return[]}}
+function consChatSaveHist(id,h){try{localStorage.setItem('wfa-cons-chat-'+id,JSON.stringify(h.slice(-40)))}catch(e){}}
+function consChatPaint(){
+  var a=CONS_AGENTES.find(function(x){return x.id===_consChatId});if(!a)return;
+  var body=document.getElementById('cc-body');
+  var h=consChatHist(a.id);
+  body.innerHTML=h.length?h.map(function(m){
+    return '<div class="cc-msg '+(m.role==='assistant'?'dele':'meu')+'">'+String(m.content||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</div>';
+  }).join(''):'<div class="cc-vazio">Pergunta qualquer coisa: plano, opinião, próximo passo. O '+a.nm+' responde na hora.</div>';
+  body.scrollTop=body.scrollHeight;
+}
+function consChatOpen(id){
+  var a=CONS_AGENTES.find(function(x){return x.id===id});if(!a)return;
+  _consChatId=id;
+  var ini=a.nm.split(/\s+/).map(function(w){return w[0]}).join('').slice(0,2).toUpperCase();
+  var coin=document.getElementById('cc-coin');coin.textContent=ini;
+  coin.style.cssText='background:'+a.cor+'22;color:'+a.cor+';border:1px solid '+a.cor+'55';
+  document.getElementById('cc-nm').textContent=a.nm;
+  document.getElementById('cc-fn').textContent=a.fn;
+  document.getElementById('cons-chat').classList.add('open');
+  consChatPaint();
+  setTimeout(function(){document.getElementById('cc-input').focus()},250);
+}
+function consChatClose(){document.getElementById('cons-chat').classList.remove('open');_consChatId=null;}
+async function consChatSend(){
+  var inp=document.getElementById('cc-input');var v=(inp.value||'').trim();
+  if(!v||!_consChatId)return;
+  var id=_consChatId;var h=consChatHist(id);
+  h.push({role:'user',content:v});consChatSaveHist(id,h);inp.value='';consChatPaint();
+  var body=document.getElementById('cc-body');
+  body.insertAdjacentHTML('beforeend','<div class="cc-msg dele digitando">…</div>');body.scrollTop=body.scrollHeight;
+  try{
+    var cliente=(document.getElementById('cons-cliente')||{}).value||'';
+    var r=await cloudCall('save',{action:'agente-chat',persona:id,cliente:cliente,messages:h.map(function(m){return{role:m.role,content:m.content}})});
+    h.push({role:'assistant',content:(r&&r.text)||'(sem resposta)'});
+  }catch(e){
+    var msg=e&&e.message||'Falha no chat';
+    if(/sem-pai|timeout|autorizado|401|session/i.test(msg))msg='Você está fora do login. Entra pelo app que o conselho responde.';
+    h.push({role:'assistant',content:'⚠ '+msg});
+  }
+  consChatSaveHist(id,h);consChatPaint();
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')consChatClose()});
+document.addEventListener('click',function(e){
+  if(e.target.closest&&e.target.closest('[data-nav="conselho"]'))setTimeout(consBancadaRender,300);
+},true);
+if(document.querySelector('#page-conselho.active'))setTimeout(consBancadaRender,800);
 
 /* Sub-abas do Comercial: Funil nativo ou Propostas/Contratos embutidos (iframe lazy, mesma origem) */
 function comTab(id){
