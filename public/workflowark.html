@@ -899,6 +899,8 @@ body.aura-dark .side.compact.peek{border-radius:22px}
 /* ============ MISTURA ARK OS (print LAST DANCE) sobre o palco Aura ============ */
 /* Fileira herói Mission Control: só existe no tema aura-dark */
 .aura-hero-row{display:none}
+/* No Meu Dia o hero substitui a saudação antiga (senão fica "Boa noite" duas vezes) */
+body.aura-dark #page-dashboard #md-greet,body.aura-dark #page-dashboard #md-sub{display:none}
 body.aura-dark .aura-hero-row{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;margin-bottom:16px}
 @media (max-width:1180px){body.aura-dark .aura-hero-row{grid-template-columns:1fr}}
 body.aura-dark .aura-hero{position:relative;overflow:hidden;border-radius:28px;padding:34px 36px 30px;
@@ -1014,6 +1016,7 @@ body.aura-dark .view.aura-enter .page.active .mdw:nth-child(5){animation-delay:.
 body.aura-dark .view.aura-enter .page.active .mdw:nth-child(6){animation-delay:.35s}
 body.aura-dark .view.aura-enter .page.active .mdw:nth-child(7){animation-delay:.42s}
 body.aura-dark .view.aura-enter .page.active .page-head{animation:arIn .7s cubic-bezier(.16,.6,.28,1) both}
+body.aura-dark .view.aura-enter .page.active .aura-hero-row{animation:arIn .75s cubic-bezier(.16,.6,.28,1) both;animation-delay:.04s}
 
 /* Troca de página com desfoque que assenta (motion blur da Aura) */
 body.aura-dark .page.active{animation:auraPageIn .55s cubic-bezier(.16,.6,.28,1)}
@@ -1092,10 +1095,76 @@ body.aura-dark .explainer h3{color:var(--ink)}
 /* Botões de troca de visão do Kanban: a regra original usa ID e ganha da camada, precisa do ID junto */
 body.aura-dark #page-tarefas .tv-btn{background:rgba(255,255,255,.07);border-color:var(--line);color:var(--txt)}
 body.aura-dark #page-tarefas .tv-btn.on{background:var(--yel);border-color:var(--yel);color:#131316}
+/* Planejamento: card gerador tinha degradê branco com ID (mesma guerra de especificidade) */
+body.aura-dark #page-planejamento .pl-gen{background:rgba(13,14,17,.6);border-color:var(--line)}
+body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-color:var(--line);color:var(--txt)}
+
+/* ============ SELETOR DE TEMA (Personalizar aparência) ============ */
+#wfa-aparencia{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(6px)}
+#wfa-aparencia.open{display:flex}
+#wfa-aparencia .ap-box{width:min(520px,92vw);border-radius:22px;padding:26px;
+  background:#101116;border:1px solid rgba(255,255,255,.12);color:#eef0f3;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9)}
+#wfa-aparencia h3{font-family:'Sora',var(--sans);font-size:18px;font-weight:600;margin:0 0 4px}
+#wfa-aparencia .ap-sub{font-size:12.5px;color:#a6adba;margin-bottom:18px}
+#wfa-aparencia .ap-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+#wfa-aparencia .ap-opt{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;cursor:pointer;
+  background:rgba(255,255,255,.03);transition:transform .18s ease,border-color .2s ease,box-shadow .25s ease;text-align:left}
+#wfa-aparencia .ap-opt:hover{transform:translateY(-2px);border-color:rgba(255,199,0,.45);
+  box-shadow:0 18px 44px -22px rgba(255,199,0,.4)}
+#wfa-aparencia .ap-opt.on{border-color:var(--yel,#FFC700);box-shadow:0 0 0 1px var(--yel,#FFC700)}
+#wfa-aparencia .ap-prev{height:74px;border-radius:11px;margin-bottom:10px;border:1px solid rgba(255,255,255,.14);overflow:hidden;position:relative}
+#wfa-aparencia .ap-prev.claro{background:linear-gradient(180deg,#f5f5f7 55%,#ffffff)}
+#wfa-aparencia .ap-prev.claro::after{content:'';position:absolute;left:10px;top:10px;right:10px;height:16px;border-radius:6px;background:#fff;border:1px solid #e5e5ea}
+#wfa-aparencia .ap-prev.escuro{background:radial-gradient(120% 160% at 85% -20%,#2e2f36 0%,#000 60%)}
+#wfa-aparencia .ap-prev.escuro::after{content:'';position:absolute;left:10px;top:10px;right:10px;height:16px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,199,0,.5)}
+#wfa-aparencia .ap-nm{font-size:13.5px;font-weight:650;color:#fff}
+#wfa-aparencia .ap-ds{font-size:11px;color:#a6adba;margin-top:2px}
+#wfa-aparencia .ap-foot{display:flex;justify-content:flex-end;margin-top:18px}
+#wfa-aparencia .ap-close{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;
+  border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260702-1910 -->
+<!-- build AURA-DARK-OS-MIX 20260702-2005 -->
 <body class="aura-dark">
+<script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
+try{if(localStorage.getItem('wfa-theme')==='light')document.body.classList.remove('aura-dark');}catch(e){}</script>
+<div id="wfa-aparencia" onclick="if(event.target===this)wfaAparencia(false)">
+  <div class="ap-box">
+    <h3>Personalizar aparência</h3>
+    <div class="ap-sub">Escolha o tema do sistema. Fica salvo neste navegador.</div>
+    <div class="ap-grid">
+      <button class="ap-opt" id="ap-opt-light" onclick="wfaSetTheme('light')">
+        <div class="ap-prev claro"></div>
+        <div class="ap-nm">Claro</div>
+        <div class="ap-ds">Fundo cinza Apple, cartões brancos</div>
+      </button>
+      <button class="ap-opt" id="ap-opt-dark" onclick="wfaSetTheme('dark')">
+        <div class="ap-prev escuro"></div>
+        <div class="ap-nm">Escuro</div>
+        <div class="ap-ds">Preto absoluto, glows âmbar, Mission Control</div>
+      </button>
+    </div>
+    <div class="ap-foot"><button class="ap-close" onclick="wfaAparencia(false)">Fechar</button></div>
+  </div>
+</div>
+<script>
+function wfaAparencia(open){
+  var m=document.getElementById('wfa-aparencia');if(!m)return;
+  m.classList.toggle('open',!!open);
+  if(open){
+    var t;try{t=localStorage.getItem('wfa-theme')||'dark';}catch(e){t='dark';}
+    document.getElementById('ap-opt-light').classList.toggle('on',t==='light');
+    document.getElementById('ap-opt-dark').classList.toggle('on',t!=='light');
+  }
+}
+function wfaSetTheme(t){
+  try{localStorage.setItem('wfa-theme',t);}catch(e){}
+  /* recarrega: o normalizador escuro grava estilos inline, o reload garante o claro limpo */
+  location.reload();
+}
+</script>
 
 <!-- ============== BOOT CINEMATOGRÁFICO (estilo Apple) ============== -->
 <div id="ark-boot" aria-hidden="true">
@@ -1383,6 +1452,9 @@ body.aura-dark #page-tarefas .tv-btn.on{background:var(--yel);border-color:var(-
       </div>
       <div class="tb-right">
         <div class="tb-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="gsearch" placeholder="Buscar cliente, tarefa, processo, página…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onkeydown="if(event.key==='Escape')gsearchClose()"><div id="gsearch-res"></div></div>
+        <button class="tb-btn tb-ic" onclick="wfaAparencia(true)" title="Personalizar aparência (tema claro ou escuro)" style="padding:6px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
+        </button>
         <button class="tb-btn tb-ic" data-nav="notificacoes" title="Notificações" style="position:relative;padding:6px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></svg>
           <span id="notif-badge-top" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red,#e5484d);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:10px;align-items:center;justify-content:center;padding:0 3px">0</span>
@@ -1613,25 +1685,25 @@ body.aura-dark #page-tarefas .tv-btn.on{background:var(--yel);border-color:var(-
           <div class="aura-hero">
             <div class="sphere" aria-hidden="true"></div>
             <div class="eyebrow">Mission Control · ARK Content</div>
-            <h1 id="aura-saud">Boa tarde, Senhor 👋</h1>
+            <h1 class="aura-saud">Boa tarde, Senhor 👋</h1>
             <div class="ah-cards">
               <div class="ahc">
                 <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="l">Tarefas abertas</span></div>
-                <div class="n" id="aura-n-abertas">0</div>
+                <div class="n aura-n-abertas">0</div>
                 <div class="s">na operação agora</div>
               </div>
               <div class="ahc">
                 <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span class="l">Vencem hoje</span></div>
-                <div class="n" id="aura-n-hoje">0</div>
+                <div class="n aura-n-hoje">0</div>
                 <div class="s">até o fim do dia</div>
               </div>
             </div>
           </div>
           <div class="aura-goal">
             <div class="gt">Operação em dia</div>
-            <div class="donut-wrap"><div class="donut" id="aura-donut" style="--p:100"></div><span class="pct" id="aura-donut-pct">100%</span></div>
-            <div class="gv" id="aura-goal-late">0 atrasadas</div>
-            <div class="gs" id="aura-goal-sub">de 0 tarefas abertas</div>
+            <div class="donut-wrap"><div class="donut aura-donut" style="--p:100"></div><span class="pct aura-donut-pct">100%</span></div>
+            <div class="gv aura-goal-late">0 atrasadas</div>
+            <div class="gs aura-goal-sub">de 0 tarefas abertas</div>
             <button class="gbtn" data-aura-keep onclick="document.querySelector('[data-nav=tarefas]')&&document.querySelector('[data-nav=tarefas]').click()">Revisar fila</button>
           </div>
         </div>
@@ -11164,23 +11236,37 @@ try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
   },true);
   auraEnter();
 
-  /* Hero Mission Control: saudação por hora + números reais de mdwBuckets */
+  /* Hero Mission Control compartilhado: existe no Meu Painel (markup) e é clonado
+     pro Meu Dia (e pra onde mais o Gabriel quiser estender). Tudo por classe, sem id,
+     justamente pra clonar sem conflito. */
+  function auraHeroEnsure(){
+    var fonte=document.querySelector('#page-painel .aura-hero-row');if(!fonte)return;
+    ['page-dashboard'].forEach(function(pid){
+      var pg=document.getElementById(pid);
+      if(!pg||pg.querySelector('.aura-hero-row'))return;
+      var clone=fonte.cloneNode(true);
+      var head=pg.querySelector('.page-head');
+      if(head)head.insertAdjacentElement('afterend',clone);
+      else pg.insertAdjacentElement('afterbegin',clone);
+    });
+  }
+  function auraSet(cls,txt){document.querySelectorAll('.'+cls).forEach(function(e){e.textContent=txt})}
   function auraHero(){
-    var el=document.getElementById('aura-saud');if(!el)return;
+    auraHeroEnsure();
     var h=new Date().getHours();
     var s=h<5?'Boa madrugada':h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
-    el.textContent=s+', Senhor 👋';
+    auraSet('aura-saud',s+', Senhor 👋');
     try{
       if(typeof mdwBuckets!=='function')return;
       var B=mdwBuckets();
       var abertas=B.late.length+B.todayT.length+B.pend.length;
-      document.getElementById('aura-n-abertas').textContent=abertas;
-      document.getElementById('aura-n-hoje').textContent=B.todayT.length;
+      auraSet('aura-n-abertas',abertas);
+      auraSet('aura-n-hoje',B.todayT.length);
       var pct=abertas?Math.round(100*(abertas-B.late.length)/abertas):100;
-      document.getElementById('aura-donut').style.setProperty('--p',pct);
-      document.getElementById('aura-donut-pct').textContent=pct+'%';
-      document.getElementById('aura-goal-late').textContent=B.late.length+' atrasada'+(B.late.length===1?'':'s');
-      document.getElementById('aura-goal-sub').textContent='de '+abertas+' tarefas abertas na sua fila';
+      document.querySelectorAll('.aura-donut').forEach(function(d){d.style.setProperty('--p',pct)});
+      auraSet('aura-donut-pct',pct+'%');
+      auraSet('aura-goal-late',B.late.length+' atrasada'+(B.late.length===1?'':'s'));
+      auraSet('aura-goal-sub','de '+abertas+' tarefas abertas na sua fila');
     }catch(err){}
   }
   auraHero();
@@ -11203,7 +11289,21 @@ try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
     els.forEach(function(el){
       var cs=getComputedStyle(el);
       var bg=auraParse(cs.backgroundColor);
-      if(!bg||bg.a<.5)return;
+      if(!bg||bg.a<.5){
+        /* degradês claros (background-image) escapam da cor computada: mede as paradas do gradiente */
+        var bi=cs.backgroundImage;
+        if(bi&&bi.indexOf('gradient')>-1){
+          var stops=bi.match(/rgba?\([^)]*\)/g)||[];
+          var claras=0,validas=0;
+          stops.forEach(function(c){
+            var p=auraParse(c);if(!p||p.a<.5)return;validas++;
+            var mx2=Math.max(p.r,p.g,p.b),mn2=Math.min(p.r,p.g,p.b);
+            if(((0.299*p.r+0.587*p.g+0.114*p.b)/255)>0.62&&(mx2-mn2)<70)claras++;
+          });
+          if(validas&&claras>=validas/2){el.style.background='rgba(13,14,17,.6)';darkened.add(el);}
+        }
+        return;
+      }
       var mx=Math.max(bg.r,bg.g,bg.b),mn=Math.min(bg.r,bg.g,bg.b);
       var L=(0.299*bg.r+0.587*bg.g+0.114*bg.b)/255;
       if(L>0.62&&(mx-mn)<70){
