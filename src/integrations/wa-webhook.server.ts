@@ -76,6 +76,12 @@ export async function processWaWebhook(body: any): Promise<void> {
 
     if (phone && text) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      // Controle remoto ("jarvis <demanda>"): enfileira pro PC executar e NÃO
+      // entra no fluxo de conversa/agente (comando não é papo de cliente).
+      try {
+        const { handleRemoteCommand } = await import("@/integrations/remote-queue.server");
+        if (await handleRemoteCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
+      } catch { /* fila indisponível: segue fluxo normal */ }
       const { appendWhatsapp } = await import("@/integrations/zapi.server");
       await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name, media, mkey });
       if (!fromMe && !isGroup) {
@@ -188,6 +194,11 @@ export async function processWaWebhook(body: any): Promise<void> {
   // só guarda mensagens de texto reais (ignora status, recibos, etc.)
   if (phone && text && typeof text === "string") {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Controle remoto ("jarvis <demanda>") — mesmo tratamento do caminho Bridge acima.
+    try {
+      const { handleRemoteCommand } = await import("@/integrations/remote-queue.server");
+      if (await handleRemoteCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
+    } catch { /* fila indisponível: segue fluxo normal */ }
     const { appendWhatsapp } = await import("@/integrations/zapi.server");
     await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name, media, mkey });
     // Assistente: só em mensagens recebidas e fora de grupo (evita enxurrada de tarefas).
