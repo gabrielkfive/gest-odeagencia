@@ -1037,6 +1037,40 @@ body.aura-light .topbar{position:absolute;top:0;left:0;right:0;z-index:30;
   transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform}
 body.aura-light .main.tb-hidden .topbar{transform:translateY(-100%)}
 body.aura-light .view{padding-top:52px;background:transparent}
+/* Barra Lançar missão no hero (ref /os): input pill + CTA amarelo acoplado */
+body.aura-dark .aura-missao,body.aura-light .aura-missao{display:flex;gap:0;margin-top:18px;position:relative;
+  border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+body.aura-dark .aura-missao-in,body.aura-light .aura-missao-in{flex:1;border:0;background:transparent;color:#fff;
+  font:400 13px Inter,sans-serif;padding:13px 16px;outline:none}
+body.aura-dark .aura-missao-in::placeholder,body.aura-light .aura-missao-in::placeholder{color:rgba(255,255,255,.45)}
+body.aura-dark .aura-missao-go,body.aura-light .aura-missao-go{border:0;background:var(--yel);color:#131316;
+  font:600 12.5px Inter,sans-serif;padding:0 18px;cursor:pointer;white-space:nowrap;
+  box-shadow:0 0 26px rgba(255,199,0,.35);transition:filter .2s ease,transform .15s ease}
+body.aura-dark .aura-missao-go:hover,body.aura-light .aura-missao-go:hover{filter:brightness(1.06)}
+body.aura-dark .aura-missao-go:active,body.aura-light .aura-missao-go:active{transform:scale(.97)}
+/* Hoje na operação: botão Abrir por linha + chips de prazo no padrão /os */
+body.aura-dark .md-act .ab{background:rgba(255,255,255,.1);color:#fff;border:0;border-radius:8px;
+  padding:6px 12px;font:600 10.5px Inter,sans-serif;cursor:pointer}
+body.aura-dark .md-act .ab:hover{background:rgba(255,255,255,.18)}
+body.aura-light .md-act .ab{background:#131316;color:#fff;border:0;border-radius:8px;
+  padding:6px 12px;font:600 10.5px Inter,sans-serif;cursor:pointer}
+body.aura-dark .md-chip-today{background:rgba(255,199,0,.16)!important;color:var(--yel)!important;border:1px solid rgba(255,199,0,.35)}
+body.aura-dark .md-chip-late{background:rgba(239,68,68,.16)!important;color:#f87171!important;border:1px solid rgba(248,113,113,.4)}
+/* Fila de aprovação: moedinha colorida por função + Revisar */
+body.aura-dark .md-apr-row,body.aura-light .md-apr-row{display:flex;align-items:center;gap:12px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);cursor:pointer;margin-bottom:8px;
+  transition:transform .18s cubic-bezier(.16,1,.3,1),border-color .2s ease}
+body.aura-dark .md-apr-row:hover,body.aura-light .md-apr-row:hover{transform:translateX(3px);border-color:rgba(255,199,0,.3)}
+.md-apr-coin{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex-shrink:0;
+  font:700 11px Inter,sans-serif}
+.md-apr-tx{flex:1;min-width:0}
+.md-apr-tx .t{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.md-apr-tx .m{font-size:10.5px;color:var(--mute);margin-top:1px}
+.md-apr-btn{background:rgba(48,209,88,.16);color:#30d158;border:1px solid rgba(48,209,88,.35);border-radius:9px;
+  padding:7px 14px;font:600 11px Inter,sans-serif;cursor:pointer;flex-shrink:0;transition:background .2s ease}
+.md-apr-btn:hover{background:rgba(48,209,88,.28)}
+body.aura-light .md-apr-row{background:#fff}
+
 /* Sidebar preta 0000 no claro: os textos dela já eram claros, só o palco em volta muda */
 body.aura-light .side{background:radial-gradient(130% 90% at 0% 0%,#17181d 0%,#0a0a0d 58%,#000 100%)}
 /* Regras que o script de dualização perdeu (comentário grudava no seletor) */
@@ -1312,7 +1346,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-0300 -->
+<!-- build AURA-DARK-OS-MIX 20260703-0400 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -1814,6 +1848,8 @@ function wfaSetTheme(t){
           <div id="md-briefings" style="display:none;margin-top:10px"></div>
         </div>
 
+        <div id="md-aprovacao" style="margin-bottom:16px;display:none"></div>
+
         <div class="md-grid">
           <div class="md-card">
             <div class="md-hd">
@@ -1883,6 +1919,10 @@ function wfaSetTheme(t){
                 <div class="n aura-n-hoje">0</div>
                 <div class="s">até o fim do dia</div>
               </div>
+            </div>
+            <div class="aura-missao">
+              <input class="aura-missao-in" placeholder="Declare um objetivo. Ex.: preparar o lançamento da Vivenda..." onkeydown="if(event.key==='Enter')auraLancarMissao(this)">
+              <button class="aura-missao-go" onclick="auraLancarMissao(this.previousElementSibling)">✦ Lançar missão</button>
             </div>
           </div>
           <div class="aura-goal">
@@ -6286,10 +6326,31 @@ function mdTaskRow(kind,t){
     <div class="tk-main" onclick="openTaskDetail('${t.id}')" style="cursor:pointer"><div class="tk-t">${mdEsc(t.title||'Sem título')}</div>${meta?`<div class="tk-m">${meta}</div>`:''}</div>
     ${chip}
     <div class="md-act">
+      <button class="ab" title="Abrir a tarefa" onclick="event.stopPropagation();openTaskDetail('${t.id}')">Abrir</button>
       <button class="ok" title="Já fiz · concluir" onclick="event.stopPropagation();mdDone('${t.id}')">✓</button>
       <button class="sn" title="Adiar para amanhã" onclick="event.stopPropagation();mdSnooze('${t.id}')">↻</button>
     </div>
   </div>`;
+}
+/* Fila de aprovação (ref ARK OS): tarefas paradas em Aprovação, com moedinha por função e Revisar */
+const MD_APR_CORES={'Account Manager':'#ffc700','Gestor de Tráfego':'#5b8cff','Criador':'#ff7ab8','Edição':'#a78bfa','Editor':'#a78bfa'};
+function mdRenderAprovacao(){
+  const box=document.getElementById('md-aprovacao');if(!box)return;
+  const list=(state.tarefas||[]).filter(t=>t.status==='aprovacao');
+  const sig=list.map(t=>t.id).join(',');
+  if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+  if(!list.length){box.innerHTML='';box.style.display='none';return;}
+  box.style.display='';
+  box.innerHTML=`<div class="md-card"><div class="md-hd"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Fila de aprovação</h3><span class="md-count">${list.length}</span></div>
+  <div class="md-bd">${list.slice(0,8).map(t=>{
+    const cor=MD_APR_CORES[t.funcao]||'#2dd4bf';
+    const ini=(t.funcao||'?').split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const cli=mdClientName(t.clienteId);
+    return `<div class="md-apr-row" onclick="openTaskDetail('${t.id}')">
+      <span class="md-apr-coin" style="background:${cor}22;color:${cor};border:1px solid ${cor}55">${mdEsc(ini)}</span>
+      <div class="md-apr-tx"><div class="t">${mdEsc(t.title||'Sem título')}</div><div class="m">${mdEsc([cli,t.funcao].filter(Boolean).join(' · '))}</div></div>
+      <button class="md-apr-btn" onclick="event.stopPropagation();openTaskDetail('${t.id}')">Revisar</button>
+    </div>`;}).join('')}</div></div>`;
 }
 function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;t.status='concluido';if(typeof taskStopTimer==='function')taskStopTimer(t);t.criadaEm=new Date().toISOString();saveTarefas();renderMeuDia();if(typeof renderWidgets==='function')renderWidgets();toast('✓ Tarefa concluída · boa!');}
 function mdSnooze(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;const d=new Date();d.setDate(d.getDate()+1);t.data=d.toISOString().split('T')[0];saveTarefas();renderMeuDia();toast('↻ Adiada para amanhã');}
@@ -6641,6 +6702,8 @@ function renderMeuDia(){
   }
   // JARVIS: resumo do dia (lê a última notificação de resumo/ideia/conselho)
   mdRenderJarvis(late.length,todayT.length,pend.length);
+  // Fila de aprovação (ref ARK OS)
+  try{mdRenderAprovacao();}catch(e){}
   // Briefings do conselho de hoje
   mdRenderBriefings();
   // título do cartão de tarefas
@@ -11406,6 +11469,18 @@ renderAgenda();
 renderComercialMes();
 try{renderMeumes();}catch(e){console.warn('meumes boot',e);}
 try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
+
+/* Lançar missão (ref ARK OS): o objetivo vira tarefa de alta prioridade no fluxo normal */
+function auraLancarMissao(inp){
+  var v=(inp&&inp.value||'').trim();
+  if(!v){if(typeof toast==='function')toast('Escreva o objetivo da missão');return;}
+  if(typeof openNovaTarefa!=='function')return;
+  openNovaTarefa('backlog');
+  var t=document.getElementById('nt-title');if(t)t.value=v;
+  var pr=document.getElementById('nt-prio');if(pr)pr.value='alta';
+  inp.value='';
+  if(typeof toast==='function')toast('✦ Missão declarada: confirme os detalhes');
+}
 
 /* ============ MAPA DOS CLIENTES (MapLibre GL, o motor por baixo do mapcn) ============ */
 var _mapLibreP=null,_cliMap=null,_cliMapMarkers=[],_cliMapPlacing=false;
