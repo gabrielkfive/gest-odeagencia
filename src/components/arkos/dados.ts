@@ -64,15 +64,16 @@ export const TAREFAS_DEMO_OPS: TarefaLinha[] = [
    wfa-clientes-custom no estado. status: gr = saudável, y = atenção, r = urgente. */
 export type ClienteInfo = {
   id: string; nm: string; tipo: string; plano: string; status: string; meta: string;
+  valor?: number;
 };
 
 export const CLIENTES_BASE: ClienteInfo[] = [
   { id: "ark", nm: "ARK Content", tipo: "Interno", plano: "Interno", status: "gr", meta: "Marketing e operação da própria ARK" },
-  { id: "vivenda", nm: "Vivenda", tipo: "ARK", plano: "Plano X", status: "gr", meta: "Maior ticket · 3 captações/mês · prioritário" },
-  { id: "fercon", nm: "Fercon", tipo: "ARK", plano: "Gold", status: "gr", meta: "Ampliou · 2 captações/mês" },
-  { id: "sasse", nm: "Sasse Gifts", tipo: "ARK", plano: "Plano X", status: "gr", meta: "2 captações/mês" },
-  { id: "fonseca", nm: "Fonseca & Cavalcanti", tipo: "ARK", plano: "Gold", status: "gr", meta: "1 captação/mês · próxima fase" },
-  { id: "vaca", nm: "Vaca Velha", tipo: "ARK", plano: "Gold", status: "gr", meta: "1 captação/mês" },
+  { id: "vivenda", nm: "Vivenda", tipo: "ARK", plano: "Plano X", status: "gr", meta: "Maior ticket · 3 captações/mês · prioritário", valor: 5500 },
+  { id: "fercon", nm: "Fercon", tipo: "ARK", plano: "Gold", status: "gr", meta: "Ampliou · 2 captações/mês", valor: 4200 },
+  { id: "sasse", nm: "Sasse Gifts", tipo: "ARK", plano: "Plano X", status: "gr", meta: "2 captações/mês", valor: 4500 },
+  { id: "fonseca", nm: "Fonseca & Cavalcanti", tipo: "ARK", plano: "Gold", status: "gr", meta: "1 captação/mês · próxima fase", valor: 2500 },
+  { id: "vaca", nm: "Vaca Velha", tipo: "ARK", plano: "Gold", status: "gr", meta: "1 captação/mês", valor: 2000 },
   { id: "dom", nm: "Dom Baruka", tipo: "Alpha", plano: "Alpha Senior", status: "r", meta: "URGENTE · cardápio + iFood + bebidas" },
   { id: "stray", nm: "Stray House", tipo: "Alpha", plano: "Alpha Senior", status: "y", meta: "Recuperação · ROAS 5,08 · subir criativos" },
   { id: "cachu", nm: "Cachu Restaurante", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Ajustada · acompanhando ROAS" },
@@ -85,6 +86,24 @@ export const CLIENTES_BASE: ClienteInfo[] = [
 
 export const CLIENTES_NM: Record<string, string> =
   Object.fromEntries(CLIENTES_BASE.map((c) => [c.id, c.nm]));
+
+/* Financeiro em leitura: planilha do mês (wfa-planilha) + cobrança (wfa-cobranca).
+   Ações de cobrança (mensagem WhatsApp) continuam no V1 por decisão do Gabriel. */
+export type Financeiro = {
+  mesNome: string; receber: number; pagar: number; sobra: number;
+  cobranca: { nome: string; valor: number; cobrado: boolean }[];
+};
+
+export const FINANCEIRO_DEMO: Financeiro = {
+  mesNome: "Julho 2026", receber: 18700, pagar: 9800, sobra: 8900,
+  cobranca: [
+    { nome: "Vivenda", valor: 5500, cobrado: true },
+    { nome: "Sasse Gifts", valor: 4500, cobrado: true },
+    { nome: "Fercon", valor: 4200, cobrado: false },
+    { nome: "Fonseca & Cavalcanti", valor: 2500, cobrado: false },
+    { nome: "Vaca Velha", valor: 2000, cobrado: false },
+  ],
+};
 
 /* Briefing do Conselho de IA (wfa-conselho-briefings, escrito pelo agents-run) */
 export type Briefing = {
@@ -163,6 +182,7 @@ export function useArkData() {
   const [fila, setFila] = useState<Proposta[]>(FILA_DEMO);
   const [clientes, setClientes] = useState<ClienteInfo[]>(CLIENTES_BASE);
   const [briefings, setBriefings] = useState<Briefing[]>(BRIEFINGS_DEMO);
+  const [financeiro, setFinanceiro] = useState<Financeiro>(FINANCEIRO_DEMO);
 
   const aplicar = (st: any, member?: any) => {
     const tarefas: any[] = Array.isArray(st["wfa-tarefas"]) ? st["wfa-tarefas"] : [];
@@ -179,6 +199,35 @@ export function useArkData() {
           meta: String(c.meta || c.extra || ""),
         })),
     ]);
+    /* Financeiro: mês ativo da planilha + status de cobrança das mensalidades */
+    const plan: any = st["wfa-planilha"] || {};
+    const meses: any[] = Array.isArray(plan.meses) ? plan.meses : [];
+    const mes = meses.find((m) => m?.id === plan.ativo) || meses[0];
+    const cob: any = st["wfa-cobranca"] || {};
+    const mesKey = new Date().toISOString().slice(0, 7);
+    const soma = (arr: any[], f: string) => arr.reduce((a, x) => a + (Number(x?.[f]) || 0), 0);
+    if (mes || Object.keys(cob).length) {
+      const receitas: any[] = Array.isArray(mes?.receitas) ? mes.receitas : [];
+      const pagar: any[] = Array.isArray(mes?.pagar) ? mes.pagar : [];
+      const receber = soma(receitas, "valor");
+      const custos = soma(receitas, "custo") + soma(pagar, "valor");
+      const cobranca = [
+        ...CLIENTES_BASE.filter((c) => (c.valor || 0) > 0).map((c) => ({
+          nome: c.nm, valor: c.valor || 0,
+          cobrado: cob[c.id]?.cobradoMes === mesKey,
+        })),
+        ...Object.entries(cob)
+          .filter(([, v]: [string, any]) => v?._plan && (Number(v?._valor) || 0) > 0)
+          .map(([, v]: [string, any]) => ({
+            nome: String(v._nome || "Receita"), valor: Number(v._valor) || 0,
+            cobrado: v?.cobradoMes === mesKey,
+          })),
+      ].sort((a, b) => Number(a.cobrado) - Number(b.cobrado) || b.valor - a.valor);
+      setFinanceiro({
+        mesNome: String(mes?.nome || mesKey), receber, pagar: custos,
+        sobra: receber - custos, cobranca,
+      });
+    }
     const briefRaw: any[] = Array.isArray(st["wfa-conselho-briefings"]) ? st["wfa-conselho-briefings"] : [];
     if (briefRaw.length) {
       setBriefings(briefRaw.slice(0, 10).map((b) => ({
@@ -345,7 +394,7 @@ export function useArkData() {
 
   return {
     demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila, clientes, briefings,
-    concluirTarefa, criarTarefa, decidirProposta, jarvis,
+    financeiro, concluirTarefa, criarTarefa, decidirProposta, jarvis,
   };
 }
 

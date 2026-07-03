@@ -4,14 +4,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
-  Sparkles, Hexagon, Activity, BrainCircuit, Users, Inbox,
+  Sparkles, Hexagon, Activity, BrainCircuit, Users, Inbox, Wallet,
   ArrowLeft, Search, Bell, LayoutGrid,
 } from "lucide-react";
 import { CSS, spring, springSoft, easeApple } from "@/components/arkos/tokens";
 import { AGENTES, OPS_DEMO, useArkData, type Op } from "@/components/arkos/dados";
 import { AgentExpanded, Boot, MissaoOverlay } from "@/components/arkos/ui";
 import {
-  AgentesView, AprovacoesView, ClientesView, MemoriaView, MissaoView, OperacoesView,
+  AgentesView, AprovacoesView, ClientesView, FinanceiroView, MemoriaView, MissaoView, OperacoesView,
 } from "@/components/arkos/vistas";
 
 export const Route = createFileRoute("/os")({
@@ -34,6 +34,7 @@ const RAIL = [
   { id: "operacoes", Icon: Activity, label: "Operações" },
   { id: "aprovacoes", Icon: Inbox, label: "Aprovações" },
   { id: "agentes", Icon: Hexagon, label: "Agentes" },
+  { id: "financeiro", Icon: Wallet, label: "Financeiro" },
   { id: "memoria", Icon: BrainCircuit, label: "Memória" },
   { id: "clientes", Icon: Users, label: "Clientes" },
 ];
@@ -47,7 +48,7 @@ function ArkOS() {
   const [openAg, setOpenAg] = useState<string | null>(null);
   const {
     demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila: filaItens,
-    clientes, briefings: briefingsList, concluirTarefa, criarTarefa, decidirProposta, jarvis,
+    clientes, briefings: briefingsList, financeiro, concluirTarefa, criarTarefa, decidirProposta, jarvis,
   } = useArkData();
   const [missao, setMissao] = useState<{ q: string; resp: string | null } | null>(null);
 
@@ -89,7 +90,7 @@ function ArkOS() {
   const emDia = abertas > 0 ? Math.round(100 * (abertas - atrasadas) / abertas) : 100;
 
   return (
-    <div className="arkos" data-build="arkos-v3-20260703-c6">
+    <div className="arkos" data-build="arkos-v3-20260703-c7">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
@@ -170,6 +171,7 @@ function ArkOS() {
                     <AprovacoesView demo={demo} fila={filaItens} onDecidir={decidirProposta} />
                   )}
                   {nav === "agentes" && <AgentesView open={setOpenAg} />}
+                  {nav === "financeiro" && <FinanceiroView fin={financeiro} demo={demo} />}
                   {nav === "memoria" && (
                     <MemoriaView briefings={briefingsList} ops={ops.length ? ops : OPS_DEMO} />
                   )}

@@ -5,7 +5,7 @@ import { Activity, Check, Hexagon, PenLine, Plus } from "lucide-react";
 import { spring, easeApple } from "./tokens";
 import {
   AGENTES, TAREFAS_DEMO,
-  chipClass, type Briefing, type ClienteInfo, type Op, type Proposta, type TarefaLinha,
+  chipClass, type Briefing, type ClienteInfo, type Financeiro, type Op, type Proposta, type TarefaLinha,
 } from "./dados";
 import { AgentCard, Donut, Reveal, Spark } from "./ui";
 
@@ -318,6 +318,65 @@ export function MemoriaView({ briefings, ops }: { briefings: Briefing[]; ops: Op
               </div>
             ))}
           </div>
+        </div>
+      </Reveal>
+      <div style={{ height: 24 }} />
+    </>
+  );
+}
+
+const fmtBRL = (v: number) =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
+export function FinanceiroView({ fin, demo }: { fin: Financeiro; demo: boolean }) {
+  const pendentes = fin.cobranca.filter((c) => !c.cobrado);
+  return (
+    <>
+      <Reveal>
+        <div className="view-hero">
+          <div className="view-eyebrow">ARK OS · Financeiro</div>
+          <h1 className="view-h1">O caixa, sem mistério.<br /><span className="soft">Um mês de cada vez.</span></h1>
+          <p className="view-lead">
+            {fin.mesNome}: o que entra, o que sai e quem ainda não foi cobrado.
+            A mensagem de cobrança continua saindo pelo V1 por enquanto.
+            {demo ? " Modo demonstração." : ""}
+          </p>
+        </div>
+      </Reveal>
+      <Reveal delay={0.08}>
+        <div className="stat-strip">
+          <div className="stat-big">
+            <div className="n">{fmtBRL(fin.receber)}</div>
+            <div className="l">a receber no mês</div>
+          </div>
+          <div className="stat-big">
+            <div className="n">{fmtBRL(fin.pagar)}</div>
+            <div className="l">custos e pagamentos</div>
+          </div>
+          <div className="stat-big dark">
+            <div className="n">{fmtBRL(fin.sobra)}</div>
+            <div className="l">sobra do mês</div>
+          </div>
+        </div>
+      </Reveal>
+      <Reveal>
+        <div className="panel">
+          <div className="group-h">Cobrança do mês.<span className="count">{pendentes.length} pendente{pendentes.length === 1 ? "" : "s"}</span></div>
+          <table className="tt">
+            <tbody>
+              {fin.cobranca.map((c, i) => (
+                <motion.tr key={`${c.nome}-${i}`} initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                  transition={{ duration: 0.45, ease: easeApple, delay: 0.06 + i * 0.04 }}>
+                  <td className="t-name">{c.nome}</td>
+                  <td className="t-cli" style={{ fontVariantNumeric: "tabular-nums" }}>{fmtBRL(c.valor)}</td>
+                  <td style={{ textAlign: "right" }}>
+                    <span className={c.cobrado ? "chip ok" : "chip hold"}>{c.cobrado ? "cobrado" : "pendente"}</span>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </Reveal>
       <div style={{ height: 24 }} />
