@@ -1,0 +1,18 @@
+# Documentos do app SEMPRE revalidam (ETag/304): navegador nunca roda build velho.
+# Os assets com hash continuam cacheáveis para sempre por padrão.
+/workflowark
+  Cache-Control: no-cache, must-revalidate
+/workflowark.html
+  Cache-Control: no-cache, must-revalidate
+/propostas
+  Cache-Control: no-cache, must-revalidate
+/propostas.html
+  Cache-Control: no-cache, must-revalidate
+/contratos
+  Cache-Control: no-cache, must-revalidate
+/contratos.html
+  Cache-Control: no-cache, must-revalidate
+/comercial
+  Cache-Control: no-cache, must-revalidate
+/comercial.html
+  Cache-Control: no-cache, must-revalidate

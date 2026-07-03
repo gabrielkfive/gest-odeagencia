@@ -1410,7 +1410,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-1100 -->
+<!-- build AURA-DARK-OS-MIX 20260703-1200 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -9432,7 +9432,13 @@ function legDeTema(tema,cliente){
   if(t)t.focus();toast&&toast('Tema enviado pras Legendas ✍️');
 }
 async function wfaUploadFile(file){
+  // Arquivo grande em base64 + JSON congela a thread inteira (UI "sumia" durante o envio).
+  // Teto honesto + aviso do tamanho; acima disso o certo é link do Drive.
+  const MAX=15*1024*1024;
+  if(file.size>MAX){toast('⚠ Arquivo de '+(file.size/1048576).toFixed(1)+'MB. O teto é 15MB — pra vídeo grande, cola o link do Drive.');throw new Error('Arquivo acima de 15MB');}
+  if(file.size>2*1024*1024)toast('Enviando '+(file.size/1048576).toFixed(1)+'MB… a tela pode engasgar uns segundos.');
   const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(file);});
+  await new Promise(r=>setTimeout(r,30)); // deixa o toast pintar antes do stringify pesado
   return cloudCall('save',{action:'upload-file',filename:file.name,contentType:file.type||'application/octet-stream',dataBase64:b64});
 }
 async function vivGalImg(input,imgId){
