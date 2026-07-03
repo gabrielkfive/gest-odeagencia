@@ -1415,7 +1415,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-1400 -->
+<!-- build AURA-DARK-OS-MIX 20260703-1500 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -5431,7 +5431,7 @@ let state = {
   cobranca: JSON.parse(localStorage.getItem('wfa-cobranca')||'{}'),
   acerto: JSON.parse(localStorage.getItem('wfa-acerto')||'{}'),
   planilha: JSON.parse(localStorage.getItem('wfa-planilha')||'null'),
-  whatsapp: JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}'),
+  _wpp: null, // whatsapp: parse PREGUIÇOSO via getter abaixo (megabytes de conversas travavam o boot por segundos)
   notificacoes: JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]'),
   planejamento: JSON.parse(localStorage.getItem('wfa-planejamento')||'{}'),
   criativos: JSON.parse(localStorage.getItem('wfa-criativos')||'{}'),
@@ -5439,6 +5439,14 @@ let state = {
   currentSprint: null,
   currentCliente: null,
 };
+/* WhatsApp preguiçoso: o parse do estado inteiro das conversas (o maior blob do
+   localStorage) só acontece no PRIMEIRO uso real, nunca no caminho do primeiro paint. */
+Object.defineProperty(state,'whatsapp',{
+  get(){ if(this._wpp==null){ try{this._wpp=JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}');}catch(e){this._wpp={conversas:{}};} } return this._wpp; },
+  set(v){ this._wpp=v; },
+  configurable:true
+});
+
 
 function saveTarefas(){localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));renderTarefas();renderSprints();updateBadges();}
 function saveRegua(){localStorage.setItem('wfa-regua',JSON.stringify(state.regua));}
