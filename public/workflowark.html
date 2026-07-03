@@ -1415,7 +1415,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-1500 -->
+<!-- build AURA-DARK-OS-MIX 20260703-1600 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -3479,15 +3479,16 @@ function wfaSeedClientesV1(){
     const existentes=new Set(todos.map(c=>norm(c.nm)));
     const arr=loadClientesCustom().filter(c=>c.id!=='the-guste'&&norm(c.nm)!=='pizzariatheguste');
     // dedup do 4B: grafias Burger/Burguer/Burguers duplicavam; fica UMA, com o nome oficial
-    let viu4b=false;
+    let viu4b=false,limpou=false;const antesLen=arr.length;
     for(let i=0;i<arr.length;i++){const n4=norm(arr[i].nm);if(n4==='4bburguer'||n4==='4bburger'||n4==='4bburguers'){
-      if(viu4b){arr.splice(i,1);i--;}else{viu4b=true;arr[i].nm='4B Burguers';}
+      if(viu4b){arr.splice(i,1);i--;limpou=true;}else{viu4b=true;if(arr[i].nm!=='4B Burguers'){arr[i].nm='4B Burguers';limpou=true;}}
     }}
+    if(arr.length!==antesLen)limpou=true;
     arr.forEach(c=>{if(c.id==='cafe-lumiere')c.nm='Café Lumière';}); // corrige grafia do seed v2
     let add=0;
     novos.forEach(n=>{ if(!existentes.has(norm(n.nm))&&!arr.some(c=>c.id===n.id||norm(c.nm)===norm(n.nm))){ arr.push(n); add++; } });
     localStorage.setItem('wfa-seed-clientes-v4','1');
-    if(add){
+    if(add||limpou){
       saveClientesCustom(arr); // persiste, reconstrói CLIENTES, re-renderiza e sincroniza
       if(typeof fillClienteSelects==='function')fillClienteSelects();
       if(typeof toast==='function')toast('✓ '+add+' cliente(s) adicionado(s): '+novos.map(n=>n.nm).join(' · '));
@@ -5492,6 +5493,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
     if(p==='whatsapp'){try{wfaCarregarWhatsapp();}catch(e){} try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
+    if(p==='jornada'&&typeof renderSprints==='function'){try{renderSprints();}catch(e){}}
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
     document.querySelector('.view').scrollTo(0,0);
@@ -6392,6 +6394,12 @@ function acertoSeedFromFin(force){
    cliente novo (seed, botão + Novo cliente ou sync de outro usuário) nunca mais some. */
 function jornadaAutoInclui(){
   let mudou=false;
+  // remove ids orfaos (cliente que nao existe mais na carteira, ex.: 4B duplicado migrado)
+  SPRINTS.forEach(sp=>{
+    const antes=sp.clis.length;
+    sp.clis=sp.clis.filter(id=>(CLIENTES||[]).some(c=>c.id===id));
+    if(sp.clis.length!==antes)mudou=true;
+  });
   (CLIENTES||[]).forEach(c=>{
     if(!c||!c.id||c.id==='ark'||c.status==='churn')return;
     if(SPRINTS.some(sp=>sp.clis.includes(c.id)))return;
