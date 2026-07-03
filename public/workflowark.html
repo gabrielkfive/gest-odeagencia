@@ -1410,7 +1410,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-1000 -->
+<!-- build AURA-DARK-OS-MIX 20260703-1100 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -1930,7 +1930,7 @@ function wfaSetTheme(t){
               <span class="md-count">Google</span>
             </div>
             <div class="md-agwrap">
-              <iframe id="md-agenda-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
+              <iframe loading="lazy" id="md-agenda-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
             </div>
           </div>
         </div>
@@ -2741,8 +2741,8 @@ function wfaSetTheme(t){
           <button class="al-tab" data-comtab="contratos" onclick="comTab('contratos')">⚖️ Contratos</button>
         </div>
         <div id="com-embed" style="display:none">
-          <iframe id="com-if-propostas" data-src="/propostas.html" style="display:none;width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
-          <iframe id="com-if-contratos" data-src="/contratos.html" style="display:none;width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
+          <iframe loading="lazy" id="com-if-propostas" data-src="/propostas.html" style="display:none;width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
+          <iframe loading="lazy" id="com-if-contratos" data-src="/contratos.html" style="display:none;width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
         </div>
         <div id="comercial-mes-banner" class="alert yel" style="margin-bottom:12px;display:none">
           <h4>Mês anterior</h4>
@@ -3020,7 +3020,7 @@ function wfaSetTheme(t){
       <div class="page" id="page-reunioes">
         <div class="page-head"><div class="page-title"><h1>Reuniões · Google Agenda</h1><p>Agenda integrada da ARK Content · todas as reuniões e compromissos em tempo real.</p></div></div>
         <div id="gcal-wrap" style="height:calc(100vh - 140px);background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden">
-          <iframe id="gcal-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo" style="border:0;width:100%;height:100%" frameborder="0" scrolling="no"></iframe>
+          <iframe loading="lazy" id="gcal-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo" style="border:0;width:100%;height:100%" frameborder="0" scrolling="no"></iframe>
         </div>
       </div>
 
@@ -3413,17 +3413,19 @@ function wfaLimpezaConselhoV1(){
     }
   }catch(e){/* nunca derruba o boot */}
 }
-/* ===== SEED de clientes pedidos pelo Gabriel (16/06): 4B Burguer e Pizzaria Sabor e Lenha =====
+/* ===== SEED de clientes pedidos pelo Gabriel (16/06 + 03/07): 4B, Sabor e Lenha, The Guste e Café Lumiere =====
    Entram como clientes PERSONALIZADOS (editáveis pela interface e sincronizados). Roda PÓS-sync
    (dados já mesclados da nuvem) pra nunca sobrescrever a lista existente. Idempotente: não
    duplica se o cliente já existir (por nome) na base ou nos personalizados. valor=0 mantém
    fora da Cobrança até o Gabriel definir plano/valor no botão Editar. */
 function wfaSeedClientesV1(){
   try{
-    if(localStorage.getItem('wfa-seed-clientes-v1')==='1')return;
+    if(localStorage.getItem('wfa-seed-clientes-v2')==='1')return;
     const novos=[
       {id:'4b-burguer',nm:'4B Burguer',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Hamburgueria'},
       {id:'pizzaria-sabor-e-lenha',nm:'Pizzaria Sabor e Lenha',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Pizzaria'},
+      {id:'the-guste',nm:'Pizzaria The Guste',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Pizzaria'},
+      {id:'cafe-lumiere',nm:'Café Lumiere',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Cafeteria'},
     ];
     const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'').trim();
     const todos=(typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE);
@@ -3431,7 +3433,7 @@ function wfaSeedClientesV1(){
     const arr=loadClientesCustom();
     let add=0;
     novos.forEach(n=>{ if(!existentes.has(norm(n.nm))&&!arr.some(c=>c.id===n.id||norm(c.nm)===norm(n.nm))){ arr.push(n); add++; } });
-    localStorage.setItem('wfa-seed-clientes-v1','1');
+    localStorage.setItem('wfa-seed-clientes-v2','1');
     if(add){
       saveClientesCustom(arr); // persiste, reconstrói CLIENTES, re-renderiza e sincroniza
       if(typeof fillClienteSelects==='function')fillClienteSelects();
@@ -4069,7 +4071,7 @@ function iniciarAutoSync(){
             <details style="margin-bottom:8px">
               <summary style="cursor:pointer;font-size:12px;color:var(--mute);font-weight:600;padding:4px 0">Ver a planilha completa do Google</summary>
               <div id="fin-wrap" style="height:60vh;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px">
-                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml?widget=true&headers=false" style="border:0;width:100%;height:100%" frameborder="0"></iframe>
+                <iframe loading="lazy" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml?widget=true&headers=false" style="border:0;width:100%;height:100%" frameborder="0"></iframe>
               </div>
             </details>
           </div>
@@ -6582,7 +6584,7 @@ function mdwBody(w,B){
     if(!h)h='<div class="mdw-empty">Nada pendente. Dia livre 🎯</div>';
     return {body:h,count:(B.late.length+B.todayT.length+B.pend.length)||null};
   }
-  if(w.t==='agenda'){return {body:`<iframe class="mdw-agenda" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=0" scrolling="no"></iframe>`,count:'Google'};}
+  if(w.t==='agenda'){return {body:`<iframe loading="lazy" class="mdw-agenda" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=0" scrolling="no"></iframe>`,count:'Google'};}
   if(w.t==='nota'){const s=mdwLoad();return {body:`<textarea class="mdw-nota" placeholder="Escreva uma nota rápida..." oninput="mdwNotaSave(this.value)">${mdEsc(s.nota||'')}</textarea>`,count:null};}
   if(w.t==='whatsapp'){
     const conv=(state.whatsapp&&state.whatsapp.conversas)||{};
@@ -7200,7 +7202,7 @@ function renderTaskLista(){
     const prio=t.prio==='alta'?'🔴 Alta':t.prio==='baixa'?'🟢 Baixa':'🟡 Média';
     return `<tr class="tl-row" onclick="openTaskDetail('${t.id}')"><td class="tl-tt">${escapeHtml(t.title)}</td><td>${c?escapeHtml(c.nm):'—'}</td><td>${escapeHtml(t.resp||'—')}</td><td class="${late?'tl-late':''}">${late?'⚠ ':''}${dataFmt}</td><td>${prio}</td><td><span class="tl-pill tl-st-${t.status}">${taskStatusLabel(t.status)}</span></td></tr>`;
   }).join('');
-  document.getElementById('task-lista').innerHTML=`<table class="tl-table"><thead><tr><th>Tarefa</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:20px">Nenhuma tarefa.</td></tr>'}</tbody></table>`;
+  wfaSetHTML(document.getElementById('task-lista'),`<table class="tl-table"><thead><tr><th>Tarefa</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:20px">Nenhuma tarefa.</td></tr>'}</tbody></table>`);
 }
 function renderTaskCalendario(){
   const ts=taskFiltradas();
@@ -7220,7 +7222,7 @@ function renderTaskCalendario(){
     const items=(byDay[day]||[]).map(t=>{const late=t.data&&t.data<todayStr&&t.status!=='concluido';const cls=t.status==='concluido'?'done':late?'late':'';return `<div class="tcal-chip ${cls}" onclick="openTaskDetail('${t.id}')" title="${escapeHtml(t.title)}">${escapeHtml(t.title.slice(0,30))}</div>`;}).join('');
     cells+=`<div class="tcal-cell${isToday?' today':''}"><span class="tcal-num">${day}</span>${items}</div>`;
   }
-  document.getElementById('task-calendario').innerHTML=`<div class="tcal"><div class="tcal-head"><span>${monthName}</span><span style="font-size:12px;color:var(--mute)">${dated.length} com prazo</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`;
+  wfaSetHTML(document.getElementById('task-calendario'),`<div class="tcal"><div class="tcal-head"><span>${monthName}</span><span style="font-size:12px;color:var(--mute)">${dated.length} com prazo</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`);
 }
 function renderTaskPessoas(){
   const today=new Date().toISOString().split('T')[0];
@@ -7239,7 +7241,7 @@ function renderTaskPessoas(){
     const lista=arr.slice().sort((a,b)=>((a.data||'9999')<(b.data||'9999')?-1:1)).slice(0,6).map(t=>{const late=t.data&&t.data<today&&t.status!=='concluido';const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';return `<div class="tp-task ${late?'late':''}" onclick="openTaskDetail('${t.id}')"><span>${t.status==='concluido'?'✅ ':''}${escapeHtml(t.title.slice(0,38))}</span><span class="d">${late?'⚠ ':''}${dataFmt}</span></div>`;}).join('');
     return `<div class="tp-card"><div class="tp-head"><div class="tp-av">${initials(nm)}</div><div><div class="tp-nm">${escapeHtml(nm)}</div><div class="tp-sub">${ativos.length} ativas${atras?` · <span style="color:var(--red,#e0364f);font-weight:700">${atras} atrasada${atras>1?'s':''}</span>`:''}</div></div></div><div class="tp-bar">${seg('backlog','#bbb')}${seg('andamento','#ffd400')}${seg('aprovacao','#4a90ff')}${seg('concluido','#19b36b')}</div>${lista||'<div class="tp-sub">Sem tarefas</div>'}${arr.length>6?`<div class="tp-sub" style="margin-top:6px">+${arr.length-6} outras</div>`:''}</div>`;
   }).join('');
-  document.getElementById('task-pessoas').innerHTML=`<div class="tp-grid">${cards||'<div class="tp-sub">Nenhuma tarefa.</div>'}</div>`;
+  wfaSetHTML(document.getElementById('task-pessoas'),`<div class="tp-grid">${cards||'<div class="tp-sub">Nenhuma tarefa.</div>'}</div>`);
 }
 function renderTaskDashboard(){
   const today=new Date().toISOString().split('T')[0];
@@ -7270,7 +7272,7 @@ function renderTaskDashboard(){
   const WIPLIM=5;
   const wipRows=Object.entries(wip).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{const over=v>WIPLIM;return `<div class="db-row"><div class="db-lb" title="${escapeHtml(k)}">${escapeHtml(k)}</div><div class="db-track"><div class="db-fill" style="width:${Math.min(100,v/WIPLIM*100)}%;background:${over?'#e0364f':'#19b36b'}"></div></div><div class="db-val">${v}/${WIPLIM}${over?' ⚠':''}</div></div>`;}).join('');
   const wipCard=`<div class="db-card"><h3>Capacidade · WIP por pessoa <span style="font-size:11px;color:var(--mute);font-weight:500">(meta ${WIPLIM} em execução)</span></h3>${wipRows||'<div class="tp-sub">Ninguém em execução</div>'}</div>`;
-  document.getElementById('task-painel').innerHTML=kpis+`<div class="db-grid">${barBlock('Atividades por Função',porFuncao,'#ffd400')}${barBlock('Atividades por Membro',porMembro,'#111')}${barBlock('Atrasadas por Membro',atrasMembro,'#e0364f')}${wipCard}</div>`;
+  wfaSetHTML(document.getElementById('task-painel'),kpis+`<div class="db-grid">${barBlock('Atividades por Função',porFuncao,'#ffd400')}${barBlock('Atividades por Membro',porMembro,'#111')}${barBlock('Atrasadas por Membro',atrasMembro,'#e0364f')}${wipCard}</div>`);
 }
 function taskCard(t){
   const c=CLIENTES.find(x=>x.id===t.clienteId);
@@ -7341,11 +7343,19 @@ function taskDragAfterElement(list,y){
   },{offset:-Infinity,element:null}).element;
 }
 function bindDrag(){
+  // GUARDA ANTI-DUPLICAÇÃO: com a escrita calma os cards persistem entre renders,
+  // então bindDrag re-chamado empilhava listener em cima de listener (drag caótico).
+  // Cada elemento é atado UMA vez na vida (__dragBound).
   document.querySelectorAll('.task-card').forEach(c=>{
+    if(c.__dragBound)return;c.__dragBound=1;
     c.addEventListener('dragstart',e=>{e.dataTransfer.setData('id',c.dataset.tid);e.dataTransfer.effectAllowed='move';requestAnimationFrame(()=>c.classList.add('dragging'));});
-    c.addEventListener('dragend',e=>{c.classList.remove('dragging');document.querySelectorAll('.task-col.drop-on').forEach(x=>x.classList.remove('drop-on'));});
+    c.addEventListener('dragend',e=>{c.classList.remove('dragging');document.querySelectorAll('.task-col.drop-on').forEach(x=>x.classList.remove('drop-on'));
+      // o drag mexe no DOM por fora do render: invalida o cache pro próximo render repintar de verdade
+      document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});
+    });
   });
   document.querySelectorAll('.task-list').forEach(list=>{
+    if(list.__dragBound)return;list.__dragBound=1;
     const col=list.closest('.task-col')||list;
     list.addEventListener('dragover',e=>{
       e.preventDefault();e.dataTransfer.dropEffect='move';col.classList.add('drop-on');
@@ -8787,17 +8797,52 @@ async function jarvisRunActions(actions){
 }
 function jarvisFalar(txt){jarvisSpeak(String(txt||'').replace(/[#*_`]/g,''));}
 function jarvisMic(){
+  /* Turn-taking estilo ChatGPT (03/07): o modo antigo era tiro único e o Chrome
+     finaliza em QUALQUER pausa de respiração, então o JARVIS respondia antes de
+     o Gabriel terminar de falar. Agora: contínuo, acumula o que você fala, mostra
+     ao vivo no campo, e só envia depois de 1,8s de silêncio DE VERDADE.
+     Clicar de novo no meio envia na hora o que já foi dito. */
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){toast('Voz por microfone só no Chrome/Edge');return;}
   const btn=document.getElementById('jarvis-mic');
-  if(_jarvisRec){try{_jarvisRec.stop();}catch(e){}_jarvisRec=null;if(btn)btn.textContent='🎙️';return;}
+  const inp=document.getElementById('jarvis-input');
+  if(_jarvisRec){ // 2º clique: encerra e envia o que já tem
+    const parcial=(_jarvisRec.__buf||'').trim();
+    try{_jarvisRec.onend=null;_jarvisRec.stop();}catch(e){}
+    clearTimeout(_jarvisRec.__t); _jarvisRec=null;
+    if(btn)btn.textContent='🎙️';
+    if(inp)inp.placeholder=inp.__ph||inp.placeholder;
+    if(parcial)jarvisSend(parcial);
+    return;
+  }
   window.speechSynthesis.cancel();
-  _jarvisRec=new SR(); _jarvisRec.lang='pt-BR'; _jarvisRec.interimResults=false; _jarvisRec.maxAlternatives=1;
+  const rec=new SR(); _jarvisRec=rec;
+  rec.lang='pt-BR'; rec.continuous=true; rec.interimResults=true; rec.maxAlternatives=1;
+  rec.__buf='';
   if(btn)btn.textContent='🔴';
-  _jarvisRec.onresult=(e)=>{const t=e.results[0][0].transcript;jarvisSend(t);};
-  _jarvisRec.onerror=()=>{toast('Não captei o áudio, tenta de novo');};
-  _jarvisRec.onend=()=>{const b=document.getElementById('jarvis-mic');if(b)b.textContent='🎙️';_jarvisRec=null;};
-  try{_jarvisRec.start();}catch(e){}
+  if(inp){inp.__ph=inp.placeholder;inp.placeholder='Ouvindo… fala tranquilo, eu espero você terminar.';}
+  const enviar=()=>{
+    const t=(rec.__buf||'').trim();
+    try{rec.onend=null;rec.stop();}catch(e){}
+    clearTimeout(rec.__t); _jarvisRec=null;
+    if(btn)btn.textContent='🎙️';
+    if(inp){inp.placeholder=inp.__ph||'';inp.value='';}
+    if(t)jarvisSend(t);
+  };
+  rec.onresult=(e)=>{
+    let fin='',inter='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)fin+=e.results[i][0].transcript+' ';
+      else inter+=e.results[i][0].transcript;
+    }
+    if(fin)rec.__buf+=fin;
+    if(inp)inp.value=((rec.__buf||'')+inter).trim(); // você vê o que ele está entendendo
+    clearTimeout(rec.__t);
+    rec.__t=setTimeout(enviar,1800); // 1,8s de silêncio real = terminou a vez
+  };
+  rec.onerror=()=>{};
+  rec.onend=()=>{ if(_jarvisRec===rec){try{rec.start();}catch(e){}} }; // pausa longa não derruba o mic
+  try{rec.start();}catch(e){toast('Não consegui abrir o microfone');}
 }
 /* ===== MODO CONVERSA (mãos-livres, estilo JARVIS) =====
    Ouve contínuo, espera ~2,5s de silêncio depois que você para de falar, executa/responde,
@@ -9915,7 +9960,7 @@ function renderPlanilha(){
       <td style="border:1px solid var(--line);text-align:center;white-space:nowrap">${stBtn(pago,`planTogglePag(${i})`,'Pago','Pagar')}</td>
       <td style="border:1px solid var(--line);text-align:center;width:24px"><span onclick="planDelPag(${i})" title="apagar" style="cursor:pointer;color:var(--mute)">×</span></td>
     </tr>`;}).join('');
-  wrap.innerHTML=`
+  wfaSetHTML(wrap,`
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <strong style="font-size:15px;letter-spacing:-.02em">Minha Planilha</strong>
       <span style="font-size:11px;color:var(--mute)">edite clicando nas células · salva sozinho na nuvem · sincroniza com Cobranças e Acerto</span>
@@ -9952,7 +9997,7 @@ function renderPlanilha(){
         <div style="padding:8px 10px"><button class="tb-btn" onclick="planAddPag()">+ Pagamento</button></div>
       </div>
     </div>
-    <div id="plan-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px">${planSummaryHTML(m)}</div>`;
+    <div id="plan-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px">${planSummaryHTML(m)}</div>`);
 }
 function planRefreshSummary(){
   const m=planActive();const s=planSums(m);
