@@ -3,7 +3,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>WorkFlowArk · Sistema ARK Content</title>
 <link rel="icon" type="image/png" href="/ark-mark.png?v=2">
 <link rel="apple-touch-icon" href="/ark-mark.png?v=2">
@@ -219,7 +219,7 @@ html,body{letter-spacing:-.006em}
 .navitem.active::before{content:"";position:absolute;left:-4px;top:50%;transform:translateY(-50%);width:3px;height:16px;border-radius:3px;background:var(--yel)}
 .navitem.active svg{color:var(--yel-d)}
 .subitem.active{background:#f6f3e9}
-.topbar{backdrop-filter:saturate(1.2) blur(8px);background:rgba(255,255,255,.72);border-bottom:1px solid var(--line)}
+.topbar{backdrop-filter:saturate(1.2) blur(8px);-webkit-backdrop-filter:saturate(1.2) blur(8px);background:rgba(255,255,255,.72);border-bottom:1px solid var(--line)}
 .crumbs .here{letter-spacing:-.01em}
 .proc-hero::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,199,0,.5),transparent)}
 .proc-chip{border-radius:9px;letter-spacing:-.01em}
@@ -942,7 +942,7 @@ body.aura-light .aura-hero .ah-cards{display:grid;grid-template-columns:1fr 1fr;
 @media (max-width:640px){body.aura-dark .aura-hero .ah-cards{grid-template-columns:1fr}}
 body.aura-dark .ahc,
 body.aura-light .ahc{border-radius:16px;padding:16px 18px 14px;background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(6px)}
+  border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 body.aura-dark .ahc .top,
 body.aura-light .ahc .top{display:flex;align-items:center;gap:10px}
 body.aura-dark .ahc .ic,
@@ -1058,7 +1058,7 @@ body.aura-light .view{padding-top:52px;background:transparent}
 body.aura-light .cons-agente{background:#fff}
 .cons-chat{position:fixed;top:12px;right:12px;bottom:12px;width:min(400px,92vw);z-index:300;
   display:flex;flex-direction:column;border-radius:20px;border:1px solid rgba(255,255,255,.14);
-  background:rgba(12,13,17,.96);backdrop-filter:blur(26px) saturate(1.2);color:#eef0f3;
+  background:rgba(12,13,17,.96);backdrop-filter:blur(26px) saturate(1.2);-webkit-backdrop-filter:blur(26px) saturate(1.2);color:#eef0f3;
   box-shadow:0 40px 90px -30px rgba(0,0,0,.9);
   transform:translateX(calc(100% + 24px));transition:transform .45s cubic-bezier(.22,1,.36,1)}
 .cons-chat.open{transform:none}
@@ -1125,6 +1125,30 @@ body.aura-light .subitem.active svg{color:#131316;background:rgba(0,0,0,.14)}
 /* Textos do hero e do goal sempre claros (a regra global h1{color:var(--ink)} vencia no claro) */
 body.aura-light .aura-hero h1,body.aura-light .aura-hero .eyebrow,body.aura-light .aura-goal .gt,
 body.aura-light .aura-goal .gv,body.aura-light .aura-goal .donut-wrap .pct{color:#fff}
+
+/* ============ UNIFORMIDADE CROSS-BROWSER (auditoria Safari/iOS 03/07) ============ */
+/* iOS Safari: a barra de URL come ~60-100px do 100vh e corta o rodapé; dvh mede a área REAL */
+@supports (height:100dvh){
+  .app,.side,.main{height:100dvh}
+  .ah-present .ahd{min-height:100dvh}
+  #page-jarvis .jv-shell{height:calc(100dvh - 168px)}
+  #com-embed iframe{height:calc(100dvh - 210px)!important}
+}
+/* Modais com o fundo desfocado do ARK OS: a página inteira recua atrás do vidro,
+   e o modal chega com uma mola suave (mesma cara em todo navegador) */
+body.aura-dark .modal-bg,body.aura-light .modal-bg,
+body.aura-dark .crm-modal,body.aura-light .crm-modal{
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15)}
+body.aura-dark .modal-bg.open .modal,body.aura-light .modal-bg.open .modal,
+body.aura-dark .crm-modal.open .crm-mbox,body.aura-light .crm-modal.open .crm-mbox{
+  animation:osModalIn .42s cubic-bezier(.22,1,.36,1)}
+@keyframes osModalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  body.aura-dark .modal-bg.open .modal,body.aura-light .modal-bg.open .modal{animation:none}}
+/* Botões uniformes (padrão do print do ARK OS): mesma altura, mesmo raio, sem variação por tela */
+body.aura-dark .tb-btn,body.aura-light .tb-btn,body.aura-dark .icobtn,body.aura-light .icobtn{
+  min-height:34px;border-radius:980px;font-size:12.5px;font-weight:600;letter-spacing:-.01em}
 
 /* Scrollbar discreta no preto */
 body.aura-dark .view::-webkit-scrollbar{width:10px}
@@ -1361,7 +1385,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
 
 /* ============ SELETOR DE TEMA (Personalizar aparência) ============ */
 #wfa-aparencia{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.6);backdrop-filter:blur(6px)}
+  background:rgba(0,0,0,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #wfa-aparencia.open{display:flex}
 #wfa-aparencia .ap-box{width:min(520px,92vw);border-radius:22px;padding:26px;
   background:#101116;border:1px solid rgba(255,255,255,.12);color:#eef0f3;
@@ -1386,7 +1410,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-0800 -->
+<!-- build AURA-DARK-OS-MIX 20260703-0900 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -2210,7 +2234,7 @@ function wfaSetTheme(t){
           @keyframes ahfade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
           .ah-bar{position:fixed;top:0;left:0;height:4px;background:#ffc400;z-index:6010;transition:width .35s ease}
           .ah-navbar{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;
-            background:rgba(20,20,24,.86);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:9px 13px;z-index:6010}
+            background:rgba(20,20,24,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:9px 13px;z-index:6010}
           .ah-navbar button{width:40px;height:40px;border-radius:50%;background:#1c1c22;border:1px solid rgba(255,255,255,.12);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
           .ah-navbar button:hover{background:#ffc400;color:#000;border-color:#ffc400}
           .ah-navbar .ah-counter{font-family:'Sora',sans-serif;font-weight:700;color:#fff;font-size:14px;min-width:64px;text-align:center;letter-spacing:.06em}
@@ -6679,8 +6703,11 @@ function renderWidgets(){
   const s=mdwLoad();const B=mdwBuckets();
   board.classList.toggle('editing',MDW_EDIT);
   const eb=document.getElementById('mdw-edit-btn');if(eb)eb.textContent=MDW_EDIT?'✓ Pronto':'✎ Editar';
-  board.innerHTML=s.layout.map((w,i)=>mdwCard(i,w,B)).join('')||`<div class="mdw-empty" style="grid-column:1/-1;padding:40px">Sem widgets. Clique em <b>Adicionar</b>.</div>`;
-  mdwBindDrag();mdwTick();
+  // escrita calma: se nada mudou (dados iguais), NÃO repinta — o iframe da agenda
+  // parava de recarregar e os widgets paravam de "piscar" a cada sync
+  const _html=s.layout.map((w,i)=>mdwCard(i,w,B)).join('')||`<div class="mdw-empty" style="grid-column:1/-1;padding:40px">Sem widgets. Clique em <b>Adicionar</b>.</div>`;
+  if(wfaSetHTML(board,_html)){mdwBindDrag();}
+  mdwTick();
 }
 function mdwTick(){
   const t=document.querySelector('#mdw-board [data-clock]');if(!t)return;
@@ -6786,7 +6813,7 @@ function renderMeuDia(){
     if(todayT.length){html+='<div class="md-subhd">📅 Para hoje</div>'+todayT.map(t=>mdTaskRow('today',t)).join('');}
     if(pend.length){html+='<div class="md-subhd">➜ Próximas</div>'+pend.slice(0,8).map(t=>mdTaskRow('soon',t)).join('');}
     if(!html)html='<div class="md-empty">Nada pendente no seu nome. Dia livre — ou hora de puxar algo do time. 🎯</div>';
-    box.innerHTML=html;
+    wfaSetHTML(box,html); /* escrita calma: sem repintar se nada mudou */
   }
   const tc=document.getElementById('md-tasks-count');
   if(tc)tc.textContent=(late.length+todayT.length+pend.length);
@@ -7128,7 +7155,7 @@ function renderTarefas(){
         const p=(_pr[a.prio]??1)-(_pr[b.prio]??1); if(p)return p;
         return (a.data||'9999').localeCompare(b.data||'9999');
       });
-    list.innerHTML=filt.map(taskCard).join('')||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`;
+    wfaSetHTML(list,filt.map(taskCard).join('')||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`);
     document.getElementById('ct-'+st).textContent=filt.length;
   });
   // KPIs — "Ativas" = não concluídas (o total cru de 200+ assustava o time logo de cara)
@@ -8089,7 +8116,7 @@ function consAutoRender(){
   // mostra os de hoje primeiro; se não houver de hoje, mostra os mais recentes
   const list=(all.filter(b=>b.date===hoje).length?all.filter(b=>b.date===hoje):all).slice(0,12);
   if(!list.length){wrap.innerHTML='<div class="cons-empty">Os agentes ainda não debateram hoje.<br>Clique em <b>▶ Rodar conselho agora</b> — ou eles fazem isso sozinhos toda manhã.</div>';return;}
-  wrap.innerHTML='<div class="brf-grid">'+list.map(b=>`
+  wfaSetHTML(wrap,'<div class="brf-grid">'+list.map(b=>`
     <div class="brf">
       <div class="brf-top"><div class="cl">${b.doc?'📄 DOCUMENTO · ':''}${escapeHtml(b.cliente||'ARK')} · ${b.date===hoje?'hoje':escapeHtml(b.date||'')}${b.motivo?` · ${escapeHtml(b.motivo)}`:''}</div><div class="dc">${escapeHtml(b.decisao||'—')}</div></div>
       <div class="brf-body">
@@ -8109,7 +8136,7 @@ function consAutoRender(){
         ${b.doc?`<button onclick="consCopiarDoc('${b.id}')">Copiar documento</button>`:`<button onclick="consToggleDebate('${b.id}')">Ver debate</button>`}
         <button class="pri" onclick="document.querySelector('[data-nav=tarefas]').click()">Ver tarefas geradas</button>
       </div>
-    </div>`).join('')+'</div>';
+    </div>`).join('')+'</div>');
 }
 async function consRodarAuto(){
   const btn=document.getElementById('cons-run-btn');const st=document.getElementById('cons-status');
@@ -11551,6 +11578,18 @@ renderComercialMes();
 try{renderMeumes();}catch(e){console.warn('meumes boot',e);}
 try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
 
+/* ============ ESCRITA CALMA NO DOM (fluidez Apple) ============
+   O sync re-renderizava tudo a cada tick mesmo sem mudança: o iframe da agenda recarregava,
+   listas repintavam e animações re-disparavam ("saltando, pulando, reabrindo").
+   wfaSetHTML só toca o DOM quando o conteúdo REALMENTE mudou. */
+function wfaSetHTML(el,html){
+  if(!el)return false;
+  if(el.__wfaHtml===html)return false;
+  el.__wfaHtml=html;
+  el.innerHTML=html;
+  return true;
+}
+
 /* ============ CONSELHO DE IA: bancada + chat individual ============ */
 var CONS_AGENTES=[
   {id:'diretor',nm:'Diretor de Operações',fn:'prioriza o que gera receita',cor:'#ffc700'},
@@ -11778,7 +11817,7 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
   var _bl=document.body.classList;
   if(!_bl.contains('aura-dark')&&!_bl.contains('aura-light'))return;
   var raf=null;
-  document.addEventListener('mousemove',function(e){
+  document.addEventListener('pointermove',function(e){ /* pointer cobre mouse E toque (iOS) */
     var c=e.target.closest&&e.target.closest('.mdw,.kpi,.md-card');
     if(!c)return;
     if(raf)return;
