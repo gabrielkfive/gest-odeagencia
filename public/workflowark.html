@@ -1346,7 +1346,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-0400 -->
+<!-- build AURA-DARK-OS-MIX 20260703-0500 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -1490,14 +1490,15 @@ function wfaSetTheme(t){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
           <span>Régua dos 15</span>
         </div>
-        <div class="subitem" data-nav="comercial">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          <span>Comercial</span>
-        </div>
         <div class="subitem" data-nav="alpha">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="9" width="3" height="9"/><rect x="12" y="5" width="3" height="13"/><rect x="17" y="12" width="3" height="6"/></svg>
           <span>Squad Alpha</span>
         </div>
+      </div>
+
+      <div class="navitem" data-nav="comercial">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span>Comercial</span>
       </div>
 
       <div class="navitem" data-nav="tarefas">
@@ -2663,10 +2664,21 @@ function wfaSetTheme(t){
               <option value="2026-11">Nov 2026</option>
               <option value="2026-12">Dez 2026</option>
             </select>
-            <button class="tb-btn" onclick="window.open('/propostas','_blank')">⚡ Nova proposta</button>
-            <button class="tb-btn" onclick="window.open('/contratos','_blank')">⚖️ Novo contrato</button>
+            <button class="tb-btn" onclick="comTab('propostas')">⚡ Nova proposta</button>
+            <button class="tb-btn" onclick="comTab('contratos')">⚖️ Novo contrato</button>
             <button class="tb-btn" onclick="comercialSalvarMes()">Salvar dados do mês</button>
           </div>
+        </div>
+
+        <!-- Sub-abas do Comercial: Funil nativo + Propostas e Contratos (páginas do Estrategista embutidas) -->
+        <div class="al-tabbar" id="com-tabbar" style="margin:0 0 14px">
+          <button class="al-tab on" data-comtab="funil" onclick="comTab('funil')">Funil</button>
+          <button class="al-tab" data-comtab="propostas" onclick="comTab('propostas')">⚡ Propostas</button>
+          <button class="al-tab" data-comtab="contratos" onclick="comTab('contratos')">⚖️ Contratos</button>
+        </div>
+        <div id="com-embed" style="display:none">
+          <iframe id="com-if-propostas" data-src="/propostas.html" style="display:none;width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
+          <iframe id="com-if-contratos" data-src="/contratos.html" style="display:none;width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
         </div>
         <div id="comercial-mes-banner" class="alert yel" style="margin-bottom:12px;display:none">
           <h4>Mês anterior</h4>
@@ -11476,6 +11488,26 @@ renderAgenda();
 renderComercialMes();
 try{renderMeumes();}catch(e){console.warn('meumes boot',e);}
 try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
+
+/* Sub-abas do Comercial: Funil nativo ou Propostas/Contratos embutidos (iframe lazy, mesma origem) */
+function comTab(id){
+  var pg=document.getElementById('page-comercial');if(!pg)return;
+  document.querySelectorAll('#com-tabbar .al-tab').forEach(function(b){b.classList.toggle('on',b.dataset.comtab===id)});
+  var embed=document.getElementById('com-embed');
+  var funil=id==='funil';
+  /* esconde o conteúdo do funil sem tocar nele: tudo que não é cabeçalho, tabbar ou embed */
+  Array.prototype.forEach.call(pg.children,function(el){
+    if(el.classList.contains('page-head')||el.id==='com-tabbar'||el.id==='com-embed')return;
+    el.style.display=funil?'':'none';
+  });
+  embed.style.display=funil?'none':'';
+  ['propostas','contratos'].forEach(function(k){
+    var f=document.getElementById('com-if-'+k);
+    var ativo=(k===id);
+    f.style.display=ativo?'':'none';
+    if(ativo&&!f.src)f.src=f.dataset.src; /* carrega só na primeira abertura */
+  });
+}
 
 /* Lançar missão (ref ARK OS): o objetivo vira tarefa de alta prioridade no fluxo normal */
 function auraLancarMissao(inp){
