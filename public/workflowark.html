@@ -1415,7 +1415,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-1700 -->
+<!-- build AURA-DARK-OS-MIX 20260703-1800 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -3174,6 +3174,8 @@ const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
 const WFA_FIN_DEFAULT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml?widget=true&headers=false';
+var WFA_WPP_OFF=true; // WhatsApp DESLIGADO a pedido do Gabriel (03/07): some da sidebar,
+// do painel e de todo caminho de execução. Reversível: false religa. Dados intactos na nuvem.
 let WFA_CLOUD_READY = false;
 let WFA_CLOUD_MUTED = false;
 let WFA_MEMBER = null;
@@ -3247,6 +3249,7 @@ async function directCloudCall(action,payload){
    badges/resumo. O merge reusa o applyCloudState (mute + mescla). */
 let _wppCloudLoaded=false;
 async function wfaCarregarWhatsapp(){
+  if(WFA_WPP_OFF)return;
   if(_wppCloudLoaded)return;_wppCloudLoaded=true;
   try{
     const r=await cloudCall('load-key',{key:'wfa-whatsapp'});
@@ -3412,7 +3415,9 @@ function applyCloudState(remote){
   if(!wfaLocalAuth('wfa-cobranca'))state.cobranca=JSON.parse(localStorage.getItem('wfa-cobranca')||'{}');
   if(!wfaLocalAuth('wfa-acerto'))state.acerto=JSON.parse(localStorage.getItem('wfa-acerto')||'{}');
   if(!wfaLocalAuth('wfa-planilha'))state.planilha=JSON.parse(localStorage.getItem('wfa-planilha')||'null');
-  if(!wfaLocalAuth('wfa-whatsapp'))state.whatsapp=JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}');
+  // WhatsApp: so re-hidrata se o remoto realmente trouxe a chave (o load leve nao traz)
+  // e derruba o cache preguicoso em vez de parsear MBs a cada tique de sync
+  if(remote&&remote['wfa-whatsapp']!=null&&!wfaLocalAuth('wfa-whatsapp'))state._wpp=null;
   state.notificacoes=JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]');
   state.planejamento=JSON.parse(localStorage.getItem('wfa-planejamento')||'{}');
   state.criativos=JSON.parse(localStorage.getItem('wfa-criativos')||'{}');
@@ -3544,6 +3549,7 @@ async function bootCloudSync(){
     wfaLimpezaConselhoV1(); // limpeza única: tarefas do conselho/ressuscitadas -> Concluído
     wfaSeedClientesV1();     // clientes novos (1x, idempotente)
     wfaSeedRotinasV1();      // rotinas semanais da equipe (1x, idempotente)
+    if(WFA_WPP_OFF){try{document.querySelectorAll('[data-nav="whatsapp"]').forEach(el=>el.style.display='none');}catch(e){}}
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
     WFA_CLOUD_READY=false;
@@ -5488,6 +5494,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='jarvis'){try{jarvisPageEnter();}catch(e){} try{jvHudInit();}catch(e){console.warn('jvhud',e);}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
+    if(p==='whatsapp'&&WFA_WPP_OFF){try{document.querySelector('[data-nav="painel"]').click();}catch(e){}return;}
     if(p==='whatsapp'){try{wfaCarregarWhatsapp();}catch(e){} try{const _td=new Date().toISOString().split('T')[0];if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     if(p==='jornada'&&typeof renderSprints==='function'){try{renderSprints();}catch(e){}}
@@ -6694,6 +6701,7 @@ function mdwBody(w,B){
   if(w.t==='agenda'){return {body:`<iframe loading="lazy" class="mdw-agenda" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=0" scrolling="no"></iframe>`,count:'Google'};}
   if(w.t==='nota'){const s=mdwLoad();return {body:`<textarea class="mdw-nota" placeholder="Escreva uma nota rápida..." oninput="mdwNotaSave(this.value)">${mdEsc(s.nota||'')}</textarea>`,count:null};}
   if(w.t==='whatsapp'){
+    if(WFA_WPP_OFF)return {body:'<div class="muted" style="font-size:11.5px;padding:14px;text-align:center">WhatsApp desativado</div>',count:null};
     const conv=(state.whatsapp&&state.whatsapp.conversas)||{};
     const list=Object.values(conv).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
     const unread=list.filter(c=>c.unread).length;
@@ -10769,7 +10777,7 @@ function renderProcessos(){
 })();
 
 /* ============ WAR ROOM (cockpit operacional) ============ */
-const WR_TEMPS=[{k:'red',e:'🔴',l:'Crítico',o:0},{k:'yel',e:'🟡',l:'Atenção',o:1},{k:'grn',e:'🟢',l:'OK',o:2}];
+var WR_TEMPS=[{k:'red',e:'🔴',l:'Crítico',o:0},{k:'yel',e:'🟡',l:'Atenção',o:1},{k:'grn',e:'🟢',l:'OK',o:2}];
 function loadWarroom(){try{return JSON.parse(localStorage.getItem('wfa-warroom')||'{}');}catch(e){return {};}}
 function saveWarroom(o){try{localStorage.setItem('wfa-warroom',JSON.stringify(o||{}));}catch(e){}}
 function wrTempOrder(t){const x=WR_TEMPS.find(z=>z.k===t);return x?x.o:1;}
@@ -10791,6 +10799,7 @@ function wrSinais(c){
   return {abertas:abertas,atras:atras};
 }
 function renderWarroom(){
+  if(!WR_TEMPS){setTimeout(renderWarroom,150);return;} // boot pode chamar antes da definição (restore de aba)
   const board=document.getElementById('wr-board');if(!board)return;
   const o=loadWarroom();const list=(typeof CLIENTES!=='undefined'?CLIENTES.slice():[]);
   list.sort((a,b)=>{const ta=wrTempOrder((o[a.id]&&o[a.id].temp)||'grn');const tb=wrTempOrder((o[b.id]&&o[b.id].temp)||'grn');return ta-tb || String(a.nm).localeCompare(String(b.nm));});
