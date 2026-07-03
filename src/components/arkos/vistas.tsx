@@ -1,15 +1,71 @@
 // ArkOS: vistas (Mission Control, Operações, Agentes, Em breve), linguagem Apple
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Activity, Hexagon, PenLine } from "lucide-react";
+import { Activity, Check, Hexagon, PenLine, Plus } from "lucide-react";
 import { spring, easeApple } from "./tokens";
 import {
-  AGENTES, APROVACOES_DEMO, TAREFAS_DEMO, TAREFAS_DEMO_OPS,
+  AGENTES, APROVACOES_DEMO, TAREFAS_DEMO,
   chipClass, type Op, type TarefaLinha,
 } from "./dados";
 import { AgentCard, Donut, Reveal, Spark } from "./ui";
 
-export function OperacoesView({ demo, tarefas, fila }: { demo: boolean; tarefas: TarefaLinha[]; fila: number }) {
-  const lista = demo || !tarefas.length ? TAREFAS_DEMO_OPS : tarefas;
+type OperacoesProps = {
+  demo: boolean; tarefas: TarefaLinha[]; fila: number;
+  nomesCli: Record<string, string>;
+  onConcluir: (id: string) => void;
+  onCriar: (title: string, clienteId: string, data: string) => Promise<void>;
+};
+
+function NovaTarefa({ nomesCli, onCriar }: { nomesCli: Record<string, string>; onCriar: OperacoesProps["onCriar"] }) {
+  const hoje = new Date().toISOString().slice(0, 10);
+  const [title, setTitle] = useState("");
+  const [cli, setCli] = useState("ark");
+  const [data, setData] = useState(hoje);
+  const [salvando, setSalvando] = useState(false);
+  const enviar = async () => {
+    const t = title.trim();
+    if (!t || salvando) return;
+    setSalvando(true);
+    try { await onCriar(t, cli, data); setTitle(""); } finally { setSalvando(false); }
+  };
+  return (
+    <div className="composer">
+      <input className="c-title" value={title} placeholder="Nova tarefa. Ex.: revisar criativos do Cachu…"
+        onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") enviar(); }} />
+      <select className="c-sel" value={cli} onChange={(e) => setCli(e.target.value)} aria-label="Cliente">
+        {Object.entries(nomesCli).map(([id, nm]) => <option key={id} value={id}>{nm}</option>)}
+      </select>
+      <input className="c-date" type="date" value={data} onChange={(e) => setData(e.target.value)} aria-label="Prazo" />
+      <button className="c-add" onClick={enviar} disabled={salvando || !title.trim()}>
+        <Plus size={14} strokeWidth={2.4} style={{ marginRight: 5, verticalAlign: -2 }} />
+        {salvando ? "Salvando…" : "Adicionar"}
+      </button>
+    </div>
+  );
+}
+
+function LinhaTarefa({ t, i, onConcluir }: { t: TarefaLinha; i: number; onConcluir: (id: string) => void }) {
+  return (
+    <motion.tr layout initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+      exit={{ opacity: 0, x: 40, transition: { duration: 0.35, ease: easeApple } }}
+      transition={{ duration: 0.45, ease: easeApple, delay: 0.06 + i * 0.04 }}>
+      <td className="t-check">
+        <button className="chk" aria-label={`Concluir: ${t.tt}`} onClick={() => onConcluir(t.id)}>
+          <Check size={13} strokeWidth={3} />
+        </button>
+      </td>
+      <td className="t-name">{t.tt}</td>
+      <td className="t-cli hide-sm">{t.cc}</td>
+      <td><span className={chipClass(t.due)}>{t.due}</span></td>
+      <td style={{ textAlign: "right" }}><a className="tbtn" href="/app">Abrir</a></td>
+    </motion.tr>
+  );
+}
+
+export function OperacoesView({ demo, tarefas, fila, nomesCli, onConcluir, onCriar }: OperacoesProps) {
+  const lista = tarefas;
   const atrasadas = lista.filter((t) => t.due === "atrasada");
   const deHoje = lista.filter((t) => t.due === "hoje");
   const proximas = lista.filter((t) => t.due !== "atrasada" && t.due !== "hoje");
@@ -27,10 +83,14 @@ export function OperacoesView({ demo, tarefas, fila }: { demo: boolean; tarefas:
           <p className="view-lead">
             Cada tarefa da operação, agrupada pelo que importa: o que atrasou, o que é para hoje
             e o que vem a seguir.{fila > 0 ? ` E ${fila} proposta${fila === 1 ? "" : "s"} esperando o seu aval na fila.` : ""}
+            {demo ? " Modo demonstração: as ações valem só nesta tela." : ""}
           </p>
         </div>
       </Reveal>
-      <Reveal delay={0.08}>
+      <Reveal delay={0.06}>
+        <NovaTarefa nomesCli={nomesCli} onCriar={onCriar} />
+      </Reveal>
+      <Reveal delay={0.1}>
         <div className="stat-strip">
           <div className="stat-big dark">
             <div className="n">{atrasadas.length}</div>
@@ -52,21 +112,24 @@ export function OperacoesView({ demo, tarefas, fila }: { demo: boolean; tarefas:
             <div className="group-h">{g.h}<span className="count">{g.itens.length}</span></div>
             <table className="tt">
               <tbody>
-                {g.itens.map((t, i) => (
-                  <motion.tr key={`${g.id}-${i}`} initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                    transition={{ duration: 0.45, ease: easeApple, delay: 0.08 + i * 0.04 }}>
-                    <td className="t-name">{t.tt}</td>
-                    <td className="t-cli hide-sm">{t.cc}</td>
-                    <td><span className={chipClass(t.due)}>{t.due}</span></td>
-                    <td style={{ textAlign: "right" }}><a className="tbtn" href="/app">Abrir</a></td>
-                  </motion.tr>
-                ))}
+                <AnimatePresence initial={false}>
+                  {g.itens.map((t, i) => (
+                    <LinhaTarefa key={t.id || `${g.id}-${i}`} t={t} i={i} onConcluir={onConcluir} />
+                  ))}
+                </AnimatePresence>
               </tbody>
             </table>
           </div>
         </Reveal>
       ))}
+      {!lista.length && (
+        <Reveal>
+          <div className="empty-view" style={{ padding: "60px 6px 80px" }}>
+            <h1 className="view-h1" style={{ fontSize: 34 }}>Tudo em dia.</h1>
+            <p className="view-lead">Nenhuma tarefa aberta na operação agora.</p>
+          </div>
+        </Reveal>
+      )}
       <div style={{ height: 24 }} />
     </>
   );

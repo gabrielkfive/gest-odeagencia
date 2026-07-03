@@ -270,6 +270,33 @@ html:has(.arkos),body:has(.arkos){background:#E9EBF3; margin:0}
 .arkos .group-h .count{color:var(--dim); font-weight:600; font-size:15px; margin-left:10px}
 .arkos .empty-view{padding:110px 6px 140px; text-align:center}
 .arkos .empty-view .view-lead{margin:16px auto 0}
+
+/* compositor de nova tarefa (Operações) */
+.arkos .composer{display:flex; gap:10px; align-items:center; background:var(--card);
+  border-radius:18px; padding:10px 10px 10px 18px;
+  box-shadow:0 1px 2px rgba(22,24,29,.04); transition:box-shadow .25s}
+.arkos .composer:focus-within{box-shadow:0 0 0 2px var(--yel-soft), 0 10px 30px -16px rgba(255,199,0,.5)}
+.arkos .composer .c-title{flex:1; min-width:0; border:0; outline:0; background:none;
+  font-size:13.5px; font-family:var(--sans); color:var(--ink)}
+.arkos .composer .c-title::placeholder{color:var(--dim)}
+.arkos .composer .c-sel,.arkos .composer .c-date{border:0; outline:0; background:var(--bg);
+  border-radius:10px; padding:9px 12px; font-size:12px; font-family:var(--sans); color:var(--mute)}
+.arkos .composer .c-add{border:0; border-radius:12px; padding:10px 16px; font-size:12px; font-weight:600;
+  color:#131316; background:linear-gradient(180deg,#FFD84D,#E9AE00);
+  box-shadow:0 8px 20px -8px rgba(255,199,0,.55); transition:transform .18s, opacity .18s}
+.arkos .composer .c-add:hover{transform:translateY(-1px)}
+.arkos .composer .c-add:disabled{opacity:.45; transform:none; cursor:default}
+@media (max-width:760px){.arkos .composer{flex-wrap:wrap}
+  .arkos .composer .c-title{flex-basis:100%}}
+
+/* check de concluir tarefa */
+.arkos .tt .t-check{width:34px; padding-right:2px}
+.arkos .chk{width:22px; height:22px; border-radius:50%; border:1.5px solid var(--hair2);
+  background:none; display:grid; place-items:center; color:transparent;
+  transition:all .2s cubic-bezier(.25,.1,.25,1)}
+.arkos .chk:hover{border-color:var(--ok-ink); color:var(--ok-ink); background:rgba(61,217,164,.12);
+  transform:scale(1.08)}
+.arkos .chk:active{transform:scale(.92)}
 `;
 /* Física */
 export const spring = { type: "spring" as const, stiffness: 400, damping: 34, mass: 0.8 };

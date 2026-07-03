@@ -42,7 +42,7 @@ function ArkOS() {
   const [nav, setNav] = useState("missao");
   const [cmd, setCmd] = useState("");
   const [openAg, setOpenAg] = useState<string | null>(null);
-  const { demo, nome, stats, ops, tarefasTop, tarefasAll } = useArkData();
+  const { demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, concluirTarefa, criarTarefa } = useArkData();
   const [feed, setFeed] = useState<Op[]>([]);
   const feedIdx = useRef(0);
 
@@ -74,7 +74,7 @@ function ArkOS() {
   const emDia = abertas > 0 ? Math.round(100 * (abertas - atrasadas) / abertas) : 100;
 
   return (
-    <div className="arkos" data-build="arkos-v3-20260703-c2">
+    <div className="arkos" data-build="arkos-v3-20260703-c3">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
@@ -143,7 +143,10 @@ function ArkOS() {
                       tarefasTop={tarefasTop} feed={feed} reduced={!!reduced}
                       open={setOpenAg} verOperacoes={() => setNav("operacoes")} />
                   )}
-                  {nav === "operacoes" && <OperacoesView demo={demo} tarefas={tarefasAll} fila={fila} />}
+                  {nav === "operacoes" && (
+                    <OperacoesView demo={demo} tarefas={tarefasAll} fila={fila}
+                      nomesCli={nomesCli} onConcluir={concluirTarefa} onCriar={criarTarefa} />
+                  )}
                   {nav === "agentes" && <AgentesView open={setOpenAg} />}
                   {nav === "memoria" && (
                     <EmBreveView eyebrow="ARK OS · Memória" titulo="Tudo que o sistema aprendeu."
