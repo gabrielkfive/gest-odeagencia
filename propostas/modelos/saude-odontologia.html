@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARK Content × {{CLIENTE_NOME}} · Proposta Estratégica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --bg2:#111114; --panel:#16161a; --panel2:#1c1c20;
+  --ink:#f5f5f2; --muted:#9a9aa2; --faint:#5a5a62;
+  --rose:#feef02; --rose-soft:#e3d502;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --display:"Sora","Segoe UI",system-ui,sans-serif;
+  --body:"Inter","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+img{display:block;max-width:100%}
+
+/* progress + brand chrome */
+.progress{position:fixed;left:0;top:0;height:3px;background:var(--rose);width:0;z-index:90;box-shadow:0 0 18px rgba(254,239,2,.6);transition:width .12s linear}
+.brandmark{position:fixed;top:22px;left:30px;display:flex;align-items:center;gap:12px;z-index:80}
+.brandmark img{height:30px;width:auto;border-radius:6px}
+.brandmark .bm-tx{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.04em}
+.brandmark .bm-tx b{color:var(--rose)}
+@media screen and (max-width:640px){.brandmark{left:18px;top:16px}.brandmark .bm-tx{display:none}}
+
+/* page shell */
+.page{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:108px 8vw;border-bottom:1px solid var(--line);overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 90% -10%, rgba(254,239,2,.06), transparent 55%),
+    radial-gradient(90% 70% at -10% 110%, rgba(254,239,2,.04), transparent 55%),
+    var(--bg);
+}
+.page.alt{background:
+    radial-gradient(110% 80% at 8% -10%, rgba(254,239,2,.05), transparent 55%),
+    var(--bg2);}
+.page::after{content:"";position:absolute;inset:22px;border:1px solid var(--line);border-radius:16px;pointer-events:none}
+.wrap{max-width:1080px;width:100%;margin:0 auto;position:relative;z-index:2}
+.pg-no{position:absolute;bottom:38px;right:8vw;font-family:var(--display);font-size:12px;color:var(--faint);letter-spacing:.1em;z-index:3}
+.pg-no b{color:var(--ink)}
+
+/* typography */
+.kicker{font-family:var(--display);font-weight:600;letter-spacing:.3em;text-transform:uppercase;
+  font-size:12px;color:var(--rose);display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.kicker .dot{width:7px;height:7px;background:var(--rose);border-radius:50%}
+h1{font-family:var(--display);font-weight:800;line-height:1.02;letter-spacing:-.025em;font-size:clamp(40px,7vw,84px)}
+h2{font-family:var(--display);font-weight:700;line-height:1.06;letter-spacing:-.02em;font-size:clamp(30px,5vw,56px)}
+h3{font-family:var(--display);font-weight:700;line-height:1.12;letter-spacing:-.01em;font-size:clamp(22px,3vw,32px)}
+h4{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.2}
+p{color:var(--muted);font-size:clamp(15px,1.5vw,18px);line-height:1.65}
+.lead{color:var(--muted);font-size:clamp(16px,1.8vw,20px);line-height:1.6;max-width:66ch}
+.rose{color:var(--rose)}
+.ink{color:var(--ink)}
+strong{color:var(--ink);font-weight:600}
+.yl{width:64px;height:3px;background:var(--rose);margin:26px 0;border-radius:2px}
+
+/* pills / badges */
+.tag{display:inline-block;background:var(--rose);color:#111;font-family:var(--display);font-weight:700;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:6px 13px;border-radius:3px}
+
+/* cards / grids */
+.grid{display:grid;gap:22px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);
+  border-radius:16px;padding:30px;transition:border-color .25s,transform .25s}
+.card:hover{border-color:rgba(254,239,2,.35);transform:translateY(-4px)}
+.card.amb{border-color:rgba(254,239,2,.45);background:linear-gradient(160deg,rgba(254,239,2,.10),rgba(254,239,2,.01))}
+.card h4{margin-bottom:10px}
+.card p{font-size:15px}
+
+/* image frame (instagram-style window) */
+.frame{background:var(--panel2);border:1px solid var(--line2);border-radius:14px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.frame .cap{display:flex;align-items:center;gap:9px;padding:12px 16px;background:#202024;border-bottom:1px solid var(--line);
+  font-size:12.5px;color:var(--faint);font-family:var(--display);letter-spacing:.02em}
+.frame .cap .d{width:9px;height:9px;border-radius:50%;background:var(--rose);flex:none}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:18px}
+.stat{border-left:2px solid var(--rose);padding-left:20px}
+.stat .num{font-family:var(--display);font-weight:800;font-size:clamp(38px,5.5vw,62px);line-height:1;letter-spacing:-.03em}
+.stat .lbl{color:var(--muted);font-size:15px;margin-top:10px;line-height:1.4}
+
+/* lists */
+.clist{list-style:none}
+.clist li{position:relative;padding:11px 0 11px 24px;border-bottom:1px solid var(--line);color:var(--ink);font-size:15.5px}
+.clist li:last-child{border-bottom:none}
+.clist li::before{content:"";position:absolute;left:0;top:19px;width:7px;height:7px;background:var(--rose);border-radius:50%}
+.clist li span{color:var(--muted);display:block;font-size:13.5px;margin-top:3px}
+.checks{list-style:none}
+.checks li{display:flex;gap:12px;align-items:flex-start;padding:9px 0;color:var(--ink);font-size:15.5px}
+.checks li::before{content:"✓";color:var(--rose);font-weight:800;flex:none;margin-top:1px}
+
+/* quote block */
+.quote{border-left:3px solid var(--rose);padding:22px 30px;background:rgba(254,239,2,.05);border-radius:0 10px 10px 0;margin:34px 0}
+.quote p{font-family:var(--display);font-weight:700;color:var(--ink);font-size:clamp(19px,2.4vw,27px);line-height:1.3}
+.quote .by{color:var(--rose);font-family:var(--body);font-weight:600;font-size:14px;margin-top:12px;letter-spacing:.04em}
+
+/* step header number */
+.stepwrap{display:grid;grid-template-columns:84px 1fr;gap:38px;align-items:start}
+.stepbadge{width:68px;height:68px;border-radius:18px;background:var(--rose);color:#111;font-family:var(--display);
+  font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center}
+.ghostnum{position:absolute;right:5vw;top:50%;transform:translateY(-50%);font-family:var(--display);font-weight:800;
+  font-size:34vmin;color:rgba(255,255,255,.022);line-height:.8;z-index:1;pointer-events:none}
+@media screen and (max-width:820px){.stepwrap{grid-template-columns:1fr;gap:18px}.ghostnum{display:none}}
+
+/* cover */
+.cover{justify-content:center;text-align:center;align-items:center}
+.cover .logo{height:96px;width:auto;margin:0 auto 30px;border-radius:20px;filter:drop-shadow(0 10px 50px rgba(254,239,2,.18))}
+.cover .duo{display:flex;align-items:center;gap:16px;justify-content:center;font-family:var(--display);font-weight:700;
+  letter-spacing:.06em;font-size:14px;color:var(--muted);margin-bottom:30px}
+.cover .duo b{color:var(--ink)}
+.cover .duo .x{color:var(--rose);font-size:18px}
+.cover h1{max-width:17ch;margin:0 auto}
+.cover .sub{margin:26px auto 0;max-width:58ch;font-size:clamp(16px,1.9vw,20px);color:var(--muted)}
+.cover .meta{margin-top:42px;display:flex;gap:26px;justify-content:center;align-items:center;flex-wrap:wrap;color:var(--faint);font-size:13px;font-family:var(--display);letter-spacing:.04em}
+.cover .meta .s{width:1px;height:18px;background:var(--line2)}
+.cover .scroll{margin-top:54px;color:var(--faint);font-size:12px;letter-spacing:.2em;text-transform:uppercase;animation:bob 2s infinite}
+@keyframes bob{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(6px);opacity:1}}
+
+/* insta profile card */
+.ig-card{padding:30px 28px;background:var(--panel)}
+.ig-head{display:flex;align-items:center;gap:18px}
+.ig-head img{width:74px;height:74px;border-radius:50%;border:2px solid var(--rose);object-fit:cover}
+.ig-user{font-family:var(--display);font-weight:700;font-size:18px;color:var(--ink)}
+.ig-sub{color:var(--faint);font-size:13px;margin-top:2px}
+.ig-nums{display:flex;gap:26px;margin:20px 0 6px}
+.ig-nums b{font-family:var(--display);font-size:18px}
+.ig-nums span{color:var(--faint);font-size:13px}
+.ig-bio{color:var(--muted);font-size:13.5px;line-height:1.5;margin-top:10px}
+
+/* projection table */
+.ptable{width:100%;border-collapse:collapse;margin-top:10px}
+.ptable th{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:left;padding:14px 18px;border-bottom:1px solid var(--line2)}
+.ptable th.hl{color:var(--rose)}
+.ptable td{padding:16px 18px;border-bottom:1px solid var(--line);color:var(--muted);font-size:15.5px}
+.ptable td b{font-family:var(--display);font-size:20px;color:var(--ink);font-weight:700}
+.ptable td.hl b{color:var(--rose)}
+.ptable tr:last-child td{border-bottom:none}
+
+/* plans */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:20px;align-items:stretch}
+.plan{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);
+  border-radius:18px;padding:34px 28px;position:relative;display:flex;flex-direction:column}
+.plan.feat{border-color:var(--rose);background:linear-gradient(170deg,rgba(254,239,2,.12),rgba(254,239,2,.01));transform:translateY(-10px)}
+.plan.feat::before{content:"RECOMENDADO PARA A {{CLIENTE_CURTO_CAPS}}";position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  background:var(--rose);color:#111;font-family:var(--display);font-weight:700;font-size:9.5px;letter-spacing:.12em;
+  padding:5px 14px;border-radius:20px;white-space:nowrap}
+.plan .pn{font-family:var(--display);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:13px;color:var(--rose)}
+.plan .pt{font-family:var(--display);font-weight:800;font-size:26px;margin:8px 0 4px}
+.plan .pd{font-size:13.5px;color:var(--faint);min-height:54px}
+.plan .div{height:1px;background:var(--line);margin:22px 0}
+.plan .checks{flex:1}
+.plan .checks li{font-size:14px;padding:7px 0}
+.price-row{display:flex;align-items:baseline;gap:5px;margin-top:18px}
+.price-row .cur{font-family:var(--display);font-weight:600;font-size:16px;color:var(--muted)}
+.price-row .val{font-family:var(--display);font-weight:800;font-size:38px;letter-spacing:-.02em;color:var(--ink)}
+.plan.feat .price-row .val{color:var(--rose)}
+.price-row .per{font-size:14px;color:var(--faint)}
+.price-sub{font-size:12.5px;color:var(--muted);margin-top:8px}
+.price-sub b{color:var(--ink);font-weight:600}
+
+/* CTA */
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--rose);color:#111;font-family:var(--display);
+  font-weight:700;font-size:15px;letter-spacing:.03em;padding:17px 38px;border-radius:8px;text-decoration:none;
+  transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(254,239,2,.25)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+
+/* responsive */
+@media screen and (max-width:820px){.g2,.g3,.g4,.stats,.plans{grid-template-columns:1fr}.plan.feat{transform:none}
+  .page{padding:90px 7vw}.page::after{inset:12px}.pg-no{right:7vw}}
+.mt8{margin-top:8px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mt40{margin-top:40px}
+.center{text-align:center}.mxauto{margin-left:auto;margin-right:auto}
+.note{color:var(--faint);font-size:12.5px;line-height:1.5}
+
+/* ===== PRINT / PDF ===== */
+@page{size:1280px 800px;margin:0}
+@media print{
+  .progress,.scroll{display:none}
+  body{background:var(--bg)}
+  .page{width:1280px;height:800px;min-height:0;padding:64px 92px;border-bottom:none;
+    page-break-after:always;break-inside:avoid}
+  .page::after{inset:18px}
+  .wrap{max-width:1060px}
+  h1{font-size:62px} h2{font-size:42px} h3{font-size:28px}
+  p{font-size:14.5px}.lead{font-size:17px}.card p{font-size:13.5px}
+  .clist li{font-size:14px;padding:9px 0 9px 22px}.clist li span{font-size:12.5px}
+  .clist li::before{top:16px}
+  .checks li{font-size:14px;padding:7px 0}
+  .quote{margin:26px 0;padding:18px 26px}.quote p{font-size:22px}
+  .stat .num{font-size:54px}.stat .lbl{font-size:13.5px}
+  .card{padding:24px}
+  .ghostnum{font-size:300px}
+  .cover .logo{height:88px}
+  .pg-no{bottom:30px;right:92px}
+  .card:hover{transform:none}
+  .grid{gap:18px}.plans{gap:18px}
+  /* compactação da página de investimento */
+  #p16 h2{font-size:34px}
+  #p16 .kicker{margin-bottom:14px}
+  #p16 .yl{margin:16px 0}
+  #p16 .plans{margin-top:14px;gap:16px}
+  #p16 .plan{padding:20px 18px}
+  #p16 .plan.feat{transform:translateY(0)}
+  #p16 .plan .pt{font-size:19px}
+  #p16 .plan .pd{min-height:0;font-size:11.5px}
+  #p16 .price-row{margin-top:10px}
+  #p16 .price-row .val{font-size:27px}
+  #p16 .plan .div{margin:12px 0}
+  #p16 .plan .checks li{font-size:12px;padding:4px 0}
+  #p16 .card.amb{padding:14px 20px}
+  #p16 .card.amb p{font-size:12.5px}
+  #p16 .mt40{margin-top:16px}
+  #p16 .note{font-size:10.5px;margin-top:8px}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="brandmark"><img src="{{LOGO}}" alt="ARK"><span class="bm-tx">ARK <b>CONTENT</b> × {{CLIENTE_NOME_CAPS}}</span></div>
+
+<!-- 01 CAPA -->
+<section class="page cover" id="p1">
+  <div class="wrap">
+    <img class="logo" src="{{LOGO}}" alt="ARK Content">
+    <div class="duo"><b>ARK CONTENT</b> <span class="x">×</span> <b>{{CLIENTE_NOME_CAPS}}</b></div>
+    <h1>A {{CLIENTE_CURTO}} está pronta para ser <span class="rose">referência.</span></h1>
+    <p class="sub">Um plano completo de posicionamento, linha editorial, tráfego pago e captação audiovisual para transformar a presença digital da {{CLIENTE_CURTO}} em uma <strong>máquina previsível de novos pacientes.</strong></p>
+    <div class="meta"><span>PROPOSTA ESTRATÉGICA</span><span class="s"></span><span>PREPARADA PARA A {{CLIENTE_NOME_CAPS}}</span><span class="s"></span><span>{{MES_ANO_CAPS}}</span><span class="s"></span><span>CONFIDENCIAL</span></div>
+    <div class="scroll">role para começar ↓</div>
+  </div>
+  <div class="pg-no"><b>01</b> / 17</div>
+</section>
+
+<!-- 02 CARTA -->
+<section class="page alt" id="p2">
+  <div class="wrap" style="max-width:880px">
+    <div class="kicker"><span class="dot"></span> Uma palavra antes de tudo</div>
+    <h2>Isso aqui <span class="rose">não é</span> uma proposta padrão.</h2>
+    <div class="yl"></div>
+    <p class="lead">Antes de escrever uma linha, estudamos o Instagram da {{CLIENTE_CURTO}}: os posts, os vídeos, o ritmo, o que já está sendo construído. E encontramos algo que a maioria das clínicas não tem: <strong>uma marca com identidade e uma profissional que já entendeu que precisa aparecer.</strong></p>
+    <p class="lead mt24">O que falta não é esforço. É <span class="rose">direção</span>. Uma linha editorial profissional que transforme cada post em um passo rumo à agenda cheia, e não em mais uma publicação solta na vitrine.</p>
+    <p class="lead mt24">Esta proposta foi escrita para ser lida em poucos minutos, direto ao ponto, com números reais e um plano claro. Sem rodeios e sem depender de reunião.</p>
+    <div class="quote"><p>“A {{CLIENTE_CURTO}} não precisa de mais posts. Precisa de uma linha editorial que transforme presença em pacientes.”</p><div class="by">O ponto de partida desta proposta</div></div>
+  </div>
+  <div class="pg-no"><b>02</b> / 17</div>
+</section>
+
+<!-- 03 DIAGNOSTICO -->
+<section class="page" id="p3">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Diagnóstico · o ponto de partida</div>
+    <h2>Onde a {{CLIENTE_CURTO}} está <span class="rose">hoje.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g2 mt24" style="align-items:center">
+      <div>
+        <p class="lead">Uma clínica com estrutura pronta, marca com identidade definida e conteúdo próprio já em produção. A base existe. O que ainda não existe é o <strong>sistema</strong> que transforma essa base em captação.</p>
+        <ul class="clist mt24">
+          <li>Marca com identidade visual definida <span>Nome forte, estética premium e potencial claro de diferenciação na região.</span></li>
+          <li>Estrutura clínica pronta <span>Capacidade instalada para receber um volume bem maior de agendamentos.</span></li>
+          <li>Conteúdo próprio em produção <span>Cerca de {{IG_POSTS}} posts publicados, com a comunicação sendo feita por conta própria.</span></li>
+          <li>Sem linha editorial e sem tráfego <span>Publicações por inspiração, sem funil, sem CTAs e sem mídia paga estruturada.</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="frame">
+          <div class="cap"><span class="d"></span> instagram.com/{{CLIENTE_HANDLE}}</div>
+          <div class="ig-card">
+            <div class="ig-head">
+              <img src="{{CLIENTE_AVATAR}}" alt="{{CLIENTE_NOME}}">
+              <div>
+                <div class="ig-user">{{CLIENTE_HANDLE}}</div>
+                <div class="ig-sub">{{CLIENTE_NOME}} · Clínica odontológica</div>
+              </div>
+            </div>
+            <div class="ig-nums">
+              <div><b>{{IG_POSTS}}</b> <span>posts</span></div>
+              <div><b class="rose">{{IG_SEGUIDORES}}</b> <span>seguidores</span></div>
+              <div><b>{{IG_SEGUINDO}}</b> <span>seguindo</span></div>
+            </div>
+            <div class="ig-bio">Perfil ativo, com esforço real e recente. Exatamente o estágio em que a direção certa muda tudo.</div>
+          </div>
+        </div>
+        <div class="stats" style="grid-template-columns:1fr 1fr;margin-top:22px">
+          <div class="stat"><div class="num">{{IG_POSTS}}</div><div class="lbl">posts publicados por conta própria</div></div>
+          <div class="stat"><div class="num">{{IG_SEGUIDORES}}</div><div class="lbl">seguidores hoje, sem tráfego e sem linha editorial</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-no"><b>03</b> / 17</div>
+</section>
+
+<!-- 04 HONESTO -->
+<section class="page alt" id="p4">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> O diagnóstico honesto</div>
+    <h2>Esforço sem direção vira vitrine. <span class="rose">Não vira agenda.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Hoje, tudo o que a {{CLIENTE_CURTO}} publica depende do tempo e da inspiração de quem também precisa atender, gerir e cuidar da clínica. É o que acontece com 9 em cada 10 clínicas: <strong>conteúdo existe, captação não.</strong></p>
+    <div class="grid g2 mt40">
+      <div class="card"><h4 class="rose">Hoje · sem linha editorial</h4>
+        <ul class="checks mt16" style="opacity:.85">
+          <li>Posts por inspiração, sem pilares nem funil</li>
+          <li>Sem CTAs que levem ao agendamento</li>
+          <li>Audiência parada na casa dos {{IG_SEGUIDORES}} seguidores</li>
+          <li>Nenhum investimento estruturado em tráfego</li>
+          <li>Prova social invisível, sem rotina de depoimentos</li>
+          <li>Tempo da direção consumido pela comunicação</li>
+        </ul>
+      </div>
+      <div class="card amb"><h4 class="rose">Com o sistema ARK</h4>
+        <ul class="checks mt16">
+          <li>Calendário editorial mensal, cada post com propósito</li>
+          <li>Pilares de autoridade, prova, oferta e humanização</li>
+          <li>CTAs direcionando para WhatsApp e agendamento</li>
+          <li>Tráfego segmentado por CEP rodando todo mês</li>
+          <li>4 vídeos profissionais por mês, com direção</li>
+          <li>Direção da clínica focada no que só ela pode fazer: atender</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-bottom:0"><p>Postar por postar custa caro. Custa o tempo de quem posta e a agenda que <span class="rose">não enche.</span></p></div>
+  </div>
+  <div class="pg-no"><b>04</b> / 17</div>
+</section>
+
+<!-- 05 R$1900 -->
+<section class="page" id="p5">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Uma conversa honesta sobre investimento</div>
+    <h2>O barato que <span class="rose">sai caro.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Existem no mercado propostas de social media na faixa de <strong>R$ {{PRECO_CONCORRENTE}} por mês</strong>, e é justo dizer: há bons profissionais nesse formato. Mas uma pessoa sozinha, por melhor que seja, não tem como ser estrategista, roteirista, designer, videomaker e gestora de tráfego ao mesmo tempo.</p>
+    <div class="grid g2 mt40">
+      <div class="card"><h4 class="rose">O que o formato avulso entrega</h4>
+        <ul class="clist mt8">
+          <li>Posts padronizados a partir de modelos prontos</li>
+          <li>Artes genéricas, sem estratégia de funil</li>
+          <li>Nenhuma gestão de tráfego pago</li>
+          <li>Sem captação audiovisual profissional</li>
+          <li>Sem metas, sem relatório, sem projeção de pacientes</li>
+        </ul>
+      </div>
+      <div class="card amb"><h4 class="rose">O que a captação de pacientes exige</h4>
+        <ul class="clist mt8">
+          <li>Estrategista formado em publicidade e propaganda</li>
+          <li>Roteirista pensando cada vídeo e cada legenda</li>
+          <li>Gestor de tráfego otimizando campanhas toda semana</li>
+          <li>Equipe audiovisual captando conteúdo real da clínica</li>
+          <li>Account acompanhando tudo junto com a {{CLIENTE_CURTO}}, todo mês</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-bottom:0"><p>Investimento que não gera paciente não é economia. <span class="rose">É custo.</span></p></div>
+  </div>
+  <div class="pg-no"><b>05</b> / 17</div>
+</section>
+
+<!-- 06 BENCHMARK -->
+<section class="page alt" id="p6">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Benchmark de mercado</div>
+    <h2>As clínicas que crescem tratam o Instagram como <span class="rose">canal de aquisição.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Olhe para as marcas de odontologia que dominam o digital no Brasil. Nenhuma delas posta por postar: todas operam <strong>linha editorial, prova social e tráfego pago como um sistema</strong>, com equipe dedicada por trás.</p>
+    <div class="stats g4 mt40" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat"><div class="num rose">{{IG_SEGUIDORES}}</div><div class="lbl"><strong>{{CLIENTE_NOME}}</strong><br>{{IG_POSTS}} posts, comunicação por conta própria</div></div>
+      <div class="stat"><div class="num">32<span style="font-size:.45em">mil</span></div><div class="lbl"><strong>Sorrifácil</strong><br>1.545 posts com linha editorial</div></div>
+      <div class="stat"><div class="num">81<span style="font-size:.45em">mil</span></div><div class="lbl"><strong>Oral Sin Implantes</strong><br>951 posts orientados a captação</div></div>
+      <div class="stat"><div class="num">212<span style="font-size:.45em">mil</span></div><div class="lbl"><strong>OdontoCompany</strong><br>1.701 posts e mídia paga constante</div></div>
+    </div>
+    <div class="card amb mt40">
+      <h4 class="rose">O padrão escondido</h4>
+      <p class="mt8 ink">Nenhuma dessas marcas cresceu com alguém postando quando dava tempo. Todas operam o mesmo tripé: <strong>linha editorial profissional, prova social em escala e tráfego pago constante.</strong> É exatamente esse tripé que esta proposta instala na {{CLIENTE_CURTO}}.</p>
+    </div>
+    <p class="note mt16">Números públicos dos perfis no Instagram, coletados em {{MES_COLETA}}.</p>
+  </div>
+  <div class="pg-no"><b>06</b> / 17</div>
+</section>
+
+<!-- 07 CASE FABULA -->
+<section class="page" id="p7">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Case real · o método aplicado</div>
+    <h2>De 0 a 40 pacientes no <span class="rose">primeiro mês.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g2 mt24" style="align-items:center">
+      <div>
+        <span class="tag">Fábula Odontopediatria &amp; Ortodontia · Lago Sul, Brasília</span>
+        <p class="lead mt24">A Fábula chegou ao mercado sem pacientes e sem reconhecimento. Inaugurada no Lago Sul, uma das regiões mais competitivas de Brasília, precisava construir um posicionamento premium do zero e transformar visibilidade em <strong>agenda cheia desde o primeiro mês.</strong></p>
+        <ul class="checks mt24">
+          <li>Posicionamento e identidade premium antes da abertura</li>
+          <li>Linha editorial de autoridade, humanização e prova social</li>
+          <li>Tráfego segmentado por CEP com criativos de alta conversão</li>
+          <li>Captação audiovisual profissional desde o início</li>
+        </ul>
+      </div>
+      <div>
+        <div class="frame">
+          <div class="cap"><span class="d"></span> instagram.com/fabulaodonto</div>
+          <div class="ig-card">
+            <div class="ig-head">
+              <img src="data:image/jpeg;base64,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" alt="Fábula Odontopediatria">
+              <div>
+                <div class="ig-user">fabulaodonto</div>
+                <div class="ig-sub">Fábula Odontopediatria &amp; Ortodontia</div>
+              </div>
+            </div>
+            <div class="ig-nums">
+              <div><b>2.115</b> <span>posts</span></div>
+              <div><b class="rose">6.923</b> <span>seguidores</span></div>
+              <div><b>2.029</b> <span>seguindo</span></div>
+            </div>
+            <div class="ig-bio">Cliente ARK · perfil operado com linha editorial, prova social e tráfego.</div>
+          </div>
+        </div>
+        <div class="stats" style="grid-template-columns:1fr 1fr;margin-top:22px">
+          <div class="stat"><div class="num">0 <span style="font-size:.5em">→</span> 40</div><div class="lbl">pacientes no primeiro mês de operação</div></div>
+          <div class="stat"><div class="num">100<span style="font-size:.45em">%</span></div><div class="lbl">da agenda preenchida via estratégia digital</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-no"><b>07</b> / 17</div>
+</section>
+
+<!-- 08 TESE -->
+<section class="page alt" id="p8">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> A tese central</div>
+    <h2>O Instagram da {{CLIENTE_CURTO}} precisa parar de ser vitrine e virar <span class="rose">máquina de captação.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Muito além do visual: uma plataforma com função clara de negócio. Elevar percepção de valor, atrair pacientes qualificados e transformar seguidor em agendamento.</p>
+    <div class="grid g3 mt40">
+      <div class="card"><h4><span class="rose">01.</span> Bio reestruturada</h4><p class="mt8">Clareza imediata no diferencial da {{CLIENTE_CURTO}} e no caminho para agendar.</p></div>
+      <div class="card"><h4><span class="rose">02.</span> Destaques funcionais</h4><p class="mt8">Desenhados para o funil de agendamento, não para decoração.</p></div>
+      <div class="card"><h4><span class="rose">03.</span> Prova social em escala</h4><p class="mt8">Depoimentos e antes e depois em rotina fixa, não por acaso.</p></div>
+      <div class="card"><h4><span class="rose">04.</span> Feed padronizado</h4><p class="mt8">Consistência visual à altura da identidade premium da {{CLIENTE_CURTO}}.</p></div>
+      <div class="card"><h4><span class="rose">05.</span> CTAs incisivos</h4><p class="mt8">Todo conteúdo com direcionamento para WhatsApp e agendamento.</p></div>
+      <div class="card amb"><h4 class="rose">O resultado</h4><p class="mt8 ink">Um perfil que converte visita em conversa e conversa em <strong>consulta.</strong></p></div>
+    </div>
+  </div>
+  <div class="pg-no"><b>08</b> / 17</div>
+</section>
+
+<!-- 09 METODO -->
+<section class="page" id="p9" style="text-align:center;align-items:center">
+  <div class="wrap" style="max-width:860px">
+    <span class="tag">Método exclusivo</span>
+    <h1 class="mt24">O Método <span class="rose">ARK.</span></h1>
+    <div class="yl mxauto" style="margin-left:auto;margin-right:auto"></div>
+    <p class="lead mxauto" style="text-align:center">Quatro pilares operados por uma <strong>equipe integrada</strong>: estrategista, roteirista, gestor de tráfego, equipe audiovisual e account, todos na mesma mesa, olhando para a mesma meta. Não é um freelancer entregando posts. É um time inteiro cuidando da captação da {{CLIENTE_CURTO}}.</p>
+    <div class="grid g2 mt40" style="text-align:left">
+      <div class="card"><h4><span class="rose">01.</span> Planejamento Estratégico</h4><p class="mt8">Posicionamento, público, funil e metas mensais. Direção antes de execução.</p></div>
+      <div class="card"><h4><span class="rose">02.</span> Linha Editorial</h4><p class="mt8">4 a 6 vídeos e fotos mensais com propósito: autoridade, prova, oferta e humanização.</p></div>
+      <div class="card"><h4><span class="rose">03.</span> Tráfego Pago</h4><p class="mt8">Meta Ads segmentado por CEP para gerar leads qualificados toda semana.</p></div>
+      <div class="card"><h4><span class="rose">04.</span> Captação Audiovisual</h4><p class="mt8">4 vídeos profissionais por mês, com roteiro, direção, gravação e edição.</p></div>
+    </div>
+  </div>
+  <div class="pg-no"><b>09</b> / 17</div>
+</section>
+
+<!-- 10 PILAR 1 -->
+<section class="page alt" id="p10">
+  <span class="ghostnum">1</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">01</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 01 · Planejamento Estratégico</div>
+      <h3>Antes de crescer, direção.</h3>
+      <p class="lead mt16">Definição de posicionamento, público, personas, funil e metas mensais. Todo mês, um calendário editorial com temas, formatos e CTAs alinhados aos objetivos da clínica. <strong>Nada vai ao ar sem saber para que serve.</strong></p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>Posicionamento e diferenciação da {{CLIENTE_CURTO}}</li><li>Personas e funil de agendamento</li><li>Metas mensais de captação</li><li>Calendário editorial mensal completo</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Estrategista <span>Formado em publicidade e propaganda, dono da direção do plano.</span></li><li>Account dedicado <span>O elo diário entre a {{CLIENTE_CURTO}} e toda a equipe.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>“Todo crescimento começa com direção.”</p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>10</b> / 17</div>
+</section>
+
+<!-- 11 PILAR 2 -->
+<section class="page" id="p11">
+  <span class="ghostnum">2</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">02</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 02 · Linha Editorial</div>
+      <h3>Uma linha editorial profissional, não posts soltos.</h3>
+      <p class="lead mt16">Pilares de conteúdo estruturados: autoridade, prova social, oferta e humanização. De <strong>4 a 6 vídeos e fotos mensais</strong> com roteiro, copy, design e revisão incluídos, cada um com papel definido no funil de agendamento.</p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>4 a 6 vídeos e fotos mensais completos</li><li>Roteiros e legendas com propósito</li><li>Design consistente com a identidade {{CLIENTE_CURTO}}</li><li>Revisão e aprovação antes de ir ao ar</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Roteirista <span>Ganchos, roteiros e copy de cada peça.</span></li><li>Designer <span>Identidade premium aplicada ao feed.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>Cada conteúdo com um papel. Cada semana com <span class="rose">um objetivo.</span></p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>11</b> / 17</div>
+</section>
+
+<!-- 12 PILAR 3 -->
+<section class="page alt" id="p12">
+  <span class="ghostnum">3</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">03</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 03 · Tráfego Pago (Meta Ads)</div>
+      <h3>Tráfego que enche agenda, não que queima verba.</h3>
+      <p class="lead mt16">Gestão completa de campanhas Meta Ads com segmentação por CEP, remarketing e otimização semanal. <strong>4 criativos mensais</strong> desenhados para conversão em WhatsApp, com relatório mensal de leads, custo por lead e agendamentos gerados.</p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>Campanhas segmentadas no CEP alvo da {{CLIENTE_CURTO}}</li><li>4 criativos mensais de performance</li><li>Otimização semanal e remarketing</li><li>Relatório mensal com leads, CPL e agendamentos</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Gestor de tráfego <span>Campanhas, testes e otimização semanal.</span></li><li>Estrategista <span>Oferta e ângulo de cada campanha.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>Verba pequena com direção vence verba grande <span class="rose">sem estratégia.</span></p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>12</b> / 17</div>
+</section>
+
+<!-- 13 PILAR 4 -->
+<section class="page" id="p13">
+  <span class="ghostnum">4</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">04</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 04 · Captação Audiovisual</div>
+      <h3>Vídeo profissional todo mês, sem depender de inspiração.</h3>
+      <p class="lead mt16"><strong>4 vídeos profissionais por mês</strong> com roteiro, direção, gravação e edição. Um dia de gravação mensal na clínica constrói o acervo de conteúdo da {{CLIENTE_CURTO}} para feed, Reels e anúncios. Quem aparece, aparece com direção, sem improvisar sozinha.</p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>4 vídeos profissionais por mês</li><li>Roteiro e direção de gravação</li><li>Edição pronta para Reels e anúncios</li><li>Acervo crescente de conteúdo da marca</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Equipe audiovisual <span>Captação e edição profissional.</span></li><li>Roteirista <span>Gancho e roteiro de cada vídeo.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>Vídeo profissional é o novo <span class="rose">boca a boca.</span></p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>13</b> / 17</div>
+</section>
+
+<!-- 14 PROJECAO -->
+<section class="page alt" id="p14">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Viabilidade</div>
+    <h2>Retorno mensurável desde o primeiro ciclo de <span class="rose">30 dias.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g2 mt24" style="grid-template-columns:1.2fr 1fr;align-items:start">
+      <div class="card" style="padding:10px 6px">
+        <table class="ptable">
+          <tr><th>Projeção · mês 2 em diante</th><th>Conservador</th><th class="hl">Realista</th></tr>
+          <tr><td>Leads gerados / mês</td><td><b>50</b></td><td class="hl"><b>80</b></td></tr>
+          <tr><td>Consultas agendadas</td><td><b>20</b></td><td class="hl"><b>38</b></td></tr>
+          <tr><td>Novos pacientes / mês</td><td><b>14</b></td><td class="hl"><b>24</b></td></tr>
+          <tr><td>Receita estimada</td><td><b>R$ 14 mil</b></td><td class="hl"><b>R$ 30 mil</b></td></tr>
+        </table>
+      </div>
+      <div class="card"><h4 class="rose">Premissas do modelo</h4>
+        <ul class="clist mt8">
+          <li>Mídia recomendada <span>R$ 800 a R$ 1.200 por mês em Meta Ads.</span></li>
+          <li>Custo por lead <span>R$ 25 a R$ 60 (odontologia premium).</span></li>
+          <li>Conversão lead → consulta <span>30% a 50%.</span></li>
+          <li>Ticket médio <span>R$ 800 a R$ 3.000+ por procedimento.</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="note mt24">Projeções baseadas no histórico de clínicas atendidas pela ARK. Resultados dependem de investimento em mídia, sazonalidade e capacidade de atendimento da clínica.</p>
+  </div>
+  <div class="pg-no"><b>14</b> / 17</div>
+</section>
+
+<!-- 15 90 DIAS -->
+<section class="page" id="p15">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Como começa</div>
+    <h2>Os primeiros <span class="rose">90 dias.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g3 mt24">
+      <div class="card amb"><div class="tag">Semana 1 a 2</div><h4 class="mt16">Fundação</h4><ul class="clist mt8"><li>Onboarding e briefing completo</li><li>Planejamento estratégico</li><li>Calendário editorial do mês</li></ul></div>
+      <div class="card amb"><div class="tag">Semana 3 em diante</div><h4 class="mt16">Produção</h4><ul class="clist mt8"><li>Primeiro dia de gravação</li><li>Nova linha editorial no ar</li><li>Campanhas Meta Ads ativas</li></ul></div>
+      <div class="card amb"><div class="tag">Mês 2 a 3</div><h4 class="mt16">Tração</h4><ul class="clist mt8"><li>Otimização semanal de campanhas</li><li>Relatório mensal com leads e agendamentos</li><li>Primeiros pacientes rastreáveis via digital</li></ul></div>
+    </div>
+    <div class="card mt24" style="border-left:3px solid var(--rose)">
+      <h4 class="rose">O que precisamos da {{CLIENTE_CURTO}}</h4>
+      <p class="mt8 ink">Acesso ao Instagram e ao Meta Business Suite · 1 dia de gravação por mês · aprovação de conteúdo em até 24h · 1 reunião mensal de alinhamento. <strong>Só isso.</strong> Todo o resto é responsabilidade da equipe ARK.</p>
+    </div>
+  </div>
+  <div class="pg-no"><b>15</b> / 17</div>
+</section>
+
+<!-- 16 INVESTIMENTO -->
+<section class="page alt" id="p16">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Investimento</div>
+    <h2>Escolha o ritmo do <span class="rose">crescimento.</span></h2>
+    <div class="yl"></div>
+    <div class="plans mt24">
+      <div class="plan">
+        <div class="pn">Aceleração</div><div class="pt">Plano 3 meses</div>
+        <div class="pd">Para testar o método e validar os primeiros resultados.</div>
+        <div class="price-row"><span class="cur">R$</span><span class="val">{{PRECO_3M}}</span><span class="per">/mês</span></div>
+        <div class="price-sub">Total do período: <b>R$ {{TOTAL_3M}}</b></div>
+        <div class="div"></div>
+        <ul class="checks"><li>Os 4 pilares completos</li><li>4 a 6 vídeos e fotos mensais</li><li>4 vídeos profissionais / mês</li><li>Gestão de tráfego Meta Ads</li><li>Account e relatório mensal</li></ul>
+      </div>
+      <div class="plan feat">
+        <div class="pn">Crescimento</div><div class="pt">Plano 6 meses</div>
+        <div class="pd">Para consolidar posicionamento e escalar a captação.</div>
+        <div class="price-row"><span class="cur">R$</span><span class="val">{{PRECO_6M}}</span><span class="per">/mês</span></div>
+        <div class="price-sub">Total: <b>R$ {{TOTAL_6M}}</b> · economia de <b>R$ {{ECONOMIA_6M}}</b></div>
+        <div class="div"></div>
+        <ul class="checks"><li>Tudo do plano Aceleração</li><li>Tempo real para o método maturar</li><li>Otimização com histórico de dados</li><li>Posicionamento consolidado na região</li></ul>
+      </div>
+      <div class="plan">
+        <div class="pn">Autoridade</div><div class="pt">Plano 12 meses</div>
+        <div class="pd">Para construir autoridade de marca e liderança regional.</div>
+        <div class="price-row"><span class="cur">R$</span><span class="val">{{PRECO_12M}}</span><span class="per">/mês</span></div>
+        <div class="price-sub">Total: <b>R$ {{TOTAL_12M}}</b> · economia de <b>R$ {{ECONOMIA_12M}}</b></div>
+        <div class="div"></div>
+        <ul class="checks"><li>Tudo dos planos anteriores</li><li>Menor investimento mensal</li><li>Marca construída para durar</li><li>Referência regional em odontologia</li></ul>
+      </div>
+    </div>
+    <div class="card amb mt40">
+      <p class="ink">Para comparar: no plano de 12 meses, a diferença para uma social media avulsa de R$ {{PRECO_CONCORRENTE}} é de <strong>R$ {{DIFERENCA_MENSAL}} por mês</strong>. Por essa diferença, a {{CLIENTE_CURTO}} sai de uma pessoa fazendo posts para uma <span class="rose">equipe inteira</span>: estrategista, roteirista, gestor de tráfego, equipe audiovisual e account.</p>
+    </div>
+    <p class="note mt16">Valores referentes à gestão e produção ARK. O investimento em mídia paga (Meta Ads) é adicional, recomendado entre R$ 800 e R$ 1.200 por mês, e gerenciado pela ARK sem custo extra de gestão.</p>
+  </div>
+  <div class="pg-no"><b>16</b> / 17</div>
+</section>
+
+<!-- 17 CTA -->
+<section class="page" id="p17" style="text-align:center;align-items:center">
+  <div class="wrap" style="max-width:840px">
+    <span class="tag">Próximo passo</span>
+    <h1 class="mt24">Vamos encher a agenda da <span class="rose">{{CLIENTE_CURTO}}?</span></h1>
+    <div class="yl mxauto"></div>
+    <p class="lead mxauto" style="text-align:center">A marca existe, a estrutura está pronta e o esforço já começou. O que falta é o sistema que transforma tudo isso em pacientes. É exatamente isso que a ARK instala, com método e com equipe.</p>
+    <div class="mt40" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a class="btn" href="#">Aprovar proposta e começar</a>
+      <a class="btn ghost" href="#">Falar com a ARK no WhatsApp</a>
+    </div>
+    <div class="mt40" style="display:flex;gap:26px;justify-content:center;flex-wrap:wrap;color:var(--muted);font-size:14px;font-family:var(--display)">
+      <span>Semana 1 · Onboarding</span><span>Semana 2 · Planejamento</span><span>Semana 3 · Tudo no ar</span>
+    </div>
+    <p class="mt40 note" style="letter-spacing:.06em">ARK CONTENT · Marketing consultivo para saúde e odontologia<br>Proposta preparada exclusivamente para a {{CLIENTE_NOME}} · {{MES_ANO}} · Confidencial</p>
+  </div>
+  <div class="pg-no"><b>17</b> / 17</div>
+</section>
+
+<script>
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{const h=document.documentElement;const sc=h.scrollTop/(h.scrollHeight-h.clientHeight);prog.style.width=(sc*100)+'%';},{passive:true});
+// modo de verificação: ?page=N mostra só a página N
+const pp=new URLSearchParams(location.search).get('page');
+if(pp){document.querySelectorAll('.page').forEach((s,i)=>{if(i+1!==+pp)s.style.display='none';});}
+</script>
+</body>
+</html>
