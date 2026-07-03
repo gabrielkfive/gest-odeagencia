@@ -310,6 +310,13 @@ html:has(.arkos),body:has(.arkos){background:#E9EBF3; margin:0}
 .arkos .btn-ver{border:0; background:none; color:var(--dim); font-size:12px; font-weight:500; margin-left:auto}
 .arkos .btn-ver:hover{color:var(--ink)}
 
+/* cards de cliente (Clientes) */
+.arkos .cli .cli-orb{font-family:var(--disp); font-weight:700; font-size:15px}
+.arkos .cli .cli-dot{width:8px; height:8px; border-radius:50%; margin-left:auto; flex-shrink:0}
+.arkos .cli .cli-meta{font-size:11.5px; color:var(--mute); margin-top:12px; line-height:1.5;
+  min-height:34px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.arkos .cli .cli-chips{display:flex; gap:6px; margin-top:10px}
+
 /* check de concluir tarefa */
 .arkos .tt .t-check{width:34px; padding-right:2px}
 .arkos .chk{width:22px; height:22px; border-radius:50%; border:1.5px solid var(--hair2);

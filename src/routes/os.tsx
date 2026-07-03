@@ -10,7 +10,9 @@ import {
 import { CSS, spring, springSoft, easeApple } from "@/components/arkos/tokens";
 import { AGENTES, OPS_DEMO, useArkData, type Op } from "@/components/arkos/dados";
 import { AgentExpanded, Boot } from "@/components/arkos/ui";
-import { AgentesView, AprovacoesView, EmBreveView, MissaoView, OperacoesView } from "@/components/arkos/vistas";
+import {
+  AgentesView, AprovacoesView, ClientesView, MemoriaView, MissaoView, OperacoesView,
+} from "@/components/arkos/vistas";
 
 export const Route = createFileRoute("/os")({
   head: () => ({
@@ -43,7 +45,10 @@ function ArkOS() {
   const [nav, setNav] = useState("missao");
   const [cmd, setCmd] = useState("");
   const [openAg, setOpenAg] = useState<string | null>(null);
-  const { demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila: filaItens, concluirTarefa, criarTarefa, decidirProposta } = useArkData();
+  const {
+    demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila: filaItens,
+    clientes, briefings: briefingsList, concluirTarefa, criarTarefa, decidirProposta,
+  } = useArkData();
   const [feed, setFeed] = useState<Op[]>([]);
   const feedIdx = useRef(0);
 
@@ -75,7 +80,7 @@ function ArkOS() {
   const emDia = abertas > 0 ? Math.round(100 * (abertas - atrasadas) / abertas) : 100;
 
   return (
-    <div className="arkos" data-build="arkos-v3-20260703-c4">
+    <div className="arkos" data-build="arkos-v3-20260703-c5">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
@@ -154,12 +159,10 @@ function ArkOS() {
                   )}
                   {nav === "agentes" && <AgentesView open={setOpenAg} />}
                   {nav === "memoria" && (
-                    <EmBreveView eyebrow="ARK OS · Memória" titulo="Tudo que o sistema aprendeu."
-                      texto="A memória viva da ARK chega aqui na próxima fase da migração do V1." />
+                    <MemoriaView briefings={briefingsList} ops={ops.length ? ops : OPS_DEMO} />
                   )}
                   {nav === "clientes" && (
-                    <EmBreveView eyebrow="ARK OS · Clientes" titulo="Cada cliente, um universo."
-                      texto="Os painéis por cliente chegam aqui na próxima fase da migração do V1." />
+                    <ClientesView clientes={clientes} tarefas={tarefasAll} />
                   )}
                 </motion.div>
               </AnimatePresence>

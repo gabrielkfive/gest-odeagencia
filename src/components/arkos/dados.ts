@@ -61,13 +61,44 @@ export const TAREFAS_DEMO_OPS: TarefaLinha[] = [
 ];
 
 /* Clientes fixos do V1 (CLIENTES_BASE em public/workflowark.html); os custom vêm de
-   wfa-clientes-custom no estado. Necessário para traduzir clienteId em nome. */
-export const CLIENTES_NM: Record<string, string> = {
-  ark: "ARK Content", vivenda: "Vivenda", fercon: "Fercon", sasse: "Sasse Gifts",
-  fonseca: "Fonseca & Cavalcanti", vaca: "Vaca Velha", dom: "Dom Baruka",
-  stray: "Stray House", cachu: "Cachu Restaurante", babbo: "Babbo Giovanni",
-  brisa: "Brisa Doce Café",
+   wfa-clientes-custom no estado. status: gr = saudável, y = atenção, r = urgente. */
+export type ClienteInfo = {
+  id: string; nm: string; tipo: string; plano: string; status: string; meta: string;
 };
+
+export const CLIENTES_BASE: ClienteInfo[] = [
+  { id: "ark", nm: "ARK Content", tipo: "Interno", plano: "Interno", status: "gr", meta: "Marketing e operação da própria ARK" },
+  { id: "vivenda", nm: "Vivenda", tipo: "ARK", plano: "Plano X", status: "gr", meta: "Maior ticket · 3 captações/mês · prioritário" },
+  { id: "fercon", nm: "Fercon", tipo: "ARK", plano: "Gold", status: "gr", meta: "Ampliou · 2 captações/mês" },
+  { id: "sasse", nm: "Sasse Gifts", tipo: "ARK", plano: "Plano X", status: "gr", meta: "2 captações/mês" },
+  { id: "fonseca", nm: "Fonseca & Cavalcanti", tipo: "ARK", plano: "Gold", status: "gr", meta: "1 captação/mês · próxima fase" },
+  { id: "vaca", nm: "Vaca Velha", tipo: "ARK", plano: "Gold", status: "gr", meta: "1 captação/mês" },
+  { id: "dom", nm: "Dom Baruka", tipo: "Alpha", plano: "Alpha Senior", status: "r", meta: "URGENTE · cardápio + iFood + bebidas" },
+  { id: "stray", nm: "Stray House", tipo: "Alpha", plano: "Alpha Senior", status: "y", meta: "Recuperação · ROAS 5,08 · subir criativos" },
+  { id: "cachu", nm: "Cachu Restaurante", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Ajustada · acompanhando ROAS" },
+  { id: "babbo", nm: "Babbo Giovanni", tipo: "Alpha", plano: "Alpha Senior", status: "y", meta: "Em ajuste · tarefas on-demand" },
+  { id: "brisa", nm: "Brisa Doce Café", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Super saudável · onboarding/inauguração" },
+  { id: "attra", nm: "Attraversiamo Café", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Bombando · 1 captação/mês" },
+  { id: "4bburger", nm: "4B Burger", tipo: "ARK", plano: "Onboarding", status: "gr", meta: "Em onboarding" },
+  { id: "saborlenha", nm: "Pizzaria Sabor e Lenha", tipo: "ARK", plano: "Onboarding", status: "gr", meta: "Em onboarding" },
+];
+
+export const CLIENTES_NM: Record<string, string> =
+  Object.fromEntries(CLIENTES_BASE.map((c) => [c.id, c.nm]));
+
+/* Briefing do Conselho de IA (wfa-conselho-briefings, escrito pelo agents-run) */
+export type Briefing = {
+  id: string; cliente: string; date: string; decisao: string; plano: string[]; lido: boolean;
+};
+
+export const BRIEFINGS_DEMO: Briefing[] = [
+  { id: "bd1", cliente: "Vivenda", date: new Date().toISOString().slice(0, 10), lido: false,
+    decisao: "Concentrar julho no creme de ureia: captação dedicada, três Reels de prova social e mídia paga no público de recompra.",
+    plano: ["Captação do creme na fábrica com foco em textura", "Sequência de 3 Reels: antes/depois, bastidores, depoimento"] },
+  { id: "bd2", cliente: "Dom Baruka", date: new Date().toISOString().slice(0, 10), lido: true,
+    decisao: "Prioridade máxima no iFood: refazer fotos do cardápio e ativar cupom de primeira compra antes do fim de semana.",
+    plano: ["Sessão de fotos dos 8 pratos mais pedidos", "Cupom de 20% na primeira compra via iFood"] },
+];
 
 export const APROVACOES_DEMO = [
   { t: "Carrossel · 5 motivos para amassar o burger", s: "Cachu · Social Media", cor: "#FFD84D" },
@@ -130,12 +161,33 @@ export function useArkData() {
   const [tarefasAll, setTarefasAll] = useState<TarefaLinha[]>(TAREFAS_DEMO_OPS);
   const [nomesCli, setNomesCli] = useState<Record<string, string>>(CLIENTES_NM);
   const [fila, setFila] = useState<Proposta[]>(FILA_DEMO);
+  const [clientes, setClientes] = useState<ClienteInfo[]>(CLIENTES_BASE);
+  const [briefings, setBriefings] = useState<Briefing[]>(BRIEFINGS_DEMO);
 
   const aplicar = (st: any, member?: any) => {
     const tarefas: any[] = Array.isArray(st["wfa-tarefas"]) ? st["wfa-tarefas"] : [];
     const custom: any[] = Array.isArray(st["wfa-clientes-custom"]) ? st["wfa-clientes-custom"] : [];
     const nomes: Record<string, string> = { ...CLIENTES_NM };
     for (const c of custom) if (c?.id && c?.nm) nomes[String(c.id)] = String(c.nm);
+    setClientes([
+      ...CLIENTES_BASE,
+      ...custom
+        .filter((c) => c?.id && c?.nm)
+        .map((c) => ({
+          id: String(c.id), nm: String(c.nm), tipo: String(c.tipo || "Custom"),
+          plano: String(c.plano || ""), status: String(c.status || "gr"),
+          meta: String(c.meta || c.extra || ""),
+        })),
+    ]);
+    const briefRaw: any[] = Array.isArray(st["wfa-conselho-briefings"]) ? st["wfa-conselho-briefings"] : [];
+    if (briefRaw.length) {
+      setBriefings(briefRaw.slice(0, 10).map((b) => ({
+        id: String(b?.id || ""), cliente: String(b?.cliente || nomes[b?.clienteId] || "Cliente"),
+        date: String(b?.date || ""), decisao: String(b?.decisao || ""),
+        plano: Array.isArray(b?.plano) ? b.plano.map((x: any) => String(x)) : [],
+        lido: !!b?.lido,
+      })));
+    }
     const hoje = new Date().toISOString().slice(0, 10);
     const abertasArr = tarefas.filter(tarefaAberta);
     const atrasadas = abertasArr.filter((t) => (t.data || t.prazo) && String(t.data || t.prazo) < hoje).length;
@@ -268,7 +320,10 @@ export function useArkData() {
     }
   };
 
-  return { demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila, concluirTarefa, criarTarefa, decidirProposta };
+  return {
+    demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila, clientes, briefings,
+    concluirTarefa, criarTarefa, decidirProposta,
+  };
 }
 
 export function chipClass(due: string) {

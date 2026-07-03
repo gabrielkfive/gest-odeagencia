@@ -5,7 +5,7 @@ import { Activity, Check, Hexagon, PenLine, Plus } from "lucide-react";
 import { spring, easeApple } from "./tokens";
 import {
   AGENTES, TAREFAS_DEMO,
-  chipClass, type Op, type Proposta, type TarefaLinha,
+  chipClass, type Briefing, type ClienteInfo, type Op, type Proposta, type TarefaLinha,
 } from "./dados";
 import { AgentCard, Donut, Reveal, Spark } from "./ui";
 
@@ -216,6 +216,111 @@ export function AgentesView({ open }: { open: (id: string) => void }) {
       <div className="agents" style={{ paddingBottom: 24 }}>
         {AGENTES.map((a, i) => <AgentCard key={a.id} a={a} i={i} open={open} />)}
       </div>
+    </>
+  );
+}
+
+const SAUDE: Record<string, { cor: string; label: string }> = {
+  gr: { cor: "#0F8A61", label: "saudável" },
+  y: { cor: "#8A6200", label: "atenção" },
+  r: { cor: "#C2372F", label: "urgente" },
+};
+
+export function ClientesView({ clientes, tarefas }: { clientes: ClienteInfo[]; tarefas: TarefaLinha[] }) {
+  const conta = (nm: string) => {
+    const doCliente = tarefas.filter((t) => t.cc.startsWith(nm));
+    return { abertas: doCliente.length, atrasadas: doCliente.filter((t) => t.due === "atrasada").length };
+  };
+  return (
+    <>
+      <Reveal>
+        <div className="view-hero">
+          <div className="view-eyebrow">ARK OS · Clientes</div>
+          <h1 className="view-h1">Cada cliente, um universo.<br /><span className="soft">A carteira inteira à vista.</span></h1>
+          <p className="view-lead">
+            Saúde, plano e o que está aberto por cliente. O ponto colorido diz quem precisa
+            de você primeiro.
+          </p>
+        </div>
+      </Reveal>
+      <div className="agents" style={{ paddingBottom: 24 }}>
+        {clientes.map((c, i) => {
+          const s = SAUDE[c.status] || SAUDE.gr;
+          const n = conta(c.nm);
+          return (
+            <motion.div key={c.id} className="ag cli" initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-30px" }}
+              transition={{ duration: 0.5, ease: easeApple, delay: 0.03 * i }}
+              whileHover={{ y: -4, scale: 1.015, transition: spring }}>
+              <div className="ag-top">
+                <div className="orb cli-orb" style={{ color: s.cor }}>
+                  {c.nm.slice(0, 1).toUpperCase()}
+                </div>
+                <div>
+                  <div className="ag-name">{c.nm}</div>
+                  <div className="ag-role">{c.tipo}{c.plano ? ` · ${c.plano}` : ""}</div>
+                </div>
+                <span className="cli-dot" style={{ background: s.cor, boxShadow: `0 0 9px ${s.cor}` }} title={s.label} />
+              </div>
+              <div className="cli-meta">{c.meta}</div>
+              <div className="cli-chips">
+                <span className="chip ok">{n.abertas} aberta{n.abertas === 1 ? "" : "s"}</span>
+                {n.atrasadas > 0 && <span className="chip bad">{n.atrasadas} atrasada{n.atrasadas === 1 ? "" : "s"}</span>}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+export function MemoriaView({ briefings, ops }: { briefings: Briefing[]; ops: Op[] }) {
+  return (
+    <>
+      <Reveal>
+        <div className="view-hero">
+          <div className="view-eyebrow">ARK OS · Memória</div>
+          <h1 className="view-h1">Tudo que o sistema aprendeu.<br /><span className="soft">E decidiu por você.</span></h1>
+          <p className="view-lead">
+            Os briefings do Conselho de IA e a linha do tempo do que os agentes fizeram,
+            registrados para você nunca perder o fio.
+          </p>
+        </div>
+      </Reveal>
+      {briefings.map((b, i) => (
+        <Reveal key={b.id} delay={0.04 * i}>
+          <div className="panel prop">
+            <div className="prop-head">
+              <span className="prop-cli" style={{ background: CORES_AP[i % CORES_AP.length] }}>{b.cliente}</span>
+              <span className="prop-fmt">Conselho de IA{b.date ? ` · ${b.date.slice(8, 10)}/${b.date.slice(5, 7)}` : ""}</span>
+              {!b.lido && <span className="prop-fmt" style={{ color: "#8A6200", borderColor: "rgba(255,199,0,.5)" }}>novo</span>}
+            </div>
+            <div className="prop-tema">{b.decisao}</div>
+            {b.plano.length > 0 && (
+              <p className="prop-roteiro"><b>Plano.</b> {b.plano.join(" · ")}</p>
+            )}
+          </div>
+        </Reveal>
+      ))}
+      <Reveal>
+        <div className="panel">
+          <div className="group-h">Linha do tempo.</div>
+          <div style={{ marginTop: 8 }}>
+            {ops.map((o) => (
+              <div key={o.id} className="op">
+                <span className="op-dot" />
+                <div>
+                  <div className="who">{o.who}</div>
+                  <div className="what">{o.what}</div>
+                  <div className="when">{o.when}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Reveal>
+      <div style={{ height: 24 }} />
     </>
   );
 }
