@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gerador de Propostas · Estrategista Comercial ARK</title>
-<!-- build-propostas-20260703-0117 -->
+<!-- build-propostas-20260703-0140 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,6 +21,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15p
 .top .t{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.04em}
 .top .t b{color:var(--amarelo)}
 .top .badge{margin-left:auto;font-family:var(--display);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#111;background:var(--amarelo);padding:5px 12px;border-radius:999px;font-weight:700}
+.nav{display:flex;gap:4px;margin-left:26px}
+.nav a{font-family:var(--display);font-weight:600;font-size:12.5px;color:var(--muted);text-decoration:none;padding:7px 14px;border-radius:999px;border:1px solid transparent}
+.nav a:hover{color:var(--ink);border-color:var(--line2)}
+.nav a.on{color:#111;background:var(--amarelo)}
+@media(max-width:900px){.nav{display:none}}
 .shell{display:grid;grid-template-columns:420px 1fr;gap:0;height:calc(100vh - 67px)}
 .form{padding:26px 28px;overflow-y:auto;border-right:1px solid var(--line)}
 h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em;margin-bottom:4px}
@@ -52,7 +57,12 @@ button:hover{transform:translateY(-1px)}
 <body>
 <div class="top">
   <img src="/ark-logo.png" alt="ARK">
-  <span class="t">ARK <b>CONTENT</b> · Gerador de Propostas</span>
+  <span class="t">ARK <b>CONTENT</b> · Comercial</span>
+  <nav class="nav">
+    <a href="/comercial">Visão geral</a>
+    <a href="/propostas" class="on">Propostas</a>
+    <a href="/contratos">Contratos</a>
+  </nav>
   <span class="badge">Estrategista Comercial</span>
 </div>
 <div class="shell">

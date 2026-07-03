@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comercial · Estrategista Comercial ARK</title>
+<!-- build-comercial-20260703-A -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --panel:#16161a; --ink:#f5f5f2; --muted:#9a9aa2; --faint:#5a5a62;
+  --amarelo:#feef02; --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --display:"Sora",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
+.top{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--line)}
+.top img{height:30px;border-radius:6px}
+.top .t{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.04em}
+.top .t b{color:var(--amarelo)}
+.nav{display:flex;gap:4px;margin-left:26px}
+.nav a{font-family:var(--display);font-weight:600;font-size:12.5px;color:var(--muted);text-decoration:none;padding:7px 14px;border-radius:999px;border:1px solid transparent}
+.nav a:hover{color:var(--ink);border-color:var(--line2)}
+.nav a.on{color:#111;background:var(--amarelo)}
+.top .badge{margin-left:auto;font-family:var(--display);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#111;background:var(--amarelo);padding:5px 12px;border-radius:999px;font-weight:700}
+.wrap{max-width:1000px;margin:0 auto;padding:56px 28px}
+.kicker{font-family:var(--display);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:11px;color:var(--amarelo);margin-bottom:14px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,4.5vw,44px);letter-spacing:-.02em;line-height:1.08}
+.lead{color:var(--muted);font-size:16px;max-width:64ch;margin-top:14px}
+.funil{display:flex;gap:10px;align-items:center;margin:34px 0 8px;flex-wrap:wrap;font-family:var(--display);font-weight:600;font-size:13px}
+.funil .et{border:1px solid var(--line2);border-radius:999px;padding:8px 18px;color:var(--muted)}
+.funil .et.on{border-color:var(--amarelo);color:var(--amarelo)}
+.funil .seta{color:var(--faint)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:26px}
+.card{display:block;background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);border-radius:18px;padding:30px;text-decoration:none;color:var(--ink);transition:border-color .2s,transform .2s}
+.card:hover{border-color:rgba(254,239,2,.5);transform:translateY(-3px)}
+.card .ic{font-size:30px}
+.card h2{font-family:var(--display);font-weight:700;font-size:20px;margin:12px 0 6px}
+.card p{color:var(--muted);font-size:13.5px}
+.card .go{display:inline-block;margin-top:16px;font-family:var(--display);font-weight:700;font-size:13px;color:var(--amarelo)}
+.card.em-breve{opacity:.55;pointer-events:none}
+.nota{margin-top:34px;border-left:3px solid var(--amarelo);background:rgba(254,239,2,.05);border-radius:0 10px 10px 0;padding:16px 22px;color:var(--muted);font-size:13.5px}
+.nota b{color:var(--ink)}
+@media(max-width:760px){.cards{grid-template-columns:1fr}.nav{display:none}}
+</style>
+</head>
+<body>
+<div class="top">
+  <img src="/ark-logo.png" alt="ARK">
+  <span class="t">ARK <b>CONTENT</b> · Comercial</span>
+  <nav class="nav">
+    <a href="/comercial" class="on">Visão geral</a>
+    <a href="/propostas">Propostas</a>
+    <a href="/contratos">Contratos</a>
+  </nav>
+  <span class="badge">Estrategista Comercial</span>
+</div>
+<div class="wrap">
+  <div class="kicker">Estrategista Comercial · Central de Agentes</div>
+  <h1>Do primeiro contato à <span style="color:var(--amarelo)">assinatura.</span></h1>
+  <p class="lead">As ferramentas comerciais da ARK num lugar só. Cada etapa do funil tem a sua: a proposta convence, o contrato fecha.</p>
+
+  <div class="funil">
+    <span class="et">Ativar</span><span class="seta">→</span>
+    <span class="et on">Cotar · Proposta</span><span class="seta">→</span>
+    <span class="et on">Fechar · Contrato</span><span class="seta">→</span>
+    <span class="et">Operar</span>
+  </div>
+
+  <div class="cards">
+    <a class="card" href="/propostas">
+      <div class="ic">⚡</div>
+      <h2>Gerador de Propostas</h2>
+      <p>Proposta premium de 17 páginas na IDV da ARK: diagnóstico com dados reais do Instagram, benchmark, case, método, projeção e planos. Preview ao vivo e PDF em 1 clique.</p>
+      <span class="go">Criar proposta →</span>
+    </a>
+    <a class="card" href="/contratos">
+      <div class="ic">⚖️</div>
+      <h2>Gerador de Contratos</h2>
+      <p>Contrato de prestação de serviços com as blindagens dos modelos mais recentes, variação por segmento (gastronomia, advocacia com OAB, saúde), fundo preto com logo. PDF e DOCX.</p>
+      <span class="go">Criar contrato →</span>
+    </a>
+  </div>
+
+  <div class="nota">
+    <b>Como se divide:</b> a <b>proposta</b> nasce aqui com os dados do cliente e vira PDF pro decisor. Fechou? O <b>contrato</b> sai no mesmo lugar, já com valor, vigência e segmento certos. Propostas salvas como modelo ficam no repositório (pasta <b>propostas/</b>), e os PDFs enviados vão pro Drive como documento comercial.
+  </div>
+</div>
+</body>
+</html>
