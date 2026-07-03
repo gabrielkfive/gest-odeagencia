@@ -4,14 +4,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
-  Sparkles, Hexagon, Activity, BrainCircuit, Users, Inbox, Wallet,
+  Sparkles, Hexagon, Activity, BrainCircuit, Users, Inbox, Wallet, Presentation,
   ArrowLeft, Search, Bell, LayoutGrid,
 } from "lucide-react";
 import { CSS, spring, springSoft, easeApple } from "@/components/arkos/tokens";
 import { AGENTES, OPS_DEMO, useArkData, type Op } from "@/components/arkos/dados";
 import { AgentExpanded, Boot, MissaoOverlay } from "@/components/arkos/ui";
 import {
-  AgentesView, AprovacoesView, ClientesView, FinanceiroView, MemoriaView, MissaoView, OperacoesView,
+  AgentesView, AprovacoesView, ClientesView, FinanceiroView, MemoriaView, MeuMesView,
+  MissaoView, OperacoesView,
 } from "@/components/arkos/vistas";
 
 export const Route = createFileRoute("/os")({
@@ -37,6 +38,7 @@ const RAIL = [
   { id: "financeiro", Icon: Wallet, label: "Financeiro" },
   { id: "memoria", Icon: BrainCircuit, label: "Memória" },
   { id: "clientes", Icon: Users, label: "Clientes" },
+  { id: "meumes", Icon: Presentation, label: "Meu Mês" },
 ];
 
 /* ARK OS */
@@ -90,7 +92,7 @@ function ArkOS() {
   const emDia = abertas > 0 ? Math.round(100 * (abertas - atrasadas) / abertas) : 100;
 
   return (
-    <div className="arkos" data-build="arkos-v3-20260703-c7">
+    <div className="arkos" data-build="arkos-v3-20260703-c8">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
@@ -172,6 +174,11 @@ function ArkOS() {
                   )}
                   {nav === "agentes" && <AgentesView open={setOpenAg} />}
                   {nav === "financeiro" && <FinanceiroView fin={financeiro} demo={demo} />}
+                  {nav === "meumes" && (
+                    <MeuMesView demo={demo} concluidasMes={stats.concluidasMes}
+                      aprovadasMes={stats.aprovadasMes} briefings={briefings}
+                      fin={financeiro} clientes={clientes} />
+                  )}
                   {nav === "memoria" && (
                     <MemoriaView briefings={briefingsList} ops={ops.length ? ops : OPS_DEMO} />
                   )}

@@ -321,6 +321,24 @@ html:has(.arkos),body:has(.arkos){background:#E9EBF3; margin:0}
 .arkos .jv-dots{display:inline-flex; gap:6px; padding:4px 0}
 .arkos .jv-dots i{width:7px; height:7px; border-radius:50%; background:var(--yel); display:block}
 
+/* Meu Mês: apresentação em tela, um número por seção (ritmo da página da Apple) */
+.arkos .mm-sec{min-height:56vh; display:grid; place-items:center; text-align:center;
+  border-radius:28px; padding:80px 34px; background:var(--card);
+  box-shadow:0 1px 2px rgba(22,24,29,.04)}
+.arkos .mm-sec.dark{background:radial-gradient(120% 160% at 80% -20%, #33333B 0%, #131316 58%);
+  color:#fff; box-shadow:0 30px 60px -30px rgba(19,19,22,.55)}
+.arkos .mm-title{font-family:var(--disp); font-weight:800; letter-spacing:-.035em; line-height:1.04;
+  font-size:clamp(44px,5.4vw,76px)}
+.arkos .mm-lead{margin:18px auto 0; max-width:520px}
+.arkos .mm-big{font-family:var(--disp); font-weight:800; letter-spacing:-.04em; line-height:1;
+  font-size:clamp(72px,10vw,132px); font-variant-numeric:tabular-nums}
+.arkos .mm-sec.dark .mm-big{background:linear-gradient(180deg,#FFF 40%, rgba(255,255,255,.5));
+  -webkit-background-clip:text; background-clip:text; color:transparent}
+.arkos .mm-label{font-size:17px; line-height:1.5; margin-top:18px; color:var(--mute); font-weight:600}
+.arkos .mm-sec.dark .mm-label{color:rgba(255,255,255,.75)}
+.arkos .mm-sub{font-size:13px; margin-top:12px; color:var(--dim)}
+.arkos .mm-sec.dark .mm-sub{color:rgba(255,255,255,.5)}
+
 /* check de concluir tarefa */
 .arkos .tt .t-check{width:34px; padding-right:2px}
 .arkos .chk{width:22px; height:22px; border-radius:50%; border:1.5px solid var(--hair2);

@@ -174,7 +174,7 @@ function linhaDe(t: any, hoje: string, nomes: Record<string, string>): TarefaLin
 export function useArkData() {
   const [demo, setDemo] = useState(true);
   const [nome, setNome] = useState("Senhor");
-  const [stats, setStats] = useState({ abertas: 0, atrasadas: 0, fila: 0, briefings: 0 });
+  const [stats, setStats] = useState({ abertas: 0, atrasadas: 0, fila: 0, briefings: 0, concluidasMes: 47, aprovadasMes: 12 });
   const [ops, setOps] = useState<Op[]>([]);
   const [tarefasTop, setTarefasTop] = useState<TarefaLinha[]>(TAREFAS_DEMO);
   const [tarefasAll, setTarefasAll] = useState<TarefaLinha[]>(TAREFAS_DEMO_OPS);
@@ -240,8 +240,15 @@ export function useArkData() {
     const hoje = new Date().toISOString().slice(0, 10);
     const abertasArr = tarefas.filter(tarefaAberta);
     const atrasadas = abertasArr.filter((t) => (t.data || t.prazo) && String(t.data || t.prazo) < hoje).length;
-    const pendentes: any[] = (st["wfa-social-fila"] || []).filter((p: any) => p?.status === "pendente");
+    const filaToda: any[] = Array.isArray(st["wfa-social-fila"]) ? st["wfa-social-fila"] : [];
+    const pendentes: any[] = filaToda.filter((p: any) => p?.status === "pendente");
     const fila = pendentes.length;
+    const mesAtual = hoje.slice(0, 7);
+    const concluidasMes = tarefas.filter((t) =>
+      t && (t.status === "concluido" || t.done || t.concluida)
+      && String(t.concluidaEm || t.data || "").slice(0, 7) === mesAtual).length;
+    const aprovadasMes = filaToda.filter((p: any) =>
+      p?.status === "aprovada" && String(p?.date || "").slice(0, 7) === mesAtual).length;
     setFila(pendentes
       .slice()
       .sort((a, b) => (b?.ts || 0) - (a?.ts || 0))
@@ -268,7 +275,7 @@ export function useArkData() {
       setNome(first || "Senhor");
     }
     setNomesCli(nomes);
-    setStats({ abertas: abertasArr.length, atrasadas, fila, briefings });
+    setStats({ abertas: abertasArr.length, atrasadas, fila, briefings, concluidasMes, aprovadasMes });
     setTarefasTop(abertasList.slice(0, 6));
     setTarefasAll(abertasList);
     if (reais.length) setOps(reais);

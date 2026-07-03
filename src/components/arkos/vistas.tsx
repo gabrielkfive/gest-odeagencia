@@ -1,5 +1,5 @@
 // ArkOS: vistas (Mission Control, Operações, Agentes, Em breve), linguagem Apple
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Activity, Check, Hexagon, PenLine, Plus } from "lucide-react";
 import { spring, easeApple } from "./tokens";
@@ -379,6 +379,84 @@ export function FinanceiroView({ fin, demo }: { fin: Financeiro; demo: boolean }
           </table>
         </div>
       </Reveal>
+      <div style={{ height: 24 }} />
+    </>
+  );
+}
+
+/* Meu Mês: o ritual mensal como página da Apple. Um número gigante por tela,
+   seções claras e escuras alternadas, reveal ao rolar. */
+type MeuMesProps = {
+  demo: boolean;
+  concluidasMes: number; aprovadasMes: number; briefings: number;
+  fin: Financeiro; clientes: ClienteInfo[];
+};
+
+function MmSec({ dark, children, delay = 0 }: { dark?: boolean; children: ReactNode; delay?: number }) {
+  return (
+    <motion.section className={`mm-sec ${dark ? "dark" : ""}`}
+      initial={{ opacity: 0, y: 44 }} whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.7, ease: easeApple, delay }}>
+      {children}
+    </motion.section>
+  );
+}
+
+export function MeuMesView({ demo, concluidasMes, aprovadasMes, briefings, fin, clientes }: MeuMesProps) {
+  const mes = new Date().toLocaleDateString("pt-BR", { month: "long" });
+  const mesTitulo = mes.charAt(0).toUpperCase() + mes.slice(1);
+  const ativos = clientes.filter((c) => c.id !== "ark").length;
+  const urgentes = clientes.filter((c) => c.status === "r").length;
+  return (
+    <>
+      <MmSec>
+        <div>
+          <div className="view-eyebrow">ARK OS · Meu Mês</div>
+          <h1 className="mm-title">{mesTitulo}, até agora.</h1>
+          <p className="view-lead mm-lead">
+            O mês da ARK contado pelos números que importam. Role para apresentar.
+            {demo ? " Modo demonstração." : ""}
+          </p>
+        </div>
+      </MmSec>
+      <MmSec dark>
+        <div>
+          <div className="mm-big">{concluidasMes}</div>
+          <div className="mm-label">tarefas concluídas pela equipe neste mês.</div>
+        </div>
+      </MmSec>
+      <MmSec>
+        <div>
+          <div className="mm-big">{aprovadasMes}</div>
+          <div className="mm-label">conteúdos aprovados e a caminho das redes.</div>
+          <div className="mm-sub">{briefings} briefings do Conselho de IA registrados no período.</div>
+        </div>
+      </MmSec>
+      <MmSec dark>
+        <div>
+          <div className="mm-big">{fmtBRL(fin.sobra)}</div>
+          <div className="mm-label">de sobra em {fin.mesNome}.</div>
+          <div className="mm-sub">{fmtBRL(fin.receber)} a receber · {fmtBRL(fin.pagar)} em custos e pagamentos.</div>
+        </div>
+      </MmSec>
+      <MmSec>
+        <div>
+          <div className="mm-big">{ativos}</div>
+          <div className="mm-label">clientes ativos na carteira.</div>
+          <div className="mm-sub">
+            {urgentes > 0
+              ? `${urgentes} pedindo atenção urgente. O resto, saudável.`
+              : "Todos saudáveis. Carteira em dia."}
+          </div>
+        </div>
+      </MmSec>
+      <MmSec dark>
+        <div>
+          <h2 className="mm-title" style={{ color: "#fff" }}>Foi assim que {mesTitulo.toLowerCase()} aconteceu.</h2>
+          <p className="mm-label" style={{ marginTop: 14 }}>Feito pela equipe. Contado pelo ArkOS.</p>
+        </div>
+      </MmSec>
       <div style={{ height: 24 }} />
     </>
   );
