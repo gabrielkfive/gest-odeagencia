@@ -1151,6 +1151,10 @@ body.aura-dark .crm-modal.open .crm-mbox,body.aura-light .crm-modal.open .crm-mb
 body.aura-dark .tb-btn,body.aura-light .tb-btn,body.aura-dark .icobtn,body.aura-light .icobtn{
   min-height:34px;border-radius:980px;font-size:12.5px;font-weight:600;letter-spacing:-.01em}
 
+/* Botao Adicionar cartao do Kanban no tema escuro */
+body.aura-dark .add-task-btn{border:1px dashed rgba(255,255,255,.18);color:var(--mute);border-radius:10px;background:transparent}
+body.aura-dark .add-task-btn:hover{border-color:var(--yel);color:var(--yel);background:rgba(255,199,0,.06)}
+
 /* Scrollbar discreta no preto */
 body.aura-dark .view::-webkit-scrollbar{width:10px}
 body.aura-dark .view::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
@@ -1411,7 +1415,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-1300 -->
+<!-- build AURA-DARK-OS-MIX 20260703-1400 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -3462,21 +3466,27 @@ function wfaLimpezaConselhoV1(){
    fora da Cobrança até o Gabriel definir plano/valor no botão Editar. */
 function wfaSeedClientesV1(){
   try{
-    if(localStorage.getItem('wfa-seed-clientes-v3')==='1')return;
+    if(localStorage.getItem('wfa-seed-clientes-v4')==='1')return;
     const novos=[
-      {id:'4b-burguer',nm:'4B Burguer',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Hamburgueria'},
+      {id:'4b-burguer',nm:'4B Burguers',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Hamburgueria'},
       {id:'pizzaria-sabor-e-lenha',nm:'Pizzaria Sabor e Lenha',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Pizzaria'},
       {id:'dgust',nm:'Pizzaria Dgust',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Pizzaria'},
       {id:'cafe-lumiere',nm:'Café Lumière',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Cafeteria'},
+      {id:'kopi-coffee',nm:'Kopi Coffee',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Cafeteria'},
     ];
     const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'').trim();
     const todos=(typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE);
     const existentes=new Set(todos.map(c=>norm(c.nm)));
     const arr=loadClientesCustom().filter(c=>c.id!=='the-guste'&&norm(c.nm)!=='pizzariatheguste');
+    // dedup do 4B: grafias Burger/Burguer/Burguers duplicavam; fica UMA, com o nome oficial
+    let viu4b=false;
+    for(let i=0;i<arr.length;i++){const n4=norm(arr[i].nm);if(n4==='4bburguer'||n4==='4bburger'||n4==='4bburguers'){
+      if(viu4b){arr.splice(i,1);i--;}else{viu4b=true;arr[i].nm='4B Burguers';}
+    }}
     arr.forEach(c=>{if(c.id==='cafe-lumiere')c.nm='Café Lumière';}); // corrige grafia do seed v2
     let add=0;
     novos.forEach(n=>{ if(!existentes.has(norm(n.nm))&&!arr.some(c=>c.id===n.id||norm(c.nm)===norm(n.nm))){ arr.push(n); add++; } });
-    localStorage.setItem('wfa-seed-clientes-v3','1');
+    localStorage.setItem('wfa-seed-clientes-v4','1');
     if(add){
       saveClientesCustom(arr); // persiste, reconstrói CLIENTES, re-renderiza e sincroniza
       if(typeof fillClienteSelects==='function')fillClienteSelects();
@@ -6369,7 +6379,20 @@ function acertoSeedFromFin(force){
 }
 
 /* ============ JORNADA SPRINTS ============ */
+/* AUTOMÁTICO E PARA SEMPRE (pedido do Gabriel, 03/07): TODO cliente ativo da carteira
+   aparece na Jornada. Quem não está em nenhum sprint entra no Onboarding sozinho —
+   cliente novo (seed, botão + Novo cliente ou sync de outro usuário) nunca mais some. */
+function jornadaAutoInclui(){
+  let mudou=false;
+  (CLIENTES||[]).forEach(c=>{
+    if(!c||!c.id||c.id==='ark'||c.status==='churn')return;
+    if(SPRINTS.some(sp=>sp.clis.includes(c.id)))return;
+    SPRINTS[0].clis.push(c.id);mudou=true;
+  });
+  if(mudou)saveJornada();
+}
 function renderSprints(){
+  try{jornadaAutoInclui();}catch(e){}
   const board=document.getElementById('sprint-board');
   board.innerHTML=SPRINTS.map(sp=>{
     const clis=sp.clis.map(cid=>{

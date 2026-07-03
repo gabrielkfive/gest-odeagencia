@@ -37,6 +37,7 @@ const CLIENTES_CTX: { id: string; nm: string; seg: string; nota: string }[] = [
   { id: "fonseca", nm: "Fonseca & Cavalcanti", seg: "Advocacia (compliance OAB)", nota: "1 captação/mês; conteúdo precisa respeitar limites de publicidade da OAB; autoridade." },
   { id: "vaca", nm: "Vaca Velha", seg: "Restaurante / churrascaria", nota: "1 captação/mês (2ª às vezes); ramp-up de receita." },
   { id: "dgust", nm: "Pizzaria Dgust", seg: "Pizzaria", nota: "Cliente NOVO (jul/2026): onboarding, primeira linha editorial e primeiras captações." },
+  { id: "kopi-coffee", nm: "Kopi Coffee", seg: "Cafeteria", nota: "Cliente NOVO (jul/2026): onboarding e presença inicial." },
   { id: "cafe-lumiere", nm: "Café Lumière", seg: "Cafeteria", nota: "Cliente NOVO (jul/2026): onboarding, posicionamento e presença inicial." },
   { id: "dom", nm: "Dom Baruka", seg: "Restaurante (Squad Alpha)", nota: "URGENTE: cardápio + iFood + bebidas; auditoria iFood em curso." },
   { id: "stray", nm: "Stray House", seg: "Restaurante/bar (Squad Alpha)", nota: "Recuperação; ROAS ~5; subir criativos novos." },
