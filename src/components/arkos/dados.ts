@@ -320,9 +320,32 @@ export function useArkData() {
     }
   };
 
+  /* JARVIS pela barra de missão (action jarvis: Haiku com tom de mordomo, resposta curta). */
+  const jarvis = async (pergunta: string): Promise<string> => {
+    if (demo) {
+      await new Promise((r) => setTimeout(r, 900));
+      return "Senhor, estou em modo demonstração nesta tela. Entre com a sua conta e eu passo a executar missões de verdade sobre a operação.";
+    }
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) throw new Error("sem sessão");
+      const r = await fetch("/api/workflowark/state", {
+        method: "POST",
+        headers: { "content-type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "jarvis", pergunta }),
+      });
+      const j: any = await r.json().catch(() => ({}));
+      if (!r.ok) return String(j?.error || "Senhor, encontrei uma falha ao processar. Tente novamente.");
+      return String(j?.reply || "Senhor, não obtive resposta desta vez.");
+    } catch {
+      return "Senhor, não consegui falar com a central agora. Verifique a conexão e tente de novo.";
+    }
+  };
+
   return {
     demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila, clientes, briefings,
-    concluirTarefa, criarTarefa, decidirProposta,
+    concluirTarefa, criarTarefa, decidirProposta, jarvis,
   };
 }
 

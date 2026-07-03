@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { CSS, spring, springSoft, easeApple } from "@/components/arkos/tokens";
 import { AGENTES, OPS_DEMO, useArkData, type Op } from "@/components/arkos/dados";
-import { AgentExpanded, Boot } from "@/components/arkos/ui";
+import { AgentExpanded, Boot, MissaoOverlay } from "@/components/arkos/ui";
 import {
   AgentesView, AprovacoesView, ClientesView, MemoriaView, MissaoView, OperacoesView,
 } from "@/components/arkos/vistas";
@@ -47,8 +47,17 @@ function ArkOS() {
   const [openAg, setOpenAg] = useState<string | null>(null);
   const {
     demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila: filaItens,
-    clientes, briefings: briefingsList, concluirTarefa, criarTarefa, decidirProposta,
+    clientes, briefings: briefingsList, concluirTarefa, criarTarefa, decidirProposta, jarvis,
   } = useArkData();
+  const [missao, setMissao] = useState<{ q: string; resp: string | null } | null>(null);
+
+  const lancarMissao = () => {
+    const q = cmd.trim();
+    if (!q) return;
+    setMissao({ q, resp: null });
+    setCmd("");
+    jarvis(q).then((resp) => setMissao((m) => (m && m.q === q ? { ...m, resp } : m)));
+  };
   const [feed, setFeed] = useState<Op[]>([]);
   const feedIdx = useRef(0);
 
@@ -80,7 +89,7 @@ function ArkOS() {
   const emDia = abertas > 0 ? Math.round(100 * (abertas - atrasadas) / abertas) : 100;
 
   return (
-    <div className="arkos" data-build="arkos-v3-20260703-c5">
+    <div className="arkos" data-build="arkos-v3-20260703-c6">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
@@ -123,8 +132,11 @@ function ArkOS() {
                 <label className="cmd">
                   <Search size={16} color="#A6AAB8" strokeWidth={2} />
                   <input value={cmd} onChange={(e) => setCmd(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") lancarMissao(); }}
                     placeholder="Declare um objetivo. Ex.: preparar o lançamento da Vivenda…" />
-                  <button className="go" type="button"><Sparkles size={13} style={{ marginRight: 6, verticalAlign: -2 }} />Lançar missão</button>
+                  <button className="go" type="button" onClick={lancarMissao}>
+                    <Sparkles size={13} style={{ marginRight: 6, verticalAlign: -2 }} />Lançar missão
+                  </button>
                 </label>
                 <span className="date-pill">
                   {agora.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
@@ -173,6 +185,9 @@ function ArkOS() {
 
       <AnimatePresence>
         {agAberto && <AgentExpanded a={agAberto} close={() => setOpenAg(null)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {missao && <MissaoOverlay pergunta={missao.q} resposta={missao.resp} close={() => setMissao(null)} />}
       </AnimatePresence>
     </div>
   );

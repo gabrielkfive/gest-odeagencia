@@ -189,3 +189,38 @@ export function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: n
     </motion.div>
   );
 }
+
+/* Overlay da missão: pergunta + resposta do JARVIS no vidro escuro (mesma linguagem do agente) */
+export function MissaoOverlay({ pergunta, resposta, close }: {
+  pergunta: string; resposta: string | null; close: () => void;
+}) {
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, [close]);
+  return (
+    <>
+      <motion.div className="veil" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }} transition={{ duration: 0.25 }} onClick={close} />
+      <div className="ag-x-wrap">
+        <motion.div className="ag-x" initial={{ opacity: 0, y: 26, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12 }} transition={morph}>
+          <button className="close" onClick={close} aria-label="Fechar"><X size={15} /></button>
+          <div className="ag-role">Missão declarada</div>
+          <div className="ag-name" style={{ fontSize: 17, marginTop: 6 }}>{pergunta}</div>
+          <div className="desc" aria-live="polite">
+            {resposta ?? (
+              <span className="jv-dots" aria-label="JARVIS pensando">
+                <motion.i animate={{ opacity: [0.25, 1, 0.25] }} transition={{ duration: 1.1, repeat: Infinity, delay: 0 }} />
+                <motion.i animate={{ opacity: [0.25, 1, 0.25] }} transition={{ duration: 1.1, repeat: Infinity, delay: 0.18 }} />
+                <motion.i animate={{ opacity: [0.25, 1, 0.25] }} transition={{ duration: 1.1, repeat: Infinity, delay: 0.36 }} />
+              </span>
+            )}
+          </div>
+          {resposta && <div className="ag-role" style={{ marginTop: 16 }}>JARVIS · Comandante</div>}
+        </motion.div>
+      </div>
+    </>
+  );
+}

@@ -317,6 +317,10 @@ html:has(.arkos),body:has(.arkos){background:#E9EBF3; margin:0}
   min-height:34px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .arkos .cli .cli-chips{display:flex; gap:6px; margin-top:10px}
 
+/* pontinhos do JARVIS pensando */
+.arkos .jv-dots{display:inline-flex; gap:6px; padding:4px 0}
+.arkos .jv-dots i{width:7px; height:7px; border-radius:50%; background:var(--yel); display:block}
+
 /* check de concluir tarefa */
 .arkos .tt .t-check{width:34px; padding-right:2px}
 .arkos .chk{width:22px; height:22px; border-radius:50%; border:1.5px solid var(--hair2);
