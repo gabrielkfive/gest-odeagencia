@@ -848,6 +848,13 @@ body.aura-dark{
 body.aura-dark .app{background:#000}
 body.aura-dark .view{background:transparent}
 body.aura-dark h1,body.aura-dark h2,body.aura-dark h3,body.aura-dark h4{color:var(--ink)}
+/* color-scheme manda o navegador desenhar os controles NATIVOS (dropdown de select,
+   scrollbar, date picker) no tom do tema; sem isso a lista do select abre branca
+   com texto claro e fica ilegível (bug dos filtros do Kanban) */
+body.aura-dark{color-scheme:dark}
+body.aura-light{color-scheme:light}
+body.aura-dark select,body.aura-dark .form-select{background:rgba(255,255,255,.06);color:var(--ink);border-color:var(--line)}
+body.aura-dark select option,body.aura-dark .form-select option{background:#101116;color:#eef0f3}
 
 /* Painel principal: PRETO ABSOLUTO #000 (pedido do Gabriel) com glows âmbar vivos por trás (o "movimento") */
 body.aura-dark .main{position:relative;background:#000;border:1px solid rgba(255,255,255,.08)}
@@ -1379,7 +1386,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-0700 -->
+<!-- build AURA-DARK-OS-MIX 20260703-0800 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
