@@ -1623,6 +1623,10 @@ function wfaSetTheme(t){
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="subnav" id="agentes-menu">
+        <div class="subitem" data-nav="agentes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Central de Agentes</span>
+        </div>
         <div class="subitem" data-nav="jarvis">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/></svg>
           <span>JARVIS</span>
@@ -3623,7 +3627,7 @@ function iniciarAutoSync(){
             <div class="ag-desc">Transforma um tema em roteiro de Reels/TikTok com gancho, estrutura e legenda — pronto para gravar.</div>
             <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
           </div>
-          <div class="ag-card on" onclick="window.open('/comercial','_blank')">
+          <div class="ag-card on" onclick="document.querySelector('[data-nav=comercial]').click();setTimeout(()=>comTab('propostas'),60)">
             <div class="ag-top"><div class="ag-ico">🤝</div><div><div class="ag-nm">Estrategista Comercial</div><div class="ag-role">Comercial · propostas e contratos</div></div></div>
             <div class="ag-desc">Gera a proposta premium de 17 páginas com dados reais do Instagram e o contrato blindado por segmento (PDF e DOCX), na IDV da ARK.</div>
             <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
