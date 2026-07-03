@@ -3,7 +3,7 @@
 // pílula ativa preta na sidebar (Dashboard Marketing "Vision"), vidro escuro só no overlay de agente
 // (Apple Vision Pro HR). Marca ARK: amarelo #FFC700 no lugar do accent das refs.
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Sparkles, Hexagon, Activity, BrainCircuit, Users, MessageCircle,
@@ -275,6 +275,27 @@ html:has(.arkos),body:has(.arkos){background:#E9EBF3; margin:0}
 .arkos .boot-lines .ok{color:var(--ok)}
 .arkos .demo-tag{font-size:9.5px; letter-spacing:.18em; color:#8A6200;
   background:var(--yel-soft); border-radius:99px; padding:5px 12px; white-space:nowrap}
+
+/* vistas internas: linguagem Apple (tipo display, um assunto por bloco, reveal suave de 0.6s) */
+.arkos .view-hero{padding:54px 6px 14px}
+.arkos .view-eyebrow{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); font-weight:600}
+.arkos .view-h1{font-family:var(--disp); font-weight:800; letter-spacing:-.035em; line-height:1.04;
+  font-size:clamp(38px,4.6vw,62px); margin-top:12px}
+.arkos .view-h1 .soft{color:var(--dim)}
+.arkos .view-lead{font-size:16px; line-height:1.55; color:var(--mute); max-width:600px; margin-top:16px}
+.arkos .stat-strip{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+@media (max-width:900px){.arkos .stat-strip{grid-template-columns:1fr}}
+.arkos .stat-big{background:var(--card); border-radius:24px; padding:24px 26px;
+  box-shadow:0 1px 2px rgba(22,24,29,.04)}
+.arkos .stat-big .n{font-family:var(--disp); font-size:46px; font-weight:800; letter-spacing:-.03em;
+  line-height:1; font-variant-numeric:tabular-nums}
+.arkos .stat-big .l{font-size:12.5px; color:var(--mute); margin-top:10px}
+.arkos .stat-big.dark{background:radial-gradient(120% 150% at 80% -20%, #2A2A31 0%, #131316 60%); color:#fff}
+.arkos .stat-big.dark .l{color:rgba(255,255,255,.62)}
+.arkos .group-h{font-family:var(--disp); font-size:23px; font-weight:700; letter-spacing:-.02em}
+.arkos .group-h .count{color:var(--dim); font-weight:600; font-size:15px; margin-left:10px}
+.arkos .empty-view{padding:110px 6px 140px; text-align:center}
+.arkos .empty-view .view-lead{margin:16px auto 0}
 `;
 
 /* Física */
@@ -367,6 +388,7 @@ function useArkData() {
   const [stats, setStats] = useState({ abertas: 0, atrasadas: 0, fila: 0, briefings: 0 });
   const [ops, setOps] = useState<Op[]>([]);
   const [tarefasTop, setTarefasTop] = useState<{ tt: string; cc: string; due: string }[]>([]);
+  const [tarefasAll, setTarefasAll] = useState<{ tt: string; cc: string; due: string }[]>([]);
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -395,7 +417,6 @@ function useArkData() {
         const abertasList = tarefas
           .filter((t) => t && !t.done && !t.concluida)
           .sort((a, b) => String(a.prazo || "9999").localeCompare(String(b.prazo || "9999")))
-          .slice(0, 6)
           .map((t) => ({
             tt: String(t.titulo || t.nome || t.texto || "Tarefa"),
             cc: [t.cliente, t.area || t.responsavel].filter(Boolean).join(" · ") || "ARK",
@@ -404,14 +425,15 @@ function useArkData() {
         const first = (j.member?.full_name || "").split(" ")[0];
         setNome(first || "Senhor");
         setStats({ abertas, atrasadas, fila, briefings });
-        setTarefasTop(abertasList);
+        setTarefasTop(abertasList.slice(0, 6));
+        setTarefasAll(abertasList);
         if (reais.length) setOps(reais);
         setDemo(false);
       } catch { /* segue em demo */ }
     })();
     return () => { alive = false; };
   }, []);
-  return { demo, nome, stats, ops, tarefasTop };
+  return { demo, nome, stats, ops, tarefasTop, tarefasAll };
 }
 
 /* Sparkline em menta (ref SaaS UI Kit): linha + área com gradiente */
@@ -464,6 +486,15 @@ const TAREFAS_DEMO = [
   { tt: "Responder demanda do portal da Fercon", cc: "Fercon · Portal do cliente", due: "amanhã" },
   { tt: "Postar carrossel aprovado do Cachu", cc: "Cachu · Social Media", due: "qui" },
   { tt: "Fechar relatório mensal da Sasse", cc: "Sasse · Relatórios", due: "sex" },
+];
+
+const TAREFAS_DEMO_OPS = [
+  { tt: "Enviar relatório de junho da Babbo", cc: "Babbo · Relatórios", due: "atrasada" },
+  { tt: "Cobrar aprovação do calendário do Cachu", cc: "Cachu · Social Media", due: "atrasada" },
+  { tt: "Ajustar orçamento de tráfego da Fercon", cc: "Fercon · Tráfego", due: "atrasada" },
+  ...TAREFAS_DEMO,
+  { tt: "Planejar pauta do conselho de agosto", cc: "ARK · Conselho de IA", due: "07-10" },
+  { tt: "Atualizar organograma no ARK OS", cc: "ARK · Sistema", due: "07-14" },
 ];
 
 const APROVACOES_DEMO = [
@@ -575,6 +606,268 @@ function chipClass(due: string) {
   return "chip ok";
 }
 
+/* Fluidez da ref Apple (AirPods Max): conteúdo chega ao entrar na tela, 0.6s ease-out, uma ideia por bloco */
+const easeApple = [0.25, 0.1, 0.25, 1] as const;
+
+function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
+  const reduced = useReducedMotion();
+  return (
+    <motion.div initial={reduced ? false : { opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.6, ease: easeApple, delay }}>
+      {children}
+    </motion.div>
+  );
+}
+
+type TarefaLinha = { tt: string; cc: string; due: string };
+
+function OperacoesView({ demo, tarefas, fila }: { demo: boolean; tarefas: TarefaLinha[]; fila: number }) {
+  const lista = demo || !tarefas.length ? TAREFAS_DEMO_OPS : tarefas;
+  const atrasadas = lista.filter((t) => t.due === "atrasada");
+  const deHoje = lista.filter((t) => t.due === "hoje");
+  const proximas = lista.filter((t) => t.due !== "atrasada" && t.due !== "hoje");
+  const grupos = [
+    { id: "g-atr", h: "Atrasadas.", itens: atrasadas },
+    { id: "g-hoje", h: "Para hoje.", itens: deHoje },
+    { id: "g-prox", h: "A seguir.", itens: proximas },
+  ].filter((g) => g.itens.length);
+  return (
+    <>
+      <Reveal>
+        <div className="view-hero">
+          <div className="view-eyebrow">ARK OS · Operações</div>
+          <h1 className="view-h1">Tudo em movimento.<br /><span className="soft">Nada esquecido.</span></h1>
+          <p className="view-lead">
+            Cada tarefa da operação, agrupada pelo que importa: o que atrasou, o que é para hoje
+            e o que vem a seguir.{fila > 0 ? ` E ${fila} proposta${fila === 1 ? "" : "s"} esperando o seu aval na fila.` : ""}
+          </p>
+        </div>
+      </Reveal>
+      <Reveal delay={0.08}>
+        <div className="stat-strip">
+          <div className="stat-big dark">
+            <div className="n">{atrasadas.length}</div>
+            <div className="l">atrasadas, para resolver primeiro</div>
+          </div>
+          <div className="stat-big">
+            <div className="n">{deHoje.length}</div>
+            <div className="l">para hoje</div>
+          </div>
+          <div className="stat-big">
+            <div className="n">{lista.length}</div>
+            <div className="l">abertas na operação</div>
+          </div>
+        </div>
+      </Reveal>
+      {grupos.map((g) => (
+        <Reveal key={g.id}>
+          <div className="panel">
+            <div className="group-h">{g.h}<span className="count">{g.itens.length}</span></div>
+            <table className="tt">
+              <tbody>
+                {g.itens.map((t, i) => (
+                  <motion.tr key={`${g.id}-${i}`} initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                    transition={{ duration: 0.45, ease: easeApple, delay: 0.08 + i * 0.04 }}>
+                    <td className="t-name">{t.tt}</td>
+                    <td className="t-cli hide-sm">{t.cc}</td>
+                    <td><span className={chipClass(t.due)}>{t.due}</span></td>
+                    <td style={{ textAlign: "right" }}><a className="tbtn" href="/app">Abrir</a></td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Reveal>
+      ))}
+      <div style={{ height: 24 }} />
+    </>
+  );
+}
+
+function AgentesView({ open }: { open: (id: string) => void }) {
+  return (
+    <>
+      <Reveal>
+        <div className="view-hero">
+          <div className="view-eyebrow">ARK OS · Agentes</div>
+          <h1 className="view-h1">A sociedade que<br /><span className="soft">trabalha por você.</span></h1>
+          <p className="view-lead">
+            Seis agentes especializados, cada um com um papel claro na operação.
+            Toque em um card para ver o que ele está fazendo agora.
+          </p>
+        </div>
+      </Reveal>
+      <div className="agents" style={{ paddingBottom: 24 }}>
+        {AGENTES.map((a, i) => <AgentCard key={a.id} a={a} i={i} open={open} />)}
+      </div>
+    </>
+  );
+}
+
+function EmBreveView({ eyebrow, titulo, texto }: { eyebrow: string; titulo: string; texto: string }) {
+  return (
+    <Reveal>
+      <div className="empty-view">
+        <div className="view-eyebrow">{eyebrow}</div>
+        <h1 className="view-h1">{titulo}</h1>
+        <p className="view-lead">{texto}</p>
+      </div>
+    </Reveal>
+  );
+}
+
+type MissaoProps = {
+  saud: string; nome: string; demo: boolean;
+  abertas: number; atrasadas: number; fila: number; briefings: number; emDia: number;
+  tarefasTop: TarefaLinha[]; feed: Op[]; reduced: boolean;
+  open: (id: string) => void; verOperacoes: () => void;
+};
+
+function MissaoView({ saud, nome, demo, abertas, atrasadas, fila, briefings, emDia, tarefasTop, feed, reduced, open, verOperacoes }: MissaoProps) {
+  const chega = (delay: number) => ({
+    initial: { y: 24, opacity: 0 },
+    animate: { y: 0, opacity: 1 },
+    transition: { ...spring, delay },
+  });
+  return (
+    <>
+      <motion.div {...chega(0)} className="hero-row">
+        <div className="hero">
+          <div className="sphere" aria-hidden />
+          <div className="eyebrow">Mission Control · ARK Content</div>
+          <h1>{saud}, {nome} 👋</h1>
+          <div className="hero-cards">
+            <div className="hcard">
+              <div className="hc-top">
+                <span className="hc-ic"><Activity size={14} strokeWidth={2} /></span>
+                <span className="hc-l">Tarefas abertas</span>
+              </div>
+              <div className="hc-n">{abertas}</div>
+              <div className="hc-s">na operação agora</div>
+            </div>
+            <div className="hcard">
+              <div className="hc-top">
+                <span className="hc-ic"><Hexagon size={14} strokeWidth={2} /></span>
+                <span className="hc-l">Briefings do conselho</span>
+              </div>
+              <div className="hc-n">{briefings}</div>
+              <div className="hc-s">últimos 14 dias</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="goal">
+          <div className="gt">Operação em dia</div>
+          <Donut pct={emDia} />
+          <div className="gv">{atrasadas} atrasada{atrasadas === 1 ? "" : "s"}</div>
+          <div className="gs">de {abertas} tarefas abertas. {fila} proposta{fila === 1 ? "" : "s"} esperando o seu aval.</div>
+          <a className="gbtn" href="/postagens">Revisar fila</a>
+        </div>
+      </motion.div>
+
+      <motion.div {...chega(0.07)} className="body-row">
+        <div className="panel">
+          <div className="pt">Hoje na operação <a style={{ cursor: "pointer" }} onClick={verOperacoes}>abrir tarefas →</a></div>
+          <table className="tt">
+            <thead>
+              <tr>
+                <th>Tarefa</th>
+                <th className="hide-sm">Cliente · Área</th>
+                <th>Prazo</th>
+                <th aria-label="Ação" />
+              </tr>
+            </thead>
+            <tbody>
+              {(tarefasTop.length ? tarefasTop : TAREFAS_DEMO).map((t, i) => (
+                <motion.tr key={i} initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ ...spring, delay: 0.25 + i * 0.05 }}>
+                  <td className="t-name">{t.tt}</td>
+                  <td className="t-cli hide-sm">{t.cc}</td>
+                  <td><span className={chipClass(t.due)}>{t.due}</span></td>
+                  <td style={{ textAlign: "right" }}><a className="tbtn" href="/app">Abrir</a></td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="panel">
+            <div className="pt">Fila de aprovação <a href="/postagens">ver todas →</a></div>
+            <div style={{ marginTop: 8 }}>
+              {APROVACOES_DEMO.slice(0, demo ? 4 : Math.max(1, Math.min(4, fila))).map((p, i) => (
+                <motion.div className="ap-it" key={i} initial={{ opacity: 0, x: 14 }}
+                  animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.3 + i * 0.06 }}>
+                  <span className="ap-ic" style={{ background: p.cor }}>
+                    <PenLine size={16} strokeWidth={1.8} />
+                  </span>
+                  <div className="ap-tx">
+                    <div className="ap-t">{p.t}</div>
+                    <div className="ap-s">{p.s}</div>
+                  </div>
+                  <a className="ap-chip" href="/postagens">Revisar</a>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="panel feed">
+            <div className="pt feed-h">
+              <motion.span className="live" animate={reduced ? {} : { opacity: [1, 0.35, 1] }}
+                transition={{ duration: 1.8, repeat: Infinity }} />
+              Operações ao vivo
+            </div>
+            <div style={{ marginTop: 6 }}>
+              <AnimatePresence initial={false}>
+                {feed.slice(0, 6).map((o) => (
+                  <motion.div key={o.id} className="op" layout
+                    initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
+                    exit={{ opacity: 0 }} transition={spring}>
+                    <span className="op-dot" />
+                    <div>
+                      <div className="who">{o.who}</div>
+                      <div className="what">{o.what}</div>
+                      <div className="when">{o.when}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div {...chega(0.14)} className="kpis">
+        {[
+          { n: abertas, l: "Tarefas abertas", d: "+4 esta semana", pts: [12, 14, 13, 17, 16, 19, 18, 21, 20, 23] },
+          { n: atrasadas, l: "Atrasadas", d: "2 a menos que ontem", pts: [8, 7, 7, 6, 5, 6, 5, 4, 4, 3] },
+          { n: fila, l: "Aguardando seu aval", d: "fila de aprovação", pts: [1, 2, 2, 3, 2, 4, 3, 5, 4, 6] },
+          { n: briefings, l: "Briefings do conselho", d: "últimos 14 dias", pts: [4, 5, 6, 6, 8, 7, 9, 10, 11, 12] },
+        ].map((s, i) => (
+          <div className="kpi" key={s.l}>
+            <div className="l">{s.l}</div>
+            <div className="row">
+              <div className="n">{s.n}</div>
+              <Spark pts={s.pts} id={String(i)} />
+            </div>
+            <div className="delta"><b>●</b> {s.d}</div>
+          </div>
+        ))}
+      </motion.div>
+
+      <motion.div {...chega(0.2)} className="sec-t">
+        <h2>Sociedade de agentes</h2>
+        <span>toque para abrir</span>
+      </motion.div>
+      <div className="agents" style={{ paddingBottom: 24 }}>
+        {AGENTES.map((a, i) => <AgentCard key={a.id} a={a} i={i} open={open} />)}
+      </div>
+    </>
+  );
+}
+
 /* ARK OS */
 function ArkOS() {
   const reduced = useReducedMotion();
@@ -582,7 +875,7 @@ function ArkOS() {
   const [nav, setNav] = useState("missao");
   const [cmd, setCmd] = useState("");
   const [openAg, setOpenAg] = useState<string | null>(null);
-  const { demo, nome, stats, ops, tarefasTop } = useArkData();
+  const { demo, nome, stats, ops, tarefasTop, tarefasAll } = useArkData();
   const [feed, setFeed] = useState<Op[]>([]);
   const feedIdx = useRef(0);
 
@@ -613,14 +906,8 @@ function ArkOS() {
   const briefings = demo ? 12 : stats.briefings;
   const emDia = abertas > 0 ? Math.round(100 * (abertas - atrasadas) / abertas) : 100;
 
-  const shell = useMemo(() => ({
-    hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : 0.07, delayChildren: 0.05 } },
-  }), [reduced]);
-  const chega = { hidden: { y: 24, opacity: 0 }, show: { y: 0, opacity: 1, transition: spring } };
-
   return (
-    <div className="arkos" data-build="arkos-v2-20260702-b3">
+    <div className="arkos" data-build="arkos-v3-20260703-c1">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
@@ -655,9 +942,11 @@ function ArkOS() {
             <div className="side-foot">© ARK Content 2026</div>
           </motion.nav>
 
-          <motion.main className="main" variants={shell} initial="hidden" animate="show">
+          <motion.main className="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}>
             <div className="stage">
-              <motion.div variants={chega} className="top">
+              <motion.div className="top" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+                transition={spring}>
                 <label className="cmd">
                   <Search size={16} color="#A6AAB8" strokeWidth={2} />
                   <input value={cmd} onChange={(e) => setCmd(e.target.value)}
@@ -675,137 +964,30 @@ function ArkOS() {
                 <span className="avatar-top">{nome.slice(0, 1).toUpperCase()}</span>
               </motion.div>
 
-              <motion.div variants={chega} className="hero-row">
-                <div className="hero">
-                  <div className="sphere" aria-hidden />
-                  <div className="eyebrow">Mission Control · ARK Content</div>
-                  <h1>{saud}, {nome} 👋</h1>
-                  <div className="hero-cards">
-                    <div className="hcard">
-                      <div className="hc-top">
-                        <span className="hc-ic"><Activity size={14} strokeWidth={2} /></span>
-                        <span className="hc-l">Tarefas abertas</span>
-                      </div>
-                      <div className="hc-n">{abertas}</div>
-                      <div className="hc-s">na operação agora</div>
-                    </div>
-                    <div className="hcard">
-                      <div className="hc-top">
-                        <span className="hc-ic"><Hexagon size={14} strokeWidth={2} /></span>
-                        <span className="hc-l">Briefings do conselho</span>
-                      </div>
-                      <div className="hc-n">{briefings}</div>
-                      <div className="hc-s">últimos 14 dias</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="goal">
-                  <div className="gt">Operação em dia</div>
-                  <Donut pct={emDia} />
-                  <div className="gv">{atrasadas} atrasada{atrasadas === 1 ? "" : "s"}</div>
-                  <div className="gs">de {abertas} tarefas abertas. {fila} proposta{fila === 1 ? "" : "s"} esperando o seu aval.</div>
-                  <a className="gbtn" href="/postagens">Revisar fila</a>
-                </div>
-              </motion.div>
-
-              <motion.div variants={chega} className="body-row">
-                <div className="panel">
-                  <div className="pt">Hoje na operação <a href="/app">abrir tarefas →</a></div>
-                  <table className="tt">
-                    <thead>
-                      <tr>
-                        <th>Tarefa</th>
-                        <th className="hide-sm">Cliente · Área</th>
-                        <th>Prazo</th>
-                        <th aria-label="Ação" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(tarefasTop.length ? tarefasTop : TAREFAS_DEMO).map((t, i) => (
-                        <motion.tr key={i} initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }}
-                          transition={{ ...spring, delay: 0.25 + i * 0.05 }}>
-                          <td className="t-name">{t.tt}</td>
-                          <td className="t-cli hide-sm">{t.cc}</td>
-                          <td><span className={chipClass(t.due)}>{t.due}</span></td>
-                          <td style={{ textAlign: "right" }}><a className="tbtn" href="/app">Abrir</a></td>
-                        </motion.tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div className="panel">
-                    <div className="pt">Fila de aprovação <a href="/postagens">ver todas →</a></div>
-                    <div style={{ marginTop: 8 }}>
-                      {APROVACOES_DEMO.slice(0, demo ? 4 : Math.max(1, Math.min(4, fila))).map((p, i) => (
-                        <motion.div className="ap-it" key={i} initial={{ opacity: 0, x: 14 }}
-                          animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.3 + i * 0.06 }}>
-                          <span className="ap-ic" style={{ background: p.cor }}>
-                            <PenLine size={16} strokeWidth={1.8} />
-                          </span>
-                          <div className="ap-tx">
-                            <div className="ap-t">{p.t}</div>
-                            <div className="ap-s">{p.s}</div>
-                          </div>
-                          <a className="ap-chip" href="/postagens">Revisar</a>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="panel feed">
-                    <div className="pt feed-h">
-                      <motion.span className="live" animate={reduced ? {} : { opacity: [1, 0.35, 1] }}
-                        transition={{ duration: 1.8, repeat: Infinity }} />
-                      Operações ao vivo
-                    </div>
-                    <div style={{ marginTop: 6 }}>
-                      <AnimatePresence initial={false}>
-                        {feed.slice(0, 6).map((o) => (
-                          <motion.div key={o.id} className="op" layout
-                            initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
-                            exit={{ opacity: 0 }} transition={spring}>
-                            <span className="op-dot" />
-                            <div>
-                              <div className="who">{o.who}</div>
-                              <div className="what">{o.what}</div>
-                              <div className="when">{o.when}</div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div variants={chega} className="kpis">
-                {[
-                  { n: abertas, l: "Tarefas abertas", d: "+4 esta semana", pts: [12, 14, 13, 17, 16, 19, 18, 21, 20, 23] },
-                  { n: atrasadas, l: "Atrasadas", d: "2 a menos que ontem", pts: [8, 7, 7, 6, 5, 6, 5, 4, 4, 3] },
-                  { n: fila, l: "Aguardando seu aval", d: "fila de aprovação", pts: [1, 2, 2, 3, 2, 4, 3, 5, 4, 6] },
-                  { n: briefings, l: "Briefings do conselho", d: "últimos 14 dias", pts: [4, 5, 6, 6, 8, 7, 9, 10, 11, 12] },
-                ].map((s, i) => (
-                  <div className="kpi" key={s.l}>
-                    <div className="l">{s.l}</div>
-                    <div className="row">
-                      <div className="n">{s.n}</div>
-                      <Spark pts={s.pts} id={String(i)} />
-                    </div>
-                    <div className="delta"><b>●</b> {s.d}</div>
-                  </div>
-                ))}
-              </motion.div>
-
-              <motion.div variants={chega} className="sec-t">
-                <h2>Sociedade de agentes</h2>
-                <span>toque para abrir</span>
-              </motion.div>
-              <div className="agents" style={{ paddingBottom: 24 }}>
-                {AGENTES.map((a, i) => <AgentCard key={a.id} a={a} i={i} open={setOpenAg} />)}
-              </div>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div key={nav}
+                  initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -14 }}
+                  transition={{ duration: reduced ? 0 : 0.5, ease: easeApple }}
+                  style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  {nav === "missao" && (
+                    <MissaoView saud={saud} nome={nome} demo={demo} abertas={abertas}
+                      atrasadas={atrasadas} fila={fila} briefings={briefings} emDia={emDia}
+                      tarefasTop={tarefasTop} feed={feed} reduced={!!reduced}
+                      open={setOpenAg} verOperacoes={() => setNav("operacoes")} />
+                  )}
+                  {nav === "operacoes" && <OperacoesView demo={demo} tarefas={tarefasAll} fila={fila} />}
+                  {nav === "agentes" && <AgentesView open={setOpenAg} />}
+                  {nav === "memoria" && (
+                    <EmBreveView eyebrow="ARK OS · Memória" titulo="Tudo que o sistema aprendeu."
+                      texto="A memória viva da ARK chega aqui na próxima fase da migração do V1." />
+                  )}
+                  {nav === "clientes" && (
+                    <EmBreveView eyebrow="ARK OS · Clientes" titulo="Cada cliente, um universo."
+                      texto="Os painéis por cliente chegam aqui na próxima fase da migração do V1." />
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </motion.main>
         </div>
