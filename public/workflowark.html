@@ -926,7 +926,7 @@ body.aura-light .aura-hero .sphere{position:absolute;top:-70px;right:40px;width:
 body.aura-dark .aura-hero .eyebrow,
 body.aura-light .aura-hero .eyebrow{font-size:12.5px;color:rgba(255,255,255,.55);position:relative}
 body.aura-dark .aura-hero h1,
-body.aura-light .aura-hero h1{font-family:'Sora',var(--sans);font-size:clamp(28px,3.2vw,40px);font-weight:600;
+body.aura-light .aura-hero h1{font-family:'Sora',var(--sans);font-size:clamp(28px,3.2vw,40px);font-weight:700;
   letter-spacing:-.03em;line-height:1.1;margin-top:8px;position:relative;padding:0}
 body.aura-dark .aura-hero h1::after,
 body.aura-light .aura-hero h1::after{display:none}
@@ -1058,11 +1058,13 @@ body.aura-dark .view::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);b
 body.aura-dark .view::-webkit-scrollbar-track{background:transparent}
 
 /* ============ IMERSIVIDADE (rodada 2, pedido do Gabriel) ============ */
-/* Título de página vira display: grande, fino, apertado, com traço de luz âmbar */
-body.aura-dark .page-head h1{
-  font-family:'Sora',var(--sans);font-size:clamp(30px,3.2vw,44px);font-weight:400;
-  letter-spacing:-.045em;line-height:1.04;color:#fff;position:relative;padding-bottom:12px}
-body.aura-dark .page-head h1::after{
+/* Título de página vira display: Sora BOLD, a fonte da ARK (a mesma do deck do TCC) */
+body.aura-dark .page-head h1,body.aura-light .page-head h1{
+  font-family:'Sora',var(--sans);font-size:clamp(27px,2.9vw,38px);font-weight:700;
+  letter-spacing:-.035em;line-height:1.06;position:relative;padding-bottom:12px}
+body.aura-dark .page-head h1{color:#fff}
+body.aura-light .page-head h1{color:#131316}
+body.aura-dark .page-head h1::after,body.aura-light .page-head h1::after{
   content:'';position:absolute;left:1px;bottom:0;width:56px;height:2px;border-radius:2px;
   background:linear-gradient(90deg,var(--yel),rgba(255,199,0,0))}
 body.aura-dark .page-head p,body.aura-dark .page-title p{color:var(--mute);font-size:14px}
@@ -1078,6 +1080,15 @@ body.aura-dark .mdw::after,body.aura-dark .kpi::after,body.aura-dark .md-card::a
   background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),rgba(255,199,0,.12),transparent 62%);
   transition:opacity .35s ease}
 body.aura-dark .mdw:hover::after,body.aura-dark .kpi:hover::after,body.aura-dark .md-card:hover::after{opacity:1}
+
+/* Coreografia de entrada do ARK OS: sidebar desliza da esquerda, Mission Control desce,
+   o resto sobe de baixo pra cima (pedido do Gabriel: "isso é foda e fluido") */
+@keyframes osSideIn{from{opacity:0;transform:translateX(-42px)}to{opacity:1;transform:none}}
+@keyframes osTopIn{from{opacity:0;transform:translateY(-26px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+body.aura-dark .side,body.aura-light .side{animation:osSideIn .7s cubic-bezier(.22,1,.36,1) both}
+body.aura-dark .topbar,body.aura-light .topbar{animation:osTopIn .6s cubic-bezier(.22,1,.36,1) both;animation-delay:.08s}
+@media (prefers-reduced-motion:reduce){
+  body.aura-dark .side,body.aura-light .side,body.aura-dark .topbar,body.aura-light .topbar{animation:none}}
 
 /* Entrada em cascata quando a página abre (classe .aura-enter posta pelo JS) */
 @keyframes arIn{from{opacity:0;transform:translateY(26px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
@@ -1104,8 +1115,9 @@ body.aura-dark .view.aura-enter .page.active .mdw:nth-child(7),
 body.aura-light .view.aura-enter .page.active .mdw:nth-child(7){animation-delay:.42s}
 body.aura-dark .view.aura-enter .page.active .page-head,
 body.aura-light .view.aura-enter .page.active .page-head{animation:arIn .7s cubic-bezier(.16,.6,.28,1) both}
+/* Mission Control chega de CIMA pra baixo, o resto sobe (coreografia do /os) */
 body.aura-dark .view.aura-enter .page.active .aura-hero-row,
-body.aura-light .view.aura-enter .page.active .aura-hero-row{animation:arIn .75s cubic-bezier(.16,.6,.28,1) both;animation-delay:.04s}
+body.aura-light .view.aura-enter .page.active .aura-hero-row{animation:osTopIn .7s cubic-bezier(.16,.6,.28,1) both}
 
 /* Tipografia cinética (ref SVGator, expressive typography): palavras entram uma a uma */
 @keyframes kinIn{from{opacity:0;transform:translateY(.5em) rotate(2.5deg);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
@@ -1191,10 +1203,39 @@ body.aura-dark table td,body.aura-dark table th{border-color:var(--line)}
 body.aura-dark table.t td,body.aura-dark table.t th,body.aura-dark .tl-table td,body.aura-dark .tl-table th,
 body.aura-dark .okr-table td,body.aura-dark .okr-table th{color:var(--txt);background:transparent}
 body.aura-dark table.t thead th,body.aura-dark .tl-table thead th{background:rgba(255,255,255,.04);color:var(--mute)}
-/* Inline whites que sobraram em markup e em HTML gerado por JS */
+/* Inline whites que sobraram em markup e em HTML gerado por JS.
+   IMPORTANTE: cobrir por CSS os tons que o JS recria a cada re-render (sync),
+   senão o normalizador chega atrasado e a tela PISCA em branco (bug do Financeiro). */
 body.aura-dark [style*="background:#fff"]{background:rgba(13,14,17,.6)!important;color:var(--txt)}
 body.aura-dark [style*="background:#fffbeb"],body.aura-dark [style*="background:#fff7d6"],
-body.aura-dark [style*="background:#fff8dc"]{background:rgba(255,199,0,.09)!important;color:var(--txt)}
+body.aura-dark [style*="background:#fff8dc"],body.aura-dark [style*="background:#fef9c3"],
+body.aura-dark [style*="background:#fffbe8"],body.aura-dark [style*="background:#fff4c2"],
+body.aura-dark [style*="background:#fff3cd"]{background:rgba(255,199,0,.09)!important;color:var(--txt)}
+body.aura-dark [style*="background:#eafaef"],body.aura-dark [style*="background:#e6f8ec"],
+body.aura-dark [style*="background:#eef7ee"],body.aura-dark [style*="background:#e7f7ec"],
+body.aura-dark [style*="background:#e9f9ef"],body.aura-dark [style*="background:#f0fff4"],
+body.aura-dark [style*="background:#fafdf6"]{background:rgba(34,197,94,.10)!important;color:var(--txt)}
+body.aura-dark [style*="background:#fdecec"],body.aura-dark [style*="background:#fff1f0"],
+body.aura-dark [style*="background:#ffe9ec"]{background:rgba(239,68,68,.10)!important;color:var(--txt)}
+body.aura-dark [style*="background:#eef4ff"],body.aura-dark [style*="background:#e7f0ff"],
+body.aura-dark [style*="background:#e6f0ff"],body.aura-dark [style*="background:#eff6ff"]{background:rgba(91,140,255,.12)!important;color:var(--txt)}
+body.aura-dark [style*="background:#f6eeff"]{background:rgba(167,139,250,.12)!important;color:var(--txt)}
+body.aura-dark [style*="background:#fafafa"],body.aura-dark [style*="background:#f5f5f7"],
+body.aura-dark [style*="background:#f7f7f8"],body.aura-dark [style*="background:#f0f0f2"],
+body.aura-dark [style*="background:#f0f0ee"],body.aura-dark [style*="background:#fcfcfa"],
+body.aura-dark [style*="background:#fcfbf7"],body.aura-dark [style*="background:#f6f6f4"],
+body.aura-dark [style*="background:#faf9f6"],body.aura-dark [style*="background:#fafaf7"],
+body.aura-dark [style*="background:#fafaf8"],body.aura-dark [style*="background:#f1f1ef"],
+body.aura-dark [style*="background:#f4f1e6"],body.aura-dark [style*="background:#f6f3e9"],
+body.aura-dark [style*="background:#efeae2"],body.aura-dark [style*="background:#e8e8ed"],
+body.aura-dark [style*="background:#e6e6e3"],body.aura-dark [style*="background:#e7e7e3"],
+body.aura-dark [style*="background:#f0f0ed"],body.aura-dark [style*="background:#eef0f2"],
+body.aura-dark [style*="background:#eef0ee"]{background:rgba(255,255,255,.05)!important;color:var(--txt)}
+/* Kanban: demanda de ALTA prioridade ganha fio vermelho à esquerda (espelho do fio da coluna) */
+body.aura-dark #page-tarefas .task-card{border-left:3px solid transparent}
+body.aura-dark #page-tarefas .task-card:has(.prio-alta){border-left-color:#ff453a}
+body.aura-light #page-tarefas .task-card{border-left:3px solid transparent}
+body.aura-light #page-tarefas .task-card:has(.prio-alta){border-left-color:#ff453a}
 /* Títulos e textos fortes herdando tinta clara */
 body.aura-dark .sect-title h2,body.aura-dark .pt,body.aura-dark .stat{color:var(--ink)}
 /* Banner explicativo (Jornada e afins): sai do degradê amarelo-pra-branco, vira ilha âmbar escura */
@@ -1271,7 +1312,7 @@ body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-c
   border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<!-- build AURA-DARK-OS-MIX 20260703-0100 -->
+<!-- build AURA-DARK-OS-MIX 20260703-0300 -->
 <body class="aura-dark">
 <script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
 try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
@@ -2149,6 +2190,21 @@ function wfaSetTheme(t){
 
         <div id="cli-health"></div>
 
+        <!-- Mapa dos clientes (MapLibre GL, o motor do mapcn, carregado sob demanda) -->
+        <div class="card" id="climap-card" style="padding:0;overflow:hidden;margin-bottom:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap">
+            <h3 style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin:0">
+              <span style="width:26px;height:26px;border-radius:8px;background:var(--yel);color:#131316;display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+              Mapa dos clientes <span id="climap-count" style="font-size:11px;color:var(--mute);font-weight:500"></span>
+            </h3>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <select id="climap-sel" class="form-select" style="width:auto;font-size:12px;padding:7px 10px"></select>
+              <button class="icobtn" id="climap-place" onclick="cliMapPlaceToggle()" style="font-size:12px">📍 Posicionar no mapa</button>
+            </div>
+          </div>
+          <div id="climap" style="height:400px;background:#0a0a0c"></div>
+        </div>
+
         <div class="tabs" data-tabs>
           <div class="tab active" data-sub="todos">Todos <span class="ct">14</span></div>
           <div class="tab" data-sub="ark">ARK Direto <span class="ct">8</span></div>
@@ -2964,7 +3020,7 @@ function wfaSetTheme(t){
 
         <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-deleted-ids'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -6570,13 +6626,19 @@ function renderMeuDia(){
   const doneToday=src.filter(t=>t.status==='concluido'&&t.criadaEm&&t.criadaEm.startsWith(today));
   // KPIs
   const kpis=document.getElementById('md-kpis');
-  if(kpis)kpis.innerHTML=[
-    mdKpi('yel','Vencem hoje',todayT.length,todayT.length?'foco do dia':'nada para hoje'),
-    mdKpi('red','Atrasadas',late.length,late.length?'precisa destravar':'tudo em dia ✓'),
-    mdKpi('dk','Pendentes',pend.length,'próximas e sem data'),
-    mdKpi('green','Concluídas hoje',doneToday.length,'no seu nome'),
-  ].join('');
-  if(typeof animateCounters==='function')setTimeout(()=>animateCounters(document.getElementById('page-dashboard')),30);
+  // só reconstrói (e re-anima a contagem) se os números MUDARAM: re-render de sync
+  // recriava os cards toda hora e o contador recomeçava do zero ("página com tique")
+  const _kpiSig=[todayT.length,late.length,pend.length,doneToday.length].join('|');
+  if(kpis&&kpis.dataset.sig!==_kpiSig){
+    kpis.dataset.sig=_kpiSig;
+    kpis.innerHTML=[
+      mdKpi('yel','Vencem hoje',todayT.length,todayT.length?'foco do dia':'nada para hoje'),
+      mdKpi('red','Atrasadas',late.length,late.length?'precisa destravar':'tudo em dia ✓'),
+      mdKpi('dk','Pendentes',pend.length,'próximas e sem data'),
+      mdKpi('green','Concluídas hoje',doneToday.length,'no seu nome'),
+    ].join('');
+    if(typeof animateCounters==='function')setTimeout(()=>animateCounters(document.getElementById('page-dashboard')),30);
+  }
   // JARVIS: resumo do dia (lê a última notificação de resumo/ideia/conselho)
   mdRenderJarvis(late.length,todayT.length,pend.length);
   // Briefings do conselho de hoje
@@ -11345,6 +11407,113 @@ renderComercialMes();
 try{renderMeumes();}catch(e){console.warn('meumes boot',e);}
 try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
 
+/* ============ MAPA DOS CLIENTES (MapLibre GL, o motor por baixo do mapcn) ============ */
+var _mapLibreP=null,_cliMap=null,_cliMapMarkers=[],_cliMapPlacing=false;
+function loadMapLibre(){
+  if(_mapLibreP)return _mapLibreP;
+  _mapLibreP=new Promise(function(res,rej){
+    if(window.maplibregl){res(window.maplibregl);return;}
+    var css=document.createElement('link');css.rel='stylesheet';
+    css.href='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css';
+    document.head.appendChild(css);
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js';
+    s.onload=function(){res(window.maplibregl)};
+    s.onerror=function(){_mapLibreP=null;rej(new Error('sem internet pro mapa'))};
+    document.head.appendChild(s);
+  });
+  return _mapLibreP;
+}
+function cliGeoLoad(){try{return JSON.parse(localStorage.getItem('wfa-cli-geo')||'{}')}catch(e){return{}}}
+function cliGeoSave(g){try{localStorage.setItem('wfa-cli-geo',JSON.stringify(g));}catch(e){}}
+function cliMapClientes(){
+  var base=(typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE)||[];
+  return base.filter(function(c){return c.status!=='churn'});
+}
+function cliMapSelFill(){
+  var sel=document.getElementById('climap-sel');if(!sel)return;
+  var geo=cliGeoLoad();
+  sel.innerHTML=cliMapClientes().map(function(c){
+    return '<option value="'+c.id+'">'+(geo[c.id]?'📍 ':'')+(c.nm||c.id)+'</option>';
+  }).join('');
+}
+function cliMapDots(){
+  if(!_cliMap)return;
+  _cliMapMarkers.forEach(function(m){m.remove()});_cliMapMarkers=[];
+  var geo=cliGeoLoad(),cls=cliMapClientes(),tem=0;
+  var CORES={gr:'#30d158',y:'#ffc700',r:'#ff453a'};
+  cls.forEach(function(c){
+    var p=geo[c.id];if(!p)return;tem++;
+    var el=document.createElement('div');
+    var cor=c.id==='ark'?'#ffc700':(CORES[c.status]||'#9aa1ad');
+    var ini=(c.nm||'?').replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').trim().split(/\s+/).slice(0,2).map(function(w){return w[0]||''}).join('').toUpperCase();
+    el.style.cssText='width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;'
+      +'font:700 11px Inter,sans-serif;color:#fff;background:#0b0c10;border:2.5px solid '+cor+';'
+      +'box-shadow:0 6px 18px -6px '+cor+'99, 0 2px 8px rgba(0,0,0,.5);transition:transform .18s cubic-bezier(.34,1.56,.64,1)';
+    el.textContent=c.id==='ark'?'A':ini;
+    el.onmouseenter=function(){el.style.transform='scale(1.18)'};
+    el.onmouseleave=function(){el.style.transform=''};
+    var pop=new maplibregl.Popup({offset:20,closeButton:false}).setHTML(
+      '<div style="font:600 13px Inter,sans-serif;color:#111;margin-bottom:2px">'+(c.nm||'')+'</div>'
+      +'<div style="font:400 11.5px Inter,sans-serif;color:#666">'+(c.plano||'')+(c.valor?' · R$ '+c.valor.toLocaleString('pt-BR')+'/mês':'')+'</div>'
+      +(c.meta?'<div style="font:400 11px Inter,sans-serif;color:#888;margin-top:3px">'+c.meta+'</div>':'')
+      +'<button onclick="cliMapRemove(\''+c.id+'\')" style="margin-top:7px;font:600 10.5px Inter,sans-serif;color:#c00;background:none;border:none;cursor:pointer;padding:0">remover do mapa</button>');
+    var mk=new maplibregl.Marker({element:el}).setLngLat(p).setPopup(pop).addTo(_cliMap);
+    _cliMapMarkers.push(mk);
+  });
+  var ct=document.getElementById('climap-count');
+  if(ct)ct.textContent='· '+tem+' de '+cls.length+' posicionados';
+  cliMapSelFill();
+}
+function cliMapRemove(id){
+  var g=cliGeoLoad();delete g[id];cliGeoSave(g);cliMapDots();
+  if(typeof toast==='function')toast('Cliente removido do mapa');
+}
+function cliMapPlaceToggle(){
+  _cliMapPlacing=!_cliMapPlacing;
+  var b=document.getElementById('climap-place');
+  if(b){b.style.background=_cliMapPlacing?'var(--yel)':'';b.style.color=_cliMapPlacing?'#131316':'';
+    b.textContent=_cliMapPlacing?'Clique no mapa…':'📍 Posicionar no mapa';}
+  if(_cliMap)_cliMap.getCanvas().style.cursor=_cliMapPlacing?'crosshair':'';
+}
+async function cliMapInit(){
+  var box=document.getElementById('climap');if(!box)return;
+  if(_cliMap){_cliMap.resize();cliMapDots();return;}
+  try{
+    var ml=await loadMapLibre();
+    var escuro=document.body.classList.contains('aura-dark');
+    _cliMap=new ml.Map({
+      container:'climap',
+      style:escuro?'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+                  :'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      center:[-47.8825,-15.7942],zoom:10.2,attributionControl:{compact:true}
+    });
+    _cliMap.addControl(new ml.NavigationControl({showCompass:false}),'top-right');
+    _cliMap.on('load',function(){
+      cliMapDots();
+      var geo=cliGeoLoad(),pts=Object.values(geo);
+      if(pts.length>1){
+        var b=new ml.LngLatBounds();pts.forEach(function(p){b.extend(p)});
+        _cliMap.fitBounds(b,{padding:70,maxZoom:13,duration:800});
+      }
+    });
+    _cliMap.on('click',function(e){
+      if(!_cliMapPlacing)return;
+      var sel=document.getElementById('climap-sel');if(!sel||!sel.value)return;
+      var g=cliGeoLoad();g[sel.value]=[e.lngLat.lng,e.lngLat.lat];cliGeoSave(g);
+      cliMapPlaceToggle();cliMapDots();
+      if(typeof toast==='function')toast('📍 Cliente posicionado ✓');
+    });
+  }catch(err){
+    box.innerHTML='<div style="display:grid;place-items:center;height:100%;color:var(--mute);font-size:12.5px">'+(err&&err.message||'Não deu pra carregar o mapa')+'</div>';
+  }
+}
+document.addEventListener('click',function(e){
+  var nav=e.target.closest&&e.target.closest('[data-nav="lista-clientes"]');
+  if(nav)setTimeout(cliMapInit,350);
+},true);
+if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,900);
+
 /* AURA DARK: navbar de vidro some ao rolar pra baixo e volta ao subir (padrão aurasoftware.cloud) */
 (function(){
   var v=document.getElementById('view');if(!v)return;
@@ -11453,12 +11622,16 @@ try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
     if(!m)return null;
     return {r:+m[1],g:+m[2],b:+m[3],a:m[4]===undefined?1:+m[4]};
   }
-  function auraNormalize(){
+  function auraNormalize(root){
     if(!document.body.classList.contains('aura-dark'))return;
     var t0=performance.now();
-    /* body inteiro: modais (relatório do cliente, detalhe da tarefa) montam FORA do .main e escapavam */
-    var els=document.querySelectorAll('body *:not(svg):not(path):not(circle):not(rect):not(line):not(iframe):not(img):not([data-aura-keep])');
-    els=Array.prototype.filter.call(els,function(el){return !el.closest('.side')&&!el.closest('#wfa-aparencia')});
+    /* body inteiro: modais (relatório do cliente, detalhe da tarefa) montam FORA do .main e escapavam.
+       Com root: processa só a subárvore recém-criada (mutação), muito mais leve que varrer tudo. */
+    var sel='*:not(svg):not(path):not(circle):not(rect):not(line):not(iframe):not(img):not([data-aura-keep])';
+    var els;
+    if(root&&root.nodeType===1){els=[root].concat(Array.prototype.slice.call(root.querySelectorAll(sel)));}
+    else{els=Array.prototype.slice.call(document.body.querySelectorAll(sel));}
+    els=els.filter(function(el){return !el.closest('.side')&&!el.closest('#wfa-aparencia')&&!el.closest('#climap')&&!el.closest('.maplibregl-popup')});
     var darkened=new WeakSet();
     els.forEach(function(el){
       var cs=getComputedStyle(el);
@@ -11517,9 +11690,17 @@ try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
     });
     if(performance.now()-t0>200)console.warn('auraNormalize lento',Math.round(performance.now()-t0)+'ms');
   }
-  var normT=null;
-  function auraNormalizeSoon(){clearTimeout(normT);normT=setTimeout(auraNormalize,320)}
-  new MutationObserver(auraNormalizeSoon).observe(document.body,{childList:true,subtree:true});
+  var normT=null,_normRoots=[];
+  function auraNormalizeSoon(){clearTimeout(normT);normT=setTimeout(function(){
+    var roots=_normRoots.splice(0);
+    if(roots.length&&roots.length<=60)roots.forEach(function(r){auraNormalize(r)});
+    else auraNormalize(); /* mudança grande demais: passada completa */
+  },90)}
+  new MutationObserver(function(muts){
+    for(var i=0;i<muts.length;i++){var ad=muts[i].addedNodes;
+      for(var j=0;j<ad.length;j++)if(ad[j].nodeType===1)_normRoots.push(ad[j]);}
+    auraNormalizeSoon();
+  }).observe(document.body,{childList:true,subtree:true});
   document.addEventListener('click',function(e){
     /* na troca de página normaliza ANTES do primeiro paint (mata o flash branco do Planejamento/POPs) */
     if(e.target.closest&&e.target.closest('[data-nav],[data-subnav]')){requestAnimationFrame(auraNormalize);auraNormalizeSoon();}
