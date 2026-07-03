@@ -76,6 +76,33 @@ export const APROVACOES_DEMO = [
   { t: "Resposta sugerida no WhatsApp", s: "Fercon · Atendente", cor: "#B6A5F5" },
 ];
 
+/* Proposta do agente Social Media (wfa-social-fila, server-owned; decidir via action social-decide) */
+export type Proposta = {
+  id: string; cliente: string; formato: string; tema: string;
+  gancho: string; roteiro: string; legenda: string; cta: string;
+};
+
+export const FILA_DEMO: Proposta[] = [
+  { id: "fd1", cliente: "Cachu Restaurante", formato: "Carrossel",
+    tema: "5 motivos para amassar o burger do Cachu",
+    gancho: "O segredo não está no pão. Está no que a gente faz antes dele.",
+    roteiro: "Capa com o burger em close. Cards 2 a 5 com um motivo cada (blend da casa, pão de fermentação, queijo derretido na chapa, molho autoral). Último card com CTA.",
+    legenda: "Tem burger e tem O burger. Aqui a gente escolheu fazer do jeito difícil: blend próprio, pão de fermentação natural e molho da casa. Vem provar o motivo número 6. 📍 Asa Sul",
+    cta: "Marca quem vem junto no próximo rodízio." },
+  { id: "fd2", cliente: "Vivenda", formato: "Reel",
+    tema: "Bastidores da cozinha: o creme de ureia saindo da linha",
+    gancho: "Você já viu um creme ser envasado de perto? Olha isso.",
+    roteiro: "Abre na linha de envase (3s). Corte para a textura do creme. Fecha com a embalagem e o benefício em uma frase.",
+    legenda: "Da linha de produção direto para a sua rotina de cuidado. O creme de ureia da Vivenda nasce assim: processo limpo, textura que você sente na primeira aplicação.",
+    cta: "Toca no link da bio para conhecer." },
+  { id: "fd3", cliente: "Babbo Giovanni", formato: "Post",
+    tema: "Promoção de quarta: pizza em dobro",
+    gancho: "Quarta é dia de dobrar a pizza, não a sobremesa.",
+    roteiro: "Arte única com a pizza inteira em cima e a condição da promoção embaixo.",
+    legenda: "Toda quarta a segunda pizza sai por nossa conta. Vale no salão, das 18h às 22h. Chama a mesa inteira.",
+    cta: "Reserva pelo link da bio." },
+];
+
 /* Tarefa do V1 (public/workflowark.html): title, data (prazo ISO), status ('concluido' = feita),
    clienteId, funcao, resp, prio. NUNCA remover campos desconhecidos ao salvar. */
 function tarefaAberta(t: any) {
@@ -102,6 +129,7 @@ export function useArkData() {
   const [tarefasTop, setTarefasTop] = useState<TarefaLinha[]>(TAREFAS_DEMO);
   const [tarefasAll, setTarefasAll] = useState<TarefaLinha[]>(TAREFAS_DEMO_OPS);
   const [nomesCli, setNomesCli] = useState<Record<string, string>>(CLIENTES_NM);
+  const [fila, setFila] = useState<Proposta[]>(FILA_DEMO);
 
   const aplicar = (st: any, member?: any) => {
     const tarefas: any[] = Array.isArray(st["wfa-tarefas"]) ? st["wfa-tarefas"] : [];
@@ -111,7 +139,17 @@ export function useArkData() {
     const hoje = new Date().toISOString().slice(0, 10);
     const abertasArr = tarefas.filter(tarefaAberta);
     const atrasadas = abertasArr.filter((t) => (t.data || t.prazo) && String(t.data || t.prazo) < hoje).length;
-    const fila = (st["wfa-social-fila"] || []).filter((p: any) => p?.status === "pendente").length;
+    const pendentes: any[] = (st["wfa-social-fila"] || []).filter((p: any) => p?.status === "pendente");
+    const fila = pendentes.length;
+    setFila(pendentes
+      .slice()
+      .sort((a, b) => (b?.ts || 0) - (a?.ts || 0))
+      .map((p) => ({
+        id: String(p.id || ""), cliente: String(p.cliente || nomes[p.clienteId] || "Cliente"),
+        formato: String(p.formato || "Post"), tema: String(p.tema || "Proposta de postagem"),
+        gancho: String(p.gancho || ""), roteiro: String(p.roteiro || ""),
+        legenda: String(p.legenda || ""), cta: String(p.cta || ""),
+      })));
     const briefings = (st["wfa-conselho-briefings"] || []).length;
     const notifs: any[] = st["wfa-notificacoes"] || [];
     const reais: Op[] = notifs.slice(-14).reverse().map((n: any, i: number) => ({
@@ -209,7 +247,28 @@ export function useArkData() {
     await salvarTarefas((ts) => [...ts, nova]);
   };
 
-  return { demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, concluirTarefa, criarTarefa };
+  /* Aprovar ou recusar UMA proposta (action social-decide: o servidor muda só o status). */
+  const decidirProposta = async (id: string, decisao: "aprovada" | "recusada") => {
+    setFila((l) => l.filter((p) => p.id !== id));
+    setStats((s) => ({ ...s, fila: Math.max(0, s.fila - 1) }));
+    if (demo) return;
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) throw new Error("sem sessão");
+      const r = await fetch("/api/workflowark/state", {
+        method: "POST",
+        headers: { "content-type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "social-decide", id, decisao }),
+      });
+      if (!r.ok) throw new Error("decide falhou");
+    } catch {
+      const res = await carregar().catch(() => null);
+      if (res) aplicar(res.j.state || {});
+    }
+  };
+
+  return { demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila, concluirTarefa, criarTarefa, decidirProposta };
 }
 
 export function chipClass(due: string) {

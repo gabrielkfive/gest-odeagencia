@@ -4,10 +4,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { Activity, Check, Hexagon, PenLine, Plus } from "lucide-react";
 import { spring, easeApple } from "./tokens";
 import {
-  AGENTES, APROVACOES_DEMO, TAREFAS_DEMO,
-  chipClass, type Op, type TarefaLinha,
+  AGENTES, TAREFAS_DEMO,
+  chipClass, type Op, type Proposta, type TarefaLinha,
 } from "./dados";
 import { AgentCard, Donut, Reveal, Spark } from "./ui";
+
+const CORES_AP = ["#FFD84D", "#7DD8D8", "#F4A0C0", "#B6A5F5", "#9BE29B"];
 
 type OperacoesProps = {
   demo: boolean; tarefas: TarefaLinha[]; fila: number;
@@ -135,6 +137,69 @@ export function OperacoesView({ demo, tarefas, fila, nomesCli, onConcluir, onCri
   );
 }
 
+type AprovacoesProps = {
+  demo: boolean; fila: Proposta[];
+  onDecidir: (id: string, decisao: "aprovada" | "recusada") => void;
+};
+
+function PropostaCard({ p, i, onDecidir }: { p: Proposta; i: number; onDecidir: AprovacoesProps["onDecidir"] }) {
+  const [aberta, setAberta] = useState(false);
+  return (
+    <motion.div layout className="panel prop" initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }}
+      exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.35, ease: easeApple } }}
+      transition={{ duration: 0.55, ease: easeApple, delay: 0.04 * i }}>
+      <div className="prop-head">
+        <span className="prop-cli" style={{ background: CORES_AP[i % CORES_AP.length] }}>{p.cliente}</span>
+        <span className="prop-fmt">{p.formato}</span>
+      </div>
+      <div className="prop-tema">{p.tema}</div>
+      {p.gancho && <p className="prop-gancho">“{p.gancho}”</p>}
+      {p.legenda && (
+        <p className={`prop-legenda ${aberta ? "aberta" : ""}`} onClick={() => setAberta((v) => !v)}
+          title={aberta ? "Recolher" : "Ver completa"}>{p.legenda}</p>
+      )}
+      {aberta && p.roteiro && <p className="prop-roteiro"><b>Roteiro.</b> {p.roteiro}</p>}
+      {aberta && p.cta && <p className="prop-roteiro"><b>CTA.</b> {p.cta}</p>}
+      <div className="prop-acts">
+        <button className="btn-aprovar" onClick={() => onDecidir(p.id, "aprovada")}>Aprovar</button>
+        <button className="btn-recusar" onClick={() => onDecidir(p.id, "recusada")}>Recusar</button>
+        <button className="btn-ver" onClick={() => setAberta((v) => !v)}>{aberta ? "Recolher" : "Ver tudo"}</button>
+      </div>
+    </motion.div>
+  );
+}
+
+export function AprovacoesView({ demo, fila, onDecidir }: AprovacoesProps) {
+  return (
+    <>
+      <Reveal>
+        <div className="view-hero">
+          <div className="view-eyebrow">ARK OS · Aprovações</div>
+          <h1 className="view-h1">Nada sai sem você.<br /><span className="soft">Seu aval em um toque.</span></h1>
+          <p className="view-lead">
+            Tudo que os agentes produziram e está esperando a sua decisão.
+            Aprovou, segue para publicação. Recusou, morre aqui.
+            {demo ? " Modo demonstração: as decisões valem só nesta tela." : ""}
+          </p>
+        </div>
+      </Reveal>
+      <AnimatePresence initial={false}>
+        {fila.map((p, i) => <PropostaCard key={p.id} p={p} i={i} onDecidir={onDecidir} />)}
+      </AnimatePresence>
+      {!fila.length && (
+        <Reveal>
+          <div className="empty-view" style={{ padding: "60px 6px 80px" }}>
+            <h1 className="view-h1" style={{ fontSize: 34 }}>Fila zerada.</h1>
+            <p className="view-lead">Nenhuma proposta esperando o seu aval agora.</p>
+          </div>
+        </Reveal>
+      )}
+      <div style={{ height: 24 }} />
+    </>
+  );
+}
+
 export function AgentesView({ open }: { open: (id: string) => void }) {
   return (
     <>
@@ -170,11 +235,11 @@ export function EmBreveView({ eyebrow, titulo, texto }: { eyebrow: string; titul
 export type MissaoProps = {
   saud: string; nome: string; demo: boolean;
   abertas: number; atrasadas: number; fila: number; briefings: number; emDia: number;
-  tarefasTop: TarefaLinha[]; feed: Op[]; reduced: boolean;
-  open: (id: string) => void; verOperacoes: () => void;
+  tarefasTop: TarefaLinha[]; filaItens: Proposta[]; feed: Op[]; reduced: boolean;
+  open: (id: string) => void; verOperacoes: () => void; verAprovacoes: () => void;
 };
 
-export function MissaoView({ saud, nome, demo, abertas, atrasadas, fila, briefings, emDia, tarefasTop, feed, reduced, open, verOperacoes }: MissaoProps) {
+export function MissaoView({ saud, nome, demo, abertas, atrasadas, fila, briefings, emDia, tarefasTop, filaItens, feed, reduced, open, verOperacoes, verAprovacoes }: MissaoProps) {
   const chega = (delay: number) => ({
     initial: { y: 24, opacity: 0 },
     animate: { y: 0, opacity: 1 },
@@ -212,7 +277,7 @@ export function MissaoView({ saud, nome, demo, abertas, atrasadas, fila, briefin
           <Donut pct={emDia} />
           <div className="gv">{atrasadas} atrasada{atrasadas === 1 ? "" : "s"}</div>
           <div className="gs">de {abertas} tarefas abertas. {fila} proposta{fila === 1 ? "" : "s"} esperando o seu aval.</div>
-          <a className="gbtn" href="/postagens">Revisar fila</a>
+          <a className="gbtn" style={{ cursor: "pointer" }} onClick={verAprovacoes}>Revisar fila</a>
         </div>
       </motion.div>
 
@@ -244,21 +309,24 @@ export function MissaoView({ saud, nome, demo, abertas, atrasadas, fila, briefin
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div className="panel">
-            <div className="pt">Fila de aprovação <a href="/postagens">ver todas →</a></div>
+            <div className="pt">Fila de aprovação <a style={{ cursor: "pointer" }} onClick={verAprovacoes}>ver todas →</a></div>
             <div style={{ marginTop: 8 }}>
-              {APROVACOES_DEMO.slice(0, demo ? 4 : Math.max(1, Math.min(4, fila))).map((p, i) => (
-                <motion.div className="ap-it" key={i} initial={{ opacity: 0, x: 14 }}
+              {filaItens.slice(0, 4).map((p, i) => (
+                <motion.div className="ap-it" key={p.id} initial={{ opacity: 0, x: 14 }}
                   animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.3 + i * 0.06 }}>
-                  <span className="ap-ic" style={{ background: p.cor }}>
+                  <span className="ap-ic" style={{ background: CORES_AP[i % CORES_AP.length] }}>
                     <PenLine size={16} strokeWidth={1.8} />
                   </span>
                   <div className="ap-tx">
-                    <div className="ap-t">{p.t}</div>
-                    <div className="ap-s">{p.s}</div>
+                    <div className="ap-t">{p.formato} · {p.tema}</div>
+                    <div className="ap-s">{p.cliente} · Social Media</div>
                   </div>
-                  <a className="ap-chip" href="/postagens">Revisar</a>
+                  <a className="ap-chip" style={{ cursor: "pointer" }} onClick={verAprovacoes}>Revisar</a>
                 </motion.div>
               ))}
+              {!filaItens.length && (
+                <div className="ap-s" style={{ padding: "14px 0 6px" }}>Nenhuma proposta esperando o seu aval.</div>
+              )}
             </div>
           </div>
 

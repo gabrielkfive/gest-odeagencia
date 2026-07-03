@@ -289,6 +289,27 @@ html:has(.arkos),body:has(.arkos){background:#E9EBF3; margin:0}
 @media (max-width:760px){.arkos .composer{flex-wrap:wrap}
   .arkos .composer .c-title{flex-basis:100%}}
 
+/* cards de proposta (Aprovações) */
+.arkos .prop .prop-head{display:flex; align-items:center; gap:8px}
+.arkos .prop .prop-cli{font-size:11px; font-weight:700; color:#131316; border-radius:8px; padding:4px 10px}
+.arkos .prop .prop-fmt{font-size:11px; color:var(--dim); border:1px solid var(--hair2); border-radius:8px; padding:3px 10px}
+.arkos .prop .prop-tema{font-family:var(--disp); font-size:21px; font-weight:700; letter-spacing:-.02em; margin-top:14px}
+.arkos .prop .prop-gancho{font-size:14px; color:var(--mute); font-style:italic; margin-top:8px}
+.arkos .prop .prop-legenda{font-size:13px; color:var(--mute); line-height:1.6; margin-top:10px; cursor:pointer;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.arkos .prop .prop-legenda.aberta{-webkit-line-clamp:unset}
+.arkos .prop .prop-roteiro{font-size:13px; color:var(--mute); line-height:1.6; margin-top:10px}
+.arkos .prop .prop-roteiro b{color:var(--ink)}
+.arkos .prop .prop-acts{display:flex; gap:10px; margin-top:18px}
+.arkos .btn-aprovar{border:0; border-radius:12px; background:var(--black); color:#fff; font-size:12.5px;
+  font-weight:600; padding:11px 22px; transition:transform .18s}
+.arkos .btn-aprovar:hover{transform:translateY(-1px); background:var(--black2)}
+.arkos .btn-recusar{border:1px solid var(--hair2); border-radius:12px; background:none; color:var(--mute);
+  font-size:12.5px; font-weight:600; padding:11px 20px; transition:all .2s}
+.arkos .btn-recusar:hover{color:#C2372F; border-color:rgba(244,100,92,.4); background:rgba(244,100,92,.06)}
+.arkos .btn-ver{border:0; background:none; color:var(--dim); font-size:12px; font-weight:500; margin-left:auto}
+.arkos .btn-ver:hover{color:var(--ink)}
+
 /* check de concluir tarefa */
 .arkos .tt .t-check{width:34px; padding-right:2px}
 .arkos .chk{width:22px; height:22px; border-radius:50%; border:1.5px solid var(--hair2);

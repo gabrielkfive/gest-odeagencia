@@ -4,13 +4,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
-  Sparkles, Hexagon, Activity, BrainCircuit, Users,
+  Sparkles, Hexagon, Activity, BrainCircuit, Users, Inbox,
   ArrowLeft, Search, Bell, LayoutGrid,
 } from "lucide-react";
 import { CSS, spring, springSoft, easeApple } from "@/components/arkos/tokens";
 import { AGENTES, OPS_DEMO, useArkData, type Op } from "@/components/arkos/dados";
 import { AgentExpanded, Boot } from "@/components/arkos/ui";
-import { AgentesView, EmBreveView, MissaoView, OperacoesView } from "@/components/arkos/vistas";
+import { AgentesView, AprovacoesView, EmBreveView, MissaoView, OperacoesView } from "@/components/arkos/vistas";
 
 export const Route = createFileRoute("/os")({
   head: () => ({
@@ -29,8 +29,9 @@ export const Route = createFileRoute("/os")({
 
 const RAIL = [
   { id: "missao", Icon: LayoutGrid, label: "Mission Control" },
-  { id: "agentes", Icon: Hexagon, label: "Agentes" },
   { id: "operacoes", Icon: Activity, label: "Operações" },
+  { id: "aprovacoes", Icon: Inbox, label: "Aprovações" },
+  { id: "agentes", Icon: Hexagon, label: "Agentes" },
   { id: "memoria", Icon: BrainCircuit, label: "Memória" },
   { id: "clientes", Icon: Users, label: "Clientes" },
 ];
@@ -42,7 +43,7 @@ function ArkOS() {
   const [nav, setNav] = useState("missao");
   const [cmd, setCmd] = useState("");
   const [openAg, setOpenAg] = useState<string | null>(null);
-  const { demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, concluirTarefa, criarTarefa } = useArkData();
+  const { demo, nome, stats, ops, tarefasTop, tarefasAll, nomesCli, fila: filaItens, concluirTarefa, criarTarefa, decidirProposta } = useArkData();
   const [feed, setFeed] = useState<Op[]>([]);
   const feedIdx = useRef(0);
 
@@ -67,14 +68,14 @@ function ArkOS() {
   const saud = hora < 5 ? "Boa madrugada" : hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
   const agAberto = AGENTES.find((a) => a.id === openAg);
 
-  const abertas = demo ? 23 : stats.abertas;
-  const atrasadas = demo ? 3 : stats.atrasadas;
-  const fila = demo ? 4 : stats.fila;
+  const abertas = demo ? tarefasAll.length : stats.abertas;
+  const atrasadas = demo ? tarefasAll.filter((t) => t.due === "atrasada").length : stats.atrasadas;
+  const filaN = demo ? filaItens.length : stats.fila;
   const briefings = demo ? 12 : stats.briefings;
   const emDia = abertas > 0 ? Math.round(100 * (abertas - atrasadas) / abertas) : 100;
 
   return (
-    <div className="arkos" data-build="arkos-v3-20260703-c3">
+    <div className="arkos" data-build="arkos-v3-20260703-c4">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <AnimatePresence>{!booted && <Boot done={() => setBooted(true)} />}</AnimatePresence>
 
@@ -97,7 +98,7 @@ function ArkOS() {
                 )}
                 <span className="side-ic"><r.Icon size={16} strokeWidth={1.8} /></span>
                 <span className="side-label">{r.label}</span>
-                {r.id === "operacoes" && fila > 0 && <span className="side-badge">{fila}</span>}
+                {r.id === "aprovacoes" && filaN > 0 && <span className="side-badge">{filaN}</span>}
               </button>
             ))}
             <div style={{ flex: 1 }} />
@@ -126,7 +127,7 @@ function ArkOS() {
                 {demo && <span className="demo-tag mono">DEMO</span>}
                 <button className="icon-btn" aria-label="Notificações">
                   <Bell size={17} strokeWidth={1.8} />
-                  {fila > 0 && <span className="ping" />}
+                  {filaN > 0 && <span className="ping" />}
                 </button>
                 <span className="avatar-top">{nome.slice(0, 1).toUpperCase()}</span>
               </motion.div>
@@ -139,13 +140,17 @@ function ArkOS() {
                   style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                   {nav === "missao" && (
                     <MissaoView saud={saud} nome={nome} demo={demo} abertas={abertas}
-                      atrasadas={atrasadas} fila={fila} briefings={briefings} emDia={emDia}
-                      tarefasTop={tarefasTop} feed={feed} reduced={!!reduced}
-                      open={setOpenAg} verOperacoes={() => setNav("operacoes")} />
+                      atrasadas={atrasadas} fila={filaN} briefings={briefings} emDia={emDia}
+                      tarefasTop={tarefasTop} filaItens={filaItens} feed={feed} reduced={!!reduced}
+                      open={setOpenAg} verOperacoes={() => setNav("operacoes")}
+                      verAprovacoes={() => setNav("aprovacoes")} />
                   )}
                   {nav === "operacoes" && (
-                    <OperacoesView demo={demo} tarefas={tarefasAll} fila={fila}
+                    <OperacoesView demo={demo} tarefas={tarefasAll} fila={filaN}
                       nomesCli={nomesCli} onConcluir={concluirTarefa} onCriar={criarTarefa} />
+                  )}
+                  {nav === "aprovacoes" && (
+                    <AprovacoesView demo={demo} fila={filaItens} onDecidir={decidirProposta} />
                   )}
                   {nav === "agentes" && <AgentesView open={setOpenAg} />}
                   {nav === "memoria" && (
