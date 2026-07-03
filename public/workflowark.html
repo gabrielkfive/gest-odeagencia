@@ -2663,6 +2663,8 @@ function wfaSetTheme(t){
               <option value="2026-11">Nov 2026</option>
               <option value="2026-12">Dez 2026</option>
             </select>
+            <button class="tb-btn" onclick="window.open('/propostas','_blank')">⚡ Nova proposta</button>
+            <button class="tb-btn" onclick="window.open('/contratos','_blank')">⚖️ Novo contrato</button>
             <button class="tb-btn" onclick="comercialSalvarMes()">Salvar dados do mês</button>
           </div>
         </div>
@@ -3540,6 +3542,11 @@ function iniciarAutoSync(){
           <div class="ag-card on" onclick="document.querySelector('[data-nav=roteirista]').click()">
             <div class="ag-top"><div class="ag-ico">🎬</div><div><div class="ag-nm">Roteirista Viral</div><div class="ag-role">Conteúdo</div></div></div>
             <div class="ag-desc">Transforma um tema em roteiro de Reels/TikTok com gancho, estrutura e legenda — pronto para gravar.</div>
+            <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
+          </div>
+          <div class="ag-card on" onclick="window.open('/comercial','_blank')">
+            <div class="ag-top"><div class="ag-ico">🤝</div><div><div class="ag-nm">Estrategista Comercial</div><div class="ag-role">Comercial · propostas e contratos</div></div></div>
+            <div class="ag-desc">Gera a proposta premium de 17 páginas com dados reais do Instagram e o contrato blindado por segmento (PDF e DOCX), na IDV da ARK.</div>
             <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
           </div>
           <div class="ag-card on" onclick="document.querySelector('[data-nav=cliente]').click()">
