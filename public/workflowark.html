@@ -1560,9 +1560,24 @@ function wfaSetTheme(t){
         </div>
       </div>
 
-      <div class="navitem" data-nav="comercial">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <div class="navitem" data-toggle="comercial-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         <span>Comercial</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="subnav" id="comercial-menu">
+        <div class="subitem" data-nav="comercial">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span>Funil</span>
+        </div>
+        <div class="subitem" data-nav="propostas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Propostas</span>
+        </div>
+        <div class="subitem" data-nav="contratos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Contratos</span>
+        </div>
       </div>
 
       <div class="navitem" data-nav="tarefas">
@@ -2732,22 +2747,10 @@ function wfaSetTheme(t){
               <option value="2026-11">Nov 2026</option>
               <option value="2026-12">Dez 2026</option>
             </select>
-            <button class="tb-btn" onclick="comTab('propostas')">⚡ Nova proposta</button>
-            <button class="tb-btn" onclick="comTab('contratos')">⚖️ Novo contrato</button>
             <button class="tb-btn" onclick="comercialSalvarMes()">Salvar dados do mês</button>
           </div>
         </div>
 
-        <!-- Sub-abas do Comercial: Funil nativo + Propostas e Contratos (páginas do Estrategista embutidas) -->
-        <div class="al-tabbar" id="com-tabbar" style="margin:0 0 14px">
-          <button class="al-tab on" data-comtab="funil" onclick="comTab('funil')">Funil</button>
-          <button class="al-tab" data-comtab="propostas" onclick="comTab('propostas')">⚡ Propostas</button>
-          <button class="al-tab" data-comtab="contratos" onclick="comTab('contratos')">⚖️ Contratos</button>
-        </div>
-        <div id="com-embed" style="display:none">
-          <iframe loading="lazy" id="com-if-propostas" data-src="/propostas.html" style="display:none;width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
-          <iframe loading="lazy" id="com-if-contratos" data-src="/contratos.html" style="display:none;width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
-        </div>
         <div id="comercial-mes-banner" class="alert yel" style="margin-bottom:12px;display:none">
           <h4>Mês anterior</h4>
           <span id="comercial-mes-banner-txt">Visualizando dados de mês anterior. Edite os campos para registrar histórico.</span>
@@ -2789,6 +2792,24 @@ function wfaSetTheme(t){
           <div class="card dk"><h4 style="font-size:11px;font-weight:700;color:var(--yel);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Fechamentos meta</h4><div style="font-size:22px;font-weight:700;font-family:var(--mono);color:#fff" contenteditable="true" data-com-key="meta_fecha">≥3</div><p style="font-size:11.5px;color:#a8a8a4;margin-top:5px" contenteditable="true" data-com-key="meta_fecha_d">Conversão ≥ 20% em qualificados</p></div>
         </div>
         <p style="font-size:10.5px;color:var(--mute);margin-top:10px">💡 Clique em qualquer valor para editar. Clique em "Salvar dados do mês" para registrar no histórico.</p>
+      </div>
+
+      <!-- =================== PROPOSTAS (Estrategista Comercial) =================== -->
+      <div class="page" id="page-propostas">
+        <div class="page-head">
+          <div class="page-title"><h1>Propostas</h1><p>Estrategista Comercial · proposta premium com dados reais, preview e PDF</p></div>
+          <button class="tb-btn" onclick="window.open('/propostas','_blank')">Abrir em tela cheia</button>
+        </div>
+        <iframe loading="lazy" src="/propostas.html" title="Gerador de Propostas" style="width:100%;height:calc(100vh - 165px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
+      </div>
+
+      <!-- =================== CONTRATOS (Estrategista Comercial) =================== -->
+      <div class="page" id="page-contratos">
+        <div class="page-head">
+          <div class="page-title"><h1>Contratos</h1><p>Estrategista Comercial · contrato blindado por segmento, PDF e DOCX</p></div>
+          <button class="tb-btn" onclick="window.open('/contratos','_blank')">Abrir em tela cheia</button>
+        </div>
+        <iframe loading="lazy" src="/contratos.html" title="Gerador de Contratos" style="width:100%;height:calc(100vh - 165px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
       </div>
 
       <!-- =================== ORGANOGRAMA =================== -->
@@ -3627,7 +3648,7 @@ function iniciarAutoSync(){
             <div class="ag-desc">Transforma um tema em roteiro de Reels/TikTok com gancho, estrutura e legenda — pronto para gravar.</div>
             <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
           </div>
-          <div class="ag-card on" onclick="document.querySelector('[data-nav=comercial]').click();setTimeout(()=>comTab('propostas'),60)">
+          <div class="ag-card on" onclick="document.querySelector('[data-nav=propostas]').click()">
             <div class="ag-top"><div class="ag-ico">🤝</div><div><div class="ag-nm">Estrategista Comercial</div><div class="ag-role">Comercial · propostas e contratos</div></div></div>
             <div class="ag-desc">Gera a proposta premium de 17 páginas com dados reais do Instagram e o contrato blindado por segmento (PDF e DOCX), na IDV da ARK.</div>
             <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
@@ -6914,7 +6935,7 @@ const NAV_CATALOG=[
   {k:'dashboard',l:'Meu Dia'},{k:'painel',l:'Meu Painel'},{k:'reunioes',l:'Reuniões · Agenda'},
   {k:'lista-clientes',l:'Lista de Clientes'},{k:'jornada',l:'Jornada · Sprints'},{k:'regua',l:'Régua dos 15'},
   {k:'tarefas',l:'Tarefas'},{k:'demandas',l:'Demandas'},{k:'rotinas',l:'Rotinas'},
-  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'conselho',l:'Conselho de IA'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},
+  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'conselho',l:'Conselho de IA'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},{k:'propostas',l:'Propostas'},{k:'contratos',l:'Contratos'},
   {k:'crm',l:'CRM · Pipeline'},
   {k:'organograma',l:'Organograma'},{k:'pops',l:'POPs por Função'},{k:'processos',l:'Processos'},
   {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},{k:'tutorial',l:'Tutorial / POPs'},{k:'integracoes',l:'Integrações'},
@@ -11086,6 +11107,10 @@ function renderAgenda(){
   // Convert Sunday-first to Monday-first: Mon=0..Sun=6
   const startOffset=(firstDay===0?6:firstDay-1);
   const grid=document.getElementById('agenda-cal-grid');if(!grid)return;
+  // escrita calma: o sync chamava isso toda hora e o calendário inteiro piscava
+  const _sig=ano+'-'+mes+'|'+JSON.stringify(events);
+  if(grid.dataset.sig===_sig)return;
+  grid.dataset.sig=_sig;
   // Keep headers
   const headers=Array.from(grid.querySelectorAll('.cal-dh'));
   grid.innerHTML='';
@@ -11095,7 +11120,8 @@ function renderAgenda(){
   // Day cells
   for(let day=1;day<=days;day++){
     const dateStr=`${ano}-${String(mes+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const dayEvs=events.filter(ev=>ev.date===dateStr);
+    const dayEvs=events.filter(ev=>ev.date===dateStr)
+      .sort((a,b)=>String(a.time||'99:99').localeCompare(String(b.time||'99:99'))); // manhã em cima, noite embaixo
     const isToday=dateStr===todayStr;
     const d=document.createElement('div');
     d.className='cal-d'+(isToday?' today':'');
@@ -11716,24 +11742,7 @@ document.addEventListener('click',function(e){
 if(document.querySelector('#page-conselho.active'))setTimeout(consBancadaRender,800);
 
 /* Sub-abas do Comercial: Funil nativo ou Propostas/Contratos embutidos (iframe lazy, mesma origem) */
-function comTab(id){
-  var pg=document.getElementById('page-comercial');if(!pg)return;
-  document.querySelectorAll('#com-tabbar .al-tab').forEach(function(b){b.classList.toggle('on',b.dataset.comtab===id)});
-  var embed=document.getElementById('com-embed');
-  var funil=id==='funil';
-  /* esconde o conteúdo do funil sem tocar nele: tudo que não é cabeçalho, tabbar ou embed */
-  Array.prototype.forEach.call(pg.children,function(el){
-    if(el.classList.contains('page-head')||el.id==='com-tabbar'||el.id==='com-embed')return;
-    el.style.display=funil?'':'none';
-  });
-  embed.style.display=funil?'none':'';
-  ['propostas','contratos'].forEach(function(k){
-    var f=document.getElementById('com-if-'+k);
-    var ativo=(k===id);
-    f.style.display=ativo?'':'none';
-    if(ativo&&!f.src)f.src=f.dataset.src; /* carrega só na primeira abertura */
-  });
-}
+/* Propostas e Contratos agora são páginas próprias no grupo Comercial do menu (page-propostas / page-contratos). */
 
 /* Lançar missão (ref ARK OS): o objetivo vira tarefa de alta prioridade no fluxo normal */
 function auraLancarMissao(inp){
