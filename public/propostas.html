@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gerador de Propostas · Estrategista Comercial ARK</title>
-<!-- build-propostas-20260703-0107 -->
+<!-- build-propostas-20260703-0117 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -176,7 +176,7 @@ function montar() {
 
   // verificações: tokens órfãos e travessões
   const sobras = html.match(/\{\{[A-Z_0-9]+\}\}/g);
-  const travessoes = html.match(/[—–─━═]/g);
+  const travessoes = html.match(new RegExp('[\u2014\u2013\u2500\u2501\u2550]', 'g'));
   const aviso = document.getElementById('aviso');
   let msg = '';
   if (sobras) msg += 'Campos sem valor: ' + [...new Set(sobras)].join(', ') + '\n';

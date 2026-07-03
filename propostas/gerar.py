@@ -25,7 +25,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
-TRAVESSOES = ['—', '–', '─', '━', '═']  # yasismo: proibido
+TRAVESSOES = ['\u2014', '\u2013', '\u2500', '\u2501', '\u2550']  # yasismo: proibido
 
 
 def b64(path, mime):
