@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gerador de Contratos · Estrategista Comercial ARK</title>
-<!-- build-contratos-20260703-A -->
+<!-- build-contratos-20260703-B -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -67,7 +67,7 @@ button:hover{transform:translateY(-1px)}
 <div class="shell">
   <div class="form">
     <h1>Novo contrato</h1>
-    <div class="sub">Contrato de prestação de serviços de marketing e comunicação, com as blindagens dos modelos mais recentes da ARK. Baixe em PDF ou DOCX (fundo preto, logo ARK).</div>
+    <div class="sub">Contrato de prestação de serviços com as blindagens dos modelos mais recentes da ARK. <b style="color:var(--amarelo)">Já abre com um exemplo pronto</b>, é só trocar pelos dados reais do cliente. Baixa em PDF (vertical, fundo preto) ou DOCX.</div>
 
     <div class="sec">Segmento</div>
     <select id="segmento" onchange="aplicarSegmento()">
@@ -184,12 +184,21 @@ function aplicarSegmento() {
   document.getElementById('plano').value = s.plano.join('\n');
 }
 
-// data default
+// data default + contrato de exemplo já carregado
 (function () {
   const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const d = new Date();
   document.getElementById('local_data').value = `Brasília/DF, ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
   aplicarSegmento();
+  // exemplo: troque pelos dados reais do cliente
+  document.getElementById('ct_nome').value = 'Cliente Exemplo Bar e Restaurante LTDA';
+  document.getElementById('ct_doc').value = '00.000.000/0001-00';
+  document.getElementById('ct_tel').value = '(61) 90000-0000';
+  document.getElementById('ct_end').value = 'Endereço do cliente, Brasília/DF, CEP 70.000-000';
+  document.getElementById('ct_email').value = 'contato@clienteexemplo.com.br';
+  document.getElementById('segmento').value = 'gastronomia';
+  aplicarSegmento();
+  setTimeout(previewContrato, 350);
 })();
 
 // ===== número por extenso (reais) =====
@@ -363,7 +372,7 @@ function blocos() {
 function renderHtml(bs) {
   let corpo = '';
   for (const bl of bs) {
-    if (bl.t === 'titulo') corpo += `<div class="logo-top"><img src="${LOGO_URL}" alt="ARK"></div><h1>${bl.x}</h1>`;
+    if (bl.t === 'titulo') corpo += `<div class="logo-top"><img src="${LOGO_URL}" alt="ARK"></div><div class="wordmark">ARK <b>CONTENT</b></div><div class="wordsub">Soluções de Marketing</div><div class="filete"></div><h1>${bl.x}</h1>`;
     else if (bl.t === 'clausula') corpo += `<h2>${bl.x}</h2>`;
     else if (bl.t === 'par') corpo += `<p>${bl.x}</p>`;
     else if (bl.t === 'alineas') corpo += '<div class="al">' + bl.x.map((s, i) => `<p>${letra(i)}) ${s};</p>`).join('') + '</div>';
@@ -378,9 +387,13 @@ function renderHtml(bs) {
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#0a0a0b;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{color:#eceae6;font-family:Georgia,'Times New Roman',serif;font-size:12.5px;line-height:1.75}
-.doc{max-width:210mm;margin:0 auto;padding:20mm 22mm}
-.logo-top{text-align:center;margin-bottom:18px}
-.logo-top img{height:58px;border-radius:12px}
+.doc{max-width:210mm;margin:0 auto;padding:16mm 22mm 20mm}
+.logo-top{text-align:center;margin-bottom:10px}
+.logo-top img{height:76px;border-radius:16px;box-shadow:0 8px 40px rgba(254,239,2,.14)}
+.wordmark{text-align:center;font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:13px;letter-spacing:.34em;color:#f5f5f2;margin-bottom:4px}
+.wordmark b{color:#feef02}
+.wordsub{text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:8.5px;letter-spacing:.28em;color:#8a8780;text-transform:uppercase;margin-bottom:14px}
+.filete{width:64px;height:3px;background:#feef02;border-radius:2px;margin:0 auto 24px}
 h1{font-family:Arial,Helvetica,sans-serif;font-size:17px;letter-spacing:.04em;text-align:center;color:#feef02;margin-bottom:26px;line-height:1.4}
 h2{font-family:Arial,Helvetica,sans-serif;font-size:12.5px;letter-spacing:.05em;color:#feef02;margin:22px 0 8px}
 p{margin:7px 0;text-align:justify}

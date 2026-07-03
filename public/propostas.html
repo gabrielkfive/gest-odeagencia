@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gerador de Propostas · Estrategista Comercial ARK</title>
-<!-- build-propostas-20260703-0140 -->
+<!-- build-propostas-20260703-0200 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -68,7 +68,7 @@ button:hover{transform:translateY(-1px)}
 <div class="shell">
   <div class="form">
     <h1>Nova proposta</h1>
-    <div class="sub">Preencha os dados do cliente. Preview ao lado, PDF em 1 clique (na proposta aberta, o botão "Baixar PDF" usa a impressão do Chrome no tamanho certo).</div>
+    <div class="sub"><b style="color:var(--amarelo)">Já abre com um exemplo pronto</b>, é só trocar pelos dados reais do cliente. Preview ao lado, PDF horizontal em 1 clique (17 páginas, fundo preto, logo ARK).</div>
 
     <div class="sec">Cliente</div>
     <label>Nome completo da marca</label>
@@ -120,7 +120,14 @@ let MODELO = null;
 let ultimoHtml = null;
 let avatarDataUrl = null;
 
-fetch('/propostas-modelo-saude.html').then(r => r.text()).then(t => { MODELO = t; });
+// exemplo pré-carregado (dados demonstrativos, troque pelos reais do cliente)
+const EXEMPLO = {
+  cliente_nome: 'Clínica Exemplo Odontologia', cliente_curto: 'Exemplo', cliente_handle: 'clinicaexemplo',
+  ig_posts: '20', ig_seguidores: '228', ig_seguindo: '390',
+};
+Object.entries(EXEMPLO).forEach(([k, v]) => { const el = document.getElementById(k); if (el && !el.value) el.value = v; });
+
+fetch('/propostas-modelo-saude.html').then(r => r.text()).then(t => { MODELO = t; gerar(true); });
 
 document.getElementById('avatar').addEventListener('change', e => {
   const f = e.target.files[0];
