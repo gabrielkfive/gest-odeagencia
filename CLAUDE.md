@@ -30,6 +30,16 @@ o sistema está em produção sendo usado pela equipe da ARK todos os dias.
 
 ### 5. Antes de afirmar "pronto/funcionando"
 - Verificar de verdade (build, e quando dá, Playwright). Evidência antes de afirmar.
+
+### 6. Mobile é produção (metade da equipe usa pelo celular)
+- Mexeu em CSS/JS do `public/workflowark.html`? Rode `npm run teste:mobile` antes do deploy.
+  Ele confere em viewport de celular (dark e light) que o menu lateral começa escondido,
+  abre pelo hamburger e fecha na seta de voltar. Incidente de jul/26: animação de entrada
+  com `animation-fill-mode: both` congelou `transform:none` e prendeu a sidebar aberta
+  no celular por dias.
+- Animação de entrada em elemento de layout (sidebar, topbar, drawer) SEMPRE dentro de
+  `@media (min-width:901px)`. Fill "both"/"forwards" em transform atropela o estado
+  escondido do mobile pra sempre, porque animação CSS ganha de regra normal.
 - Correções de segurança e de perda de dado têm prioridade sobre feature nova.
 
 ## Dono do projeto
