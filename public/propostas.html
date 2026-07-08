@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gerador de Propostas · Estrategista Comercial ARK</title>
-<!-- build-propostas-20260703-0200 -->
+<!-- build-propostas-20260707-multinicho -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -26,31 +26,54 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15p
 .nav a:hover{color:var(--ink);border-color:var(--line2)}
 .nav a.on{color:#111;background:var(--amarelo)}
 @media(max-width:900px){.nav{display:none}}
-.shell{display:grid;grid-template-columns:420px 1fr;gap:0;height:calc(100vh - 67px)}
-.form{padding:26px 28px;overflow-y:auto;border-right:1px solid var(--line)}
+.shell{display:grid;grid-template-columns:440px 1fr;gap:0;height:calc(100vh - 67px)}
+.form{padding:22px 24px;overflow-y:auto;border-right:1px solid var(--line)}
 h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em;margin-bottom:4px}
-.sub{color:var(--muted);font-size:13px;margin-bottom:22px}
-.sec{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amarelo);margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.sec{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amarelo);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
 .sec::after{content:"";flex:1;height:1px;background:var(--line)}
 label{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 4px}
-input{width:100%;background:var(--panel);border:1px solid var(--line2);border-radius:8px;color:var(--ink);
+input,textarea,select{width:100%;background:var(--panel);border:1px solid var(--line2);border-radius:8px;color:var(--ink);
   font-family:var(--body);font-size:14px;padding:10px 12px;outline:none;transition:border-color .2s}
-input:focus{border-color:var(--amarelo)}
+textarea{min-height:64px;resize:vertical;line-height:1.45}
+input:focus,textarea:focus,select:focus{border-color:var(--amarelo)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.row4{display:grid;grid-template-columns:1.4fr .8fr .8fr;gap:8px}
 .hint{font-size:11.5px;color:var(--faint);margin-top:3px}
-.btns{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.btns{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
 button{font-family:var(--display);font-weight:700;font-size:14px;border:none;border-radius:8px;padding:13px 22px;cursor:pointer;transition:transform .15s}
 button:hover{transform:translateY(-1px)}
 .b-amarelo{background:var(--amarelo);color:#111}
 .b-ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.b-mini{padding:9px 14px;font-size:12.5px}
 .aviso{margin-top:14px;font-size:12.5px;color:#ff9f6e;display:none;white-space:pre-line}
+.ok{color:#7ee081}
+details{border:1px solid var(--line);border-radius:10px;margin-top:12px;background:rgba(255,255,255,.015)}
+details>summary{cursor:pointer;list-style:none;padding:12px 14px;font-family:var(--display);font-weight:700;font-size:12.5px;color:var(--ink);display:flex;align-items:center;gap:8px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";color:var(--amarelo);font-size:11px}
+details[open]>summary::before{content:"▾"}
+details .bd{padding:2px 14px 16px}
 .preview{position:relative;background:#000}
 .preview iframe{width:100%;height:100%;border:none;background:#0a0a0b}
 .preview .vazio{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--faint);gap:10px;text-align:center;padding:30px}
 .preview .vazio .g{font-size:44px}
 .avatarwrap{display:flex;gap:12px;align-items:center;margin-top:4px}
 .avatarwrap img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--amarelo);display:none}
+.segpick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px}
+.segpick .opt{border:1px solid var(--line2);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;font-family:var(--display);font-weight:700;font-size:12.5px;color:var(--muted);transition:.15s}
+.segpick .opt .ic{font-size:20px;display:block;margin-bottom:4px}
+.segpick .opt.on{border-color:var(--amarelo);color:var(--ink);background:rgba(254,239,2,.06)}
+.painel{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:50;align-items:stretch;justify-content:flex-end}
+.painel.on{display:flex}
+.painel .card{width:min(420px,92vw);background:var(--panel);height:100%;overflow-y:auto;padding:22px;border-left:1px solid var(--line2)}
+.painel h3{font-family:var(--display);font-size:16px;margin-bottom:4px}
+.pitem{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px}
+.pitem .nm{font-family:var(--display);font-weight:700;font-size:14px}
+.pitem .mt{font-size:11.5px;color:var(--faint);margin-top:2px}
+.pitem .acs{display:flex;gap:8px;margin-top:10px}
+.tagseg{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#111;background:var(--amarelo);padding:2px 8px;border-radius:999px;font-weight:700;font-family:var(--display)}
 @media(max-width:900px){.shell{grid-template-columns:1fr;height:auto}.preview{min-height:60vh}}
 </style>
 </head>
@@ -68,7 +91,15 @@ button:hover{transform:translateY(-1px)}
 <div class="shell">
   <div class="form">
     <h1>Nova proposta</h1>
-    <div class="sub"><b style="color:var(--amarelo)">Já abre com um exemplo pronto</b>, é só trocar pelos dados reais do cliente. Preview ao lado, PDF horizontal em 1 clique (17 páginas, fundo preto, logo ARK).</div>
+    <div class="sub">Escolha o <b style="color:var(--amarelo)">segmento</b>, ajuste os dados do cliente e clique em Atualizar. Preview ao lado, PDF horizontal em 1 clique (17 páginas, fundo preto, logo ARK).</div>
+
+    <div class="sec">Segmento</div>
+    <div class="segpick" id="segpick">
+      <div class="opt on" data-seg="saude"><span class="ic">🦷</span>Saúde / Estética</div>
+      <div class="opt" data-seg="gastro"><span class="ic">🍽️</span>Gastronomia</div>
+      <div class="opt" data-seg="advoc"><span class="ic">⚖️</span>Advocacia</div>
+    </div>
+    <div class="hint">Trocar o segmento recarrega referências, case, projeção e a linguagem do nicho. Os dados do cliente e os preços são mantidos.</div>
 
     <div class="sec">Cliente</div>
     <label>Nome completo da marca</label>
@@ -77,6 +108,8 @@ button:hover{transform:translateY(-1px)}
       <div><label>Nome curto</label><input id="cliente_curto" placeholder="Ahava"></div>
       <div><label>@ do Instagram</label><input id="cliente_handle" placeholder="ahavaodontologia"></div>
     </div>
+    <label>Tipo / descrição curta (aparece no diagnóstico)</label>
+    <input id="cliente_tipo" placeholder="Clínica odontológica">
     <label>Avatar do Instagram (opcional)</label>
     <div class="avatarwrap">
       <input type="file" id="avatar" accept="image/*" style="padding:8px">
@@ -90,22 +123,116 @@ button:hover{transform:translateY(-1px)}
       <div><label>Seguidores</label><input id="ig_seguidores" placeholder="228" inputmode="numeric"></div>
       <div><label>Seguindo</label><input id="ig_seguindo" placeholder="390" inputmode="numeric"></div>
     </div>
-    <div class="hint">Números públicos do perfil, coletados na hora. Nunca inventar.</div>
+    <div class="btns" style="margin-top:10px">
+      <button class="b-ghost b-mini" onclick="buscarIG()">Buscar do Instagram</button>
+    </div>
+    <div class="hint">Tenta puxar posts, seguidores, seguindo e avatar pelo @. O Instagram costuma bloquear robô: se não vier, preencha na mão. Nunca inventar números.</div>
 
     <div class="sec">Investimento (R$/mês)</div>
     <div class="row3">
-      <div><label>Plano 3 meses</label><input id="preco_3m" value="3200" inputmode="numeric"></div>
-      <div><label>Plano 6 meses</label><input id="preco_6m" value="2800" inputmode="numeric"></div>
-      <div><label>Plano 12 meses</label><input id="preco_12m" value="2300" inputmode="numeric"></div>
+      <div><label>Plano 3 meses</label><input id="preco_3m" value="3800" inputmode="numeric"></div>
+      <div><label>Plano 6 meses</label><input id="preco_6m" value="3400" inputmode="numeric"></div>
+      <div><label>Plano 12 meses</label><input id="preco_12m" value="3000" inputmode="numeric"></div>
     </div>
     <label>Proposta concorrente (R$/mês, aparece no comparativo)</label>
     <input id="preco_concorrente" value="1900" inputmode="numeric">
     <div class="hint">Totais, economias e a diferença mensal são calculados sozinhos.</div>
 
+    <details>
+      <summary>Referências de mercado (benchmark)</summary>
+      <div class="bd">
+        <div class="hint" style="margin:2px 0 8px">3 marcas de referência do nicho. Deixe o número em branco se não tiver: aí aparece só o @ da marca. Nunca inventar seguidores.</div>
+        <label>Referência 1</label>
+        <div class="row4"><input id="ref1_nome" placeholder="Nome"><input id="ref1_num" placeholder="Nº"><input id="ref1_uni" placeholder="mil"></div>
+        <input id="ref1_desc" placeholder="Descrição curta" style="margin-top:8px">
+        <label>Referência 2</label>
+        <div class="row4"><input id="ref2_nome" placeholder="Nome"><input id="ref2_num" placeholder="Nº"><input id="ref2_uni" placeholder="mil"></div>
+        <input id="ref2_desc" placeholder="Descrição curta" style="margin-top:8px">
+        <label>Referência 3</label>
+        <div class="row4"><input id="ref3_nome" placeholder="Nome"><input id="ref3_num" placeholder="Nº"><input id="ref3_uni" placeholder="mil"></div>
+        <input id="ref3_desc" placeholder="Descrição curta" style="margin-top:8px">
+      </div>
+    </details>
+
+    <details>
+      <summary>Case (prova real)</summary>
+      <div class="bd">
+        <label>Título da página (resultado)</label>
+        <input id="case_h2" placeholder="De 0 a 40 pacientes no primeiro mês.">
+        <label>Etiqueta (nome do case · local)</label>
+        <input id="case_tag" placeholder="Fábula Odontopediatria · Lago Sul, Brasília">
+        <label>Descrição do case</label>
+        <textarea id="case_desc"></textarea>
+        <label>Pontos do case (um por linha)</label>
+        <textarea id="case_bullets"></textarea>
+        <div class="row"><div><label>@ do case</label><input id="case_handle" placeholder="fabulaodonto"></div><div><label>Nome no perfil</label><input id="case_perfil" placeholder="Fábula Odontopediatria"></div></div>
+        <div class="row3"><div><label>Posts</label><input id="case_posts" placeholder="2.115"></div><div><label>Seguidores</label><input id="case_seg" placeholder="6.923"></div><div><label>Seguindo</label><input id="case_seguindo" placeholder="2.029"></div></div>
+        <label>Bio do perfil do case</label>
+        <input id="case_bio" placeholder="Cliente ARK · perfil operado com linha editorial e tráfego.">
+        <div class="row"><div><label>Nº de destaque 1</label><input id="case_stat1_num" placeholder="0 → 40"></div><div><label>Rótulo 1</label><input id="case_stat1_lbl" placeholder="pacientes no 1º mês"></div></div>
+        <div class="row"><div><label>Nº de destaque 2</label><input id="case_stat2_num" placeholder="100%"></div><div><label>Rótulo 2</label><input id="case_stat2_lbl" placeholder="da agenda preenchida"></div></div>
+        <div class="hint">No segmento Saúde já vem o case real da Fábula com foto. Nos outros, edite com um case real do nicho antes de enviar.</div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Viabilidade (projeção de números)</summary>
+      <div class="bd">
+        <div class="hint" style="margin:2px 0 8px">Projeção conservadora e realista. Melhor prometer de menos e entregar mais. Cliente que cobra número gosta de ver a coluna conservadora batida.</div>
+        <div class="row4" style="grid-template-columns:1.6fr .7fr .7fr"><b style="font-size:11px;color:var(--faint)">Linha</b><b style="font-size:11px;color:var(--faint)">Conserv.</b><b style="font-size:11px;color:var(--faint)">Realista</b></div>
+        <div class="row4" style="grid-template-columns:1.6fr .7fr .7fr;margin-top:6px"><input id="proj1_lbl"><input id="proj1_c"><input id="proj1_r"></div>
+        <div class="row4" style="grid-template-columns:1.6fr .7fr .7fr;margin-top:6px"><input id="proj2_lbl"><input id="proj2_c"><input id="proj2_r"></div>
+        <div class="row4" style="grid-template-columns:1.6fr .7fr .7fr;margin-top:6px"><input id="proj3_lbl"><input id="proj3_c"><input id="proj3_r"></div>
+        <div class="row4" style="grid-template-columns:1.6fr .7fr .7fr;margin-top:6px"><input id="proj4_lbl"><input id="proj4_c"><input id="proj4_r"></div>
+        <label>Premissas do modelo (uma por linha, formato Título | detalhe)</label>
+        <textarea id="proj_premissas"></textarea>
+        <label>Nota de rodapé da projeção</label>
+        <textarea id="proj_note"></textarea>
+      </div>
+    </details>
+
+    <details>
+      <summary>Entregas por mês (posts, vídeos, criativos)</summary>
+      <div class="bd">
+        <div class="row3">
+          <div><label>Conteúdos / mês</label><input id="qtd_conteudo" placeholder="4 a 6"></div>
+          <div><label>Vídeos prof. / mês</label><input id="qtd_video" placeholder="4"></div>
+          <div><label>Criativos tráfego</label><input id="qtd_criativo" placeholder="4"></div>
+        </div>
+        <div class="hint">Muda a quantidade de entregas em todas as páginas e nos planos, igual no contrato.</div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Linguagem do nicho (avançado)</summary>
+      <div class="bd">
+        <div class="row"><div><label>Setor</label><input id="setor"></div><div><label>Setor (longo)</label><input id="setor_longo"></div></div>
+        <div class="row"><div><label>Público (plural)</label><input id="publico"></div><div><label>Público (singular)</label><input id="publico_sing"></div></div>
+        <div class="row"><div><label>Local (ex: clínica)</label><input id="local"></div><div><label>Local (plural)</label><input id="local_plural"></div></div>
+        <div class="row"><div><label>Ação (ex: agendamento)</label><input id="acao"></div><div><label>Atendimento (ex: consulta)</label><input id="atendimento"></div></div>
+        <label>Título do benchmark</label><input id="bench_h2">
+        <label>Texto do benchmark</label><textarea id="bench_lead"></textarea>
+        <label>Descrição do cliente no benchmark</label><input id="bench_cliente_desc">
+        <label>Título do CTA final</label><input id="cta_h1">
+      </div>
+    </details>
+
+    <details>
+      <summary>Pedidos / anotações desta proposta</summary>
+      <div class="bd">
+        <div class="hint" style="margin:2px 0 8px">Espaço para quem monta (ex: Saulo) anotar o que quer incluir: "adicionar mais 2 posts", "cliente pediu vídeo extra", etc. Fica salvo junto da proposta.</div>
+        <textarea id="notas" style="min-height:90px" placeholder="Ex: incluir 1 vídeo extra por mês; destacar garantia de relatório; ..."></textarea>
+      </div>
+    </details>
+
     <div class="btns">
       <button class="b-amarelo" onclick="gerar(true)">Atualizar preview</button>
-      <button class="b-ghost" onclick="abrir()">Abrir em nova aba</button>
-      <button class="b-ghost" onclick="baixarHtml()">Baixar HTML</button>
+      <button class="b-ghost" onclick="salvarProposta()">Salvar proposta</button>
+      <button class="b-ghost" onclick="abrirPainel()">Propostas geradas</button>
+    </div>
+    <div class="btns" style="margin-top:8px">
+      <button class="b-ghost b-mini" onclick="abrir()">Abrir em nova aba</button>
+      <button class="b-ghost b-mini" onclick="baixarHtml()">Baixar HTML</button>
     </div>
     <div class="aviso" id="aviso"></div>
   </div>
@@ -115,120 +242,319 @@ button:hover{transform:translateY(-1px)}
   </div>
 </div>
 
+<div class="painel" id="painel" onclick="if(event.target===this)fecharPainel()">
+  <div class="card">
+    <h3>Propostas geradas</h3>
+    <div class="hint">Salvas neste navegador. Clique para reabrir e editar.</div>
+    <div id="lista"></div>
+  </div>
+</div>
+
 <script>
-let MODELO = null;
-let ultimoHtml = null;
-let avatarDataUrl = null;
+const FABULA_AVATAR = "data:image/jpeg;base64,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";
 
-// exemplo pré-carregado (dados demonstrativos, troque pelos reais do cliente)
-const EXEMPLO = {
-  cliente_nome: 'Clínica Exemplo Odontologia', cliente_curto: 'Exemplo', cliente_handle: 'clinicaexemplo',
-  ig_posts: '20', ig_seguidores: '228', ig_seguindo: '390',
+// ---- Presets por segmento (preenchem tudo; o usuario ajusta o que quiser) ----
+const SEG = {
+  saude: {
+    setor:'odontologia', setor_longo:'saúde e estética', publico:'pacientes', publico_sing:'paciente',
+    local:'clínica', local_plural:'clínicas', acao:'agendamento', atendimento:'consulta',
+    cliente_tipo:'Clínica de saúde',
+    bench_h2:'As clínicas que crescem tratam o Instagram como <span class="rose">canal de aquisição.</span>',
+    bench_lead:'Olhe para as clínicas que dominam o digital em Brasília. Nenhuma delas posta por postar: todas operam <strong>linha editorial, prova social e tráfego pago como um sistema</strong>, com equipe dedicada por trás.',
+    bench_cliente_desc:'comunicação por conta própria',
+    ref1_nome:'OMA Estética', ref1_num:'', ref1_uni:'mil', ref1_desc:'@oma_estetica · estética avançada e lasers, Brasília',
+    ref2_nome:'Sensce Clinic Spa', ref2_num:'', ref2_uni:'mil', ref2_desc:'@sensceclinicspa · clinic spa e estética integrada',
+    ref3_nome:'Villa Prime Estética', ref3_num:'', ref3_uni:'mil', ref3_desc:'@villaprime.estetica · estética premium',
+    case_h2:'De 0 a 40 pacientes no <span class="rose">primeiro mês.</span>',
+    case_tag:'Fábula Odontopediatria &amp; Ortodontia · Lago Sul, Brasília',
+    case_desc:'A Fábula chegou ao mercado sem pacientes e sem reconhecimento. Inaugurada no Lago Sul, uma das regiões mais competitivas de Brasília, precisava construir um posicionamento premium do zero e transformar visibilidade em <strong>agenda cheia desde o primeiro mês.</strong>',
+    case_bullets:['Posicionamento e identidade premium antes da abertura','Linha editorial de autoridade, humanização e prova social','Tráfego segmentado por CEP com criativos de alta conversão','Captação audiovisual profissional desde o início'].join('\n'),
+    case_handle:'fabulaodonto', case_perfil:'Fábula Odontopediatria &amp; Ortodontia',
+    case_posts:'2.115', case_seg:'6.923', case_seguindo:'2.029',
+    case_bio:'Cliente ARK · perfil operado com linha editorial, prova social e tráfego.',
+    case_stat1_num:'0 <span style="font-size:.5em">→</span> 40', case_stat1_lbl:'pacientes no primeiro mês de operação',
+    case_stat2_num:'100<span style="font-size:.45em">%</span>', case_stat2_lbl:'da agenda preenchida via estratégia digital',
+    case_avatar: FABULA_AVATAR,
+    proj:[['Leads gerados / mês','40','60'],['Consultas agendadas','16','26'],['Novos pacientes / mês','8','14'],['Receita estimada','R$ 8 mil','R$ 18 mil']],
+    proj_premissas:['Mídia recomendada | R$ 800 a R$ 1.200 por mês em Meta Ads.','Custo por lead | R$ 25 a R$ 60 (saúde premium).','Conversão lead para consulta | 30% a 50%.','Ticket médio | R$ 800 a R$ 3.000+ por procedimento.'].join('\n'),
+    proj_note:'Projeções conservadoras, baseadas no histórico de clínicas atendidas pela ARK. Resultados dependem de investimento em mídia, sazonalidade e capacidade de atendimento.',
+    cta_h1:'Vamos encher a agenda da <span class="rose">{{CLIENTE_CURTO}}?</span>',
+  },
+  gastro: {
+    setor:'gastronomia', setor_longo:'gastronomia e hospitalidade', publico:'clientes', publico_sing:'cliente',
+    local:'casa', local_plural:'casas', acao:'reserva', atendimento:'visita',
+    cliente_tipo:'Restaurante',
+    bench_h2:'Os restaurantes que lotam tratam o Instagram como <span class="rose">canal de reserva.</span>',
+    bench_lead:'Olhe para as casas que dominam o digital na cidade. Nenhuma delas posta por postar: todas operam <strong>linha editorial, prova social e tráfego pago como um sistema</strong>, com equipe dedicada por trás.',
+    bench_cliente_desc:'comunicação por conta própria',
+    ref1_nome:'Referência 1', ref1_num:'', ref1_uni:'mil', ref1_desc:'@ da casa de referência · edite aqui',
+    ref2_nome:'Referência 2', ref2_num:'', ref2_uni:'mil', ref2_desc:'@ da casa de referência · edite aqui',
+    ref3_nome:'Referência 3', ref3_num:'', ref3_uni:'mil', ref3_desc:'@ da casa de referência · edite aqui',
+    case_h2:'De casa vazia a <span class="rose">fila na porta.</span>',
+    case_tag:'Case do nicho · edite com um cliente real',
+    case_desc:'Edite este bloco com um case real de gastronomia da ARK: a casa, o desafio, o que foi feito e o resultado em <strong>reservas e movimento.</strong>',
+    case_bullets:['Posicionamento e identidade de marca antes da virada','Linha editorial de desejo, bastidores e prova social','Tráfego segmentado por bairro com criativos de alta conversão','Captação audiovisual profissional dos pratos e do ambiente'].join('\n'),
+    case_handle:'seucase', case_perfil:'Nome do case',
+    case_posts:'0', case_seg:'0', case_seguindo:'0',
+    case_bio:'Cliente ARK · perfil operado com linha editorial, prova social e tráfego.',
+    case_stat1_num:'0 <span style="font-size:.5em">→</span> 30', case_stat1_lbl:'reservas nas primeiras semanas',
+    case_stat2_num:'100<span style="font-size:.45em">%</span>', case_stat2_lbl:'das mesas cheias no fim de semana',
+    case_avatar:'',
+    proj:[['Leads gerados / mês','40','60'],['Reservas geradas','16','26'],['Novos clientes / mês','10','18'],['Receita estimada','R$ 8 mil','R$ 20 mil']],
+    proj_premissas:['Mídia recomendada | R$ 800 a R$ 1.200 por mês em Meta Ads.','Custo por lead | R$ 15 a R$ 45 (gastronomia).','Conversão lead para reserva | 30% a 50%.','Ticket médio | R$ 60 a R$ 180+ por mesa.'].join('\n'),
+    proj_note:'Projeções conservadoras, baseadas no histórico de casas atendidas pela ARK. Resultados dependem de investimento em mídia, sazonalidade e capacidade de atendimento.',
+    cta_h1:'Vamos encher a casa da <span class="rose">{{CLIENTE_CURTO}}?</span>',
+  },
+  advoc: {
+    setor:'advocacia', setor_longo:'advocacia e serviços jurídicos', publico:'clientes', publico_sing:'cliente',
+    local:'banca', local_plural:'bancas', acao:'consulta', atendimento:'reunião',
+    cliente_tipo:'Escritório de advocacia',
+    bench_h2:'Os escritórios que crescem tratam o Instagram como <span class="rose">canal de autoridade.</span>',
+    bench_lead:'Olhe para as bancas que dominam o digital com ética e autoridade. Nenhuma delas posta por postar: todas operam <strong>linha editorial, prova social e tráfego pago dentro das regras da OAB</strong>, com equipe dedicada por trás.',
+    bench_cliente_desc:'comunicação por conta própria',
+    ref1_nome:'Referência 1', ref1_num:'', ref1_uni:'mil', ref1_desc:'@ do escritório de referência · edite aqui',
+    ref2_nome:'Referência 2', ref2_num:'', ref2_uni:'mil', ref2_desc:'@ do escritório de referência · edite aqui',
+    ref3_nome:'Referência 3', ref3_num:'', ref3_uni:'mil', ref3_desc:'@ do escritório de referência · edite aqui',
+    case_h2:'De perfil parado a <span class="rose">agenda de consultas cheia.</span>',
+    case_tag:'Case do nicho · edite com um cliente real',
+    case_desc:'Edite este bloco com um case real de advocacia da ARK: o escritório, a área de atuação, o que foi feito dentro das regras da OAB e o resultado em <strong>consultas qualificadas.</strong>',
+    case_bullets:['Posicionamento e autoridade dentro das regras da OAB','Linha editorial de conteúdo educativo e prova social','Tráfego segmentado com criativos sóbrios e de alta conversão','Captação audiovisual profissional do escritório e da equipe'].join('\n'),
+    case_handle:'seucase', case_perfil:'Nome do case',
+    case_posts:'0', case_seg:'0', case_seguindo:'0',
+    case_bio:'Cliente ARK · perfil operado com linha editorial e tráfego, dentro das regras da OAB.',
+    case_stat1_num:'0 <span style="font-size:.5em">→</span> 20', case_stat1_lbl:'consultas qualificadas no primeiro mês',
+    case_stat2_num:'100<span style="font-size:.45em">%</span>', case_stat2_lbl:'da agenda dentro das regras da OAB',
+    case_avatar:'',
+    proj:[['Leads gerados / mês','30','50'],['Consultas marcadas','12','20'],['Novos clientes / mês','6','12'],['Receita estimada','R$ 10 mil','R$ 25 mil']],
+    proj_premissas:['Mídia recomendada | R$ 800 a R$ 1.500 por mês em Meta Ads.','Custo por lead | R$ 30 a R$ 80 (jurídico).','Conversão lead para consulta | 25% a 45%.','Ticket médio | R$ 1.500 a R$ 10.000+ por causa.'].join('\n'),
+    proj_note:'Projeções conservadoras, baseadas no histórico de escritórios atendidos pela ARK, sempre dentro das regras de publicidade da OAB. Resultados dependem de investimento em mídia e capacidade de atendimento.',
+    cta_h1:'Vamos encher a agenda da <span class="rose">{{CLIENTE_CURTO}}?</span>',
+  },
 };
-Object.entries(EXEMPLO).forEach(([k, v]) => { const el = document.getElementById(k); if (el && !el.value) el.value = v; });
 
-fetch('/propostas-modelo-saude.html').then(r => r.text()).then(t => { MODELO = t; gerar(true); });
+// entregas padrao (iguais para os 3, editaveis)
+const ENTREGAS = { qtd_conteudo:'4 a 6', qtd_video:'4', qtd_criativo:'4' };
 
-document.getElementById('avatar').addEventListener('change', e => {
-  const f = e.target.files[0];
-  if (!f) { avatarDataUrl = null; return; }
+let MODELO = null, ultimoHtml = null, avatarDataUrl = null, segAtual = 'saude', editId = null;
+
+const gid = id => document.getElementById(id);
+const val = id => (gid(id)?.value || '').trim();
+const set = (id,v) => { const el = gid(id); if (el) el.value = (v==null?'':v); };
+const fmt = n => Math.round(n).toLocaleString('pt-BR');
+const num = id => parseFloat(val(id).replace(/\./g,'').replace(',','.')) || 0;
+
+// campos controlados pelo preset (recarregam ao trocar de segmento)
+const CAMPOS_PRESET = ['setor','setor_longo','publico','publico_sing','local','local_plural','acao','atendimento',
+  'cliente_tipo','bench_h2','bench_lead','bench_cliente_desc',
+  'ref1_nome','ref1_num','ref1_uni','ref1_desc','ref2_nome','ref2_num','ref2_uni','ref2_desc','ref3_nome','ref3_num','ref3_uni','ref3_desc',
+  'case_h2','case_tag','case_desc','case_bullets','case_handle','case_perfil','case_posts','case_seg','case_seguindo','case_bio',
+  'case_stat1_num','case_stat1_lbl','case_stat2_num','case_stat2_lbl','proj_premissas','proj_note','cta_h1'];
+// todos os campos (para salvar/carregar proposta)
+const CAMPOS_CLIENTE = ['cliente_nome','cliente_curto','cliente_handle','cliente_tipo','ig_posts','ig_seguidores','ig_seguindo',
+  'preco_3m','preco_6m','preco_12m','preco_concorrente','qtd_conteudo','qtd_video','qtd_criativo','notas',
+  'proj1_lbl','proj1_c','proj1_r','proj2_lbl','proj2_c','proj2_r','proj3_lbl','proj3_c','proj3_r','proj4_lbl','proj4_c','proj4_r'];
+
+function aplicarPreset(seg, manterCliente) {
+  const p = SEG[seg];
+  CAMPOS_PRESET.forEach(k => { if (k in p) set(k, p[k]); });
+  set('qtd_conteudo', ENTREGAS.qtd_conteudo); set('qtd_video', ENTREGAS.qtd_video); set('qtd_criativo', ENTREGAS.qtd_criativo);
+  // projecao
+  p.proj.forEach((row,i) => { set('proj'+(i+1)+'_lbl',row[0]); set('proj'+(i+1)+'_c',row[1]); set('proj'+(i+1)+'_r',row[2]); });
+  // tipo do cliente so preenche se vazio
+  if (!manterCliente || !val('cliente_tipo')) set('cliente_tipo', p.cliente_tipo);
+}
+
+function trocarSeg(seg) {
+  segAtual = seg;
+  document.querySelectorAll('#segpick .opt').forEach(o => o.classList.toggle('on', o.dataset.seg===seg));
+  aplicarPreset(seg, true);
+  gerar(true);
+}
+document.querySelectorAll('#segpick .opt').forEach(o => o.addEventListener('click', () => trocarSeg(o.dataset.seg)));
+
+// exemplo inicial do cliente
+set('cliente_nome','Clínica Exemplo'); set('cliente_curto','Exemplo'); set('cliente_handle','clinicaexemplo');
+set('ig_posts','20'); set('ig_seguidores','228'); set('ig_seguindo','390');
+aplicarPreset('saude', false);
+
+fetch('/propostas-modelo-saude.html').then(r=>r.text()).then(t=>{ MODELO=t; gerar(true); });
+
+gid('avatar').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) { avatarDataUrl=null; return; }
   const rd = new FileReader();
-  rd.onload = () => {
-    avatarDataUrl = rd.result;
-    const img = document.getElementById('avatar_prev');
-    img.src = avatarDataUrl; img.style.display = 'block';
-  };
+  rd.onload = () => { avatarDataUrl = rd.result; const img = gid('avatar_prev'); img.src = avatarDataUrl; img.style.display='block'; };
   rd.readAsDataURL(f);
 });
 
-const fmt = n => Math.round(n).toLocaleString('pt-BR');
-const val = id => document.getElementById(id).value.trim();
-const num = id => parseFloat(val(id).replace(/\./g, '').replace(',', '.')) || 0;
-
 function avatarIniciais(nome) {
-  const ini = (nome || 'A').split(/\s+/).slice(0, 2).map(p => p[0] || '').join('').toUpperCase();
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="148" height="148"><rect width="148" height="148" fill="#1c1c20"/><text x="50%" y="54%" font-family="Arial,sans-serif" font-size="52" font-weight="bold" fill="#feef02" text-anchor="middle" dominant-baseline="middle">${ini}</text></svg>`;
+  const ini = (nome||'A').replace(/&amp;/g,'').split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase();
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="148" height="148"><rect width="148" height="148" fill="#1c1c20"/><text x="50%" y="54%" font-family="Arial,sans-serif" font-size="52" font-weight="bold" fill="#feef02" text-anchor="middle" dominant-baseline="middle">'+ini+'</text></svg>';
   return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+}
+
+function linhasParaLi(txt) {
+  return txt.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>'<li>'+l+'</li>').join('');
+}
+function premissasParaLi(txt) {
+  return txt.split('\n').map(l=>l.trim()).filter(Boolean).map(l => {
+    const i = l.indexOf('|');
+    if (i<0) return '<li>'+l+'</li>';
+    return '<li>'+l.slice(0,i).trim()+' <span>'+l.slice(i+1).trim()+'</span></li>';
+  }).join('');
+}
+function projTabela() {
+  let tr = '<tr><th>Projeção · mês 2 em diante</th><th>Conservador</th><th class="hl">Realista</th></tr>';
+  for (let i=1;i<=4;i++) {
+    const l=val('proj'+i+'_lbl'), c=val('proj'+i+'_c'), r=val('proj'+i+'_r');
+    if (!l && !c && !r) continue;
+    tr += '<tr><td>'+l+'</td><td><b>'+c+'</b></td><td class="hl"><b>'+r+'</b></td></tr>';
+  }
+  return tr;
+}
+function benchCell(nomeId,numId,uniId,descId) {
+  const nome=val(nomeId), n=val(numId), uni=val(uniId), desc=val(descId);
+  const bignum = n ? (n+'<span style="font-size:.45em">'+uni+'</span>') : ('<span style="font-size:.5em;letter-spacing:.02em">'+ (nome||'') +'</span>');
+  return {NUM:n?n:'', UNI:n?uni:'', NOME:nome, DESC:desc, BIG:bignum};
 }
 
 function montar() {
   if (!MODELO) { alert('Modelo ainda carregando, tenta de novo em 1 segundo.'); return null; }
   const nome = val('cliente_nome') || 'Cliente';
   const curto = val('cliente_curto') || nome.split(' ')[0];
-  const p3 = num('preco_3m'), p6 = num('preco_6m'), p12 = num('preco_12m'), conc = num('preco_concorrente');
+  const p3=num('preco_3m'), p6=num('preco_6m'), p12=num('preco_12m'), conc=num('preco_concorrente');
   const agora = new Date();
   const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const mes = meses[agora.getMonth()], ano = agora.getFullYear();
-  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+  const caseAvatar = SEG[segAtual].case_avatar || avatarIniciais(val('case_perfil')||curto);
 
   const t = {
-    CLIENTE_NOME: nome,
-    CLIENTE_NOME_CAPS: nome.toUpperCase(),
-    CLIENTE_CURTO: curto,
-    CLIENTE_CURTO_CAPS: curto.toUpperCase(),
-    CLIENTE_HANDLE: val('cliente_handle') || 'perfil',
-    CLIENTE_AVATAR: avatarDataUrl || avatarIniciais(curto),
-    IG_POSTS: val('ig_posts') || '0',
-    IG_SEGUIDORES: val('ig_seguidores') || '0',
-    IG_SEGUINDO: val('ig_seguindo') || '0',
-    MES_ANO_CAPS: `${mes.toUpperCase()} / ${ano}`,
-    MES_ANO: `${cap(mes)}/${ano}`,
-    MES_COLETA: `${mes} de ${ano}`,
-    PRECO_3M: fmt(p3), TOTAL_3M: fmt(p3 * 3),
-    PRECO_6M: fmt(p6), TOTAL_6M: fmt(p6 * 6), ECONOMIA_6M: fmt((p3 - p6) * 6),
-    PRECO_12M: fmt(p12), TOTAL_12M: fmt(p12 * 12), ECONOMIA_12M: fmt((p3 - p12) * 12),
-    PRECO_CONCORRENTE: fmt(conc),
-    DIFERENCA_MENSAL: fmt(Math.abs(p12 - conc)),
+    CLIENTE_NOME:nome, CLIENTE_NOME_CAPS:nome.toUpperCase(), CLIENTE_CURTO:curto, CLIENTE_CURTO_CAPS:curto.toUpperCase(),
+    CLIENTE_HANDLE:val('cliente_handle')||'perfil', CLIENTE_AVATAR:avatarDataUrl||avatarIniciais(curto), CLIENTE_TIPO:val('cliente_tipo')||SEG[segAtual].cliente_tipo,
+    IG_POSTS:val('ig_posts')||'0', IG_SEGUIDORES:val('ig_seguidores')||'0', IG_SEGUINDO:val('ig_seguindo')||'0',
+    MES_ANO_CAPS:mes.toUpperCase()+' / '+ano, MES_ANO:cap(mes)+'/'+ano, MES_COLETA:mes+' de '+ano,
+    PRECO_3M:fmt(p3), TOTAL_3M:fmt(p3*3),
+    PRECO_6M:fmt(p6), TOTAL_6M:fmt(p6*6), ECONOMIA_6M:fmt((p3-p6)*6),
+    PRECO_12M:fmt(p12), TOTAL_12M:fmt(p12*12), ECONOMIA_12M:fmt((p3-p12)*12),
+    PRECO_CONCORRENTE:fmt(conc), DIFERENCA_MENSAL:fmt(Math.abs(p12-conc)),
+    // nicho
+    SETOR:val('setor'), SETOR_LONGO:val('setor_longo'), PUBLICO:val('publico'), PUBLICO_SING:val('publico_sing'),
+    LOCAL:val('local'), LOCAL_PLURAL:val('local_plural'), ACAO:val('acao'), ATENDIMENTO:val('atendimento'),
+    BENCH_H2:val('bench_h2'), BENCH_LEAD:val('bench_lead'), BENCH_CLIENTE_DESC:val('bench_cliente_desc'),
+    CTA_H1:val('cta_h1'),
+    // entregas
+    QTD_CONTEUDO:val('qtd_conteudo')||'4 a 6', QTD_VIDEO:val('qtd_video')||'4', QTD_CRIATIVO:val('qtd_criativo')||'4',
+    // case
+    CASE_H2:val('case_h2'), CASE_TAG:val('case_tag'), CASE_DESC:val('case_desc'), CASE_BULLETS:linhasParaLi(val('case_bullets')),
+    CASE_HANDLE:val('case_handle')||'case', CASE_PERFIL:val('case_perfil'), CASE_POSTS:val('case_posts')||'0',
+    CASE_SEG:val('case_seg')||'0', CASE_SEGUINDO:val('case_seguindo')||'0', CASE_BIO:val('case_bio'),
+    CASE_STAT1_NUM:val('case_stat1_num'), CASE_STAT1_LBL:val('case_stat1_lbl'),
+    CASE_STAT2_NUM:val('case_stat2_num'), CASE_STAT2_LBL:val('case_stat2_lbl'), CASE_AVATAR:caseAvatar,
+    // projecao
+    PROJ_TABELA:projTabela(), PROJ_PREMISSAS:premissasParaLi(val('proj_premissas')), PROJ_NOTE:val('proj_note'),
   };
+  // referencias (numero em branco => mostra o @/nome)
+  const r1=benchCell('ref1_nome','ref1_num','ref1_uni','ref1_desc');
+  const r2=benchCell('ref2_nome','ref2_num','ref2_uni','ref2_desc');
+  const r3=benchCell('ref3_nome','ref3_num','ref3_uni','ref3_desc');
+  Object.assign(t, {REF1_NUM:r1.BIG, REF1_UNI:'', REF1_NOME:r1.NOME, REF1_DESC:r1.DESC,
+                    REF2_NUM:r2.BIG, REF2_UNI:'', REF2_NOME:r2.NOME, REF2_DESC:r2.DESC,
+                    REF3_NUM:r3.BIG, REF3_UNI:'', REF3_NOME:r3.NOME, REF3_DESC:r3.DESC});
+
   let html = MODELO;
-  for (const [k, v] of Object.entries(t)) html = html.split('{{' + k + '}}').join(v);
+  // duas passadas: resolve tokens aninhados (ex: CTA_H1 contem CLIENTE_CURTO)
+  for (let pass=0; pass<2; pass++)
+    for (const [k,v] of Object.entries(t)) html = html.split('{{'+k+'}}').join(v);
 
-  // botão flutuante de PDF na proposta gerada (some na impressão)
-  html = html.replace('</body>', `
-<div id="pdfbar" style="position:fixed;bottom:22px;left:22px;z-index:99;display:flex;gap:10px">
-  <button onclick="window.print()" style="background:#feef02;color:#111;border:none;border-radius:8px;padding:13px 22px;font-family:Sora,sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.5)">Baixar PDF</button>
-</div>
-<style>@media print{#pdfbar{display:none!important}}</style>
-</body>`);
+  html = html.replace('</body>', '\n<div id="pdfbar" style="position:fixed;bottom:22px;left:22px;z-index:99;display:flex;gap:10px">\n  <button onclick="window.print()" style="background:#feef02;color:#111;border:none;border-radius:8px;padding:13px 22px;font-family:Sora,sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.5)">Baixar PDF</button>\n</div>\n<style>@media print{#pdfbar{display:none!important}}</style>\n</body>');
 
-  // verificações: tokens órfãos e travessões
   const sobras = html.match(/\{\{[A-Z_0-9]+\}\}/g);
-  const travessoes = html.match(new RegExp('[\u2014\u2013\u2500\u2501\u2550]', 'g'));
-  const aviso = document.getElementById('aviso');
-  let msg = '';
+  const travessoes = html.match(new RegExp('[\\u2014\\u2013\\u2500\\u2501\\u2550]','g'));
+  const aviso = gid('aviso'); let msg='';
   if (sobras) msg += 'Campos sem valor: ' + [...new Set(sobras)].join(', ') + '\n';
   if (travessoes) msg += 'Travessão proibido encontrado no texto! Corrigir antes de enviar.';
-  aviso.textContent = msg; aviso.style.display = msg ? 'block' : 'none';
-
-  ultimoHtml = html;
-  return html;
+  aviso.textContent = msg; aviso.style.display = msg?'block':'none';
+  ultimoHtml = html; return html;
 }
 
 function gerar(preview) {
-  const html = montar();
-  if (!html) return;
-  if (preview) {
-    document.getElementById('vazio').style.display = 'none';
-    document.getElementById('frame').srcdoc = html;
+  const html = montar(); if (!html) return;
+  if (preview) { gid('vazio').style.display='none'; gid('frame').srcdoc = html; }
+}
+function abrir() { const html=montar(); if(!html)return; window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank'); }
+function baixarHtml() {
+  const html=montar(); if(!html)return;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download='proposta-'+(val('cliente_curto')||'cliente').toLowerCase().replace(/\s+/g,'-')+'.html'; a.click();
+}
+
+// ---- Buscar Instagram (melhor esforço) ----
+async function buscarIG() {
+  const h = val('cliente_handle').replace('@','').trim();
+  if (!h) { alert('Escreva o @ do Instagram primeiro.'); return; }
+  const aviso = gid('aviso'); aviso.style.display='block'; aviso.className='aviso'; aviso.textContent='Buscando @'+h+' no Instagram...';
+  try {
+    const r = await fetch('/api/ig/perfil?handle='+encodeURIComponent(h));
+    const d = await r.json();
+    if (!r.ok || d.error) throw new Error(d.error||'falhou');
+    if (d.posts!=null) set('ig_posts', String(d.posts));
+    if (d.seguidores!=null) set('ig_seguidores', String(d.seguidores));
+    if (d.seguindo!=null) set('ig_seguindo', String(d.seguindo));
+    if (d.avatar) { avatarDataUrl=d.avatar; const img=gid('avatar_prev'); img.src=d.avatar; img.style.display='block'; }
+    aviso.className='aviso ok'; aviso.textContent='Instagram carregado. Confira os números antes de enviar.';
+    gerar(true);
+  } catch(e) {
+    aviso.className='aviso'; aviso.textContent='Não consegui puxar do Instagram (o IG bloqueia robô). Preencha posts, seguidores e seguindo na mão.';
   }
 }
 
-function abrir() {
-  const html = montar();
-  if (!html) return;
-  const blob = new Blob([html], { type: 'text/html' });
-  window.open(URL.createObjectURL(blob), '_blank');
+// ---- Propostas salvas (localStorage) ----
+const LS='ark_props_v1';
+const carregarLista = () => { try { return JSON.parse(localStorage.getItem(LS)||'[]'); } catch(e){ return []; } };
+const salvarLista = l => localStorage.setItem(LS, JSON.stringify(l));
+function coletarCampos() {
+  const o = { seg:segAtual };
+  CAMPOS_CLIENTE.concat(CAMPOS_PRESET).forEach(k => o[k]=val(k));
+  o.avatar = avatarDataUrl||'';
+  return o;
 }
-
-function baixarHtml() {
-  const html = montar();
-  if (!html) return;
-  const blob = new Blob([html], { type: 'text/html' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'proposta-' + (val('cliente_curto') || 'cliente').toLowerCase().replace(/\s+/g, '-') + '.html';
-  a.click();
+function aplicarCampos(o) {
+  segAtual = o.seg||'saude';
+  document.querySelectorAll('#segpick .opt').forEach(x=>x.classList.toggle('on',x.dataset.seg===segAtual));
+  CAMPOS_CLIENTE.concat(CAMPOS_PRESET).forEach(k => { if (k in o) set(k, o[k]); });
+  if (o.avatar) { avatarDataUrl=o.avatar; const img=gid('avatar_prev'); img.src=o.avatar; img.style.display='block'; }
+  else { avatarDataUrl=null; gid('avatar_prev').style.display='none'; }
 }
+function salvarProposta() {
+  const l = carregarLista();
+  const campos = coletarCampos();
+  const nomep = val('cliente_nome')||'Sem nome';
+  const stamp = new Date().toLocaleString('pt-BR');
+  if (editId) {
+    const it = l.find(x=>x.id===editId);
+    if (it) { it.nome=nomep; it.seg=segAtual; it.ts=stamp; it.campos=campos; }
+  } else {
+    editId = 'p'+Date.now();
+    l.unshift({ id:editId, nome:nomep, seg:segAtual, ts:stamp, campos });
+  }
+  salvarLista(l);
+  const aviso=gid('aviso'); aviso.style.display='block'; aviso.className='aviso ok'; aviso.textContent='Proposta salva ('+nomep+'). Fica em Propostas geradas.';
+}
+const SEGNOME = {saude:'Saúde',gastro:'Gastronomia',advoc:'Advocacia'};
+function abrirPainel() {
+  const l = carregarLista(); const box = gid('lista');
+  box.innerHTML = l.length ? '' : '<div class="hint" style="margin-top:14px">Nenhuma proposta salva ainda. Preencha e clique em Salvar proposta.</div>';
+  l.forEach(it => {
+    const d = document.createElement('div'); d.className='pitem';
+    d.innerHTML = '<span class="tagseg">'+(SEGNOME[it.seg]||it.seg)+'</span><div class="nm" style="margin-top:6px">'+it.nome+'</div><div class="mt">'+it.ts+'</div>'+
+      '<div class="acs"><button class="b-amarelo b-mini" data-a="abrir">Reabrir</button><button class="b-ghost b-mini" data-a="del">Apagar</button></div>';
+    d.querySelector('[data-a=abrir]').onclick = () => { editId=it.id; aplicarCampos(it.campos); fecharPainel(); gerar(true); };
+    d.querySelector('[data-a=del]').onclick = () => { const nl=carregarLista().filter(x=>x.id!==it.id); salvarLista(nl); if(editId===it.id)editId=null; abrirPainel(); };
+    box.appendChild(d);
+  });
+  gid('painel').classList.add('on');
+}
+function fecharPainel(){ gid('painel').classList.remove('on'); }
 </script>
 </body>
 </html>
