@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Propostas · Estrategista Comercial ARK</title>
+<!-- build-propostas-20260703-0200 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --panel:#16161a; --panel2:#1c1c20; --ink:#f5f5f2; --muted:#9a9aa2; --faint:#5a5a62;
+  --amarelo:#feef02; --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --display:"Sora",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+.top{display:flex;align-items:center;gap:12px;padding:18px 28px;border-bottom:1px solid var(--line)}
+.top img{height:30px;border-radius:6px}
+.top .t{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.04em}
+.top .t b{color:var(--amarelo)}
+.top .badge{margin-left:auto;font-family:var(--display);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#111;background:var(--amarelo);padding:5px 12px;border-radius:999px;font-weight:700}
+.nav{display:flex;gap:4px;margin-left:26px}
+.nav a{font-family:var(--display);font-weight:600;font-size:12.5px;color:var(--muted);text-decoration:none;padding:7px 14px;border-radius:999px;border:1px solid transparent}
+.nav a:hover{color:var(--ink);border-color:var(--line2)}
+.nav a.on{color:#111;background:var(--amarelo)}
+@media(max-width:900px){.nav{display:none}}
+.shell{display:grid;grid-template-columns:420px 1fr;gap:0;height:calc(100vh - 67px)}
+.form{padding:26px 28px;overflow-y:auto;border-right:1px solid var(--line)}
+h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:22px}
+.sec{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amarelo);margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+label{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 4px}
+input{width:100%;background:var(--panel);border:1px solid var(--line2);border-radius:8px;color:var(--ink);
+  font-family:var(--body);font-size:14px;padding:10px 12px;outline:none;transition:border-color .2s}
+input:focus{border-color:var(--amarelo)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.hint{font-size:11.5px;color:var(--faint);margin-top:3px}
+.btns{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+button{font-family:var(--display);font-weight:700;font-size:14px;border:none;border-radius:8px;padding:13px 22px;cursor:pointer;transition:transform .15s}
+button:hover{transform:translateY(-1px)}
+.b-amarelo{background:var(--amarelo);color:#111}
+.b-ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.aviso{margin-top:14px;font-size:12.5px;color:#ff9f6e;display:none;white-space:pre-line}
+.preview{position:relative;background:#000}
+.preview iframe{width:100%;height:100%;border:none;background:#0a0a0b}
+.preview .vazio{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--faint);gap:10px;text-align:center;padding:30px}
+.preview .vazio .g{font-size:44px}
+.avatarwrap{display:flex;gap:12px;align-items:center;margin-top:4px}
+.avatarwrap img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--amarelo);display:none}
+@media(max-width:900px){.shell{grid-template-columns:1fr;height:auto}.preview{min-height:60vh}}
+</style>
+</head>
+<body>
+<div class="top">
+  <img src="/ark-logo.png" alt="ARK">
+  <span class="t">ARK <b>CONTENT</b> · Comercial</span>
+  <nav class="nav">
+    <a href="/comercial">Visão geral</a>
+    <a href="/propostas" class="on">Propostas</a>
+    <a href="/contratos">Contratos</a>
+  </nav>
+  <span class="badge">Estrategista Comercial</span>
+</div>
+<div class="shell">
+  <div class="form">
+    <h1>Nova proposta</h1>
+    <div class="sub"><b style="color:var(--amarelo)">Já abre com um exemplo pronto</b>, é só trocar pelos dados reais do cliente. Preview ao lado, PDF horizontal em 1 clique (17 páginas, fundo preto, logo ARK).</div>
+
+    <div class="sec">Cliente</div>
+    <label>Nome completo da marca</label>
+    <input id="cliente_nome" placeholder="Ahava Odontologia">
+    <div class="row">
+      <div><label>Nome curto</label><input id="cliente_curto" placeholder="Ahava"></div>
+      <div><label>@ do Instagram</label><input id="cliente_handle" placeholder="ahavaodontologia"></div>
+    </div>
+    <label>Avatar do Instagram (opcional)</label>
+    <div class="avatarwrap">
+      <input type="file" id="avatar" accept="image/*" style="padding:8px">
+      <img id="avatar_prev" alt="">
+    </div>
+    <div class="hint">Sem avatar, a proposta usa as iniciais do cliente no círculo.</div>
+
+    <div class="sec">Instagram hoje</div>
+    <div class="row3">
+      <div><label>Posts</label><input id="ig_posts" placeholder="20" inputmode="numeric"></div>
+      <div><label>Seguidores</label><input id="ig_seguidores" placeholder="228" inputmode="numeric"></div>
+      <div><label>Seguindo</label><input id="ig_seguindo" placeholder="390" inputmode="numeric"></div>
+    </div>
+    <div class="hint">Números públicos do perfil, coletados na hora. Nunca inventar.</div>
+
+    <div class="sec">Investimento (R$/mês)</div>
+    <div class="row3">
+      <div><label>Plano 3 meses</label><input id="preco_3m" value="3200" inputmode="numeric"></div>
+      <div><label>Plano 6 meses</label><input id="preco_6m" value="2800" inputmode="numeric"></div>
+      <div><label>Plano 12 meses</label><input id="preco_12m" value="2300" inputmode="numeric"></div>
+    </div>
+    <label>Proposta concorrente (R$/mês, aparece no comparativo)</label>
+    <input id="preco_concorrente" value="1900" inputmode="numeric">
+    <div class="hint">Totais, economias e a diferença mensal são calculados sozinhos.</div>
+
+    <div class="btns">
+      <button class="b-amarelo" onclick="gerar(true)">Atualizar preview</button>
+      <button class="b-ghost" onclick="abrir()">Abrir em nova aba</button>
+      <button class="b-ghost" onclick="baixarHtml()">Baixar HTML</button>
+    </div>
+    <div class="aviso" id="aviso"></div>
+  </div>
+  <div class="preview">
+    <div class="vazio" id="vazio"><div class="g">⚡</div><div>Preencha os dados e clique em<br><b style="color:var(--ink)">Atualizar preview</b></div></div>
+    <iframe id="frame"></iframe>
+  </div>
+</div>
+
+<script>
+let MODELO = null;
+let ultimoHtml = null;
+let avatarDataUrl = null;
+
+// exemplo pré-carregado (dados demonstrativos, troque pelos reais do cliente)
+const EXEMPLO = {
+  cliente_nome: 'Clínica Exemplo Odontologia', cliente_curto: 'Exemplo', cliente_handle: 'clinicaexemplo',
+  ig_posts: '20', ig_seguidores: '228', ig_seguindo: '390',
+};
+Object.entries(EXEMPLO).forEach(([k, v]) => { const el = document.getElementById(k); if (el && !el.value) el.value = v; });
+
+fetch('/propostas-modelo-saude.html').then(r => r.text()).then(t => { MODELO = t; gerar(true); });
+
+document.getElementById('avatar').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) { avatarDataUrl = null; return; }
+  const rd = new FileReader();
+  rd.onload = () => {
+    avatarDataUrl = rd.result;
+    const img = document.getElementById('avatar_prev');
+    img.src = avatarDataUrl; img.style.display = 'block';
+  };
+  rd.readAsDataURL(f);
+});
+
+const fmt = n => Math.round(n).toLocaleString('pt-BR');
+const val = id => document.getElementById(id).value.trim();
+const num = id => parseFloat(val(id).replace(/\./g, '').replace(',', '.')) || 0;
+
+function avatarIniciais(nome) {
+  const ini = (nome || 'A').split(/\s+/).slice(0, 2).map(p => p[0] || '').join('').toUpperCase();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="148" height="148"><rect width="148" height="148" fill="#1c1c20"/><text x="50%" y="54%" font-family="Arial,sans-serif" font-size="52" font-weight="bold" fill="#feef02" text-anchor="middle" dominant-baseline="middle">${ini}</text></svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+}
+
+function montar() {
+  if (!MODELO) { alert('Modelo ainda carregando, tenta de novo em 1 segundo.'); return null; }
+  const nome = val('cliente_nome') || 'Cliente';
+  const curto = val('cliente_curto') || nome.split(' ')[0];
+  const p3 = num('preco_3m'), p6 = num('preco_6m'), p12 = num('preco_12m'), conc = num('preco_concorrente');
+  const agora = new Date();
+  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const mes = meses[agora.getMonth()], ano = agora.getFullYear();
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+  const t = {
+    CLIENTE_NOME: nome,
+    CLIENTE_NOME_CAPS: nome.toUpperCase(),
+    CLIENTE_CURTO: curto,
+    CLIENTE_CURTO_CAPS: curto.toUpperCase(),
+    CLIENTE_HANDLE: val('cliente_handle') || 'perfil',
+    CLIENTE_AVATAR: avatarDataUrl || avatarIniciais(curto),
+    IG_POSTS: val('ig_posts') || '0',
+    IG_SEGUIDORES: val('ig_seguidores') || '0',
+    IG_SEGUINDO: val('ig_seguindo') || '0',
+    MES_ANO_CAPS: `${mes.toUpperCase()} / ${ano}`,
+    MES_ANO: `${cap(mes)}/${ano}`,
+    MES_COLETA: `${mes} de ${ano}`,
+    PRECO_3M: fmt(p3), TOTAL_3M: fmt(p3 * 3),
+    PRECO_6M: fmt(p6), TOTAL_6M: fmt(p6 * 6), ECONOMIA_6M: fmt((p3 - p6) * 6),
+    PRECO_12M: fmt(p12), TOTAL_12M: fmt(p12 * 12), ECONOMIA_12M: fmt((p3 - p12) * 12),
+    PRECO_CONCORRENTE: fmt(conc),
+    DIFERENCA_MENSAL: fmt(Math.abs(p12 - conc)),
+  };
+  let html = MODELO;
+  for (const [k, v] of Object.entries(t)) html = html.split('{{' + k + '}}').join(v);
+
+  // botão flutuante de PDF na proposta gerada (some na impressão)
+  html = html.replace('</body>', `
+<div id="pdfbar" style="position:fixed;bottom:22px;left:22px;z-index:99;display:flex;gap:10px">
+  <button onclick="window.print()" style="background:#feef02;color:#111;border:none;border-radius:8px;padding:13px 22px;font-family:Sora,sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.5)">Baixar PDF</button>
+</div>
+<style>@media print{#pdfbar{display:none!important}}</style>
+</body>`);
+
+  // verificações: tokens órfãos e travessões
+  const sobras = html.match(/\{\{[A-Z_0-9]+\}\}/g);
+  const travessoes = html.match(new RegExp('[\u2014\u2013\u2500\u2501\u2550]', 'g'));
+  const aviso = document.getElementById('aviso');
+  let msg = '';
+  if (sobras) msg += 'Campos sem valor: ' + [...new Set(sobras)].join(', ') + '\n';
+  if (travessoes) msg += 'Travessão proibido encontrado no texto! Corrigir antes de enviar.';
+  aviso.textContent = msg; aviso.style.display = msg ? 'block' : 'none';
+
+  ultimoHtml = html;
+  return html;
+}
+
+function gerar(preview) {
+  const html = montar();
+  if (!html) return;
+  if (preview) {
+    document.getElementById('vazio').style.display = 'none';
+    document.getElementById('frame').srcdoc = html;
+  }
+}
+
+function abrir() {
+  const html = montar();
+  if (!html) return;
+  const blob = new Blob([html], { type: 'text/html' });
+  window.open(URL.createObjectURL(blob), '_blank');
+}
+
+function baixarHtml() {
+  const html = montar();
+  if (!html) return;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'proposta-' + (val('cliente_curto') || 'cliente').toLowerCase().replace(/\s+/g, '-') + '.html';
+  a.click();
+}
+</script>
+</body>
+</html>

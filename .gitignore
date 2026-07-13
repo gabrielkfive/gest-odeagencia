@@ -44,3 +44,5 @@ _BACKUP*/
 __pycache__/
 *.pyc
 .superpowers/
+remote/.env
+remote/*.log

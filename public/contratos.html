@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Contratos · Estrategista Comercial ARK</title>
+<!-- build-contratos-20260703-B -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="/vendor/docx.umd.js"></script>
+<style>
+:root{
+  --bg:#0a0a0b; --panel:#16161a; --panel2:#1c1c20; --ink:#f5f5f2; --muted:#9a9aa2; --faint:#5a5a62;
+  --amarelo:#feef02; --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --display:"Sora",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
+.top{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--line)}
+.top img{height:30px;border-radius:6px}
+.top .t{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.04em}
+.top .t b{color:var(--amarelo)}
+.nav{display:flex;gap:4px;margin-left:26px}
+.nav a{font-family:var(--display);font-weight:600;font-size:12.5px;color:var(--muted);text-decoration:none;padding:7px 14px;border-radius:999px;border:1px solid transparent}
+.nav a:hover{color:var(--ink);border-color:var(--line2)}
+.nav a.on{color:#111;background:var(--amarelo)}
+.top .badge{margin-left:auto;font-family:var(--display);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#111;background:var(--amarelo);padding:5px 12px;border-radius:999px;font-weight:700}
+.shell{display:grid;grid-template-columns:440px 1fr;height:calc(100vh - 59px)}
+.form{padding:24px 28px;overflow-y:auto;border-right:1px solid var(--line)}
+h1{font-family:var(--display);font-weight:800;font-size:22px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.sec{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--amarelo);margin:20px 0 8px;display:flex;align-items:center;gap:8px}
+.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+label{display:block;font-size:12.5px;color:var(--muted);margin:9px 0 4px}
+input,select,textarea{width:100%;background:var(--panel);border:1px solid var(--line2);border-radius:8px;color:var(--ink);
+  font-family:var(--body);font-size:13.5px;padding:9px 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--amarelo)}
+textarea{resize:vertical;min-height:74px;line-height:1.5}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.hint{font-size:11px;color:var(--faint);margin-top:3px}
+.btns{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+button{font-family:var(--display);font-weight:700;font-size:13.5px;border:none;border-radius:8px;padding:12px 20px;cursor:pointer}
+button:hover{transform:translateY(-1px)}
+.b-amarelo{background:var(--amarelo);color:#111}
+.b-ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.aviso{margin-top:12px;font-size:12.5px;color:#ff9f6e;display:none;white-space:pre-line}
+.preview{position:relative;background:#000}
+.preview iframe{width:100%;height:100%;border:none;background:#0a0a0b}
+.preview .vazio{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--faint);gap:10px;text-align:center;padding:30px}
+.preview .vazio .g{font-size:44px}
+@media(max-width:960px){.shell{grid-template-columns:1fr;height:auto}.preview{min-height:60vh}.nav{display:none}}
+</style>
+</head>
+<body>
+<div class="top">
+  <img src="/ark-logo.png" alt="ARK">
+  <span class="t">ARK <b>CONTENT</b> · Comercial</span>
+  <nav class="nav">
+    <a href="/comercial">Visão geral</a>
+    <a href="/propostas">Propostas</a>
+    <a href="/contratos" class="on">Contratos</a>
+  </nav>
+  <span class="badge">Estrategista Comercial</span>
+</div>
+<div class="shell">
+  <div class="form">
+    <h1>Novo contrato</h1>
+    <div class="sub">Contrato de prestação de serviços com as blindagens dos modelos mais recentes da ARK. <b style="color:var(--amarelo)">Já abre com um exemplo pronto</b>, é só trocar pelos dados reais do cliente. Baixa em PDF (vertical, fundo preto) ou DOCX.</div>
+
+    <div class="sec">Segmento</div>
+    <select id="segmento" onchange="aplicarSegmento()">
+      <option value="padrao">Padrão (qualquer segmento)</option>
+      <option value="gastronomia">Gastronomia (bares e restaurantes)</option>
+      <option value="advocacia">Advocacia (compliance OAB)</option>
+      <option value="saude">Saúde e odontologia (publicidade em saúde)</option>
+    </select>
+
+    <div class="sec">Contratante (o cliente)</div>
+    <label>Razão social ou nome completo</label>
+    <input id="ct_nome" placeholder="LA EM CASA BAR E RESTAURANTE LTDA">
+    <div class="row">
+      <div><label>CNPJ ou CPF</label><input id="ct_doc" placeholder="38.002.739/0001-05"></div>
+      <div><label>Telefone</label><input id="ct_tel" placeholder="(61) 99999-0000"></div>
+    </div>
+    <label>Endereço completo (com CEP)</label>
+    <input id="ct_end" placeholder="Endereço, cidade/UF, CEP 00.000-000">
+    <div class="row">
+      <div><label>E-mail</label><input id="ct_email" placeholder="contato@cliente.com"></div>
+      <div><label>Representante legal (opcional)</label><input id="ct_rep" placeholder="Nome, CPF 000.000.000-00"></div>
+    </div>
+
+    <div class="sec">Escopo</div>
+    <label>Serviços (1 por linha, viram alíneas a, b, c...)</label>
+    <textarea id="servicos"></textarea>
+    <label>Plano contratado (1 por linha, viram os entregáveis)</label>
+    <textarea id="plano"></textarea>
+
+    <div class="sec">Valores e prazos</div>
+    <div class="row3">
+      <div><label>Valor mensal (R$)</label><input id="valor" value="2500" inputmode="numeric"></div>
+      <div><label>Vigência inicial (meses)</label><input id="vigencia" value="6" inputmode="numeric"></div>
+      <div><label>Aviso prévio (dias)</label><input id="aviso" value="15" inputmode="numeric"></div>
+    </div>
+    <div class="row3">
+      <div><label>Multa rescisão antecipada (%)</label><input id="multa" value="20" inputmode="numeric"></div>
+      <div><label>Aprovação em (dias úteis)</label><input id="aprovacao" value="3" inputmode="numeric"></div>
+      <div><label>Pagamento</label>
+        <select id="pagamento">
+          <option value="antecipado">Antecipado (1º dia útil do ciclo)</option>
+          <option value="posterior">Até dia 30 do mês subsequente</option>
+          <option value="dia10">Até o dia 10 do mês subsequente</option>
+        </select>
+      </div>
+    </div>
+    <label>Cidade e data da assinatura</label>
+    <input id="local_data">
+
+    <div class="btns">
+      <button class="b-amarelo" onclick="previewContrato()">Atualizar preview</button>
+      <button class="b-ghost" onclick="abrirContrato()">Abrir / PDF</button>
+      <button class="b-ghost" onclick="baixarDocx()">Baixar DOCX</button>
+    </div>
+    <div class="aviso" id="aviso"></div>
+  </div>
+  <div class="preview">
+    <div class="vazio" id="vazio"><div class="g">⚖️</div><div>Preencha os dados e clique em<br><b style="color:var(--ink)">Atualizar preview</b></div></div>
+    <iframe id="frame"></iframe>
+  </div>
+</div>
+
+<script>
+// ===== dados fixos da ARK (contratada) =====
+const ARK = {
+  nome: 'ARK CONTENT SOLUÇÕES DE MARKETING LTDA',
+  doc: 'CNPJ nº 48.674.401/0001-53',
+  end: 'Setor Comercial Sul, Quadra 02, Bloco C, Sala 403, Edifício São Paulo, Asa Sul, Brasília/DF, CEP 70.314-900',
+};
+
+// ===== defaults por segmento =====
+const SEGMENTOS = {
+  padrao: {
+    servicos: ['Planejamento estratégico de marketing e comunicação', 'Direcionamento criativo e posicionamento de marca', 'Produção de conteúdo para redes sociais', 'Criação de peças gráficas e materiais institucionais', 'Captação audiovisual', 'Edição e finalização de vídeos', 'Acompanhamento estratégico da presença digital', 'Organização de cronograma de publicações e ações'],
+    plano: ['04 (quatro) vídeos mensais', '04 (quatro) peças gráficas mensais', 'Planejamento mensal dos conteúdos', 'Organização do cronograma de publicações', 'Reuniões de alinhamento', 'Ajustes compatíveis com o escopo contratado'],
+    compliance: null,
+  },
+  gastronomia: {
+    servicos: ['Planejamento de marketing', 'Planejamento editorial', 'Direção criativa da comunicação', 'Produção de conteúdo para redes sociais', 'Captação audiovisual', 'Edição de vídeos', 'Desenvolvimento de peças gráficas', 'Acompanhamento estratégico da comunicação digital'],
+    plano: ['04 (quatro) vídeos mensais', '04 (quatro) peças gráficas mensais', 'Planejamento mensal dos conteúdos', 'Organização do cronograma de publicações', 'Reuniões de alinhamento', 'Ajustes compatíveis com o escopo contratado'],
+    compliance: null,
+  },
+  advocacia: {
+    servicos: ['Planejamento estratégico de marketing e comunicação', 'Direcionamento criativo e posicionamento de marca', 'Produção de conteúdo para redes sociais', 'Criação de peças gráficas e materiais institucionais', 'Captação audiovisual', 'Edição e finalização de vídeos', 'Desenvolvimento de campanhas institucionais', 'Consultoria estratégica de presença digital', 'Organização de cronograma de publicações e ações'],
+    plano: ['04 (quatro) vídeos mensais', '04 (quatro) peças gráficas mensais', 'Planejamento mensal dos conteúdos', 'Organização do cronograma de publicações', 'Reuniões de alinhamento', 'Ajustes compatíveis com o escopo contratado'],
+    compliance: {
+      titulo: 'DO COMPLIANCE E DAS NORMAS DA OAB',
+      itens: [
+        'A CONTRATADA compromete-se a executar os serviços observando, sempre que aplicável, as diretrizes éticas da publicidade jurídica previstas pelo Conselho Federal da Ordem dos Advogados do Brasil (OAB).',
+        'A CONTRATANTE reconhece que possui responsabilidade pela validação técnica, jurídica e ética dos conteúdos publicados, especialmente no que se refere às normas da advocacia, publicidade jurídica e provimentos da OAB.',
+        'A aprovação, publicação ou solicitação expressa de conteúdo pela CONTRATANTE implicará concordância integral quanto à adequação jurídica e ética do material.',
+        'A CONTRATADA não poderá ser responsabilizada por interpretações jurídicas, infrações éticas ou entendimentos disciplinares relacionados à atuação profissional da CONTRATANTE.',
+      ],
+    },
+  },
+  saude: {
+    servicos: ['Planejamento estratégico de marketing e comunicação', 'Direcionamento criativo e posicionamento de marca', 'Produção de conteúdo para redes sociais', 'Criação de peças gráficas e materiais institucionais', 'Captação audiovisual', 'Edição e finalização de vídeos', 'Gestão de tráfego pago (quando contratada)', 'Acompanhamento estratégico da presença digital'],
+    plano: ['04 (quatro) a 06 (seis) vídeos e fotos mensais', 'Peças gráficas conforme calendário editorial', 'Planejamento mensal dos conteúdos', 'Organização do cronograma de publicações', 'Reuniões de alinhamento', 'Ajustes compatíveis com o escopo contratado'],
+    compliance: {
+      titulo: 'DO COMPLIANCE E DA PUBLICIDADE EM SAÚDE',
+      itens: [
+        'A CONTRATADA compromete-se a executar os serviços observando, sempre que aplicável, as diretrizes éticas de publicidade em saúde previstas pelos conselhos profissionais competentes (CFO/CRO e correlatos).',
+        'A CONTRATANTE reconhece que possui responsabilidade pela validação técnica e ética dos conteúdos publicados, especialmente quanto a antes e depois, promessas de resultado e demais restrições da publicidade em saúde.',
+        'A aprovação, publicação ou solicitação expressa de conteúdo pela CONTRATANTE implicará concordância integral quanto à adequação técnica e ética do material.',
+        'A CONTRATADA não poderá ser responsabilizada por interpretações técnicas ou infrações éticas relacionadas à atuação profissional da CONTRATANTE.',
+      ],
+    },
+  },
+};
+
+function aplicarSegmento() {
+  const s = SEGMENTOS[document.getElementById('segmento').value];
+  document.getElementById('servicos').value = s.servicos.join('\n');
+  document.getElementById('plano').value = s.plano.join('\n');
+}
+
+// data default + contrato de exemplo já carregado
+(function () {
+  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const d = new Date();
+  document.getElementById('local_data').value = `Brasília/DF, ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+  aplicarSegmento();
+  // exemplo: troque pelos dados reais do cliente
+  document.getElementById('ct_nome').value = 'Cliente Exemplo Bar e Restaurante LTDA';
+  document.getElementById('ct_doc').value = '00.000.000/0001-00';
+  document.getElementById('ct_tel').value = '(61) 90000-0000';
+  document.getElementById('ct_end').value = 'Endereço do cliente, Brasília/DF, CEP 70.000-000';
+  document.getElementById('ct_email').value = 'contato@clienteexemplo.com.br';
+  document.getElementById('segmento').value = 'gastronomia';
+  aplicarSegmento();
+  setTimeout(previewContrato, 350);
+})();
+
+// ===== número por extenso (reais) =====
+function extenso(n) {
+  n = Math.round(n);
+  if (n === 0) return 'zero reais';
+  const u = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+  const d = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+  const c = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+  function ate999(x) {
+    if (x === 0) return '';
+    if (x === 100) return 'cem';
+    const cc = Math.floor(x / 100), dd = x % 100;
+    let s = cc ? c[cc] : '';
+    if (dd) {
+      if (s) s += ' e ';
+      if (dd < 20) s += u[dd];
+      else { s += d[Math.floor(dd / 10)]; if (dd % 10) s += ' e ' + u[dd % 10]; }
+    }
+    return s;
+  }
+  const mil = Math.floor(n / 1000), resto = n % 1000;
+  let s = '';
+  if (mil) {
+    if (mil === 1) s = 'mil';
+    else if (mil < 1000) s = ate999(mil) + ' mil';
+    else { const mi = Math.floor(mil / 1000); s = (mi === 1 ? 'um milhão' : ate999(mi) + ' milhões'); const mr = mil % 1000; if (mr) s += ' ' + (mr === 1 ? 'mil' : ate999(mr) + ' mil'); }
+  }
+  if (resto) s += (s ? (resto < 100 || resto % 100 === 0 ? ' e ' : ' ') : '') + ate999(resto);
+  return s + (n === 1 ? ' real' : ' reais');
+}
+
+const ORDINAIS = ['PRIMEIRA', 'SEGUNDA', 'TERCEIRA', 'QUARTA', 'QUINTA', 'SEXTA', 'SÉTIMA', 'OITAVA', 'NONA', 'DÉCIMA', 'DÉCIMA PRIMEIRA', 'DÉCIMA SEGUNDA', 'DÉCIMA TERCEIRA', 'DÉCIMA QUARTA', 'DÉCIMA QUINTA', 'DÉCIMA SEXTA'];
+const val = id => document.getElementById(id).value.trim();
+const num = id => parseFloat(val(id).replace(/\./g, '').replace(',', '.')) || 0;
+const fmt = n => Math.round(n).toLocaleString('pt-BR');
+const letra = i => String.fromCharCode(97 + i);
+
+// ===== monta o contrato como blocos =====
+function blocos() {
+  const seg = SEGMENTOS[document.getElementById('segmento').value];
+  const nome = val('ct_nome') || 'CONTRATANTE';
+  const valor = num('valor');
+  const vig = val('vigencia') || '6';
+  const aviso = val('aviso') || '15';
+  const multa = val('multa') || '20';
+  const aprov = val('aprovacao') || '3';
+  const servicos = val('servicos').split('\n').map(s => s.trim()).filter(Boolean);
+  const plano = val('plano').split('\n').map(s => s.trim()).filter(Boolean);
+  const rep = val('ct_rep');
+  const pagTipo = document.getElementById('pagamento').value;
+
+  const b = [];
+  b.push({ t: 'titulo', x: 'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE MARKETING E COMUNICAÇÃO' });
+  b.push({ t: 'par', x: 'Pelo presente instrumento particular, de um lado:' });
+  b.push({ t: 'par', x: `${ARK.nome}, pessoa jurídica de direito privado, inscrita no ${ARK.doc}, com sede no ${ARK.end}, doravante denominada simplesmente CONTRATADA;` });
+  b.push({ t: 'par', x: 'e, de outro lado:' });
+  b.push({ t: 'par', x: `${nome.toUpperCase()}, inscrita no ${val('ct_doc') ? 'CNPJ/CPF nº ' + val('ct_doc') : '________________'}, com endereço em ${val('ct_end') || '________________'}${rep ? ', neste ato representada por ' + rep : ''}${val('ct_email') ? ', e-mail ' + val('ct_email') : ''}${val('ct_tel') ? ', telefone ' + val('ct_tel') : ''}, doravante denominada simplesmente CONTRATANTE;` });
+  b.push({ t: 'par', x: 'resolvem celebrar o presente CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE MARKETING E COMUNICAÇÃO, que será regido pelas cláusulas e condições abaixo.' });
+
+  let n = 0;
+  const clausula = (titulo, itens) => {
+    b.push({ t: 'clausula', x: `CLÁUSULA ${ORDINAIS[n]}. ${titulo}` });
+    let k = 0;
+    itens.forEach(it => b.push(typeof it === 'string' ? { t: 'par', x: `${n + 1}.${++k}. ${it}` } : it));
+    n++;
+  };
+
+  clausula('DO OBJETO', [
+    'O presente contrato tem por objeto a prestação de serviços especializados de marketing e comunicação para fortalecimento da presença digital da CONTRATANTE.',
+    'Os serviços poderão compreender, conforme planejamento estratégico mensal:',
+    { t: 'alineas', x: servicos },
+    'O plano atualmente contratado contempla:',
+    { t: 'lista', x: plano },
+    'Os serviços serão executados conforme estratégia definida pela CONTRATADA, podendo sofrer adaptações para melhor atender aos objetivos do projeto.',
+    'A CONTRATADA não garante resultados financeiros específicos, crescimento numérico, captação de clientes, faturamento, alcance, engajamento ou qualquer métrica de performance, tendo em vista que os serviços possuem natureza intelectual, estratégica e criativa, sujeitos a fatores externos alheios ao controle da CONTRATADA.',
+  ]);
+
+  clausula('DA EXECUÇÃO DOS SERVIÇOS', [
+    'A CONTRATADA executará os serviços com autonomia técnica, criativa e operacional, podendo definir metodologias, cronogramas, ferramentas e estratégias necessárias ao desenvolvimento do projeto.',
+    'A execução das atividades dependerá do envio, pela CONTRATANTE, de materiais, informações, aprovações, acessos e retornos necessários à continuidade do projeto.',
+    'Eventuais atrasos decorrentes da ausência de resposta, demora em aprovações, indisponibilidade para gravações ou falta de envio de materiais não poderão ser atribuídos à CONTRATADA.',
+    'As gravações presenciais ocorrerão mediante alinhamento prévio entre as partes, comprometendo-se a CONTRATANTE a disponibilizar ambiente, equipe e estrutura necessários à sua realização.',
+    'Demandas emergenciais, alterações substanciais de escopo, refações excessivas, campanhas adicionais ou solicitações não previstas serão orçadas separadamente e dependerão de aprovação prévia da CONTRATANTE.',
+  ]);
+
+  clausula('DOS KPIS OPERACIONAIS', [
+    'Para fins de acompanhamento da execução contratual, serão considerados como indicadores operacionais mínimos: realização de alinhamentos estratégicos periódicos; entrega de materiais compatíveis com o planejamento mensal aprovado; execução das captações e edições previamente alinhadas; comunicação operacional ativa entre as partes; e cumprimento razoável do cronograma definido.',
+    'Os KPIs previstos nesta cláusula possuem natureza exclusivamente operacional e não representam garantia de performance comercial, crescimento financeiro, geração de clientes ou resultados específicos.',
+    'A eventual alteração de estratégia, pausa operacional, reformulação de cronograma ou adaptação do escopo não caracterizará descumprimento contratual quando realizada mediante alinhamento entre as partes.',
+  ]);
+
+  if (seg.compliance) clausula(seg.compliance.titulo, seg.compliance.itens);
+
+  clausula('DAS OBRIGAÇÕES DA CONTRATADA', [
+    'Constituem obrigações da CONTRATADA: executar os serviços com diligência técnica e profissional; manter comunicação periódica sobre o andamento do projeto; cumprir o planejamento previamente alinhado; preservar o sigilo das informações comerciais e estratégicas da CONTRATANTE; e entregar os materiais previstos dentro da capacidade operacional acordada.',
+    'A CONTRATADA poderá utilizar terceiros, parceiros, colaboradores ou fornecedores para auxiliar na execução operacional do projeto, permanecendo responsável pela coordenação geral dos serviços.',
+  ]);
+
+  clausula('DAS OBRIGAÇÕES DA CONTRATANTE', [
+    'Constituem obrigações da CONTRATANTE: efetuar os pagamentos nas datas previstas; fornecer informações, materiais e acessos necessários; realizar aprovações e retornos em tempo razoável; comparecer às captações, reuniões e alinhamentos agendados; e manter comunicação objetiva e organizada sobre o projeto.',
+    'A CONTRATANTE reconhece que o andamento adequado do projeto depende de participação ativa e colaboração contínua.',
+    'A CONTRATANTE responsabiliza-se integralmente pela veracidade das informações fornecidas e pela legalidade dos conteúdos institucionais e publicitários divulgados.',
+  ]);
+
+  clausula('DO PRAZO', [
+    `O presente contrato possui vigência inicial de ${vig} (${extenso(parseInt(vig)).replace(' reais', '').replace(' real', '')}) meses, contados a partir da data de assinatura.`,
+    'O período inicial destina-se à estruturação da comunicação da marca, implantação das estratégias e consolidação do fluxo operacional entre as partes.',
+    'Ao término do período inicial, será realizada reunião de revisão estratégica para avaliação da evolução do projeto, podendo as partes atualizar escopo, entregáveis e investimento mediante aditivo contratual ou novo instrumento.',
+  ]);
+
+  const pagTexto = {
+    antecipado: 'O pagamento deverá ser realizado de forma antecipada, até o primeiro dia útil de cada ciclo mensal de prestação de serviços, mediante PIX, transferência bancária ou outro meio indicado pela CONTRATADA.',
+    posterior: 'O primeiro ciclo de prestação dos serviços será executado integralmente antes do respectivo pagamento, com primeiro vencimento até o dia 30 (trinta) do mês subsequente ao início da execução; os demais vencimentos ocorrerão mensalmente no mesmo dia.',
+    dia10: 'O pagamento será realizado até o dia 10 (dez) do mês subsequente ao da prestação dos serviços, mediante PIX, transferência bancária ou outro meio indicado pela CONTRATADA.',
+  }[pagTipo];
+
+  clausula('DO VALOR E FORMA DE PAGAMENTO', [
+    `Pela prestação dos serviços previstos neste contrato, a CONTRATANTE pagará à CONTRATADA o valor mensal de R$ ${fmt(valor)},00 (${extenso(valor)}).`,
+    pagTexto,
+    'A execução das atividades mensais ficará condicionada à confirmação do pagamento correspondente ao respectivo ciclo.',
+    'O não pagamento até a data de vencimento acarretará multa moratória de 2% sobre o valor devido, juros de 1% ao mês e correção monetária proporcional ao período de inadimplência.',
+    'Permanecendo a inadimplência por período superior a 05 (cinco) dias úteis, a CONTRATADA poderá suspender imediatamente a execução dos serviços até a regularização, sem que isso caracterize descumprimento contratual.',
+    'O valor contratado refere-se exclusivamente ao escopo previsto neste contrato, não abrangendo custos extras com impulsionamentos, mídia paga, deslocamentos extraordinários, locações, contratação de elenco, estúdio, plataformas, softwares ou fornecedores terceiros.',
+  ]);
+
+  clausula('DAS APROVAÇÕES E ALTERAÇÕES', [
+    `Os materiais enviados para aprovação deverão ser analisados pela CONTRATANTE em até ${aprov.padStart(2, '0')} (${extenso(parseInt(aprov)).replace(' reais', '').replace(' real', '')}) dias úteis após o envio.`,
+    'Não havendo manifestação dentro desse prazo, os materiais serão considerados aprovados para fins de continuidade do cronograma.',
+    'Ajustes simples compatíveis com o briefing originalmente aprovado serão realizados sem custo adicional.',
+    'Alterações estruturais, mudanças de conceito, refações integrais ou solicitações fora do briefing inicialmente aprovado poderão gerar cobrança complementar.',
+  ]);
+
+  clausula('DOS DIREITOS AUTORAIS E USO DE PORTFÓLIO', [
+    'A CONTRATADA poderá utilizar os materiais produzidos em portfólio, apresentações comerciais, redes sociais e materiais institucionais, preservando a imagem e a reputação da CONTRATANTE, salvo manifestação expressa em contrário.',
+    'Os direitos patrimoniais dos materiais finais aprovados serão licenciados à CONTRATANTE para utilização vinculada às suas atividades institucionais e comerciais, permanecendo resguardados à CONTRATADA os direitos autorais intelectuais, estratégicos, metodológicos e criativos.',
+    'Arquivos editáveis, projetos abertos e arquivos-fonte não integram automaticamente a contratação, podendo sua cessão ocorrer mediante negociação específica.',
+  ]);
+
+  clausula('DA CONFIDENCIALIDADE', [
+    'As partes comprometem-se a manter sigilo sobre informações estratégicas, comerciais, operacionais e financeiras compartilhadas durante a execução deste contrato.',
+    'A obrigação de confidencialidade permanecerá válida mesmo após o encerramento contratual.',
+  ]);
+
+  clausula('DA RESCISÃO', [
+    `O presente contrato poderá ser rescindido por qualquer das partes mediante aviso prévio escrito com antecedência mínima de ${aviso} (${extenso(parseInt(aviso)).replace(' reais', '').replace(' real', '')}) dias.`,
+    `Em caso de rescisão antecipada imotivada pela CONTRATANTE antes do encerramento da vigência mínima, será devida multa correspondente a ${multa}% do valor restante do contrato.`,
+    'A CONTRATANTE poderá rescindir sem multa exclusivamente em caso de descumprimento operacional grave pela CONTRATADA, mediante notificação escrita com prazo mínimo de 07 (sete) dias úteis para regularização.',
+    'A inadimplência superior a 15 (quinze) dias autoriza a CONTRATADA a rescindir imediatamente este contrato, mantido o direito ao recebimento dos valores vencidos.',
+    'O encerramento do contrato não exime a CONTRATANTE do pagamento de valores vencidos ou de serviços já executados.',
+  ]);
+
+  clausula('DAS DISPOSIÇÕES GERAIS', [
+    'A relação estabelecida possui natureza exclusivamente civil e comercial, inexistindo vínculo trabalhista, societário ou empregatício entre as partes.',
+    'A eventual tolerância quanto ao descumprimento de qualquer obrigação não constituirá renúncia de direito ou novação contratual.',
+    'Este contrato substitui quaisquer entendimentos verbais anteriores e somente poderá ser alterado por escrito.',
+  ]);
+
+  clausula('DO FORO', [
+    'Fica eleito o foro da Comarca de Brasília/DF para dirimir quaisquer controvérsias oriundas deste contrato, com renúncia expressa a qualquer outro, por mais privilegiado que seja.',
+  ]);
+
+  b.push({ t: 'par', x: 'E, por estarem justas e contratadas, as partes firmam o presente instrumento.' });
+  b.push({ t: 'data', x: val('local_data') });
+  b.push({ t: 'ass', x: [ARK.nome + '\nCONTRATADA', nome.toUpperCase() + '\nCONTRATANTE'] });
+  b.push({ t: 'test' });
+  return b;
+}
+
+// ===== render HTML (fundo preto, logo, A4) =====
+function renderHtml(bs) {
+  let corpo = '';
+  for (const bl of bs) {
+    if (bl.t === 'titulo') corpo += `<div class="logo-top"><img src="${LOGO_URL}" alt="ARK"></div><div class="wordmark">ARK <b>CONTENT</b></div><div class="wordsub">Soluções de Marketing</div><div class="filete"></div><h1>${bl.x}</h1>`;
+    else if (bl.t === 'clausula') corpo += `<h2>${bl.x}</h2>`;
+    else if (bl.t === 'par') corpo += `<p>${bl.x}</p>`;
+    else if (bl.t === 'alineas') corpo += '<div class="al">' + bl.x.map((s, i) => `<p>${letra(i)}) ${s};</p>`).join('') + '</div>';
+    else if (bl.t === 'lista') corpo += '<div class="al">' + bl.x.map(s => `<p>• ${s};</p>`).join('') + '</div>';
+    else if (bl.t === 'data') corpo += `<p class="data">${bl.x}.</p>`;
+    else if (bl.t === 'ass') corpo += '<div class="assinaturas">' + bl.x.map(a => `<div class="ass"><div class="linha"></div><p>${a.replace('\n', '<br><span>')}</span></p></div>`).join('') + '</div>';
+    else if (bl.t === 'test') corpo += `<h2 style="text-align:center">TESTEMUNHAS</h2><div class="assinaturas"><div class="ass"><div class="linha"></div><p>Nome / CPF</p></div><div class="ass"><div class="linha"></div><p>Nome / CPF</p></div></div>`;
+  }
+  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Contrato · ARK Content</title>
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0a0b;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{color:#eceae6;font-family:Georgia,'Times New Roman',serif;font-size:12.5px;line-height:1.75}
+.doc{max-width:210mm;margin:0 auto;padding:16mm 22mm 20mm}
+.logo-top{text-align:center;margin-bottom:10px}
+.logo-top img{height:76px;border-radius:16px;box-shadow:0 8px 40px rgba(254,239,2,.14)}
+.wordmark{text-align:center;font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:13px;letter-spacing:.34em;color:#f5f5f2;margin-bottom:4px}
+.wordmark b{color:#feef02}
+.wordsub{text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:8.5px;letter-spacing:.28em;color:#8a8780;text-transform:uppercase;margin-bottom:14px}
+.filete{width:64px;height:3px;background:#feef02;border-radius:2px;margin:0 auto 24px}
+h1{font-family:Arial,Helvetica,sans-serif;font-size:17px;letter-spacing:.04em;text-align:center;color:#feef02;margin-bottom:26px;line-height:1.4}
+h2{font-family:Arial,Helvetica,sans-serif;font-size:12.5px;letter-spacing:.05em;color:#feef02;margin:22px 0 8px}
+p{margin:7px 0;text-align:justify}
+.al{margin-left:22px}
+.data{margin-top:34px;text-align:center}
+.assinaturas{display:flex;gap:40px;justify-content:center;margin:44px 0 10px;flex-wrap:wrap}
+.ass{text-align:center;min-width:240px}
+.ass .linha{border-bottom:1px solid #eceae6;margin-bottom:8px;height:34px}
+.ass p{text-align:center;font-family:Arial,sans-serif;font-size:11px;font-weight:bold}
+.ass p span{font-weight:normal;color:#9a9aa2}
+@media print{.pdfbar{display:none!important}}
+</style></head><body><div class="doc">${corpo}</div>
+<div class="pdfbar" style="position:fixed;bottom:22px;left:22px"><button onclick="window.print()" style="background:#feef02;color:#111;border:none;border-radius:8px;padding:13px 22px;font-family:Arial,sans-serif;font-weight:700;font-size:14px;cursor:pointer">Baixar PDF</button></div>
+</body></html>`;
+}
+
+let LOGO_URL = '/ark-logo.png';
+let LOGO_B64 = null;
+fetch('/ark-logo.png').then(r => r.blob()).then(bl => { const rd = new FileReader(); rd.onload = () => { LOGO_B64 = rd.result; LOGO_URL = LOGO_B64; }; rd.readAsDataURL(bl); });
+
+function checar(html) {
+  const trav = html.match(new RegExp('[\u2014\u2013\u2500\u2501\u2550]', 'g'));
+  const aviso = document.getElementById('aviso');
+  aviso.textContent = trav ? 'Travessão proibido encontrado no texto! Corrigir antes de enviar.' : '';
+  aviso.style.display = trav ? 'block' : 'none';
+}
+
+function previewContrato() {
+  const html = renderHtml(blocos());
+  checar(html);
+  document.getElementById('vazio').style.display = 'none';
+  document.getElementById('frame').srcdoc = html;
+}
+
+function abrirContrato() {
+  const html = renderHtml(blocos());
+  checar(html);
+  window.open(URL.createObjectURL(new Blob([html], { type: 'text/html' })), '_blank');
+}
+
+// ===== DOCX real com fundo preto =====
+async function baixarDocx() {
+  const d = window.docx;
+  if (!d) { alert('Biblioteca DOCX não carregou. Recarrega a página.'); return; }
+  const bs = blocos();
+  const AMARELO = 'FEEF02', BRANCO = 'ECEAE6', CINZA = '9A9AA2';
+  const kids = [];
+
+  // logo
+  try {
+    const buf = await fetch('/ark-logo.png').then(r => r.arrayBuffer());
+    kids.push(new d.Paragraph({ alignment: d.AlignmentType.CENTER, children: [new d.ImageRun({ data: buf, transformation: { width: 64, height: 64 } })], spacing: { after: 240 } }));
+  } catch (e) { /* segue sem logo */ }
+
+  const par = (txt, opts = {}) => new d.Paragraph({
+    alignment: opts.center ? d.AlignmentType.CENTER : d.AlignmentType.JUSTIFIED,
+    spacing: { after: 120, line: 330 },
+    indent: opts.indent ? { left: 420 } : undefined,
+    children: [new d.TextRun({ text: txt, color: opts.cor || BRANCO, bold: !!opts.bold, size: opts.size || 22, font: opts.sans ? 'Arial' : 'Georgia' })],
+  });
+
+  for (const bl of bs) {
+    if (bl.t === 'titulo') kids.push(par(bl.x, { center: true, bold: true, cor: AMARELO, size: 30, sans: true }));
+    else if (bl.t === 'clausula') kids.push(par(bl.x, { bold: true, cor: AMARELO, size: 23, sans: true }));
+    else if (bl.t === 'par') kids.push(par(bl.x));
+    else if (bl.t === 'alineas') bl.x.forEach((s, i) => kids.push(par(`${letra(i)}) ${s};`, { indent: true })));
+    else if (bl.t === 'lista') bl.x.forEach(s => kids.push(par(`• ${s};`, { indent: true })));
+    else if (bl.t === 'data') kids.push(par(bl.x + '.', { center: true }));
+    else if (bl.t === 'ass') {
+      kids.push(par(' ', {})); kids.push(par(' ', {}));
+      bl.x.forEach(a => { const [nome, papel] = a.split('\n');
+        kids.push(par('________________________________________', { center: true }));
+        kids.push(par(nome, { center: true, bold: true, sans: true, size: 20 }));
+        kids.push(par(papel, { center: true, cor: CINZA, sans: true, size: 18 }));
+        kids.push(par(' ', {}));
+      });
+    } else if (bl.t === 'test') {
+      kids.push(par('TESTEMUNHAS', { center: true, bold: true, cor: AMARELO, sans: true }));
+      for (let i = 0; i < 2; i++) { kids.push(par(' ', {})); kids.push(par('________________________________________', { center: true })); kids.push(par('Nome / CPF', { center: true, cor: CINZA, sans: true, size: 18 })); }
+    }
+  }
+
+  const doc = new d.Document({
+    background: { color: '0A0A0B' },
+    sections: [{ properties: { page: { margin: { top: 1140, bottom: 1140, left: 1250, right: 1250 } } }, children: kids }],
+  });
+  const blob = await d.Packer.toBlob(doc);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const nome = (val('ct_nome') || 'cliente').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  a.download = `contrato-ark-${nome}.docx`;
+  a.click();
+}
+</script>
+</body>
+</html>

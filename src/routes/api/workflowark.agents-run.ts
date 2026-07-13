@@ -8,8 +8,8 @@ import { hojeSP, dataSP } from "@/lib/datas";
 // - guarda os briefings em wfa-conselho-briefings (o app mostra de manhã)
 // - notifica em wfa-notificacoes
 // Chamável por cron (Cloudflare/cron-job.org). Protegido por ?key=. ?force=1 força.
-//   /api/workflowark/agents-run?key=ark-2026
-const RUN_KEY = "ark-2026";
+//   /api/workflowark/agents-run?key=<segredo RUN_KEY> (cron) ou Authorization: Bearer (UI)
+// (auth em @/integrations/run-auth.server, importado dinamicamente no handler)
 
 // Mapeia a área/função sugerida pela IA para a PESSOA responsável (organograma da ARK).
 // Assim o conselho atribui a tarefa a quem executa, não a um "agente".
@@ -37,6 +37,9 @@ const CLIENTES_CTX: { id: string; nm: string; seg: string; nota: string }[] = [
   { id: "brisa", nm: "Brisa Doce Café", seg: "Cafeteria / doces", nota: "Onboarding + inauguração." },
   { id: "fonseca", nm: "Fonseca & Cavalcanti", seg: "Advocacia (compliance OAB)", nota: "1 captação/mês; conteúdo precisa respeitar limites de publicidade da OAB; autoridade." },
   { id: "vaca", nm: "Vaca Velha", seg: "Restaurante / churrascaria", nota: "1 captação/mês (2ª às vezes); ramp-up de receita." },
+  { id: "dgust", nm: "Pizzaria Dgust", seg: "Pizzaria", nota: "Cliente NOVO (jul/2026): onboarding, primeira linha editorial e primeiras captações." },
+  { id: "kopi-coffee", nm: "Kopi Coffee", seg: "Cafeteria", nota: "Cliente NOVO (jul/2026): onboarding e presença inicial." },
+  { id: "cafe-lumiere", nm: "Café Lumière", seg: "Cafeteria", nota: "Cliente NOVO (jul/2026): onboarding, posicionamento e presença inicial." },
   { id: "dom", nm: "Dom Baruka", seg: "Restaurante (Squad Alpha)", nota: "URGENTE: cardápio + iFood + bebidas; auditoria iFood em curso." },
   { id: "stray", nm: "Stray House", seg: "Restaurante/bar (Squad Alpha)", nota: "Recuperação; ROAS ~5; subir criativos novos." },
   { id: "babbo", nm: "Babbo Giovanni", seg: "Restaurante italiano (Squad Alpha)", nota: "Em ajuste; precisa de uma roteirização interessante de Reels, viável de gravar e exportável pro Drive." },
@@ -53,7 +56,8 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
     handlers: {
       GET: async ({ request }) => {
         const u = new URL(request.url);
-        if (u.searchParams.get("key") !== RUN_KEY) return Response.json({ error: "unauthorized" }, { status: 401 });
+        const { isRunAuthorized, runSecret } = await import("@/integrations/run-auth.server");
+        if (!(await isRunAuthorized(request, u))) return Response.json({ error: "unauthorized" }, { status: 401 });
         const force = u.searchParams.get("force") === "1";
         // ?cliente=vivenda roda só um cliente (e ignora idempotência) — útil pro botão "rodar agora"
         const soCliente = u.searchParams.get("cliente") || "";
@@ -139,26 +143,25 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             } catch { /* */ }
           }
 
-          // 2) Conselho autônomo POR CLIENTE ----------------------------------------
-          // Pra não estourar o tempo da request (Cloudflare ~limite por request), o run
-          // completo é INCREMENTAL: a cada chamada processa só quem ainda não tem briefing
-          // de hoje, no máx. MAX_POR_CHAMADA. Várias chamadas no dia completam o conjunto.
-          const MAX_POR_CHAMADA = 3;
+          // 2) PAUTA DO DIA + DOCUMENTO DE TRABALHO ---------------------------------
+          // Reestruturado (pedido do Gabriel, 03/07): o debate diário de TODOS os clientes
+          // com contexto estático virava ruminação ("murro em ponta de faca"). Agora:
+          // - PAUTA PREVISÍVEL: 1-2 clientes por dia — quem tem evento/apresentação chegando
+          //   na agenda (próximos 7 dias) + um do RODÍZIO semanal (cada cliente ~1x/semana).
+          // - CONTEXTO DINÂMICO: tarefas abertas e eventos reais do cliente entram no prompt,
+          //   e os títulos do último documento entram como "NÃO REPITA".
+          // - SAÍDA = DOCUMENTO: planejamento datado + roteiro pronto + checklist de preparação,
+          //   material que a equipe usa na entrega, não opinião.
 
-          // tarefas existentes (pra anexar as novas)
-          // SEGURANÇA CONTRA PERDA DE DADOS: se a leitura falhar, NÃO escrevemos nada em
-          // wfa-tarefas (senão sobrescreveríamos as tarefas reais com uma lista curta).
           const { data: tRow, error: tErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-tarefas").maybeSingle();
           const tarefasLoadOk = !tErr;
           const tarefasBaseLen = Array.isArray(tRow?.data) ? tRow.data.length : 0;
           const tarefas: any[] = Array.isArray(tRow?.data) ? tRow.data.slice() : [];
 
-          // briefings existentes (mantém os de hoje atualizados, descarta antigos > 14 dias)
           const { data: bRow } = await db.from("workflowark_state").select("data").eq("key", "wfa-conselho-briefings").maybeSingle();
           let briefings: any[] = Array.isArray(bRow?.data) ? bRow.data : [];
           briefings = briefings.filter((b) => (b.ts || 0) > Date.now() - 14 * 86400 * 1000);
 
-          // agenda existente (pra ADICIONAR os alinhamentos do conselho — append-only)
           const { data: agRow, error: agErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-agenda-events").maybeSingle();
           const agendaOk = !agErr;
           const agenda: any[] = Array.isArray(agRow?.data) ? agRow.data.slice() : [];
@@ -166,45 +169,66 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           // próximo dia útil a partir de amanhã
           const proxDiaUtil = (offset: number) => { const d = new Date(); d.setDate(d.getDate() + 1 + offset); while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1); return dataSP(d); };
 
-          // define quem o conselho vai debater AGORA
+          // sinais reais: eventos dos próximos 7 dias que citam um cliente
+          const em7dias = (d: string) => d >= hoje && d <= new Date(Date.now() + 7 * 86400 * 1000).toISOString().split("T")[0];
+          const eventosProx = agenda.filter((e) => e && e.date && em7dias(String(e.date)));
+          const eventosDo = (c: { id: string; nm: string }) =>
+            eventosProx.filter((e) => String(e.clienteId || "") === c.id || String(e.title || "").toLowerCase().includes(c.nm.toLowerCase()));
+
           const temHoje = (id: string) => briefings.some((b) => b.clienteId === id && b.date === hoje);
+          const comEvento = CLIENTES_CTX.filter((c) => eventosDo(c).length > 0);
+          const dayIdx = Math.floor(Date.now() / 86400000) % CLIENTES_CTX.length;
+          const rodizio = CLIENTES_CTX[dayIdx];
           let alvos = soCliente
             ? CLIENTES_CTX.filter((c) => c.id === soCliente)
-            : CLIENTES_CTX.filter((c) => !temHoje(c.id)).slice(0, MAX_POR_CHAMADA);
-          const faltam = soCliente ? 0 : CLIENTES_CTX.filter((c) => !temHoje(c.id)).length - alvos.length;
+            : [...comEvento, rodizio]
+                .filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i)
+                .filter((c) => !temHoje(c.id))
+                .slice(0, 2);
+          const faltam = 0; // pauta enxuta por desenho: nada de varrer a carteira inteira
 
-          const sysConselho =
-            "Você é o CONSELHO DE IA da ARK Content (agência de marketing de gastronomia/varejo). " +
-            "O conselho tem vozes: Diretor de Operações, Gestor de Tráfego, Social Media, Roteirista e Account/CS. " +
-            "Eles se reúnem como um TIME INTERNO da agência: pensam fundo em CADA cliente e definem o que A ARK vai executar. " +
-            "REGRAS DE QUALIDADE (críticas): " +
-            "1) Traga só ideias ESPECÍFICAS deste cliente e do momento dele — nada de conselho genérico que qualquer IA daria (ex: 'poste mais', 'use stories', 'crie identidade visual'). Se não tiver uma ideia realmente boa e específica, traga MENOS itens. Qualidade vale mais que quantidade. " +
-            "2) PROIBIDO falar de ESTOQUE, inventário ou 'capacidade de vender mais por causa de estoque'. Os clientes da ARK conseguem repor; estoque é irrelevante e não é assunto da agência. " +
-            "3) Não repita o mesmo tipo de ideia entre clientes. Pense no ângulo, na narrativa, no produto-herói, na sazonalidade e na referência concreta do nicho. " +
-            "4) 'alinhamentos' = ALINHAMENTOS INTERNOS do próprio time da ARK pra executar o plano (ex: 'Alinhamento de tráfego x social sobre a campanha', 'Revisão de roteiro com o Account'). NUNCA são tarefas pro Gabriel nem reuniões pra falar de estoque com o cliente. São a agenda do conselho. " +
-            "Proponha também um ORÇAMENTO de mídia realista. Benchmarks Brasil 2025-26: Meta Ads Click-to-WhatsApp é o melhor pra PME (CPL R$5-25, conversão 15-30%); Google Ads CPL R$30-200. Regra: CPL máximo = ticket médio × taxa de conversão. Diga verba mensal, canal (geralmente Click-to-WhatsApp) e resultado esperado em leads. " +
-            "Responda SOMENTE em JSON válido, sem texto fora do JSON. Ordem dos campos (preencha TODOS): " +
-            '{"decisao":"frase única e forte, específica deste cliente",' +
-            '"orcamento":"verba mensal + canal + resultado esperado (ex: R$1.500/mês em Click-to-WhatsApp ~ 60-100 leads)",' +
-            '"roteiro":"roteiro curto de 1 Reel: gancho + 3 cenas + CTA (1 parágrafo)",' +
-            '"plano":["passo específico 1","passo específico 2"],' +
-            '"reunioes":["alinhamento INTERNO do time pra executar (com qual área)"],' +
-            '"tarefas":[{"title":"ideia acionável, específica e não-óbvia","resp":"área (trafego, social, account, design, edicao, captacao, comercial)"}],' +
-            '"referencias":["marca/criador real do nicho + por que olhar"],"parcerias":["ideia de parceria concreta e plausível na praça"],' +
-            '"debate":[{"voz":"Gestor de Tráfego","fala":"..."},{"voz":"Social Media","fala":"..."}]}. ' +
-            "Máx 2 passos, 2 ideias, 1 alinhamento interno, 2 referências, 1 parceria, 2 falas. Português, específico e prático.";
+          const sysDoc =
+            "Você é o CONSELHO DE IA da ARK Content (agência de marketing de gastronomia/varejo em Brasília) preparando um DOCUMENTO DE TRABALHO pro cliente da pauta de hoje. " +
+            "Não é debate nem opinião: é material que a equipe vai USAR (apresentar ao cliente, gravar, postar). " +
+            "REGRAS: 1) Específico deste cliente e do MOMENTO dele (use as tarefas abertas e os eventos da semana informados). " +
+            "2) PROIBIDO item genérico ('poste mais', 'use stories') e PROIBIDO falar de estoque/inventário. " +
+            "3) NÃO repita os títulos listados como 'já sugerido antes' — traga ângulos novos. " +
+            "4) Datas do planejamento começam AMANHÃ e cobrem ~7 dias, no formato AAAA-MM-DD. " +
+            "Responda SOMENTE em JSON válido: " +
+            '{"foco":"1 frase: o foco da semana deste cliente e porquê agora",' +
+            '"planejamento":[{"data":"AAAA-MM-DD","formato":"Reels|Carrossel|Story|Foto","titulo":"...","gancho":"1 linha"}],' +
+            '"roteiro":"roteiro COMPLETO do post mais importante: GANCHO + 3 cenas descritas + CTA + legenda com 3 hashtags (texto corrido, quebras de linha)",' +
+            '"checklist":[{"title":"o que a equipe precisa preparar/agendar pra executar","resp":"área (trafego, social, account, design, edicao, captacao, comercial)"}],' +
+            '"orcamento":"1 linha: verba mensal + canal + resultado esperado (benchmark Meta Click-to-WhatsApp CPL R$5-25)"}. ' +
+            "5 a 7 itens no planejamento, 3 a 4 no checklist. Português, pronto pra usar.";
 
           let criadas = 0;
           for (const c of alvos) {
+            const evs = eventosDo(c).slice(0, 4).map((e) => `${e.date} ${e.time || ""} ${String(e.title || "").slice(0, 70)}`);
+            const motivo = evs.length ? `entrega/apresentação chegando (${evs[0].slice(0, 40)}…)` : "rodízio semanal da pauta";
+            const abertas = tarefas
+              .filter((t) => t && String(t.clienteId || "") === c.id && t.status !== "concluido")
+              .slice(0, 8)
+              .map((t) => `- ${String(t.title || "").slice(0, 80)} (${t.status || "?"})`);
+            const anterior = briefings.find((b) => b.clienteId === c.id);
+            const jaSugerido = anterior
+              ? [...(anterior.plano || []), ...((anterior.ideias || []).map((i: any) => i.titulo))].slice(0, 10).join("; ")
+              : "";
             const raw = await callAI(
-              sysConselho,
-              `Cliente: ${c.nm}. Segmento: ${c.seg}. Contexto: ${c.nota}. ` +
-                `Debata o que ESTE cliente precisa AGORA pra vender mais e crescer em CONTEÚDO e MÍDIA — com referências reais do nicho e uma parceria plausível. ` +
-                `Nada de estoque/inventário. Nada de conselho óbvio. Hoje é ${hoje}.`,
-              2400,
+              sysDoc,
+              `Cliente da pauta: ${c.nm}. Segmento: ${c.seg}. Nota de conta: ${c.nota}\n` +
+                `MOTIVO da pauta hoje: ${motivo}.\n` +
+                `EVENTOS da semana deste cliente:\n${evs.join("\n") || "(nenhum na agenda)"}\n` +
+                `TAREFAS ABERTAS deste cliente agora:\n${abertas.join("\n") || "(nenhuma)"}\n` +
+                (jaSugerido ? `JÁ SUGERIDO ANTES (não repita): ${jaSugerido}\n` : "") +
+                `Hoje é ${hoje}. Monte o documento de trabalho da semana.`,
+              2600,
             );
             const j = parseJSON(raw);
             if (!j) continue;
+            const planejamento = (Array.isArray(j.planejamento) ? j.planejamento : []).slice(0, 7)
+              .map((p: any) => `${String(p?.data || "").slice(0, 10)} · ${String(p?.formato || "Post")} · ${String(p?.titulo || "").slice(0, 90)}${p?.gancho ? " — " + String(p.gancho).slice(0, 90) : ""}`)
+              .filter((s: string) => s.length > 15);
             const brief = {
               id: "brf" + c.id + "-" + hoje + "-" + Date.now(),
               clienteId: c.id,
@@ -212,21 +236,21 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
               date: hoje,
               ts: Date.now(),
               lido: false,
-              debate: Array.isArray(j.debate) ? j.debate.slice(0, 3) : [],
-              decisao: String(j.decisao || ""),
-              plano: Array.isArray(j.plano) ? j.plano.slice(0, 2).map((x: any) => String(x)) : [],
-              referencias: Array.isArray(j.referencias) ? j.referencias.slice(0, 2).map((x: any) => String(x)) : [],
-              parcerias: Array.isArray(j.parcerias) ? j.parcerias.slice(0, 1).map((x: any) => String(x)) : [],
-              reunioes: Array.isArray(j.reunioes) ? j.reunioes.slice(0, 1).map((x: any) => String(x)) : [],
+              doc: true,
+              motivo,
+              debate: [],
+              decisao: `📄 ${String(j.foco || "Documento de trabalho da semana")}`,
+              plano: planejamento,
+              referencias: [],
+              parcerias: [],
+              reunioes: [],
               roteiro: String(j.roteiro || ""),
               orcamento: String(j.orcamento || ""),
-              // IDEIAS (NÃO viram tarefa automaticamente — o Gabriel dá check pra promover).
-              // Resolve o "muito volume": nada de auto-flood no Kanban.
-              ideias: (Array.isArray(j.tarefas) ? j.tarefas : []).slice(0, 2).map((tk: any) => ({
+              // checklist de preparação vira "ideias" (o Gabriel dá check pra promover a tarefa)
+              ideias: (Array.isArray(j.checklist) ? j.checklist : []).slice(0, 4).map((tk: any) => ({
                 titulo: String(tk?.title || "").slice(0, 140), area: String(tk?.resp || ""), feito: false,
               })).filter((x: any) => x.titulo),
             };
-            // PRESERVA o histórico: cada debate é ADICIONADO. Mantém os últimos 60.
             briefings.unshift(brief);
             criadas++; // conta o que este lote produziu (destrava o auto-encadeamento e o retorno)
             // Apenas as REUNIÕES/ALINHAMENTOS entram direto NA AGENDA (não no Kanban)
@@ -237,7 +261,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
                 agenda.push({ id: "ce" + Date.now() + i + c.id, date: proxDiaUtil(i), title: evTitle, time: i === 0 ? "10:00" : "15:00", type: "reuniao", origem: "conselho" });
               }
             });
-            notifs.push({ tipo: "conselho", clienteId: c.id, texto: `🧠 Conselho debateu ${c.nm}: ${brief.decisao}` });
+            notifs.push({ tipo: "conselho", clienteId: c.id, texto: `📄 Documento de trabalho pronto: ${c.nm} · ${motivo}` });
           }
 
           // persiste tudo — só grava tarefas se a leitura veio OK e o resultado é
@@ -262,11 +286,7 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           }
           // só marca "rodou hoje" quando TODOS os clientes já têm briefing de hoje
           if (!soCliente && faltam === 0) await db.from("workflowark_state").upsert({ key: "wfa-agents-lastrun", data: { date: hoje, ts: Date.now() } });
-          // AUTO-ENCADEIA: se ainda faltam clientes e este lote produziu algo, dispara o
-          // próximo lote em background (best-effort) — assim 1 chamada do cron cobre todos.
-          if (!soCliente && faltam > 0 && criadas > 0) {
-            try { fetch(`${u.origin}/api/workflowark/agents-run?key=${RUN_KEY}`).catch(() => {}); } catch { /* ignore */ }
-          }
+          // (sem auto-encadeamento: a pauta é enxuta por desenho, 1-2 clientes por dia)
           return Response.json({ ok: true, ran: true, clientes: alvos.length, faltam, tarefas: criadas, tarefasSalvas: salvouTarefas, notificacoes: notifs.length });
         } catch (e) {
           return Response.json({ error: (e as Error)?.message || "falha" }, { status: 500 });

@@ -135,6 +135,29 @@ function RootComponent() {
         /* PWA opcional: ignora falha de registro */
       });
     }
+    // Tela branca pós-deploy: aba aberta antes do deploy pede um chunk com hash
+    // antigo que o deploy novo removeu. Recarrega UMA vez pra pegar o build novo
+    // (guarda em sessionStorage pra nunca entrar em loop de reload).
+    const recarregaUmaVez = () => {
+      try {
+        if (sessionStorage.getItem("wfa-chunk-reload")) return;
+        sessionStorage.setItem("wfa-chunk-reload", "1");
+        window.location.reload();
+      } catch { /* sem sessionStorage: não arrisca loop */ }
+    };
+    const onPreloadError = (e: Event) => { e.preventDefault(); recarregaUmaVez(); };
+    const onError = (e: ErrorEvent) => {
+      const m = String(e?.message || "");
+      if (/Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk .* failed/i.test(m)) recarregaUmaVez();
+    };
+    window.addEventListener("vite:preloadError", onPreloadError);
+    window.addEventListener("error", onError);
+    // A guarda fica pela sessão da aba inteira (1 auto-reload no máximo): se após o
+    // reload o chunk ainda falhar, é erro real e o error boundary assume. Sem loop.
+    return () => {
+      window.removeEventListener("vite:preloadError", onPreloadError);
+      window.removeEventListener("error", onError);
+    };
   }, []);
 
   return (

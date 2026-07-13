@@ -1,14 +1,16 @@
+<!-- build 2026-07-06-sidebar-mobile-fix -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>WorkFlowArk · Sistema ARK Content</title>
 <link rel="icon" type="image/png" href="/ark-mark.png?v=2">
 <link rel="apple-touch-icon" href="/ark-mark.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
 <style>
 :root{
@@ -218,7 +220,7 @@ html,body{letter-spacing:-.006em}
 .navitem.active::before{content:"";position:absolute;left:-4px;top:50%;transform:translateY(-50%);width:3px;height:16px;border-radius:3px;background:var(--yel)}
 .navitem.active svg{color:var(--yel-d)}
 .subitem.active{background:#f6f3e9}
-.topbar{backdrop-filter:saturate(1.2) blur(8px);background:rgba(255,255,255,.72);border-bottom:1px solid var(--line)}
+.topbar{backdrop-filter:saturate(1.2) blur(8px);-webkit-backdrop-filter:saturate(1.2) blur(8px);background:rgba(255,255,255,.72);border-bottom:1px solid var(--line)}
 .crumbs .here{letter-spacing:-.01em}
 .proc-hero::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,199,0,.5),transparent)}
 .proc-chip{border-radius:9px;letter-spacing:-.01em}
@@ -537,6 +539,8 @@ table.t tr.high{background:var(--yel-bg)}
   .app{grid-template-columns:1fr}
   .side{position:fixed;top:0;left:0;bottom:0;width:272px;max-width:85vw;z-index:1000;transform:translateX(-100%);transition:transform .26s cubic-bezier(.16,1,.3,1);box-shadow:0 0 44px rgba(0,0,0,.2)}
   .side.open{transform:none}
+  /* trava: nenhuma animacao de tema pode congelar o transform do drawer no celular */
+  .side{animation:none!important}
   .side-backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.44);z-index:999;opacity:0;pointer-events:none;transition:opacity .26s}
   .side-backdrop.show{opacity:1;pointer-events:auto}
   .mob-menu{display:inline-flex}
@@ -664,31 +668,30 @@ h1,h2,h3,h4{letter-spacing:-.02em}
 
 /* =====================================================================
    APPLE REFORM · camada final coesa (vence as camadas anteriores).
-   Tipografia SF, fundo/cinzas Apple, profundidade suave, controles iOS,
-   vidro fosco no topo, sidebar grafite, foco e física de movimento Apple.
-   Escopo cuidadoso: NÃO mexe em inputs especiais (ex: células .al-cell).
+   02/07: tentativa de migrar o sistema inteiro pro escuro (Linear) foi
+   REVERTIDA a pedido do Gabriel ("não quero esse fundo preto horrível,
+   volta pro certo") — quebrou contraste em telas que não tinham sido
+   testadas uma a uma. Volta pro claro que já estava validado: fundo
+   #f5f5f7, cartões brancos, sidebar/JARVIS/widgets escuros continuam
+   escuros (isso já era assim antes e funcionava).
    ===================================================================== */
 :root{
   --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Inter',system-ui,'Segoe UI',sans-serif;
-  --bg:#f5f5f7;            /* cinza de fundo Apple */
-  --ink:#1d1d1f;--ink-2:#1d1d1f;--txt:#1d1d1f;  /* preto Apple (não #000) */
-  --mute:#6e6e73;--mute-2:#8e8e93;              /* cinzas secundários iOS */
-  --line:#e5e5ea;--line-2:#d1d1d6;              /* hairlines iOS */
+  /* claro de VERDADE (feedback: #f5f5f7 lia como off-white desgastado) */
+  --bg:#fbfbfd;
+  --ink:#1d1d1f;--ink-2:#1d1d1f;--txt:#1d1d1f;
+  --mute:#6e6e73;--mute-2:#8e8e93;
+  --line:#e5e5ea;--line-2:#d1d1d6;
 }
-html,body{font-family:var(--sans);letter-spacing:-.011em}
-h1,h2,h3,h4{letter-spacing:-.022em}
+html,body{font-family:var(--sans);letter-spacing:-.011em;background:var(--bg)}
+h1,h2,h3,h4{letter-spacing:-.022em;color:var(--ink)}
 .view{background:var(--bg)}
 
-/* Cartões — referência Apple (macbook-neo): raio 28px, elevação por CONTRASTE DE VALOR
-   (branco sobre #f5f5f7), quase sem sombra em repouso — a sombra só entra como resposta
-   ao toque/hover, nunca como decoração parada. */
+/* Cartões claros — raio 28px, sombra quase zero em repouso, sombra real só no hover. */
 .card,.kpi,.mdw,.al-kpi{border-radius:28px;border:1px solid rgba(0,0,0,.04);box-shadow:0 1px 1px rgba(0,0,0,.02);transition:box-shadow .34s ease,transform .34s ease}
 .card:hover,.mdw:hover{box-shadow:0 12px 28px -16px rgba(0,0,0,.16);transform:translateY(-2px)}
 
-/* Cartões ESCUROS — referência Linear (midnight command deck): raio mais fechado (14px, não
-   28px — instrumento denso, não vitrine), borda inset fina em vez de preenchimento chapado,
-   sombra curta e precisa. É a metade "escura" do sistema (sidebar, JARVIS) falando a língua
-   certa: painel de instrumento, não cartão de produto. */
+/* Cartões ESCUROS (sidebar, JARVIS, widget Relógio) continuam escuros — isso não mudou. */
 .card.dk,.kpi.dk,.mdw.dk,#md-jarvis{border-radius:14px!important;border:1px solid rgba(255,255,255,.08)!important;
   box-shadow:0 0 0 1px rgba(0,0,0,.3),0 2px 4px rgba(0,0,0,.4)!important;background:#161718!important}
 .card.dk .l,.card.dk .d,.kpi.dk .l,.kpi.dk .d{color:#8a8f98!important}
@@ -702,7 +705,7 @@ h1,h2,h3,h4{letter-spacing:-.022em}
 @keyframes tbShine{to{left:130%}}
 @media (prefers-reduced-motion:reduce){.tb-btn:hover::after{animation:none}}
 
-/* Topo — vidro fosco translúcido (iOS) */
+/* Topo — vidro fosco translúcido, agora escuro (Linear) */
 .topbar{background:rgba(245,245,247,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.07)}
 
 /* Estrutura flutuante, ajustada (feedback do Gabriel: "borda grande demais na esquerda"):
@@ -713,7 +716,7 @@ h1,h2,h3,h4{letter-spacing:-.022em}
 .main{height:100%;border-radius:22px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.03),0 20px 44px -28px rgba(0,0,0,.14)}
 @media (max-width:900px){.app{padding:0;gap:0}.main{border-radius:0}.side{border-radius:0}}
 
-/* Sidebar — grafite Apple (não preto chapado) + hairline translúcido */
+/* Sidebar — grafite Apple (não preto chapado), como já era antes da tentativa de escurecer tudo */
 .side{background:#1c1c1e;border-right:1px solid rgba(255,255,255,.07)}
 #nav{position:relative}
 .navitem,.subitem{position:relative;border-radius:10px;font-weight:500;transition:background .2s ease,color .2s ease,transform .18s cubic-bezier(.16,1,.3,1)}
@@ -819,9 +822,644 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
 .regua-cell:active{transform:scale(.9)}
 
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important;animation-duration:.01s!important}}
+
+/* =====================================================================
+   AURA DARK · camada piloto (02/07/2026). Referência: aurasoftware.cloud
+   com o azul trocado pelo amarelo ARK (#FFC700). Tokens reais extraídos
+   do site: fundo #000, card rgba(255,255,255,.025), borda rgba(255,255,255,.10),
+   hovers translateY(-3px) + glow, navbar vidro rgba(5,6,10,.35) blur(10px)
+   que some no scroll pra baixo e volta no scroll pra cima.
+   ESCOPO: body.aura-dark. Rollback total = tirar a classe do <body>.
+   A tentativa anterior de dark global quebrou telas não testadas; esta
+   camada sobe tela a tela, piloto = Meu Painel.
+   ===================================================================== */
+body.aura-dark{
+  --bg:#000000;--surface:rgba(255,255,255,.04);
+  --ink:#ffffff;--ink-2:#f4f5f7;--txt:#eef0f3;
+  --mute:#a6adba;--mute-2:#7b8494;
+  --line:rgba(255,255,255,.12);--line-2:rgba(255,255,255,.18);
+  --yel-soft:rgba(255,199,0,.14);--yel-bg:rgba(255,199,0,.09);
+  --blue-soft:rgba(255,255,255,.06);
+  --red-soft:rgba(220,38,38,.16);--green-soft:rgba(22,163,74,.16);--orange-soft:rgba(234,88,12,.18);
+  --sh-1:0 1px 0 rgba(255,255,255,.03) inset;
+  --sh-2:0 1px 0 rgba(255,255,255,.04) inset,0 8px 20px -12px rgba(0,0,0,.6);
+  --sh-3:0 12px 28px -6px rgba(0,0,0,.55);
+  --sh-4:0 28px 60px -12px rgba(0,0,0,.65);
+  --sh-yel:0 8px 40px rgba(255,199,0,.35);
+  background:#000;color:var(--txt);
+}
+body.aura-dark .app{background:#000}
+body.aura-dark .view{background:transparent}
+body.aura-dark h1,body.aura-dark h2,body.aura-dark h3,body.aura-dark h4{color:var(--ink)}
+/* color-scheme manda o navegador desenhar os controles NATIVOS (dropdown de select,
+   scrollbar, date picker) no tom do tema; sem isso a lista do select abre branca
+   com texto claro e fica ilegível (bug dos filtros do Kanban) */
+body.aura-dark{color-scheme:dark}
+body.aura-light{color-scheme:light}
+body.aura-dark select,body.aura-dark .form-select{background:rgba(255,255,255,.06);color:var(--ink);border-color:var(--line)}
+body.aura-dark select option,body.aura-dark .form-select option{background:#101116;color:#eef0f3}
+
+/* Painel principal: PRETO ABSOLUTO #000 (pedido do Gabriel) com glows âmbar vivos por trás (o "movimento") */
+body.aura-dark .main{position:relative;background:#000;border:1px solid rgba(255,255,255,.08)}
+body.aura-dark .main::before,body.aura-dark .main::after{
+  content:'';position:absolute;width:56vw;height:56vw;border-radius:50%;
+  pointer-events:none;z-index:0;will-change:transform;
+  background:radial-gradient(circle closest-side,rgba(255,199,0,.10),rgba(255,199,0,0) 72%);
+  filter:blur(70px)}
+body.aura-dark .main::before{top:-34vw;right:-22vw;animation:auraDriftA 26s ease-in-out infinite alternate}
+body.aura-dark .main::after{bottom:-32vw;left:-20vw;width:44vw;height:44vw;
+  background:radial-gradient(circle closest-side,rgba(255,168,0,.06),rgba(255,168,0,0) 72%);
+  animation:auraDriftB 34s ease-in-out infinite alternate}
+@keyframes auraDriftA{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-9vw,7vw,0) scale(1.18)}}
+@keyframes auraDriftB{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(10vw,-8vw,0) scale(1.14)}}
+@media (prefers-reduced-motion:reduce){body.aura-dark .main::before,body.aura-dark .main::after{animation:none}}
+body.aura-dark .topbar,body.aura-dark .view{position:relative;z-index:1}
+
+/* Navbar Aura: vidro escuro translúcido flutuando sobre o conteúdo, some ao descer, volta ao subir */
+body.aura-dark .topbar{position:absolute;top:0;left:0;right:0;z-index:30;
+  background:rgba(5,6,10,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.10);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform}
+body.aura-dark .main.tb-hidden .topbar{transform:translateY(-100%)}
+body.aura-dark .view{padding-top:52px}
+body.aura-dark .crumbs,body.aura-dark .crumbs .sep{color:var(--mute)}
+body.aura-dark .crumbs .here{color:var(--ink)}
+body.aura-dark .tb-pill{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--txt)}
+body.aura-dark .tb-search input{background:rgba(255,255,255,.05);border-color:var(--line);color:var(--ink)}
+body.aura-dark .tb-search input::placeholder{color:var(--mute-2)}
+body.aura-dark .tb-search svg{color:var(--mute)}
+body.aura-dark #gsearch-res{background:#0b0c10;border:1px solid var(--line);color:var(--txt);box-shadow:0 28px 60px -12px rgba(0,0,0,.7)}
+body.aura-dark .icobtn,body.aura-dark .tb-btn.tb-ic{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--ink)}
+body.aura-dark .icobtn:hover,body.aura-dark .tb-btn.tb-ic:hover{background:rgba(255,255,255,.12);color:#fff}
+
+/* CTA amarelo com o glow triplo do botão Aura */
+body.aura-dark .tb-btn:not(.tb-ic){background:var(--yel);color:#000;border-color:transparent;
+  box-shadow:0 8px 40px rgba(255,199,0,.35),inset 0 0 10px 1px rgba(255,255,255,.10),0 0 0 1px rgba(255,199,0,.15)}
+body.aura-dark .tb-btn:not(.tb-ic):hover{transform:translateY(-1px);
+  box-shadow:0 12px 50px rgba(255,199,0,.5),0 0 0 1px rgba(255,199,0,.25)}
+
+/* Sidebar: ilha flutuante no formato do print do ARK OS, com profundidade real na divisa
+   (canto arredondado nos 4 lados, respiro em volta, luz interna e sombra pro palco) */
+body.aura-dark .app{padding:12px;gap:14px;background:#000}
+body.aura-dark .side,
+body.aura-light .side{height:100%;border-radius:22px;border:1px solid rgba(255,255,255,.09);border-right:1px solid rgba(255,255,255,.09);
+  background:radial-gradient(130% 90% at 0% 0%,#17181d 0%,#0a0a0d 58%,#050506 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 34px 70px -30px rgba(0,0,0,.9),18px 0 60px -34px rgba(255,199,0,.10)}
+body.aura-dark .side.compact.peek,
+body.aura-light .side.compact.peek{border-radius:22px}
+@media (max-width:900px){body.aura-dark .app{padding:0;gap:0}body.aura-dark .side,
+body.aura-light .side{border-radius:0}}
+
+/* ============ MISTURA ARK OS (print LAST DANCE) sobre o palco Aura ============ */
+/* Fileira herói Mission Control: só existe no tema aura-dark */
+.aura-hero-row{display:none}
+/* No Meu Dia o hero substitui a saudação antiga (senão fica "Boa noite" duas vezes) */
+body.aura-dark #page-dashboard #md-greet,
+body.aura-dark #page-dashboard #md-sub,
+body.aura-light #page-dashboard #md-sub{display:none}
+body.aura-dark .aura-hero-row,
+body.aura-light .aura-hero-row{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;margin-bottom:16px}
+@media (max-width:1180px){body.aura-dark .aura-hero-row{grid-template-columns:1fr}}
+body.aura-dark .aura-hero,
+body.aura-light .aura-hero{position:relative;overflow:hidden;border-radius:28px;padding:34px 36px 30px;
+  border:1px solid rgba(255,255,255,.08);color:#fff;
+  background:radial-gradient(120% 160% at 85% -20%,#2e2f36 0%,#0a0a0c 55%);
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+body.aura-dark .aura-hero .sphere,
+body.aura-light .aura-hero .sphere{position:absolute;top:-70px;right:40px;width:260px;height:260px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 32% 28%,#4a4a54 0%,#202024 42%,#0c0c0e 78%);
+  box-shadow:inset -20px -28px 60px rgba(0,0,0,.6),inset 14px 18px 40px rgba(255,255,255,.08),
+    0 40px 80px -30px rgba(0,0,0,.8),0 0 90px -20px rgba(255,199,0,.22);
+  animation:auraSphere 9s ease-in-out infinite alternate}
+@keyframes auraSphere{from{transform:translateY(0)}to{transform:translateY(14px)}}
+body.aura-dark .aura-hero .eyebrow,
+body.aura-light .aura-hero .eyebrow{font-size:12.5px;color:rgba(255,255,255,.55);position:relative}
+body.aura-dark .aura-hero h1,
+body.aura-light .aura-hero h1{font-family:'Sora',var(--sans);font-size:clamp(28px,3.2vw,40px);font-weight:700;
+  letter-spacing:-.03em;line-height:1.1;margin-top:8px;position:relative;padding:0}
+body.aura-dark .aura-hero h1::after,
+body.aura-light .aura-hero h1::after{display:none}
+body.aura-dark .aura-hero .ah-cards,
+body.aura-light .aura-hero .ah-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px;position:relative}
+@media (max-width:640px){body.aura-dark .aura-hero .ah-cards{grid-template-columns:1fr}}
+body.aura-dark .ahc,
+body.aura-light .ahc{border-radius:16px;padding:16px 18px 14px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+body.aura-dark .ahc .top,
+body.aura-light .ahc .top{display:flex;align-items:center;gap:10px}
+body.aura-dark .ahc .ic,
+body.aura-light .ahc .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.12);color:#fff;flex-shrink:0}
+body.aura-dark .ahc .l,
+body.aura-light .ahc .l{margin-left:auto;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+body.aura-dark .ahc .n,
+body.aura-light .ahc .n{font-family:'Sora',var(--sans);font-size:34px;font-weight:700;letter-spacing:-.02em;margin-top:10px;font-variant-numeric:tabular-nums}
+body.aura-dark .ahc .s,
+body.aura-light .ahc .s{font-size:11.5px;color:rgba(255,255,255,.5);margin-top:4px;text-align:right}
+/* Meta: donut amarelo sobre preto */
+body.aura-dark .aura-goal{position:relative;overflow:hidden;border-radius:28px;padding:26px 26px 24px;
+  border:1px solid rgba(255,255,255,.08);color:#fff;display:flex;flex-direction:column;align-items:center;
+  background:radial-gradient(130% 150% at 15% 110%,#26262c 0%,#0a0a0c 60%);
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+body.aura-dark .aura-goal .gt,
+body.aura-light .aura-goal .gt{font-family:'Sora',var(--sans);font-size:15px;font-weight:600;align-self:flex-start}
+body.aura-dark .aura-goal .donut-wrap,
+body.aura-light .aura-goal .donut-wrap{position:relative;width:132px;height:132px;margin-top:18px}
+body.aura-dark .aura-goal .donut,
+body.aura-light .aura-goal .donut{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(var(--yel) calc(var(--p,100)*1%),rgba(255,255,255,.10) 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 15px),#000 calc(100% - 14px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 15px),#000 calc(100% - 14px))}
+body.aura-dark .aura-goal .donut-wrap .pct,
+body.aura-light .aura-goal .donut-wrap .pct{position:absolute;inset:0;display:grid;place-items:center;
+  font-family:'Sora',var(--sans);font-size:27px;font-weight:700;letter-spacing:-.02em}
+body.aura-dark .aura-goal .gv,
+body.aura-light .aura-goal .gv{font-family:'Sora',var(--sans);font-size:20px;font-weight:700;margin-top:14px;font-variant-numeric:tabular-nums}
+body.aura-dark .aura-goal .gs,
+body.aura-light .aura-goal .gs{font-size:11.5px;color:rgba(255,255,255,.55);margin-top:5px;text-align:center}
+body.aura-dark .aura-goal .gbtn,
+body.aura-light .aura-goal .gbtn{margin-top:14px;border:0;border-radius:12px;background:#fff;color:#131316;
+  font-size:12.5px;font-weight:600;padding:11px 22px;cursor:pointer;transition:transform .18s ease}
+body.aura-dark .aura-goal .gbtn:hover,
+body.aura-light .aura-goal .gbtn:hover{transform:translateY(-1px)}
+/* Ícones parrudos: moedinhas squircle na sidebar e item ativo em pill amarelo sólido */
+body.aura-dark .navitem svg,
+body.aura-dark .subitem svg,
+body.aura-light .subitem svg{width:26px;height:26px;padding:5px;border-radius:9px;
+  background:rgba(255,255,255,.06);flex-shrink:0;transition:background .2s ease,color .2s ease}
+body.aura-dark #nav-indicator,
+body.aura-light #nav-indicator{background:var(--yel);box-shadow:0 6px 18px -6px rgba(255,199,0,.55)}
+body.aura-dark .navitem.active,
+body.aura-light .navitem.active{color:#131316;font-weight:650}
+body.aura-dark .navitem.active svg,
+body.aura-light .navitem.active svg{color:#131316;background:rgba(0,0,0,.14)}
+body.aura-dark .navitem.active .badge,
+body.aura-light .navitem.active .badge{background:#131316;color:#fff}
+/* Subitem ativo tem pill próprio: o indicador deslizante não cobre a sub-navegação */
+body.aura-dark .subitem.active{background:var(--yel);color:#131316;font-weight:650}
+body.aura-dark .subitem.active svg,
+body.aura-light .subitem.active svg{color:#131316;background:rgba(0,0,0,.14)}
+
+/* Cartões no padrão Aura: quase invisíveis em repouso, acendem no hover */
+body.aura-dark .card,body.aura-dark .kpi,body.aura-dark .mdw,body.aura-dark .al-kpi,
+body.aura-dark .md-card,body.aura-dark table.t,body.aura-dark .alert,body.aura-dark .regua-wrap,
+body.aura-dark .role-block,body.aura-dark .cal-wrap,body.aura-dark .barpanel,body.aura-dark #gcal-wrap{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10);color:var(--txt);
+  box-shadow:0 1px 0 rgba(255,255,255,.03) inset}
+body.aura-dark .card:hover,body.aura-dark .mdw:hover,body.aura-dark .kpi:hover{
+  transform:translateY(-3px);border-color:rgba(255,199,0,.30);
+  box-shadow:0 26px 70px -30px rgba(255,199,0,.35),0 1px 0 rgba(255,255,255,.05) inset}
+body.aura-dark .md-card .md-hd{background:rgba(255,255,255,.05);border-bottom:1px solid var(--line)}
+body.aura-dark .md-task{background:rgba(255,255,255,.03);border-color:var(--line)}
+body.aura-dark .md-task:hover{box-shadow:0 10px 22px -16px rgba(255,199,0,.35)}
+body.aura-dark .mdb{background:rgba(255,255,255,.03);border-color:var(--line)}
+
+/* Formulários e modais */
+body.aura-dark .form-input,body.aura-dark .form-select,body.aura-dark textarea{
+  background:rgba(255,255,255,.04);border-color:var(--line);color:var(--ink)}
+body.aura-dark .form-input::placeholder{color:var(--mute-2)}
+body.aura-dark .modal,body.aura-dark .crm-mbox{background:#0b0c10;border:1px solid var(--line);color:var(--txt)}
+/* Flutuantes (quick-add da agenda, popovers): liquid glass com corpo, não transparente demais */
+body.aura-dark .qadd-box,body.aura-dark .pop,body.aura-dark .agenda-mbox{
+  background:rgba(12,13,17,.94)!important;backdrop-filter:blur(26px) saturate(1.2);-webkit-backdrop-filter:blur(26px) saturate(1.2);
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 34px 80px -24px rgba(0,0,0,.85)}
+
+/* ============ AURA LIGHT: ctrl+V do preto, em branco (pedido 03/07) ============ */
+/* Palco branco com a mesma estrutura: painel principal com moldura, glows âmbar suaves */
+body.aura-light .app{padding:12px;gap:14px;background:#fbfbfd}
+body.aura-light .main{position:relative;background:#ffffff;border:1px solid #e9e9ee;overflow:hidden}
+body.aura-light .main::before,body.aura-light .main::after{
+  content:'';position:absolute;width:56vw;height:56vw;border-radius:50%;
+  pointer-events:none;z-index:0;will-change:transform;
+  background:radial-gradient(circle closest-side,rgba(255,199,0,.12),rgba(255,199,0,0) 72%);
+  filter:blur(70px)}
+body.aura-light .main::before{top:-34vw;right:-22vw;animation:auraDriftA 26s ease-in-out infinite alternate}
+body.aura-light .main::after{bottom:-32vw;left:-20vw;width:44vw;height:44vw;
+  background:radial-gradient(circle closest-side,rgba(255,168,0,.08),rgba(255,168,0,0) 72%);
+  animation:auraDriftB 34s ease-in-out infinite alternate}
+@media (prefers-reduced-motion:reduce){body.aura-light .main::before,body.aura-light .main::after{animation:none}}
+/* Navbar de vidro claro flutuando sobre o conteúdo, some ao descer e volta ao subir (igual à preta) */
+body.aura-light .topbar,body.aura-light .view{position:relative;z-index:1}
+body.aura-light .topbar{position:absolute;top:0;left:0;right:0;z-index:30;
+  background:rgba(255,255,255,.55);backdrop-filter:blur(12px) saturate(1.4);-webkit-backdrop-filter:blur(12px) saturate(1.4);
+  border-bottom:1px solid rgba(0,0,0,.06);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform}
+body.aura-light .main.tb-hidden .topbar{transform:translateY(-100%)}
+body.aura-light .view{padding-top:52px;background:transparent}
+/* Conselho: bancada de agentes + chat lateral */
+.cons-bancada{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin:12px 0 4px}
+.cons-agente{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--line);
+  border-radius:14px;background:rgba(255,255,255,.03);cursor:pointer;text-align:left;font-family:inherit;
+  transition:transform .2s cubic-bezier(.16,1,.3,1),border-color .2s ease,box-shadow .25s ease}
+.cons-agente:hover{transform:translateY(-2px);border-color:rgba(255,199,0,.35);box-shadow:0 16px 40px -24px rgba(255,199,0,.4)}
+.ca-coin{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;font:700 12px Inter,sans-serif}
+.ca-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ca-tx b{font-size:12.5px;color:var(--ink)}
+.ca-tx i{font-style:normal;font-size:10.5px;color:var(--mute)}
+.ca-go{font:600 10.5px Inter,sans-serif;color:var(--yel);flex-shrink:0}
+body.aura-light .cons-agente{background:#fff}
+.cons-chat{position:fixed;top:12px;right:12px;bottom:12px;width:min(400px,92vw);z-index:300;
+  display:flex;flex-direction:column;border-radius:20px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(12,13,17,.96);backdrop-filter:blur(26px) saturate(1.2);-webkit-backdrop-filter:blur(26px) saturate(1.2);color:#eef0f3;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9);
+  transform:translateX(calc(100% + 24px));transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.cons-chat.open{transform:none}
+.cons-chat .cc-hd{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.cons-chat .cc-coin{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font:700 12px Inter,sans-serif}
+.cons-chat .cc-nm{font:600 13.5px 'Sora',Inter,sans-serif}
+.cons-chat .cc-fn{font-size:10.5px;color:#a6adba}
+.cons-chat .cc-x{margin-left:auto;border:0;background:rgba(255,255,255,.08);color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer}
+.cons-chat .cc-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.cons-chat .cc-msg{max-width:86%;padding:9px 12px;border-radius:13px;font-size:12.5px;line-height:1.5}
+.cons-chat .cc-msg.meu{align-self:flex-end;background:var(--yel);color:#131316;border-bottom-right-radius:4px}
+.cons-chat .cc-msg.dele{align-self:flex-start;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-bottom-left-radius:4px}
+.cons-chat .cc-vazio{color:#7b8494;font-size:12px;text-align:center;margin-top:30px;padding:0 20px;line-height:1.6}
+.cons-chat .cc-in{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,.1)}
+.cons-chat .cc-in input{flex:1;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff;
+  border-radius:11px;padding:10px 13px;font:400 12.5px Inter,sans-serif;outline:none}
+.cons-chat .cc-in button{border:0;background:var(--yel);color:#131316;border-radius:11px;padding:0 16px;cursor:pointer;font-size:14px}
+
+/* Barra Lançar missão no hero (ref /os): input pill + CTA amarelo acoplado */
+body.aura-dark .aura-missao,body.aura-light .aura-missao{display:flex;gap:0;margin-top:18px;position:relative;
+  border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+body.aura-dark .aura-missao-in,body.aura-light .aura-missao-in{flex:1;border:0;background:transparent;color:#fff;
+  font:400 13px Inter,sans-serif;padding:13px 16px;outline:none}
+body.aura-dark .aura-missao-in::placeholder,body.aura-light .aura-missao-in::placeholder{color:rgba(255,255,255,.45)}
+body.aura-dark .aura-missao-go,body.aura-light .aura-missao-go{border:0;background:var(--yel);color:#131316;
+  font:600 12.5px Inter,sans-serif;padding:0 18px;cursor:pointer;white-space:nowrap;
+  box-shadow:0 0 26px rgba(255,199,0,.35);transition:filter .2s ease,transform .15s ease}
+body.aura-dark .aura-missao-go:hover,body.aura-light .aura-missao-go:hover{filter:brightness(1.06)}
+body.aura-dark .aura-missao-go:active,body.aura-light .aura-missao-go:active{transform:scale(.97)}
+/* Hoje na operação: botão Abrir por linha + chips de prazo no padrão /os */
+body.aura-dark .md-act .ab{background:rgba(255,255,255,.1);color:#fff;border:0;border-radius:8px;
+  padding:6px 12px;font:600 10.5px Inter,sans-serif;cursor:pointer}
+body.aura-dark .md-act .ab:hover{background:rgba(255,255,255,.18)}
+body.aura-light .md-act .ab{background:#131316;color:#fff;border:0;border-radius:8px;
+  padding:6px 12px;font:600 10.5px Inter,sans-serif;cursor:pointer}
+body.aura-dark .md-chip-today{background:rgba(255,199,0,.16)!important;color:var(--yel)!important;border:1px solid rgba(255,199,0,.35)}
+body.aura-dark .md-chip-late{background:rgba(239,68,68,.16)!important;color:#f87171!important;border:1px solid rgba(248,113,113,.4)}
+/* Fila de aprovação: moedinha colorida por função + Revisar */
+body.aura-dark .md-apr-row,body.aura-light .md-apr-row{display:flex;align-items:center;gap:12px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);cursor:pointer;margin-bottom:8px;
+  transition:transform .18s cubic-bezier(.16,1,.3,1),border-color .2s ease}
+body.aura-dark .md-apr-row:hover,body.aura-light .md-apr-row:hover{transform:translateX(3px);border-color:rgba(255,199,0,.3)}
+.md-apr-coin{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex-shrink:0;
+  font:700 11px Inter,sans-serif}
+.md-apr-tx{flex:1;min-width:0}
+.md-apr-tx .t{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.md-apr-tx .m{font-size:10.5px;color:var(--mute);margin-top:1px}
+.md-apr-btn{background:rgba(48,209,88,.16);color:#30d158;border:1px solid rgba(48,209,88,.35);border-radius:9px;
+  padding:7px 14px;font:600 11px Inter,sans-serif;cursor:pointer;flex-shrink:0;transition:background .2s ease}
+.md-apr-btn:hover{background:rgba(48,209,88,.28)}
+body.aura-light .md-apr-row{background:#fff}
+
+/* Sidebar preta 0000 no claro: os textos dela já eram claros, só o palco em volta muda */
+body.aura-light .side{background:radial-gradient(130% 90% at 0% 0%,#17181d 0%,#0a0a0d 58%,#000 100%)}
+/* Regras que o script de dualização perdeu (comentário grudava no seletor) */
+body.aura-light #page-dashboard #md-greet,body.aura-light #page-dashboard #md-sub{display:none}
+body.aura-light .aura-goal{position:relative;overflow:hidden;border-radius:28px;padding:26px 26px 24px;
+  border:1px solid rgba(255,255,255,.08);color:#fff;display:flex;flex-direction:column;align-items:center;
+  background:radial-gradient(130% 150% at 15% 110%,#26262c 0%,#0a0a0c 60%);
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.35)}
+body.aura-light .navitem:hover svg{transform:scale(1.14) rotate(-5deg)}
+body.aura-light .subitem.active{background:var(--yel);color:#131316;font-weight:650}
+body.aura-light .subitem.active svg{color:#131316;background:rgba(0,0,0,.14)}
+/* Textos do hero e do goal sempre claros (a regra global h1{color:var(--ink)} vencia no claro) */
+body.aura-light .aura-hero h1,body.aura-light .aura-hero .eyebrow,body.aura-light .aura-goal .gt,
+body.aura-light .aura-goal .gv,body.aura-light .aura-goal .donut-wrap .pct{color:#fff}
+
+/* ============ UNIFORMIDADE CROSS-BROWSER (auditoria Safari/iOS 03/07) ============ */
+/* iOS Safari: a barra de URL come ~60-100px do 100vh e corta o rodapé; dvh mede a área REAL */
+@supports (height:100dvh){
+  .app,.side,.main{height:100dvh}
+  .ah-present .ahd{min-height:100dvh}
+  #page-jarvis .jv-shell{height:calc(100dvh - 168px)}
+  #com-embed iframe{height:calc(100dvh - 210px)!important}
+}
+/* Modais com o fundo desfocado do ARK OS: a página inteira recua atrás do vidro,
+   e o modal chega com uma mola suave (mesma cara em todo navegador) */
+body.aura-dark .modal-bg,body.aura-light .modal-bg,
+body.aura-dark .crm-modal,body.aura-light .crm-modal{
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15)}
+body.aura-dark .modal-bg.open .modal,body.aura-light .modal-bg.open .modal,
+body.aura-dark .crm-modal.open .crm-mbox,body.aura-light .crm-modal.open .crm-mbox{
+  animation:osModalIn .42s cubic-bezier(.22,1,.36,1)}
+@keyframes osModalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  body.aura-dark .modal-bg.open .modal,body.aura-light .modal-bg.open .modal{animation:none}}
+/* Botões uniformes (padrão do print do ARK OS): mesma altura, mesmo raio, sem variação por tela */
+body.aura-dark .tb-btn,body.aura-light .tb-btn,body.aura-dark .icobtn,body.aura-light .icobtn{
+  min-height:34px;border-radius:980px;font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+
+/* Botao Adicionar cartao do Kanban no tema escuro */
+body.aura-dark .add-task-btn{border:1px dashed rgba(255,255,255,.18);color:var(--mute);border-radius:10px;background:transparent}
+body.aura-dark .add-task-btn:hover{border-color:var(--yel);color:var(--yel);background:rgba(255,199,0,.06)}
+
+/* Scrollbar discreta no preto */
+body.aura-dark .view::-webkit-scrollbar{width:10px}
+body.aura-dark .view::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
+body.aura-dark .view::-webkit-scrollbar-track{background:transparent}
+
+/* ============ IMERSIVIDADE (rodada 2, pedido do Gabriel) ============ */
+/* Título de página vira display: Sora BOLD, a fonte da ARK (a mesma do deck do TCC) */
+body.aura-dark .page-head h1,body.aura-light .page-head h1{
+  font-family:'Sora',var(--sans);font-size:clamp(27px,2.9vw,38px);font-weight:700;
+  letter-spacing:-.035em;line-height:1.06;position:relative;padding-bottom:12px}
+body.aura-dark .page-head h1{color:#fff}
+body.aura-light .page-head h1{color:#131316}
+body.aura-dark .page-head h1::after,body.aura-light .page-head h1::after{
+  content:'';position:absolute;left:1px;bottom:0;width:56px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,var(--yel),rgba(255,199,0,0))}
+body.aura-dark .page-head p,body.aura-dark .page-title p{color:var(--mute);font-size:14px}
+
+/* Vidro de verdade: os cartões deixam os glows em movimento vazarem por dentro */
+body.aura-dark .mdw,body.aura-dark .kpi,body.aura-dark .md-card,body.aura-dark .card{
+  background:rgba(13,14,17,.55);backdrop-filter:blur(22px) saturate(1.25);-webkit-backdrop-filter:blur(22px) saturate(1.25)}
+
+/* Spotlight: a luz segue o mouse dentro do cartão (JS alimenta as vars --mx/--my) */
+body.aura-dark .mdw,body.aura-dark .kpi,body.aura-dark .md-card{position:relative;overflow:hidden}
+body.aura-dark .mdw::after,body.aura-dark .kpi::after,body.aura-dark .md-card::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;z-index:0;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),rgba(255,199,0,.12),transparent 62%);
+  transition:opacity .35s ease}
+body.aura-dark .mdw:hover::after,body.aura-dark .kpi:hover::after,body.aura-dark .md-card:hover::after{opacity:1}
+
+/* Coreografia de entrada do ARK OS: sidebar desliza da esquerda, Mission Control desce,
+   o resto sobe de baixo pra cima (pedido do Gabriel: "isso é foda e fluido") */
+@keyframes osSideIn{from{opacity:0;transform:translateX(-42px)}to{opacity:1;transform:none}}
+@keyframes osTopIn{from{opacity:0;transform:translateY(-26px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+/* Entrada da sidebar SO no desktop: o fill "both" congela transform:none pra sempre e,
+   no celular, atropela o translateX(-100%) que esconde o drawer (bug da sidebar presa, jul/26) */
+@media (min-width:901px){
+body.aura-dark .side,body.aura-light .side{animation:osSideIn .7s cubic-bezier(.22,1,.36,1) both}
+}
+body.aura-dark .topbar,body.aura-light .topbar{animation:osTopIn .6s cubic-bezier(.22,1,.36,1) both;animation-delay:.08s}
+@media (prefers-reduced-motion:reduce){
+  body.aura-dark .side,body.aura-light .side,body.aura-dark .topbar,body.aura-light .topbar{animation:none}}
+
+/* Entrada em cascata quando a página abre (classe .aura-enter posta pelo JS) */
+@keyframes arIn{from{opacity:0;transform:translateY(26px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+body.aura-dark .view.aura-enter .page.active .mdw,
+body.aura-light .view.aura-enter .page.active .mdw,
+body.aura-dark .view.aura-enter .page.active .kpi,
+body.aura-light .view.aura-enter .page.active .kpi,
+body.aura-dark .view.aura-enter .page.active .md-card,
+body.aura-light .view.aura-enter .page.active .md-card,
+body.aura-dark .view.aura-enter .page.active .card,
+body.aura-light .view.aura-enter .page.active .card{
+  animation:arIn .85s cubic-bezier(.16,.6,.28,1) both}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(2),
+body.aura-light .view.aura-enter .page.active .mdw:nth-child(2){animation-delay:.07s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(3),
+body.aura-light .view.aura-enter .page.active .mdw:nth-child(3){animation-delay:.14s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(4),
+body.aura-light .view.aura-enter .page.active .mdw:nth-child(4){animation-delay:.21s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(5),
+body.aura-light .view.aura-enter .page.active .mdw:nth-child(5){animation-delay:.28s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(6),
+body.aura-light .view.aura-enter .page.active .mdw:nth-child(6){animation-delay:.35s}
+body.aura-dark .view.aura-enter .page.active .mdw:nth-child(7),
+body.aura-light .view.aura-enter .page.active .mdw:nth-child(7){animation-delay:.42s}
+body.aura-dark .view.aura-enter .page.active .page-head,
+body.aura-light .view.aura-enter .page.active .page-head{animation:arIn .7s cubic-bezier(.16,.6,.28,1) both}
+/* Mission Control chega de CIMA pra baixo, o resto sobe (coreografia do /os) */
+body.aura-dark .view.aura-enter .page.active .aura-hero-row,
+body.aura-light .view.aura-enter .page.active .aura-hero-row{animation:osTopIn .7s cubic-bezier(.16,.6,.28,1) both}
+
+/* Tipografia cinética (ref SVGator, expressive typography): palavras entram uma a uma */
+@keyframes kinIn{from{opacity:0;transform:translateY(.5em) rotate(2.5deg);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+body.aura-dark .aura-kin .kin-w,
+body.aura-light .aura-kin .kin-w{display:inline-block;opacity:0;white-space:pre;
+  animation:kinIn .62s cubic-bezier(.16,.6,.28,1) forwards;animation-delay:calc(var(--i)*80ms)}
+@media (prefers-reduced-motion:reduce){body.aura-dark .aura-kin .kin-w{animation:none;opacity:1}}
+/* Micro-interações: ícones da sidebar com pop de mola,
+cards de tarefa vivos */
+body.aura-dark .navitem:hover svg{transform:scale(1.14) rotate(-5deg)}
+body.aura-dark .navitem svg,
+body.aura-light .navitem svg{transition:transform .28s cubic-bezier(.34,1.56,.64,1),background .2s ease,color .2s ease}
+body.aura-dark .task-card{transition:transform .22s cubic-bezier(.16,1,.3,1),border-color .2s ease,box-shadow .25s ease}
+body.aura-dark .task-card:hover{transform:translateY(-2px) scale(1.01);border-color:rgba(255,199,0,.35);
+  box-shadow:0 18px 44px -24px rgba(255,199,0,.35)}
+body.aura-dark .icobtn{transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s ease}
+body.aura-dark .icobtn:hover{transform:translateY(-1px)}
+body.aura-dark .icobtn:active{transform:scale(.93)}
+
+/* Troca de página com desfoque que assenta (motion blur da Aura) */
+body.aura-dark .page.active{animation:auraPageIn .55s cubic-bezier(.16,.6,.28,1)}
+@keyframes auraPageIn{from{opacity:0;transform:translateY(20px) scale(.992);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
+
+/* Grain de filme por cima de tudo: mata o chapado do preto digital */
+body.aura-dark .app::after{
+  content:'';position:fixed;inset:0;z-index:200;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E")}
+
+/* Glows mais presentes, com um terceiro varrendo o centro */
+body.aura-dark .view::before{
+  content:'';position:absolute;left:30%;top:30%;width:38vw;height:38vw;border-radius:50%;
+  pointer-events:none;z-index:-1;
+  background:radial-gradient(circle closest-side,rgba(255,199,0,.05),rgba(255,199,0,0) 70%);
+  filter:blur(60px);animation:auraDriftC 40s ease-in-out infinite alternate}
+@keyframes auraDriftC{from{transform:translate3d(-6vw,4vw,0) scale(.9)}to{transform:translate3d(8vw,-6vw,0) scale(1.25)}}
+@media (prefers-reduced-motion:reduce){
+  body.aura-dark .view::before{animation:none}
+  body.aura-dark .page.active,
+body.aura-light .page.active,
+body.aura-dark .page.aura-enter .mdw,
+body.aura-light .page.aura-enter .mdw{animation:none!important}}
+
+/* Relógio como peça de display */
+body.aura-dark .mdw .mdw-clock,body.aura-dark #mdw-board [id^="mdwclock"]{font-family:'Sora',var(--sans)}
+
+/* Widgets do Meu Painel: KPIs e checks saem do branco chumbado */
+body.aura-dark .mdw-kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}
+body.aura-dark .mdw-kpi .v{color:var(--ink)}
+body.aura-dark .mdw-kpi.y .v{color:var(--yel)}
+body.aura-dark .mdw-chk{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}
+body.aura-dark .mdw-hd .ic{background:rgba(255,199,0,.10);color:var(--yel)}
+body.aura-dark .mdw-hd .ct{background:rgba(255,255,255,.08);color:var(--mute)}
+body.aura-dark .mdw-chk:hover{background:var(--green);border-color:var(--green)}
+/* Iframes claros (Google Calendar) viram escuros por inversão, único jeito de estilizar iframe externo */
+body.aura-dark .mdw-agenda,body.aura-dark .md-agwrap iframe,body.aura-dark #gcal-wrap iframe{
+  filter:invert(.92) hue-rotate(180deg) saturate(.85);border-radius:12px}
+
+/* ============ VARREDURA GERAL: telas legadas com branco chumbado viram ilhas escuras ============ */
+/* Containers e cartões */
+body.aura-dark .ag-card,body.aura-dark .agenda-mbox,body.aura-dark .al-kpi,body.aura-dark .al-wrap,
+body.aura-dark .barpanel,body.aura-dark .brf,body.aura-dark .brf-foot,body.aura-dark .bs-pilar,
+body.aura-dark .cal-d,body.aura-dark .ckl,body.aura-dark .cli,body.aura-dark .cli-kpi,
+body.aura-dark .cli-stat,body.aura-dark .cli-wrap,body.aura-dark .cri-card,body.aura-dark .crm-card,
+body.aura-dark .crm-fh-card,body.aura-dark .csa-card,body.aura-dark .db-card,body.aura-dark .dz-card,
+body.aura-dark .flow,body.aura-dark .ob,body.aura-dark .okr-table,body.aura-dark .org-area,
+body.aura-dark .pl-card,body.aura-dark .plc,body.aura-dark .pop,body.aura-dark .proc-card,
+body.aura-dark .qadd-box,body.aura-dark .regua-mtx,body.aura-dark .rot-doc,body.aura-dark .set-acc,
+body.aura-dark .sprint-card,body.aura-dark .step,body.aura-dark .task-card,body.aura-dark .tcal,
+body.aura-dark .tl-table,body.aura-dark .tp-card,body.aura-dark .activity-suggestion,
+body.aura-dark .onb-check,body.aura-dark .md-act,body.aura-dark .mdb{
+  background:rgba(13,14,17,.6);border-color:var(--line);color:var(--txt)}
+/* Poços e colunas (Kanban, sprints, CRM) mais fundos que os cards */
+body.aura-dark .crm-col,body.aura-dark .sprint-col,body.aura-dark .task-col-head,body.aura-dark .task-col{
+  background:rgba(255,255,255,.025);border-color:var(--line);color:var(--txt)}
+/* Chips e botões pequenos */
+body.aura-dark .cli-btn,body.aura-dark .csa-go,body.aura-dark .csa-tag,body.aura-dark .proc-chip,
+body.aura-dark .tcal-chip,body.aura-dark .pl-seg,body.aura-dark .pl-save,body.aura-dark .dz-del,
+body.aura-dark .set-accbtn,body.aura-dark .tv-btn,body.aura-dark .td2-tbtn,body.aura-dark .mob-menu,
+body.aura-dark .agenda-nav,body.aura-dark .rot-tab,body.aura-dark .cli-chip,body.aura-dark .proc-search{
+  background:rgba(255,255,255,.07);border-color:var(--line);color:var(--txt)}
+/* Tabelas: célula, cabeçalho e divisas legíveis no escuro */
+body.aura-dark table td,body.aura-dark table th{border-color:var(--line)}
+body.aura-dark table.t td,body.aura-dark table.t th,body.aura-dark .tl-table td,body.aura-dark .tl-table th,
+body.aura-dark .okr-table td,body.aura-dark .okr-table th{color:var(--txt);background:transparent}
+body.aura-dark table.t thead th,body.aura-dark .tl-table thead th{background:rgba(255,255,255,.04);color:var(--mute)}
+/* Inline whites que sobraram em markup e em HTML gerado por JS.
+   IMPORTANTE: cobrir por CSS os tons que o JS recria a cada re-render (sync),
+   senão o normalizador chega atrasado e a tela PISCA em branco (bug do Financeiro). */
+body.aura-dark [style*="background:#fff"]{background:rgba(13,14,17,.6)!important;color:var(--txt)}
+body.aura-dark [style*="background:#fffbeb"],body.aura-dark [style*="background:#fff7d6"],
+body.aura-dark [style*="background:#fff8dc"],body.aura-dark [style*="background:#fef9c3"],
+body.aura-dark [style*="background:#fffbe8"],body.aura-dark [style*="background:#fff4c2"],
+body.aura-dark [style*="background:#fff3cd"]{background:rgba(255,199,0,.09)!important;color:var(--txt)}
+body.aura-dark [style*="background:#eafaef"],body.aura-dark [style*="background:#e6f8ec"],
+body.aura-dark [style*="background:#eef7ee"],body.aura-dark [style*="background:#e7f7ec"],
+body.aura-dark [style*="background:#e9f9ef"],body.aura-dark [style*="background:#f0fff4"],
+body.aura-dark [style*="background:#fafdf6"]{background:rgba(34,197,94,.10)!important;color:var(--txt)}
+body.aura-dark [style*="background:#fdecec"],body.aura-dark [style*="background:#fff1f0"],
+body.aura-dark [style*="background:#ffe9ec"]{background:rgba(239,68,68,.10)!important;color:var(--txt)}
+body.aura-dark [style*="background:#eef4ff"],body.aura-dark [style*="background:#e7f0ff"],
+body.aura-dark [style*="background:#e6f0ff"],body.aura-dark [style*="background:#eff6ff"]{background:rgba(91,140,255,.12)!important;color:var(--txt)}
+body.aura-dark [style*="background:#f6eeff"]{background:rgba(167,139,250,.12)!important;color:var(--txt)}
+body.aura-dark [style*="background:#fafafa"],body.aura-dark [style*="background:#f5f5f7"],
+body.aura-dark [style*="background:#f7f7f8"],body.aura-dark [style*="background:#f0f0f2"],
+body.aura-dark [style*="background:#f0f0ee"],body.aura-dark [style*="background:#fcfcfa"],
+body.aura-dark [style*="background:#fcfbf7"],body.aura-dark [style*="background:#f6f6f4"],
+body.aura-dark [style*="background:#faf9f6"],body.aura-dark [style*="background:#fafaf7"],
+body.aura-dark [style*="background:#fafaf8"],body.aura-dark [style*="background:#f1f1ef"],
+body.aura-dark [style*="background:#f4f1e6"],body.aura-dark [style*="background:#f6f3e9"],
+body.aura-dark [style*="background:#efeae2"],body.aura-dark [style*="background:#e8e8ed"],
+body.aura-dark [style*="background:#e6e6e3"],body.aura-dark [style*="background:#e7e7e3"],
+body.aura-dark [style*="background:#f0f0ed"],body.aura-dark [style*="background:#eef0f2"],
+body.aura-dark [style*="background:#eef0ee"]{background:rgba(255,255,255,.05)!important;color:var(--txt)}
+/* Kanban: demanda de ALTA prioridade ganha fio vermelho à esquerda (espelho do fio da coluna) */
+body.aura-dark #page-tarefas .task-card{border-left:3px solid transparent}
+body.aura-dark #page-tarefas .task-card:has(.prio-alta){border-left-color:#ff453a}
+body.aura-light #page-tarefas .task-card{border-left:3px solid transparent}
+body.aura-light #page-tarefas .task-card:has(.prio-alta){border-left-color:#ff453a}
+/* Títulos e textos fortes herdando tinta clara */
+body.aura-dark .sect-title h2,body.aura-dark .pt,body.aura-dark .stat{color:var(--ink)}
+/* Banner explicativo (Jornada e afins): sai do degradê amarelo-pra-branco, vira ilha âmbar escura */
+body.aura-dark .explainer{background:linear-gradient(180deg,rgba(255,199,0,.10) 0%,rgba(13,14,17,.6) 100%);
+  border-color:rgba(255,199,0,.35);border-radius:16px}
+body.aura-dark .explainer h4{color:var(--yel)}
+body.aura-dark .explainer h3{color:var(--ink)}
+/* Botões de troca de visão do Kanban: a regra original usa ID e ganha da camada, precisa do ID junto */
+body.aura-dark #page-tarefas .tv-btn{background:rgba(255,255,255,.07);border-color:var(--line);color:var(--txt)}
+body.aura-dark #page-tarefas .tv-btn.on{background:var(--yel);border-color:var(--yel);color:#131316}
+/* ============ COR SEMÂNTICA NO ESCURO (feedback: "ficou monocor") ============ */
+/* KPIs coloridos: tint no fundo, borda acesa e número vibrante (verde=entra, vermelho=sai, amarelo=atenção) */
+body.aura-dark .kpi.green,body.aura-dark .rel-kpi.green,body.aura-dark .al-kpi.green,body.aura-dark .mdw-kpi.g{
+  background:rgba(34,197,94,.10);border-color:rgba(74,222,128,.35)}
+body.aura-dark .kpi.red,body.aura-dark .rel-kpi.red,body.aura-dark .al-kpi.red,body.aura-dark .mdw-kpi.r{
+  background:rgba(239,68,68,.10);border-color:rgba(248,113,113,.38)}
+body.aura-dark .kpi.yel,body.aura-dark .rel-kpi.yel,body.aura-dark .al-kpi.yel,body.aura-dark .mdw-kpi.y{
+  background:rgba(255,199,0,.09);border-color:rgba(255,199,0,.38)}
+body.aura-dark .kpi.green .v,body.aura-dark .rel-kpi.green .v,body.aura-dark .al-kpi.green .v,body.aura-dark .mdw-kpi.g .v{color:#4ade80}
+body.aura-dark .kpi.red .v,body.aura-dark .rel-kpi.red .v,body.aura-dark .al-kpi.red .v,body.aura-dark .mdw-kpi.r .v{color:#f87171}
+body.aura-dark .kpi.yel .v,body.aura-dark .rel-kpi.yel .v,body.aura-dark .al-kpi.yel .v,body.aura-dark .mdw-kpi.y .v{color:var(--yel)}
+/* Prioridades do Kanban com cor de verdade */
+body.aura-dark .prio-alta{background:rgba(239,68,68,.18)!important;color:#f87171!important;border:1px solid rgba(248,113,113,.4)}
+body.aura-dark .prio-media{background:rgba(255,199,0,.14)!important;color:var(--yel)!important;border:1px solid rgba(255,199,0,.35)}
+body.aura-dark .prio-baixa{background:rgba(34,197,94,.14)!important;color:#4ade80!important;border:1px solid rgba(74,222,128,.35)}
+/* Cabeçalho das colunas do Kanban: sem vidro fosco em cima da barra de cor;
+   a cor da etapa vira um fio interno no próprio cabeçalho */
+body.aura-dark .task-col-head{background:rgba(4,5,7,.9);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+body.aura-dark .task-col[data-status=backlog] .task-col-head{box-shadow:inset 0 3px 0 #7b8494}
+body.aura-dark .task-col[data-status=andamento] .task-col-head{box-shadow:inset 0 3px 0 var(--yel)}
+body.aura-dark .task-col[data-status=aprovacao] .task-col-head{box-shadow:inset 0 3px 0 #5b8cff}
+body.aura-dark .task-col[data-status=concluido] .task-col-head{box-shadow:inset 0 3px 0 #4ade80}
+body.aura-dark .task-col[data-status=andamento] .task-col-head h4{color:var(--yel)}
+body.aura-dark .task-col[data-status=aprovacao] .task-col-head h4{color:#8db0ff}
+body.aura-dark .task-col[data-status=concluido] .task-col-head h4{color:#4ade80}
+/* Chips de status (tabelas, réguas): mantêm cor viva no preto */
+body.aura-dark .chip.ok{background:rgba(34,197,94,.2);color:#4ade80}
+body.aura-dark .chip.bad{background:rgba(239,68,68,.2);color:#f87171}
+/* Hover de linha de tabela era branco chumbado (Financeiro, Régua, Squad Alpha) */
+body.aura-dark table.t tr:hover td,body.aura-dark .regua-mtx tr:hover td,
+body.aura-dark .regua-mtx tr:hover td:first-child,body.aura-dark table.al-tbl tbody tr:hover td,
+body.aura-dark table.al-tbl tbody tr:hover td.sticky{background:rgba(255,199,0,.06)}
+body.aura-dark .al-cell{color:var(--ink)}
+body.aura-dark .al-cell:focus{background:rgba(255,199,0,.12);box-shadow:0 0 0 1.5px var(--yel)}
+
+/* Planejamento: card gerador tinha degradê branco com ID (mesma guerra de especificidade) */
+body.aura-dark #page-planejamento .pl-gen{background:rgba(13,14,17,.6);border-color:var(--line)}
+body.aura-dark #page-planejamento .pl-card{background:rgba(13,14,17,.6);border-color:var(--line);color:var(--txt)}
+
+/* ============ SELETOR DE TEMA (Personalizar aparência) ============ */
+#wfa-aparencia{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#wfa-aparencia.open{display:flex}
+#wfa-aparencia .ap-box{width:min(520px,92vw);border-radius:22px;padding:26px;
+  background:#101116;border:1px solid rgba(255,255,255,.12);color:#eef0f3;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9)}
+#wfa-aparencia h3{font-family:'Sora',var(--sans);font-size:18px;font-weight:600;margin:0 0 4px}
+#wfa-aparencia .ap-sub{font-size:12.5px;color:#a6adba;margin-bottom:18px}
+#wfa-aparencia .ap-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+#wfa-aparencia .ap-opt{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;cursor:pointer;
+  background:rgba(255,255,255,.03);transition:transform .18s ease,border-color .2s ease,box-shadow .25s ease;text-align:left}
+#wfa-aparencia .ap-opt:hover{transform:translateY(-2px);border-color:rgba(255,199,0,.45);
+  box-shadow:0 18px 44px -22px rgba(255,199,0,.4)}
+#wfa-aparencia .ap-opt.on{border-color:var(--yel,#FFC700);box-shadow:0 0 0 1px var(--yel,#FFC700)}
+#wfa-aparencia .ap-prev{height:74px;border-radius:11px;margin-bottom:10px;border:1px solid rgba(255,255,255,.14);overflow:hidden;position:relative}
+#wfa-aparencia .ap-prev.claro{background:linear-gradient(180deg,#f5f5f7 55%,#ffffff)}
+#wfa-aparencia .ap-prev.claro::after{content:'';position:absolute;left:10px;top:10px;right:10px;height:16px;border-radius:6px;background:#fff;border:1px solid #e5e5ea}
+#wfa-aparencia .ap-prev.escuro{background:radial-gradient(120% 160% at 85% -20%,#2e2f36 0%,#000 60%)}
+#wfa-aparencia .ap-prev.escuro::after{content:'';position:absolute;left:10px;top:10px;right:10px;height:16px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,199,0,.5)}
+#wfa-aparencia .ap-nm{font-size:13.5px;font-weight:650;color:#fff}
+#wfa-aparencia .ap-ds{font-size:11px;color:#a6adba;margin-top:2px}
+#wfa-aparencia .ap-foot{display:flex;justify-content:flex-end;margin-top:18px}
+#wfa-aparencia .ap-close{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;
+  border-radius:11px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
-<body>
+<!-- build AURA-DARK-OS-MIX 20260703-1830 -->
+<body class="aura-dark">
+<script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
+try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
+<div id="wfa-aparencia" onclick="if(event.target===this)wfaAparencia(false)">
+  <div class="ap-box">
+    <h3>Personalizar aparência</h3>
+    <div class="ap-sub">Escolha o tema do sistema. Fica salvo neste navegador.</div>
+    <div class="ap-grid">
+      <button class="ap-opt" id="ap-opt-light" onclick="wfaSetTheme('light')">
+        <div class="ap-prev claro"></div>
+        <div class="ap-nm">Claro</div>
+        <div class="ap-ds">Fundo cinza Apple, cartões brancos</div>
+      </button>
+      <button class="ap-opt" id="ap-opt-dark" onclick="wfaSetTheme('dark')">
+        <div class="ap-prev escuro"></div>
+        <div class="ap-nm">Escuro</div>
+        <div class="ap-ds">Preto absoluto, glows âmbar, Mission Control</div>
+      </button>
+    </div>
+    <div class="ap-foot"><button class="ap-close" onclick="wfaAparencia(false)">Fechar</button></div>
+  </div>
+</div>
+<script>
+function wfaAparencia(open){
+  var m=document.getElementById('wfa-aparencia');if(!m)return;
+  m.classList.toggle('open',!!open);
+  if(open){
+    var t;try{t=localStorage.getItem('wfa-theme')||'dark';}catch(e){t='dark';}
+    document.getElementById('ap-opt-light').classList.toggle('on',t==='light');
+    document.getElementById('ap-opt-dark').classList.toggle('on',t!=='light');
+  }
+}
+function wfaSetTheme(t){
+  try{localStorage.setItem('wfa-theme',t);}catch(e){}
+  /* recarrega: o normalizador escuro grava estilos inline, o reload garante o claro limpo */
+  location.reload();
+}
+</script>
 
 <!-- ============== BOOT CINEMATOGRÁFICO (estilo Apple) ============== -->
 <div id="ark-boot" aria-hidden="true">
@@ -880,7 +1518,7 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
   <!-- ============== SIDEBAR ============== -->
   <aside class="side">
     <div class="side-head">
-      <div class="brand-mark"><img src="/ark-mark.png" alt="ARK Content"></div>
+      <div class="brand-mark" onclick="document.querySelector('[data-nav=dashboard]')?.click()" title="Meu Dia" style="cursor:pointer"><img src="/ark-mark.png" alt="ARK Content"></div>
       <div class="brand-info">
         <div class="nm">ARK Content</div>
       </div>
@@ -927,13 +1565,29 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
           <span>Régua dos 15</span>
         </div>
-        <div class="subitem" data-nav="comercial">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          <span>Comercial</span>
-        </div>
         <div class="subitem" data-nav="alpha">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="9" width="3" height="9"/><rect x="12" y="5" width="3" height="13"/><rect x="17" y="12" width="3" height="6"/></svg>
           <span>Squad Alpha</span>
+        </div>
+      </div>
+
+      <div class="navitem" data-toggle="comercial-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <span>Comercial</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="subnav" id="comercial-menu">
+        <div class="subitem" data-nav="comercial">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span>Funil</span>
+        </div>
+        <div class="subitem" data-nav="propostas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Propostas</span>
+        </div>
+        <div class="subitem" data-nav="contratos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Contratos</span>
         </div>
       </div>
 
@@ -995,6 +1649,10 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="subnav" id="agentes-menu">
+        <div class="subitem" data-nav="agentes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Central de Agentes</span>
+        </div>
         <div class="subitem" data-nav="jarvis">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/></svg>
           <span>JARVIS</span>
@@ -1109,6 +1767,9 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
       </div>
       <div class="tb-right">
         <div class="tb-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="gsearch" placeholder="Buscar cliente, tarefa, processo, página…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onkeydown="if(event.key==='Escape')gsearchClose()"><div id="gsearch-res"></div></div>
+        <button class="tb-btn tb-ic" onclick="wfaAparencia(true)" title="Personalizar aparência (tema claro ou escuro)" style="padding:6px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
+        </button>
         <button class="tb-btn tb-ic" data-nav="notificacoes" title="Notificações" style="position:relative;padding:6px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></svg>
           <span id="notif-badge-top" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red,#e5484d);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:10px;align-items:center;justify-content:center;padding:0 3px">0</span>
@@ -1282,6 +1943,8 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
           <div id="md-briefings" style="display:none;margin-top:10px"></div>
         </div>
 
+        <div id="md-aprovacao" style="margin-bottom:16px;display:none"></div>
+
         <div class="md-grid">
           <div class="md-card">
             <div class="md-hd">
@@ -1297,7 +1960,7 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
               <span class="md-count">Google</span>
             </div>
             <div class="md-agwrap">
-              <iframe id="md-agenda-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
+              <iframe loading="lazy" id="md-agenda-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
             </div>
           </div>
         </div>
@@ -1332,6 +1995,37 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
             <button class="icobtn" id="mdw-preset" onclick="mdwApplyPreset()" title="Montar o painel com os widgets certos pro seu papel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>Painel do meu papel</button>
             <button class="icobtn" id="mdw-add" onclick="mdwAddOpen(event)" title="Adicionar widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button>
             <button class="icobtn" id="mdw-edit-btn" onclick="mdwToggleEdit()" title="Reorganizar, redimensionar e remover widgets">✎ Editar</button>
+          </div>
+        </div>
+        <!-- AURA/OS: fileira herói Mission Control (só aparece no tema aura-dark) -->
+        <div class="aura-hero-row">
+          <div class="aura-hero">
+            <div class="sphere" aria-hidden="true"></div>
+            <div class="eyebrow">Mission Control · ARK Content</div>
+            <h1 class="aura-saud">Boa tarde, Senhor 👋</h1>
+            <div class="ah-cards">
+              <div class="ahc">
+                <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="l">Tarefas abertas</span></div>
+                <div class="n aura-n-abertas">0</div>
+                <div class="s">na operação agora</div>
+              </div>
+              <div class="ahc">
+                <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span class="l">Vencem hoje</span></div>
+                <div class="n aura-n-hoje">0</div>
+                <div class="s">até o fim do dia</div>
+              </div>
+            </div>
+            <div class="aura-missao">
+              <input class="aura-missao-in" placeholder="Declare um objetivo. Ex.: preparar o lançamento da Vivenda..." onkeydown="if(event.key==='Enter')auraLancarMissao(this)">
+              <button class="aura-missao-go" onclick="auraLancarMissao(this.previousElementSibling)">✦ Lançar missão</button>
+            </div>
+          </div>
+          <div class="aura-goal">
+            <div class="gt">Operação em dia</div>
+            <div class="donut-wrap"><div class="donut aura-donut" style="--p:100"></div><span class="pct aura-donut-pct">100%</span></div>
+            <div class="gv aura-goal-late">0 atrasadas</div>
+            <div class="gs aura-goal-sub">de 0 tarefas abertas</div>
+            <button class="gbtn" data-aura-keep onclick="document.querySelector('[data-nav=tarefas]')&&document.querySelector('[data-nav=tarefas]').click()">Revisar fila</button>
           </div>
         </div>
         <div id="mdw-board"></div>
@@ -1570,7 +2264,7 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
           @keyframes ahfade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
           .ah-bar{position:fixed;top:0;left:0;height:4px;background:#ffc400;z-index:6010;transition:width .35s ease}
           .ah-navbar{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;
-            background:rgba(20,20,24,.86);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:9px 13px;z-index:6010}
+            background:rgba(20,20,24,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:9px 13px;z-index:6010}
           .ah-navbar button{width:40px;height:40px;border-radius:50%;background:#1c1c22;border:1px solid rgba(255,255,255,.12);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
           .ah-navbar button:hover{background:#ffc400;color:#000;border-color:#ffc400}
           .ah-navbar .ah-counter{font-family:'Sora',sans-serif;font-weight:700;color:#fff;font-size:14px;min-width:64px;text-align:center;letter-spacing:.06em}
@@ -1630,6 +2324,21 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
         <div class="cli-kpis" id="cli-kpis"></div>
 
         <div id="cli-health"></div>
+
+        <!-- Mapa dos clientes (MapLibre GL, o motor do mapcn, carregado sob demanda) -->
+        <div class="card" id="climap-card" style="padding:0;overflow:hidden;margin-bottom:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap">
+            <h3 style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin:0">
+              <span style="width:26px;height:26px;border-radius:8px;background:var(--yel);color:#131316;display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+              Mapa dos clientes <span id="climap-count" style="font-size:11px;color:var(--mute);font-weight:500"></span>
+            </h3>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <select id="climap-sel" class="form-select" style="width:auto;font-size:12px;padding:7px 10px"></select>
+              <button class="icobtn" id="climap-place" onclick="cliMapPlaceToggle()" style="font-size:12px">📍 Posicionar no mapa</button>
+            </div>
+          </div>
+          <div id="climap" style="height:400px;background:#0a0a0c"></div>
+        </div>
 
         <div class="tabs" data-tabs>
           <div class="tab active" data-sub="todos">Todos <span class="ct">14</span></div>
@@ -2052,6 +2761,7 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
             <button class="tb-btn" onclick="comercialSalvarMes()">Salvar dados do mês</button>
           </div>
         </div>
+
         <div id="comercial-mes-banner" class="alert yel" style="margin-bottom:12px;display:none">
           <h4>Mês anterior</h4>
           <span id="comercial-mes-banner-txt">Visualizando dados de mês anterior. Edite os campos para registrar histórico.</span>
@@ -2093,6 +2803,24 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
           <div class="card dk"><h4 style="font-size:11px;font-weight:700;color:var(--yel);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Fechamentos meta</h4><div style="font-size:22px;font-weight:700;font-family:var(--mono);color:#fff" contenteditable="true" data-com-key="meta_fecha">≥3</div><p style="font-size:11.5px;color:#a8a8a4;margin-top:5px" contenteditable="true" data-com-key="meta_fecha_d">Conversão ≥ 20% em qualificados</p></div>
         </div>
         <p style="font-size:10.5px;color:var(--mute);margin-top:10px">💡 Clique em qualquer valor para editar. Clique em "Salvar dados do mês" para registrar no histórico.</p>
+      </div>
+
+      <!-- =================== PROPOSTAS (Estrategista Comercial) =================== -->
+      <div class="page" id="page-propostas">
+        <div class="page-head">
+          <div class="page-title"><h1>Propostas</h1><p>Estrategista Comercial · proposta premium com dados reais, preview e PDF</p></div>
+          <button class="tb-btn" onclick="window.open('/propostas','_blank')">Abrir em tela cheia</button>
+        </div>
+        <iframe loading="lazy" src="/propostas.html" title="Gerador de Propostas" style="width:100%;height:calc(100vh - 165px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
+      </div>
+
+      <!-- =================== CONTRATOS (Estrategista Comercial) =================== -->
+      <div class="page" id="page-contratos">
+        <div class="page-head">
+          <div class="page-title"><h1>Contratos</h1><p>Estrategista Comercial · contrato blindado por segmento, PDF e DOCX</p></div>
+          <button class="tb-btn" onclick="window.open('/contratos','_blank')">Abrir em tela cheia</button>
+        </div>
+        <iframe loading="lazy" src="/contratos.html" title="Gerador de Contratos" style="width:100%;height:calc(100vh - 165px);border:1px solid var(--line);border-radius:16px;background:#0a0a0c"></iframe>
       </div>
 
       <!-- =================== ORGANOGRAMA =================== -->
@@ -2328,7 +3056,7 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
       <div class="page" id="page-reunioes">
         <div class="page-head"><div class="page-title"><h1>Reuniões · Google Agenda</h1><p>Agenda integrada da ARK Content · todas as reuniões e compromissos em tempo real.</p></div></div>
         <div id="gcal-wrap" style="height:calc(100vh - 140px);background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden">
-          <iframe id="gcal-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo" style="border:0;width:100%;height:100%" frameborder="0" scrolling="no"></iframe>
+          <iframe loading="lazy" id="gcal-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo" style="border:0;width:100%;height:100%" frameborder="0" scrolling="no"></iframe>
         </div>
       </div>
 
@@ -2444,13 +3172,16 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
           </table>
         </div>
 
-        <script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-deleted-ids'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
 const WFA_FIN_DEFAULT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml?widget=true&headers=false';
+var WFA_WPP_OFF=true; // WhatsApp DESLIGADO a pedido do Gabriel (03/07): some da sidebar,
+// do painel e de todo caminho de execução. Reversível: false religa. Dados intactos na nuvem.
 let WFA_CLOUD_READY = false;
 let WFA_CLOUD_MUTED = false;
 let WFA_MEMBER = null;
@@ -2504,7 +3235,7 @@ async function directCloudCall(action,payload){
   const {data:{session}}=await _wfaSb.auth.getSession();
   const token=session?.access_token;
   if(!token)throw new Error('Faça login para usar o sistema.');
-  const isLoad=action==='load';
+  const isLoad=action==='load'||action==='load-key';
   // TIMEOUT: sem isso, uma rede travada deixa o fetch pendurado pra sempre — a mensagem
   // fica "enviando…" eterna e o sync nunca avisa. Com AbortController, vira erro limpo
   // (a mensagem vira "⚠ falhou · reenviar" e o badge de sync acende).
@@ -2512,7 +3243,7 @@ async function directCloudCall(action,payload){
   const to=setTimeout(()=>ctrl.abort(),25000);
   let resp;
   try{
-    resp=await fetch('/api/workflowark/state',{
+    resp=await fetch('/api/workflowark/state'+(action==='load-key'&&payload&&payload.key?('?key='+encodeURIComponent(payload.key)):''),{
       method:isLoad?'GET':'POST',
       headers:{...(!isLoad?{'Content-Type':'application/json'}:{}),Authorization:'Bearer '+token},
       body:isLoad?undefined:JSON.stringify(payload??{}),
@@ -2524,6 +3255,22 @@ async function directCloudCall(action,payload){
   if(!resp.ok)throw new Error(result.error||'Erro ao sincronizar');
   return result;
 }
+/* BOOT LEVE: o WhatsApp (todas as conversas) ficou FORA do load inicial (maior payload do
+   estado). Busca sob demanda ao abrir a aba, e em segundo plano ~8s após o boot pra
+   badges/resumo. O merge reusa o applyCloudState (mute + mescla). */
+let _wppCloudLoaded=false;
+async function wfaCarregarWhatsapp(){
+  if(WFA_WPP_OFF)return;
+  if(_wppCloudLoaded)return;_wppCloudLoaded=true;
+  try{
+    const r=await cloudCall('load-key',{key:'wfa-whatsapp'});
+    const v=r&&r.state?r.state['wfa-whatsapp']:null;
+    if(v!=null)applyCloudState({'wfa-whatsapp':v});
+    if(typeof renderWhatsapp==='function')try{renderWhatsapp();}catch(e){}
+    if(typeof updateBadges==='function')try{updateBadges();}catch(e){}
+  }catch(e){_wppCloudLoaded=false;}
+}
+setTimeout(()=>{try{wfaCarregarWhatsapp();}catch(e){}},8000);
 // Pede ao app pai (React, que tem a sessão) via postMessage. Usado como FALLBACK.
 function cloudCallViaParent(action,payload,timeoutMs){
   return new Promise((resolve,reject)=>{
@@ -2626,7 +3373,10 @@ async function arkDailyAgentsKick(){
     const hoje=hojeSP();
     if(localStorage.getItem('wfa-agents-kick-date')===hoje)return;
     localStorage.setItem('wfa-agents-kick-date',hoje);
-    const r=await fetch('/api/workflowark/agents-run?key=ark-2026');
+    // Autentica pela sessão (a antiga key fixa "ark-2026" virou segredo de servidor, só cron)
+    const {data:{session}}=await _wfaSb.auth.getSession();
+    if(!session||!session.access_token)return;
+    const r=await fetch('/api/workflowark/agents-run',{headers:{Authorization:'Bearer '+session.access_token}});
     if(!r.ok)return;
     // dá um tempinho pro auto-encadeamento e puxa os briefings novos
     setTimeout(async()=>{try{await sincronizarAgora();if(typeof renderMeuDia==='function')renderMeuDia();if(typeof consAutoRender==='function')consAutoRender();}catch(e){}},9000);
@@ -2682,7 +3432,9 @@ function applyCloudState(remote){
   if(!wfaLocalAuth('wfa-cobranca'))state.cobranca=JSON.parse(localStorage.getItem('wfa-cobranca')||'{}');
   if(!wfaLocalAuth('wfa-acerto'))state.acerto=JSON.parse(localStorage.getItem('wfa-acerto')||'{}');
   if(!wfaLocalAuth('wfa-planilha'))state.planilha=JSON.parse(localStorage.getItem('wfa-planilha')||'null');
-  if(!wfaLocalAuth('wfa-whatsapp'))state.whatsapp=JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}');
+  // WhatsApp: so re-hidrata se o remoto realmente trouxe a chave (o load leve nao traz)
+  // e derruba o cache preguicoso em vez de parsear MBs a cada tique de sync
+  if(remote&&remote['wfa-whatsapp']!=null&&!wfaLocalAuth('wfa-whatsapp'))state._wpp=null;
   state.notificacoes=JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]');
   state.planejamento=JSON.parse(localStorage.getItem('wfa-planejamento')||'{}');
   state.criativos=JSON.parse(localStorage.getItem('wfa-criativos')||'{}');
@@ -2729,30 +3481,64 @@ function wfaLimpezaConselhoV1(){
     }
   }catch(e){/* nunca derruba o boot */}
 }
-/* ===== SEED de clientes pedidos pelo Gabriel (16/06): 4B Burguer e Pizzaria Sabor e Lenha =====
+/* ===== SEED de clientes pedidos pelo Gabriel (16/06 + 03/07): 4B, Sabor e Lenha, The Guste e Café Lumiere =====
    Entram como clientes PERSONALIZADOS (editáveis pela interface e sincronizados). Roda PÓS-sync
    (dados já mesclados da nuvem) pra nunca sobrescrever a lista existente. Idempotente: não
    duplica se o cliente já existir (por nome) na base ou nos personalizados. valor=0 mantém
    fora da Cobrança até o Gabriel definir plano/valor no botão Editar. */
 function wfaSeedClientesV1(){
   try{
-    if(localStorage.getItem('wfa-seed-clientes-v1')==='1')return;
+    if(localStorage.getItem('wfa-seed-clientes-v6')==='1')return;
     const novos=[
-      {id:'4b-burguer',nm:'4B Burguer',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Hamburgueria'},
       {id:'pizzaria-sabor-e-lenha',nm:'Pizzaria Sabor e Lenha',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Pizzaria'},
+      {id:'dgust',nm:'Pizzaria Dgust',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Pizzaria'},
+      {id:'cafe-lumiere',nm:'Café Lumière',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Cafeteria'},
+      {id:'kopi-coffee',nm:'Kopi Coffee',tipo:'ARK',plano:'A definir',valor:0,cap:0,status:'gr',meta:'Novo cliente · ajuste plano e valor no botão Editar',extra:'Cafeteria'},
     ];
     const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'').trim();
     const todos=(typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE);
     const existentes=new Set(todos.map(c=>norm(c.nm)));
-    const arr=loadClientesCustom();
+    const arr=loadClientesCustom().filter(c=>c.id!=='the-guste'&&norm(c.nm)!=='pizzariatheguste');
+    // dedup do 4B: grafias Burger/Burguer/Burguers duplicavam; fica UMA, com o nome oficial
+    let limpou=false;
+    for(let i=arr.length-1;i>=0;i--){const n4=norm(arr[i].nm);
+      if(n4==='4bburguer'||n4==='4bburger'||n4==='4bburguers'){arr.splice(i,1);limpou=true;}}
+    arr.forEach(c=>{if(c.id==='cafe-lumiere')c.nm='Café Lumière';}); // corrige grafia do seed v2
     let add=0;
     novos.forEach(n=>{ if(!existentes.has(norm(n.nm))&&!arr.some(c=>c.id===n.id||norm(c.nm)===norm(n.nm))){ arr.push(n); add++; } });
-    localStorage.setItem('wfa-seed-clientes-v1','1');
-    if(add){
+    localStorage.setItem('wfa-seed-clientes-v6','1');
+    if(add||limpou){
       saveClientesCustom(arr); // persiste, reconstrói CLIENTES, re-renderiza e sincroniza
       if(typeof fillClienteSelects==='function')fillClienteSelects();
       if(typeof toast==='function')toast('✓ '+add+' cliente(s) adicionado(s): '+novos.map(n=>n.nm).join(' · '));
     }
+  }catch(e){/* nunca derruba o boot */}
+}
+/* ===== SEED de ROTINAS por area (pedido do Gabriel, 03/07): as rotinas semanais dos
+   meninos, correlatas aos processos de cada funcao (relatorio semanal, otimizacao
+   semanal, criativo semanal...). Idempotente por titulo; roda pos-sync junto do seed
+   de clientes. Elas viram tarefa no board automaticamente nos dias certos. */
+function wfaSeedRotinasV1(){
+  try{
+    if(localStorage.getItem('wfa-seed-rotinas-v1')==='1')return;
+    const novas=[
+      {titulo:'Otimização semanal das campanhas (todos os clientes)',freq:'Semanal',dia:'Segunda',hora:'09:00',resp:'Danilo de Lima'},
+      {titulo:'Relatório semanal de tráfego por cliente',freq:'Semanal',dia:'Sexta',hora:'16:00',resp:'Danilo de Lima'},
+      {titulo:'Criativo semanal: pauta e produção da semana',freq:'Semanal',dia:'Segunda',hora:'10:00',resp:'Maria Luiza'},
+      {titulo:'Relatório semanal pro cliente (entregas e resultados)',freq:'Semanal',dia:'Sexta',hora:'15:00',resp:'Lucas Rosi'},
+      {titulo:'Ativação diária dos grupos dos clientes',freq:'Diária',dia:'',hora:'09:30',resp:'Lucas Rosi'},
+      {titulo:'Fechamento semanal de edições (fila zerada)',freq:'Semanal',dia:'Quinta',hora:'14:00',resp:'Samuel Magalhães'},
+      {titulo:'Agenda de captações da semana confirmada',freq:'Semanal',dia:'Segunda',hora:'11:00',resp:'Samuel Magalhães'},
+      {titulo:'Artes e criativos da semana (demandas de design)',freq:'Semanal',dia:'Terça',hora:'10:00',resp:'M. Portela'},
+      {titulo:'Revisão semanal do pipeline comercial',freq:'Semanal',dia:'Segunda',hora:'14:00',resp:'Saulo'},
+    ];
+    const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+    const arr=loadRot();
+    const jaTem=new Set(arr.map(r=>norm(r.titulo)));
+    let add=0;
+    novas.forEach((n,i)=>{ if(!jaTem.has(norm(n.titulo))){ arr.push({id:'rseed'+Date.now()+i,ativo:true,...n}); add++; } });
+    localStorage.setItem('wfa-seed-rotinas-v1','1');
+    if(add){ saveRot(arr); if(typeof toast==='function')toast('✓ '+add+' rotinas da equipe adicionadas'); }
   }catch(e){/* nunca derruba o boot */}
 }
 function isEmptyCloudValue(v){return v==null||(Array.isArray(v)&&v.length===0)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===0)||v==='';}
@@ -2781,9 +3567,11 @@ async function bootCloudSync(){
     // aperta "Rodar conselho agora". // arkDailyAgentsKick();
     wfaLimpezaConselhoV1(); // limpeza única: tarefas do conselho/ressuscitadas -> Concluído
     wfaSeedClientesV1();     // adiciona 4B Burguer e Pizzaria Sabor e Lenha (1x, idempotente)
+    wfaSeedRotinasV1();      // rotinas semanais da equipe (1x, idempotente)
     // Seeds que ANTES rodavam no parse (e apagavam dados em navegador novo): agora aqui,
     // com a lista real do servidor já aplicada, então só ACRESCENTAM.
     seedValhalla();seedSamuel();seedProcessos();
+    if(WFA_WPP_OFF){try{document.querySelectorAll('[data-nav="whatsapp"]').forEach(el=>el.style.display='none');}catch(e){}}
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
     WFA_CLOUD_READY=false;
@@ -2945,6 +3733,11 @@ function iniciarAutoSync(){
           <div class="ag-card on" onclick="document.querySelector('[data-nav=roteirista]').click()">
             <div class="ag-top"><div class="ag-ico">🎬</div><div><div class="ag-nm">Roteirista Viral</div><div class="ag-role">Conteúdo</div></div></div>
             <div class="ag-desc">Transforma um tema em roteiro de Reels/TikTok com gancho, estrutura e legenda — pronto para gravar.</div>
+            <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
+          </div>
+          <div class="ag-card on" onclick="document.querySelector('[data-nav=propostas]').click()">
+            <div class="ag-top"><div class="ag-ico">🤝</div><div><div class="ag-nm">Estrategista Comercial</div><div class="ag-role">Comercial · propostas e contratos</div></div></div>
+            <div class="ag-desc">Gera a proposta premium de 17 páginas com dados reais do Instagram e o contrato blindado por segmento (PDF e DOCX), na IDV da ARK.</div>
             <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
           </div>
           <div class="ag-card on" onclick="document.querySelector('[data-nav=cliente]').click()">
@@ -3391,7 +4184,7 @@ function iniciarAutoSync(){
             <details style="margin-bottom:8px">
               <summary style="cursor:pointer;font-size:12px;color:var(--mute);font-weight:600;padding:4px 0">Ver a planilha completa do Google</summary>
               <div id="fin-wrap" style="height:60vh;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px">
-                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml?widget=true&headers=false" style="border:0;width:100%;height:100%" frameborder="0"></iframe>
+                <iframe loading="lazy" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml?widget=true&headers=false" style="border:0;width:100%;height:100%" frameborder="0"></iframe>
               </div>
             </details>
           </div>
@@ -3703,21 +4496,31 @@ function iniciarAutoSync(){
           .brf-idea.on span{text-decoration:none;color:var(--ink)}
           .brf-idea input{margin-top:2px;flex-shrink:0;width:15px;height:15px;accent-color:var(--green)}
         </style>
-        <div id="cons-status" style="font-size:12px;color:var(--mute);margin-bottom:10px"></div>
-        <div id="cons-auto"></div>
-
-        <details style="margin-bottom:14px">
-          <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--mute)">⚖️ Quer perguntar algo específico pro conselho agora?</summary>
-          <div class="card" style="padding:16px;margin-top:10px">
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
-              <div style="flex:1;min-width:220px"><label class="form-label">O que o conselho deve resolver?</label><input id="cons-tema" class="form-input" placeholder="Ex: como aumentar agendamentos da Vivenda na Copa? / o que postar essa semana?"></div>
-              <div style="min-width:160px"><label class="form-label">Cliente (opcional)</label><select id="cons-cliente" class="form-select"></select></div>
-              <button class="tb-btn dk" onclick="consRodar()">⚖️ Reunir o conselho</button>
-            </div>
-            <div id="cons-status2" style="font-size:12px;color:var(--mute);margin-top:8px"></div>
+        <!-- Convocar reunião: sempre visível, é O jeito de usar o conselho -->
+        <div class="card" id="cons-reuniao" style="padding:16px;margin-bottom:16px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:1;min-width:220px"><label class="form-label">Convocar reunião · o que o conselho deve resolver?</label><input id="cons-tema" class="form-input" placeholder="Ex: como aumentar agendamentos da Vivenda na Copa? / o que postar essa semana?" onkeydown="if(event.key==='Enter')consRodar()"></div>
+            <div style="min-width:160px"><label class="form-label">Cliente (opcional)</label><select id="cons-cliente" class="form-select"></select></div>
+            <button class="tb-btn" onclick="consRodar()">⚖️ Reunir o conselho</button>
           </div>
-        </details>
+          <div id="cons-status2" style="font-size:12px;color:var(--mute);margin-top:8px"></div>
+        </div>
         <div id="cons-out"></div>
+
+        <!-- Bancada: os 7 do conselho, cada um com conversa individual -->
+        <div class="sect-title"><h2>Bancada do conselho</h2><span class="sub">clique pra conversar com um deles</span></div>
+        <div id="cons-bancada" class="cons-bancada"></div>
+
+        <div id="cons-status" style="font-size:12px;color:var(--mute);margin:14px 0 10px"></div>
+        <div id="cons-auto"></div>
+      </div>
+
+      <!-- Chat lateral com um membro do conselho -->
+      <div id="cons-chat" class="cons-chat">
+        <div class="cc-hd"><span class="cc-coin" id="cc-coin">D</span><div><div class="cc-nm" id="cc-nm">Agente</div><div class="cc-fn" id="cc-fn">função</div></div>
+          <button class="cc-x" onclick="consChatClose()">✕</button></div>
+        <div class="cc-body" id="cc-body"></div>
+        <div class="cc-in"><input id="cc-input" placeholder="Pergunta, pede plano, pede opinião…" onkeydown="if(event.key==='Enter')consChatSend()"><button onclick="consChatSend()">➤</button></div>
       </div>
 
       <!-- =================== TUTORIAL / POPs =================== -->
@@ -4352,7 +5155,7 @@ const CLIENTES_BASE = [
   {id:'brisa',nm:'Brisa Doce Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · onboarding/inauguração',extra:'Aderir método'},
   {id:'attra',nm:'Attraversiamo Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',cap:1,meta:'Super saudável ✓ · bombando · 1 captação/mês',extra:'📹 1 captação/mês'},
   // Em onboarding
-  {id:'4bburger',nm:'4B Burger',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding',extra:'Onboarding em andamento',defaultSprint:0},
+  {id:'4bburger',nm:'4B Burguers',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding',extra:'Onboarding em andamento',defaultSprint:0},
   {id:'saborlenha',nm:'Pizzaria Sabor e Lenha',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · último cliente',extra:'Onboarding em andamento',defaultSprint:0},
   // (Lunna's, Shopping dos Uniformes, Bellato e Bella Vita removidos do sistema a pedido do Gabriel)
 ];
@@ -4664,7 +5467,7 @@ let state = {
   cobranca: JSON.parse(localStorage.getItem('wfa-cobranca')||'{}'),
   acerto: JSON.parse(localStorage.getItem('wfa-acerto')||'{}'),
   planilha: JSON.parse(localStorage.getItem('wfa-planilha')||'null'),
-  whatsapp: JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}'),
+  _wpp: null, // whatsapp: parse PREGUIÇOSO via getter abaixo (megabytes de conversas travavam o boot por segundos)
   notificacoes: JSON.parse(localStorage.getItem('wfa-notificacoes')||'[]'),
   planejamento: JSON.parse(localStorage.getItem('wfa-planejamento')||'{}'),
   criativos: JSON.parse(localStorage.getItem('wfa-criativos')||'{}'),
@@ -4672,6 +5475,14 @@ let state = {
   currentSprint: null,
   currentCliente: null,
 };
+/* WhatsApp preguiçoso: o parse do estado inteiro das conversas (o maior blob do
+   localStorage) só acontece no PRIMEIRO uso real, nunca no caminho do primeiro paint. */
+Object.defineProperty(state,'whatsapp',{
+  get(){ if(this._wpp==null){ try{this._wpp=JSON.parse(localStorage.getItem('wfa-whatsapp')||'{"conversas":{}}');}catch(e){this._wpp={conversas:{}};} } return this._wpp; },
+  set(v){ this._wpp=v; },
+  configurable:true
+});
+
 
 function saveTarefas(){localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));renderTarefas();renderSprints();updateBadges();}
 function saveRegua(){localStorage.setItem('wfa-regua',JSON.stringify(state.regua));}
@@ -4688,10 +5499,24 @@ function toast(msg){
 /* ============ MENU MOBILE (drawer) ============ */
 function toggleSide(force){
   const s=document.querySelector('.side');const b=document.getElementById('sideBackdrop');if(!s)return;
-  const open=force!==undefined?force:!s.classList.contains('open');
+  const was=s.classList.contains('open');
+  const open=force!==undefined?!!force:!was;
+  if(open===was)return;
   s.classList.toggle('open',open);
   if(b)b.classList.toggle('show',open);
+  /* botao voltar do celular fecha o drawer em vez de sair do app */
+  try{
+    if(open)history.pushState({wfaSide:1},'');
+    else if(history.state&&history.state.wfaSide)history.back();
+  }catch(e){}
 }
+window.addEventListener('popstate',()=>{
+  const s=document.querySelector('.side');
+  if(s&&s.classList.contains('open')){
+    s.classList.remove('open');
+    document.getElementById('sideBackdrop')?.classList.remove('show');
+  }
+});
 /* ============ NAV ============ */
 document.querySelectorAll('[data-nav]').forEach(el=>{
   el.addEventListener('click',()=>{
@@ -4715,8 +5540,10 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='jarvis'){try{jarvisPageEnter();}catch(e){} try{jvHudInit();}catch(e){console.warn('jvhud',e);}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
-    if(p==='whatsapp'){try{const _td=hojeSP();if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
+    if(p==='whatsapp'&&WFA_WPP_OFF){try{document.querySelector('[data-nav="painel"]').click();}catch(e){}return;}
+    if(p==='whatsapp'){try{wfaCarregarWhatsapp();}catch(e){} try{const _td=hojeSP();if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
+    if(p==='jornada'&&typeof renderSprints==='function'){try{renderSprints();}catch(e){}}
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
     document.querySelector('.view').scrollTo(0,0);
@@ -5611,7 +6438,26 @@ function acertoSeedFromFin(force){
 }
 
 /* ============ JORNADA SPRINTS ============ */
+/* AUTOMÁTICO E PARA SEMPRE (pedido do Gabriel, 03/07): TODO cliente ativo da carteira
+   aparece na Jornada. Quem não está em nenhum sprint entra no Onboarding sozinho —
+   cliente novo (seed, botão + Novo cliente ou sync de outro usuário) nunca mais some. */
+function jornadaAutoInclui(){
+  let mudou=false;
+  // remove ids orfaos (cliente que nao existe mais na carteira, ex.: 4B duplicado migrado)
+  SPRINTS.forEach(sp=>{
+    const antes=sp.clis.length;
+    sp.clis=sp.clis.filter(id=>(CLIENTES||[]).some(c=>c.id===id));
+    if(sp.clis.length!==antes)mudou=true;
+  });
+  (CLIENTES||[]).forEach(c=>{
+    if(!c||!c.id||c.id==='ark'||c.status==='churn')return;
+    if(SPRINTS.some(sp=>sp.clis.includes(c.id)))return;
+    SPRINTS[0].clis.push(c.id);mudou=true;
+  });
+  if(mudou)saveJornada();
+}
 function renderSprints(){
+  try{jornadaAutoInclui();}catch(e){}
   const board=document.getElementById('sprint-board');
   board.innerHTML=SPRINTS.map(sp=>{
     const clis=sp.clis.map(cid=>{
@@ -5734,10 +6580,31 @@ function mdTaskRow(kind,t){
     <div class="tk-main" onclick="openTaskDetail('${t.id}')" style="cursor:pointer"><div class="tk-t">${mdEsc(t.title||'Sem título')}</div>${meta?`<div class="tk-m">${meta}</div>`:''}</div>
     ${chip}
     <div class="md-act">
+      <button class="ab" title="Abrir a tarefa" onclick="event.stopPropagation();openTaskDetail('${t.id}')">Abrir</button>
       <button class="ok" title="Já fiz · concluir" onclick="event.stopPropagation();mdDone('${t.id}')">✓</button>
       <button class="sn" title="Adiar para amanhã" onclick="event.stopPropagation();mdSnooze('${t.id}')">↻</button>
     </div>
   </div>`;
+}
+/* Fila de aprovação (ref ARK OS): tarefas paradas em Aprovação, com moedinha por função e Revisar */
+const MD_APR_CORES={'Account Manager':'#ffc700','Gestor de Tráfego':'#5b8cff','Criador':'#ff7ab8','Edição':'#a78bfa','Editor':'#a78bfa'};
+function mdRenderAprovacao(){
+  const box=document.getElementById('md-aprovacao');if(!box)return;
+  const list=(state.tarefas||[]).filter(t=>t.status==='aprovacao');
+  const sig=list.map(t=>t.id).join(',');
+  if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+  if(!list.length){box.innerHTML='';box.style.display='none';return;}
+  box.style.display='';
+  box.innerHTML=`<div class="md-card"><div class="md-hd"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Fila de aprovação</h3><span class="md-count">${list.length}</span></div>
+  <div class="md-bd">${list.slice(0,8).map(t=>{
+    const cor=MD_APR_CORES[t.funcao]||'#2dd4bf';
+    const ini=(t.funcao||'?').split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const cli=mdClientName(t.clienteId);
+    return `<div class="md-apr-row" onclick="openTaskDetail('${t.id}')">
+      <span class="md-apr-coin" style="background:${cor}22;color:${cor};border:1px solid ${cor}55">${mdEsc(ini)}</span>
+      <div class="md-apr-tx"><div class="t">${mdEsc(t.title||'Sem título')}</div><div class="m">${mdEsc([cli,t.funcao].filter(Boolean).join(' · '))}</div></div>
+      <button class="md-apr-btn" onclick="event.stopPropagation();openTaskDetail('${t.id}')">Revisar</button>
+    </div>`;}).join('')}</div></div>`;
 }
 function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;taskConcluir(t);saveTarefas();renderMeuDia();if(typeof renderWidgets==='function')renderWidgets();toast('✓ Tarefa concluída · boa!');}
 function mdSnooze(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;const d=new Date();d.setDate(d.getDate()+1);t.data=dataSP(d);saveTarefas();renderMeuDia();toast('↻ Adiada para amanhã');}
@@ -5876,9 +6743,10 @@ function mdwBody(w,B){
     if(!h)h='<div class="mdw-empty">Nada pendente. Dia livre 🎯</div>';
     return {body:h,count:(B.late.length+B.todayT.length+B.pend.length)||null};
   }
-  if(w.t==='agenda'){return {body:`<iframe class="mdw-agenda" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=0" scrolling="no"></iframe>`,count:'Google'};}
+  if(w.t==='agenda'){return {body:`<iframe loading="lazy" class="mdw-agenda" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=0" scrolling="no"></iframe>`,count:'Google'};}
   if(w.t==='nota'){const s=mdwLoad();return {body:`<textarea class="mdw-nota" placeholder="Escreva uma nota rápida..." oninput="mdwNotaSave(this.value)">${mdEsc(s.nota||'')}</textarea>`,count:null};}
   if(w.t==='whatsapp'){
+    if(WFA_WPP_OFF)return {body:'<div class="muted" style="font-size:11.5px;padding:14px;text-align:center">WhatsApp desativado</div>',count:null};
     const conv=(state.whatsapp&&state.whatsapp.conversas)||{};
     const list=Object.values(conv).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
     const unread=list.filter(c=>c.unread).length;
@@ -5997,8 +6865,11 @@ function renderWidgets(){
   const s=mdwLoad();const B=mdwBuckets();
   board.classList.toggle('editing',MDW_EDIT);
   const eb=document.getElementById('mdw-edit-btn');if(eb)eb.textContent=MDW_EDIT?'✓ Pronto':'✎ Editar';
-  board.innerHTML=s.layout.map((w,i)=>mdwCard(i,w,B)).join('')||`<div class="mdw-empty" style="grid-column:1/-1;padding:40px">Sem widgets. Clique em <b>Adicionar</b>.</div>`;
-  mdwBindDrag();mdwTick();
+  // escrita calma: se nada mudou (dados iguais), NÃO repinta — o iframe da agenda
+  // parava de recarregar e os widgets paravam de "piscar" a cada sync
+  const _html=s.layout.map((w,i)=>mdwCard(i,w,B)).join('')||`<div class="mdw-empty" style="grid-column:1/-1;padding:40px">Sem widgets. Clique em <b>Adicionar</b>.</div>`;
+  if(wfaSetHTML(board,_html)){mdwBindDrag();}
+  mdwTick();
 }
 function mdwTick(){
   const t=document.querySelector('#mdw-board [data-clock]');if(!t)return;
@@ -6050,6 +6921,10 @@ function mdwAddOpen(ev){
 }
 function mdwAddClose(e){const m=document.getElementById('mdw-addmenu');if(m&&!m.contains(e.target)){m.classList.remove('show');document.removeEventListener('click',mdwAddClose);}}
 function mdwAdd(t){const s=mdwLoad();s.layout.push({t,s:(MDW_TYPES[t]||{}).size||'m'});mdwPut(s);const m=document.getElementById('mdw-addmenu');if(m)m.classList.remove('show');renderWidgets();if(typeof toast==='function')toast('Widget adicionado');}
+function mdVerAtrasadas(){
+  const n=document.querySelector('[data-nav=tarefas]');if(n)n.click();
+  setTimeout(()=>{const s=document.getElementById('filt-data');if(s){s.value='atrasadas';if(typeof aplicarFiltros==='function')aplicarFiltros();}},60);
+}
 function renderMeuDia(){
   if(!document.getElementById('page-dashboard'))return;
   if(typeof applyCalendars==='function')applyCalendars();
@@ -6066,7 +6941,12 @@ function renderMeuDia(){
   if(gEl)gEl.textContent=`${mdGreeting()}${myName?', '+mdFirst(myName):''}`;
   if(sEl)sEl.textContent=dCap;
   // origem das tarefas: as minhas (se tiver nome) ou todas (gestor sem nome)
-  const src=myName?tasks.filter(t=>t.resp===myName):tasks;
+  // Comparação tolerante: "Gabriel" na tarefa tem que casar com "Gabriel Andrade" do
+  // cadastro (antes era === exato e tarefas sumiam da contagem de atrasadas)
+  const _nm=s=>String(s||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const myN=_nm(myName),myFirst=myN.split(/\s+/)[0]||'';
+  const isMine=t=>{const r=_nm(t.resp);if(!r)return false;if(r===myN)return true;const rf=r.split(/\s+/)[0];return !!myFirst&&rf===myFirst;};
+  const src=myName?tasks.filter(isMine):tasks;
   const late=src.filter(t=>t.data&&t.data<today&&notDone(t)).sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   const todayT=src.filter(t=>t.data===today&&notDone(t));
   const pend=src.filter(t=>notDone(t)&&!(t.data&&t.data<today)&&t.data!==today)
@@ -6074,15 +6954,23 @@ function renderMeuDia(){
   const doneToday=src.filter(t=>t.status==='concluido'&&String(t.concluidaEm||t.criadaEm||'').startsWith(today));
   // KPIs
   const kpis=document.getElementById('md-kpis');
-  if(kpis)kpis.innerHTML=[
-    mdKpi('yel','Vencem hoje',todayT.length,todayT.length?'foco do dia':'nada para hoje'),
-    mdKpi('red','Atrasadas',late.length,late.length?'precisa destravar':'tudo em dia ✓'),
-    mdKpi('dk','Pendentes',pend.length,'próximas e sem data'),
-    mdKpi('green','Concluídas hoje',doneToday.length,'no seu nome'),
-  ].join('');
-  if(typeof animateCounters==='function')setTimeout(()=>animateCounters(document.getElementById('page-dashboard')),30);
+  // só reconstrói (e re-anima a contagem) se os números MUDARAM: re-render de sync
+  // recriava os cards toda hora e o contador recomeçava do zero ("página com tique")
+  const _kpiSig=[todayT.length,late.length,pend.length,doneToday.length].join('|');
+  if(kpis&&kpis.dataset.sig!==_kpiSig){
+    kpis.dataset.sig=_kpiSig;
+    kpis.innerHTML=[
+      mdKpi('yel','Vencem hoje',todayT.length,todayT.length?'foco do dia':'nada para hoje'),
+      mdKpi('red','Atrasadas',late.length,late.length?'precisa destravar':'tudo em dia ✓'),
+      mdKpi('dk','Pendentes',pend.length,'próximas e sem data'),
+      mdKpi('green','Concluídas hoje',doneToday.length,'no seu nome'),
+    ].join('');
+    if(typeof animateCounters==='function')setTimeout(()=>animateCounters(document.getElementById('page-dashboard')),30);
+  }
   // JARVIS: resumo do dia (lê a última notificação de resumo/ideia/conselho)
   mdRenderJarvis(late.length,todayT.length,pend.length);
+  // Fila de aprovação (ref ARK OS)
+  try{mdRenderAprovacao();}catch(e){}
   // Briefings do conselho de hoje
   mdRenderBriefings();
   // título do cartão de tarefas
@@ -6092,11 +6980,14 @@ function renderMeuDia(){
   const box=document.getElementById('md-tasks');
   if(box){
     let html='';
-    if(late.length){html+='<div class="md-subhd">⚠ Atrasadas</div>'+late.slice(0,12).map(t=>mdTaskRow('late',t)).join('');}
+    if(late.length){
+      html+='<div class="md-subhd">⚠ Atrasadas</div>'+late.slice(0,12).map(t=>mdTaskRow('late',t)).join('');
+      if(late.length>12)html+=`<div style="padding:8px 4px"><button class="icobtn" style="font-size:12px;color:var(--red)" onclick="mdVerAtrasadas()">+ ${late.length-12} atrasada(s), ver todas em Tarefas</button></div>`;
+    }
     if(todayT.length){html+='<div class="md-subhd">📅 Para hoje</div>'+todayT.map(t=>mdTaskRow('today',t)).join('');}
     if(pend.length){html+='<div class="md-subhd">➜ Próximas</div>'+pend.slice(0,8).map(t=>mdTaskRow('soon',t)).join('');}
     if(!html)html='<div class="md-empty">Nada pendente no seu nome. Dia livre — ou hora de puxar algo do time. 🎯</div>';
-    box.innerHTML=html;
+    wfaSetHTML(box,html); /* escrita calma: sem repintar se nada mudou */
   }
   const tc=document.getElementById('md-tasks-count');
   if(tc)tc.textContent=(late.length+todayT.length+pend.length);
@@ -6190,7 +7081,7 @@ const NAV_CATALOG=[
   {k:'dashboard',l:'Meu Dia'},{k:'painel',l:'Meu Painel'},{k:'reunioes',l:'Reuniões · Agenda'},
   {k:'lista-clientes',l:'Lista de Clientes'},{k:'jornada',l:'Jornada · Sprints'},{k:'regua',l:'Régua dos 15'},
   {k:'tarefas',l:'Tarefas'},{k:'demandas',l:'Demandas'},{k:'rotinas',l:'Rotinas'},
-  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'conselho',l:'Conselho de IA'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},
+  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'conselho',l:'Conselho de IA'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},{k:'propostas',l:'Propostas'},{k:'contratos',l:'Contratos'},
   {k:'crm',l:'CRM · Pipeline'},
   {k:'organograma',l:'Organograma'},{k:'pops',l:'POPs por Função'},{k:'processos',l:'Processos'},
   {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},{k:'tutorial',l:'Tutorial / POPs'},{k:'integracoes',l:'Integrações'},
@@ -6438,7 +7329,7 @@ function renderTarefas(){
         const p=(_pr[a.prio]??1)-(_pr[b.prio]??1); if(p)return p;
         return (a.data||'9999').localeCompare(b.data||'9999');
       });
-    list.innerHTML=filt.map(taskCard).join('')||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`;
+    wfaSetHTML(list,filt.map(taskCard).join('')||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`);
     document.getElementById('ct-'+st).textContent=filt.length;
   });
   // KPIs — "Ativas" = não concluídas (o total cru de 200+ assustava o time logo de cara)
@@ -6483,18 +7374,24 @@ function renderTaskLista(){
     const prio=t.prio==='alta'?'🔴 Alta':t.prio==='baixa'?'🟢 Baixa':'🟡 Média';
     return `<tr class="tl-row" onclick="openTaskDetail('${t.id}')"><td class="tl-tt">${escapeHtml(t.title)}</td><td>${c?escapeHtml(c.nm):'—'}</td><td>${escapeHtml(t.resp||'—')}</td><td class="${late?'tl-late':''}">${late?'⚠ ':''}${dataFmt}</td><td>${prio}</td><td><span class="tl-pill tl-st-${t.status}">${taskStatusLabel(t.status)}</span></td></tr>`;
   }).join('');
-  document.getElementById('task-lista').innerHTML=`<table class="tl-table"><thead><tr><th>Tarefa</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:20px">Nenhuma tarefa.</td></tr>'}</tbody></table>`;
+  wfaSetHTML(document.getElementById('task-lista'),`<table class="tl-table"><thead><tr><th>Tarefa</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:20px">Nenhuma tarefa.</td></tr>'}</tbody></table>`);
 }
+/* Calendário de tarefas: sempre abre no MÊS ATUAL (antes ancorava na tarefa
+   mais antiga e ficava preso em meses passados). WFA_TCAL_OFF navega entre meses. */
+let WFA_TCAL_OFF=0;
+function tcalNav(d){WFA_TCAL_OFF=(d===0)?0:WFA_TCAL_OFF+d;renderTaskCalendario();}
 function renderTaskCalendario(){
   const ts=taskFiltradas();
   const today=new Date();today.setHours(0,0,0,0);
   const dated=ts.map(t=>({t,d:t.data?new Date(t.data+'T00:00:00'):null})).filter(x=>x.d&&!isNaN(x.d.getTime()));
-  const ref=dated.length?dated.slice().sort((a,b)=>a.d-b.d)[0].d:new Date();
+  const now=new Date();
+  const ref=new Date(now.getFullYear(),now.getMonth()+WFA_TCAL_OFF,1);
   const year=ref.getFullYear(),month=ref.getMonth();
   const first=new Date(year,month,1);const startDow=first.getDay();const days=new Date(year,month+1,0).getDate();
   const monthName=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   const dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const byDay={};dated.forEach(x=>{if(x.d.getMonth()===month&&x.d.getFullYear()===year){(byDay[x.d.getDate()]=byDay[x.d.getDate()]||[]).push(x.t);}});
+  const byDay={};let noMes=0;
+  dated.forEach(x=>{if(x.d.getMonth()===month&&x.d.getFullYear()===year){(byDay[x.d.getDate()]=byDay[x.d.getDate()]||[]).push(x.t);noMes++;}});
   const todayStr=hojeSP();
   let cells='';
   for(let b=0;b<startDow;b++)cells+='<div class="tcal-cell muted"></div>';
@@ -6503,7 +7400,9 @@ function renderTaskCalendario(){
     const items=(byDay[day]||[]).map(t=>{const late=t.data&&t.data<todayStr&&t.status!=='concluido';const cls=t.status==='concluido'?'done':late?'late':'';return `<div class="tcal-chip ${cls}" onclick="openTaskDetail('${t.id}')" title="${escapeHtml(t.title)}">${escapeHtml(t.title.slice(0,30))}</div>`;}).join('');
     cells+=`<div class="tcal-cell${isToday?' today':''}"><span class="tcal-num">${day}</span>${items}</div>`;
   }
-  document.getElementById('task-calendario').innerHTML=`<div class="tcal"><div class="tcal-head"><span>${monthName}</span><span style="font-size:12px;color:var(--mute)">${dated.length} com prazo</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`;
+  const navBtn=(d,lb,tt)=>`<button class="icobtn" style="padding:2px 10px;font-size:13px" title="${tt}" onclick="tcalNav(${d})">${lb}</button>`;
+  const navHtml=`<span style="display:inline-flex;gap:4px;align-items:center">${navBtn(-1,'‹','Mês anterior')}${WFA_TCAL_OFF!==0?navBtn(0,'Hoje','Voltar para o mês atual'):''}${navBtn(1,'›','Próximo mês')}</span>`;
+  wfaSetHTML(document.getElementById('task-calendario'),`<div class="tcal"><div class="tcal-head"><span style="text-transform:capitalize">${monthName}</span><span style="display:inline-flex;gap:10px;align-items:center"><span style="font-size:12px;color:var(--mute)">${noMes} com prazo no mês</span>${navHtml}</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`);
 }
 function renderTaskPessoas(){
   const today=hojeSP();
@@ -6522,7 +7421,7 @@ function renderTaskPessoas(){
     const lista=arr.slice().sort((a,b)=>((a.data||'9999')<(b.data||'9999')?-1:1)).slice(0,6).map(t=>{const late=t.data&&t.data<today&&t.status!=='concluido';const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';return `<div class="tp-task ${late?'late':''}" onclick="openTaskDetail('${t.id}')"><span>${t.status==='concluido'?'✅ ':''}${escapeHtml(t.title.slice(0,38))}</span><span class="d">${late?'⚠ ':''}${dataFmt}</span></div>`;}).join('');
     return `<div class="tp-card"><div class="tp-head"><div class="tp-av">${initials(nm)}</div><div><div class="tp-nm">${escapeHtml(nm)}</div><div class="tp-sub">${ativos.length} ativas${atras?` · <span style="color:var(--red,#e0364f);font-weight:700">${atras} atrasada${atras>1?'s':''}</span>`:''}</div></div></div><div class="tp-bar">${seg('backlog','#bbb')}${seg('andamento','#ffd400')}${seg('aprovacao','#4a90ff')}${seg('concluido','#19b36b')}</div>${lista||'<div class="tp-sub">Sem tarefas</div>'}${arr.length>6?`<div class="tp-sub" style="margin-top:6px">+${arr.length-6} outras</div>`:''}</div>`;
   }).join('');
-  document.getElementById('task-pessoas').innerHTML=`<div class="tp-grid">${cards||'<div class="tp-sub">Nenhuma tarefa.</div>'}</div>`;
+  wfaSetHTML(document.getElementById('task-pessoas'),`<div class="tp-grid">${cards||'<div class="tp-sub">Nenhuma tarefa.</div>'}</div>`);
 }
 function renderTaskDashboard(){
   const today=hojeSP();
@@ -6553,7 +7452,7 @@ function renderTaskDashboard(){
   const WIPLIM=5;
   const wipRows=Object.entries(wip).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{const over=v>WIPLIM;return `<div class="db-row"><div class="db-lb" title="${escapeHtml(k)}">${escapeHtml(k)}</div><div class="db-track"><div class="db-fill" style="width:${Math.min(100,v/WIPLIM*100)}%;background:${over?'#e0364f':'#19b36b'}"></div></div><div class="db-val">${v}/${WIPLIM}${over?' ⚠':''}</div></div>`;}).join('');
   const wipCard=`<div class="db-card"><h3>Capacidade · WIP por pessoa <span style="font-size:11px;color:var(--mute);font-weight:500">(meta ${WIPLIM} em execução)</span></h3>${wipRows||'<div class="tp-sub">Ninguém em execução</div>'}</div>`;
-  document.getElementById('task-painel').innerHTML=kpis+`<div class="db-grid">${barBlock('Atividades por Função',porFuncao,'#ffd400')}${barBlock('Atividades por Membro',porMembro,'#111')}${barBlock('Atrasadas por Membro',atrasMembro,'#e0364f')}${wipCard}</div>`;
+  wfaSetHTML(document.getElementById('task-painel'),kpis+`<div class="db-grid">${barBlock('Atividades por Função',porFuncao,'#ffd400')}${barBlock('Atividades por Membro',porMembro,'#111')}${barBlock('Atrasadas por Membro',atrasMembro,'#e0364f')}${wipCard}</div>`);
 }
 function taskCard(t){
   const c=CLIENTES.find(x=>x.id===t.clienteId);
@@ -6624,11 +7523,19 @@ function taskDragAfterElement(list,y){
   },{offset:-Infinity,element:null}).element;
 }
 function bindDrag(){
+  // GUARDA ANTI-DUPLICAÇÃO: com a escrita calma os cards persistem entre renders,
+  // então bindDrag re-chamado empilhava listener em cima de listener (drag caótico).
+  // Cada elemento é atado UMA vez na vida (__dragBound).
   document.querySelectorAll('.task-card').forEach(c=>{
+    if(c.__dragBound)return;c.__dragBound=1;
     c.addEventListener('dragstart',e=>{e.dataTransfer.setData('id',c.dataset.tid);e.dataTransfer.effectAllowed='move';requestAnimationFrame(()=>c.classList.add('dragging'));});
-    c.addEventListener('dragend',e=>{c.classList.remove('dragging');document.querySelectorAll('.task-col.drop-on').forEach(x=>x.classList.remove('drop-on'));});
+    c.addEventListener('dragend',e=>{c.classList.remove('dragging');document.querySelectorAll('.task-col.drop-on').forEach(x=>x.classList.remove('drop-on'));
+      // o drag mexe no DOM por fora do render: invalida o cache pro próximo render repintar de verdade
+      document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});
+    });
   });
   document.querySelectorAll('.task-list').forEach(list=>{
+    if(list.__dragBound)return;list.__dragBound=1;
     const col=list.closest('.task-col')||list;
     list.addEventListener('dragover',e=>{
       e.preventDefault();e.dataTransfer.dropEffect='move';col.classList.add('drop-on');
@@ -7411,14 +8318,14 @@ function consAutoRender(){
   // mostra os de hoje primeiro; se não houver de hoje, mostra os mais recentes
   const list=(all.filter(b=>b.date===hoje).length?all.filter(b=>b.date===hoje):all).slice(0,12);
   if(!list.length){wrap.innerHTML='<div class="cons-empty">Os agentes ainda não debateram hoje.<br>Clique em <b>▶ Rodar conselho agora</b> — ou eles fazem isso sozinhos toda manhã.</div>';return;}
-  wrap.innerHTML='<div class="brf-grid">'+list.map(b=>`
+  wfaSetHTML(wrap,'<div class="brf-grid">'+list.map(b=>`
     <div class="brf">
-      <div class="brf-top"><div class="cl">${escapeHtml(b.cliente||'ARK')} · ${b.date===hoje?'hoje':escapeHtml(b.date||'')}</div><div class="dc">${escapeHtml(b.decisao||'—')}</div></div>
+      <div class="brf-top"><div class="cl">${b.doc?'📄 DOCUMENTO · ':''}${escapeHtml(b.cliente||'ARK')} · ${b.date===hoje?'hoje':escapeHtml(b.date||'')}${b.motivo?` · ${escapeHtml(b.motivo)}`:''}</div><div class="dc">${escapeHtml(b.decisao||'—')}</div></div>
       <div class="brf-body">
-        ${(b.ideias&&b.ideias.length)?`<div class="lb">Ideias — marque pra virar tarefa</div><div class="brf-ideias">${b.ideias.map((id,ix)=>`<label class="brf-idea ${id.feito?'on':''}"><input type="checkbox" ${id.feito?'checked':''} onchange="consPromoverIdeia('${b.id}',${ix},this.checked)"><span>${escapeHtml(id.titulo)}${id.area?` <em style="color:var(--mute);font-style:normal;font-size:10px">· ${escapeHtml(id.area)}</em>`:''}</span></label>`).join('')}</div>`:''}
-        ${(b.plano&&b.plano.length)?`<div class="lb">Plano</div><ul>${b.plano.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
+        ${(b.plano&&b.plano.length)?`<div class="lb">${b.doc?'Planejamento da semana':'Plano'}</div><ul>${b.plano.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
+        ${b.roteiro?`<div class="lb">${b.doc?'Roteiro pronto pra gravar':'Roteirização (Reel)'}</div><div style="font-size:12px;line-height:1.5;background:var(--yel-bg);border-radius:8px;padding:8px 10px;white-space:pre-wrap">${escapeHtml(b.roteiro)}</div>`:''}
+        ${(b.ideias&&b.ideias.length)?`<div class="lb">${b.doc?'Checklist de preparação — marque pra virar tarefa':'Ideias — marque pra virar tarefa'}</div><div class="brf-ideias">${b.ideias.map((id,ix)=>`<label class="brf-idea ${id.feito?'on':''}"><input type="checkbox" ${id.feito?'checked':''} onchange="consPromoverIdeia('${b.id}',${ix},this.checked)"><span>${escapeHtml(id.titulo)}${id.area?` <em style="color:var(--mute);font-style:normal;font-size:10px">· ${escapeHtml(id.area)}</em>`:''}</span></label>`).join('')}</div>`:''}
         ${b.orcamento?`<div class="lb">Orçamento de mídia sugerido</div><div style="font-size:12px;line-height:1.5;font-weight:600;color:var(--ink);background:#eef7ee;border-radius:8px;padding:8px 10px">${escapeHtml(b.orcamento)}</div>`:''}
-        ${b.roteiro?`<div class="lb">Roteirização (Reel)</div><div style="font-size:12px;line-height:1.5;background:var(--yel-bg);border-radius:8px;padding:8px 10px">${escapeHtml(b.roteiro)}</div>`:''}
         ${(b.reunioes&&b.reunioes.length)?`<div class="lb">Reuniões / alinhamentos</div><ul>${b.reunioes.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
         ${(b.referencias&&b.referencias.length)?`<div class="lb">Referências do nicho</div><ul>${b.referencias.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
         ${(b.parcerias&&b.parcerias.length)?`<div class="lb">Parcerias possíveis</div><ul>${b.parcerias.map(p=>`<li>${escapeHtml(p)}</li>`).join('')}</ul>`:''}
@@ -7428,17 +8335,19 @@ function consAutoRender(){
         </div>
       </div>
       <div class="brf-foot">
-        <button onclick="consToggleDebate('${b.id}')">Ver debate</button>
+        ${b.doc?`<button onclick="consCopiarDoc('${b.id}')">Copiar documento</button>`:`<button onclick="consToggleDebate('${b.id}')">Ver debate</button>`}
         <button class="pri" onclick="document.querySelector('[data-nav=tarefas]').click()">Ver tarefas geradas</button>
       </div>
-    </div>`).join('')+'</div>';
+    </div>`).join('')+'</div>');
 }
 async function consRodarAuto(){
   const btn=document.getElementById('cons-run-btn');const st=document.getElementById('cons-status');
   if(btn){btn.disabled=true;btn.textContent='⏳ Debatendo...';}
   if(st)st.textContent='Os agentes estão debatendo cliente por cliente — pode levar ~1 min.';
   try{
-    const r=await fetch('/api/workflowark/agents-run?key=ark-2026&force=1');
+    const {data:{session}}=await _wfaSb.auth.getSession();
+    if(!session||!session.access_token)throw new Error('Sessão expirada. Entre novamente.');
+    const r=await fetch('/api/workflowark/agents-run?force=1',{headers:{Authorization:'Bearer '+session.access_token}});
     const j=await r.json().catch(()=>({}));
     if(!r.ok||j.error)throw new Error(j.error||'falha');
     if(st)st.textContent=`✓ Conselho rodou: ${j.clientes||0} clientes, ${j.tarefas||0} tarefas criadas.`;
@@ -7458,6 +8367,18 @@ function consRender(r){
     <div class="card" style="padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><h3 style="font-size:14px;font-weight:800">📋 Plano de ação</h3><div style="display:flex;gap:6px"><button class="tb-btn" onclick="consNarrar()">🔊 Ouvir</button><button class="tb-btn dk" onclick="consCriarTarefas()">+ Criar tarefas</button></div></div><ul style="font-size:13px;padding-left:18px;margin:0">${plano||'<li>—</li>'}</ul></div>`;
 }
 function consNarrar(){if(!_consData)return;jarvisSpeak('Decisão do conselho: '+(_consData.decisao||'')+'. Plano de ação: '+((_consData.plano||[]).join('. ')));}
+/* Copia o documento de trabalho inteiro (pra colar no WhatsApp/Docs e levar pro cliente) */
+function consCopiarDoc(id){
+  const b=consBriefings().find(x=>x.id===id);if(!b)return;
+  const txt=['DOCUMENTO DE TRABALHO · '+(b.cliente||'')+' · '+(b.date||''),
+    b.motivo?('Pauta: '+b.motivo):'',
+    '',b.decisao||'',
+    '',(b.plano&&b.plano.length)?('PLANEJAMENTO DA SEMANA:\n'+b.plano.map(p=>'• '+p).join('\n')):'',
+    '',b.roteiro?('ROTEIRO:\n'+b.roteiro):'',
+    '',(b.ideias&&b.ideias.length)?('PREPARAÇÃO:\n'+b.ideias.map(i=>'☐ '+i.titulo+(i.area?' ('+i.area+')':'')).join('\n')):'',
+    '',b.orcamento?('MÍDIA: '+b.orcamento):''].filter(Boolean).join('\n');
+  navigator.clipboard?.writeText(txt).then(()=>toast('📄 Documento copiado'),()=>toast('Não consegui copiar'));
+}
 function consCriarTarefas(){
   if(!_consData||!(_consData.plano||[]).length){toast('Sem plano pra virar tarefa');return;}
   const cliente=document.getElementById('cons-cliente').value||'';const cli=CLIENTES.find(c=>c.nm===cliente);const today=Date.now();
@@ -8068,17 +8989,52 @@ async function jarvisRunActions(actions){
 }
 function jarvisFalar(txt){jarvisSpeak(String(txt||'').replace(/[#*_`]/g,''));}
 function jarvisMic(){
+  /* Turn-taking estilo ChatGPT (03/07): o modo antigo era tiro único e o Chrome
+     finaliza em QUALQUER pausa de respiração, então o JARVIS respondia antes de
+     o Gabriel terminar de falar. Agora: contínuo, acumula o que você fala, mostra
+     ao vivo no campo, e só envia depois de 1,8s de silêncio DE VERDADE.
+     Clicar de novo no meio envia na hora o que já foi dito. */
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){toast('Voz por microfone só no Chrome/Edge');return;}
   const btn=document.getElementById('jarvis-mic');
-  if(_jarvisRec){try{_jarvisRec.stop();}catch(e){}_jarvisRec=null;if(btn)btn.textContent='🎙️';return;}
+  const inp=document.getElementById('jarvis-input');
+  if(_jarvisRec){ // 2º clique: encerra e envia o que já tem
+    const parcial=(_jarvisRec.__buf||'').trim();
+    try{_jarvisRec.onend=null;_jarvisRec.stop();}catch(e){}
+    clearTimeout(_jarvisRec.__t); _jarvisRec=null;
+    if(btn)btn.textContent='🎙️';
+    if(inp)inp.placeholder=inp.__ph||inp.placeholder;
+    if(parcial)jarvisSend(parcial);
+    return;
+  }
   window.speechSynthesis.cancel();
-  _jarvisRec=new SR(); _jarvisRec.lang='pt-BR'; _jarvisRec.interimResults=false; _jarvisRec.maxAlternatives=1;
+  const rec=new SR(); _jarvisRec=rec;
+  rec.lang='pt-BR'; rec.continuous=true; rec.interimResults=true; rec.maxAlternatives=1;
+  rec.__buf='';
   if(btn)btn.textContent='🔴';
-  _jarvisRec.onresult=(e)=>{const t=e.results[0][0].transcript;jarvisSend(t);};
-  _jarvisRec.onerror=()=>{toast('Não captei o áudio, tenta de novo');};
-  _jarvisRec.onend=()=>{const b=document.getElementById('jarvis-mic');if(b)b.textContent='🎙️';_jarvisRec=null;};
-  try{_jarvisRec.start();}catch(e){}
+  if(inp){inp.__ph=inp.placeholder;inp.placeholder='Ouvindo… fala tranquilo, eu espero você terminar.';}
+  const enviar=()=>{
+    const t=(rec.__buf||'').trim();
+    try{rec.onend=null;rec.stop();}catch(e){}
+    clearTimeout(rec.__t); _jarvisRec=null;
+    if(btn)btn.textContent='🎙️';
+    if(inp){inp.placeholder=inp.__ph||'';inp.value='';}
+    if(t)jarvisSend(t);
+  };
+  rec.onresult=(e)=>{
+    let fin='',inter='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)fin+=e.results[i][0].transcript+' ';
+      else inter+=e.results[i][0].transcript;
+    }
+    if(fin)rec.__buf+=fin;
+    if(inp)inp.value=((rec.__buf||'')+inter).trim(); // você vê o que ele está entendendo
+    clearTimeout(rec.__t);
+    rec.__t=setTimeout(enviar,1800); // 1,8s de silêncio real = terminou a vez
+  };
+  rec.onerror=()=>{};
+  rec.onend=()=>{ if(_jarvisRec===rec){try{rec.start();}catch(e){}} }; // pausa longa não derruba o mic
+  try{rec.start();}catch(e){toast('Não consegui abrir o microfone');}
 }
 /* ===== MODO CONVERSA (mãos-livres, estilo JARVIS) =====
    Ouve contínuo, espera ~2,5s de silêncio depois que você para de falar, executa/responde,
@@ -8136,6 +9092,7 @@ function wppAvatarHtml(c,size){
 }
 function wppTime(ts){if(!ts)return '';const d=new Date(ts),n=new Date();const sameDay=d.toDateString()===n.toDateString();return sameDay?d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});}
 function renderWhatsapp(){
+  if(typeof WFA_WPP_OFF!=='undefined'&&WFA_WPP_OFF)return; // WhatsApp desligado: nada de repintar conversas no boot/sync
   const wrap=document.getElementById('wpp-wrap');if(!wrap)return;
   if(typeof wppInitPasteDrop==='function')wppInitPasteDrop();
   // preserva o que está sendo digitado/buscado (a auto-atualização redesenha a tela)
@@ -8382,7 +9339,11 @@ async function rotGerar(){
   try{
     const r=await cloudCall('save',{action:'agente-roteirista',tema,cliente,plataforma,qtd,referencia});
     if(out)out.textContent=(r&&r.text)||'(sem resposta)';if(st)st.textContent='Pronto ✓';
-  }catch(e){if(out)out.textContent='⚠ '+(e.message||'Falha ao gerar');if(st)st.textContent='';}
+  }catch(e){
+    var msg=e&&e.message||'Falha ao gerar';
+    if(/sem-pai|timeout|autorizado|401|session/i.test(msg))msg='Você está fora do login. Os agentes precisam da sessão: entre pelo app (workflowark.arkcontent.workers.dev, botão Entrar) e abra o Roteirista lá dentro.';
+    if(out)out.textContent='⚠ '+msg;if(st)st.textContent='';
+  }
 }
 function rotFileChosen(input){
   const file=input.files&&input.files[0]; if(!file)return;
@@ -8413,7 +9374,9 @@ function rotSalvarNoDrive(){
   toast&&toast(ok?('💾 Salvo no Drive › '+cliente+' › Roteiros'):'Não consegui salvar');
 }
 /* ============ PLANEJAMENTO DE CONTEÚDO ============ */
-let _planIdeias=[];let _planCliente='';let _planView='cal';
+/* var, não let: planOpen() pode ser chamado no boot (restore de aba) antes desta linha rodar;
+   com let dava temporal dead zone e a página Planejamento/Roteirizar quebrava (mesmo gotcha do WFA_PAGE_RESTORED) */
+var _planIdeias=[],_planCliente='',_planView='cal';
 // Plano concreto da Vivenda (cronograma da Copa + produtos) — carrega de exemplo se nao houver plano salvo.
 const PLAN_SEED_VIVENDA={cliente:'Farmácia Vivenda',periodo:'Junho 2026 · Copa + novos produtos',ideias:[
   {data:'2026-06-11',dia:'Qui 11/06',formato:'Reels',tema:'Série Copa · Vídeo 1 (cinematográfico)',produto:'Campanha Copa',angulo:'Abertura épica. Gancho nos 3s com pergunta provocativa: "E se a sua torcida cuidasse de você também?". Imagens cinematográficas conectando emoção da Copa ao bem-estar. CTA suave pra série.',legenda:'A Copa começou — e a Vivenda entra em campo com você. 🇧🇷'},
@@ -8478,7 +9441,8 @@ async function planGerarPortal(btn){
   finally{if(btn){btn.disabled=false;btn.textContent=old||'🌐 Portal do cliente';}}
 }
 function planOpen(){
-  if(_planIdeias.length)return; // ja tem algo na tela
+  if(_planIdeias&&_planIdeias.length)return; // ja tem algo na tela (guarda: boot pode chamar cedo)
+  if(!_planIdeias)_planIdeias=[];
   const saved=state.planejamento||{};
   let pick=saved.vivenda;
   if(!pick){const ks=Object.keys(saved);if(ks.length)pick=ks.map(k=>saved[k]).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];}
@@ -8666,7 +9630,13 @@ function legDeTema(tema,cliente){
   if(t)t.focus();toast&&toast('Tema enviado pras Legendas ✍️');
 }
 async function wfaUploadFile(file){
+  // Arquivo grande em base64 + JSON congela a thread inteira (UI "sumia" durante o envio).
+  // Teto honesto + aviso do tamanho; acima disso o certo é link do Drive.
+  const MAX=15*1024*1024;
+  if(file.size>MAX){toast('⚠ Arquivo de '+(file.size/1048576).toFixed(1)+'MB. O teto é 15MB — pra vídeo grande, cola o link do Drive.');throw new Error('Arquivo acima de 15MB');}
+  if(file.size>2*1024*1024)toast('Enviando '+(file.size/1048576).toFixed(1)+'MB… a tela pode engasgar uns segundos.');
   const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(file);});
+  await new Promise(r=>setTimeout(r,30)); // deixa o toast pintar antes do stringify pesado
   return cloudCall('save',{action:'upload-file',filename:file.name,contentType:file.type||'application/octet-stream',dataBase64:b64});
 }
 async function vivGalImg(input,imgId){
@@ -9227,7 +10197,7 @@ function renderPlanilha(){
       <td style="border:1px solid var(--line);text-align:center;white-space:nowrap">${stBtn(pago,`planTogglePag(${i})`,'Pago','Pagar')}</td>
       <td style="border:1px solid var(--line);text-align:center;width:24px"><span onclick="planDelPag(${i})" title="apagar" style="cursor:pointer;color:var(--mute)">×</span></td>
     </tr>`;}).join('');
-  wrap.innerHTML=`
+  wfaSetHTML(wrap,`
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <strong style="font-size:15px;letter-spacing:-.02em">Minha Planilha</strong>
       <span style="font-size:11px;color:var(--mute)">edite clicando nas células · salva sozinho na nuvem · sincroniza com Cobranças e Acerto</span>
@@ -9264,7 +10234,7 @@ function renderPlanilha(){
         <div style="padding:8px 10px"><button class="tb-btn" onclick="planAddPag()">+ Pagamento</button></div>
       </div>
     </div>
-    <div id="plan-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px">${planSummaryHTML(m)}</div>`;
+    <div id="plan-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px">${planSummaryHTML(m)}</div>`);
 }
 function planRefreshSummary(){
   const m=planActive();const s=planSums(m);
@@ -9925,7 +10895,7 @@ function renderProcessos(){
 })();
 
 /* ============ WAR ROOM (cockpit operacional) ============ */
-const WR_TEMPS=[{k:'red',e:'🔴',l:'Crítico',o:0},{k:'yel',e:'🟡',l:'Atenção',o:1},{k:'grn',e:'🟢',l:'OK',o:2}];
+var WR_TEMPS=[{k:'red',e:'🔴',l:'Crítico',o:0},{k:'yel',e:'🟡',l:'Atenção',o:1},{k:'grn',e:'🟢',l:'OK',o:2}];
 function loadWarroom(){try{return JSON.parse(localStorage.getItem('wfa-warroom')||'{}');}catch(e){return {};}}
 function saveWarroom(o){try{localStorage.setItem('wfa-warroom',JSON.stringify(o||{}));}catch(e){}}
 function wrTempOrder(t){const x=WR_TEMPS.find(z=>z.k===t);return x?x.o:1;}
@@ -9947,6 +10917,7 @@ function wrSinais(c){
   return {abertas:abertas,atras:atras};
 }
 function renderWarroom(){
+  if(!WR_TEMPS){setTimeout(renderWarroom,150);return;} // boot pode chamar antes da definição (restore de aba)
   const board=document.getElementById('wr-board');if(!board)return;
   const o=loadWarroom();const list=(typeof CLIENTES!=='undefined'?CLIENTES.slice():[]);
   list.sort((a,b)=>{const ta=wrTempOrder((o[a.id]&&o[a.id].temp)||'grn');const tb=wrTempOrder((o[b.id]&&o[b.id].temp)||'grn');return ta-tb || String(a.nm).localeCompare(String(b.nm));});
@@ -10344,6 +11315,10 @@ function renderAgenda(){
   // Convert Sunday-first to Monday-first: Mon=0..Sun=6
   const startOffset=(firstDay===0?6:firstDay-1);
   const grid=document.getElementById('agenda-cal-grid');if(!grid)return;
+  // escrita calma: o sync chamava isso toda hora e o calendário inteiro piscava
+  const _sig=ano+'-'+mes+'|'+JSON.stringify(events);
+  if(grid.dataset.sig===_sig)return;
+  grid.dataset.sig=_sig;
   // Keep headers
   const headers=Array.from(grid.querySelectorAll('.cal-dh'));
   grid.innerHTML='';
@@ -10353,7 +11328,8 @@ function renderAgenda(){
   // Day cells
   for(let day=1;day<=days;day++){
     const dateStr=`${ano}-${String(mes+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const dayEvs=events.filter(ev=>ev.date===dateStr);
+    const dayEvs=events.filter(ev=>ev.date===dateStr)
+      .sort((a,b)=>String(a.time||'99:99').localeCompare(String(b.time||'99:99'))); // manhã em cima, noite embaixo
     const isToday=dateStr===todayStr;
     const d=document.createElement('div');
     d.className='cal-d'+(isToday?' today':'');
@@ -10863,10 +11839,11 @@ function renderComercialFunil(data,useDef){
   const fech=Math.round(g('fechamentos_ark')+g('fechamentos_alpha'));
   const metaF=g('meta_fecha')||0;
   const pct=(a,b)=>b?Math.round(a/b*100):0;
+  const _aura=document.body.classList.contains('aura-dark'); // tema escuro pede barras vivas (as mesmas do Meu Mês)
   const stages=[
-    {l:'Leads gerados',v:leads,c:'#1d1d1f',sub:'Tráfego + Growth + Indicação'},
-    {l:'Reuniões (estim.)',v:reunioes,c:'#6e6e73',sub:'~10 reuniões por fechamento'},
-    {l:'Fechamentos',v:fech,c:'#16a34a',sub:metaF?('meta do mês: '+metaF):''},
+    {l:'Leads gerados',v:leads,c:_aura?'#ffc400':'#1d1d1f',sub:'Tráfego + Growth + Indicação'},
+    {l:'Reuniões (estim.)',v:reunioes,c:_aura?'#5b8cff':'#6e6e73',sub:'~10 reuniões por fechamento'},
+    {l:'Fechamentos',v:fech,c:_aura?'#30d158':'#16a34a',sub:metaF?('meta do mês: '+metaF):''},
   ];
   const max=Math.max(leads,1);
   box.innerHTML=`<div class="card" style="padding:20px 22px">
@@ -10902,6 +11879,405 @@ renderAgenda();
 renderComercialMes();
 try{renderMeumes();}catch(e){console.warn('meumes boot',e);}
 try{renderAllhands();}catch(e){console.warn('allhands boot',e);}
+
+/* ============ ESCRITA CALMA NO DOM (fluidez Apple) ============
+   O sync re-renderizava tudo a cada tick mesmo sem mudança: o iframe da agenda recarregava,
+   listas repintavam e animações re-disparavam ("saltando, pulando, reabrindo").
+   wfaSetHTML só toca o DOM quando o conteúdo REALMENTE mudou. */
+function wfaSetHTML(el,html){
+  if(!el)return false;
+  if(el.__wfaHtml===html)return false;
+  el.__wfaHtml=html;
+  el.innerHTML=html;
+  return true;
+}
+
+/* ============ CONSELHO DE IA: bancada + chat individual ============ */
+var CONS_AGENTES=[
+  {id:'diretor',nm:'Diretor de Operações',fn:'prioriza o que gera receita',cor:'#ffc700'},
+  {id:'trafego',nm:'Gestor de Tráfego',fn:'Meta Ads · CAC · ROAS',cor:'#5b8cff'},
+  {id:'social',nm:'Social Media',fn:'linha editorial e formatos',cor:'#ff7ab8'},
+  {id:'roteirista',nm:'Roteirista Viral',fn:'ganchos e retenção',cor:'#a78bfa'},
+  {id:'designer',nm:'Designer',fn:'criativo que para o scroll',cor:'#2dd4bf'},
+  {id:'account',nm:'Account / CS',fn:'relação e retenção',cor:'#30d158'},
+  {id:'comercial',nm:'Estrategista Comercial',fn:'pipeline e fechamento',cor:'#ff9f0a'},
+];
+var _consChatId=null;
+function consBancadaRender(){
+  var box=document.getElementById('cons-bancada');if(!box||box.childElementCount)return;
+  box.innerHTML=CONS_AGENTES.map(function(a){
+    var ini=a.nm.split(/\s+/).map(function(w){return w[0]}).join('').slice(0,2).toUpperCase();
+    return '<button class="cons-agente" onclick="consChatOpen(\''+a.id+'\')">'
+      +'<span class="ca-coin" style="background:'+a.cor+'22;color:'+a.cor+';border:1px solid '+a.cor+'55">'+ini+'</span>'
+      +'<span class="ca-tx"><b>'+a.nm+'</b><i>'+a.fn+'</i></span>'
+      +'<span class="ca-go">Conversar</span></button>';
+  }).join('');
+}
+function consChatHist(id){try{return JSON.parse(localStorage.getItem('wfa-cons-chat-'+id)||'[]')}catch(e){return[]}}
+function consChatSaveHist(id,h){try{localStorage.setItem('wfa-cons-chat-'+id,JSON.stringify(h.slice(-40)))}catch(e){}}
+function consChatPaint(){
+  var a=CONS_AGENTES.find(function(x){return x.id===_consChatId});if(!a)return;
+  var body=document.getElementById('cc-body');
+  var h=consChatHist(a.id);
+  body.innerHTML=h.length?h.map(function(m){
+    return '<div class="cc-msg '+(m.role==='assistant'?'dele':'meu')+'">'+String(m.content||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</div>';
+  }).join(''):'<div class="cc-vazio">Pergunta qualquer coisa: plano, opinião, próximo passo. O '+a.nm+' responde na hora.</div>';
+  body.scrollTop=body.scrollHeight;
+}
+function consChatOpen(id){
+  var a=CONS_AGENTES.find(function(x){return x.id===id});if(!a)return;
+  _consChatId=id;
+  var ini=a.nm.split(/\s+/).map(function(w){return w[0]}).join('').slice(0,2).toUpperCase();
+  var coin=document.getElementById('cc-coin');coin.textContent=ini;
+  coin.style.cssText='background:'+a.cor+'22;color:'+a.cor+';border:1px solid '+a.cor+'55';
+  document.getElementById('cc-nm').textContent=a.nm;
+  document.getElementById('cc-fn').textContent=a.fn;
+  document.getElementById('cons-chat').classList.add('open');
+  consChatPaint();
+  setTimeout(function(){document.getElementById('cc-input').focus()},250);
+}
+function consChatClose(){document.getElementById('cons-chat').classList.remove('open');_consChatId=null;}
+async function consChatSend(){
+  var inp=document.getElementById('cc-input');var v=(inp.value||'').trim();
+  if(!v||!_consChatId)return;
+  var id=_consChatId;var h=consChatHist(id);
+  h.push({role:'user',content:v});consChatSaveHist(id,h);inp.value='';consChatPaint();
+  var body=document.getElementById('cc-body');
+  body.insertAdjacentHTML('beforeend','<div class="cc-msg dele digitando">…</div>');body.scrollTop=body.scrollHeight;
+  try{
+    var cliente=(document.getElementById('cons-cliente')||{}).value||'';
+    var r=await cloudCall('save',{action:'agente-chat',persona:id,cliente:cliente,messages:h.map(function(m){return{role:m.role,content:m.content}})});
+    h.push({role:'assistant',content:(r&&r.text)||'(sem resposta)'});
+  }catch(e){
+    var msg=e&&e.message||'Falha no chat';
+    if(/sem-pai|timeout|autorizado|401|session/i.test(msg))msg='Você está fora do login. Entra pelo app que o conselho responde.';
+    h.push({role:'assistant',content:'⚠ '+msg});
+  }
+  consChatSaveHist(id,h);consChatPaint();
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')consChatClose()});
+document.addEventListener('click',function(e){
+  if(e.target.closest&&e.target.closest('[data-nav="conselho"]'))setTimeout(consBancadaRender,300);
+},true);
+if(document.querySelector('#page-conselho.active'))setTimeout(consBancadaRender,800);
+
+/* Sub-abas do Comercial: Funil nativo ou Propostas/Contratos embutidos (iframe lazy, mesma origem) */
+/* Propostas e Contratos agora são páginas próprias no grupo Comercial do menu (page-propostas / page-contratos). */
+
+/* Lançar missão (ref ARK OS): o objetivo vira tarefa de alta prioridade no fluxo normal */
+function auraLancarMissao(inp){
+  var v=(inp&&inp.value||'').trim();
+  if(!v){if(typeof toast==='function')toast('Escreva o objetivo da missão');return;}
+  if(typeof openNovaTarefa!=='function')return;
+  openNovaTarefa('backlog');
+  var t=document.getElementById('nt-title');if(t)t.value=v;
+  var pr=document.getElementById('nt-prio');if(pr)pr.value='alta';
+  inp.value='';
+  if(typeof toast==='function')toast('✦ Missão declarada: confirme os detalhes');
+}
+
+/* ============ MAPA DOS CLIENTES (MapLibre GL, o motor por baixo do mapcn) ============ */
+var _mapLibreP=null,_cliMap=null,_cliMapMarkers=[],_cliMapPlacing=false;
+function loadMapLibre(){
+  if(_mapLibreP)return _mapLibreP;
+  _mapLibreP=new Promise(function(res,rej){
+    if(window.maplibregl){res(window.maplibregl);return;}
+    var css=document.createElement('link');css.rel='stylesheet';
+    css.href='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css';
+    document.head.appendChild(css);
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js';
+    s.onload=function(){res(window.maplibregl)};
+    s.onerror=function(){_mapLibreP=null;rej(new Error('sem internet pro mapa'))};
+    document.head.appendChild(s);
+  });
+  return _mapLibreP;
+}
+function cliGeoLoad(){try{return JSON.parse(localStorage.getItem('wfa-cli-geo')||'{}')}catch(e){return{}}}
+function cliGeoSave(g){try{localStorage.setItem('wfa-cli-geo',JSON.stringify(g));}catch(e){}}
+function cliMapClientes(){
+  var base=(typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE)||[];
+  return base.filter(function(c){return c.status!=='churn'});
+}
+function cliMapSelFill(){
+  var sel=document.getElementById('climap-sel');if(!sel)return;
+  var geo=cliGeoLoad();
+  sel.innerHTML=cliMapClientes().map(function(c){
+    return '<option value="'+c.id+'">'+(geo[c.id]?'📍 ':'')+(c.nm||c.id)+'</option>';
+  }).join('');
+}
+function cliMapDots(){
+  if(!_cliMap)return;
+  _cliMapMarkers.forEach(function(m){m.remove()});_cliMapMarkers=[];
+  var geo=cliGeoLoad(),cls=cliMapClientes(),tem=0;
+  var CORES={gr:'#30d158',y:'#ffc700',r:'#ff453a'};
+  cls.forEach(function(c){
+    var p=geo[c.id];if(!p)return;tem++;
+    var el=document.createElement('div');
+    var cor=c.id==='ark'?'#ffc700':(CORES[c.status]||'#9aa1ad');
+    var ini=(c.nm||'?').replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').trim().split(/\s+/).slice(0,2).map(function(w){return w[0]||''}).join('').toUpperCase();
+    el.style.cssText='width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;'
+      +'font:700 11px Inter,sans-serif;color:#fff;background:#0b0c10;border:2.5px solid '+cor+';'
+      +'box-shadow:0 6px 18px -6px '+cor+'99, 0 2px 8px rgba(0,0,0,.5);transition:transform .18s cubic-bezier(.34,1.56,.64,1)';
+    el.textContent=c.id==='ark'?'A':ini;
+    el.onmouseenter=function(){el.style.transform='scale(1.18)'};
+    el.onmouseleave=function(){el.style.transform=''};
+    var pop=new maplibregl.Popup({offset:20,closeButton:false}).setHTML(
+      '<div style="font:600 13px Inter,sans-serif;color:#111;margin-bottom:2px">'+(c.nm||'')+'</div>'
+      +'<div style="font:400 11.5px Inter,sans-serif;color:#666">'+(c.plano||'')+(c.valor?' · R$ '+c.valor.toLocaleString('pt-BR')+'/mês':'')+'</div>'
+      +(c.meta?'<div style="font:400 11px Inter,sans-serif;color:#888;margin-top:3px">'+c.meta+'</div>':'')
+      +'<button onclick="cliMapRemove(\''+c.id+'\')" style="margin-top:7px;font:600 10.5px Inter,sans-serif;color:#c00;background:none;border:none;cursor:pointer;padding:0">remover do mapa</button>');
+    var mk=new maplibregl.Marker({element:el}).setLngLat(p).setPopup(pop).addTo(_cliMap);
+    _cliMapMarkers.push(mk);
+  });
+  var ct=document.getElementById('climap-count');
+  if(ct)ct.textContent='· '+tem+' de '+cls.length+' posicionados';
+  cliMapSelFill();
+}
+function cliMapRemove(id){
+  var g=cliGeoLoad();delete g[id];cliGeoSave(g);cliMapDots();
+  if(typeof toast==='function')toast('Cliente removido do mapa');
+}
+function cliMapPlaceToggle(){
+  _cliMapPlacing=!_cliMapPlacing;
+  var b=document.getElementById('climap-place');
+  if(b){b.style.background=_cliMapPlacing?'var(--yel)':'';b.style.color=_cliMapPlacing?'#131316':'';
+    b.textContent=_cliMapPlacing?'Clique no mapa…':'📍 Posicionar no mapa';}
+  if(_cliMap)_cliMap.getCanvas().style.cursor=_cliMapPlacing?'crosshair':'';
+}
+async function cliMapInit(){
+  var box=document.getElementById('climap');if(!box)return;
+  if(_cliMap){_cliMap.resize();cliMapDots();return;}
+  try{
+    var ml=await loadMapLibre();
+    var escuro=document.body.classList.contains('aura-dark');
+    _cliMap=new ml.Map({
+      container:'climap',
+      style:escuro?'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+                  :'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      center:[-47.8825,-15.7942],zoom:10.2,attributionControl:{compact:true}
+    });
+    _cliMap.addControl(new ml.NavigationControl({showCompass:false}),'top-right');
+    _cliMap.on('load',function(){
+      cliMapDots();
+      var geo=cliGeoLoad(),pts=Object.values(geo);
+      if(pts.length>1){
+        var b=new ml.LngLatBounds();pts.forEach(function(p){b.extend(p)});
+        _cliMap.fitBounds(b,{padding:70,maxZoom:13,duration:800});
+      }
+    });
+    _cliMap.on('click',function(e){
+      if(!_cliMapPlacing)return;
+      var sel=document.getElementById('climap-sel');if(!sel||!sel.value)return;
+      var g=cliGeoLoad();g[sel.value]=[e.lngLat.lng,e.lngLat.lat];cliGeoSave(g);
+      cliMapPlaceToggle();cliMapDots();
+      if(typeof toast==='function')toast('📍 Cliente posicionado ✓');
+    });
+  }catch(err){
+    box.innerHTML='<div style="display:grid;place-items:center;height:100%;color:var(--mute);font-size:12.5px">'+(err&&err.message||'Não deu pra carregar o mapa')+'</div>';
+  }
+}
+document.addEventListener('click',function(e){
+  var nav=e.target.closest&&e.target.closest('[data-nav="lista-clientes"]');
+  if(nav)setTimeout(cliMapInit,350);
+},true);
+if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,900);
+
+/* AURA DARK: navbar de vidro some ao rolar pra baixo e volta ao subir (padrão aurasoftware.cloud) */
+(function(){
+  var v=document.getElementById('view');if(!v)return;
+  var m=document.querySelector('.main');var last=0;
+  v.addEventListener('scroll',function(){
+    var bl=document.body.classList;
+    if(!bl.contains('aura-dark')&&!bl.contains('aura-light')){m.classList.remove('tb-hidden');return}
+    var y=v.scrollTop;
+    if(y>last&&y>120)m.classList.add('tb-hidden');
+    else if(y<last||y<=120)m.classList.remove('tb-hidden');
+    last=y;
+  },{passive:true});
+})();
+
+/* AURA imersividade (escuro E claro): spotlight, cascata, hero e tipografia cinética */
+(function(){
+  var _bl=document.body.classList;
+  if(!_bl.contains('aura-dark')&&!_bl.contains('aura-light'))return;
+  var raf=null;
+  document.addEventListener('pointermove',function(e){ /* pointer cobre mouse E toque (iOS) */
+    var c=e.target.closest&&e.target.closest('.mdw,.kpi,.md-card');
+    if(!c)return;
+    if(raf)return;
+    raf=requestAnimationFrame(function(){
+      raf=null;
+      var r=c.getBoundingClientRect();
+      c.style.setProperty('--mx',(e.clientX-r.left)+'px');
+      c.style.setProperty('--my',(e.clientY-r.top)+'px');
+    });
+  },{passive:true});
+  /* tipografia cinética: divide o título em palavras que entram escalonadas (re-split a cada entrada) */
+  function auraKinetic(el){
+    if(!el)return;
+    var txt=el.textContent;if(!txt||!txt.trim())return;
+    el.innerHTML=txt.split(/(\s+)/).filter(Boolean).map(function(w,i){
+      if(!w.trim())return w;
+      return '<span class="kin-w" style="--i:'+i+'">'+w.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>';
+    }).join('');
+    el.classList.add('aura-kin');
+  }
+  var enterTimer=null;
+  function auraEnter(){
+    /* a classe fica no #view: os handlers de nav re-setam as classes das .page e apagariam a marca */
+    var v=document.getElementById('view');if(!v)return;
+    v.classList.remove('aura-enter');
+    void v.offsetWidth;
+    v.classList.add('aura-enter');
+    clearTimeout(enterTimer);
+    enterTimer=setTimeout(function(){v.classList.remove('aura-enter')},1700);
+    setTimeout(function(){
+      var p=document.querySelector('.page.active');if(!p)return;
+      auraKinetic(p.querySelector('.page-head h1'));
+      auraKinetic(p.querySelector('.aura-saud'));
+    },40);
+  }
+  /* captura: o handler de nav do app corta a propagação, no bubble o clique nunca chega aqui */
+  document.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-nav],[data-subnav]')){requestAnimationFrame(auraEnter);requestAnimationFrame(auraHero);}
+  },true);
+  auraEnter();
+
+  /* Hero Mission Control compartilhado: existe no Meu Painel (markup) e é clonado
+     pro Meu Dia (e pra onde mais o Gabriel quiser estender). Tudo por classe, sem id,
+     justamente pra clonar sem conflito. */
+  function auraHeroEnsure(){
+    var fonte=document.querySelector('#page-painel .aura-hero-row');if(!fonte)return;
+    ['page-dashboard'].forEach(function(pid){
+      var pg=document.getElementById(pid);
+      if(!pg||pg.querySelector('.aura-hero-row'))return;
+      var clone=fonte.cloneNode(true);
+      var head=pg.querySelector('.page-head');
+      if(head)head.insertAdjacentElement('afterend',clone);
+      else pg.insertAdjacentElement('afterbegin',clone);
+    });
+  }
+  function auraSet(cls,txt){document.querySelectorAll('.'+cls).forEach(function(e){
+    if(e.textContent!==String(txt))e.textContent=txt; /* não desmonta os spans cinéticos à toa */
+  })}
+  function auraHero(){
+    auraHeroEnsure();
+    var h=new Date().getHours();
+    var s=h<5?'Boa madrugada':h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+    auraSet('aura-saud',s+', Senhor 👋');
+    try{
+      if(typeof mdwBuckets!=='function')return;
+      var B=mdwBuckets();
+      var abertas=B.late.length+B.todayT.length+B.pend.length;
+      auraSet('aura-n-abertas',abertas);
+      auraSet('aura-n-hoje',B.todayT.length);
+      var pct=abertas?Math.round(100*(abertas-B.late.length)/abertas):100;
+      document.querySelectorAll('.aura-donut').forEach(function(d){d.style.setProperty('--p',pct)});
+      auraSet('aura-donut-pct',pct+'%');
+      auraSet('aura-goal-late',B.late.length+' atrasada'+(B.late.length===1?'':'s'));
+      auraSet('aura-goal-sub','de '+abertas+' tarefas abertas na sua fila');
+    }catch(err){}
+  }
+  auraHero();
+  setInterval(auraHero,60000);
+
+  /* Normalizador AURA: o sistema tem dezenas de tons claros chumbados (CSS e HTML gerado por JS).
+     Em vez de caçar um a um, mede a cor computada e escurece fundo claro PRESERVANDO o matiz.
+     Protegido por saturação: amarelo da marca (#ffc700 etc.) e cores fortes não são tocados.
+     Opt-out pontual: data-aura-keep no elemento. */
+  function auraParse(c){
+    var m=c&&c.match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\)/);
+    if(!m)return null;
+    return {r:+m[1],g:+m[2],b:+m[3],a:m[4]===undefined?1:+m[4]};
+  }
+  function auraNormalize(root){
+    if(!document.body.classList.contains('aura-dark'))return;
+    var t0=performance.now();
+    /* body inteiro: modais (relatório do cliente, detalhe da tarefa) montam FORA do .main e escapavam.
+       Com root: processa só a subárvore recém-criada (mutação), muito mais leve que varrer tudo. */
+    var sel='*:not(svg):not(path):not(circle):not(rect):not(line):not(iframe):not(img):not([data-aura-keep])';
+    var els;
+    if(root&&root.nodeType===1){els=[root].concat(Array.prototype.slice.call(root.querySelectorAll(sel)));}
+    else{els=Array.prototype.slice.call(document.body.querySelectorAll(sel));}
+    els=els.filter(function(el){return !el.closest('.side')&&!el.closest('#wfa-aparencia')&&!el.closest('#climap')&&!el.closest('.maplibregl-popup')});
+    var darkened=new WeakSet();
+    els.forEach(function(el){
+      var cs=getComputedStyle(el);
+      var bg=auraParse(cs.backgroundColor);
+      if(!bg||bg.a<.5){
+        /* degradês claros (background-image) escapam da cor computada: mede as paradas do gradiente */
+        var bi=cs.backgroundImage;
+        if(bi&&bi.indexOf('gradient')>-1){
+          var stops=bi.match(/rgba?\([^)]*\)/g)||[];
+          var claras=0,validas=0;
+          stops.forEach(function(c){
+            var p=auraParse(c);if(!p||p.a<.5)return;validas++;
+            var mx2=Math.max(p.r,p.g,p.b),mn2=Math.min(p.r,p.g,p.b);
+            if(((0.299*p.r+0.587*p.g+0.114*p.b)/255)>0.62&&(mx2-mn2)<70)claras++;
+          });
+          if(validas&&claras>=validas/2){el.style.background='rgba(13,14,17,.6)';darkened.add(el);}
+        }
+        return;
+      }
+      var mx=Math.max(bg.r,bg.g,bg.b),mn=Math.min(bg.r,bg.g,bg.b);
+      var L=(0.299*bg.r+0.587*bg.g+0.114*bg.b)/255;
+      if(L>0.62&&(mx-mn)<70){
+        var h=0,d=mx-mn;
+        if(d){
+          if(mx===bg.r)h=60*(((bg.g-bg.b)/d)%6);
+          else if(mx===bg.g)h=60*((bg.b-bg.r)/d+2);
+          else h=60*((bg.r-bg.g)/d+4);
+          if(h<0)h+=360;
+        }
+        var s=d?Math.min(45,Math.round(100*d/mx)):0;
+        el.style.backgroundColor='hsla('+Math.round(h)+','+s+'%,10%,.92)';
+        if(cs.borderColor&&auraParse(cs.borderColor)&&(function(b){return (0.299*b.r+0.587*b.g+0.114*b.b)/255>0.75})(auraParse(cs.borderColor))){
+          el.style.borderColor='rgba(255,255,255,.12)';
+        }
+        darkened.add(el);
+      }
+    });
+    /* segunda passada: texto escuro que ficou em cima de fundo escurecido sobe pra tinta clara */
+    els.forEach(function(el){
+      var cs=getComputedStyle(el);
+      var col=auraParse(cs.color);
+      if(!col||col.a<.5)return; /* texto transparente é de propósito (ex.: check invisível até o hover) */
+      var mx=Math.max(col.r,col.g,col.b),mn=Math.min(col.r,col.g,col.b);
+      var L=(0.299*col.r+0.587*col.g+0.114*col.b)/255;
+      if(L>=0.4||(mx-mn)>90)return;
+      var p=el;
+      while(p&&p!==document.body){
+        var pb=auraParse(getComputedStyle(p).backgroundColor);
+        if(pb&&pb.a>=.5){
+          var pl=(0.299*pb.r+0.587*pb.g+0.114*pb.b)/255;
+          if(pl<0.35)el.style.color='#eef0f3';
+          break;
+        }
+        p=p.parentElement;
+      }
+    });
+    if(performance.now()-t0>200)console.warn('auraNormalize lento',Math.round(performance.now()-t0)+'ms');
+  }
+  var normT=null,_normRoots=[];
+  function auraNormalizeSoon(){clearTimeout(normT);normT=setTimeout(function(){
+    var roots=_normRoots.splice(0);
+    if(roots.length&&roots.length<=60)roots.forEach(function(r){auraNormalize(r)});
+    else auraNormalize(); /* mudança grande demais: passada completa */
+  },90)}
+  new MutationObserver(function(muts){
+    for(var i=0;i<muts.length;i++){var ad=muts[i].addedNodes;
+      for(var j=0;j<ad.length;j++)if(ad[j].nodeType===1)_normRoots.push(ad[j]);}
+    auraNormalizeSoon();
+  }).observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('click',function(e){
+    /* na troca de página normaliza ANTES do primeiro paint (mata o flash branco do Planejamento/POPs) */
+    if(e.target.closest&&e.target.closest('[data-nav],[data-subnav]')){requestAnimationFrame(auraNormalize);auraNormalizeSoon();}
+  },true);
+  /* boot leve: 1a passada so na pagina visivel (rapida); a varredura completa vai pro idle */
+  requestAnimationFrame(function(){auraNormalize(document.querySelector('.page.active')||undefined)});
+  setTimeout(auraNormalize,1500);
+})();
 </script>
 </body>
 </html>
