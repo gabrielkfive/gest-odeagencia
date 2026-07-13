@@ -44,6 +44,9 @@ const STATE_KEYS = new Set([
   "wfa-clientes-custom",
   "wfa-colab-custom",
   "wfa-cliente-detalhes",
+  // Extratos bancários importados na rota /inteligencia (lançamentos conciliáveis;
+  // preparado para futura integração com o Nibo).
+  "wfa-extratos",
   // OBS: wfa-whatsapp é de propósito SERVER-OWNED (escrito pelo webhook). O cliente só LÊ;
   // não entra aqui pra um save do cliente nunca sobrescrever mensagens que chegaram no servidor.
 ]);

@@ -14,6 +14,7 @@ import { Route as PropostasRouteImport } from './routes/propostas'
 import { Route as PostagensRouteImport } from './routes/postagens'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as OsRouteImport } from './routes/os'
+import { Route as InteligenciaRouteImport } from './routes/inteligencia'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AprovarRouteImport } from './routes/aprovar'
@@ -62,6 +63,11 @@ const PortalRoute = PortalRouteImport.update({
 const OsRoute = OsRouteImport.update({
   id: '/os',
   path: '/os',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InteligenciaRoute = InteligenciaRouteImport.update({
+  id: '/inteligencia',
+  path: '/inteligencia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarioRoute = CalendarioRouteImport.update({
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
+  '/inteligencia': typeof InteligenciaRoute
   '/os': typeof OsRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
+  '/inteligencia': typeof InteligenciaRoute
   '/os': typeof OsRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
+  '/inteligencia': typeof InteligenciaRoute
   '/os': typeof OsRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
@@ -287,6 +296,7 @@ export interface FileRouteTypes {
     | '/aprovar'
     | '/auth'
     | '/calendario'
+    | '/inteligencia'
     | '/os'
     | '/portal'
     | '/postagens'
@@ -317,6 +327,7 @@ export interface FileRouteTypes {
     | '/aprovar'
     | '/auth'
     | '/calendario'
+    | '/inteligencia'
     | '/os'
     | '/portal'
     | '/postagens'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/aprovar'
     | '/auth'
     | '/calendario'
+    | '/inteligencia'
     | '/os'
     | '/portal'
     | '/postagens'
@@ -380,6 +392,7 @@ export interface RootRouteChildren {
   AprovarRoute: typeof AprovarRoute
   AuthRoute: typeof AuthRoute
   CalendarioRoute: typeof CalendarioRoute
+  InteligenciaRoute: typeof InteligenciaRoute
   OsRoute: typeof OsRoute
   PortalRoute: typeof PortalRoute
   PostagensRoute: typeof PostagensRoute
@@ -439,6 +452,13 @@ declare module '@tanstack/react-router' {
       path: '/os'
       fullPath: '/os'
       preLoaderRoute: typeof OsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inteligencia': {
+      id: '/inteligencia'
+      path: '/inteligencia'
+      fullPath: '/inteligencia'
+      preLoaderRoute: typeof InteligenciaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendario': {
@@ -644,6 +664,7 @@ const rootRouteChildren: RootRouteChildren = {
   AprovarRoute: AprovarRoute,
   AuthRoute: AuthRoute,
   CalendarioRoute: CalendarioRoute,
+  InteligenciaRoute: InteligenciaRoute,
   OsRoute: OsRoute,
   PortalRoute: PortalRoute,
   PostagensRoute: PostagensRoute,
