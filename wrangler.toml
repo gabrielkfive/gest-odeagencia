@@ -28,3 +28,9 @@ EVOLUTION_INSTANCE = "ark"
 # Cloudflare Workers AI — transcrição de áudio do WhatsApp (Whisper)
 [ai]
 binding = "AI"
+
+# Logs no dashboard (Workers > Observability). Sem isso um Error 1102 fica cego:
+# não dá pra saber QUAL rota estourou o limite. Com isso, o próximo (se houver)
+# mostra a rota e o tempo de CPU.
+[observability]
+enabled = true

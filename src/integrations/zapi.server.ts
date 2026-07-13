@@ -303,6 +303,10 @@ export async function transcribeAudioBase64(base64: string): Promise<string> {
   try {
     const ai = (cfEnv as Record<string, any>)?.AI;
     if (!ai || !base64) return "";
+    // Trava de tamanho: áudio grande vira um array de bytes gigante e estoura o
+    // limite de CPU/memória do Worker (Error 1102). ~1,3M de base64 ≈ 1MB de áudio
+    // (uns 2-3 min de nota de voz). Acima disso, pula a transcrição (fica o placeholder).
+    if (base64.length > 1_300_000) return "";
     const bin = atob(base64);
     const bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
@@ -373,6 +377,21 @@ export async function appendWhatsapp(
   c.unread = msg.dir === "in" ? (c.unread || 0) + 1 : 0;
   if (msg.dir === "out") c.sugestao = ""; // respondeu: limpa a sugestão da IA
   state.conversas[phone] = c;
+  // Trava de tamanho: o bloco wfa-whatsapp é lido, parseado e regravado INTEIRO a cada
+  // mensagem. Sem limite no nº de conversas ele cresce pra sempre e um dia um pico de
+  // mensagens estoura os 128MB/CPU do Worker (Error 1102 "exceeded resource limits").
+  // Mantém só as MAX_CONVERSAS conversas mais recentes (uma agência ativa fala com bem
+  // menos que isso; só somem conversas antigas e paradas).
+  const MAX_CONVERSAS = 250;
+  const convKeys = Object.keys(state.conversas);
+  if (convKeys.length > MAX_CONVERSAS) {
+    const manter = new Set(
+      convKeys
+        .sort((a, b) => ((state.conversas as any)[b]?.updatedAt || 0) - ((state.conversas as any)[a]?.updatedAt || 0))
+        .slice(0, MAX_CONVERSAS),
+    );
+    for (const k of convKeys) if (!manter.has(k)) delete (state.conversas as any)[k];
+  }
   await db.from("workflowark_state").upsert({ key, data: state });
   return state;
 }
@@ -384,7 +403,10 @@ export async function transcribeAudio(audioUrl?: string): Promise<string> {
     if (!ai || !audioUrl) return "";
     const resp = await fetch(audioUrl);
     if (!resp.ok) return "";
-    const bytes = [...new Uint8Array(await resp.arrayBuffer())];
+    const buf = await resp.arrayBuffer();
+    // Trava de tamanho (mesma razão do transcribeAudioBase64): áudio > ~1MB pula.
+    if (buf.byteLength > 1_000_000) return "";
+    const bytes = [...new Uint8Array(buf)];
     const out: any = await ai.run("@cf/openai/whisper", { audio: bytes });
     return String(out?.text || "").trim();
   } catch {
