@@ -1,4 +1,4 @@
-<!-- build 2026-07-14-alertas-account -->
+<!-- build 2026-07-14-capacidade-comercial -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -2783,6 +2783,9 @@ function wfaSetTheme(t){
         </div>
 
         <div id="comercial-funil" style="margin-bottom:16px"></div>
+
+        <!-- Capacidade em tempo real: o comercial para de vender no escuro -->
+        <div id="comercial-capacidade" style="margin-bottom:16px"></div>
 
         <div class="g4" style="margin-bottom:14px" id="comercial-kpis">
           <div class="kpi"><div class="l">Leads Growth comprados</div><div class="v" contenteditable="true" data-com-key="leads_growth">4</div><div class="d" contenteditable="true" data-com-key="leads_growth_d">~R$700–900 invest.</div></div>
@@ -12284,7 +12287,41 @@ function comercialSalvarMes(){
 // dados do mês" podia gravar junho como se fosse o mês novo. Fora de junho: mês vazio = '—'.
 const COMERCIAL_DEFAULTS_MES='2026-06';
 let _comercialMesInit=false;
+/* ============ CAPACIDADE EM TEMPO REAL (comercial) ============ */
+/* "Quando posso prometer?" calculado do estado real: fila aberta por frente,
+   vazão das últimas 4 semanas e lead time médio das concluídas. */
+function capacidadeFrentes(){
+  const FRENTES=['Captação','Editor','Designer','Criador','Gestor de Tráfego','Account Manager'];
+  const d28=Date.now()-28*864e5;
+  return FRENTES.map(f=>{
+    const abertas=state.tarefas.filter(t=>t.funcao===f&&t.status!=='concluido');
+    const concl=state.tarefas.filter(t=>t.funcao===f&&t.status==='concluido'&&t.concluidaEm);
+    const concl4s=concl.filter(t=>new Date(t.concluidaEm).getTime()>=d28);
+    const vazaoSem=concl4s.length/4;
+    const leads=concl.filter(t=>t.criadaEm).slice(-20).map(t=>(new Date(t.concluidaEm)-new Date(t.criadaEm))/864e5).filter(x=>x>=0&&x<90);
+    const leadMedio=leads.length?leads.reduce((a,b)=>a+b,0)/leads.length:null;
+    let promessa=null,diasAte=null;
+    if(vazaoSem>0){
+      const semanasFila=abertas.length/vazaoSem;
+      diasAte=Math.ceil(semanasFila*5)+Math.ceil(leadMedio||3);
+      promessa=addDiasUteis(hojeSP(),diasAte);
+    }
+    return {f,fila:abertas.length,vazaoSem,leadMedio,promessa,diasAte};
+  });
+}
+function renderCapacidade(){
+  const box=document.getElementById('comercial-capacidade');if(!box)return;
+  const rows=capacidadeFrentes().map(r=>{
+    const cor=r.promessa==null?'var(--mute)':r.diasAte<=7?'#0d7a45':r.diasAte<=14?'#94590a':'var(--red,#e0364f)';
+    const prom=r.promessa?r.promessa.split('-').reverse().join('/'):'sem histórico';
+    return `<tr><td><strong>${escapeHtml(r.f)}</strong></td><td class="num">${r.fila}</td><td class="num">${r.vazaoSem.toFixed(1)}/sem</td><td class="num">${r.leadMedio!=null?r.leadMedio.toFixed(1)+'d':'—'}</td><td class="num" style="color:${cor};font-weight:700">${prom}</td></tr>`;
+  }).join('');
+  box.innerHTML=`<div class="sect-title"><h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Capacidade de entrega · pode prometer pra quando?</h2></div>
+  <table class="t"><thead><tr><th>Frente</th><th>Fila aberta</th><th>Vazão (4 sem)</th><th>Lead médio</th><th>Promessa segura</th></tr></thead><tbody>${rows}</tbody></table>
+  <div style="font-size:11.5px;color:var(--mute);margin-top:6px">Calculado das tarefas reais: fila ÷ vazão semanal + lead médio, em dias úteis. Sem histórico de conclusão na frente, não há promessa segura.</div>`;
+}
 function renderComercialMes(){
+  try{renderCapacidade();}catch(e){console.warn('capacidade',e);}
   const sel=document.getElementById('comercial-mes');if(!sel)return;
   // 1ª renderização: seleciona o mês corrente (não o junho fixo). Depois respeita a escolha do usuário.
   if(!_comercialMesInit){const cm=(typeof cobMesKey==='function')?cobMesKey():'';if(cm&&sel.querySelector('option[value="'+cm+'"]'))sel.value=cm;_comercialMesInit=true;}
