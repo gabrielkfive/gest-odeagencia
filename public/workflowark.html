@@ -1,4 +1,4 @@
-<!-- build 2026-07-14-pautas-encadeadas -->
+<!-- build 2026-07-14-alertas-account -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -6215,6 +6215,23 @@ function clienteSaudeReasons(id){
   if(c.status==='y'){r.push({t:'em ajuste',k:'yel'});sev=Math.max(sev,2);}
   if(d.conclMes.length===0 && d.ts.length>0){r.push({t:'sem entrega no mês',k:'yel'});sev=Math.max(sev,2);}
   if(d.reguaOk<=1 && d.ts.length>0){r.push({t:`régua ${d.reguaOk}/6`,k:'gray'});sev=Math.max(sev,1);}
+  // Alertas do Account (pedido do conselho, jul/26): parada em aprovação, risco de
+  // atraso, pauta travada e captação contratada sem agendamento. Tudo calculado do
+  // estado real; nada de notificação automática.
+  const hoje=hojeSP();
+  const aprParada=state.tarefas.filter(t=>t.clienteId===id&&t.status==='aprovacao'&&t.aprovacaoEm&&(Date.now()-new Date(t.aprovacaoEm).getTime())>5*864e5);
+  if(aprParada.length){const dias=Math.floor((Date.now()-new Date(aprParada[0].aprovacaoEm).getTime())/864e5);r.push({t:`aprovação parada há ${dias}d`,k:'red'});sev=Math.max(sev,3);}
+  const risco=state.tarefas.filter(t=>t.clienteId===id&&t.status==='backlog'&&t.data&&t.data<=addDiasUteis(hoje,1)&&t.data>=hoje);
+  if(risco.length){r.push({t:`${risco.length} vence e nem começou`,k:'yel'});sev=Math.max(sev,2);}
+  try{
+    const ptTrav=(typeof loadPautas==='function'?loadPautas():[]).filter(p=>p.clienteId===id&&p.status!=='entregue'&&(p.etapas||[]).some(e=>e.taskId&&!e.done&&e.prazo&&e.prazo<hoje));
+    if(ptTrav.length){r.push({t:`pauta travada (${ptTrav.length})`,k:'red'});sev=Math.max(sev,3);}
+    if(c.cap>0){
+      const mes=hoje.slice(0,7);
+      const capMes=(typeof loadProducao==='function'?loadProducao():[]).filter(x=>x.clienteId===id&&(x.data||'').slice(0,7)===mes);
+      if(!capMes.length&&new Date().getDate()>=8){r.push({t:'captação do mês não marcada',k:'yel'});sev=Math.max(sev,2);}
+    }
+  }catch(e){}
   if(!r.length)return null;
   return {c,reasons:r,sev};
 }
@@ -7675,7 +7692,7 @@ function taskCard(t){
     </div>
   </div>`;
 }
-function moveTask(id,newSt){const t=state.tarefas.find(x=>x.id===id);if(!t)return;if(newSt==='concluido'){if(!taskConcluir(t)){renderTarefas();return;}}else{t.status=newSt;}saveTarefas();toast(`Tarefa movida para ${newSt}`);}
+function moveTask(id,newSt){const t=state.tarefas.find(x=>x.id===id);if(!t)return;if(newSt==='concluido'){if(!taskConcluir(t)){renderTarefas();return;}}else{t.status=newSt;taskStampSt(t,newSt);}saveTarefas();toast(`Tarefa movida para ${newSt}`);}
 // move a tarefa pra cima/baixo na mesma coluna (define ordem manual)
 function taskMove(id,dir){
   const t=state.tarefas.find(x=>x.id===id);if(!t)return;
@@ -7729,6 +7746,7 @@ function bindDrag(){
       const id=e.dataTransfer.getData('id');const t=state.tarefas.find(x=>x.id===id);if(!t)return;
       const changedCol=t.status!==list.dataset.list;
       t.status=list.dataset.list;
+      if(changedCol)taskStampSt(t,t.status);
       if(t.status==='concluido')taskConcluir(t);else t.concluidaEm=null;
       [...list.querySelectorAll('.task-card')].forEach((el,idx)=>{const tt=state.tarefas.find(x=>x.id===el.dataset.tid);if(tt)tt.ord=idx;});
       saveTarefas();
@@ -7990,6 +8008,9 @@ function taskStopTimer(t){if(!t||!t.timerSince)return;t.timeSpent=(t.timeSpent||
 // para o cronômetro (senão o relatório do cliente conta horas correndo pra sempre) e carimba
 // concluidaEm = data de ENTREGA. NUNCA sobrescreve criadaEm (data de criação); antes o mdDone
 // fazia isso e as métricas de "entregue no mês" divergiam conforme o botão usado.
+/* Carimbo de quando a tarefa ENTROU em aprovação (alimenta o alerta "aprovação
+   parada há Xd" do Account). Entra: carimba. Sai pra outro status ativo: limpa. */
+function taskStampSt(t,st){if(!t)return;if(st==='aprovacao'){if(!t.aprovacaoEm)t.aprovacaoEm=new Date().toISOString();}else if(st!=='concluido'){t.aprovacaoEm=null;}}
 /* GATE DE POP: tarefa marcada com a tag 'pop' (edição gerada por captação, POP injetado
    no modal) só conclui com o checklist 100% fechado. É o "impossível errar" do fluxo. */
 function taskPopGate(t){
@@ -8036,6 +8057,7 @@ function saveTaskDetail(){
   t.title=document.getElementById('td-title').value.trim()||t.title;
   t.desc=document.getElementById('td-desc').value;
   t.status=document.getElementById('td-status').value;
+  taskStampSt(t,t.status);
   if(t.status==='concluido')taskConcluir(t);else t.concluidaEm=null; // congela o cronômetro e carimba/limpa a entrega
   t.prio=document.getElementById('td-prio').value;
   t.resp=document.getElementById('td-resp').value;
