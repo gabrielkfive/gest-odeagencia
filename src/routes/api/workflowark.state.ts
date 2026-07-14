@@ -47,6 +47,11 @@ const STATE_KEYS = new Set([
   // Extratos bancários importados na rota /inteligencia (lançamentos conciliáveis;
   // preparado para futura integração com o Nibo).
   "wfa-extratos",
+  // Produção Audiovisual: captações com checklist do produtor e vídeos que viram
+  // tarefas de edição automaticamente (evento "captação concluída").
+  "wfa-producao",
+  // Briefings estruturados que disparam a cadeia de pauta (roteiro → design → edição).
+  "wfa-briefings",
   // OBS: wfa-whatsapp é de propósito SERVER-OWNED (escrito pelo webhook). O cliente só LÊ;
   // não entra aqui pra um save do cliente nunca sobrescrever mensagens que chegaram no servidor.
 ]);

@@ -1,0 +1,15 @@
+import {chromium} from 'playwright-core';
+const url=process.argv[2]||'https://workflowark.arkcontent.workers.dev/workflowark';
+const b=await chromium.launch({channel:'chrome',headless:true});const p=await b.newPage({viewport:{width:1440,height:900}});
+const errs=[];p.on('pageerror',e=>errs.push(String(e)));
+await p.goto(url,{waitUntil:'networkidle'});
+await p.evaluate(()=>{document.querySelector('[data-nav="producao"]')?.click();});
+await p.waitForTimeout(800);
+await p.evaluate(()=>{if(typeof prodNovaToggle==='function')prodNovaToggle();});
+await p.waitForTimeout(400);
+await p.screenshot({path:'C:/Users/USER/.claude/playwright-out/producao-prod.png'});
+console.log('page-producao ativa:',await p.evaluate(()=>document.getElementById('page-producao')?.classList.contains('active')));
+console.log('kpis renderizados:',await p.evaluate(()=>document.getElementById('prod-kpis')?.children.length));
+console.log('form abre:',await p.evaluate(()=>document.getElementById('prod-form')?.classList.contains('open')));
+console.log('erros JS:',errs.length,errs.slice(0,3));
+await b.close();

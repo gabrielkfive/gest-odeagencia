@@ -1,4 +1,4 @@
-<!-- build 2026-07-14-fix-1102-load -->
+<!-- build 2026-07-14-producao-audiovisual+fix-1102 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -1607,6 +1607,12 @@ function wfaSetTheme(t){
         </div>
       </div>
 
+      <div class="navitem" data-nav="producao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        <span>Produção</span>
+        <span class="badge" id="producao-badge" style="display:none">0</span>
+      </div>
+
       <div class="navitem" data-toggle="perf-menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
         <span>Performance</span>
@@ -3179,7 +3185,7 @@ function wfaSetTheme(t){
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -3395,8 +3401,8 @@ function wfaMergeById(remoteArr,localArr,localPrevalece){
   (Array.isArray(localArr)?localArr:[]).forEach(o=>{if(o&&o.id){if(!(o.id in byId)){order.push(o.id);byId[o.id]=o;}else if(localPrevalece)byId[o.id]=o;}});
   return order.map(id=>byId[id]);
 }
-const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes','wfa-crm'];
-const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-crm']; // itens apagados nunca voltam
+const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes','wfa-crm','wfa-producao','wfa-briefings'];
+const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-crm','wfa-producao','wfa-briefings']; // itens apagados nunca voltam
 /* LÁPIDE DE EXCLUSÃO: ids apagados ficam em wfa-deleted-ids (sincronizado). A mescla
    nunca ressuscita um id que está na lápide. Resolve "excluo e a tarefa volta". */
 function loadDeleted(){try{return new Set(JSON.parse(localStorage.getItem('wfa-deleted-ids')||'[]'));}catch(e){return new Set();}}
@@ -4610,6 +4616,65 @@ function iniciarAutoSync(){
         </div>
       </div>
 
+      <!-- =================== PRODUÇÃO AUDIOVISUAL =================== -->
+      <div class="page" id="page-producao">
+        <style>
+          #page-producao .pd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+          #page-producao .pd-kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+          #page-producao .pd-kpi .v{font-size:26px;font-weight:780;letter-spacing:-.03em}
+          #page-producao .pd-kpi .l{font-size:11.5px;color:var(--mute);font-weight:600;margin-top:2px}
+          #page-producao .pd-form{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow);margin-bottom:22px;display:none}
+          #page-producao .pd-form.open{display:block}
+          #page-producao .pd-form .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:12px}
+          #page-producao .pd-cards{display:flex;flex-direction:column;gap:16px}
+          #page-producao .pd-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px 22px;box-shadow:var(--shadow)}
+          #page-producao .pd-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+          #page-producao .pd-head h3{font-size:17px;font-weight:760;letter-spacing:-.02em;margin:0;flex:1;min-width:160px}
+          #page-producao .pd-pill{font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px}
+          #page-producao .pd-pill.agendada{background:#fff6d6;color:#7a5c00}
+          #page-producao .pd-pill.concluida{background:#e2f7ec;color:#0d7a45}
+          #page-producao .pd-meta{font-size:12.5px;color:var(--mute);margin-bottom:12px;display:flex;gap:14px;flex-wrap:wrap}
+          #page-producao .pd-sec{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);margin:14px 0 8px}
+          #page-producao .pd-pop{display:flex;flex-direction:column;gap:6px}
+          #page-producao .pd-pop label{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer;padding:7px 10px;border:1px solid var(--line);border-radius:10px}
+          #page-producao .pd-pop label.done{background:var(--g1,#f4f9f5);color:var(--mute);text-decoration:line-through}
+          #page-producao .pd-prog{height:7px;border-radius:6px;background:var(--g1,#eee);overflow:hidden;margin:10px 0 4px}
+          #page-producao .pd-prog i{display:block;height:100%;background:#19b36b;width:0;transition:width .25s}
+          #page-producao .pd-vid{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:13px}
+          #page-producao .pd-vid .st{font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+          #page-producao .pd-vid .st.fila{background:#f2f2f4;color:#555}
+          #page-producao .pd-vid .st.edicao{background:#e5efff;color:#1751b8}
+          #page-producao .pd-vid .st.aprovacao{background:#fff1dc;color:#94590a}
+          #page-producao .pd-vid .st.entregue{background:#e2f7ec;color:#0d7a45}
+          #page-producao .pd-foot{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+          #page-producao .pd-go{background:#1d1d1f;color:#ffd400;border:0;border-radius:12px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer}
+          #page-producao .pd-go:disabled{opacity:.4;cursor:not-allowed}
+          #page-producao .pd-del{background:transparent;border:1px solid var(--line);color:var(--red,#e0364f);border-radius:12px;padding:10px 14px;font-size:12.5px;font-weight:600;cursor:pointer}
+          #page-producao .pd-rot{font-size:13px;line-height:1.55;color:var(--txt);background:var(--g1,#fafafa);border:1px solid var(--line);border-radius:12px;padding:12px 14px;white-space:pre-wrap;max-height:180px;overflow:auto}
+          #page-producao .pd-empty{border:1.5px dashed var(--line);border-radius:20px;padding:34px;text-align:center;color:var(--mute);font-size:13.5px}
+        </style>
+        <div class="page-head">
+          <div class="page-title"><h1>Produção Audiovisual</h1><p>Captação entra, edição sai sozinha · checklist do produtor trava a passagem de bastão</p></div>
+          <button class="tb-btn dk" onclick="prodNovaToggle()">+ Nova captação</button>
+        </div>
+        <div class="pd-kpis" id="prod-kpis"></div>
+        <div class="pd-form" id="prod-form">
+          <div class="grid">
+            <div class="form-group"><label class="form-label">Cliente</label><select class="form-select" id="prod-cliente"></select></div>
+            <div class="form-group"><label class="form-label">Data da captação</label><input class="form-input" type="date" id="prod-data"></div>
+            <div class="form-group"><label class="form-label">Produtor (câmera)</label><select class="form-select" id="prod-produtor"></select></div>
+            <div class="form-group"><label class="form-label">Editor responsável</label><select class="form-select" id="prod-editor"></select></div>
+            <div class="form-group"><label class="form-label">Local</label><input class="form-input" id="prod-local" placeholder="Ex: loja Asa Sul"></div>
+            <div class="form-group"><label class="form-label">Link do material (Drive)</label><input class="form-input" id="prod-material" placeholder="https://drive.google.com/…"></div>
+            <div class="form-group"><label class="form-label">Prazo de edição (dias úteis após a captação)</label><input class="form-input" type="number" id="prod-sla" value="4" min="1" max="30"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Roteiro</label><textarea class="form-input" id="prod-roteiro" rows="4" placeholder="Cole aqui o roteiro da captação (fica anexado em cada tarefa de edição)"></textarea></div>
+          <div class="form-group"><label class="form-label">Vídeos previstos · um por linha</label><textarea class="form-input" id="prod-videos" rows="3" placeholder="Reel promo Copa&#10;Depoimento cliente&#10;Bastidores da cozinha"></textarea></div>
+          <div style="display:flex;gap:10px;margin-top:10px"><button class="tb-btn dk" onclick="prodCriar()">Agendar captação</button><button class="tb-btn" onclick="prodNovaToggle()">Cancelar</button></div>
+        </div>
+        <div class="pd-cards" id="prod-list"></div>
+      </div>
+
       <!-- =================== AGENDA EDITÁVEL =================== -->
       <div class="page" id="page-agenda">
         <style>
@@ -5595,6 +5660,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='whatsapp'){try{wfaCarregarWhatsapp();}catch(e){} try{const _td=hojeSP();if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     if(p==='jornada'&&typeof renderSprints==='function'){try{renderSprints();}catch(e){}}
+    if(p==='producao'&&typeof renderProducao==='function'){try{renderProducao();}catch(e){console.warn('prod',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
     document.querySelector('.view').scrollTo(0,0);
@@ -7547,7 +7613,7 @@ function taskCard(t){
     </div>
   </div>`;
 }
-function moveTask(id,newSt){const t=state.tarefas.find(x=>x.id===id);if(t){t.status=newSt;saveTarefas();toast(`Tarefa movida para ${newSt}`);}}
+function moveTask(id,newSt){const t=state.tarefas.find(x=>x.id===id);if(!t)return;if(newSt==='concluido'){if(!taskConcluir(t)){renderTarefas();return;}}else{t.status=newSt;}saveTarefas();toast(`Tarefa movida para ${newSt}`);}
 // move a tarefa pra cima/baixo na mesma coluna (define ordem manual)
 function taskMove(id,dir){
   const t=state.tarefas.find(x=>x.id===id);if(!t)return;
@@ -7803,6 +7869,18 @@ function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;',
 /* ============ TASK DETAIL MODAL ============ */
 function openTaskDetail(id){
   const t=state.tarefas.find(x=>x.id===id);if(!t)return;
+  // POP vivo: tarefa de Captação/Edição sem checklist recebe o POP da função na hora,
+  // e ganha a tag 'pop' (que trava a conclusão até o checklist fechar).
+  try{
+    if(!(t.checklist||[]).length&&typeof POP_PRODUTOR!=='undefined'){
+      const popSrc=t.funcao==='Captação'?POP_PRODUTOR:(t.funcao==='Editor'?POP_EDITOR:null);
+      if(popSrc){
+        t.checklist=popSrc.map((tx,k)=>({id:'pi'+k,text:tx,done:false}));
+        if(!(t.tags||[]).includes('pop')){t.tags=(t.tags||[]).concat('pop');}
+        saveTarefas();toast('POP da função carregado no checklist desta tarefa');
+      }
+    }
+  }catch(e){}
   const sel=document.getElementById('td-cliente');
   sel.innerHTML=CLIENTES.map(c=>`<option value="${c.id}">${c.nm}</option>`).join('');
   document.getElementById('td-id').value=t.id;
@@ -7850,7 +7928,16 @@ function taskStopTimer(t){if(!t||!t.timerSince)return;t.timeSpent=(t.timeSpent||
 // para o cronômetro (senão o relatório do cliente conta horas correndo pra sempre) e carimba
 // concluidaEm = data de ENTREGA. NUNCA sobrescreve criadaEm (data de criação); antes o mdDone
 // fazia isso e as métricas de "entregue no mês" divergiam conforme o botão usado.
-function taskConcluir(t){if(!t)return;t.status='concluido';if(!t.concluidaEm)t.concluidaEm=new Date().toISOString();taskStopTimer(t);}
+/* GATE DE POP: tarefa marcada com a tag 'pop' (edição gerada por captação, POP injetado
+   no modal) só conclui com o checklist 100% fechado. É o "impossível errar" do fluxo. */
+function taskPopGate(t){
+  if(!(t.tags||[]).includes('pop'))return true;
+  const cl=t.checklist||[];if(!cl.length)return true;
+  const falta=cl.filter(x=>!x.done).length;
+  if(falta){toast('⚠ POP incompleto: faltam '+falta+' passo(s) do checklist antes de concluir');return false;}
+  return true;
+}
+function taskConcluir(t){if(!t)return false;if(!taskPopGate(t)){if(t.status==='concluido')t.status='andamento';return false;}t.status='concluido';if(!t.concluidaEm)t.concluidaEm=new Date().toISOString();taskStopTimer(t);return true;}
 function taskReabrir(t,st){if(!t)return;t.status=st||'backlog';t.concluidaEm=null;}
 /* ---- Comentários ---- */
 function tdAuthor(){const m=(typeof WFA_MEMBER!=='undefined')?WFA_MEMBER:null;return (m&&m.full_name)||(m&&m.email&&m.email.split('@')[0])||'Eu';}
@@ -11195,6 +11282,132 @@ function renderCrm(){
   });
 }
 
+/* ============ PRODUÇÃO AUDIOVISUAL ============ */
+/* Evento "captação concluída": o checklist do produtor (POP) trava o botão; ao concluir,
+   cada vídeo vira tarefa de edição com roteiro, material, checklist do editor e prazo.
+   Estado: wfa-producao (array, merge por id + lápide, sincronizado). */
+const POP_PRODUTOR=['Roteiro recebido 48h antes (sem roteiro, não grava)','Equipamento conferido na véspera','Confirmação com o cliente: horário, local, pauta','Chegada com 15 min de folga','Padrão técnico ARK: áudio, luz, foco, composição','Cobertura 30% além do roteiro','Backup imediato: duas cópias do material','Pastas organizadas: Cliente_Data_Tipo no Drive ARK','Material entregue à edição em até 24h'];
+const POP_EDITOR=['Roteiro conferido contra o material captado','Gancho nos 3 primeiros segundos + CTA claro','Colorização e áudio no padrão ARK','Identidade visual aplicada (preto/amarelo, tipografia)','Formato correto da plataforma (9:16, 1:1)','Check do coordenador antes do envio','Arquivo nomeado e arquivado no Drive ARK','Tarefa movida para Aprovação no sistema'];
+const PROD_PRODUTORES=['Samuel Magalhães','Márcio','Henrique','Nicolas','Anderson','João G.','Maria Clara'];
+const PROD_EDITORES=['Samuel Magalhães','Maria Luiza','Kaique','Luckas Gomes','Márcio'];
+function loadProducao(){try{const a=JSON.parse(localStorage.getItem('wfa-producao')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function saveProducao(arr){localStorage.setItem('wfa-producao',JSON.stringify(arr));renderProducao();}
+function addDiasUteis(dateStr,n){const d=new Date((dateStr||hojeSP())+'T12:00:00');let add=0;while(add<n){d.setDate(d.getDate()+1);const wd=d.getDay();if(wd!==0&&wd!==6)add++;}return d.toISOString().slice(0,10);}
+function prodNovaToggle(){
+  const f=document.getElementById('prod-form');if(!f)return;
+  const opening=!f.classList.contains('open');
+  f.classList.toggle('open');
+  if(opening){
+    document.getElementById('prod-cliente').innerHTML=CLIENTES.map(c=>`<option value="${c.id}">${escapeHtml(c.nm)}</option>`).join('');
+    document.getElementById('prod-produtor').innerHTML=PROD_PRODUTORES.map(p=>`<option>${p}</option>`).join('');
+    document.getElementById('prod-editor').innerHTML=PROD_EDITORES.map(p=>`<option>${p}</option>`).join('');
+    if(!document.getElementById('prod-data').value)document.getElementById('prod-data').value=hojeSP();
+  }
+}
+function prodCriar(){
+  const clienteId=document.getElementById('prod-cliente').value;
+  const data=document.getElementById('prod-data').value||hojeSP();
+  const videos=(document.getElementById('prod-videos').value||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!videos.length){toast('Liste ao menos 1 vídeo previsto');return;}
+  const cap={
+    id:'cap'+Date.now(),clienteId,data,
+    produtor:document.getElementById('prod-produtor').value,
+    editor:document.getElementById('prod-editor').value,
+    local:(document.getElementById('prod-local').value||'').trim(),
+    material:(document.getElementById('prod-material').value||'').trim(),
+    sla:Math.max(1,parseInt(document.getElementById('prod-sla').value,10)||4),
+    roteiro:(document.getElementById('prod-roteiro').value||'').trim(),
+    status:'agendada',
+    pop:POP_PRODUTOR.map((t,i)=>({id:'pp'+i,text:t,done:false})),
+    videos:videos.map((t,i)=>({id:'vd'+Date.now()+'_'+i,titulo:t,taskId:null})),
+    criadaEm:new Date().toISOString()
+  };
+  const arr=loadProducao();arr.unshift(cap);saveProducao(arr);
+  document.getElementById('prod-form').classList.remove('open');
+  ['prod-local','prod-material','prod-roteiro','prod-videos'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast('Captação agendada · checklist do produtor liberado');
+}
+function prodTogglePop(capId,i){
+  const arr=loadProducao();const cap=arr.find(c=>c.id===capId);if(!cap||!cap.pop||!cap.pop[i])return;
+  cap.pop[i].done=!cap.pop[i].done;saveProducao(arr);
+}
+function prodDel(capId){
+  if(!confirm('Excluir esta captação? (as tarefas de edição já geradas continuam existindo)'))return;
+  let arr=loadProducao();arr=arr.filter(c=>c.id!==capId);addDeleted(capId);saveProducao(arr);toast('Captação excluída');
+}
+function prodConcluir(capId){
+  const arr=loadProducao();const cap=arr.find(c=>c.id===capId);if(!cap)return;
+  const falta=(cap.pop||[]).filter(x=>!x.done).length;
+  if(falta){toast('⚠ Checklist do produtor incompleto: faltam '+falta+' passos');return;}
+  if(cap.status==='concluida'){toast('Captação já concluída');return;}
+  const c=CLIENTES.find(x=>x.id===cap.clienteId);const cliNome=c?c.nm:'Cliente';
+  const prazo=addDiasUteis(cap.data,cap.sla||4);
+  let criadas=0;
+  (cap.videos||[]).forEach((v,i)=>{
+    if(v.taskId)return;
+    const tid='ed'+Date.now()+'_'+i;
+    const desc=['🎬 Edição gerada automaticamente pela captação de '+(cap.data||'').split('-').reverse().join('/')+' · '+cliNome,
+      cap.local?('Local: '+cap.local):'',
+      'Produtor: '+(cap.produtor||'—'),
+      cap.roteiro?('\nROTEIRO:\n'+cap.roteiro):''].filter(Boolean).join('\n');
+    const t={id:tid,title:'Editar · '+v.titulo+' · '+cliNome,desc,funcao:'Editor',clienteId:cap.clienteId,
+      resp:cap.editor||RESPONSAVEIS_FN['Editor']||'',data:prazo,prio:'alta',status:'backlog',
+      tags:['edicao','pop'],checklist:POP_EDITOR.map((tx,k)=>({id:'ce'+k,text:tx,done:false})),
+      sprintN:null,origem:'captacao',capId:cap.id,criadaEm:new Date().toISOString(),timerSince:new Date().toISOString()};
+    if(cap.material)t.attachments=[{id:'at'+Date.now()+'_'+i,name:'Material da captação (Drive)',url:cap.material,at:new Date().toISOString()}];
+    state.tarefas.push(t);v.taskId=tid;criadas++;
+  });
+  cap.status='concluida';cap.concluidaEm=new Date().toISOString();
+  saveTarefas();saveProducao(arr);
+  toast('🎬 Captação concluída: '+criadas+' tarefa(s) de edição criada(s) para '+(cap.editor||'edição')+' · prazo '+prazo.split('-').reverse().join('/'));
+}
+function prodVideoStatus(v){
+  if(!v.taskId)return {cls:'fila',lbl:'Aguardando captação'};
+  const t=state.tarefas.find(x=>x.id===v.taskId);
+  if(!t)return {cls:'fila',lbl:'Na fila'};
+  if(t.status==='concluido')return {cls:'entregue',lbl:'Entregue'};
+  if(t.status==='aprovacao')return {cls:'aprovacao',lbl:'Em aprovação'};
+  if(t.status==='andamento')return {cls:'edicao',lbl:'Em edição'};
+  return {cls:'fila',lbl:'Na fila de edição'};
+}
+function renderProducao(){
+  const list=document.getElementById('prod-list');if(!list)return;
+  const arr=loadProducao();
+  const abertas=arr.filter(c=>c.status!=='concluida').length;
+  const emEd=state.tarefas.filter(t=>t.origem==='captacao'&&t.status!=='concluido').length;
+  const mes=hojeSP().slice(0,7);
+  const entregues=state.tarefas.filter(t=>t.origem==='captacao'&&t.status==='concluido'&&(t.concluidaEm||'').slice(0,7)===mes).length;
+  const atras=state.tarefas.filter(t=>t.origem==='captacao'&&t.status!=='concluido'&&t.data&&t.data<hojeSP()).length;
+  wfaSetHTML(document.getElementById('prod-kpis'),
+    `<div class="pd-kpi"><div class="v">${abertas}</div><div class="l">Captações abertas</div></div>`+
+    `<div class="pd-kpi"><div class="v">${emEd}</div><div class="l">Vídeos na edição</div></div>`+
+    `<div class="pd-kpi"><div class="v">${entregues}</div><div class="l">Entregues no mês</div></div>`+
+    `<div class="pd-kpi"><div class="v" style="${atras?'color:var(--red,#e0364f)':''}">${atras}</div><div class="l">Edições atrasadas</div></div>`);
+  const badge=document.getElementById('producao-badge');
+  if(badge){badge.textContent=abertas;badge.style.display=abertas?'':'none';}
+  if(!arr.length){wfaSetHTML(list,'<div class="pd-empty">Nenhuma captação ainda. Clique em "+ Nova captação": o checklist do produtor e as tarefas de edição saem daqui.</div>');return;}
+  wfaSetHTML(list,arr.map(cap=>{
+    const c=CLIENTES.find(x=>x.id===cap.clienteId);
+    const done=(cap.pop||[]).filter(x=>x.done).length,total=(cap.pop||[]).length;
+    const pct=total?Math.round(done/total*100):0;
+    const dataFmt=(cap.data||'').split('-').reverse().join('/');
+    const vids=(cap.videos||[]).map(v=>{const st=prodVideoStatus(v);return `<div class="pd-vid"><span style="flex:1">${escapeHtml(v.titulo)}</span><span class="st ${st.cls}">${st.lbl}</span>${v.taskId?`<button class="icobtn" style="padding:2px 8px" onclick="openTaskDetail('${v.taskId}')" title="Abrir tarefa">↗</button>`:''}</div>`;}).join('');
+    const popHtml=cap.status==='concluida'?'':`<div class="pd-sec">Checklist do produtor · ${done}/${total}</div><div class="pd-prog"><i style="width:${pct}%"></i></div><div class="pd-pop">${(cap.pop||[]).map((p,i)=>`<label class="${p.done?'done':''}"><input type="checkbox" ${p.done?'checked':''} onchange="prodTogglePop('${cap.id}',${i})"><span>${escapeHtml(p.text)}</span></label>`).join('')}</div>`;
+    const rotHtml=cap.roteiro?`<div class="pd-sec">Roteiro</div><div class="pd-rot">${escapeHtml(cap.roteiro)}</div>`:'';
+    const foot=cap.status==='concluida'
+      ?`<div class="pd-foot"><span style="font-size:12px;color:var(--mute)">Edições geradas em ${cap.concluidaEm?new Date(cap.concluidaEm).toLocaleDateString('pt-BR'):'—'} · prazo ${addDiasUteis(cap.data,cap.sla||4).split('-').reverse().join('/')}</span><button class="pd-del" onclick="prodDel('${cap.id}')">Excluir</button></div>`
+      :`<div class="pd-foot"><button class="pd-go" ${done<total?'disabled':''} onclick="prodConcluir('${cap.id}')">🎬 Concluir captação e gerar edições</button><span style="font-size:12px;color:var(--mute)">${done<total?'Complete o checklist para liberar':'Tudo pronto: gera '+(cap.videos||[]).length+' tarefa(s) de edição'}</span><button class="pd-del" onclick="prodDel('${cap.id}')">Excluir</button></div>`;
+    return `<div class="pd-card">
+      <div class="pd-head"><h3>${escapeHtml(c?c.nm:'Cliente')} · ${dataFmt}</h3><span class="pd-pill ${cap.status}">${cap.status==='concluida'?'Concluída':'Agendada'}</span></div>
+      <div class="pd-meta"><span>📷 ${escapeHtml(cap.produtor||'—')}</span><span>✂ ${escapeHtml(cap.editor||'—')}</span>${cap.local?`<span>📍 ${escapeHtml(cap.local)}</span>`:''}${cap.material?`<span><a href="${escapeHtml(cap.material)}" target="_blank" rel="noopener">🔗 Material</a></span>`:''}<span>⏱ SLA ${cap.sla||4} dias úteis</span></div>
+      ${rotHtml}
+      <div class="pd-sec">Vídeos · ${(cap.videos||[]).length}</div>
+      <div style="display:flex;flex-direction:column;gap:6px">${vids}</div>
+      ${popHtml}
+      ${foot}
+    </div>`;
+  }).join(''));
+}
 /* ============ AGENDA EDITÁVEL ============ */
 let agendaMes={ano:new Date().getFullYear(),mes:new Date().getMonth()}; // vira sozinho a cada mês (era travado em junho)
 const AGENDA_INITIAL_EVENTS = [
