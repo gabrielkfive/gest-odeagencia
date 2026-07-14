@@ -1,4 +1,4 @@
-<!-- build 2026-07-14-producao-audiovisual+fix-1102 -->
+<!-- build 2026-07-14-pautas-encadeadas -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -1611,6 +1611,11 @@ function wfaSetTheme(t){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
         <span>Produção</span>
         <span class="badge" id="producao-badge" style="display:none">0</span>
+      </div>
+      <div class="navitem" data-nav="pauta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span>Pautas</span>
+        <span class="badge" id="pauta-badge" style="display:none">0</span>
       </div>
 
       <div class="navitem" data-toggle="perf-menu">
@@ -4675,6 +4680,62 @@ function iniciarAutoSync(){
         <div class="pd-cards" id="prod-list"></div>
       </div>
 
+      <!-- =================== PAUTAS · BRIEFING INTELIGENTE =================== -->
+      <div class="page" id="page-pauta">
+        <style>
+          #page-pauta .pt-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+          #page-pauta .pt-kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+          #page-pauta .pt-kpi .v{font-size:26px;font-weight:780;letter-spacing:-.03em}
+          #page-pauta .pt-kpi .l{font-size:11.5px;color:var(--mute);font-weight:600;margin-top:2px}
+          #page-pauta .pt-form{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow);margin-bottom:22px;display:none}
+          #page-pauta .pt-form.open{display:block}
+          #page-pauta .pt-form .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:12px}
+          #page-pauta .pt-cards{display:flex;flex-direction:column;gap:16px}
+          #page-pauta .pt-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px 22px;box-shadow:var(--shadow)}
+          #page-pauta .pt-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+          #page-pauta .pt-head h3{font-size:16.5px;font-weight:760;letter-spacing:-.02em;margin:0;flex:1;min-width:160px}
+          #page-pauta .pt-meta{font-size:12.5px;color:var(--mute);margin-bottom:14px;display:flex;gap:14px;flex-wrap:wrap}
+          #page-pauta .pt-chain{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+          #page-pauta .pt-step{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:12.5px;min-width:150px}
+          #page-pauta .pt-step .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+          #page-pauta .pt-step.done{background:var(--g1,#f4f9f5)}
+          #page-pauta .pt-step.done .dot{background:#19b36b}
+          #page-pauta .pt-step.atual .dot{background:#ffb800}
+          #page-pauta .pt-step.atual{border-color:#ffb800;box-shadow:0 0 0 3px #ffb80022}
+          #page-pauta .pt-step.espera .dot{background:#c7c7cc}
+          #page-pauta .pt-step.late{border-color:var(--red,#e0364f)}
+          #page-pauta .pt-step.late .dot{background:var(--red,#e0364f)}
+          #page-pauta .pt-step b{font-weight:700}
+          #page-pauta .pt-step .who{color:var(--mute);font-size:11px}
+          #page-pauta .pt-arrow{color:var(--mute);font-size:14px}
+          #page-pauta .pt-foot{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+          #page-pauta .pt-del{background:transparent;border:1px solid var(--line);color:var(--red,#e0364f);border-radius:12px;padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer}
+          #page-pauta .pt-empty{border:1.5px dashed var(--line);border-radius:20px;padding:34px;text-align:center;color:var(--mute);font-size:13.5px}
+          #page-pauta .pt-pill{font-size:11px;font-weight:700;border-radius:999px;padding:4px 12px}
+          #page-pauta .pt-pill.andamento{background:#fff6d6;color:#7a5c00}
+          #page-pauta .pt-pill.entregue{background:#e2f7ec;color:#0d7a45}
+          #page-pauta .pt-pill.atrasada{background:#ffe3e6;color:#b01530}
+        </style>
+        <div class="page-head">
+          <div class="page-title"><h1>Pautas</h1><p>Briefing estruturado entra, a cadeia anda sozinha · cada conclusão passa o bastão pra próxima etapa</p></div>
+          <button class="tb-btn dk" onclick="pautaNovaToggle()">+ Novo briefing</button>
+        </div>
+        <div class="pt-kpis" id="pauta-kpis"></div>
+        <div class="pt-form" id="pauta-form">
+          <div class="grid">
+            <div class="form-group"><label class="form-label">Cliente</label><select class="form-select" id="pt-cliente"></select></div>
+            <div class="form-group"><label class="form-label">Tipo de entrega</label><select class="form-select" id="pt-tipo"><option value="video">Vídeo (Reel/TikTok/Shorts)</option><option value="video-capt">Vídeo com captação nova</option><option value="estatico">Post estático / Carrossel</option></select></div>
+            <div class="form-group"><label class="form-label">Plataforma</label><select class="form-select" id="pt-plataforma"><option>Instagram</option><option>TikTok</option><option>YouTube</option><option>Instagram + TikTok</option><option>Todas</option></select></div>
+            <div class="form-group"><label class="form-label">Deadline (publicação)</label><input class="form-input" type="date" id="pt-deadline"></div>
+            <div class="form-group"><label class="form-label">Vibe / tom</label><input class="form-input" id="pt-vibe" placeholder="Ex: leve e engraçado, urgência de promoção…"></div>
+            <div class="form-group"><label class="form-label">Referências (links)</label><input class="form-input" id="pt-refs" placeholder="Links separados por espaço"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Objetivo / o que precisa comunicar</label><textarea class="form-input" id="pt-objetivo" rows="3" placeholder="Ex: divulgar a promo de casais da Copa, CTA pra reservar mesa"></textarea></div>
+          <div style="display:flex;gap:10px;margin-top:10px"><button class="tb-btn dk" onclick="pautaCriar()">Disparar pauta</button><button class="tb-btn" onclick="pautaNovaToggle()">Cancelar</button></div>
+        </div>
+        <div class="pt-cards" id="pauta-list"></div>
+      </div>
+
       <!-- =================== AGENDA EDITÁVEL =================== -->
       <div class="page" id="page-agenda">
         <style>
@@ -5661,6 +5722,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     if(p==='jornada'&&typeof renderSprints==='function'){try{renderSprints();}catch(e){}}
     if(p==='producao'&&typeof renderProducao==='function'){try{renderProducao();}catch(e){console.warn('prod',e);}}
+    if(p==='pauta'&&typeof renderPauta==='function'){try{renderPauta();}catch(e){console.warn('pauta',e);}}
     const lbl=el.querySelector('span')?.textContent||'';
     document.getElementById('crumbs').innerHTML='<span>WorkFlowArk</span><span class="sep">/</span><span class="here">'+lbl+'</span>';
     document.querySelector('.view').scrollTo(0,0);
@@ -7937,7 +7999,7 @@ function taskPopGate(t){
   if(falta){toast('⚠ POP incompleto: faltam '+falta+' passo(s) do checklist antes de concluir');return false;}
   return true;
 }
-function taskConcluir(t){if(!t)return false;if(!taskPopGate(t)){if(t.status==='concluido')t.status='andamento';return false;}t.status='concluido';if(!t.concluidaEm)t.concluidaEm=new Date().toISOString();taskStopTimer(t);return true;}
+function taskConcluir(t){if(!t)return false;if(!taskPopGate(t)){if(t.status==='concluido')t.status='andamento';return false;}t.status='concluido';if(!t.concluidaEm)t.concluidaEm=new Date().toISOString();taskStopTimer(t);try{if(typeof pautaAvancar==='function')pautaAvancar(t);}catch(e){console.warn('pauta',e);}return true;}
 function taskReabrir(t,st){if(!t)return;t.status=st||'backlog';t.concluidaEm=null;}
 /* ---- Comentários ---- */
 function tdAuthor(){const m=(typeof WFA_MEMBER!=='undefined')?WFA_MEMBER:null;return (m&&m.full_name)||(m&&m.email&&m.email.split('@')[0])||'Eu';}
@@ -11405,6 +11467,128 @@ function renderProducao(){
       <div style="display:flex;flex-direction:column;gap:6px">${vids}</div>
       ${popHtml}
       ${foot}
+    </div>`;
+  }).join(''));
+}
+/* ============ PAUTAS · BRIEFING INTELIGENTE ============ */
+/* Evento em cadeia: o briefing cria a 1ª tarefa; concluir uma etapa cria a próxima
+   sozinha (gancho no taskConcluir). Prazos retroplanejados do deadline em dias úteis.
+   Estado: wfa-briefings (array, merge por id + lápide, sincronizado). */
+const PAUTA_FLUXOS={
+  'video':[{key:'roteiro',label:'Roteiro',funcao:'Criador',off:5},{key:'edicao',label:'Edição',funcao:'Editor',off:2},{key:'aprovacao',label:'Aprovação',funcao:'Account Manager',off:1}],
+  'video-capt':[{key:'roteiro',label:'Roteiro',funcao:'Criador',off:7},{key:'captacao',label:'Captação',funcao:'Captação',off:5},{key:'edicao',label:'Edição',funcao:'Editor',off:2},{key:'aprovacao',label:'Aprovação',funcao:'Account Manager',off:1}],
+  'estatico':[{key:'copy',label:'Copy / Conceito',funcao:'Criador',off:4},{key:'design',label:'Design',funcao:'Designer',off:2},{key:'aprovacao',label:'Aprovação',funcao:'Account Manager',off:1}]
+};
+const PAUTA_TIPO_LABEL={'video':'Vídeo','video-capt':'Vídeo + captação','estatico':'Estático/Carrossel'};
+function subDiasUteis(dateStr,n){const d=new Date((dateStr||hojeSP())+'T12:00:00');let sub=0;while(sub<n){d.setDate(d.getDate()-1);const wd=d.getDay();if(wd!==0&&wd!==6)sub++;}return d.toISOString().slice(0,10);}
+function loadPautas(){try{const a=JSON.parse(localStorage.getItem('wfa-briefings')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function savePautas(arr){localStorage.setItem('wfa-briefings',JSON.stringify(arr));renderPauta();}
+function pautaNovaToggle(){
+  const f=document.getElementById('pauta-form');if(!f)return;
+  const opening=!f.classList.contains('open');
+  f.classList.toggle('open');
+  if(opening){
+    document.getElementById('pt-cliente').innerHTML=CLIENTES.map(c=>`<option value="${c.id}">${escapeHtml(c.nm)}</option>`).join('');
+    if(!document.getElementById('pt-deadline').value)document.getElementById('pt-deadline').value=addDiasUteis(hojeSP(),7);
+  }
+}
+function pautaBriefTexto(p,c){
+  return ['📋 BRIEFING · '+(c?c.nm:'Cliente'),
+    'Tipo: '+(PAUTA_TIPO_LABEL[p.tipo]||p.tipo)+' · Plataforma: '+(p.plataforma||'—'),
+    'Deadline de publicação: '+(p.deadline||'').split('-').reverse().join('/'),
+    p.vibe?('Vibe/tom: '+p.vibe):'',
+    p.objetivo?('Objetivo: '+p.objetivo):'',
+    p.refs?('Referências: '+p.refs):''].filter(Boolean).join('\n');
+}
+function pautaCriarTarefaEtapa(p,etapa){
+  const c=CLIENTES.find(x=>x.id===p.clienteId);
+  const tid='pt'+Date.now()+'_'+etapa.key;
+  const t={id:tid,title:etapa.label+' · '+(p.titulo||'pauta')+' · '+(c?c.nm:''),
+    desc:pautaBriefTexto(p,c)+'\n\nETAPA: '+etapa.label+' (o bastão passa sozinho quando você concluir)',
+    funcao:etapa.funcao,clienteId:p.clienteId,resp:RESPONSAVEIS_FN[etapa.funcao]||'',
+    data:etapa.prazo,prio:'alta',status:'backlog',tags:['pauta'],checklist:[],sprintN:null,
+    origem:'pauta',pautaId:p.id,etapaKey:etapa.key,criadaEm:new Date().toISOString(),timerSince:new Date().toISOString()};
+  if(p.refs){t.attachments=p.refs.split(/\s+/).filter(u=>/^https?:/i.test(u)).map((u,i)=>({id:'pa'+Date.now()+'_'+i,name:'Referência '+(i+1),url:u,at:new Date().toISOString()}));}
+  state.tarefas.push(t);etapa.taskId=tid;
+  return t;
+}
+function pautaCriar(){
+  const clienteId=document.getElementById('pt-cliente').value;
+  const tipo=document.getElementById('pt-tipo').value;
+  const deadline=document.getElementById('pt-deadline').value;
+  const objetivo=(document.getElementById('pt-objetivo').value||'').trim();
+  if(!deadline){toast('Defina o deadline de publicação');return;}
+  if(!objetivo){toast('Escreva o objetivo: é ele que evita o briefing caótico');return;}
+  const fluxo=PAUTA_FLUXOS[tipo]||PAUTA_FLUXOS.video;
+  const p={id:'pta'+Date.now(),clienteId,tipo,
+    plataforma:document.getElementById('pt-plataforma').value,
+    deadline,objetivo,
+    titulo:objetivo.slice(0,48)+(objetivo.length>48?'…':''),
+    vibe:(document.getElementById('pt-vibe').value||'').trim(),
+    refs:(document.getElementById('pt-refs').value||'').trim(),
+    status:'andamento',
+    etapas:fluxo.map(e=>({key:e.key,label:e.label,funcao:e.funcao,prazo:subDiasUteis(deadline,e.off),taskId:null,done:false})),
+    criadaEm:new Date().toISOString()};
+  pautaCriarTarefaEtapa(p,p.etapas[0]);
+  const arr=loadPautas();arr.unshift(p);saveTarefas();savePautas(arr);
+  document.getElementById('pauta-form').classList.remove('open');
+  ['pt-vibe','pt-refs','pt-objetivo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast('🚀 Pauta disparada: '+p.etapas[0].label+' já está com '+(RESPONSAVEIS_FN[p.etapas[0].funcao]||'a equipe')+' · prazo '+p.etapas[0].prazo.split('-').reverse().join('/'));
+}
+/* Gancho chamado pelo taskConcluir: etapa concluída passa o bastão pra próxima. */
+function pautaAvancar(t){
+  if(!t||!t.pautaId)return;
+  const arr=loadPautas();const p=arr.find(x=>x.id===t.pautaId);if(!p)return;
+  const i=(p.etapas||[]).findIndex(e=>e.taskId===t.id);if(i<0)return;
+  p.etapas[i].done=true;
+  const next=p.etapas[i+1];
+  if(next&&!next.taskId){
+    const nt=pautaCriarTarefaEtapa(p,next);
+    toast('🏃 Bastão passado: '+next.label+' → '+(nt.resp||'equipe')+' · prazo '+(next.prazo||'').split('-').reverse().join('/'));
+  }else if(!next){
+    p.status='entregue';p.entregueEm=new Date().toISOString();
+    toast('✅ Pauta entregue: '+(p.titulo||''));
+  }
+  savePautas(arr);
+}
+function pautaDel(id){
+  if(!confirm('Excluir esta pauta? (as tarefas já criadas continuam no kanban)'))return;
+  let arr=loadPautas();arr=arr.filter(x=>x.id!==id);addDeleted(id);savePautas(arr);toast('Pauta excluída');
+}
+function pautaEtapaEstado(p,e,idx){
+  if(e.done)return {cls:'done',lbl:'Concluída'};
+  if(e.taskId){const late=e.prazo&&e.prazo<hojeSP();return {cls:'atual'+(late?' late':''),lbl:late?'ATRASADA':'Em andamento'};}
+  return {cls:'espera',lbl:'Aguardando'};
+}
+function renderPauta(){
+  const list=document.getElementById('pauta-list');if(!list)return;
+  const arr=loadPautas();
+  const ativas=arr.filter(p=>p.status!=='entregue');
+  const atrasadas=ativas.filter(p=>(p.etapas||[]).some(e=>e.taskId&&!e.done&&e.prazo&&e.prazo<hojeSP()));
+  const mes=hojeSP().slice(0,7);
+  const entregues=arr.filter(p=>p.status==='entregue'&&(p.entregueEm||'').slice(0,7)===mes).length;
+  wfaSetHTML(document.getElementById('pauta-kpis'),
+    `<div class="pt-kpi"><div class="v">${ativas.length}</div><div class="l">Pautas rodando</div></div>`+
+    `<div class="pt-kpi"><div class="v">${ativas.length-atrasadas.length}</div><div class="l">No prazo</div></div>`+
+    `<div class="pt-kpi"><div class="v" style="${atrasadas.length?'color:var(--red,#e0364f)':''}">${atrasadas.length}</div><div class="l">Com etapa atrasada</div></div>`+
+    `<div class="pt-kpi"><div class="v">${entregues}</div><div class="l">Entregues no mês</div></div>`);
+  const badge=document.getElementById('pauta-badge');
+  if(badge){badge.textContent=ativas.length;badge.style.display=ativas.length?'':'none';}
+  if(!arr.length){wfaSetHTML(list,'<div class="pt-empty">Nenhuma pauta ainda. "+ Novo briefing" dispara a cadeia: roteiro, produção e aprovação andam sozinhos.</div>');return;}
+  wfaSetHTML(list,arr.map(p=>{
+    const c=CLIENTES.find(x=>x.id===p.clienteId);
+    const late=(p.etapas||[]).some(e=>e.taskId&&!e.done&&e.prazo&&e.prazo<hojeSP());
+    const pill=p.status==='entregue'?'<span class="pt-pill entregue">Entregue</span>':late?'<span class="pt-pill atrasada">Atrasada</span>':'<span class="pt-pill andamento">Rodando</span>';
+    const chain=(p.etapas||[]).map((e,idx)=>{
+      const st=pautaEtapaEstado(p,e,idx);
+      const open=e.taskId?` onclick="openTaskDetail('${e.taskId}')" style="cursor:pointer" title="Abrir tarefa"`:'';
+      return `<div class="pt-step ${st.cls}"${open}><span class="dot"></span><div><b>${e.label}</b> <span style="font-size:10.5px;color:var(--mute)">${st.lbl}</span><div class="who">${escapeHtml(RESPONSAVEIS_FN[e.funcao]||e.funcao)} · ${(e.prazo||'').split('-').reverse().join('/')}</div></div></div>`;
+    }).join('<span class="pt-arrow">→</span>');
+    return `<div class="pt-card">
+      <div class="pt-head"><h3>${escapeHtml(c?c.nm:'Cliente')} · ${escapeHtml(p.titulo||'')}</h3>${pill}</div>
+      <div class="pt-meta"><span>${PAUTA_TIPO_LABEL[p.tipo]||p.tipo}</span><span>${escapeHtml(p.plataforma||'')}</span><span>📅 publica ${(p.deadline||'').split('-').reverse().join('/')}</span>${p.vibe?`<span>🎭 ${escapeHtml(p.vibe)}</span>`:''}</div>
+      <div class="pt-chain">${chain}</div>
+      <div class="pt-foot"><span style="font-size:12px;color:var(--mute);flex:1">${escapeHtml((p.objetivo||'').slice(0,140))}</span><button class="pt-del" onclick="pautaDel('${p.id}')">Excluir</button></div>
     </div>`;
   }).join(''));
 }
