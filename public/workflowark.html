@@ -1,4 +1,4 @@
-<!-- build 2026-07-14-performance-loop -->
+<!-- build 2026-07-14-acertos-recorrentes -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -3194,7 +3194,7 @@ function wfaSetTheme(t){
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings','wfa-acertosrec'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -3794,6 +3794,8 @@ function iniciarAutoSync(){
             <span id="cob-resumo" style="font-size:12px;color:var(--mute)"></span>
           </div>
         </div>
+        <!-- Solicitações de acerto (a RECEBER): e-mail pronto no padrão real, você só revisa e envia -->
+        <div id="acrec-wrap" style="margin-bottom:22px"></div>
         <div id="cob-wrap"></div>
       </div>
 
@@ -6431,6 +6433,7 @@ function cobMensagem(c,data,venc){
 }
 
 function renderCobranca(){
+  try{renderAcrec();}catch(e){console.warn('acrec',e);}
   const wrap=document.getElementById('cob-wrap');if(!wrap)return;
   const venc=cobVencimento();
   const mesKey=cobMesKey();
@@ -6511,6 +6514,72 @@ function cobCopiar(id){
   navigator.clipboard?.writeText(msg).then(()=>toast('Mensagem copiada'),()=>toast('Não consegui copiar'));
 }
 
+/* ============ SOLICITAÇÕES DE ACERTO (a RECEBER) ============ */
+/* Padrão minerado dos e-mails reais (201 threads "SOLICITO ACERTO"): assunto fixo,
+   destinatários Remerson + financeiro NEXUS, corpo "Solicito acerto referente a…
+   Valor: R$X". Recorrência por item; o sistema PREPARA o e-mail na data certa e o
+   Gabriel só revisa e clica Enviar no Gmail (aprovação humana = IAO nível 2). */
+const ACREC_TO='remerson1811@gmail.com,financeirovivendaescritorio@gmail.com';
+const ACREC_BASE=[
+  {id:'mensal-ark',nome:'Mensalidade ARK · Vivenda',valor:5500,freqMeses:1,diaSugerido:7,texto:'Solicito acerto referente ao serviço de Gestão de Google Ads, Social Media, Produção Audiovisual, Design de materiais gráficos e Planejamento Estratégico de Marketing.\nValor: R$5500,00.'},
+  {id:'outdoor-sobradinho',nome:'Outdoor Sobradinho',valor:1600,freqMeses:1,diaSugerido:5,texto:'Solicito acerto referente ao Outdoor de Sobradinho.\nValor: R$1600,00'},
+  {id:'outdoor-br040',nome:'Outdoor BR-040',valor:0,freqMeses:1,diaSugerido:5,texto:'Solicito acerto referente ao Outdoor da BR-040.\nValor: R$'},
+  {id:'outdoor-taguatinga',nome:'Outdoor Taguatinga',valor:0,freqMeses:3,diaSugerido:5,texto:'Solicito acerto referente ao Outdoor de Taguatinga.\nValor: R$'},
+  {id:'midia-indoor',nome:'Mídias indoor',valor:0,freqMeses:6,diaSugerido:5,texto:'Solicito acerto referente às mídias indoor.\nValor: R$'},
+  {id:'verba-google',nome:'Verba Google Ads',valor:1500,freqMeses:1,diaSugerido:6,texto:'Solicito acerto referente a verba a ser inserida na plataforma do Google Ads.\nValor: R$1500,00'},
+  {id:'verba-meta',nome:'Verba Meta Ads',valor:1000,freqMeses:1,diaSugerido:6,texto:'Solicito acerto referente a verba a ser inserida na plataforma do Meta Ads.\nValor: R$1000,00'},
+];
+function acrecState(){try{return JSON.parse(localStorage.getItem('wfa-acertosrec')||'{}');}catch(e){return {};}}
+function acrecSave(s){localStorage.setItem('wfa-acertosrec',JSON.stringify(s));renderAcrec();}
+function acrecMesesDesde(ym){if(!ym)return 999;const [a,m]=ym.split('-').map(Number);const now=new Date();return (now.getFullYear()-a)*12+(now.getMonth()+1-m);}
+function acrecDevido(item,d){
+  const meses=acrecMesesDesde(d.enviadoYm);
+  if(meses<item.freqMeses)return false;
+  return new Date().getDate()>=(item.diaSugerido||5);
+}
+function acrecMailto(item,d){
+  const corpo=(d.texto||item.texto||'');
+  return 'mailto:'+ACREC_TO+'?subject='+encodeURIComponent('SOLICITO ACERTO')+'&body='+encodeURIComponent(corpo);
+}
+function acrecEnviado(id){
+  const s=acrecState();s[id]=s[id]||{};s[id].enviadoYm=hojeSP().slice(0,7);s[id].feitas=(s[id].feitas||0)+1;acrecSave(s);
+  toast('Marcado como solicitado neste ciclo ✓');
+}
+function acrecEditar(id){
+  const item=ACREC_BASE.find(x=>x.id===id);if(!item)return;
+  const s=acrecState();const d=s[id]||{};
+  const novo=prompt('Texto do e-mail (o valor vai dentro do texto):',d.texto||item.texto);
+  if(novo==null)return;s[id]=Object.assign({},d,{texto:novo});acrecSave(s);
+}
+function renderAcrec(){
+  const box=document.getElementById('acrec-wrap');if(!box)return;
+  const dom=new Date().getDay();
+  const domingo=dom===0;
+  const s=acrecState();
+  const cards=ACREC_BASE.map(item=>{
+    const d=s[item.id]||{};
+    const devido=acrecDevido(item,d);
+    const ciclo=item.freqMeses===1?'mensal':item.freqMeses+'/'+item.freqMeses+' meses';
+    const ultimo=d.enviadoYm?d.enviadoYm.split('-').reverse().join('/'):'nunca';
+    const badge=devido
+      ?(domingo?'<span style="background:#eef0f2;color:#666;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">⏸ devido · evite domingo</span>'
+               :'<span style="background:#ffe3e6;color:#b01530;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">🔔 Devido agora</span>')
+      :'<span style="background:#e7f7ec;color:#1a7f3c;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">✓ Em dia</span>';
+    return `<div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px"><b style="flex:1;font-size:13.5px">${escapeHtml(item.nome)}</b>${badge}</div>
+      <div style="font-size:11.5px;color:var(--mute)">Ciclo ${ciclo} · sugerido dia ${item.diaSugerido} · último: ${ultimo}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <a class="tb-btn dk" style="font-size:12px;text-decoration:none" href="${acrecMailto(item,d)}" target="_blank" rel="noopener">✉ Abrir e-mail pronto</a>
+        <button class="tb-btn" style="font-size:12px" onclick="navigator.clipboard.writeText(${JSON.stringify((s[item.id]||{}).texto||item.texto).replace(/"/g,'&quot;')});toast('Texto copiado')">Copiar texto</button>
+        <button class="tb-btn" style="font-size:12px" onclick="acrecEditar('${item.id}')">Editar</button>
+        <button class="tb-btn" style="font-size:12px" onclick="acrecEnviado('${item.id}')">✓ Solicitei</button>
+      </div>
+    </div>`;
+  }).join('');
+  const nDev=ACREC_BASE.filter(it=>acrecDevido(it,s[it.id]||{})).length;
+  box.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin:0 2px 10px"><b style="font-size:14px">Solicitações de acerto · a receber</b><span style="font-size:11.5px;color:var(--mute)">assunto e destinatários do padrão real · ${nDev?nDev+' devida(s) agora':'tudo em dia'}</span></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards}</div>`;
+}
 /* ============ ACERTO · PAGAMENTOS (espelho da cobrança) ============ */
 const ACERTO_CATEGORIAS=[
   {k:'equipe',l:'Equipe fixa'},

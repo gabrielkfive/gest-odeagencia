@@ -52,6 +52,8 @@ const STATE_KEYS = new Set([
   "wfa-producao",
   // Briefings estruturados que disparam a cadeia de pauta (roteiro → design → edição).
   "wfa-briefings",
+  // Solicitações de acerto a receber (ciclos e textos dos e-mails "SOLICITO ACERTO").
+  "wfa-acertosrec",
   // OBS: wfa-whatsapp é de propósito SERVER-OWNED (escrito pelo webhook). O cliente só LÊ;
   // não entra aqui pra um save do cliente nunca sobrescrever mensagens que chegaram no servidor.
 ]);
