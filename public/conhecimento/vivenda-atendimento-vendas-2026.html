@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual Vivenda 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --o:#F47B20;--o2:#FF9A4D;--ol:#FFF4EC;--om:#FDE8D4;
+  --bk:#0D0D0D;--bk2:#1a1a1a;--bk3:#242424;
+  --wh:#ffffff;--g1:#F7F6F3;--g2:#EDECE8;--g3:#D4D2CC;
+  --gm:#7a7a72;--gd:#3d3d38;
+  --r:14px;--rl:22px;--rxl:32px;--rxx:48px;
+  --shadow:0 2px 20px rgba(0,0,0,0.06);
+  --shadow-lg:0 8px 40px rgba(0,0,0,0.10);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Montserrat',sans-serif;background:var(--wh);color:var(--bk);overflow-x:hidden;cursor:default}
+
+/* PROGRESS */
+#prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--o),var(--o2));width:0%;z-index:9999;transition:width .12s linear}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:58px;background:rgba(255,255,255,.93);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(0,0,0,.07);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.5rem;
+}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-brand .dot{width:8px;height:8px;background:var(--o);border-radius:50%}
+.nav-brand span{font-size:13px;font-weight:800;letter-spacing:-.01em;color:var(--bk)}
+.nav-brand span em{color:var(--o);font-style:normal}
+.nav-pills{display:flex;gap:2px;list-style:none;overflow-x:auto;scrollbar-width:none;max-width:70vw}
+.nav-pills::-webkit-scrollbar{display:none}
+.nav-pills a{display:block;font-size:11.5px;font-weight:600;color:var(--gm);text-decoration:none;padding:6px 14px;border-radius:30px;white-space:nowrap;transition:all .18s}
+.nav-pills a:hover,.nav-pills a.active{color:var(--o);background:var(--ol)}
+
+/* HERO */
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:80px 2rem;position:relative;overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 20%, rgba(244,123,32,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-ring{
+  position:absolute;width:700px;height:700px;
+  border-radius:50%;border:1px solid rgba(244,123,32,.08);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:spin 30s linear infinite;pointer-events:none;
+}
+.hero-ring2{
+  position:absolute;width:500px;height:500px;
+  border-radius:50%;border:1px solid rgba(244,123,32,.12);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:spin 20s linear infinite reverse;pointer-events:none;
+}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.hero-inner{position:relative;z-index:1}
+.hero-kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--bk);color:var(--wh);
+  padding:8px 20px 8px 12px;border-radius:40px;
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:2.5rem;
+}
+.hero-kicker .dot{width:6px;height:6px;background:var(--o);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{
+  font-size:clamp(3rem,7vw,6.5rem);font-weight:900;
+  line-height:.97;letter-spacing:-.05em;color:var(--bk);
+  max-width:860px;margin:0 auto 1.5rem;
+}
+.hero h1 .line-o{color:var(--o)}
+.hero h1 .line-thin{font-weight:300;color:var(--gm)}
+.hero-desc{font-size:17px;font-weight:400;color:var(--gm);max-width:500px;margin:0 auto 3.5rem;line-height:1.7}
+.hero-numbers{display:flex;gap:0;justify-content:center;flex-wrap:wrap}
+.h-num{
+  padding:2rem 3rem;border-right:1px solid var(--g2);text-align:center;
+}
+.h-num:last-child{border-right:none}
+.h-num .big{font-size:3.5rem;font-weight:900;letter-spacing:-.06em;color:var(--bk);line-height:1}
+.h-num .big span{color:var(--o)}
+.h-num .lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gm);margin-top:8px}
+.hero-scroll{
+  position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g3);
+}
+.scroll-line{width:1px;height:40px;background:linear-gradient(var(--g3),transparent)}
+
+/* SECTION */
+section{padding:110px 2rem;position:relative}
+.s-inner{max-width:1160px;margin:0 auto}
+.s-kicker{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--o);margin-bottom:1rem}
+.s-title{font-size:clamp(2.2rem,4.5vw,3.8rem);font-weight:900;letter-spacing:-.04em;line-height:1.05;color:var(--bk);margin-bottom:1.5rem}
+.s-title em{color:var(--o);font-style:normal}
+.s-desc{font-size:16px;color:var(--gm);max-width:580px;line-height:1.75;margin-bottom:4rem;font-weight:400}
+hr.div{border:none;border-top:1px solid var(--g2);max-width:1160px;margin:0 auto}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .55s ease,transform .55s ease}
+.rv.show{opacity:1;transform:none}
+.rv[data-d="1"]{transition-delay:.1s}.rv[data-d="2"]{transition-delay:.2s}
+.rv[data-d="3"]{transition-delay:.3s}.rv[data-d="4"]{transition-delay:.4s}
+
+/* CARDS GRID */
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+@media(max-width:740px){.grid-2{grid-template-columns:1fr;gap:2.5rem}}
+
+/* CARD TYPES */
+.card{background:var(--g1);border-radius:var(--rxl);padding:2.5rem;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.card.dark{background:var(--bk);color:var(--wh)}
+.card.orange{background:var(--o);color:var(--wh)}
+.card.white{background:var(--wh);border:1px solid var(--g2)}
+.card-icon{width:52px;height:52px;border-radius:16px;background:var(--ol);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:1.5rem}
+.card.dark .card-icon{background:rgba(255,255,255,.08)}
+.card-tag{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--o);margin-bottom:.7rem}
+.card.dark .card-tag{color:var(--o2)}
+.card-title{font-size:17px;font-weight:800;color:var(--bk);margin-bottom:.75rem;letter-spacing:-.02em}
+.card.dark .card-title,.card.orange .card-title{color:var(--wh)}
+.card-body{font-size:13.5px;color:var(--gm);line-height:1.65;font-weight:400}
+.card.dark .card-body{color:rgba(255,255,255,.55)}
+.card.orange .card-body{color:rgba(255,255,255,.8)}
+
+/* PILLS */
+.pill{display:inline-block;padding:12px 24px;border-radius:40px;font-size:13px;font-weight:700;cursor:default;transition:all .18s}
+.pill-bk{background:var(--bk);color:var(--wh)}.pill-bk:hover{background:var(--o)}
+.pill-ol{background:var(--ol);color:var(--o)}
+.pills-wrap{display:flex;flex-wrap:wrap;gap:.75rem}
+
+/* ACCORDION */
+.acc{border-top:1px solid var(--g2)}
+.acc-item{border-bottom:1px solid var(--g2)}
+.acc-btn{
+  width:100%;background:none;border:none;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.6rem 0;cursor:pointer;text-align:left;
+  font-family:'Montserrat',sans-serif;
+  font-size:15px;font-weight:700;color:var(--bk);
+  transition:color .18s;gap:1rem;
+}
+.acc-btn:hover{color:var(--o)}
+.acc-ico{
+  width:32px;height:32px;background:var(--g1);border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:300;color:var(--gm);
+  transition:transform .3s,background .2s,color .2s;
+}
+.acc-btn[aria-expanded="true"] .acc-ico{transform:rotate(45deg);background:var(--ol);color:var(--o)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .42s cubic-bezier(.4,0,.2,1)}
+.acc-body.open{max-height:2000px}
+.acc-content{padding:.5rem 0 2rem;display:grid;gap:.75rem}
+.rule{
+  background:var(--g1);border-radius:var(--r);
+  padding:1.1rem 1.4rem;font-size:13.5px;color:var(--gd);line-height:1.65;
+  border-left:3px solid transparent;transition:border-color .2s;
+}
+.rule:hover{border-left-color:var(--o)}
+.rule b,.rule strong{color:var(--o);font-weight:700}
+.rule.highlight{background:var(--om);border-left-color:var(--o)}
+
+/* BIG QUOTE */
+.bq{
+  border-left:4px solid var(--o);padding:1.75rem 2rem;
+  background:var(--ol);border-radius:0 var(--r) var(--r) 0;
+  margin:2rem 0;
+}
+.bq-text{font-size:18px;font-weight:700;font-style:italic;color:var(--bk);line-height:1.5}
+.bq-sub{font-size:12px;font-weight:600;color:var(--o);margin-top:.75rem;text-transform:uppercase;letter-spacing:.1em}
+
+/* STAT CARD */
+.stat-card{
+  background:var(--wh);border:1px solid var(--g2);
+  border-radius:var(--rl);padding:2rem;text-align:center;
+}
+.stat-big{font-size:3rem;font-weight:900;color:var(--o);letter-spacing:-.05em;line-height:1}
+.stat-label{font-size:12px;font-weight:700;color:var(--bk);margin-top:.5rem}
+.stat-sub{font-size:12px;color:var(--gm);margin-top:.35rem;line-height:1.5}
+
+/* SCRIPT BLOCK */
+.script{border-radius:var(--rl);padding:2rem 2.25rem;margin-bottom:1rem}
+.script.s-dark{background:var(--bk);color:var(--wh)}
+.script.s-light{background:var(--ol)}
+.script.s-mid{background:var(--g1)}
+.script.s-orange{background:var(--o);color:var(--wh)}
+.script-ctx{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.85rem;opacity:.6}
+.script-q{font-size:17px;font-weight:800;font-style:italic;line-height:1.45;letter-spacing:-.01em}
+.script.s-dark .script-q{color:var(--o2)}
+.script.s-light .script-q{color:var(--bk)}
+.script.s-mid .script-q{color:var(--bk)}
+.script.s-orange .script-q{color:var(--wh)}
+
+/* STEP LIST */
+.steps{display:grid;gap:1rem}
+.step{display:flex;gap:1.5rem;align-items:flex-start}
+.step-dot{
+  width:40px;height:40px;flex-shrink:0;border-radius:50%;
+  background:var(--bk);color:var(--wh);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;
+}
+.step-dot.o{background:var(--o)}
+.step-info{flex:1;padding-top:6px}
+.step-title{font-size:14px;font-weight:800;color:var(--bk);margin-bottom:4px;letter-spacing:-.01em}
+.step-desc{font-size:13px;color:var(--gm);line-height:1.6}
+
+/* TAB NAVIGATOR */
+.tab-nav{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.tab-btn{
+  padding:10px 22px;border-radius:30px;border:1.5px solid var(--g2);
+  background:var(--wh);cursor:pointer;
+  font-family:'Montserrat',sans-serif;
+  font-size:12.5px;font-weight:700;color:var(--gm);
+  transition:all .2s;
+}
+.tab-btn:hover{border-color:var(--o);color:var(--o)}
+.tab-btn.on{background:var(--bk);color:var(--wh);border-color:var(--bk)}
+.tab-pane{display:none}.tab-pane.on{display:block}
+
+/* OBJECOES */
+.filter-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}
+.fb{
+  padding:8px 18px;border-radius:30px;border:1.5px solid var(--g2);
+  background:var(--wh);cursor:pointer;
+  font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--gm);
+  transition:all .18s;
+}
+.fb.on{background:var(--o);color:var(--wh);border-color:var(--o)}
+.obj-grid{display:grid;gap:1rem}
+.obj-card{
+  display:grid;grid-template-columns:1fr 1.8fr;
+  border-radius:var(--rl);overflow:hidden;
+  border:1px solid var(--g2);transition:box-shadow .2s;cursor:default;
+}
+.obj-card:hover{box-shadow:var(--shadow-lg)}
+.obj-l{background:var(--g1);padding:1.75rem;display:flex;flex-direction:column;justify-content:center}
+.obj-type-tag{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem}
+.obj-type-tag.pt{color:#6366f1}.obj-type-tag.pr{color:var(--o)}.obj-type-tag.pd{color:#10b981}
+.obj-phrase{font-size:14px;font-weight:700;color:var(--bk);font-style:italic;line-height:1.4}
+.obj-r{padding:1.75rem;background:var(--wh)}
+.obj-r-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--gm);margin-bottom:.85rem}
+.obj-answers{display:grid;gap:.6rem}
+.obj-ans{font-size:13px;color:var(--gd);line-height:1.55;background:var(--g1);border-radius:10px;padding:.8rem 1rem}
+@media(max-width:640px){.obj-card{grid-template-columns:1fr}}
+
+/* SUBSTITUTIONS TABLE */
+.sub-wrap{border-radius:var(--rl);overflow:hidden;border:1px solid var(--g2);margin-top:2rem}
+.sub-head{display:grid;grid-template-columns:1fr 1fr}
+.sub-head div{padding:1rem 1.5rem;background:var(--bk);color:var(--wh);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.sub-row{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--g2)}
+.sub-from{padding:1rem 1.5rem;font-size:13px;color:var(--gm);text-decoration:line-through;background:var(--wh)}
+.sub-to{padding:1rem 1.5rem;font-size:13px;font-weight:700;color:var(--bk);background:var(--ol)}
+
+/* TIMELINE */
+.tl{position:relative;margin-top:2.5rem;padding-left:.5rem}
+.tl::before{content:'';position:absolute;left:19px;top:0;bottom:0;width:2px;background:var(--g2)}
+.tl-item{display:flex;gap:1.75rem;padding-bottom:2.5rem;position:relative}
+.tl-dot{
+  width:40px;height:40px;flex-shrink:0;border-radius:50%;
+  background:var(--wh);border:2px solid var(--o);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;color:var(--o);
+  position:relative;z-index:1;
+}
+.tl-body{flex:1;padding-top:6px}
+.tl-title{font-size:15px;font-weight:800;color:var(--bk);margin-bottom:5px;letter-spacing:-.01em}
+.tl-desc{font-size:13px;color:var(--gm);line-height:1.6}
+
+/* HORARIOS */
+.hor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin-top:2rem}
+.hor-card{background:var(--g1);border-radius:var(--rl);padding:1.75rem}
+.hor-name{font-size:13px;font-weight:800;color:var(--bk);margin-bottom:1rem;letter-spacing:-.01em}
+.hor-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.45rem}
+.hor-day{font-size:11px;font-weight:600;color:var(--gm);text-transform:uppercase;letter-spacing:.06em}
+.hor-time{font-size:13px;font-weight:800;color:var(--bk)}
+
+/* DIFF ITEMS */
+.diffs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin-top:2rem}
+.diff-it{
+  background:var(--wh);border:1px solid var(--g2);
+  border-radius:var(--r);padding:1.25rem;
+  display:flex;align-items:flex-start;gap:.85rem;
+  transition:border-color .18s,transform .18s;
+}
+.diff-it:hover{border-color:var(--o);transform:translateY(-3px)}
+.diff-n{
+  width:28px;height:28px;flex-shrink:0;border-radius:50%;
+  background:var(--ol);color:var(--o);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;
+}
+.diff-t{font-size:12.5px;color:var(--gd);line-height:1.5;font-weight:500}
+
+/* SONDAGEM */
+.sond-list{list-style:none;margin-top:2rem;display:grid;gap:.75rem}
+.sond-item{
+  display:flex;align-items:flex-start;gap:1.25rem;
+  padding:1.25rem 1.5rem;background:var(--g1);border-radius:var(--r);
+}
+.sond-q{
+  width:32px;height:32px;flex-shrink:0;border-radius:50%;
+  background:var(--o);color:var(--wh);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;
+}
+.sond-t{font-size:14px;font-weight:600;color:var(--bk);line-height:1.5}
+.sond-t em{font-style:normal;font-size:12px;color:var(--gm);font-weight:400}
+
+/* CANAL CARDS */
+.canal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;margin-top:2rem}
+.canal-card{background:var(--g1);border-radius:var(--rxl);padding:2rem}
+.canal-ico{font-size:2rem;margin-bottom:1rem;display:block}
+.canal-title{font-size:16px;font-weight:800;color:var(--bk);margin-bottom:.75rem;letter-spacing:-.01em}
+.canal-rules{list-style:none;display:grid;gap:.5rem;margin-top:.75rem}
+.canal-rules li{font-size:13px;color:var(--gd);line-height:1.55;padding-left:1.1rem;position:relative}
+.canal-rules li::before{content:'·';position:absolute;left:0;color:var(--o);font-weight:800}
+
+/* PRAZOS */
+.prazo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-top:2rem}
+.prazo-card{background:var(--wh);border:1px solid var(--g2);border-radius:var(--rl);padding:2rem;text-align:center}
+.prazo-num{font-size:2.8rem;font-weight:900;color:var(--o);letter-spacing:-.05em;line-height:1}
+.prazo-unit{font-size:14px;font-weight:800;color:var(--bk);margin-top:.35rem}
+.prazo-desc{font-size:12px;color:var(--gm);margin-top:.5rem;line-height:1.55}
+
+/* PAGAMENTO */
+.pag-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1.25rem;margin-top:2rem}
+.pag-card{border-radius:var(--rl);padding:2rem;border:1px solid var(--g2);text-align:center;background:var(--wh)}
+.pag-big{font-size:3rem;font-weight:900;color:var(--o);letter-spacing:-.05em;line-height:1;margin-bottom:.5rem}
+.pag-name{font-size:13px;font-weight:800;color:var(--bk);margin-bottom:.6rem}
+.pag-info{font-size:12px;color:var(--gm);line-height:1.6}
+
+/* CLOSING */
+.closing{
+  background:var(--bk);color:var(--wh);
+  padding:140px 2rem;text-align:center;position:relative;overflow:hidden;
+}
+.closing::before{
+  content:'';position:absolute;width:800px;height:800px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(244,123,32,.12),transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;
+}
+.closing-inner{position:relative;z-index:1}
+.closing h2{
+  font-size:clamp(3rem,7vw,6rem);font-weight:900;
+  letter-spacing:-.05em;margin-bottom:1.5rem;line-height:1.0;
+}
+.closing h2 em{color:var(--o);font-style:normal}
+.closing p{font-size:17px;color:rgba(255,255,255,.45);max-width:520px;margin:0 auto 3rem;line-height:1.7}
+.closing-meta{font-size:11px;color:rgba(255,255,255,.2);letter-spacing:.08em}
+
+/* RAPPORT BOX */
+.rapport-box{
+  background:var(--bk);border-radius:var(--rxl);padding:2.5rem;margin-top:2rem;
+}
+.rapport-step{
+  display:flex;gap:1.25rem;align-items:flex-start;padding-bottom:1.5rem;margin-bottom:1.5rem;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.rapport-step:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.rapport-num{
+  width:36px;height:36px;flex-shrink:0;border-radius:50%;
+  background:var(--o);color:var(--wh);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;
+}
+.rapport-body{flex:1;padding-top:4px}
+.rapport-title{font-size:13px;font-weight:800;color:var(--o2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.rapport-text{font-size:14px;color:rgba(255,255,255,.7);line-height:1.6;font-style:italic}
+
+/* SINAIS DE COMPRA */
+.sinais-table{width:100%;border-radius:var(--rl);overflow:hidden;margin-top:2rem;border:1px solid var(--g2)}
+.sinais-table thead tr{background:var(--bk);color:var(--wh)}
+.sinais-table th{padding:1rem 1.5rem;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;text-align:left}
+.sinais-table tbody tr{border-top:1px solid var(--g2);transition:background .15s}
+.sinais-table tbody tr:hover{background:var(--g1)}
+.sinais-table td{padding:.9rem 1.5rem;font-size:13px;vertical-align:top;line-height:1.5}
+.sinais-table td:first-child{font-weight:700;color:var(--bk);font-style:italic;width:40%}
+.sinais-table td:last-child{color:var(--gd);font-weight:600}
+
+/* SCRIPTS PADRÃO TABLE */
+.sp-table{width:100%;border-radius:var(--rl);overflow:hidden;border:1px solid var(--g2);margin-top:2rem}
+.sp-table thead tr{background:var(--o);color:var(--wh)}
+.sp-table th{padding:1rem 1.5rem;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;text-align:left}
+.sp-table tbody tr{border-top:1px solid var(--g2);transition:background .15s}
+.sp-table tbody tr:hover{background:var(--ol)}
+.sp-table td{padding:1rem 1.5rem;font-size:13px;vertical-align:top;line-height:1.6}
+.sp-table td:first-child{font-weight:700;color:var(--bk);width:35%}
+.sp-table td:last-child{color:var(--gd);font-style:italic}
+
+/* DISPENSAÇÃO */
+.disp-flow{display:grid;gap:1rem;margin-top:2rem}
+.disp-step{
+  display:flex;gap:1.25rem;align-items:flex-start;
+  background:var(--g1);border-radius:var(--r);padding:1.25rem;
+}
+.disp-n{
+  width:36px;height:36px;flex-shrink:0;background:var(--bk);color:var(--wh);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;
+}
+.disp-b{flex:1}
+.disp-title{font-size:13.5px;font-weight:800;color:var(--bk);margin-bottom:4px}
+.disp-desc{font-size:12.5px;color:var(--gm);line-height:1.6}
+
+/* WHATSAPP RULES */
+.wa-rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:2rem}
+.wa-rule{
+  background:var(--g1);border-radius:var(--r);padding:1.25rem;
+  display:flex;gap:1rem;align-items:flex-start;
+}
+.wa-dot{width:8px;height:8px;background:var(--o);border-radius:50%;flex-shrink:0;margin-top:5px}
+.wa-text{font-size:13px;color:var(--gd);line-height:1.6}
+.wa-text b{color:var(--bk);font-weight:700}
+
+/* IA SECTION */
+.ia-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2rem}
+.ia-card{border-radius:var(--rl);padding:2rem;border:1px solid var(--g2);background:var(--wh)}
+.ia-badge{
+  display:inline-block;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.1em;
+  padding:4px 12px;border-radius:30px;margin-bottom:1rem;
+  background:var(--ol);color:var(--o);
+}
+.ia-title{font-size:15px;font-weight:800;color:var(--bk);margin-bottom:.75rem;letter-spacing:-.01em}
+.ia-body{font-size:13px;color:var(--gm);line-height:1.65}
+
+/* FOOTER */
+footer{padding:2rem;text-align:center;font-size:11.5px;color:var(--g3);border-top:1px solid var(--g2);letter-spacing:.05em}
+
+/* --- DARK SECTIONS --- */
+.dark-sec{background:var(--bk)}
+.dark-sec .s-kicker{color:var(--o2)}
+.dark-sec .s-title{color:var(--wh)}
+.dark-sec .s-desc{color:rgba(255,255,255,.45)}
+.dark-sec hr.div{border-color:rgba(255,255,255,.08)}
+.dark-sec .acc{border-color:rgba(255,255,255,.1)}
+.dark-sec .acc-item{border-color:rgba(255,255,255,.1)}
+.dark-sec .acc-btn{color:var(--wh)}
+.dark-sec .acc-ico{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4)}
+.dark-sec .acc-btn[aria-expanded="true"] .acc-ico{background:rgba(244,123,32,.2);color:var(--o2)}
+.dark-sec .rule{background:rgba(255,255,255,.04);color:rgba(255,255,255,.65)}
+.dark-sec .rule:hover{border-left-color:var(--o2)}
+.dark-sec .rule b,.dark-sec .rule strong{color:var(--o2)}
+.dark-sec .stat-card{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
+.dark-sec .stat-label{color:var(--wh)}
+.dark-sec .stat-sub{color:rgba(255,255,255,.4)}
+.dark-sec .tab-btn{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.5)}
+.dark-sec .tab-btn:hover{border-color:var(--o);color:var(--o)}
+.dark-sec .tab-btn.on{background:var(--o);color:var(--wh);border-color:var(--o)}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="dot"></div>
+    <span>Vivenda <em>Manual 2026</em></span>
+  </div>
+  <ul class="nav-pills">
+    <li><a href="#filosofia" class="nl">Filosofia</a></li>
+    <li><a href="#excelencia" class="nl">Excelência</a></li>
+    <li><a href="#telefone" class="nl">Telefone</a></li>
+    <li><a href="#whatsapp" class="nl">WhatsApp</a></li>
+    <li><a href="#loja" class="nl">Loja Física</a></li>
+    <li><a href="#omnichannel" class="nl">Omnichannel</a></li>
+    <li><a href="#fluxo" class="nl">Fluxo IA</a></li>
+    <li><a href="#negociacao" class="nl">Negociação</a></li>
+    <li><a href="#rapport" class="nl">Rapport</a></li>
+    <li><a href="#fechamento" class="nl">Fechamento</a></li>
+    <li><a href="#scripts" class="nl">Scripts</a></li>
+    <li><a href="#implementacao" class="nl">Implementação</a></li>
+  </ul>
+</nav>
+
+<!--  HERO  -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-ring"></div>
+  <div class="hero-ring2"></div>
+  <div class="hero-inner">
+    <div class="hero-kicker"><div class="dot"></div> Manual de Padronização · 2026</div>
+    <h1>
+      <span class="line-thin">Atendimento</span><br>
+      <span class="line-o">&amp; Vendas</span><br>
+      <span style="font-size:.55em;font-weight:300;letter-spacing:-.02em">de excelência</span>
+    </h1>
+    <p class="hero-desc">O guia completo da Farmácia Vivenda para atender, negociar e fidelizar clientes em todos os canais, do presencial ao WhatsApp.</p>
+    <div class="hero-numbers">
+      <div class="h-num"><div class="big">9<span>+</span></div><div class="lbl">capítulos</div></div>
+      <div class="h-num"><div class="big">20<span>+</span></div><div class="lbl">anos de mercado</div></div>
+      <div class="h-num"><div class="big">8</div><div class="lbl">unidades</div></div>
+      <div class="h-num"><div class="big">28<span>+</span></div><div class="lbl">diferenciais</div></div>
+      <div class="h-num"><div class="big">51</div><div class="lbl">páginas</div></div>
+    </div>
+  </div>
+  <div class="hero-scroll"><div class="scroll-line"></div>scroll</div>
+</section>
+<hr class="div">
+
+<!--  FILOSOFIA  -->
+<section id="filosofia">
+  <div class="s-inner">
+    <p class="s-kicker rv">Capítulo 2 · Filosofia Estratégica</p>
+    <h2 class="s-title rv">Nossa <em>identidade</em><br>e propósito</h2>
+    <p class="s-desc rv">Com mais de 20 anos no mercado, a Farmácia Vivenda Manipulações e Homeopatia foi a primeira farmácia de manipulação de Valparaíso de Goiás. Hoje, 8 unidades no DF e entorno com equipes altamente qualificadas.</p>
+
+    <div class="grid-3">
+      <div class="card rv" data-d="1">
+        <div class="card-icon">🎯</div>
+        <div class="card-tag">Propósito</div>
+        <div class="card-title">Nossa razão de existir</div>
+        <div class="card-body">"Cuidar de todos com excelência, segurança e proximidade."</div>
+      </div>
+      <div class="card rv" data-d="2">
+        <div class="card-icon">💊</div>
+        <div class="card-tag">Missão</div>
+        <div class="card-title">O que entregamos</div>
+        <div class="card-body">"Entregar saúde e bem estar aos nossos clientes, através de produtos com alta qualidade e contando com a competência da nossa equipe."</div>
+      </div>
+      <div class="card rv" data-d="3">
+        <div class="card-icon">🔭</div>
+        <div class="card-tag">Visão de Futuro</div>
+        <div class="card-title">Para onde vamos</div>
+        <div class="card-body">"Seguir sendo referência em produtos e serviços de alta qualidade, considerando os aspectos inovadores em tecnologia e excelência na gestão."</div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:4rem">
+      <h3 style="font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Valores que nos guiam</h3>
+      <div class="pills-wrap">
+        <span class="pill pill-bk">Ética</span>
+        <span class="pill pill-bk">Competência Técnica</span>
+        <span class="pill pill-bk">Alta Qualidade dos Produtos</span>
+        <span class="pill pill-bk">Valorização dos Colaboradores</span>
+        <span class="pill pill-bk">Satisfação dos Clientes</span>
+        <span class="pill pill-bk">Crescimento Sustentável</span>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:4rem">
+      <h3 style="font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:.5rem">28 Diferenciais Competitivos</h3>
+      <p style="font-size:14px;color:var(--gm);margin-bottom:0">O que nos torna únicos no mercado de manipulação do DF.</p>
+      <div class="diffs">
+        <div class="diff-it"><div class="diff-n">01</div><div class="diff-t">8 lojas em locais de fácil acesso</div></div>
+        <div class="diff-it"><div class="diff-n">02</div><div class="diff-t">Inteligência artificial e autoatendimento</div></div>
+        <div class="diff-it"><div class="diff-n">03</div><div class="diff-t">Utilização do omnichannel</div></div>
+        <div class="diff-it"><div class="diff-n">04</div><div class="diff-t">Entrega domiciliar em todo DF e entorno</div></div>
+        <div class="diff-it"><div class="diff-n">05</div><div class="diff-t">Consultoria farmacêutica gratuita</div></div>
+        <div class="diff-it"><div class="diff-n">06</div><div class="diff-t">Alta qualidade de produção</div></div>
+        <div class="diff-it"><div class="diff-n">07</div><div class="diff-t">Altos níveis de avaliação positiva no Google</div></div>
+        <div class="diff-it"><div class="diff-n">08</div><div class="diff-t">Processos de manipulação qualificados por terceirizados</div></div>
+        <div class="diff-it"><div class="diff-n">09</div><div class="diff-t">Cabines diferenciadas para hormônios e antibióticos</div></div>
+        <div class="diff-it"><div class="diff-n">10</div><div class="diff-t">Selo de autenticidade de matérias primas exclusivas</div></div>
+        <div class="diff-it"><div class="diff-n">11</div><div class="diff-t">Tecnologia do moinho nano estruturado</div></div>
+        <div class="diff-it"><div class="diff-n">12</div><div class="diff-t">Fornecedores qualificados</div></div>
+        <div class="diff-it"><div class="diff-n">13</div><div class="diff-t">Farmacêuticos especializados</div></div>
+        <div class="diff-it"><div class="diff-n">14</div><div class="diff-t">Extrato seco padronizado com efeito mais eficaz</div></div>
+        <div class="diff-it"><div class="diff-n">15</div><div class="diff-t">Mais de 20 anos no mercado</div></div>
+        <div class="diff-it"><div class="diff-n">16</div><div class="diff-t">Cápsulas vegetal, entérica, tapioca, clorofila, gelatinosa</div></div>
+        <div class="diff-it"><div class="diff-n">17</div><div class="diff-t">Acesso rápido ao farmacêutico</div></div>
+        <div class="diff-it"><div class="diff-n">18</div><div class="diff-t">Reconhecida como farmácia de referência no mercado</div></div>
+        <div class="diff-it"><div class="diff-n">19</div><div class="diff-t">Controle de peso médio (conferência das cápsulas)</div></div>
+        <div class="diff-it"><div class="diff-n">20</div><div class="diff-t">Laboratórios com controle da qualidade do ar e água</div></div>
+        <div class="diff-it"><div class="diff-n">21</div><div class="diff-t">Bases nobres em dermatologia</div></div>
+        <div class="diff-it"><div class="diff-n">22</div><div class="diff-t">Análise da matéria prima antes de chegar ao cliente</div></div>
+        <div class="diff-it"><div class="diff-n">23</div><div class="diff-t">Sistema de exaustão para evitar contaminação cruzada</div></div>
+        <div class="diff-it"><div class="diff-n">24</div><div class="diff-t">Rastreabilidade em todo processo de manipulação</div></div>
+        <div class="diff-it"><div class="diff-n">25</div><div class="diff-t">Embalagens diferenciadas</div></div>
+        <div class="diff-it"><div class="diff-n">26</div><div class="diff-t">Marca própria de dermocosméticos e suplementos</div></div>
+        <div class="diff-it"><div class="diff-n">27</div><div class="diff-t">Calibração de todos os equipamentos</div></div>
+        <div class="diff-it"><div class="diff-n">28</div><div class="diff-t">Tecnologia em equipamentos (seladora esteira, encapsuladora semiautomática)</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  EXCELÊNCIA  -->
+<section id="excelencia" style="background:var(--g1)">
+  <div class="s-inner">
+    <p class="s-kicker rv">Capítulo 3 · Excelência no Atendimento</p>
+    <h2 class="s-title rv">Como <em>tratamos</em><br>cada cliente</h2>
+    <p class="s-desc rv">Cada colaborador é o representante direto da Vivenda. Atendimento não é transação, é o diferencial entre o sucesso e o fracasso comercial.</p>
+
+    <div class="acc rv">
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.1 · Diretrizes Estruturantes de Atendimento</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule">Reconhecer que a satisfação do cliente é o <strong>pilar fundamental</strong> para a estabilidade, prosperidade e conquista de mercado da empresa.</div>
+          <div class="rule">Evitar a negligência e a desatenção, a combinação de consumidores exigentes com concorrência acirrada é <strong>fatal para o negócio.</strong></div>
+          <div class="rule">Dominar integralmente todos os processos, procedimentos, produtos e serviços oferecidos como requisito básico para a excelência.</div>
+          <div class="rule highlight">Tratar o atendimento não apenas como uma transação, mas como o <strong>diferencial estratégico entre o sucesso e o fracasso comercial.</strong></div>
+        </div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.2 · Procedimentos para Encantamento e Fidelização</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule">Superar as expectativas do consumidor de forma contínua, indo além do simples suprimento de necessidades básicas no momento da compra.</div>
+          <div class="rule">Exercer o dever de cordialidade, tratando todo cliente com extrema gentileza e cortesia <strong>em todos os pontos de contato.</strong></div>
+          <div class="rule">Garantir a entrega de produtos e serviços dentro dos mais rigorosos padrões de qualidade como cumprimento de uma obrigação mínima.</div>
+          <div class="rule highlight">Promover um ambiente onde o cliente sinta-se acolhido e valorizado, assegurando que sua satisfação resulte no <strong>retorno recorrente à empresa (fidelização).</strong></div>
+        </div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.3 · Postura e Representação Institucional</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule">O colaborador é o <strong>representante direto da empresa</strong>, seu dever é oferecer tratamento diferenciado com altos níveis de excelência.</div>
+          <div class="rule"><strong>Proibido:</strong> frases que demonstrem esquiva de responsabilidade ou falta de colaboração.</div>
+          <div class="rule highlight"><strong>Prioridade absoluta:</strong> atendimento presencial sobre canais on-line e telefônicos.</div>
+          <div class="rule">Utilizar a técnica de <strong>rapport</strong> na comunicação, sintonizando tom de voz ou modelo de escrita ao perfil do cliente.</div>
+          <div class="rule"><strong>Proibido:</strong> uso de apelidos, termos no diminutivo ou gerundismos desnecessários.</div>
+          <div class="rule"><strong>Proibido:</strong> alimentar-se, mascar chicletes ou balas fora dos espaços reservados durante o expediente.</div>
+        </div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.4 · Ética, Compromisso e Gestão de Conflitos</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule"><strong>Proibido:</strong> uso de "jeitinhos" ou ações antiéticas para efetivar uma venda.</div>
+          <div class="rule">Assumir apenas compromissos e promessas que a organização tenha plena capacidade de cumprir.</div>
+          <div class="rule">Focar na solução imediata de problemas em vez de apontar culpados, reconhecer falhas internas de forma profissional perante o cliente.</div>
+          <div class="rule">Atender reclamações e problemas com paciência e atenção imediata, <strong>o cliente tem razão até que se prove o contrário.</strong></div>
+          <div class="rule">Responsabilizar-se pelo atendimento de problemas ou trocas no canal em que a demanda chegar, acionar a liderança em caso de impasses.</div>
+          <div class="rule">Tratar pesquisas de mercado ou consultas de concorrentes com o <strong>mesmo padrão de qualidade</strong> aplicado aos clientes reais.</div>
+          <div class="rule highlight">A resolução ágil e eficiente de um problema é ferramenta poderosa de fidelização. A falha no suporte resulta em perda definitiva e propaganda negativa.</div>
+        </div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.5 · Identificação e Tratamento Personalizado</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule">Priorizar o uso do <strong>nome próprio do cliente</strong> em todas as interações, garantindo um atendimento humanizado e próximo.</div>
+          <div class="rule">Evitar, como regra geral, o uso dos pronomes de tratamento "Senhor" ou "Senhora", eliminar barreiras formais desnecessárias.</div>
+          <div class="rule">Garantir que, independentemente do pronome escolhido, o tom de voz e a escrita permaneçam pautados pelo respeito e profissionalismo.</div>
+        </div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.6 · Gestão de Tempo e Qualidade no Atendimento</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule highlight"><strong>Proibido:</strong> atender o cliente com pressa, sempre priorizar atenção especial e detalhada.</div>
+          <div class="rule">Identificar a impossibilidade de atendimento imediato e oferecer ao cliente a opção de retorno posterior.</div>
+          <div class="rule">Script de indisponibilidade: <strong>"[Nome], neste momento todos os atendentes estão em atendimento. Poderia me passar o seu número para que possamos te retornar em alguns instantes?"</strong></div>
+          <div class="rule">Anotar imediatamente o número e retornar com a maior brevidade possível em caso de aceite do cliente.</div>
+          <div class="rule">Script de contingência: <strong>"[Nome], peço então a sua gentileza de aguardar na linha que lhe atenderemos em seguida?"</strong></div>
+          <div class="rule">Garantir que o tempo de espera, após aceite do cliente em aguardar, seja monitorado para evitar insatisfação.</div>
+        </div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.7 · Ética e Integridade na Emissão de Pedidos</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule highlight"><strong>Terminantemente proibido:</strong> emissão de qualquer pedido sem que o lote correspondente exista e esteja disponível no sistema.</div>
+          <div class="rule">Verificar obrigatoriamente a existência real dos lotes necessários antes da conclusão da venda.</div>
+          <div class="rule">Respeitar rigorosamente as mensagens de alerta do sistema, se houver aviso de insuficiência de ativos, o pedido <strong>não pode ser emitido sob nenhuma circunstância.</strong></div>
+          <div class="rule"><strong>Proibido:</strong> inventar, trocar ou substituir componentes sem autorização técnica ou enganar o cliente.</div>
+          <div class="rule">Não prometer prazos ou resultados que a farmácia não tenha capacidade técnica ou logística de cumprir.</div>
+        </div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.8 · Gestão de Fluxo e Capacidade (Leads)</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule">O atendente não deve iniciar novos atendimentos caso sua fila atual comprometa a agilidade e a qualidade da resposta.</div>
+          <div class="rule highlight"><strong>Prioridade de Fechamento:</strong> o foco total deve ser a conclusão ágil do pedido, o cliente nunca deve ser deixado em espera por sobrecarga do operador.</div>
+          <div class="rule"><strong>Blindagem Comercial:</strong> identificada a sobrecarga, o atendimento deve ser direcionado a outro colaborador com maior disponibilidade imediatamente.</div>
+          <div class="rule">Atendentes: manter a autogestão da capacidade e comunicar sobrecarga em tempo real.</div>
+          <div class="rule">Liderança: supervisionar a fila de espera e intervir na distribuição de leads para garantir resposta imediata a todos os clientes.</div>
+        </div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.9 · Pós-Venda, Dúvidas e Reclamações</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule highlight">O atendente que realizou a venda é o <strong>responsável direto pelo pós-venda</strong> e pelo acompanhamento até a entrega final ao cliente.</div>
+          <div class="rule">Responder prontamente sobre o status do pedido (previsão de entrega ou se já está pronto).</div>
+          <div class="rule">Ao receber cliente com dúvidas ou reclamações, verificar dados no sistema e buscar a resolução imediata.</div>
+          <div class="rule">Se a informação for técnica de outro colaborador, usar a frase: <strong>"Estou encaminhando sua solicitação ao atendente que realizou o seu pedido para que ele finalize com você."</strong></div>
+          <div class="rule"><strong>Proibição de Descarte:</strong> sob nenhuma circunstância o cliente deve ser "jogado" de um atendente para outro, especialmente em casos de reclamação.</div>
+          <div class="rule"><strong>Regra de Ouro:</strong> É proibido retirar um atendimento do status "Pendente" sem que o problema tenha sido efetivamente resolvido.</div>
+          <div class="rule">A liderança deve realizar o acompanhamento diário obrigatório de todos os itens pendentes.</div>
+        </div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>3.10 · Comunicação Interna (De Ponta a Ponta)</span><span class="acc-ico">+</span></button>
+        <div class="acc-body"><div class="acc-content">
+          <div class="rule highlight">Realizar toda comunicação profissional interna <strong>exclusivamente pelos chats oficiais do sistema</strong>, conversas individuais ou grupos.</div>
+          <div class="rule"><strong>Vedado:</strong> uso de aplicativos pessoais ou canais externos para tratar de temas operacionais.</div>
+          <div class="rule">Toda mensagem recebida exige uma resposta obrigatória.</div>
+          <div class="rule">"Acusar Recebimento": caso não possa resolver na hora, responder imediatamente: <strong>"Recebido, estou verificando."</strong></div>
+          <div class="rule">A comunicação só é considerada encerrada após o retorno final sobre a solicitação.</div>
+          <div class="rule">Todos os registros de chat servem como <strong>documento oficial</strong> para avaliações de desempenho e resolução de conflitos.</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  TELEFONE  -->
+<section id="telefone">
+  <div class="s-inner">
+    <p class="s-kicker rv">Capítulo 4 · Teleatendimento</p>
+    <h2 class="s-title rv">A voz que<br><em>representa</em> a Vivenda</h2>
+    <p class="s-desc rv">Cada colaborador vende uma imagem da empresa através do telefone. O posicionamento no atendimento dita a percepção do cliente, um atendimento amador rebaixa a empresa.</p>
+
+    <div class="grid-2 rv">
+      <div>
+        <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Saudação Obrigatória</h3>
+        <div class="bq">
+          <div class="bq-text">"Farmácia Vivenda [Local], [Nome], bom-dia!!!"</div>
+          <div class="bq-sub">Estrutura: Farmácia + Local + Nome + Cumprimento cantado</div>
+        </div>
+        <div style="display:grid;gap:.75rem;margin-top:1.5rem">
+          <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--g1);border-radius:var(--r)">
+            <div class="step-dot o" style="width:36px;height:36px;font-size:12px">1</div>
+            <span style="font-size:13.5px;font-weight:600">Atender até o <strong>3º toque</strong>, priorizar o primeiro</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--g1);border-radius:var(--r)">
+            <div class="step-dot o" style="width:36px;height:36px;font-size:12px">2</div>
+            <span style="font-size:13.5px;font-weight:600">Identificar o cliente pelo nome logo no início</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--g1);border-radius:var(--r)">
+            <div class="step-dot o" style="width:36px;height:36px;font-size:12px">3</div>
+            <span style="font-size:13.5px;font-weight:600">Registrar imediatamente no sistema ou bloco de notas</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Encerramentos Padrão</h3>
+        <div class="script s-dark">
+          <div class="script-ctx">Quando o cliente liga para nós</div>
+          <div class="script-q">"A Vivenda agradece a sua ligação, tenha um bom dia/tarde/noite!"</div>
+        </div>
+        <div class="script s-light">
+          <div class="script-ctx">Quando ligamos para o cliente</div>
+          <div class="script-q">"A Vivenda agradece a sua atenção, tenha um bom dia/tarde/noite!"</div>
+        </div>
+        <div class="script s-mid">
+          <div class="script-ctx">Transferência de ligação</div>
+          <div class="script-q">"Um momento/instante, por favor, vou transferir a ligação. Tenha um bom dia!"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:4rem">
+      <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Regras de Linguagem e Conduta</h3>
+      <div class="acc">
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>4.4 · Padrões de Linguagem no Atendimento Telefônico</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule">Substituir "um minuto" ou "um segundo" por <strong>"Aguarde um instante"</strong> ou <strong>"Um momento, por gentileza".</strong></div>
+            <div class="rule">Eliminar gerundismos: em vez de <strong>"vou estar fazendo"</strong>, usar <strong>"vou fazer"</strong> ou <strong>"entregaremos".</strong></div>
+            <div class="rule">Praticar a <strong>escuta ativa</strong>, aguardar a conclusão do raciocínio do cliente antes de interromper.</div>
+            <div class="rule">Sinalizar atenção com confirmações periódicas como <strong>"sim"</strong> ou <strong>"entendi".</strong></div>
+            <div class="rule">Priorizar o atendimento presencial, se receber ligação enquanto atende cliente, solicitar recado para retorno posterior, exceto urgências.</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>4.5 · Protocolo de Espera e Conferência Técnica</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule">Solicitar permissão formal antes de colocar o cliente em espera e informar claramente a ação que será realizada.</div>
+            <div class="rule">Usar obrigatoriamente a função <strong>"mudo"</strong> durante consultas internas para preservar o profissionalismo.</div>
+            <div class="rule highlight">Retornar à linha a cada <strong>30 segundos</strong> para informar o andamento da pesquisa, evitar que o cliente se sinta abandonado.</div>
+            <div class="rule">Oferecer retorno da ligação em até <strong>15 minutos</strong> caso a consulta seja complexa, cumprir rigorosamente o prazo.</div>
+            <div class="rule">Finalizar esperas com agradecimento formal pelo tempo aguardado.</div>
+            <div class="rule">Confirmar tecnicamente todos os dados da prescrição: valores, unidades de medida (mg, mcg, g) e quantidades de cápsulas.</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>4.8 · Cotação de Preços por Telefone</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule highlight">Tratar toda ligação de cotação como uma <strong>oportunidade real de venda</strong>, cada interessado é um potencial comprador.</div>
+            <div class="rule">Identificar o interlocutor de maneira educada e gentil antes de fornecer qualquer dado ou valor.</div>
+            <div class="rule">Realizar a sondagem das necessidades do cliente antes de passar informações.</div>
+            <div class="rule">Fornecer preços, prazos e condições de pagamento de forma clara, estimulando o cliente a visualizar os benefícios e diferenciais.</div>
+            <div class="rule">Solicitar a transição para o WhatsApp, informando o número de contato e o nome do atendente.</div>
+            <div class="rule">Enviar mensagem imediata ao cliente após a ligação, facilitando o envio da receita.</div>
+            <div class="rule"><strong>Follow-up:</strong> cumprir o padrão em no máximo <strong>24 horas</strong> para clientes que não fecharam o pedido.</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>4.12 · Postura Vocal e Comunicação</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule">Projetar imagem profissional e acolhedora, o cliente constrói a percepção da empresa com base na voz do atendente.</div>
+            <div class="rule">Usar tom de voz agradável, comunicando-se com tranquilidade e evitando qualquer sinal de pressa.</div>
+            <div class="rule">Ajustar a velocidade da fala em sintonia com o ritmo do cliente (rapport), evitar exageros.</div>
+            <div class="rule">Monitorar a respiração para que não transpareça cansaço ou estado ofegante.</div>
+            <div class="rule">Priorizar a <strong>naturalidade</strong> na comunicação, evitar falas decoradas ou robóticas.</div>
+            <div class="rule"><strong>Terminantemente proibido:</strong> uso de termos pejorativos, agressivos ou de confronto.</div>
+            <div class="rule">Aplicar a simpatia como ferramenta estratégica, cordialidade aumenta diretamente as chances de fechamento.</div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:3.5rem">
+      <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Pilares para Imagem Positiva pelo Telefone</h3>
+      <div class="grid-3">
+        <div class="card white rv" data-d="1">
+          <div class="card-icon" style="background:var(--g1)">📚</div>
+          <div class="card-tag">Conhecimento</div>
+          <div class="card-title">Domínio profundo do produto</div>
+          <div class="card-body">Conhecer todos os produtos, fórmulas, modelo de negócio e estrutura da empresa como requisito mínimo.</div>
+        </div>
+        <div class="card white rv" data-d="2">
+          <div class="card-icon" style="background:var(--g1)">🗣️</div>
+          <div class="card-tag">Comunicação</div>
+          <div class="card-title">Domínio da língua portuguesa</div>
+          <div class="card-body">Desenvolver continuamente o domínio da língua portuguesa e o uso estratégico de frases de efeito que facilitem a conexão com o cliente.</div>
+        </div>
+        <div class="card white rv" data-d="3">
+          <div class="card-icon" style="background:var(--g1)">📋</div>
+          <div class="card-tag">Padronização</div>
+          <div class="card-title">Script natural, não decorado</div>
+          <div class="card-body">Estudar e aplicar o modelo de script previamente definido, garantindo que a fala ocorra de maneira natural e fluida.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  WHATSAPP  -->
+<section id="whatsapp" style="background:var(--bk)" class="dark-sec">
+  <div class="s-inner">
+    <p class="s-kicker rv">Capítulo 5 · WhatsApp Corporativo</p>
+    <h2 class="s-title rv">WhatsApp como<br><em>ferramenta de vendas</em></h2>
+    <p class="s-desc rv">Operação obrigatória através da plataforma integrada PrimePharmacie. Ambiente estritamente profissional, sem emojis, sem caixa alta, sem gírias.</p>
+
+    <div class="canal-grid rv">
+      <div style="background:rgba(255,255,255,.04);border-radius:var(--rxl);padding:2rem;border:1px solid rgba(255,255,255,.06)">
+        <span class="canal-ico">📥</span>
+        <div class="canal-title" style="color:var(--wh)">5.2.1 · Triagem e Início</div>
+        <ul class="canal-rules" style="margin-top:.75rem">
+          <li style="color:rgba(255,255,255,.65)">Identificar o cliente imediatamente ao primeiro contato</li>
+          <li style="color:rgba(255,255,255,.65)">Solicitar imagem ou texto da receita para iniciar o orçamento</li>
+          <li style="color:rgba(255,255,255,.65)">Verificar validade da receita e identificar substâncias controladas antes de avançar</li>
+        </ul>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border-radius:var(--rxl);padding:2rem;border:1px solid rgba(255,255,255,.06)">
+        <span class="canal-ico">🔬</span>
+        <div class="canal-title" style="color:var(--wh)">5.2.2 · Conferência Técnica</div>
+        <ul class="canal-rules" style="margin-top:.75rem">
+          <li style="color:rgba(255,255,255,.65)">Checklist: lotes, dosagens, forma farmacêutica e quantidade antes de lançar no sistema</li>
+          <li style="color:rgba(255,255,255,.65)">Validar urgências, usar modelo de Sobradinho com validação prévia do farmacêutico</li>
+          <li style="color:rgba(255,255,255,.65)">Enviar orçamento detalhando os benefícios da fórmula antes de apresentar o valor</li>
+        </ul>
+      </div>
+      <div style="background:rgba(244,123,32,.12);border-radius:var(--rxl);padding:2rem;border:1px solid rgba(244,123,32,.2)">
+        <span class="canal-ico">📞</span>
+        <div class="canal-title" style="color:var(--o2)">5.2.3 · Estratégia Mista</div>
+        <ul class="canal-rules" style="margin-top:.75rem">
+          <li style="color:rgba(255,255,255,.65)">Solicitar migração para ligação durante apresentação do orçamento</li>
+          <li style="color:rgba(255,255,255,.65)">Negociar via telefone, encaminhar link de pagamento via WhatsApp</li>
+          <li style="color:rgba(255,255,255,.65)">Script: "[Nome], bom-dia, tenho uma novidade sobre o orçamento. Posso ligar para você agora?"</li>
+        </ul>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border-radius:var(--rxl);padding:2rem;border:1px solid rgba(255,255,255,.06)">
+        <span class="canal-ico">✅</span>
+        <div class="canal-title" style="color:var(--wh)">5.2.4 · Fechamento</div>
+        <ul class="canal-rules" style="margin-top:.75rem">
+          <li style="color:rgba(255,255,255,.65)">Enviar obrigatoriamente pergunta de fechamento após qualquer orçamento</li>
+          <li style="color:rgba(255,255,255,.65)">"[Nome], fica bom para você assim?" ou "[Nome], já posso confirmar o seu pedido?"</li>
+          <li style="color:rgba(255,255,255,.65)">Finalizar com agradecimento e confirmação de logística, independentemente do desfecho</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:4rem">
+      <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem;color:var(--wh)">5.1 · Regras Obrigatórias de Uso</h3>
+      <div class="wa-rules">
+        <div class="wa-rule" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)"><div class="wa-dot"></div><div class="wa-text" style="color:rgba(255,255,255,.65)"><b style="color:var(--o2)">Proibido</b> emojis, caixa alta e mensagens em maiúsculas, usar negrito ou sublinhado para ênfase</div></div>
+        <div class="wa-rule" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)"><div class="wa-dot"></div><div class="wa-text" style="color:rgba(255,255,255,.65)">Zelar pela correção ortográfica e gramatical em todas as mensagens</div></div>
+        <div class="wa-rule" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)"><div class="wa-dot"></div><div class="wa-text" style="color:rgba(255,255,255,.65)">Separar parágrafos com linhas em branco, <b style="color:var(--o2)">um assunto por mensagem</b></div></div>
+        <div class="wa-rule" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)"><div class="wa-dot"></div><div class="wa-text" style="color:rgba(255,255,255,.65)">Não pressionar o cliente com novas mensagens imediatamente após o "check azul"</div></div>
+        <div class="wa-rule" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)"><div class="wa-dot"></div><div class="wa-text" style="color:rgba(255,255,255,.65)">Usar o recurso de <b style="color:var(--o2)">"citar mensagem"</b> para responder pontos específicos</div></div>
+        <div class="wa-rule" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)"><div class="wa-dot"></div><div class="wa-text" style="color:rgba(255,255,255,.65)">Praticar a concisão, evitar textos longos e linguagens inadequadas como gírias ou termos em outros idiomas</div></div>
+        <div class="wa-rule" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)"><div class="wa-dot"></div><div class="wa-text" style="color:rgba(255,255,255,.65)"><b style="color:var(--o2)">Máximo 10 atendimentos simultâneos</b>, o sistema cessa novos direcionamentos ao atingir este teto</div></div>
+        <div class="wa-rule" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)"><div class="wa-dot"></div><div class="wa-text" style="color:rgba(255,255,255,.65)">Atualizar status para <b style="color:var(--o2)">"Ocupado"</b> durante almoço, intervalos e ao encerrar expediente</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  LOJA FÍSICA  -->
+<section id="loja" style="background:var(--g1)">
+  <div class="s-inner">
+    <p class="s-kicker rv">Capítulo 6 · Loja Física</p>
+    <h2 class="s-title rv">Operação<br><em>presencial</em> de excelência</h2>
+    <p class="s-desc rv">O atendimento presencial tem prioridade absoluta. Todo cliente deve ser cumprimentado ao entrar, convidado a sentar e tratado com a saudação padrão da Vivenda.</p>
+
+    <div class="grid-2 rv">
+      <div>
+        <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Saudação e Abordagem</h3>
+        <div class="bq" style="background:var(--wh)">
+          <div class="bq-text">"Olá, bom-dia/boa-tarde/boa-noite, Seja bem-vindo(a)!"</div>
+          <div class="bq-sub">Levantando-se sempre que a dinâmica permitir</div>
+        </div>
+        <div style="margin-top:1.5rem">
+          <p style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--gm);margin-bottom:.75rem">Sondagem obrigatória de abertura</p>
+          <ul class="sond-list">
+            <li class="sond-item"><div class="sond-q">1</div><div class="sond-t">Por gentileza, qual o seu nome? <em>(seguido da sua apresentação pessoal)</em></div></li>
+            <li class="sond-item"><div class="sond-q">2</div><div class="sond-t">Já possui cadastro conosco?</div></li>
+            <li class="sond-item"><div class="sond-q">3</div><div class="sond-t">Tem a receita médica?</div></li>
+            <li class="sond-item"><div class="sond-q">4</div><div class="sond-t">Já manipulou esta medicação conosco anteriormente?</div></li>
+            <li class="sond-item"><div class="sond-q">5</div><div class="sond-t">A medicação é para você mesmo?</div></li>
+            <li class="sond-item"><div class="sond-q">6</div><div class="sond-t">Possui alguma urgência médica neste atendimento?</div></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Modelos de Fechamento Presencial</h3>
+        <div class="script s-dark" style="margin-bottom:1rem">
+          <div class="script-ctx">Modelo 1 · Foco na entrega</div>
+          <div class="script-q">"[Nome], o valor total da sua receita ficou em R$ XX para XX dias de tratamento. Podemos entregar na [Dia da Semana]. Fica bom para você assim?"</div>
+        </div>
+        <div class="script s-orange">
+          <div class="script-ctx">Modelo 2 · Confirmação direta</div>
+          <div class="script-q">"[Nome], o valor da sua receita ficou em R$ XX para um tratamento de XX dias e estará pronto na [Dia da Semana]. Já posso confirmar seu pedido?"</div>
+        </div>
+        <div style="margin-top:1.5rem;background:var(--wh);border-radius:var(--rl);padding:1.5rem">
+          <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--gm);margin-bottom:.75rem">3 pontos obrigatórios no fechamento presencial</p>
+          <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+            <div style="text-align:center;flex:1">
+              <div style="font-size:22px;font-weight:900;color:var(--o)">R$</div>
+              <div style="font-size:12px;font-weight:700;color:var(--bk)">Valor Total</div>
+            </div>
+            <div style="text-align:center;flex:1">
+              <div style="font-size:22px;font-weight:900;color:var(--o)">📅</div>
+              <div style="font-size:12px;font-weight:700;color:var(--bk)">Tempo de Tratamento</div>
+            </div>
+            <div style="text-align:center;flex:1">
+              <div style="font-size:22px;font-weight:900;color:var(--o)">🚚</div>
+              <div style="font-size:12px;font-weight:700;color:var(--bk)">Prazo de Entrega</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:4rem">
+      <div class="acc">
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>6.1 · Mesa de Hospitalidade e Cortesia</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule">Respeitar a autonomia de cada unidade, cada loja pode ter padrão de montagem próprio para a mesa de cortesia.</div>
+            <div class="rule highlight"><strong>Obrigatório em todas as lojas:</strong> oferta de água, café e chá, sempre com o adoçante de fabricação própria com embalagem da empresa.</div>
+            <div class="rule">Oferecer itens complementares conforme critério da liderança local: água saborizada em garrafas de vidro, biscoitos, chás variados e balas de marca própria.</div>
+            <div class="rule">Disponibilizar a mesa em formato de autoatendimento, o cliente se serve livremente.</div>
+            <div class="rule">Atuar de forma proativa sempre que possível, servindo e levando a cortesia diretamente ao cliente.</div>
+            <div class="rule">Utilizar exclusivamente copos descartáveis para o serviço de todas as bebidas.</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>6.3 · Padrão de Apresentação do Orçamento</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule highlight">Priorizar apresentação técnica e consultiva, detalhando forma farmacêutica, gramatura, quantidades e <strong>benefícios da fórmula antes da revelação do preço.</strong></div>
+            <div class="rule">Realizar a descrição resumida da composição para receitas de até 4 itens. Para prescrições acima deste volume, adotar síntese mais objetiva.</div>
+            <div class="rule">Descrever cada item individualmente, especificando fórmulas, formas farmacêuticas e matérias-primas utilizadas.</div>
+            <div class="rule"><strong>Cautela e discrição</strong> na leitura da receita, evitar a exposição do cliente em situações pessoais, especialmente ao tratar de termos sensíveis.</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>6.5 · Vitrines, Expositores e Uniforme</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule">Manter sempre as vitrines e expositores limpos, limpeza diária obrigatória.</div>
+            <div class="rule">Todos os produtos em exposição devem estar adesivados e precificados.</div>
+            <div class="rule"><strong>Proibido:</strong> deixar vitrines e expositores com espaços vazios.</div>
+            <div class="rule">O uniforme é padronizado para uso em todos os dias da semana, deve estar sempre limpo e bem passado.</div>
+            <div class="rule">O crachá compõe o uniforme e deve estar sempre visível.</div>
+            <div class="rule">Novatos utilizam camiseta de uniforme e crachá especial "em treinamento".</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>6.7 · Venda de Itens Adicionais</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule">Reconhecer a importância estratégica da venda dos produtos expostos na loja em todos os atendimentos.</div>
+            <div class="rule">Ao notar que o cliente observa um produto, retirar da exposição e colocar sobre a mesa de atendimento.</div>
+            <div class="rule">Oferecer após a conclusão da negociação principal: <strong>"[Nome], vi que também gostou deste produto, quer que eu o inclua junto com sua receita?"</strong></div>
+            <div class="rule">Script de promoção: <strong>"[Nome], hoje estamos com uma promoção no [Produto], posso te mostrar?"</strong></div>
+            <div class="rule highlight">Integrar o caixa na estratégia de vendas, obrigatória a oferta de um produto em promoção em todas as finalizações de venda.</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>6.8 · Script para Troca de Atendente</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule highlight">Script obrigatório: <strong>"Oi [Nome], bom dia, sou a [Fulana] e darei seguimento no seu atendimento de agora em diante."</strong></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:3.5rem">
+      <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Horários de Funcionamento</h3>
+      <div class="hor-grid">
+        <div class="hor-card">
+          <div class="hor-name">Asa Sul, Valparaíso 2,<br>Taguatinga, Ceilândia</div>
+          <div class="hor-row"><span class="hor-day">Seg a Sex</span><span class="hor-time">08h às 18h</span></div>
+          <div class="hor-row"><span class="hor-day">Sábado</span><span class="hor-time">08h às 13h</span></div>
+        </div>
+        <div class="hor-card">
+          <div class="hor-name">Valparaíso 1<br>e Sobradinho</div>
+          <div class="hor-row"><span class="hor-day">Seg a Sex</span><span class="hor-time">08h às 19h</span></div>
+          <div class="hor-row"><span class="hor-day">Sábado, VP1</span><span class="hor-time">08h às 13h</span></div>
+          <div class="hor-row"><span class="hor-day">Sábado, Sobradinho</span><span class="hor-time">08h às 14h</span></div>
+        </div>
+        <div class="hor-card">
+          <div class="hor-name">Taguatinga</div>
+          <div class="hor-row"><span class="hor-day">Sábado</span><span class="hor-time">08h às 12h</span></div>
+        </div>
+        <div class="hor-card" style="background:var(--bk)">
+          <div class="hor-name" style="color:var(--wh)">Formas de Pagamento</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.6;margin-top:.5rem">Débito e Crédito<br><span style="color:var(--o2)">Visa · Master · Elo · Amex · Diners</span></div>
+          <div style="margin-top:.75rem;font-size:11px;color:rgba(255,255,255,.4)">6x sem juros acima de R$300 · mín. R$100/parcela</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISPENSAÇÃO -->
+    <div class="rv" style="margin-top:4rem">
+      <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:.75rem">6.12 · Padrão de Dispensação (Retirada) de Medicação</h3>
+      <p style="font-size:14px;color:var(--gm);margin-bottom:1.5rem">Protocolo completo de entrega segura ao cliente.</p>
+      <div class="disp-flow">
+        <div class="disp-step"><div class="disp-n">1</div><div class="disp-b"><div class="disp-title">Verificar digitalização da receita</div><div class="disp-desc">Assegurar que o processo de digitalização tenha sido concluído integralmente durante a etapa de vendas antes de dispensar.</div></div></div>
+        <div class="disp-step"><div class="disp-n">2</div><div class="disp-b"><div class="disp-title">Entregar protocolo de retirada</div><div class="disp-desc">Garantir a entrega do protocolo a todos os clientes no ato da encomenda, serve como documento de comprovação e rastreio.</div></div></div>
+        <div class="disp-step"><div class="disp-n">3</div><div class="disp-b"><div class="disp-title">Rastreamento do pedido</div><div class="disp-desc">Com ficha: inserir dados para reconhecimento imediato. Sem ficha: acessar o sistema e realizar rastreio manual pelo cadastro do cliente.</div></div></div>
+        <div class="disp-step" style="background:var(--om)"><div class="disp-n" style="background:var(--o)">4</div><div class="disp-b"><div class="disp-title" style="color:var(--bk)">Confirmar nome do paciente na rotulagem</div><div class="disp-desc" style="color:var(--gd)">Validar obrigatoriamente se o nome do paciente na receita coincide com o impresso na rotulagem da medicação.</div></div></div>
+        <div class="disp-step"><div class="disp-n">5</div><div class="disp-b"><div class="disp-title">Leitura técnica dos ativos</div><div class="disp-desc">Efetuar a leitura técnica dos ativos descritos no rótulo diretamente para o cliente, garantindo transparência e conferência final da fórmula.</div></div></div>
+        <div class="disp-step"><div class="disp-n">6</div><div class="disp-b"><div class="disp-title">Coletar assinatura e datar</div><div class="disp-desc">Coletar a assinatura do cliente na ficha de conferência. O colaborador também deve assinar e datar para encerrar o ciclo de responsabilidade.</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  OMNICHANNEL  -->
+<section id="omnichannel">
+  <div class="s-inner">
+    <p class="s-kicker rv">Capítulo 7 · Omnichannel</p>
+    <h2 class="s-title rv">Regras dos<br><em>canais integrados</em></h2>
+    <p class="s-desc rv">Integração de todos os canais para que o cliente não veja diferença entre o mundo on-line e o presencial. Todo atendimento centralizado nos sistemas oficiais.</p>
+
+    <div class="prazo-grid rv">
+      <div class="prazo-card"><div class="prazo-num">10</div><div class="prazo-unit">minutos</div><div class="prazo-desc">Para resgate de ticket após 1ª mensagem enviada pelo cliente sem resposta</div></div>
+      <div class="prazo-card"><div class="prazo-num">20</div><div class="prazo-unit">minutos</div><div class="prazo-desc">Limite para envio de orçamentos. Até 08h30, o prazo é de 30 minutos</div></div>
+      <div class="prazo-card"><div class="prazo-num">2</div><div class="prazo-unit">horas</div><div class="prazo-desc">Janela para condução original, desde que haja interação ativa no atendimento</div></div>
+      <div class="prazo-card"><div class="prazo-num">6</div><div class="prazo-unit">horas</div><div class="prazo-desc">Para recuperação de orçamentos em aberto. Após, qualquer atendente pode resgatar</div></div>
+      <div class="prazo-card"><div class="prazo-num">15</div><div class="prazo-unit">minutos</div><div class="prazo-desc">Intervalo máximo entre mensagens em atendimentos resgatados, sob pena de ticket disponível</div></div>
+      <div class="prazo-card"><div class="prazo-num">72</div><div class="prazo-unit">horas</div><div class="prazo-desc">Encerramento automático do sistema após inatividade total no ticket</div></div>
+    </div>
+
+    <div class="rv" style="margin-top:4rem">
+      <div class="acc">
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>7.2 · Sistemas de Atendimento e Uso do Celular</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule highlight">Centralizar obrigatoriamente todo e qualquer atendimento, vendas, orçamentos, reclamações, sugestões e comunicações internas, dentro dos <strong>sistemas oficiais da empresa.</strong></div>
+            <div class="rule"><strong>Proibido celular pessoal:</strong> Atendimento e Vendas, Caixa, Farmacêuticos (função de vendas), Manipuladores (Farmacêuticos, Técnicos e Auxiliares).</div>
+            <div class="rule"><strong>Autorizado celular:</strong> Líderes e Sublíderes, Farmacêuticos em funções de gestão.</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>7.8.2 · Protocolo de Intervenção e "Resgate" de Atendimentos</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule"><strong>10 minutos:</strong> após a primeira mensagem enviada pelo cliente sem resposta, outro colaborador deve assumir.</div>
+            <div class="rule"><strong>20 minutos:</strong> para mensagens visualizadas ou orçamentos prontos no sistema, mas não enviados.</div>
+            <div class="rule">Respeitar a janela de 2 horas para condução original, desde que haja interação ativa.</div>
+            <div class="rule highlight"><strong>Regra de Fechamento:</strong> após manifestação de interesse real do cliente ("quero fechar"), o atendente tem até 20 minutos para dar seguimento. Excedido este tempo, qualquer colaborador pode finalizar o pedido.</div>
+            <div class="rule">Monitorar atendimentos resgatados: o novo atendente deve manter conversas ativas com intervalos de no máximo 15 minutos, sob pena de o ticket ficar disponível novamente.</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>7.8.3 · Scripts de Transição de Atendimento</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule highlight">Script de substituição no almoço: <strong>"Prezado cliente. O atendente que iniciou seu atendimento não está podendo dar sequência neste momento, posso lhe ajudar ou prefere aguardar?"</strong></div>
+            <div class="rule">Script de apresentação na troca de operadores: <strong>"Oi [Nome do Cliente], bom-dia, sou a [Seu Nome] e darei seguimento no seu atendimento de agora em diante."</strong></div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>7.8.5 · Gestão de Reclamações e Conflitos</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule">Atribuir ao Líder da unidade que recebeu a reclamação a responsabilidade pelo primeiro atendimento e acolhimento do cliente.</div>
+            <div class="rule">Encaminhar o caso, após o contato inicial, ao Líder da loja de origem para a resolução final.</div>
+          </div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false" onclick="tog(this)"><span>7.9 · Grupos de WhatsApp e Campo de Observações</span><span class="acc-ico">+</span></button>
+          <div class="acc-body"><div class="acc-content">
+            <div class="rule">Reconhecer os grupos corporativos como canais estratégicos de suporte operacional (Logística, Links de Pagamento, Receitas B2).</div>
+            <div class="rule">Cada colaborador deve criar rotina periódica de leitura das mensagens para garantir ciência de comunicações destinadas a ele ou à sua unidade.</div>
+            <div class="rule">Atuar de forma proativa no resgate de prescrições encaminhadas por representantes em grupos abertos.</div>
+            <div class="rule">Respeitar o direcionamento nominal: quando o representante destinar a um colaborador específico, a prioridade pertence ao destinatário mencionado.</div>
+            <div class="rule highlight">Usar obrigatoriamente o campo de <strong>OBSERVAÇÕES</strong> dentro da plataforma Omnichannel para registrar informações críticas que vinculem o atendimento a um colaborador ou ação específica.</div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:3.5rem">
+      <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Scripts de Recepção por Região</h3>
+      <div class="grid-2">
+        <div class="script s-dark">
+          <div class="script-ctx">Lojas do Distrito Federal</div>
+          <div class="script-q" style="font-style:normal;font-size:14px;line-height:1.7">A Farmácia Vivenda agradece o contato. Em que podemos lhe ajudar? Escolha uma opção abaixo:<br><br>1. Asa Sul · 2. Taguatinga · 3. Ceilândia · 4. Sobradinho · 5. Planaltina<br><br><em style="font-size:12px;color:rgba(255,255,255,.4)">Favor digitar apenas o número da opção desejada.</em></div>
+        </div>
+        <div class="script s-light">
+          <div class="script-ctx">Lojas do Valparaíso</div>
+          <div class="script-q" style="color:var(--bk);font-style:normal;font-size:14px;line-height:1.7">A Farmácia Vivenda agradece o contato. Em que podemos lhe ajudar? Escolha uma opção abaixo:<br><br>1. Valparaíso 1 · 2. Valparaíso 2<br><br><em style="font-size:12px;color:var(--gm)">Favor digitar apenas o número da opção desejada.</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  FLUXO IA  -->
+<section id="fluxo" style="background:var(--bk)" class="dark-sec">
+  <div class="s-inner">
+    <p class="s-kicker rv">Capítulo 8 · Fluxo & Tecnologia</p>
+    <h2 class="s-title rv">Fluxo de Atendimento<br><em>em 4 Etapas</em></h2>
+    <p class="s-desc rv">Processos claros, seguros e eficientes para corrigir falhas recorrentes e elevar o nível de serviço. Do primeiro contato ao fechamento com follow-up.</p>
+
+    <div class="tab-nav rv">
+      <button class="tab-btn on" onclick="tab('fa','fb',this)">Etapa A · Triagem</button>
+      <button class="tab-btn" onclick="tab('fb','fa',this)">Etapa B · Elaboração</button>
+      <button class="tab-btn" onclick="tab('fc','fa',this)">Etapa C · Negociação</button>
+      <button class="tab-btn" onclick="tab('fd','fa',this)">Etapa D · Fechamento</button>
+    </div>
+
+    <!-- ETAPA A -->
+    <div id="fa" class="tab-pane on rv">
+      <div style="background:rgba(244,123,32,.1);border:1px solid rgba(244,123,32,.2);border-radius:var(--r);padding:1rem 1.5rem;margin-bottom:2rem">
+        <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--o2)">Objetivo da Etapa A</p>
+        <p style="font-size:14px;color:rgba(255,255,255,.75);margin-top:.35rem">Assegurar que o atendimento inicie com segurança, agilidade e total conformidade legal.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="step-dot o">A1</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Saudação e Identificação Inicial</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Saudação correta e imediata, identificando a unidade e o nome do atendente. Solicitar ou confirmar dados cadastrais do cliente para personalização.</div></div></div>
+        <div class="step"><div class="step-dot o">A2</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Coleta e Análise da Receita</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Solicitar a imagem ou texto da receita logo no início da interação para análise de viabilidade técnica. Se não enviada, atuar ativamente, solicitando e aguardando o envio.</div></div></div>
+        <div class="step"><div class="step-dot o">A3</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Conferência de Integridade e Dados</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Identificar se a receita está completa: ativos farmacêuticos, dosagens, formas farmacêuticas e dados do paciente. Se faltarem dados, solicitar ao cliente e aguardar antes de qualquer lançamento.</div></div></div>
+        <div class="step"><div class="step-dot o">A4</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Validação Legal e Técnica</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Identificar se é de controle especial. Verificar obrigatoriamente o prazo de validade técnica. Se a validade estiver expirada, o documento ilegível ou com rasuras, informar imediatamente e solicitar nova receita.</div></div></div>
+        <div class="step"><div class="step-dot">A5</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Transição de Etapa</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Proceder com a Validação Técnica Inicial e seguir para a elaboração do orçamento somente após a receita ser considerada integralmente válida e completa.</div></div></div>
+      </div>
+      <div style="margin-top:2.5rem;background:rgba(255,255,255,.04);border-radius:var(--rl);padding:2rem">
+        <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--o2);margin-bottom:1rem">8.2 · Operação da IA PH 24 e Conferência de Receitas</p>
+        <div class="ia-grid" style="margin-top:0">
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1.25rem;border:1px solid rgba(255,255,255,.06)">
+            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--o2);margin-bottom:.5rem">Conferência Integral</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.55);line-height:1.6">Validar obrigatoriamente todos os ativos farmacêuticos e informações do prescritor após a leitura da IA, antes de qualquer lançamento no sistema.</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1.25rem;border:1px solid rgba(255,255,255,.06)">
+            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--o2);margin-bottom:.5rem">Gestão de Erros</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.55);line-height:1.6">Tratar como casos de report para correção sistêmica qualquer informação do prescritor que, embora legível, não tenha sido reconhecida pela IA.</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1.25rem;border:1px solid rgba(255,255,255,.06)">
+            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--o2);margin-bottom:.5rem">Tempo de Processamento</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.55);line-height:1.6">Monitorar e reportar tempos excessivos entre a leitura automática e a conferência manual, visando manter o padrão de agilidade no envio do orçamento.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ETAPA B -->
+    <div id="fb" class="tab-pane rv">
+      <div style="background:rgba(244,123,32,.1);border:1px solid rgba(244,123,32,.2);border-radius:var(--r);padding:1rem 1.5rem;margin-bottom:2rem">
+        <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--o2)">Objetivo da Etapa B</p>
+        <p style="font-size:14px;color:rgba(255,255,255,.75);margin-top:.35rem">Reduzir falhas operacionais, eliminar retrabalho e garantir a total coerência entre a prescrição e o sistema de orçamento.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="step-dot o">B1</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Elaboração do Orçamento</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Inserir os dados da prescrição no sistema. Validar o laboratório e os insumos disponíveis para assegurar que a proposta esteja em conformidade com a receita.</div></div></div>
+        <div class="step"><div class="step-dot o">B2</div><div class="step-info">
+          <div class="step-title" style="color:var(--wh)">Checklist Obrigatório de Conferência Técnica</div>
+          <div class="step-desc" style="color:rgba(255,255,255,.55)">Executar obrigatoriamente o checklist logo após a elaboração e antes do lançamento final. Conferir minuciosamente:</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.75rem">
+            <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.75rem;font-size:13px;color:rgba(255,255,255,.7);font-weight:700">✓ Dosagens</div>
+            <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.75rem;font-size:13px;color:rgba(255,255,255,.7);font-weight:700">✓ Tipos de cápsulas e quantidade</div>
+            <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.75rem;font-size:13px;color:rgba(255,255,255,.7);font-weight:700">✓ Lotes e laboratórios</div>
+            <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.75rem;font-size:13px;color:rgba(255,255,255,.7);font-weight:700">✓ Forma farmacêutica</div>
+          </div>
+        </div></div>
+        <div class="step"><div class="step-dot o">B3</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Monitoramento de Inconsistências</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Verificar a coerência das informações da receita com o sistema. Revisar qualquer inconsistência e ajustar imediatamente. O orçamento só é considerado "Revisado" após validação total do checklist.</div></div></div>
+        <div class="step"><div class="step-dot o">B4</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Validação de Urgências, Modelo Sobradinho</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Toda urgência deve passar pela validação obrigatória do farmacêutico com conferência antecipada. Utilizar este fluxo para evitar erros e garantir segurança em pedidos de prioridade alta.</div></div></div>
+        <div class="step"><div class="step-dot">B5</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Apresentação ao Cliente</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Apresentar o valor com segurança apenas após a conclusão das etapas de revisão. Destacar qualidade dos ativos, fornecedores e tradição da farmácia como diferenciais de valor.</div></div></div>
+      </div>
+    </div>
+
+    <!-- ETAPA C -->
+    <div id="fc" class="tab-pane rv">
+      <div style="background:rgba(244,123,32,.1);border:1px solid rgba(244,123,32,.2);border-radius:var(--r);padding:1rem 1.5rem;margin-bottom:2rem">
+        <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--o2)">Objetivo da Etapa C</p>
+        <p style="font-size:14px;color:rgba(255,255,255,.75);margin-top:.35rem">Conduzir a negociação de forma técnica e consultiva para converter vendas, sem comprometer a margem de contribuição da empresa.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="step-dot o">C1</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Escuta Ativa e Identificação da Objeção</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Praticar a escuta ativa para identificar com precisão a natureza da resistência do cliente.</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.75rem">
+            <div style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:10px;padding:.75rem;text-align:center;font-size:12px;font-weight:800;color:#a5b4fc">Preço</div>
+            <div style="background:rgba(244,123,32,.15);border:1px solid rgba(244,123,32,.3);border-radius:10px;padding:.75rem;text-align:center;font-size:12px;font-weight:800;color:var(--o2)">Prazo</div>
+            <div style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:.75rem;text-align:center;font-size:12px;font-weight:800;color:#6ee7b7">Dúvidas Técnicas</div>
+          </div>
+        </div></div>
+        <div class="step"><div class="step-dot o">C2</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Técnicas por Tipo de Objeção</div>
+          <div style="display:grid;gap:.75rem;margin-top:.75rem">
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:1rem;border-left:3px solid #a5b4fc">
+              <div style="font-size:11px;font-weight:800;color:#a5b4fc;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem">Dúvidas Técnicas</div>
+              <div style="font-size:13px;color:rgba(255,255,255,.6)">Aplicar conhecimento farmacêutico para sanar incertezas sobre eficácia, ativos, posologia ou forma farmacêutica.</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:1rem;border-left:3px solid var(--o2)">
+              <div style="font-size:11px;font-weight:800;color:var(--o2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem">Prazo</div>
+              <div style="font-size:13px;color:rgba(255,255,255,.6)">Validar a real urgência do cliente e avaliar a viabilidade logística. Se o prazo não puder ser alterado, reforçar o valor agregado e a procedência dos insumos.</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:1rem;border-left:3px solid #6ee7b7">
+              <div style="font-size:11px;font-weight:800;color:#6ee7b7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem">Preço</div>
+              <div style="font-size:13px;color:rgba(255,255,255,.6)">Explicar diferenciais de custo, o pagamento via PIX oferece vantagens por possuir taxas menores em comparação ao cartão de crédito.</div>
+            </div>
+          </div>
+        </div></div>
+        <div class="step"><div class="step-dot o">C3</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Sustentação de Valor · Não Ceda Automaticamente</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Evitar terminantemente a concessão automática de descontos no início da negociação. Sustentar o valor ressaltando a qualidade superior dos ativos, qualificação dos fornecedores e tradição de excelência da farmácia.</div></div></div>
+        <div class="step"><div class="step-dot o">C4</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Cobertura de Concorrentes</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Avaliar a possibilidade de cobertura de orçamentos concorrentes apenas mediante validação prévia do farmacêutico ou gestor responsável.</div></div></div>
+        <div class="step"><div class="step-dot">C5</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Conclusão da Negociação</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Confirmar se o cliente aprova o orçamento após as tratativas. Em caso de aprovação, solicitar imediatamente a melhor forma de pagamento. Se não fechar, avaliar se o perfil se adequa ao protocolo de Follow-up.</div></div></div>
+      </div>
+    </div>
+
+    <!-- ETAPA D -->
+    <div id="fd" class="tab-pane rv">
+      <div style="background:rgba(244,123,32,.1);border:1px solid rgba(244,123,32,.2);border-radius:var(--r);padding:1rem 1.5rem;margin-bottom:2rem">
+        <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--o2)">Objetivo da Etapa D</p>
+        <p style="font-size:14px;color:rgba(255,255,255,.75);margin-top:.35rem">Validar todas as informações finais, garantir a precisão da logística de entrega e assegurar o encerramento claro do atendimento.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="step-dot o">D1</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Definição da Modalidade de Entrega</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem">
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:1rem">
+              <div style="font-size:12px;font-weight:800;color:var(--o2);margin-bottom:.35rem">Retirada em Loja</div>
+              <div style="font-size:12.5px;color:rgba(255,255,255,.55)">Confirmar explicitamente a unidade de preferência do cliente</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:1rem">
+              <div style="font-size:12px;font-weight:800;color:var(--o2);margin-bottom:.35rem">Delivery</div>
+              <div style="font-size:12.5px;color:rgba(255,255,255,.55)">Solicitar endereço detalhado e pontos de referência para o serviço</div>
+            </div>
+          </div>
+        </div></div>
+        <div class="step"><div class="step-dot o">D2</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Formalização do Pagamento</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Confirmar a melhor forma de pagamento escolhida. Validar se o pagamento foi devidamente processado ou agendado no sistema antes de finalizar o pedido.</div></div></div>
+        <div class="step"><div class="step-dot o">D3</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Alinhamento de Expectativas e Conclusão</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Fornecer previsão de prazo clara e realista, devidamente alinhada com a capacidade produtiva do laboratório e logística. Certificar-se que o cliente compreendeu integralmente os próximos passos, prazos e condições financeiras.</div></div></div>
+        <div class="step"><div class="step-dot">D4</div><div class="step-info"><div class="step-title" style="color:var(--wh)">Protocolo de Follow-up</div><div class="step-desc" style="color:rgba(255,255,255,.55)">Identificar atendimentos não convertidos imediatamente. Realizar contato de follow-up para tentativa de renegociação. Se o cliente aprovar após esta nova abordagem, retomar o fluxo de solicitação de pagamento.</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  NEGOCIAÇÃO  -->
+<section id="negociacao" style="background:var(--g1)">
+  <div class="s-inner">
+    <p class="s-kicker rv">Capítulo 9 · Negociação & Vendas</p>
+    <h2 class="s-title rv">A arte de<br><em>converter</em> objeções</h2>
+    <p class="s-desc rv">O processo de negociação só se inicia quando o valor do orçamento é entregue ao cliente. Tudo antes e depois disso são processos de atendimento.</p>
+
+    <div class="grid-3 rv">
+      <div class="card dark">
+        <div class="card-icon" style="background:rgba(255,255,255,.06);font-size:2.5rem">73%</div>
+        <div class="card-title">Das vendas acontecem após a 5ª objeção</div>
+        <div class="card-body">63% dos atendentes desistem de vender após a 2ª objeção. Persistência é a chave.</div>
+      </div>
+      <div class="card orange">
+        <div class="card-icon" style="background:rgba(255,255,255,.15);font-size:2rem">💰</div>
+        <div class="card-title">Nunca ofereça desconto imediato</div>
+        <div class="card-body">Apresente o orçamento sem oferta de desconto. Diante de objeções de preço, primeiro descubra a verdade antes de dar o próximo passo.</div>
+      </div>
+      <div class="card white">
+        <div class="card-icon" style="background:var(--ol);font-size:2rem">🤝</div>
+        <div class="card-tag">Sequência de Negociação</div>
+        <div class="card-title">Se precisar ceder, comece por:</div>
+        <div class="card-body">1. Qualidade dos produtos<br>2. Parcelamento<br>3. Entrega<br>4. Parte do desconto (última opção)</div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:3.5rem">
+      <h3 style="font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:.75rem">Como Fazer o Cliente Gostar de Você</h3>
+      <p style="font-size:14px;color:var(--gm);margin-bottom:1.5rem">10 práticas que criam conexão e aumentam a conversão.</p>
+      <div class="grid-4">
+        <div class="card white"><div class="card-body"><strong>1.</strong> Seja gentil em qualquer situação</div></div>
+        <div class="card white"><div class="card-body"><strong>2.</strong> Sorria, mesmo ao telefone a pessoa percebe</div></div>
+        <div class="card white"><div class="card-body"><strong>3.</strong> Coloque-se à disposição para auxiliar, não apenas para vender</div></div>
+        <div class="card white"><div class="card-body"><strong>4.</strong> Sempre chame a todos pelo nome em qualquer canal</div></div>
+        <div class="card white"><div class="card-body"><strong>5.</strong> No presencial, fale olhando para os olhos do interlocutor</div></div>
+        <div class="card white"><div class="card-body"><strong>6.</strong> Não force a barra, nunca questione o cliente</div></div>
+        <div class="card white"><div class="card-body"><strong>7.</strong> Use sempre rapport nas negociações</div></div>
+        <div class="card white"><div class="card-body"><strong>8.</strong> Busque vender um bom atendimento antes de vender o produto</div></div>
+        <div class="card white"><div class="card-body"><strong>9.</strong> Condicionantes: "Se eu fizer por R$ X, posso confirmar seu pedido?"</div></div>
+        <div class="card white"><div class="card-body"><strong>10.</strong> O que prometer, Cumpra!</div></div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:3.5rem">
+      <h3 style="font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:.75rem">Arte das Perguntas em Vendas</h3>
+      <p style="font-size:14px;color:var(--gm);margin-bottom:1.5rem">Em vez de argumentar, devolva a pergunta. Deixe o cliente responder sua própria objeção.</p>
+      <div class="grid-2">
+        <div>
+          <div class="bq">
+            <div class="bq-text">"Eu achei muito caro." → "Sim, compreendo, mas já fez um orçamento em outro lugar?"</div>
+          </div>
+          <div class="bq" style="margin-top:1rem">
+            <div class="bq-text">"Vou fazer uma pesquisa antes." → "Entendo, e qual é a sua dúvida em relação ao nosso orçamento?"</div>
+          </div>
+          <div class="bq" style="margin-top:1rem">
+            <div class="bq-text">"Estou apenas pesquisando preços." → "[Nome], de que maneira eu posso lhe auxiliar para que ganhe tempo e tome uma decisão agora?"</div>
+          </div>
+        </div>
+        <div>
+          <div class="bq">
+            <div class="bq-text">"Seu preço tá fora do mercado." → "Entendo, e o que a levou a esta conclusão?"</div>
+          </div>
+          <div class="bq" style="margin-top:1rem">
+            <div class="bq-text">"A entrega de vocês é muito demorada." → "E, se eu garantir que a entrega chegará dentro do que negociarmos, fica bom para você?"</div>
+          </div>
+          <div style="background:var(--g1);border-radius:var(--r);padding:1.25rem;margin-top:1rem">
+            <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--gm);margin-bottom:.75rem">Respostas que fecham mais vendas</p>
+            <div style="display:grid;gap:.5rem">
+              <div style="font-size:13px;color:var(--gd)">"Pode parcelar?" → <strong>"Sim [Nome]. Em quantas parcelas fica melhor para você?"</strong></div>
+              <div style="font-size:13px;color:var(--gd)">"Aceitam PIX?" → <strong>"[Nome], pagar com PIX é melhor para você."</strong></div>
+              <div style="font-size:13px;color:var(--gd)">"Vocês entregam?" → <strong>"[Nome], por apenas R$10,00 entregaremos na sua casa na quarta-feira, assim fica bom para você?"</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:3.5rem">
+      <h3 style="font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:.75rem">Objeções Mais Comuns · Como Contornar</h3>
+      <p style="font-size:14px;color:var(--gm);margin-bottom:1.5rem">Filtre por tipo para encontrar a resposta certa.</p>
+      <div class="filter-bar">
+        <button class="fb on" onclick="filtObj('all',this)">Todas</button>
+        <button class="fb" onclick="filtObj('pt',this)">Pretexto</button>
+        <button class="fb" onclick="filtObj('pr',this)">Preço</button>
+      </div>
+      <div class="obj-grid">
+        <div class="obj-card" data-t="pt"><div class="obj-l"><div class="obj-type-tag pt">Pretexto</div><div class="obj-phrase">"Vou pensar melhor, depois eu ligo para você?"</div></div><div class="obj-r"><div class="obj-r-title">Como contornar</div><div class="obj-answers"><div class="obj-ans">Rapport: "Claro, uma decisão bem pensada sempre é um bom caminho. Mas, antes de desligar, posso lhe fazer uma pergunta?"</div><div class="obj-ans">1. Qual exatamente é a sua dúvida? 2. Tem alguma informação importante que precise saber para tomar a decisão agora? 3. Posso lhe auxiliar a que tome uma decisão agora?</div></div></div></div>
+        <div class="obj-card" data-t="pt"><div class="obj-l"><div class="obj-type-tag pt">Pretexto</div><div class="obj-phrase">"Tenho que fazer outros orçamentos antes..."</div></div><div class="obj-r"><div class="obj-r-title">Como contornar</div><div class="obj-answers"><div class="obj-ans">Rapport: "Com certeza! Isso é um fato. Temos sempre que estar alerta aos preços do mercado, não é mesmo? Mas, antes que eu me despeça, pode me responder a uma pergunta?"</div><div class="obj-ans">1. Quanto tempo ainda vai gastar para fazer outros orçamentos? 2. Será que a economia que poderá fazer compensa o tempo gasto e o custo das ligações? 3. E se eu lhe auxiliar a já resolver este problema agora, como se sentiria?</div></div></div></div>
+        <div class="obj-card" data-t="pt"><div class="obj-l"><div class="obj-type-tag pt">Pretexto</div><div class="obj-phrase">"Desta vez não vai dar" ou "vai ficar para a próxima"</div></div><div class="obj-r"><div class="obj-r-title">Como contornar</div><div class="obj-answers"><div class="obj-ans">Rapport: "Certo, mas, antes de encerrar, posso lhe fazer uma pergunta?"</div><div class="obj-ans">De que maneira eu posso auxiliar você a ter uma solução rápida e já poder ter este medicamento no seu tratamento a partir de amanhã?</div></div></div></div>
+        <div class="obj-card" data-t="pr"><div class="obj-l"><div class="obj-type-tag pr">Preço</div><div class="obj-phrase">"Está muito caro!"</div></div><div class="obj-r"><div class="obj-r-title">Como contornar</div><div class="obj-answers"><div class="obj-ans">Rapport: "Sim. Vejo que tem sua razão em pensar assim, é realmente importante se levar o preço em consideração, mas, antes de finalizarmos, me permite fazer uma pergunta?"</div><div class="obj-ans">1. O que te levou a pensar assim? 2. Já fez algum orçamento em outro lugar? 3. Quanto é importante para você ter esta medicação de qualidade em menor tempo? 4. Se eu encontrar meios de parcelar sem juros, fica bom? 5. Quanto vale o seu tempo? Estamos falando de uma receita de R$100,00, eu já posso resolver isso para você agora!</div></div></div></div>
+        <div class="obj-card" data-t="pr"><div class="obj-l"><div class="obj-type-tag pr">Preço</div><div class="obj-phrase">"Já fiz orçamentos em outros lugares e está mais barato lá"</div></div><div class="obj-r"><div class="obj-r-title">Como contornar</div><div class="obj-answers"><div class="obj-ans">Entendo sua preocupação com o preço. Todos nós sempre queremos fazer um bom negócio, não é mesmo? Mas, me diga, o que posso fazer para que finalize sua pesquisa aqui e ganhe tempo?</div><div class="obj-ans">Por sermos a farmácia mais lembrada do DF e por termos mais de 20 anos de mercado, garantimos a máxima qualidade de todos os nossos produtos. Por isso, acreditamos que o valor deste medicamento tem muito mais do que apenas o seu preço. Podemos encontrar uma maneira de você concluir seu orçamento agora?</div></div></div></div>
+        <div class="obj-card" data-t="pt"><div class="obj-l"><div class="obj-type-tag pt">Pretexto</div><div class="obj-phrase">"Vou pensar melhor, depois te falo"</div></div><div class="obj-r"><div class="obj-r-title">Como contornar</div><div class="obj-answers"><div class="obj-ans">Entendo que queira pensar melhor, penso que esta compra é importante para você e sua saúde. Mas, exatamente, qual é a sua dúvida em relação a este medicamento?</div><div class="obj-ans">Sim, compreendo que precisa pensar melhor. Mas me diga, como se sentiu em relação ao valor deste medicamento?</div></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  RAPPORT  -->
+<section id="rapport" style="background:var(--bk)" class="dark-sec">
+  <div class="s-inner">
+    <p class="s-kicker rv">Técnica · Rapport & Sondagem</p>
+    <h2 class="s-title rv">Rapport: a ferramenta<br>de <em>sintonia</em> com o cliente</h2>
+    <p class="s-desc rv">Ferramenta da PNL que significa "Sintonia". Nos coloca ao lado do cliente nos momentos de tensão, especialmente quando surgem objeções. Aqui não tem espaço para palavras agressivas.</p>
+
+    <div class="grid-2 rv">
+      <div>
+        <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem;color:var(--wh)">Modelo de Rapport em 4 Passos</h3>
+        <div class="rapport-box">
+          <div class="rapport-step">
+            <div class="rapport-num">1</div>
+            <div class="rapport-body"><div class="rapport-title">1º Passo · Concorde</div><div class="rapport-text">"Eu entendo que precise pensar um pouco mais..."</div></div>
+          </div>
+          <div class="rapport-step">
+            <div class="rapport-num">2</div>
+            <div class="rapport-body"><div class="rapport-title">2º Passo · Apoie o Cliente</div><div class="rapport-text">"...penso que esta compra é algo importante e precise cotar outros preços também..."</div></div>
+          </div>
+          <div class="rapport-step">
+            <div class="rapport-num">3</div>
+            <div class="rapport-body"><div class="rapport-title">3º Passo · Pergunte</div><div class="rapport-text">"...mas, antes de finalizarmos, me permite fazer uma pergunta?"</div></div>
+          </div>
+          <div class="rapport-step">
+            <div class="rapport-num">4</div>
+            <div class="rapport-body"><div class="rapport-title">4º Passo · Questione e Reconduza</div><div class="rapport-text">"Como se sentiu diante do meu orçamento?" → Se positivo: "E o que posso fazer para que já confirmemos o seu pedido?" → Se negativo: "E se parcelasse este valor, te atenderia bem?"</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem;color:var(--wh)">Frases de Rapport</h3>
+        <div style="display:grid;gap:.75rem;margin-bottom:2.5rem">
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1.1rem 1.4rem;font-size:15px;font-weight:700;font-style:italic;color:var(--o2)">"Eu entendo que..."</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1.1rem 1.4rem;font-size:15px;font-weight:700;font-style:italic;color:var(--o2)">"Eu compreendo que tenha..."</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1.1rem 1.4rem;font-size:15px;font-weight:700;font-style:italic;color:var(--o2)">"Neste sentido penso igual a você..."</div>
+        </div>
+        <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem;color:var(--wh)">9.4 · Sondagem de Necessidades</h3>
+        <div style="display:grid;gap:.6rem">
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1rem;display:flex;gap:1rem;align-items:center"><div style="width:28px;height:28px;background:var(--o);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0">1</div><span style="font-size:13px;color:rgba(255,255,255,.7);font-weight:600">Por gentileza qual o seu nome? <em style="font-weight:400;color:rgba(255,255,255,.4)">(depois se apresente)</em></span></div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1rem;display:flex;gap:1rem;align-items:center"><div style="width:28px;height:28px;background:var(--o);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0">2</div><span style="font-size:13px;color:rgba(255,255,255,.7);font-weight:600">Já possui cadastro conosco?</span></div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1rem;display:flex;gap:1rem;align-items:center"><div style="width:28px;height:28px;background:var(--o);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0">3</div><span style="font-size:13px;color:rgba(255,255,255,.7);font-weight:600">Tem a receita médica?</span></div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1rem;display:flex;gap:1rem;align-items:center"><div style="width:28px;height:28px;background:var(--o);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0">4</div><span style="font-size:13px;color:rgba(255,255,255,.7);font-weight:600">Já manipulou esta medicação conosco anteriormente?</span></div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1rem;display:flex;gap:1rem;align-items:center"><div style="width:28px;height:28px;background:var(--o);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0">5</div><span style="font-size:13px;color:rgba(255,255,255,.7);font-weight:600">A medicação é para você mesmo?</span></div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r);padding:1rem;display:flex;gap:1rem;align-items:center"><div style="width:28px;height:28px;background:var(--o);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0">6</div><span style="font-size:13px;color:rgba(255,255,255,.7);font-weight:600">Possui alguma urgência médica neste atendimento?</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  FECHAMENTO  -->
+<section id="fechamento">
+  <div class="s-inner">
+    <p class="s-kicker rv">Seção 9.10 e 9.11 · Fechamento</p>
+    <h2 class="s-title rv">Sinais de compra<br>e <em>fechamento</em> da venda</h2>
+    <p class="s-desc rv">Os sinais de compra são declarações do cliente que indicam que ele está pronto para comprar. Tente fechar o quanto antes, a maioria dos clientes está preparada para comprar antes que você imagine.</p>
+
+    <div class="rv">
+      <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1rem">Reconheça e Responda</h3>
+      <div class="sinais-table">
+        <thead><tr><th>Sinal de Compra do Cliente</th><th>Frase de Fechamento Sugerida</th></tr></thead>
+        <tbody>
+          <tr><td>"Penso que está bom"</td><td>"Penso da mesma forma, posso agendar a sua entrega?"</td></tr>
+          <tr><td>"Vocês parcelam?"</td><td>"Sim! Em quantas parcelas prefere pagar?" (de acordo com a regra de parcelamento)</td></tr>
+          <tr><td>"Vocês entregam?"</td><td>"Se eu lhe garantir a entrega para amanhã, fica bom para você?"</td></tr>
+          <tr><td>"Tenho uma certa urgência"</td><td>"Posso confirmar seu pedido agora e lhe entregar até amanhã no final da tarde?"</td></tr>
+          <tr><td>"Podem parcelar em 3 vezes?"</td><td>"Assim fica bom para você?"</td></tr>
+          <tr><td>"É a mesma marca que minha esposa já usa"</td><td>"Que bom. Então já vamos agendar a sua entrega!"</td></tr>
+          <tr><td>"Posso ir buscar na loja?"</td><td>"Sim, claro! Já vou confirmar o seu pedido."</td></tr>
+          <tr><td>"Assim fica melhor para mim"</td><td>"Prefere pagamento com cartão ou à vista?"</td></tr>
+          <tr><td>"Entregam amanhã?"</td><td>"Amanhã não poderemos, mas, se for para depois de amanhã, fica bom para você também?"</td></tr>
+        </tbody>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:3.5rem">
+      <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1rem">Frases de Efeito · Dos Sinais ao Fechamento</h3>
+      <div class="grid-3">
+        <div class="script s-dark">
+          <div class="script-ctx">Fechamento principal</div>
+          <div class="script-q">"Podemos confirmar o seu pedido?"</div>
+        </div>
+        <div class="script s-orange">
+          <div class="script-ctx">Delivery</div>
+          <div class="script-q">"Prefere que entreguemos?"</div>
+        </div>
+        <div class="script s-mid">
+          <div class="script-ctx">Pagamento</div>
+          <div class="script-q">"Como quer fazer o pagamento?"</div>
+        </div>
+        <div class="script s-light">
+          <div class="script-ctx">Desconto com condicionante</div>
+          <div class="script-q">"[Nome], se eu conseguir fazer por R$ tanto, temos um acordo?"</div>
+        </div>
+        <div class="script s-dark">
+          <div class="script-ctx">Desconto com fechamento</div>
+          <div class="script-q">"[Nome], se eu fizer por R$ tanto, posso confirmar seu pedido?"</div>
+        </div>
+        <div class="script s-mid">
+          <div class="script-ctx">Oferta de adicional</div>
+          <div class="script-q">"[Nome], esta semana estamos com uma superpromoção no [Produto], que tal se eu incluísse um no seu orçamento também?"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:3.5rem">
+      <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:.5rem">9.13 · Substituição dos Termos e Palavras</h3>
+      <p style="font-size:14px;color:var(--gm);margin-bottom:0">Pequenas trocas que elevam o nível profissional do atendimento.</p>
+      <div class="sub-wrap">
+        <div class="sub-head"><div>Evitar</div><div>Usar</div></div>
+        <div class="sub-row"><div class="sub-from">Quanto custa?</div><div class="sub-to">Qual o valor?</div></div>
+        <div class="sub-row"><div class="sub-from">Custo</div><div class="sub-to">Valor</div></div>
+        <div class="sub-row"><div class="sub-from">Não é caro</div><div class="sub-to">Vale o investimento</div></div>
+        <div class="sub-row"><div class="sub-from">Preço</div><div class="sub-to">Valor</div></div>
+        <div class="sub-row"><div class="sub-from">Porque</div><div class="sub-to">O quê</div></div>
+        <div class="sub-row"><div class="sub-from">Então não tem jeito mesmo</div><div class="sub-to">O que posso fazer para mudar isso?</div></div>
+        <div class="sub-row"><div class="sub-from">Então, tá!</div><div class="sub-to">Então, agradeço muito pela sua atenção. Tenha um bom dia!</div></div>
+        <div class="sub-row"><div class="sub-from">Ligo quando?</div><div class="sub-to">Vamos agendar uma data para que eu possa retornar?</div></div>
+        <div class="sub-row"><div class="sub-from">Despesas</div><div class="sub-to">Benefícios</div></div>
+        <div class="sub-row"><div class="sub-from">É difícil</div><div class="sub-to">É possível</div></div>
+        <div class="sub-row"><div class="sub-from">Eu gostaria</div><div class="sub-to">Eu quero</div></div>
+        <div class="sub-row"><div class="sub-from">Vou estar enviando</div><div class="sub-to">Vou enviar</div></div>
+        <div class="sub-row"><div class="sub-from">Cobrimos qualquer orçamento</div><div class="sub-to">Podemos encontrar meios de facilitar o aviamento da sua receita</div></div>
+        <div class="sub-row"><div class="sub-from">Tem desconto?</div><div class="sub-to">O que podemos fazer para que confirme seu pedido agora?</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  SCRIPTS PADRÃO  -->
+<section id="scripts" style="background:var(--g1)">
+  <div class="s-inner">
+    <p class="s-kicker rv">Anexo 2 · Scripts Padrão</p>
+    <h2 class="s-title rv">Respostas padronizadas<br>para cada <em>situação</em></h2>
+    <p class="s-desc rv">Scripts prontos para garantir consistência e profissionalismo em todos os canais, do WhatsApp ao atendimento pós-venda.</p>
+
+    <div class="rv">
+      <div class="sp-table">
+        <thead><tr><th>Situação</th><th>Sugestão do Padrão de Resposta</th></tr></thead>
+        <tbody>
+          <tr><td>Recebimento de receita via WhatsApp</td><td>"Prezado(a) Cliente, Bom dia / boa tarde / boa noite! Será uma satisfação atendê-lo(la). Em breve estarei enviando seu orçamento detalhado."</td></tr>
+          <tr><td>Solicitação de dados cadastrais (multicanais)</td><td>"[Nome], somos gratos pela confiança de manipular o seu medicamento na Vivenda. Para darmos continuidade ao seu pedido, solicitamos: Nome Completo, Data de nascimento, CPF, nº de Identidade, Endereço completo e Telefone."</td></tr>
+          <tr><td>Cliente cobra retorno de um orçamento</td><td>"Prezado(a) Cliente, agradecemos o seu contato. Verificaremos com urgência o seu pedido e logo retornamos."</td></tr>
+          <tr><td>Informando preços diretamente pelo WhatsApp</td><td>"Prezado(a) Cliente, conforme a sua solicitação, o valor da sua receita ficou em R$___________. Qual a forma de pagamento que melhor lhe atende?"</td></tr>
+          <tr><td>Receita ilegível enviada pelo cliente</td><td>"Prezado(a) Cliente, sua receita foi recebida, mas ela está ilegível. Poderia enviar novamente com uma resolução melhor? Caso continue nestas mesmas condições podemos agendar a coleta em qualquer ponto do Distrito Federal."</td></tr>
+          <tr><td>Cliente não encaminhou receita ou fórmula</td><td>"Prezado(a) Cliente, Bom dia/boa tarde/boa noite! Obrigado(a) por escolher a Vivenda. Por gentileza, encaminhe a sua receita para realizarmos o seu orçamento. Para isso pode utilizar o WhatsApp."</td></tr>
+          <tr><td>Despedida quando cliente não quer efetuar pedido</td><td>"[Nome], a Vivenda agradece pelo seu contato. Estaremos sempre à disposição para atendê-lo(a)!"</td></tr>
+          <tr><td>Cliente aguardando por tempo acima do padrão</td><td>"[Nome], ainda estamos calculando o valor do seu pedido de orçamento. Pedimos a sua compreensão pela espera. Entraremos em contato o mais breve possível."</td></tr>
+          <tr><td>Despedida após cliente finalizar pedido</td><td>"[Nome], somos gratos pela confiança de manipular o seu medicamento na Vivenda. Queremos sempre tê-lo(a) conosco."</td></tr>
+          <tr><td>Cliente apenas cotando preços</td><td>"[Nome], a Vivenda agradece pelo seu contato. Estamos sempre à disposição para atendê-lo(a) sempre que precisar. Aguardamos o seu retorno o mais breve possível!"</td></tr>
+          <tr><td>Cumprimento final na conclusão de uma venda</td><td>"[Nome], a Vivenda agradece a sua preferência e confiança."</td></tr>
+          <tr><td>Solicitar troca de canal (WhatsApp → telefone)</td><td>"[Nome], para um melhor atendimento, solicito a sua gentileza para que eu possa ligar e apresentar o seu orçamento pelo telefone. Pode ser?"</td></tr>
+        </tbody>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!--  IMPLEMENTAÇÃO  -->
+<section id="implementacao">
+  <div class="s-inner">
+    <p class="s-kicker rv">Capítulo 1 · Implementação</p>
+    <h2 class="s-title rv">Como este manual<br><em>funciona</em> na prática</h2>
+    <p class="s-desc rv">O manual não está totalmente finalizado, mas já está em condições de ser implementado. Composto de 9 capítulos e 2 anexos distribuídos em 51 páginas.</p>
+
+    <div class="grid-2 rv">
+      <div>
+        <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Linha do Tempo de Implementação</h3>
+        <div class="tl">
+          <div class="tl-item"><div class="tl-dot">A</div><div class="tl-body"><div class="tl-title">Lançamento e Assinatura</div><div class="tl-desc">O manual é entregue pelo líder, mediante assinatura do Termo de Responsabilidade (Anexo 1, pág. 40). A via do colaborador é a via do manual.</div></div></div>
+          <div class="tl-item"><div class="tl-dot">B</div><div class="tl-body"><div class="tl-title">Prazo de Leitura</div><div class="tl-desc">Período para leitura completa do manual. Dúvidas devem ser trazidas à liderança para esclarecimento.</div></div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--ol);border-color:var(--o);color:var(--o)">30d</div><div class="tl-body"><div class="tl-title">30 Dias, Período de Estudos</div><div class="tl-desc">Período de 30 dias dedicado ao estudo do manual antes da avaliação.</div></div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--ol);border-color:var(--o);color:var(--o)">60d</div><div class="tl-body"><div class="tl-title">60 Dias, Adequação à Realidade</div><div class="tl-desc">Período para adequar o manual à realidade do setor/loja, com suporte da liderança.</div></div></div>
+          <div class="tl-item"><div class="tl-dot">C</div><div class="tl-body"><div class="tl-title">Prova de Verificação</div><div class="tl-desc">Com objetivo de tirar dúvidas e confirmar que o manual foi devidamente estudado, haverá uma prova aplicada posteriormente.</div></div></div>
+          <div class="tl-item"><div class="tl-dot">D</div><div class="tl-body"><div class="tl-title">Avaliações Periódicas</div><div class="tl-desc">Colaboradores estão sujeitos a avaliações construídas a partir das normas descritas. O não cumprimento sujeita a sanções e ações corretivas pertinentes ao grau de função.</div></div></div>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:1.5rem">Objetivos Estratégicos do Manual</h3>
+        <div style="display:grid;gap:.75rem">
+          <div class="rule">Implantação de um padrão interno comum a este departamento dentro da empresa, visando a fixação da identidade da empresa.</div>
+          <div class="rule">Gerar condições para sermos mais competitivos em nosso segmento de atuação.</div>
+          <div class="rule">Gerar condições de termos uma equipe mais bem preparada e, em consequência, <strong>ganhar pontos de participação dentro do mercado e reduzir o "rejeitado".</strong></div>
+          <div class="rule">Dar melhores condições de trabalho a todos os nossos colaboradores.</div>
+          <div class="rule">Prestarmos serviços com maior qualidade.</div>
+          <div class="rule">Ter todas as nossas normas e políticas escritas (formalizadas), facilitando a ação dos colaboradores e servindo de base de treinamento para novos integrantes.</div>
+          <div class="rule">Simplificar, organizar e esclarecer aspectos do trabalho, de maneira que todos os colaboradores trabalhem dentro dos <strong>mesmos padrões.</strong></div>
+        </div>
+
+        <div style="margin-top:2rem;background:var(--bk);border-radius:var(--rl);padding:2rem">
+          <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--o2);margin-bottom:1rem">Regras de Uso do Manual</p>
+          <div style="display:grid;gap:.6rem">
+            <div style="font-size:13px;color:rgba(255,255,255,.65);padding-left:1rem;border-left:2px solid rgba(244,123,32,.4)">Não pode ser copiado, divulgado ou emprestado a estranhos</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.65);padding-left:1rem;border-left:2px solid rgba(244,123,32,.4)">Deve permanecer sempre na loja, saída somente com autorização da Liderança</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.65);padding-left:1rem;border-left:2px solid rgba(244,123,32,.4)">Ao sair da companhia, deve ser devolvido nos trâmites da rescisão</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.65);padding-left:1rem;border-left:2px solid rgba(244,123,32,.4)">A liderança zela pelo manual e garante que seja estudado e implementado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="div">
+
+<!-- CLOSING -->
+<div class="closing">
+  <div class="closing-inner">
+    <div style="display:inline-block;background:rgba(244,123,32,.15);color:var(--o2);padding:8px 20px;border-radius:40px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2.5rem">Farmácia Vivenda · Manual 2026</div>
+    <h2 class="rv">Acreditamos<br><em>em você!</em></h2>
+    <p class="rv">Este manual não pretende substituir o diálogo, é o seu aliado na construção de uma carreira profissional sólida. Juntos, continuamos a construir uma empresa cada dia melhor.</p>
+    <div style="display:flex;gap:3rem;justify-content:center;flex-wrap:wrap;margin-top:3rem;padding-top:3rem;border-top:1px solid rgba(255,255,255,.08)" class="rv">
+      <div style="text-align:center"><div style="font-size:2.5rem;font-weight:900;color:var(--o);letter-spacing:-.05em">9</div><div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px">capítulos</div></div>
+      <div style="text-align:center"><div style="font-size:2.5rem;font-weight:900;color:var(--o);letter-spacing:-.05em">2</div><div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px">anexos</div></div>
+      <div style="text-align:center"><div style="font-size:2.5rem;font-weight:900;color:var(--o);letter-spacing:-.05em">51</div><div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px">páginas</div></div>
+      <div style="text-align:center"><div style="font-size:2.5rem;font-weight:900;color:var(--o);letter-spacing:-.05em">8</div><div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px">unidades</div></div>
+    </div>
+    <p class="closing-meta rv" style="margin-top:3rem">Autor: Luiz César Hoeckele · Revisado em 22/04/2026 · Todos os direitos reservados, Lei nº 9.610/98</p>
+  </div>
+</div>
+<footer>Farmácia Vivenda de Manipulação e Homeopatia · Manual de Padronização de Atendimento & Vendas · 2026</footer>
+
+<script>
+// PROGRESS
+window.addEventListener('scroll',()=>{
+  const p=window.scrollY,t=document.body.scrollHeight-window.innerHeight;
+  document.getElementById('prog').style.width=(p/t*100)+'%';
+  document.querySelectorAll('section[id]').forEach(s=>{
+    const top=s.offsetTop-80,bot=top+s.offsetHeight;
+    document.querySelectorAll('.nl').forEach(l=>{
+      l.classList.toggle('active',l.getAttribute('href')==='#'+s.id&&p>=top&&p<bot);
+    });
+  });
+});
+
+// REVEAL
+const obs=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show')})},{threshold:.08});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+// ACCORDION
+function tog(btn){
+  const open=btn.getAttribute('aria-expanded')==='true';
+  btn.setAttribute('aria-expanded',!open);
+  btn.nextElementSibling.classList.toggle('open',!open);
+}
+
+// TABS (dark fluxo section, multi-group)
+function tab(show,_,btn){
+  const parent=btn.closest('.s-inner');
+  parent.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  parent.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById(show).classList.add('on');
+  btn.classList.add('on');
+}
+
+// OBJ FILTER
+function filtObj(type,btn){
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.obj-card').forEach(c=>{
+    c.style.display=(type==='all'||c.dataset.t===type)?'grid':'none';
+  });
+}
+</script>
+</body>
+</html>

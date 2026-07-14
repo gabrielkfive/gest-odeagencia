@@ -1718,6 +1718,10 @@ function wfaSetTheme(t){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         <span>Processos por área</span>
       </div>
+            <div class="navitem" data-nav="base-conhecimento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Base de Conhecimento</span>
+      </div>
       </div>
       <div class="nav-label collap closed" data-grp="mes" onclick="navGrpToggle('mes')">Gestão do mês <span class="chev">▼</span></div>
       <div class="nav-grp closed" id="navgrp-mes">
@@ -4557,6 +4561,53 @@ function iniciarAutoSync(){
         <div class="g2" id="tut-pops"></div>
         <div class="tut-sec">Conectar integrações (Meta, Google e e-mail)</div>
         <div class="g2" id="tut-integ"></div>
+      </div>
+
+            <!-- =================== BASE DE CONHECIMENTO =================== -->
+      <div class="page" id="page-base-conhecimento">
+        <style>
+          #page-base-conhecimento .bc-hero{position:relative;overflow:hidden;border-radius:24px;background:linear-gradient(135deg,#1d1d1f,#2a2622);color:#fff;padding:34px 36px;margin-bottom:26px}
+          #page-base-conhecimento .bc-hero::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,199,0,.16),transparent 65%)}
+          #page-base-conhecimento .bc-hero h2{font-size:30px;font-weight:780;letter-spacing:-.035em;margin:0 0 8px}
+          #page-base-conhecimento .bc-hero p{font-size:14.5px;color:#d2d2d7;line-height:1.6;max-width:640px;margin:0}
+          #page-base-conhecimento .bc-sec{font-size:19px;font-weight:740;letter-spacing:-.025em;margin:30px 0 14px}
+          #page-base-conhecimento .bc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+          #page-base-conhecimento .mat{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s}
+          #page-base-conhecimento .mat:hover{transform:translateY(-4px);box-shadow:0 16px 42px rgba(0,0,0,.09)}
+          #page-base-conhecimento .mat .kick{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--o);margin-bottom:9px}
+          #page-base-conhecimento .mat h3{font-size:18px;font-weight:760;letter-spacing:-.02em;line-height:1.25;margin:0 0 6px;color:var(--ink)}
+          #page-base-conhecimento .mat .meta{font-size:12px;color:var(--mute);margin-bottom:12px}
+          #page-base-conhecimento .mat .desc{font-size:13px;color:var(--mute);line-height:1.6;margin:0 0 14px}
+          #page-base-conhecimento .mat .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+          #page-base-conhecimento .mat .tag{font-size:11px;font-weight:600;color:#3a3a3c;background:var(--g1,#f2f2f4);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+          #page-base-conhecimento .mat .foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+          #page-base-conhecimento .mat .open{display:inline-flex;align-items:center;gap:7px;background:#1d1d1f;color:#ffd400;border:0;border-radius:11px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none}
+          #page-base-conhecimento .mat .open:hover{background:#000}
+          #page-base-conhecimento .mat .src{font-size:11px;color:var(--mute)}
+          #page-base-conhecimento .soon{display:flex;align-items:center;justify-content:center;text-align:center;border:1.5px dashed var(--line);border-radius:20px;padding:26px;color:var(--mute);font-size:13px;background:transparent}
+        </style>
+        <div class="page-head">
+          <div class="page-title"><h1>Base de Conhecimento</h1><p>Materiais de referência que alimentam a operação e os agentes de IA · o cérebro do seu comercial</p></div>
+        </div>
+        <div class="bc-hero">
+          <h2>O conhecimento que o comercial usa pra vender</h2>
+          <p>Manuais, playbooks e padrões de atendimento e vendas ficam aqui, organizados e sempre à mão. É a fonte que o funcionário do comercial (humano ou agente de IA) consulta pra atender, negociar e fechar dentro do padrão.</p>
+        </div>
+        <div class="bc-sec">Materiais</div>
+        <div class="bc-grid">
+          <div class="mat">
+            <div class="kick">Comercial · Atendimento & Vendas</div>
+            <h3>Manual de Atendimento & Vendas · Farmácia Vivenda 2026</h3>
+            <div class="meta">9 capítulos e 2 anexos · 51 páginas · revisado em 22/04/2026</div>
+            <p class="desc">Playbook completo de atendimento e vendas: filosofia, teleatendimento, WhatsApp, loja física, omnichannel, fluxo de IA, negociação, rapport, fechamento e scripts prontos por situação.</p>
+            <div class="tags"><span class="tag">Negociação</span><span class="tag">Rapport</span><span class="tag">Objeções</span><span class="tag">Scripts</span><span class="tag">Omnichannel</span></div>
+            <div class="foot">
+              <a class="open" href="/conhecimento/vivenda-atendimento-vendas-2026.html" target="_blank" rel="noopener">Abrir manual ↗</a>
+              <span class="src">Farmácia Vivenda</span>
+            </div>
+          </div>
+          <div class="soon">Mais materiais em breve. Cada novo manual ou playbook entra aqui.</div>
+        </div>
       </div>
 
       <!-- =================== AGENDA EDITÁVEL =================== -->
