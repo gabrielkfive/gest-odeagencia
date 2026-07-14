@@ -234,9 +234,14 @@ export const Route = createFileRoute("/api/workflowark/state")({
           return json({ state: { [soKey]: row?.data ?? null } });
         }
 
+        // Exclui o wfa-whatsapp JÁ NA CONSULTA: o blob (1,6MB+) era baixado e parseado
+        // em TODA sincronização só para ser descartado pelo filtro isHeavy abaixo.
+        // Com várias abas sincronizando ao mesmo tempo isso estourava a memória do
+        // Worker (Error 1102 "exceeded resource limits" intermitente no load).
         const { data: rows, error } = await ctx.db
           .from("workflowark_state")
-          .select("key,data,updated_at");
+          .select("key,data,updated_at")
+          .neq("key", "wfa-whatsapp");
         if (error) return json({ error: "Não foi possível carregar os dados." }, { status: 500 });
 
         const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key)).map((row: any) => [row.key, row.data]));
