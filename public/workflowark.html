@@ -1,4 +1,4 @@
-<!-- build 2026-07-14-inteligencia-executiva -->
+<!-- build 2026-07-14-performance-loop -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -11573,12 +11573,20 @@ function pautaNovaToggle(){
   }
 }
 function pautaBriefTexto(p,c){
+  // Performance loop: o que já performou pro cliente entra no briefing de toda etapa,
+  // então roteirista/designer/editor iteram em cima do que funcionou (banco de criativos).
+  let aprendizados='';
+  try{
+    const top=(typeof criGet==='function'?criGet(p.clienteId):[]).filter(x=>x&&(x.nota||'').trim()).slice(-3).reverse();
+    if(top.length)aprendizados='O QUE JÁ PERFORMOU PRA ESSE CLIENTE:\n'+top.map(x=>'• ['+(x.formato||'criativo')+'] '+x.nota).join('\n');
+  }catch(e){}
   return ['📋 BRIEFING · '+(c?c.nm:'Cliente'),
     'Tipo: '+(PAUTA_TIPO_LABEL[p.tipo]||p.tipo)+' · Plataforma: '+(p.plataforma||'—'),
     'Deadline de publicação: '+(p.deadline||'').split('-').reverse().join('/'),
     p.vibe?('Vibe/tom: '+p.vibe):'',
     p.objetivo?('Objetivo: '+p.objetivo):'',
-    p.refs?('Referências: '+p.refs):''].filter(Boolean).join('\n');
+    p.refs?('Referências: '+p.refs):'',
+    aprendizados].filter(Boolean).join('\n');
 }
 function pautaCriarTarefaEtapa(p,etapa){
   const c=CLIENTES.find(x=>x.id===p.clienteId);
@@ -11668,7 +11676,7 @@ function renderPauta(){
       <div class="pt-head"><h3>${escapeHtml(c?c.nm:'Cliente')} · ${escapeHtml(p.titulo||'')}</h3>${pill}</div>
       <div class="pt-meta"><span>${PAUTA_TIPO_LABEL[p.tipo]||p.tipo}</span><span>${escapeHtml(p.plataforma||'')}</span><span>📅 publica ${(p.deadline||'').split('-').reverse().join('/')}</span>${p.vibe?`<span>🎭 ${escapeHtml(p.vibe)}</span>`:''}</div>
       <div class="pt-chain">${chain}</div>
-      <div class="pt-foot"><span style="font-size:12px;color:var(--mute);flex:1">${escapeHtml((p.objetivo||'').slice(0,140))}</span><button class="pt-del" onclick="pautaDel('${p.id}')">Excluir</button></div>
+      <div class="pt-foot"><span style="font-size:12px;color:var(--mute);flex:1">${escapeHtml((p.objetivo||'').slice(0,140))}</span>${p.status==='entregue'?`<button class="tb-btn" style="font-size:12px" onclick="abrirCriativos('${p.clienteId}')">🏆 Performou? Salvar no banco</button>`:''}<button class="pt-del" onclick="pautaDel('${p.id}')">Excluir</button></div>
     </div>`;
   }).join(''));
 }
