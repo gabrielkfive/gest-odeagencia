@@ -31,6 +31,7 @@ import { Route as ApiWorkflowarkApproveRouteImport } from './routes/api/workflow
 import { Route as ApiWorkflowarkAiCheckRouteImport } from './routes/api/workflowark.ai-check'
 import { Route as ApiWorkflowarkAgentsRunRouteImport } from './routes/api/workflowark.agents-run'
 import { Route as ApiIgPerfilRouteImport } from './routes/api/ig.perfil'
+import { Route as ApiIaProxyRouteImport } from './routes/api/ia.proxy'
 import { Route as ApiGoogleCallbackRouteImport } from './routes/api/google.callback'
 import { Route as ApiGoogleAuthRouteImport } from './routes/api/google.auth'
 import { Route as ApiAuthSignupRouteImport } from './routes/api/auth.signup'
@@ -149,6 +150,11 @@ const ApiIgPerfilRoute = ApiIgPerfilRouteImport.update({
   path: '/api/ig/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiIaProxyRoute = ApiIaProxyRouteImport.update({
+  id: '/api/ia/proxy',
+  path: '/api/ia/proxy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGoogleCallbackRoute = ApiGoogleCallbackRouteImport.update({
   id: '/api/google/callback',
   path: '/api/google/callback',
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
   '/api/google/callback': typeof ApiGoogleCallbackRoute
+  '/api/ia/proxy': typeof ApiIaProxyRoute
   '/api/ig/perfil': typeof ApiIgPerfilRoute
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
   '/api/google/callback': typeof ApiGoogleCallbackRoute
+  '/api/ia/proxy': typeof ApiIaProxyRoute
   '/api/ig/perfil': typeof ApiIgPerfilRoute
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
   '/api/google/callback': typeof ApiGoogleCallbackRoute
+  '/api/ia/proxy': typeof ApiIaProxyRoute
   '/api/ig/perfil': typeof ApiIgPerfilRoute
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
@@ -308,6 +317,7 @@ export interface FileRouteTypes {
     | '/api/auth/signup'
     | '/api/google/auth'
     | '/api/google/callback'
+    | '/api/ia/proxy'
     | '/api/ig/perfil'
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/api/auth/signup'
     | '/api/google/auth'
     | '/api/google/callback'
+    | '/api/ia/proxy'
     | '/api/ig/perfil'
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/api/auth/signup'
     | '/api/google/auth'
     | '/api/google/callback'
+    | '/api/ia/proxy'
     | '/api/ig/perfil'
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
@@ -403,6 +415,7 @@ export interface RootRouteChildren {
   ApiAuthSignupRoute: typeof ApiAuthSignupRoute
   ApiGoogleAuthRoute: typeof ApiGoogleAuthRoute
   ApiGoogleCallbackRoute: typeof ApiGoogleCallbackRoute
+  ApiIaProxyRoute: typeof ApiIaProxyRoute
   ApiIgPerfilRoute: typeof ApiIgPerfilRoute
   ApiWorkflowarkAgentsRunRoute: typeof ApiWorkflowarkAgentsRunRoute
   ApiWorkflowarkAiCheckRoute: typeof ApiWorkflowarkAiCheckRoute
@@ -573,6 +586,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIgPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ia/proxy': {
+      id: '/api/ia/proxy'
+      path: '/api/ia/proxy'
+      fullPath: '/api/ia/proxy'
+      preLoaderRoute: typeof ApiIaProxyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/google/callback': {
       id: '/api/google/callback'
       path: '/api/google/callback'
@@ -675,6 +695,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSignupRoute: ApiAuthSignupRoute,
   ApiGoogleAuthRoute: ApiGoogleAuthRoute,
   ApiGoogleCallbackRoute: ApiGoogleCallbackRoute,
+  ApiIaProxyRoute: ApiIaProxyRoute,
   ApiIgPerfilRoute: ApiIgPerfilRoute,
   ApiWorkflowarkAgentsRunRoute: ApiWorkflowarkAgentsRunRoute,
   ApiWorkflowarkAiCheckRoute: ApiWorkflowarkAiCheckRoute,
