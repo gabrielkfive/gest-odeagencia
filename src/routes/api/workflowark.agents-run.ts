@@ -75,8 +75,12 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
           const aiKey = zapiEnv("ANTHROPIC_API_KEY");
           if (!aiKey) return Response.json({ error: "sem ANTHROPIC_API_KEY" }, { status: 500 });
 
-          const callAI = async (sys: string, user: string, max = 900) => {
-            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: max, system: sys, messages: [{ role: "user", content: user }] }) });
+          // model + cache opcionais: conselho usa Sonnet cacheado; resumos simples ficam no Haiku
+          const callAI = async (sys: string, user: string, max = 900, model = "claude-haiku-4-5", cache = false) => {
+            const hdrs: Record<string, string> = { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" };
+            if (cache) hdrs["anthropic-beta"] = "prompt-caching-2024-07-31";
+            const sysParam: any = cache ? [{ type: "text", text: sys, cache_control: { type: "ephemeral" } }] : sys;
+            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: hdrs, body: JSON.stringify({ model, max_tokens: max, system: sysParam, messages: [{ role: "user", content: user }] }) });
             const d: any = await r.json().catch(() => ({}));
             return r.ok ? (d?.content?.[0]?.text || "") : "";
           };
@@ -223,6 +227,8 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
                 (jaSugerido ? `JÁ SUGERIDO ANTES (não repita): ${jaSugerido}\n` : "") +
                 `Hoje é ${hoje}. Monte o documento de trabalho da semana.`,
               2600,
+              "claude-sonnet-4-6", // conselho exige raciocínio profundo; Haiku truncava e degradava qualidade
+              true, // sysDoc é constante entre clientes → cache economiza ~80% dos tokens de input
             );
             const j = parseJSON(raw);
             if (!j) continue;

@@ -21,11 +21,11 @@ async function aiAnalyze(text: string, name?: string): Promise<AIResult | null> 
   if (!key) return null;
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
-    headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+    headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-beta": "prompt-caching-2024-07-31" },
     body: JSON.stringify({
       model: AI_MODEL,
       max_tokens: 500,
-      system: AI_SYS,
+      system: [{ type: "text", text: AI_SYS, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content: `Mensagem recebida${name ? ` de ${name}` : ""}:\n"""${text}"""` }],
     }),
   });

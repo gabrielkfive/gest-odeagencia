@@ -5670,7 +5670,7 @@ Object.defineProperty(state,'whatsapp',{
 function saveTarefas(){localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));renderTarefas();renderSprints();updateBadges();}
 function saveRegua(){localStorage.setItem('wfa-regua',JSON.stringify(state.regua));}
 function saveGcal(){localStorage.setItem('wfa-gcal',JSON.stringify(state.gcal||{}));}
-function saveCobranca(){localStorage.setItem('wfa-cobranca',JSON.stringify(state.cobranca));}
+function saveCobranca(){localStorage.setItem('wfa-cobranca',JSON.stringify(state.cobranca));if(typeof cloudSave==='function')cloudSave('wfa-cobranca',state.cobranca);}
 
 function toast(msg){
   document.getElementById('toast-msg').textContent=msg;
@@ -6501,10 +6501,11 @@ function setCob(id,field,value){
   state.cobranca[id][field]=value;
   saveCobranca();renderCobranca();
 }
-function cobToggle(id,on){
+function cobToggle(id,on,mes){
   if(!state.cobranca[id])state.cobranca[id]=Object.assign({resp:COB_RESP_DEFAULT[id]||'',whatsapp:'',pix:'',feitas:0},state.cobranca[id]||{});
   const d=state.cobranca[id];
-  if(on){d.cobradoMes=cobMesKey();d.feitas=(d.feitas||0)+1;toast('Marcado como cobrado ✓');}
+  const key=mes||cobMesKey();
+  if(on){d.cobradoMes=key;d.feitas=(d.feitas||0)+1;toast('Marcado como cobrado ✓');}
   else{d.cobradoMes='';d.feitas=Math.max(0,(d.feitas||1)-1);}
   saveCobranca();renderCobranca();
 }
@@ -6589,7 +6590,7 @@ const ACERTO_CATEGORIAS=[
 ];
 // A lista vem do Financeiro (Time & despesas a pagar). Sem base fixa.
 const ACERTO_ITENS=[];
-function saveAcerto(){localStorage.setItem('wfa-acerto',JSON.stringify(state.acerto||{}));}
+function saveAcerto(){localStorage.setItem('wfa-acerto',JSON.stringify(state.acerto||{}));if(typeof cloudSave==='function')cloudSave('wfa-acerto',state.acerto||{});}
 function acertoData(id){const cur=(state.acerto||{})[id]||{};return Object.assign({valor:'',pix:'',dia:'',obs:'',fixo:false,pagoMes:'',feitas:0},cur);}
 function acertoTodosItens(){
   const base=ACERTO_ITENS.map(it=>({...it}));
@@ -6659,11 +6660,12 @@ function setAcerto(id,field,value){
   state.acerto[id][field]=value;
   saveAcerto();renderAcerto();
 }
-function acertoToggle(id,on){
+function acertoToggle(id,on,mes){
   if(!state.acerto)state.acerto={};
   if(!state.acerto[id])state.acerto[id]={};
   const d=state.acerto[id];
-  if(on){d.pagoMes=cobMesKey();d.feitas=(d.feitas||0)+1;toast('Marcado como pago ✓');}
+  const key=mes||cobMesKey();
+  if(on){d.pagoMes=key;d.feitas=(d.feitas||0)+1;toast('Marcado como pago ✓');}
   else{d.pagoMes='';d.feitas=Math.max(0,(d.feitas||1)-1);}
   saveAcerto();renderAcerto();
 }
@@ -10477,11 +10479,11 @@ function planSummaryHTML(m){
    Ligação por nome (normName), SEMPRE aditiva — nunca apaga o que já existe. */
 function finRecCobId(nome){const n=normName(nome);if(!n)return'';const c=(typeof CLIENTES!=='undefined'?CLIENTES:[]).find(x=>normName(x.nm)===n);return c?c.id:('plan-'+n.replace(/\s+/g,'-'));}
 function finPagAceId(nome){const n=normName(nome);return n?('fin-'+n.replace(/\s+/g,'-')):'';}
-function finRecCobrado(nome){const id=finRecCobId(nome);return !!(id&&state.cobranca&&state.cobranca[id]&&state.cobranca[id].cobradoMes===cobMesKey());}
-function finPagPago(nome){const id=finPagAceId(nome);return !!(id&&state.acerto&&state.acerto[id]&&state.acerto[id].pagoMes===cobMesKey());}
+function finRecCobrado(nome,mes){const id=finRecCobId(nome);const mk=mes||cobMesKey();return !!(id&&state.cobranca&&state.cobranca[id]&&state.cobranca[id].cobradoMes===mk);}
+function finPagPago(nome,mes){const id=finPagAceId(nome);const mk=mes||cobMesKey();return !!(id&&state.acerto&&state.acerto[id]&&state.acerto[id].pagoMes===mk);}
 function finEnsurePagItem(x){if(!state.acerto)state.acerto={};const id=finPagAceId(x.nome);if(!id)return;const prev=state.acerto[id]||{};state.acerto[id]=Object.assign({custom:true,fixo:true,cat:acertoClassify(x.nome),pix:'',obs:'',pagoMes:''},prev,{nome:x.nome,valor:String(x.valor||''),dia:prev.dia||'10'});}
-function planToggleCob(i){const m=planActive();const x=m.receitas[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao cliente primeiro');return;}const id=finRecCobId(x.nome);const on=!finRecCobrado(x.nome);if(!state.cobranca[id]||!state.cobranca[id]._plan){const n=normName(x.nome);if(!CLIENTES.find(c=>normName(c.nm)===n)){state.cobranca[id]=Object.assign({resp:'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},state.cobranca[id]||{},{_plan:true,_nome:x.nome,_valor:Number(x.valor)||0});}}if(typeof cobToggle==='function')cobToggle(id,on);renderPlanilha();}
-function planTogglePag(i){const m=planActive();const x=m.pagar[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao pagamento primeiro');return;}finEnsurePagItem(x);const id=finPagAceId(x.nome);const on=!finPagPago(x.nome);if(typeof acertoToggle==='function')acertoToggle(id,on);renderPlanilha();}
+function planToggleCob(i){const m=planActive();const x=m.receitas[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao cliente primeiro');return;}const planMes=m.mk||cobMesKey();const id=finRecCobId(x.nome);const on=!finRecCobrado(x.nome,planMes);if(!state.cobranca[id]||!state.cobranca[id]._plan){const n=normName(x.nome);if(!CLIENTES.find(c=>normName(c.nm)===n)){state.cobranca[id]=Object.assign({resp:'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},state.cobranca[id]||{},{_plan:true,_nome:x.nome,_valor:Number(x.valor)||0});}}if(typeof cobToggle==='function')cobToggle(id,on,planMes);renderPlanilha();}
+function planTogglePag(i){const m=planActive();const x=m.pagar[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao pagamento primeiro');return;}const planMes=m.mk||cobMesKey();finEnsurePagItem(x);const id=finPagAceId(x.nome);const on=!finPagPago(x.nome,planMes);if(typeof acertoToggle==='function')acertoToggle(id,on,planMes);renderPlanilha();}
 // Replica a planilha do mês ativo para Cobranças e Acerto (aditivo)
 // O financeiro ao vivo (Cobranças/Acerto) espelha SÓ o mês corrente da planilha.
 // Antes, clicar/editar uma aba de mês antigo sobrescrevia a cobrança e o acerto do
@@ -10532,7 +10534,8 @@ function renderPlanilha(){
   const ft='style="padding:8px 9px;border:1px solid var(--line);font-weight:800;border-top:2px solid var(--ink,#111)"';
   const ftr='style="padding:8px 9px;border:1px solid var(--line);text-align:right;font-weight:800;border-top:2px solid var(--ink,#111);font-variant-numeric:tabular-nums"';
   const stBtn=(on,fn,labOn,lab)=>`<button onclick="${fn}" class="tb-btn" style="padding:3px 10px;font-size:10.5px;${on?'background:#1a7f3c;border-color:#1a7f3c;color:#fff':''}">${on?labOn:lab}</button>`;
-  const recRows=m.receitas.map((x,i)=>{const mg=planMargem(x);const cob=finRecCobrado(x.nome);return `<tr style="${cob?'background:#eafaef':''}">
+  const _planMes=m.mk||cobMesKey();
+  const recRows=m.receitas.map((x,i)=>{const mg=planMargem(x);const cob=finRecCobrado(x.nome,_planMes);return `<tr style="${cob?'background:#eafaef':''}">
       <td ${ce} oninput="planLiveRec(${i},'nome',this.textContent)">${mdEsc(x.nome||'')}</td>
       <td ${ceR} oninput="planLiveRec(${i},'valor',this.textContent)">${x.valor?planFmt(x.valor):''}</td>
       <td ${ceR} oninput="planLiveRec(${i},'custo',this.textContent)">${x.custo?planFmt(x.custo):''}</td>
@@ -10540,7 +10543,7 @@ function renderPlanilha(){
       <td style="border:1px solid var(--line);text-align:center;white-space:nowrap">${stBtn(cob,`planToggleCob(${i})`,'Cobrado','Cobrar')}</td>
       <td style="border:1px solid var(--line);text-align:center;width:24px"><span onclick="planDelRec(${i})" title="apagar" style="cursor:pointer;color:var(--mute)">×</span></td>
     </tr>`;}).join('');
-  const pagRows=m.pagar.map((x,i)=>{const pago=finPagPago(x.nome);return `<tr style="${pago?'background:#eafaef':''}">
+  const pagRows=m.pagar.map((x,i)=>{const pago=finPagPago(x.nome,_planMes);return `<tr style="${pago?'background:#eafaef':''}">
       <td ${ce} oninput="planLivePag(${i},'nome',this.textContent)">${mdEsc(x.nome||'')}</td>
       <td ${ceR} oninput="planLivePag(${i},'valor',this.textContent)">${x.valor?planFmt(x.valor):''}</td>
       <td style="border:1px solid var(--line);text-align:center;white-space:nowrap">${stBtn(pago,`planTogglePag(${i})`,'Pago','Pagar')}</td>
