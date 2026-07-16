@@ -109,6 +109,37 @@ export const Route = createFileRoute("/api/workflowark/bridge")({
           return Response.json({ ok: true, criadas: criadas.length, puladas });
         }
 
+        // Editar/remover SÓ tarefas criadas pela própria ponte (origem claude-bridge):
+        // a ponte nunca toca no que o time criou. Edita título/desc/data/prio; remove por id.
+        if (body?.action === "tarefas-edit" || body?.action === "tarefas-remove") {
+          const { data: tRow, error: tErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-tarefas").maybeSingle();
+          if (tErr) return Response.json({ error: "falha ao ler tarefas" }, { status: 500 });
+          const tarefas: any[] = Array.isArray(tRow?.data) ? tRow.data.slice() : [];
+          const minha = (t: any) => t && t.origem === "claude-bridge";
+          let mudou = 0;
+          let final = tarefas;
+          if (body.action === "tarefas-remove") {
+            const ids = new Set((Array.isArray(body.ids) ? body.ids : []).map(String));
+            final = tarefas.filter((t) => { const sai = minha(t) && ids.has(String(t.id)); if (sai) mudou++; return !sai; });
+          } else {
+            const edits: any[] = Array.isArray(body.edits) ? body.edits : [];
+            edits.forEach((e) => {
+              const t = tarefas.find((x) => minha(x) && String(x.id) === String(e?.id));
+              if (!t) return;
+              if (typeof e.title === "string" && e.title.trim()) t.title = e.title.slice(0, 140).trim();
+              if (typeof e.desc === "string") t.desc = e.desc.slice(0, 500);
+              if (typeof e.data === "string") t.data = e.data.slice(0, 10);
+              if (["alta", "media", "baixa"].includes(e.prio)) t.prio = e.prio;
+              mudou++;
+            });
+          }
+          if (mudou) {
+            const { error: upErr } = await db.from("workflowark_state").upsert({ key: "wfa-tarefas", data: final });
+            if (upErr) return Response.json({ error: "falha ao salvar" }, { status: 500 });
+          }
+          return Response.json({ ok: true, alteradas: mudou });
+        }
+
         return Response.json({ error: "action inválida" }, { status: 400 });
       },
     },
