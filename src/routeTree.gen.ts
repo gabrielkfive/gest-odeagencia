@@ -14,6 +14,7 @@ import { Route as PropostasRouteImport } from './routes/propostas'
 import { Route as PostagensRouteImport } from './routes/postagens'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as OsRouteImport } from './routes/os'
+import { Route as MotorRouteImport } from './routes/motor'
 import { Route as InteligenciaRouteImport } from './routes/inteligencia'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -64,6 +65,11 @@ const PortalRoute = PortalRouteImport.update({
 const OsRoute = OsRouteImport.update({
   id: '/os',
   path: '/os',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MotorRoute = MotorRouteImport.update({
+  id: '/motor',
+  path: '/motor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InteligenciaRoute = InteligenciaRouteImport.update({
@@ -206,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
   '/inteligencia': typeof InteligenciaRoute
+  '/motor': typeof MotorRoute
   '/os': typeof OsRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
   '/inteligencia': typeof InteligenciaRoute
+  '/motor': typeof MotorRoute
   '/os': typeof OsRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
   '/inteligencia': typeof InteligenciaRoute
+  '/motor': typeof MotorRoute
   '/os': typeof OsRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendario'
     | '/inteligencia'
+    | '/motor'
     | '/os'
     | '/portal'
     | '/postagens'
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendario'
     | '/inteligencia'
+    | '/motor'
     | '/os'
     | '/portal'
     | '/postagens'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendario'
     | '/inteligencia'
+    | '/motor'
     | '/os'
     | '/portal'
     | '/postagens'
@@ -405,6 +417,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CalendarioRoute: typeof CalendarioRoute
   InteligenciaRoute: typeof InteligenciaRoute
+  MotorRoute: typeof MotorRoute
   OsRoute: typeof OsRoute
   PortalRoute: typeof PortalRoute
   PostagensRoute: typeof PostagensRoute
@@ -465,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/os'
       fullPath: '/os'
       preLoaderRoute: typeof OsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/motor': {
+      id: '/motor'
+      path: '/motor'
+      fullPath: '/motor'
+      preLoaderRoute: typeof MotorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inteligencia': {
@@ -685,6 +705,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CalendarioRoute: CalendarioRoute,
   InteligenciaRoute: InteligenciaRoute,
+  MotorRoute: MotorRoute,
   OsRoute: OsRoute,
   PortalRoute: PortalRoute,
   PostagensRoute: PostagensRoute,
