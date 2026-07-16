@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 //    wfa-extratos, contabilizados por mês, preparada para a futura integração Nibo.
 // Design: dark + gold da marca ARK (mesmo padrão do /calendario e /postagens).
 
-const BUILD = "inteligencia-v1 2026-07-13";
+const BUILD = "inteligencia-v2 2026-07-16";
 
 export const Route = createFileRoute("/inteligencia")({
   ssr: false,
@@ -140,6 +140,65 @@ function parseOFX(texto: string): Lancamento[] {
   return out;
 }
 
+// ===== Financeiro real (cobrança + acerto) =====
+type CobrancaData = { cobradoMes?: string; cobradoMeses?: Record<string, boolean>; _nome?: string; _valor?: number; _plan?: boolean; feitas?: number };
+type AcertoData = { nome?: string; valor?: string | number; pagoMes?: string; pagoMeses?: Record<string, boolean>; cat?: string };
+
+// Espelha CLIENTES_BASE do HTML (clientes ARK com cobrança mensalidade)
+const CLI_VALS: Record<string, { nm: string; valor: number }> = {
+  vivenda: { nm: "Vivenda", valor: 5500 },
+  fercon: { nm: "Fercon", valor: 4200 },
+  sasse: { nm: "Sasse Gifts", valor: 4500 },
+  fonseca: { nm: "Fonseca & Cavalcanti", valor: 2500 },
+  vaca: { nm: "Vaca Velha", valor: 2000 },
+};
+
+type MesFin = {
+  mk: string; faturamento: number; despesas: number; caixa: number;
+  margem: number | null; nCobrados: number; nPagos: number;
+  cliFaturados: { nm: string; valor: number }[];
+  pagamentos: { nome: string; valor: number; cat?: string }[];
+};
+
+function calcFinanceiro(
+  cobranca: Record<string, CobrancaData>,
+  acerto: Record<string, AcertoData>,
+  custom: { id: string; nm: string; valor: number }[],
+): MesFin[] {
+  const cliMap: Record<string, { nm: string; valor: number }> = { ...CLI_VALS };
+  custom.forEach((c) => { if (c.id && c.valor) cliMap[c.id] = { nm: c.nm, valor: c.valor }; });
+  Object.entries(cobranca).forEach(([id, d]) => {
+    if (id.startsWith("plan-") && d._plan && d._nome) cliMap[id] = { nm: d._nome, valor: Number(d._valor) || 0 };
+  });
+  const mesesSet = new Set<string>();
+  Object.values(cobranca).forEach((d) => { Object.keys(d.cobradoMeses || {}).forEach((mk) => mesesSet.add(mk)); if (d.cobradoMes) mesesSet.add(d.cobradoMes); });
+  Object.values(acerto).forEach((d) => { Object.keys(d.pagoMeses || {}).forEach((mk) => mesesSet.add(mk)); if (d.pagoMes) mesesSet.add(d.pagoMes); });
+  // inclui o mês corrente mesmo sem dados
+  const agora = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit" }).format(new Date()).slice(0, 7);
+  mesesSet.add(agora);
+  const meses = [...mesesSet].sort();
+  return meses.map((mk) => {
+    const cliFaturados: { nm: string; valor: number }[] = [];
+    let faturamento = 0;
+    Object.entries(cobranca).forEach(([id, d]) => {
+      const cobrado = d.cobradoMes === mk || !!(d.cobradoMeses?.[mk]);
+      if (!cobrado) return;
+      const cli = cliMap[id];
+      const val = cli?.valor || Number(d._valor) || 0;
+      if (val > 0) { faturamento += val; cliFaturados.push({ nm: cli?.nm || d._nome || id, valor: val }); }
+    });
+    const pagamentos: { nome: string; valor: number; cat?: string }[] = [];
+    let despesas = 0;
+    Object.values(acerto).forEach((d) => {
+      const pago = d.pagoMes === mk || !!(d.pagoMeses?.[mk]);
+      if (!pago) return;
+      const val = Number(d.valor) || 0;
+      if (val > 0) { despesas += val; pagamentos.push({ nome: d.nome || "?", valor: val, cat: d.cat }); }
+    });
+    return { mk, faturamento, despesas, caixa: faturamento - despesas, margem: faturamento ? Math.round(((faturamento - despesas) / faturamento) * 100) : null, nCobrados: cliFaturados.length, nPagos: pagamentos.length, cliFaturados, pagamentos };
+  }).reverse(); // mais recente primeiro
+}
+
 // ===== Métricas por demandado =====
 type Pessoa = {
   nome: string; abertas: Tarefa[]; atrasadas: Tarefa[]; concluidasMes: Tarefa[];
@@ -182,8 +241,12 @@ function Inteligencia() {
   const [err, setErr] = useState("");
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
   const [extratos, setExtratos] = useState<Lancamento[]>([]);
+  const [cobranca, setCobranca] = useState<Record<string, CobrancaData>>({});
+  const [acerto, setAcerto] = useState<Record<string, AcertoData>>({});
+  const [customCli, setCustomCli] = useState<{ id: string; nm: string; valor: number }[]>([]);
   const [role, setRole] = useState("");
   const [aberto, setAberto] = useState<string>("");
+  const [abertoMes, setAbertoMes] = useState<string>("");
   const [preview, setPreview] = useState<Lancamento[]>([]);
   const [previewNome, setPreviewNome] = useState("");
   const [salvando, setSalvando] = useState(false);
@@ -198,6 +261,12 @@ function Inteligencia() {
       setTarefas(Array.isArray(t) ? t : []);
       const e = out?.state?.["wfa-extratos"];
       setExtratos(Array.isArray(e) ? e : []);
+      const cob = out?.state?.["wfa-cobranca"];
+      setCobranca(cob && typeof cob === "object" && !Array.isArray(cob) ? cob : {});
+      const ace = out?.state?.["wfa-acerto"];
+      setAcerto(ace && typeof ace === "object" && !Array.isArray(ace) ? ace : {});
+      const cc = out?.state?.["wfa-clientes-custom"];
+      setCustomCli(Array.isArray(cc) ? cc.filter((c: any) => c?.id && c?.valor > 0).map((c: any) => ({ id: c.id, nm: c.nm || c.id, valor: Number(c.valor) })) : []);
       setRole(String(out?.member?.role || ""));
     } catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
     finally { setLoading(false); }
@@ -205,6 +274,7 @@ function Inteligencia() {
   useEffect(() => { carregar(); }, [carregar]);
 
   const pessoas = useMemo(() => calcularPessoas(tarefas, hoje), [tarefas, hoje]);
+  const finReal = useMemo(() => calcFinanceiro(cobranca, acerto, customCli), [cobranca, acerto, customCli]);
   const geral = useMemo(() => {
     const abertas = pessoas.reduce((s, p) => s + p.abertas.length, 0);
     const atrasadas = pessoas.reduce((s, p) => s + p.atrasadas.length, 0);
@@ -324,13 +394,106 @@ function Inteligencia() {
             {pessoas.length === 0 && <div style={{ ...card, color: MUTE }}>Nenhuma tarefa encontrada no sistema.</div>}
           </section>
 
-          {/* ===== Financeiro ===== */}
+          {/* ===== Caixa Real (cobrança + acerto) ===== */}
+          {verFin && finReal.length > 0 && (() => {
+            const totFat = finReal.reduce((s, m) => s + m.faturamento, 0);
+            const totDesp = finReal.reduce((s, m) => s + m.despesas, 0);
+            const mediaCaixa = finReal.filter(m => m.faturamento > 0).reduce((s, m, _, a) => s + m.caixa / a.length, 0);
+            return (
+              <>
+                <h2 style={{ fontFamily: SERIF, fontSize: 22, color: GOLD, margin: "0 0 6px" }}>Caixa real</h2>
+                <p style={{ color: MUTE, fontSize: 13, margin: "0 0 14px", maxWidth: 720 }}>
+                  Faturamento cobrado + pagamentos feitos mês a mês · a ARK mora aqui, não no DRE
+                </p>
+
+                {/* KPIs de resumo */}
+                <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
+                  <div style={card}><div style={lbl}>Total faturado (histórico)</div><div style={{ ...kpiNum, color: GREEN, fontSize: 22 }}>{fmtBRL(totFat)}</div></div>
+                  <div style={card}><div style={lbl}>Total pago equipe</div><div style={{ ...kpiNum, color: RED, fontSize: 22 }}>{fmtBRL(totDesp)}</div></div>
+                  <div style={{ ...card, borderColor: mediaCaixa >= 0 ? `${GREEN}44` : `${RED}44` }}>
+                    <div style={lbl}>Caixa médio mensal</div>
+                    <div style={{ ...kpiNum, color: mediaCaixa >= 0 ? GREEN : RED, fontSize: 22 }}>{fmtBRL(mediaCaixa)}</div>
+                  </div>
+                  <div style={card}>
+                    <div style={lbl}>Margem média</div>
+                    <div style={{ ...kpiNum, fontSize: 22, color: totFat ? (totFat - totDesp) / totFat >= 0.5 ? GREEN : (totFat - totDesp) / totFat >= 0.3 ? GOLD : RED : MUTE }}>
+                      {totFat ? `${Math.round(((totFat - totDesp) / totFat) * 100)}%` : "—"}
+                    </div>
+                  </div>
+                </section>
+
+                {/* Tabela por mês */}
+                <section style={{ ...card, marginBottom: 28, overflowX: "auto" as const }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                    <thead>
+                      <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                        {["Mês", "Faturamento", "Pagamentos", "Caixa", "Margem", "Clientes cobrados"].map((h) => (
+                          <th key={h} style={{ padding: "8px 10px", textAlign: h === "Mês" || h === "Clientes cobrados" ? "left" : "right", color: MUTE, fontWeight: 600, fontSize: 11, textTransform: "uppercase" as const, letterSpacing: 0.8 }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {finReal.map((m) => {
+                        const exp = abertoMes === m.mk;
+                        const mNome = m.mk.replace(/^(\d{4})-(\d{2})$/, (_, y, mo) => {
+                          const meses = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+                          return `${meses[parseInt(mo)-1]}/${y}`;
+                        });
+                        return (
+                          <>
+                            <tr key={m.mk} onClick={() => setAbertoMes(exp ? "" : m.mk)}
+                              style={{ borderBottom: `1px solid ${BORDER}`, cursor: "pointer", background: exp ? "#1e1b18" : "transparent" }}>
+                              <td style={{ padding: "10px 10px" }}><b style={{ color: GOLD }}>{mNome}</b></td>
+                              <td style={{ padding: "10px 10px", textAlign: "right", color: m.faturamento > 0 ? GREEN : MUTE }}>{m.faturamento > 0 ? fmtBRL(m.faturamento) : "—"}</td>
+                              <td style={{ padding: "10px 10px", textAlign: "right", color: m.despesas > 0 ? RED : MUTE }}>{m.despesas > 0 ? fmtBRL(m.despesas) : "—"}</td>
+                              <td style={{ padding: "10px 10px", textAlign: "right", fontWeight: 700, color: m.faturamento === 0 ? MUTE : m.caixa >= 0 ? GREEN : RED }}>{m.faturamento > 0 ? fmtBRL(m.caixa) : "—"}</td>
+                              <td style={{ padding: "10px 10px", textAlign: "right", color: m.margem === null ? MUTE : m.margem >= 50 ? GREEN : m.margem >= 30 ? GOLD : RED }}>{m.margem !== null ? `${m.margem}%` : "—"}</td>
+                              <td style={{ padding: "10px 10px", color: MUTE }}>{m.nCobrados > 0 ? `${m.nCobrados} cliente${m.nCobrados > 1 ? "s" : ""}` : "—"} {m.nCobrados > 0 && <span style={{ color: "#5d564c", fontSize: 11 }}>▼</span>}</td>
+                            </tr>
+                            {exp && (
+                              <tr key={m.mk + "-det"} style={{ background: "#141210", borderBottom: `1px solid ${BORDER}` }}>
+                                <td colSpan={6} style={{ padding: "10px 20px 14px" }}>
+                                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                                    <div>
+                                      <div style={{ color: GREEN, fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: 0.8, marginBottom: 6 }}>Cobrado</div>
+                                      {m.cliFaturados.length === 0 ? <div style={{ color: MUTE, fontSize: 12 }}>Nenhum</div> :
+                                        m.cliFaturados.map((c, i) => (
+                                          <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "3px 0", borderBottom: `1px dashed ${BORDER}` }}>
+                                            <span>{c.nm}</span><b style={{ color: GREEN }}>{fmtBRL(c.valor)}</b>
+                                          </div>
+                                        ))}
+                                    </div>
+                                    <div>
+                                      <div style={{ color: RED, fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: 0.8, marginBottom: 6 }}>Pago</div>
+                                      {m.pagamentos.length === 0 ? <div style={{ color: MUTE, fontSize: 12 }}>Nenhum</div> :
+                                        m.pagamentos.sort((a, b) => b.valor - a.valor).map((p, i) => (
+                                          <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "3px 0", borderBottom: `1px dashed ${BORDER}` }}>
+                                            <span>{p.nome} {p.cat && <span style={{ color: MUTE, fontSize: 11 }}>· {p.cat}</span>}</span>
+                                            <b style={{ color: RED }}>- {fmtBRL(p.valor)}</b>
+                                          </div>
+                                        ))}
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </section>
+              </>
+            );
+          })()}
+
+          {/* ===== Financeiro (extratos bancários) ===== */}
           {verFin && (
             <>
-              <h2 style={{ fontFamily: SERIF, fontSize: 22, color: GOLD, margin: "0 0 6px" }}>Financeiro · extratos</h2>
+              <h2 style={{ fontFamily: SERIF, fontSize: 22, color: GOLD, margin: "0 0 6px" }}>Extrato bancário</h2>
               <p style={{ color: MUTE, fontSize: 13, margin: "0 0 14px", maxWidth: 720 }}>
-                Solte aqui o extrato do banco (CSV ou OFX). Eu leio, elimino duplicados e contabilizo entradas e saídas por mês.
-                Quando a conta do Nibo estiver ativa, esta mesma tela passa a puxar os lançamentos direto de lá.
+                Importe o extrato do banco (CSV ou OFX) para cruzar com o faturamento real acima.
+                Quando o Nibo estiver ativo, a importação será automática.
               </p>
               <section style={{ ...card, marginBottom: 14 }}>
                 <input type="file" accept=".csv,.ofx,.txt" onChange={(e) => { const f = e.target.files?.[0]; if (f) receberArquivo(f); e.target.value = ""; }}

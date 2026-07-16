@@ -3590,6 +3590,8 @@ async function bootCloudSync(){
     // Seeds que ANTES rodavam no parse (e apagavam dados em navegador novo): agora aqui,
     // com a lista real do servidor já aplicada, então só ACRESCENTAM.
     seedValhalla();seedSamuel();seedProcessos();
+    wfaSeedHistoricoCob(['2026-06','2026-07']);   // preenche junho+julho como cobrado (1x por navegador)
+    wfaSeedHistoricoAcerto(['2026-06','2026-07']); // preenche junho+julho como pago (1x por navegador)
     if(WFA_WPP_OFF){try{document.querySelectorAll('[data-nav="whatsapp"]').forEach(el=>el.style.display='none');}catch(e){}}
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
@@ -6463,7 +6465,7 @@ function renderCobranca(){
 
 function cobCard(c,venc,mesKey){
   const d=cobData(c);
-  const cobrado=d.cobradoMes===mesKey;
+  const cobrado=d.cobradoMes===mesKey||!!(d.cobradoMeses&&d.cobradoMeses[mesKey]);
   const seguro=!!(d.whatsapp&&d.resp&&d.feitas>=1);
   const badge=cobrado
     ?`<span style="background:#e7f7ec;color:#1a7f3c;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">✅ Cobrado este mês</span>`
@@ -6505,8 +6507,15 @@ function cobToggle(id,on,mes){
   if(!state.cobranca[id])state.cobranca[id]=Object.assign({resp:COB_RESP_DEFAULT[id]||'',whatsapp:'',pix:'',feitas:0},state.cobranca[id]||{});
   const d=state.cobranca[id];
   const key=mes||cobMesKey();
-  if(on){d.cobradoMes=key;d.feitas=(d.feitas||0)+1;toast('Marcado como cobrado ✓');}
-  else{d.cobradoMes='';d.feitas=Math.max(0,(d.feitas||1)-1);}
+  if(!d.cobradoMeses)d.cobradoMeses={};
+  if(on){
+    d.cobradoMes=key;d.cobradoMeses[key]=true;
+    d.feitas=(d.feitas||0)+1;toast('Marcado como cobrado ✓');
+  } else {
+    if(key===d.cobradoMes)d.cobradoMes='';
+    delete d.cobradoMeses[key];
+    d.feitas=Math.max(0,(d.feitas||1)-1);
+  }
   saveCobranca();renderCobranca();
 }
 function cobCopiar(id){
@@ -6621,7 +6630,7 @@ function renderAcerto(){
 }
 function acertoCard(it,mesKey){
   const d=acertoData(it.id);
-  const pago=d.pagoMes===mesKey;
+  const pago=d.pagoMes===mesKey||!!(d.pagoMeses&&d.pagoMeses[mesKey]);
   const v=Number(d.valor)||0;
   const badge=pago
     ?`<span style="background:#e7f7ec;color:#1a7f3c;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px">✅ Pago este mês</span>`
@@ -6665,10 +6674,57 @@ function acertoToggle(id,on,mes){
   if(!state.acerto[id])state.acerto[id]={};
   const d=state.acerto[id];
   const key=mes||cobMesKey();
-  if(on){d.pagoMes=key;d.feitas=(d.feitas||0)+1;toast('Marcado como pago ✓');}
-  else{d.pagoMes='';d.feitas=Math.max(0,(d.feitas||1)-1);}
+  if(!d.pagoMeses)d.pagoMeses={};
+  if(on){
+    d.pagoMes=key;d.pagoMeses[key]=true;
+    d.feitas=(d.feitas||0)+1;toast('Marcado como pago ✓');
+  } else {
+    if(key===d.pagoMes)d.pagoMes='';
+    delete d.pagoMeses[key];
+    d.feitas=Math.max(0,(d.feitas||1)-1);
+  }
   saveAcerto();renderAcerto();
 }
+
+// Preenche cobradoMeses para todos os clientes ARK de cobrança em meses históricos.
+// Idempotente: só marca quem ainda não está marcado. Usa localStorage como flag pra não repetir.
+function wfaSeedHistoricoCob(meses){
+  const flag='wfa-seed-hist-cob-'+meses.join('-');
+  if(localStorage.getItem(flag))return;
+  if(!state.cobranca)state.cobranca={};
+  let mudou=false;
+  const clientes=cobClientes();
+  clientes.forEach(c=>{
+    const prev=state.cobranca[c.id]||{};
+    if(!prev.cobradoMeses)prev.cobradoMeses={};
+    let changed=false;
+    meses.forEach(mk=>{if(!prev.cobradoMeses[mk]){prev.cobradoMeses[mk]=true;changed=true;}});
+    if(changed){
+      prev.feitas=(prev.feitas||0)+1;
+      if(!prev.resp)prev.resp=COB_RESP_DEFAULT[c.id]||'';
+      state.cobranca[c.id]=prev;mudou=true;
+    }
+  });
+  if(mudou){saveCobranca();localStorage.setItem(flag,'1');}else{localStorage.setItem(flag,'1');}
+}
+
+// Preenche pagoMeses para todos os itens de acerto existentes em meses históricos.
+function wfaSeedHistoricoAcerto(meses){
+  const flag='wfa-seed-hist-ace-'+meses.join('-');
+  if(localStorage.getItem(flag))return;
+  if(!state.acerto||!Object.keys(state.acerto).length)return; // acerto vazio: aguarda sync
+  let mudou=false;
+  Object.keys(state.acerto).forEach(id=>{
+    const d=state.acerto[id];
+    if(!d||typeof d!=='object')return;
+    if(!d.pagoMeses)d.pagoMeses={};
+    let changed=false;
+    meses.forEach(mk=>{if(!d.pagoMeses[mk]){d.pagoMeses[mk]=true;changed=true;}});
+    if(changed){d.feitas=(d.feitas||0)+1;mudou=true;}
+  });
+  if(mudou){saveAcerto();localStorage.setItem(flag,'1');}else{localStorage.setItem(flag,'1');}
+}
+
 function acertoCopiarPix(id){
   const d=acertoData(id);if(!d.pix)return;
   navigator.clipboard?.writeText(d.pix).then(()=>toast('Pix copiado'),()=>toast('Não consegui copiar'));
@@ -10479,8 +10535,8 @@ function planSummaryHTML(m){
    Ligação por nome (normName), SEMPRE aditiva — nunca apaga o que já existe. */
 function finRecCobId(nome){const n=normName(nome);if(!n)return'';const c=(typeof CLIENTES!=='undefined'?CLIENTES:[]).find(x=>normName(x.nm)===n);return c?c.id:('plan-'+n.replace(/\s+/g,'-'));}
 function finPagAceId(nome){const n=normName(nome);return n?('fin-'+n.replace(/\s+/g,'-')):'';}
-function finRecCobrado(nome,mes){const id=finRecCobId(nome);const mk=mes||cobMesKey();return !!(id&&state.cobranca&&state.cobranca[id]&&state.cobranca[id].cobradoMes===mk);}
-function finPagPago(nome,mes){const id=finPagAceId(nome);const mk=mes||cobMesKey();return !!(id&&state.acerto&&state.acerto[id]&&state.acerto[id].pagoMes===mk);}
+function finRecCobrado(nome,mes){const id=finRecCobId(nome);const mk=mes||cobMesKey();if(!id||!state.cobranca||!state.cobranca[id])return false;const d=state.cobranca[id];return d.cobradoMes===mk||!!(d.cobradoMeses&&d.cobradoMeses[mk]);}
+function finPagPago(nome,mes){const id=finPagAceId(nome);const mk=mes||cobMesKey();if(!id||!state.acerto||!state.acerto[id])return false;const d=state.acerto[id];return d.pagoMes===mk||!!(d.pagoMeses&&d.pagoMeses[mk]);}
 function finEnsurePagItem(x){if(!state.acerto)state.acerto={};const id=finPagAceId(x.nome);if(!id)return;const prev=state.acerto[id]||{};state.acerto[id]=Object.assign({custom:true,fixo:true,cat:acertoClassify(x.nome),pix:'',obs:'',pagoMes:''},prev,{nome:x.nome,valor:String(x.valor||''),dia:prev.dia||'10'});}
 function planToggleCob(i){const m=planActive();const x=m.receitas[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao cliente primeiro');return;}const planMes=m.mk||cobMesKey();const id=finRecCobId(x.nome);const on=!finRecCobrado(x.nome,planMes);if(!state.cobranca[id]||!state.cobranca[id]._plan){const n=normName(x.nome);if(!CLIENTES.find(c=>normName(c.nm)===n)){state.cobranca[id]=Object.assign({resp:'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},state.cobranca[id]||{},{_plan:true,_nome:x.nome,_valor:Number(x.valor)||0});}}if(typeof cobToggle==='function')cobToggle(id,on,planMes);renderPlanilha();}
 function planTogglePag(i){const m=planActive();const x=m.pagar[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao pagamento primeiro');return;}const planMes=m.mk||cobMesKey();finEnsurePagItem(x);const id=finPagAceId(x.nome);const on=!finPagPago(x.nome,planMes);if(typeof acertoToggle==='function')acertoToggle(id,on,planMes);renderPlanilha();}
