@@ -34,6 +34,15 @@ type Proposta = {
   id: string; clienteId: string; cliente: string; status: string;
   formato: string; tema: string; melhorDia?: string;
 };
+type PlanoItem = {
+  id: string; clienteId: string; mes: string; titulo: string; formato: string;
+  gancho: string; roteiro: string; melhorDia: string;
+  status: "pendente" | "aprovado" | "descartado" | "publicado";
+};
+type Captacao = {
+  id: string; clienteId: string; data: string; titulo?: string;
+  status: "agendada" | "concluida";
+};
 
 const GOLD = "#E3B341";
 const BG = "#0C0A09";
@@ -78,6 +87,13 @@ function Calendario() {
   const [novoFormato, setNovoFormato] = useState("Reels");
   const [salvando, setSalvando] = useState(false);
   const [mostraFila, setMostraFila] = useState(false);
+  const [plano, setPlano] = useState<PlanoItem[]>([]);
+  const [captacoes, setCaptacoes] = useState<Captacao[]>([]);
+  const [mostraRoteiros, setMostraRoteiros] = useState(false);
+  const [gerandoPlano, setGerandoPlano] = useState(false);
+  const [gerandoLegendas, setGerandoLegendas] = useState(false);
+  const [aviso, setAviso] = useState("");
+  const [busyRoteiro, setBusyRoteiro] = useState("");
 
   const carregar = useCallback(async () => {
     setErr(""); setLoading(true);
@@ -87,6 +103,10 @@ function Calendario() {
       setEntradas(Array.isArray(e) ? e : []);
       const f = out?.state?.["wfa-social-fila"];
       setFila(Array.isArray(f) ? f : []);
+      const p = out?.state?.["wfa-motor-plano"];
+      setPlano(Array.isArray(p) ? p : []);
+      const c = out?.state?.["wfa-producao"];
+      setCaptacoes(Array.isArray(c) ? c : []);
     } catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
     finally { setLoading(false); }
   }, []);
@@ -137,6 +157,52 @@ function Calendario() {
     persistir(entradas.filter((e) => e.id !== id));
   }
 
+  // ===== Motor de Conteúdo (Vivenda) =====
+  const mesExibido = `${mesBase.getFullYear()}-${String(mesBase.getMonth() + 1).padStart(2, "0")}`;
+  const roteirosPendentes = plano.filter((p) => p.status === "pendente" && p.mes === mesExibido);
+
+  async function gerarRoteiros() {
+    setGerandoPlano(true); setErr(""); setAviso("");
+    try {
+      const out = await authedFetch("motor-plano-mensal", { action: "motor-plano-mensal", mes: mesExibido });
+      setAviso(`✨ ${out.gerados ?? "Novos"} roteiros sugeridos pra Vivenda. Revise e aprove abaixo.`);
+      await carregar();
+      setMostraRoteiros(true);
+    } catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
+    finally { setGerandoPlano(false); }
+  }
+
+  async function gerarLegendas() {
+    setGerandoLegendas(true); setErr(""); setAviso("");
+    try {
+      const out = await authedFetch("motor-gerar-legendas", { action: "motor-gerar-legendas" });
+      if (!out.gerados) setAviso(out.msg || "Nenhuma edição concluída esperando legenda.");
+      else setAviso(`✍️ ${out.gerados} legenda(s) gerada(s). Aprove em /postagens — depois elas aparecem aqui pela fila.`);
+      await carregar();
+    } catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
+    finally { setGerandoLegendas(false); }
+  }
+
+  async function decidirRoteiro(r: PlanoItem, status: "aprovado" | "descartado") {
+    setBusyRoteiro(r.id); setErr("");
+    try {
+      await authedFetch("motor-status", { action: "motor-status", id: r.id, status });
+      setPlano((prev) => prev.map((p) => (p.id === r.id ? { ...p, status } : p)));
+      if (status === "aprovado") {
+        // retroalimenta o calendário: roteiro aprovado já entra como planejado no melhor dia
+        await persistir([...entradas, {
+          id: "ed_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+          clienteId: "vivenda", cliente: "Vivenda", data: r.melhorDia || diaSel,
+          titulo: r.titulo, formato: r.formato || "Reels",
+          status: "planejado", origem: "manual",
+        }]);
+        setAviso(`✅ "${r.titulo}" aprovado: captação criada na Produção e post planejado no dia ${(r.melhorDia || diaSel).split("-").reverse().join("/")}.`);
+        await carregar();
+      }
+    } catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
+    finally { setBusyRoteiro(""); }
+  }
+
   // dias do mês em grade (domingo inicia a semana)
   const dias = useMemo(() => {
     const first = new Date(mesBase);
@@ -154,6 +220,16 @@ function Calendario() {
     }
     return m;
   }, [entradas, clienteFiltro]);
+
+  const capPorDia = useMemo(() => {
+    const m = new Map<string, Captacao[]>();
+    for (const c of captacoes) {
+      if (!c.data) continue;
+      if (clienteFiltro !== "todos" && c.clienteId !== clienteFiltro) continue;
+      const arr = m.get(c.data) || []; arr.push(c); m.set(c.data, arr);
+    }
+    return m;
+  }, [captacoes, clienteFiltro]);
 
   const jaImportadas = useMemo(() => new Set(entradas.map((e) => e.propostaId).filter(Boolean)), [entradas]);
   const aprovadasSemDia = fila.filter((p) => (p.status === "aprovada" || p.status === "agendada") && !jaImportadas.has(p.id));
@@ -187,7 +263,51 @@ function Calendario() {
         </div>
 
         {err && <div style={{ background: "#3a1414", border: "1px solid #5a2020", color: "#ffd5d5", padding: 12, borderRadius: 10, marginBottom: 16 }}>{err}</div>}
+        {aviso && <div style={{ background: "#1f2a1a", border: "1px solid #2e4a24", color: "#c9e8b8", padding: 12, borderRadius: 10, marginBottom: 16, fontSize: 13.5 }}>{aviso}</div>}
         {loading && <p style={{ color: "#A89F92" }}>Carregando o calendário…</p>}
+
+        {/* Motor de Conteúdo */}
+        {!loading && (
+          <div style={{ background: SURFACE, border: `1px solid ${GOLD}40`, borderRadius: 14, padding: 14, marginBottom: 14, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ color: GOLD, fontSize: 13, fontWeight: 700 }}>⚡ Motor</span>
+            <span style={{ color: "#A89F92", fontSize: 12.5 }}>Vivenda:</span>
+            <button onClick={gerarRoteiros} disabled={gerandoPlano} style={btn(gerandoPlano ? "#3a342c" : GOLD, gerandoPlano ? "#6b5d3f" : "#111")}>
+              {gerandoPlano ? "Gerando…" : `✨ Gerar roteiros de ${mesNome.split(" ")[0]}`}
+            </button>
+            <button onClick={gerarLegendas} disabled={gerandoLegendas} style={btn(SURFACE, gerandoLegendas ? "#6b5d3f" : GOLD, BORDER)}>
+              {gerandoLegendas ? "Gerando…" : "✍️ Gerar legendas das edições prontas"}
+            </button>
+            {roteirosPendentes.length > 0 && (
+              <button onClick={() => setMostraRoteiros(!mostraRoteiros)} style={btn(SURFACE, GOLD, BORDER)}>
+                🎬 Roteiros pra aprovar ({roteirosPendentes.length})
+              </button>
+            )}
+          </div>
+        )}
+
+        {!loading && mostraRoteiros && roteirosPendentes.length > 0 && (
+          <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 14, padding: 14, marginBottom: 14 }}>
+            {roteirosPendentes.map((r) => (
+              <div key={r.id} style={{ padding: "10px 0", borderBottom: `1px solid ${BORDER}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, flexWrap: "wrap" }}>
+                  <div style={{ flex: "1 1 280px" }}>
+                    <b style={{ fontSize: 14 }}>{r.titulo}</b>
+                    <span style={{ color: "#A89F92", fontSize: 12.5 }}> · {r.formato}{r.melhorDia ? " · sugerido: " + r.melhorDia.split("-").reverse().join("/") : ""}</span>
+                    {r.gancho && <p style={{ margin: "4px 0 0", color: GOLD, fontSize: 12.5, fontStyle: "italic" }}>{r.gancho}</p>}
+                    {r.roteiro && <p style={{ margin: "4px 0 0", color: "#CFC7B8", fontSize: 12.5, whiteSpace: "pre-wrap" }}>{r.roteiro}</p>}
+                  </div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button onClick={() => decidirRoteiro(r, "aprovado")} disabled={busyRoteiro === r.id} style={btn("#1f7a3d", "#fff")}>
+                      {busyRoteiro === r.id ? "…" : "✅ Aprovar"}
+                    </button>
+                    <button onClick={() => decidirRoteiro(r, "descartado")} disabled={busyRoteiro === r.id} style={btn("#3a1414", "#f8b4b4", "#5a2020")}>✕</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <p style={{ margin: "10px 0 0", color: "#6b6357", fontSize: 12 }}>Aprovar cria a captação na Produção e já planeja o post no melhor dia aqui do calendário.</p>
+          </div>
+        )}
 
         {!loading && (
           <>
@@ -239,6 +359,13 @@ function Calendario() {
                     style={{ background: sel ? "#241f18" : SURFACE, border: `1px solid ${sel ? GOLD : k === hoje ? "#5a4a20" : BORDER}`,
                       borderRadius: 10, minHeight: 86, padding: 6, cursor: "pointer", opacity: doMes ? 1 : 0.38 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: k === hoje ? GOLD : "#A89F92", marginBottom: 4 }}>{d.getDate()}</div>
+                    {(capPorDia.get(k) || []).map((c) => (
+                      <div key={c.id} title={`Captação · ${c.titulo || "Vivenda"} (${c.status})`}
+                        style={{ background: "#2a2210", border: `1px solid ${GOLD}55`, borderLeft: `3px solid ${GOLD}`,
+                          borderRadius: 6, padding: "3px 6px", marginBottom: 3, fontSize: 11, lineHeight: 1.35, overflow: "hidden" }}>
+                        <span style={{ color: GOLD }}>📹 {c.titulo || "Captação"}</span>
+                      </div>
+                    ))}
                     {items.map((e) => (
                       <div key={e.id} title={`${e.cliente} · ${e.titulo} (${e.status}) — clique: muda status · shift+clique: remove`}
                         onClick={(ev) => { ev.stopPropagation(); if (ev.shiftKey) remover(e.id); else ciclarStatus(e.id); }}
