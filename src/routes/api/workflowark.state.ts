@@ -1100,6 +1100,187 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
           return json({ ok: true, full_name });
         }
 
+        if (action === "motor-plano-mensal") {
+          const mes = /^\d{4}-\d{2}$/.test(String(body.mes ?? ""))
+            ? String(body.mes)
+            : (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; })();
+
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const aiKey = zapiEnv("ANTHROPIC_API_KEY");
+          if (!aiKey) return json({ error: "IA não configurada." }, { status: 500 });
+
+          const { clienteBrief } = await import("@/integrations/clientes");
+          const brief = clienteBrief("vivenda");
+          const cap = 3;
+
+          const { data: edRow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-editorial").maybeSingle();
+          const editorial: any[] = Array.isArray(edRow?.data) ? edRow.data : [];
+          const jaNoMes = editorial
+            .filter((e: any) => e.clienteId === "vivenda" && String(e.data || "").startsWith(mes))
+            .map((e: any) => e.titulo);
+
+          const sys = [
+            "Você é o PLANEJADOR DE CONTEÚDO sênior da ARK Content (Brasília). Cria roteiros de captação para a Farmácia Vivenda prontos para gravar.",
+            "REGRAS: ganchos que param o scroll — nunca 'Olá pessoal', 'Nesse vídeo', 'Você sabia que'. Primeiro frame é conflito, pergunta ou afirmação chocante. Frases curtas, tom clínico mas acessível. Indique BLOCOS e CTA único.",
+            "Responda SOMENTE com JSON válido: {\"roteiros\":[...]}.",
+            "Cada roteiro: {\"titulo\":\"título curto e específico\",\"formato\":\"Reels|Feed|Stories|Carrossel\",\"gancho\":\"1ª frase do vídeo (2 linhas max)\",\"roteiro\":\"script completo com BLOCO 1, BLOCO 2 e CTA\",\"melhorDia\":\"YYYY-MM-DD sugerido\"}",
+            "CONTEXTO DO CLIENTE (use sempre — pessoas, produtos, protocolos, tom):\n" + brief,
+          ].join("\n");
+
+          const userMsg = `Hoje é ${hojeSP()}. Gere ${cap} roteiro(s) de captação para a Vivenda no mês ${mes}.\nJá planejado este mês: ${jaNoMes.join(", ") || "nenhum"}.\nVariar formatos e temas. Conectar com os protocolos (Pós-Mounjaro, Pele em Equilíbrio, 60+ Ativa) e o contexto de Brasília.`;
+
+          try {
+            const r = await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" },
+              body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 4000, system: sys, messages: [{ role: "user", content: userMsg }] }),
+            });
+            const data: any = await r.json().catch(() => ({}));
+            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+
+            let raw: string = data?.content?.[0]?.text || "";
+            raw = raw.replace(/```json|```/g, "").trim();
+            const m = raw.match(/\{[\s\S]*\}/);
+            let roteiros: any[] = [];
+            if (m) { try { roteiros = JSON.parse(m[0])?.roteiros || []; } catch { roteiros = []; } }
+            if (!Array.isArray(roteiros)) roteiros = [];
+
+            const novos = roteiros.map((rt: any) => ({
+              id: `mpl-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+              clienteId: "vivenda",
+              mes,
+              titulo: String(rt.titulo || ""),
+              formato: String(rt.formato || "Reels"),
+              gancho: String(rt.gancho || ""),
+              roteiro: String(rt.roteiro || ""),
+              melhorDia: String(rt.melhorDia || ""),
+              status: "pendente",
+              criadoEm: new Date().toISOString(),
+            }));
+
+            const { data: mRow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-motor-plano").maybeSingle();
+            const planoAtual: any[] = Array.isArray(mRow?.data) ? mRow.data : [];
+            const planoNovo = [...novos, ...planoAtual].slice(0, 200);
+            await ctx.db.from("workflowark_state").upsert({ key: "wfa-motor-plano", data: planoNovo, updated_by: ctx.user.id });
+
+            return json({ ok: true, gerados: novos.length, roteiros: novos });
+          } catch (e) {
+            return json({ error: (e as Error)?.message || "Falha ao gerar plano." }, { status: 502 });
+          }
+        }
+
+        if (action === "motor-gerar-legendas") {
+          const { zapiEnv } = await import("@/integrations/zapi.server");
+          const aiKey = zapiEnv("ANTHROPIC_API_KEY");
+          if (!aiKey) return json({ error: "IA não configurada." }, { status: 500 });
+
+          const { clienteBrief } = await import("@/integrations/clientes");
+          const brief = clienteBrief("vivenda");
+
+          const { data: tRow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-tarefas").maybeSingle();
+          const tarefas: any[] = Array.isArray(tRow?.data) ? tRow.data : [];
+          const edicoesConcluidas = tarefas.filter((t: any) =>
+            (t.clienteId === "vivenda" || String(t.clienteId || "").includes("vivenda")) &&
+            String(t.funcao || "").toLowerCase().includes("edit") &&
+            t.status === "concluido"
+          );
+
+          const { data: fRow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-social-fila").maybeSingle();
+          const fila: any[] = Array.isArray(fRow?.data) ? fRow.data : [];
+          const jaTemLegenda = new Set(fila.filter((f: any) => f.tarefaId).map((f: any) => f.tarefaId));
+
+          const pendentes = edicoesConcluidas.filter((t: any) => !jaTemLegenda.has(t.id));
+          if (!pendentes.length) return json({ ok: true, gerados: 0, msg: "Nenhuma edição nova sem legenda." });
+
+          const sys = [
+            "Você é COPYWRITER e SOCIAL MEDIA sênior da ARK Content (Brasília). Crie UMA legenda de Instagram pronta pra postar para a Farmácia Vivenda.",
+            "REGRAS: 1ª linha é o GANCHO (para o scroll, nunca 'Você sabia que'). Corpo em 3-4 linhas curtas com respiro. CTA específico. 5 hashtags (nicho + local Brasília).",
+            "Responda SOMENTE com JSON: {\"gancho\":\"...\",\"legenda\":\"texto completo formatado\",\"cta\":\"...\",\"hashtags\":\"#... #...\"}",
+            "CONTEXTO DO CLIENTE:\n" + brief,
+          ].join("\n");
+
+          const novasLegendas: any[] = [];
+          for (const tarefa of pendentes.slice(0, 5)) {
+            try {
+              const userMsg = `Vídeo editado: ${tarefa.title}\n${tarefa.desc ? "Descrição: " + tarefa.desc : ""}`;
+              const r = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" },
+                body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 800, system: sys, messages: [{ role: "user", content: userMsg }] }),
+              });
+              const d: any = await r.json().catch(() => ({}));
+              if (!r.ok) continue;
+              let raw2 = (d?.content?.[0]?.text || "").replace(/```json|```/g, "").trim();
+              const m2 = raw2.match(/\{[\s\S]*\}/);
+              if (!m2) continue;
+              let parsed: any = {};
+              try { parsed = JSON.parse(m2[0]); } catch { continue; }
+              novasLegendas.push({
+                id: `leg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                clienteId: "vivenda",
+                cliente: "Vivenda",
+                tarefaId: tarefa.id,
+                date: new Date().toISOString().slice(0, 10),
+                ts: Date.now(),
+                status: "pendente",
+                formato: String((tarefa.tags || [])[0] || "Reels"),
+                tema: tarefa.title,
+                gancho: parsed.gancho || "",
+                roteiro: tarefa.desc || "",
+                legenda: parsed.legenda || "",
+                cta: parsed.cta || "",
+                captacao: "",
+                melhorDia: "",
+                hashtags: parsed.hashtags || "",
+              });
+            } catch { continue; }
+          }
+
+          if (novasLegendas.length) {
+            const filaAtualizada = [...novasLegendas, ...fila].slice(0, 500);
+            await ctx.db.from("workflowark_state").upsert({ key: "wfa-social-fila", data: filaAtualizada, updated_by: ctx.user.id });
+          }
+
+          return json({ ok: true, gerados: novasLegendas.length });
+        }
+
+        if (action === "motor-status") {
+          const id = String(body.id ?? "");
+          const novoStatus = String(body.status ?? "");
+          if (!id || !["aprovado", "descartado", "publicado"].includes(novoStatus)) {
+            return json({ error: "Parâmetros inválidos." }, { status: 400 });
+          }
+
+          const { data: mRow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-motor-plano").maybeSingle();
+          const plano: any[] = Array.isArray(mRow?.data) ? mRow.data : [];
+          const idx = plano.findIndex((p: any) => p.id === id);
+          if (idx < 0) return json({ error: "Roteiro não encontrado." }, { status: 404 });
+
+          plano[idx] = { ...plano[idx], status: novoStatus, atualizadoEm: new Date().toISOString() };
+
+          if (novoStatus === "aprovado") {
+            const item = plano[idx];
+            const { data: pRow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-producao").maybeSingle();
+            const producao: any[] = Array.isArray(pRow?.data) ? pRow.data : [];
+            producao.unshift({
+              id: `cap-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+              clienteId: "vivenda",
+              data: item.melhorDia || "",
+              produtor: "",
+              local: "",
+              roteiro: item.roteiro,
+              status: "agendada",
+              motorPlanoId: item.id,
+              titulo: item.titulo,
+              videos: [{ id: `vid-${Date.now()}`, titulo: item.titulo, roteiroTrecho: item.gancho, editor: "", prazo: "", status: "fila" }],
+            });
+            await ctx.db.from("workflowark_state").upsert({ key: "wfa-producao", data: producao.slice(0, 300), updated_by: ctx.user.id });
+          }
+
+          await ctx.db.from("workflowark_state").upsert({ key: "wfa-motor-plano", data: plano, updated_by: ctx.user.id });
+          return json({ ok: true });
+        }
+
         return json({ error: "Ação inválida" }, { status: 400 });
       },
     },
