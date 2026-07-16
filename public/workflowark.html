@@ -1612,10 +1612,9 @@ function wfaSetTheme(t){
         <span>Produção</span>
         <span class="badge" id="producao-badge" style="display:none">0</span>
       </div>
-      <div class="navitem" data-nav="pauta">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        <span>Pautas</span>
-        <span class="badge" id="pauta-badge" style="display:none">0</span>
+      <div class="navitem" onclick="window.open('/motor','_blank')" style="cursor:pointer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Motor</span>
       </div>
 
       <div class="navitem" data-toggle="perf-menu">
@@ -3590,9 +3589,7 @@ async function bootCloudSync(){
     // Seeds que ANTES rodavam no parse (e apagavam dados em navegador novo): agora aqui,
     // com a lista real do servidor já aplicada, então só ACRESCENTAM.
     seedValhalla();seedSamuel();seedProcessos();
-    wfaSeedHistoricoCob(['2026-06','2026-07','2026-08']);   // preenche jun/jul/ago como cobrado
-    try{if(typeof acertoSeedFromFin==='function')acertoSeedFromFin();}catch(e){} // garante itens no acerto antes do seed histórico
-    wfaSeedHistoricoAcerto(['2026-06','2026-07','2026-08']); // preenche jun/jul/ago como pago
+    wfaSeedHistoricoCob(['2026-06','2026-07']);   // preenche jun/jul como cobrado
     if(WFA_WPP_OFF){try{document.querySelectorAll('[data-nav="whatsapp"]').forEach(el=>el.style.display='none');}catch(e){}}
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
@@ -10485,13 +10482,24 @@ function planIsEditing(){const w=document.getElementById('plan-wrap');return !!(
 // (inflava os totais em 100x). Número entra e sai igual.
 function planNum(s){if(s==null)return null;if(typeof s==='number')return isFinite(s)?s:null;let t=String(s).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');if(t===''||isNaN(parseFloat(t)))return null;return parseFloat(t);}
 function planFmt(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});}
+// Converte nome de mês em português ("Julho 2026") para chave "2026-07".
+// Usado para stampar mk em meses antigos que não tinham esse campo.
+function planParseMk(nome){
+  const MAP={'janeiro':'01','fevereiro':'02','marco':'03','abril':'04','maio':'05','junho':'06','julho':'07','agosto':'08','setembro':'09','outubro':'10','novembro':'11','dezembro':'12'};
+  const n=String(nome||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const ano=(n.match(/\b(20\d{2})\b/)||[])[1];
+  const mes=Object.keys(MAP).find(k=>n.includes(k));
+  return (ano&&mes)?ano+'-'+MAP[mes]:'';
+}
 function planNovoMes(nome,base){
   const id='pm'+Date.now()+Math.floor(Math.random()*999);
-  if(base)return {id,nome:nome||'Novo mês',receitas:base.receitas.map(x=>({...x})),pagar:base.pagar.map(x=>({...x}))};
-  return {id,nome:nome||'Novo mês',receitas:[{nome:'',valor:0,custo:0}],pagar:[{nome:'',valor:0}]};
+  const mk=planParseMk(nome)||cobMesKey();
+  if(base)return {id,nome:nome||'Novo mês',mk,receitas:base.receitas.map(x=>({...x})),pagar:base.pagar.map(x=>({...x}))};
+  return {id,nome:nome||'Novo mês',mk,receitas:[{nome:'',valor:0,custo:0}],pagar:[{nome:'',valor:0}]};
 }
 // migra formato antigo {cols,rows} -> {receitas,pagar}
 function planMigra(m){
+  if(!m.mk)m.mk=planParseMk(m.nome); // stampa mk em meses antigos pelo nome
   if(m.receitas&&m.pagar)return m;
   const rec=[],pag=[];const cols=m.cols||[];const ci=rx=>cols.findIndex(c=>new RegExp(rx,'i').test(c));
   const jCat=ci('categor'),jVal=ci('valor'),jCusto=ci('custo');
