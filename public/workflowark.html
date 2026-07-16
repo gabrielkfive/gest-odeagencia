@@ -1612,10 +1612,6 @@ function wfaSetTheme(t){
         <span>Produção</span>
         <span class="badge" id="producao-badge" style="display:none">0</span>
       </div>
-      <div class="navitem" onclick="window.open('/calendario','_blank')" style="cursor:pointer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polygon points="13 12.5 10.5 15.5 12.5 15.5 12 18.5 14.5 15.5 12.5 15.5 13 12.5" fill="currentColor" stroke="none"/></svg>
-        <span>Calendário</span>
-      </div>
 
       <div class="navitem" data-toggle="perf-menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
@@ -3938,6 +3934,7 @@ function iniciarAutoSync(){
           #page-planejamento .plc-chip.carrossel{background:#eef4ff;border-left-color:#4a90ff}
           #page-planejamento .plc-chip.story{background:#f6eeff;border-left-color:#9b5cff}
           #page-planejamento .plc-chip.foto{background:#e9f9ef;border-left-color:#19b36b}
+          #page-planejamento .plc-chip.capta{background:#fff1e0;border-left-color:#ff9500}
           #page-planejamento .pl-vbtn.on{background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700}
           /* ---- design premium ---- */
           #page-planejamento .pl-gen{background:linear-gradient(180deg,#fff,#fcfcfa);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
@@ -3999,12 +3996,14 @@ function iniciarAutoSync(){
             <button class="pl-save" onclick="planGerarAprovacao(this)">🔗 Link de aprovação</button>
             <button class="pl-save" onclick="planRoteirizarTudo(this)">🎬 Roteirizar tudo</button>
             <button class="pl-save" onclick="planGerarPortal(this)">🌐 Portal do cliente</button>
+            <button class="pl-save" onclick="planGerarLegendas(this)">✍️ Legendas das edições prontas</button>
           </div>
           <div class="pl-legend">
             <span><i style="background:#ffd400"></i>Reels</span>
             <span><i style="background:#4a90ff"></i>Carrossel</span>
             <span><i style="background:#9b5cff"></i>Story</span>
             <span><i style="background:#19b36b"></i>Foto</span>
+            <span><i style="background:#ff9500"></i>Captação</span>
           </div>
         </div>
         <div id="pl-cal" style="margin-top:12px"></div>
@@ -9902,14 +9901,29 @@ function planRenderCalendar(){
   const monthName=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   const dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   const byDay={};dated.forEach(x=>{if(x.d.getMonth()===month&&x.d.getFullYear()===year){(byDay[x.d.getDate()]=byDay[x.d.getDate()]||[]).push(x);}});
+  // Captações da Produção entram na mesma grade (retroalimentação: planejamento vê a operação)
+  const cliTxt=((document.getElementById('pl-cliente')||{}).value||_planCliente||'').toLowerCase();
+  const capMes=(typeof loadProducao==='function'?loadProducao():[]).filter(c=>{
+    const d=planParseDate(c.data);if(!d||d.getMonth()!==month||d.getFullYear()!==year)return false;
+    const cid=String(c.clienteId||'').toLowerCase();
+    return !cliTxt||!cid||cliTxt.includes(cid)||cid.includes(cliTxt);
+  });
+  const capByDay={};capMes.forEach(c=>{const d=planParseDate(c.data);(capByDay[d.getDate()]=capByDay[d.getDate()]||[]).push(c);});
   let cells='';
   for(let b=0;b<startDow;b++)cells+='<div class="plc-cell muted"></div>';
   for(let day=1;day<=days;day++){
     const dd=new Date(year,month,day);const isToday=dd.getTime()===today.getTime();
+    const caps=(capByDay[day]||[]).map(c=>`<div class="plc-chip capta" title="Captação · ${mdEsc(c.titulo||c.clienteId||'')} (${mdEsc(c.status||'agendada')})"><span class="f">📹 captação</span>${mdEsc((c.titulo||c.clienteId||'Captação').slice(0,44))}</div>`).join('');
     const items=(byDay[day]||[]).map(x=>`<div class="plc-chip ${planFmtClass(x.i.formato)}" onclick="planDetalhe(${x.idx})" title="${mdEsc(x.i.tema||'')}"><span class="f">${mdEsc(x.i.formato||'')}</span>${mdEsc((x.i.tema||'').slice(0,44))}</div>`).join('');
-    cells+=`<div class="plc-cell${isToday?' today':''}"><span class="plc-num">${day}</span>${items}</div>`;
+    cells+=`<div class="plc-cell${isToday?' today':''}"><span class="plc-num">${day}</span>${caps}${items}</div>`;
   }
-  let html=`<div class="plc"><div class="plc-head"><div class="plc-title">${monthName}</div><div style="font-size:12px;color:var(--mute)">${dated.length} agendados</div></div><div class="plc-grid">${dows.map(d=>`<div class="plc-dow">${d}</div>`).join('')}${cells}</div></div>`;
+  // Radar: Vivenda tem 3 captações contratadas/mês — avisa se o mês não fechou
+  const capMeta=cliTxt.includes('vivenda')?3:0;
+  const radar=capMeta?(capMes.length>=capMeta
+    ?` · <span style="color:#19b36b;font-weight:700">📹 ${capMes.length}/${capMeta} captações ✓</span>`
+    :` · <span style="color:#d63031;font-weight:700">📹 ${capMes.length}/${capMeta} captações — falta agendar ${capMeta-capMes.length}</span>`)
+    :(capMes.length?` · 📹 ${capMes.length} captação(ões)`:'');
+  let html=`<div class="plc"><div class="plc-head"><div class="plc-title">${monthName}</div><div style="font-size:12px;color:var(--mute)">${dated.length} agendados${radar}</div></div><div class="plc-grid">${dows.map(d=>`<div class="plc-dow">${d}</div>`).join('')}${cells}</div></div>`;
   if(undated.length){html+=`<div style="margin-top:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--mute);margin:0 4px 8px">📌 Sem data definida</div><div class="pl-grid">`+undated.map(x=>planCardHtml(x.i,x.idx)).join('')+`</div></div>`;}
   cal.innerHTML=html;
 }
@@ -9924,6 +9938,26 @@ function planDetalhe(idx){
     ${i.legenda?`<div style="font-size:13px;color:var(--mute);font-style:italic;border-left:2px solid var(--line);padding-left:10px;margin-bottom:16px">“${mdEsc(i.legenda)}”</div>`:''}
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="planParaRoteirista(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">🎬 Roteirizar</button><button class="tb-btn" onclick="planParaLegenda(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">✍️ Legenda</button><button class="tb-btn" onclick="planParaTarefa(${idx});var m=document.getElementById('pl-modal');m&&m.remove()">＋ Tarefa</button><button class="tb-btn" onclick="var m=document.getElementById('pl-modal');m&&m.remove()">Fechar</button></div>
   </div>`;
+}
+// LEGENDAS AUTOMÁTICAS: busca edições concluídas da Vivenda sem legenda e gera tudo de
+// uma vez no servidor (action motor-gerar-legendas). Fetch próprio SEM o timeout de 25s
+// do cloudCall — o servidor chama a IA até 5x em sequência e pode passar de 1 minuto.
+async function planGerarLegendas(btn){
+  const orig=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='✍️ Gerando… (pode levar 1 min)';}
+  try{
+    const {data:{session}}=await _wfaSb.auth.getSession();
+    const token=session&&session.access_token;
+    if(!token)throw new Error('Faça login para usar o sistema.');
+    const resp=await fetch('/api/workflowark/state',{method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({action:'motor-gerar-legendas'})});
+    const r=await resp.json().catch(()=>({}));
+    if(!resp.ok)throw new Error(r.error||'Falha ao gerar legendas');
+    if(r.gerados)toast('✍️ '+r.gerados+' legenda(s) pronta(s) — aprova em Postagens (/postagens)');
+    else toast(r.msg||'Nenhuma edição concluída esperando legenda');
+  }catch(e){toast('⚠ '+((e&&e.message)||'Falha ao gerar legendas'));}
+  finally{if(btn){btn.disabled=false;btn.textContent=orig;}}
 }
 // Roteirista AUTÔNOMO: lê o planejamento do cliente e gera o roteiro de TODAS as ideias
 // de uma vez (sem caixinha de prompt). O brief real do cliente já entra no servidor
