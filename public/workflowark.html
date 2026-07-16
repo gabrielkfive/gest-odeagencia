@@ -3590,8 +3590,9 @@ async function bootCloudSync(){
     // Seeds que ANTES rodavam no parse (e apagavam dados em navegador novo): agora aqui,
     // com a lista real do servidor já aplicada, então só ACRESCENTAM.
     seedValhalla();seedSamuel();seedProcessos();
-    wfaSeedHistoricoCob(['2026-06','2026-07']);   // preenche junho+julho como cobrado (1x por navegador)
-    wfaSeedHistoricoAcerto(['2026-06','2026-07']); // preenche junho+julho como pago (1x por navegador)
+    wfaSeedHistoricoCob(['2026-06','2026-07','2026-08']);   // preenche jun/jul/ago como cobrado
+    try{if(typeof acertoSeedFromFin==='function')acertoSeedFromFin();}catch(e){} // garante itens no acerto antes do seed histórico
+    wfaSeedHistoricoAcerto(['2026-06','2026-07','2026-08']); // preenche jun/jul/ago como pago
     if(WFA_WPP_OFF){try{document.querySelectorAll('[data-nav="whatsapp"]').forEach(el=>el.style.display='none');}catch(e){}}
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
   }catch(err){
@@ -6686,14 +6687,14 @@ function acertoToggle(id,on,mes){
   saveAcerto();renderAcerto();
 }
 
-// Preenche cobradoMeses para todos os clientes ARK de cobrança em meses históricos.
-// Idempotente: só marca quem ainda não está marcado. Usa localStorage como flag pra não repetir.
+// Preenche cobradoMeses para todos os clientes ARK em meses históricos.
+// Idempotente: checa o ESTADO REAL (não flag de localStorage) — assim roda
+// de novo se o cloud sync tiver apagado os dados antes de gravar.
 function wfaSeedHistoricoCob(meses){
-  const flag='wfa-seed-hist-cob-'+meses.join('-');
-  if(localStorage.getItem(flag))return;
   if(!state.cobranca)state.cobranca={};
-  let mudou=false;
   const clientes=cobClientes();
+  if(!clientes.length)return;
+  let mudou=false;
   clientes.forEach(c=>{
     const prev=state.cobranca[c.id]||{};
     if(!prev.cobradoMeses)prev.cobradoMeses={};
@@ -6705,14 +6706,12 @@ function wfaSeedHistoricoCob(meses){
       state.cobranca[c.id]=prev;mudou=true;
     }
   });
-  if(mudou){saveCobranca();localStorage.setItem(flag,'1');}else{localStorage.setItem(flag,'1');}
+  if(mudou)saveCobranca();
 }
 
-// Preenche pagoMeses para todos os itens de acerto existentes em meses históricos.
+// Preenche pagoMeses para todos os itens de acerto em meses históricos.
 function wfaSeedHistoricoAcerto(meses){
-  const flag='wfa-seed-hist-ace-'+meses.join('-');
-  if(localStorage.getItem(flag))return;
-  if(!state.acerto||!Object.keys(state.acerto).length)return; // acerto vazio: aguarda sync
+  if(!state.acerto||!Object.keys(state.acerto).length)return;
   let mudou=false;
   Object.keys(state.acerto).forEach(id=>{
     const d=state.acerto[id];
@@ -6722,7 +6721,7 @@ function wfaSeedHistoricoAcerto(meses){
     meses.forEach(mk=>{if(!d.pagoMeses[mk]){d.pagoMeses[mk]=true;changed=true;}});
     if(changed){d.feitas=(d.feitas||0)+1;mudou=true;}
   });
-  if(mudou){saveAcerto();localStorage.setItem(flag,'1');}else{localStorage.setItem(flag,'1');}
+  if(mudou)saveAcerto();
 }
 
 function acertoCopiarPix(id){
