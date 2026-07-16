@@ -50,6 +50,9 @@ const STATE_KEYS = new Set([
   // Produção Audiovisual: captações com checklist do produtor e vídeos que viram
   // tarefas de edição automaticamente (evento "captação concluída").
   "wfa-producao",
+  // Motor de Conteúdo: roteiros gerados pelo planejamento mensal (escrito pelo servidor,
+  // lido pela rota /motor). Piloto com Vivenda; expansível por clienteId depois.
+  "wfa-motor-plano",
   // Briefings estruturados que disparam a cadeia de pauta (roteiro → design → edição).
   "wfa-briefings",
   // Solicitações de acerto a receber (ciclos e textos dos e-mails "SOLICITO ACERTO").
