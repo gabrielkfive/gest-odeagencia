@@ -6998,6 +6998,18 @@ function mdRenderDecisoes(){
       d:'“'+String(pend[0].gancho||pend[0].tema||'').slice(0,80)+'…”',
       acts:`<button class="dec-btn p" onclick="window.open('/postagens','_blank')">Revisar e aprovar</button>`});
   }
+  // 3b) planos mensais gerados pela IA ainda sem revisão (gestor/admin) — o piloto
+  //     automático cria no dia 1º; aqui o humano dá o aval e manda pro cliente
+  if(isManager&&state.planejamento&&typeof state.planejamento==='object'){
+    Object.entries(state.planejamento).forEach(([k,p])=>{
+      if(!p||p.origem!=='auto-mensal'||p.revisado)return;
+      const qtd=(p.ideias||[]).length;if(!qtd)return;
+      cards.push({urg:diaDoMes>=5?2:1,ico:'🗓️',bg:'#e9f9ef',cli:p.cliente||k,
+        t:'Plano de '+(p.periodo||'novo mês')+' gerado pela IA',
+        d:qtd+' ideias no calendário — revisa e aprova pra virar o mês do cliente'+(diaDoMes>=5?' (o mês já começou!)':''),
+        acts:`<button class="dec-btn p" onclick="decAprovarPlano('${k}')">✓ Aprovar plano</button><button class="dec-btn s" onclick="decVerPlano('${k}')">Ver no Planejamento</button>`});
+    });
+  }
   // 4) captações do mês faltando (account/gestor) — urgência cresce com o mês andando
   //    e com a saúde do cliente (status vermelho = urgente sempre)
   if(isManager||myFirst==='lucas'){
@@ -7033,6 +7045,29 @@ async function decRoteiro(id,status){
     const box=document.getElementById('md-decisoes');if(box)box.dataset.sig='';
     mdRenderDecisoes();
   }catch(e){toast('⚠ '+((e&&e.message)||'Falha ao decidir'));}
+}
+function decAprovarPlano(k){
+  const p=state.planejamento&&state.planejamento[k];if(!p)return;
+  p.revisado=true;p.revisadoEm=Date.now();
+  try{localStorage.setItem('wfa-planejamento',JSON.stringify(state.planejamento));}catch(e){}
+  // gera a tarefa de levar o plano ao cliente (dedupe por título+cliente aberto)
+  const titulo='Enviar plano de '+(p.periodo||'novo mês')+' de '+(p.cliente||k)+' pro cliente aprovar';
+  const jaTem=(state.tarefas||[]).some(t=>t.status!=='concluido'&&(t.title||'')===titulo);
+  if(!jaTem){
+    state.tarefas.unshift({id:'dec'+Date.now(),title:titulo,
+      desc:'Plano gerado pelo piloto automático e aprovado internamente na fila de Decisões. Está na aba Planejamento (cliente: '+(p.cliente||k)+').',
+      funcao:'Account',clienteId:k==='vivenda'?'vivenda':k,resp:'Lucas Rosi',data:hojeSP(),prio:'alta',status:'backlog',
+      tags:['planejamento','aprovação'],checklist:[],criadaEm:new Date().toISOString()});
+    saveTarefas();
+  }
+  toast('✓ Plano de '+(p.cliente||k)+' aprovado — tarefa criada pro Lucas levar ao cliente');
+  const box=document.getElementById('md-decisoes');if(box)box.dataset.sig='';
+  mdRenderDecisoes();
+}
+function decVerPlano(k){
+  const p=state.planejamento&&state.planejamento[k];
+  const nav=document.querySelector('[data-nav="planejamento"]');if(nav)nav.click();
+  setTimeout(()=>{try{if(p&&typeof planTrocarCliente==='function')planTrocarCliente(p.cliente||k);const ci=document.getElementById('pl-cliente');if(ci&&p)ci.value=p.cliente||k;}catch(e){}},300);
 }
 function decTarefaCaptacao(cid,nome,falta){
   state.tarefas.unshift({id:'dec'+Date.now(),title:'Agendar '+falta+' captação(ões) de '+nome+' com o cliente',
