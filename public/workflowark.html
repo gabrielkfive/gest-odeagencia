@@ -3882,7 +3882,7 @@ function iniciarAutoSync(){
         <div class="page-head"><div class="page-title"><h1>Roteirista</h1><p>Seu roteirista de IA · gera roteiros de Reels prontos pra gravar (método viral). Diga o tema e o cliente.</p></div></div>
         <div class="card" style="padding:16px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div style="grid-column:1/-1"><label class="form-label" style="font-size:11px">Tema / assunto do vídeo</label><textarea id="rot-tema" class="form-input" style="min-height:64px" placeholder="Ex: por que comprar genérico não é furada · combo de inverno · dica do farmacêutico sobre gripe..."></textarea></div>
-          <div><label class="form-label" style="font-size:11px">Cliente</label><input id="rot-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda"></div>
+          <div><label class="form-label" style="font-size:11px">Cliente</label><input id="rot-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda" list="pl-clientes-salvos" onchange="wfaSetClienteAtivo(this.value)"></div>
           <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px">
             <div><label class="form-label" style="font-size:11px">Plataforma</label><select id="rot-plat" class="form-select"><option>Instagram Reels</option><option>TikTok</option><option>YouTube Shorts</option></select></div>
             <div><label class="form-label" style="font-size:11px">Qtd</label><input id="rot-qtd" class="form-input" type="number" value="3" min="1" max="8"></div>
@@ -4016,7 +4016,7 @@ function iniciarAutoSync(){
         <div class="page-head"><div class="page-title"><h1>Legendas</h1><p>Escreve a legenda no tom da marca (gancho + CTA + hashtags). Cola o tema ou o roteiro e gera.</p></div></div>
         <div class="card" style="padding:16px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div style="grid-column:1/-1"><label class="form-label" style="font-size:11px">Tema ou roteiro</label><textarea id="leg-tema" class="form-input" style="min-height:72px" placeholder="Cole o tema do post ou o roteiro inteiro..."></textarea></div>
-          <div><label class="form-label" style="font-size:11px">Cliente</label><input id="leg-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda"></div>
+          <div><label class="form-label" style="font-size:11px">Cliente</label><input id="leg-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda" list="pl-clientes-salvos" onchange="wfaSetClienteAtivo(this.value)"></div>
           <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px">
             <div><label class="form-label" style="font-size:11px">Rede</label><select id="leg-rede" class="form-select"><option>Instagram</option><option>TikTok</option><option>Facebook</option></select></div>
             <div><label class="form-label" style="font-size:11px">Qtd</label><input id="leg-qtd" class="form-input" type="number" value="2" min="1" max="4"></div>
@@ -5725,6 +5725,8 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='whatsapp'&&WFA_WPP_OFF){try{document.querySelector('[data-nav="painel"]').click();}catch(e){}return;}
     if(p==='whatsapp'){try{wfaCarregarWhatsapp();}catch(e){} try{const _td=hojeSP();if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
+    if(p==='roteirista'){try{const c=document.getElementById('rot-cliente');const a=wfaClienteAtivo();if(c&&a)c.value=a;}catch(e){}}
+    if(p==='legenda'){try{const c=document.getElementById('leg-cliente');const a=wfaClienteAtivo();if(c&&a)c.value=a;}catch(e){}}
     if(p==='jornada'&&typeof renderSprints==='function'){try{renderSprints();}catch(e){}}
     if(p==='producao'&&typeof renderProducao==='function'){try{renderProducao();}catch(e){console.warn('prod',e);}}
     if(p==='pauta'&&typeof renderPauta==='function'){try{renderPauta();}catch(e){console.warn('pauta',e);}}
@@ -9848,7 +9850,8 @@ function planOpen(){
   if(_planIdeias&&_planIdeias.length)return; // ja tem algo na tela (guarda: boot pode chamar cedo)
   if(!_planIdeias)_planIdeias=[];
   const saved=state.planejamento||{};
-  let pick=saved.vivenda;
+  // abre no CLIENTE ATIVO (se tiver plano salvo); senão Vivenda; senão o mais recente
+  let pick=(wfaClienteAtivo()&&saved[planKey(wfaClienteAtivo())])||saved.vivenda;
   if(!pick){const ks=Object.keys(saved);if(ks.length)pick=ks.map(k=>saved[k]).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];}
   if(!pick)pick=PLAN_SEED_VIVENDA;
   const ci=document.getElementById('pl-cliente'),pi=document.getElementById('pl-periodo');
@@ -9857,10 +9860,20 @@ function planOpen(){
   _planIdeias=pick.ideias||[];_planCliente=pick.cliente||'';
   if(_planIdeias.length){const v=document.getElementById('pl-views');if(v)v.style.display='flex';const e=document.getElementById('pl-empty');if(e)e.style.display='none';planRender();}
 }
+// CLIENTE ATIVO global das abas de IA (pedido do Gabriel, 16/07): trocou de cliente
+// em qualquer aba (Planejamento, Roteirista, Legenda), todas acompanham. Persiste
+// entre sessões. Sem aba nova — só as existentes conversando.
+function wfaClienteAtivo(){try{return localStorage.getItem('wfa-cliente-ativo')||'';}catch(e){return '';}}
+function wfaSetClienteAtivo(nome){
+  const n=String(nome||'').trim();if(!n)return;
+  try{localStorage.setItem('wfa-cliente-ativo',n);}catch(e){}
+  ['pl-cliente','rot-cliente','leg-cliente'].forEach(id=>{const el=document.getElementById(id);if(el&&el.value!==n)el.value=n;});
+}
 // Cada cliente tem seu planejamento salvo — trocar o nome no campo carrega o dele,
 // sem apagar o dos outros (pedido do Gabriel: um plano nunca some por causa do outro).
 function planTrocarCliente(nome){
   const n=String(nome||'').trim();if(!n)return;
+  wfaSetClienteAtivo(n);
   const saved=state.planejamento||{};
   const pick=saved[planKey(n)];
   const pi=document.getElementById('pl-periodo');
