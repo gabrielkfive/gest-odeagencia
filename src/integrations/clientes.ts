@@ -63,19 +63,22 @@ TOM: fome e fartura — fogo, gordura derretendo, fatia caindo. Forte apelo de f
 FORMATOS: Reels de corte/brasa (motor) > combos e porções pra grupo > stories de salão cheio. CTA de reserva pra grupos.`;
 
 const DOM = `DOM BARUKA (Squad Alpha) — restaurante. URGENTE no operacional: cardápio + iFood + bebidas; auditoria de iFood em curso.
+MODELO DE ENTREGA (assessoria Alpha — o cliente grava, a ARK dirige e roda tráfego): gestão de Meta Ads + relatório semanal de performance no grupo + direção criativa (roteiros e validação de criativos). SEM captação da ARK. Verba de mídia enxuta e eficiente (CPA baixo — anúncio roda pouco e vende).
 FOCO: food porn + empurrar DELIVERY (iFood otimizado, fotos de cardápio que vendem, combos de bebida). Conteúdo serve salão E delivery.
 TOM: apetite + praticidade (peça agora / venha agora). Destacar pratos campeões e bebidas.
 FORMATOS: Reels de prato > destaque de itens do iFood/combos > stories de novidade. Coordenar com a auditoria de iFood (foto/descrição que convertem).`;
 
 const STRAY = `STRAY HOUSE (Squad Alpha) — restaurante/bar. Fase de RECUPERAÇÃO. ROAS ~5 (saudável) — dá pra escalar.
-PRIORIDADE: subir CRIATIVOS NOVOS com frequência (o ROAS aguenta investir mais; não deixar saturar). Testar ganchos e renovar o banco.
+MODELO DE ENTREGA (assessoria Alpha): a equipe DO CLIENTE produz os vídeos; a ARK pauta o criativo certo, valida antes de subir (edição só em caso excepcional) e roda Meta Ads (~R$550-600/semana) com relatório semanal no grupo. Contatos: Paulo/Paulinha; social media Joe acompanha. SEM captação da ARK.
+PRIORIDADE: subir CRIATIVOS NOVOS com frequência (o ROAS aguenta investir mais; não deixar saturar). Testar ganchos e renovar o banco. Atenção: alinhar bem o briefing do vídeo com o cliente (já veio vídeo errado — ex.: kit Dia dos Namorados).
 TOM: vibe de bar/noite — energia, drinks, ambiente, música, galera. Vender a EXPERIÊNCIA.
 FORMATOS: Reels de drink/ambiente noturno (motor) > eventos/agenda da semana > UGC da galera.`;
 
-const BABBO = `BABBO GIOVANNI (Squad Alpha) — restaurante italiano. Em ajuste.
-PRIORIDADE: roteirização de Reels INTERESSANTE, viável de gravar no restaurante e exportável pro Drive (workflow Alpha).
-TOM: tradição italiana + apetite — massa fresca, queijo, molho, cantina aconchegante. Experiência italiana autêntica.
-FORMATOS: Reels de prato/massa (motor) > processo artesanal (massa sendo feita) > ambiente família. Roteiros prontos e fáceis de executar na captação.`;
+const BABBO = `BABBO GIOVANNI (Squad Alpha) — restaurante italiano/pizzaria. Em ajuste. Contato: Fábio (dono).
+MODELO DE ENTREGA (assessoria Alpha): o lado do cliente grava (há quem "faz todos os vídeos da Babbo"; ideia em curso: a FILHA do Fábio apresentando com roteiro da ARK); a ARK entrega ROTEIROS prontos, valida criativos no grupo e sobe anúncios (foco em promoção). SEM captação da ARK.
+PRIORIDADE: roteirização de Reels INTERESSANTE, viável de gravar no restaurante e exportável pro Drive (workflow Alpha). Linha validada: comparação com orgulho ("essa é a pizzaria do meu pai — forno a lenha vs forno elétrico, ingrediente de verdade vs pizza de padaria").
+TOM: tradição italiana + apetite — massa fresca, queijo, molho, cantina aconchegante. Experiência italiana autêntica, voz de família.
+FORMATOS: Reels de prato/massa (motor) > processo artesanal (massa sendo feita) > ambiente família. Roteiros prontos e fáceis de executar na captação do cliente.`;
 
 const DGUST = `PIZZARIA DGUST (Brasília) — pizzaria. Cliente NOVO (jul/2026): fase de ONBOARDING.
 PRIORIDADE: primeira linha editorial + primeiras captações. Estabelecer identidade visual do feed e cadência.
