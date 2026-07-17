@@ -12,18 +12,19 @@ PILARES: (1) Autoridade acessível — traduzir ciência simples; (2) Prova soci
 PROTOCOLOS ÂNCORA: Pós-Mounjaro · Pele em Equilíbrio · 60+ Ativa.
 FORMATOS (prioridade): Reels 30-60s (motor) > Carrosséis ("manuais de bolso") > Lives com farmacêutico > WhatsApp CRM. Séries fixas: "Vivenda Responde", "Mito ou Verdade".
 
-PRODUTOS EM FOCO AGORA (Jun/2026):
-- Creme de Ureia 10%: ultra hidratante, produto TOP. SUPER PROMOÇÃO (estoque alto ~900, 200 venceram → urgência real de girar). Precisa de criativo forte.
-- NAC (N-acetilcisteína): ação antioxidante, apoio renal/fígado ("dá uma limpada"). Gancho de Copa: todo mundo tomando uma → ajuda. Tratar leve, por influenciadora.
-- Cafeína: linha performance/novos produtos.
+PRODUTOS EM FOCO AGORA (Jul/2026):
+- NAC (N-acetilcisteína): saiu do gancho de jogo, entrou no gancho de ROTINA (recuperação, fígado pós festa). Provou interesse real (53 curtidas, 14 comentários).
+- Cafeína: linha performance; ângulo "por que a minha cafeína é manipulada".
+- Creme de Ureia 10%: herói de RETENÇÃO ("o produto que mais faz cliente voltar"); julho é pico da seca em Brasília.
 
 PESSOAS (decisores — sem isso o roteiro é genérico):
 - Remerson: gestor principal e DECISOR (aprova os planejamentos mensais). É o PAI do dono. Sério, dedicado, organizado.
 - Graziella: gestora de compras/operacional/contratação. NÃO aprova planejamento nem está no dia a dia.
-- Yuri: marketing (parte) do lado do cliente — é quem executa.
+- Yuri: marketing (parte) do lado do cliente — é quem executa (produção das captações).
 - 8 gerentes no grupo "Líderes da Vivenda". Lojas com 3-7 vendedores; uma com laboratório de ~15 pessoas.
 
-PLANO DE CONTEÚDO — COPA (a partir de 11/06/2026): vídeo 1 da série cinematográfica de Copa (11/06) → vídeo de influenciador (12/06) → vídeo 2 com reforços (influenciadores Leila, Renan, Esté, 13/06) → foto no sábado (jogo do Brasil) → semana seguinte: mais posts + captação na farmácia (focar creme de ureia, NAC, cafeína).`;
+MOMENTO (Jul/2026) — VIRADA PÓS-COPA → DIA DOS PAIS (09/08): o Brasil caiu, a Copa virou memória, o Kit Copa saiu de cena. O mês é PONTE pro Mês dos Pais com conversão qualificada. Arco: (1) virada pós-Copa (recuperação/rotina) → (2) SÉRIE DOS PROPRIETÁRIOS (8 roteiros: donos filmados no dia a dia da loja, cortes a cada 3s — engaja 4x mais que produto) → (3) esquenta da campanha → (4) semana do Dia dos Pais.
+CAMPANHA "MANDA A RECEITA DO PAI": foto da receita (do pai, do avô ou a própria) no WhatsApp → orçamento em minutos, retirada ou entrega. Receita = lead mais qualificado que existe (R$2,84/conversa no criativo campeão). Meta: 40% de conversão com receita (vs 32% do atendimento comum). REGRA DE OURO: brinde, não desconto (junho já deu R$222,5 mil de desconto). Expansão: Taguatinga e Sobradinho primeiro, depois rede inteira.`;
 
 const FERCON = `FERCON (Brasília) — gastronomia. ~R$4.200/mês, 2 captações/mês.
 PERFIL: mais reativo que ativo — papel da ARK é PROVOCAR pauta, não esperar o cliente trazer.
@@ -76,6 +77,21 @@ PRIORIDADE: roteirização de Reels INTERESSANTE, viável de gravar no restauran
 TOM: tradição italiana + apetite — massa fresca, queijo, molho, cantina aconchegante. Experiência italiana autêntica.
 FORMATOS: Reels de prato/massa (motor) > processo artesanal (massa sendo feita) > ambiente família. Roteiros prontos e fáceis de executar na captação.`;
 
+const DGUST = `PIZZARIA DGUST (Brasília) — pizzaria. Cliente NOVO (jul/2026): fase de ONBOARDING.
+PRIORIDADE: primeira linha editorial + primeiras captações. Estabelecer identidade visual do feed e cadência.
+TOM: food porn de pizza — queijo puxando, forno, borda, massa aberta na mão. Apetite imediato.
+FORMATOS: Reels de pizza saindo do forno (motor) > sabores/combos > bastidor do pizzaiolo. CTA de pedido/delivery e localização desde o início.`;
+
+const KOPI = `KOPI COFFEE (Brasília) — cafeteria. Cliente NOVO (jul/2026): onboarding e presença inicial.
+PRIORIDADE: apresentar a marca (quem é, onde fica, o que tem de especial) e criar hábito de conteúdo.
+TOM: café de especialidade — método, aroma, ritual, estética minimalista. Público que valoriza o preparo.
+FORMATOS: Reels de preparo/latte art (motor) > menu e novidades > ambiente pra trabalhar/encontrar. CTA "vem conhecer" com endereço e horário.`;
+
+const LUMIERE = `CAFÉ LUMIÈRE (Brasília) — cafeteria. Cliente NOVO (jul/2026): onboarding, posicionamento e presença inicial.
+PRIORIDADE: definir posicionamento (o que diferencia o Lumière) e construir presença do zero.
+TOM: charme e luz — estética afrancesada, doces finos, café com experiência. Instagramável por natureza.
+FORMATOS: Reels de ambiente/doce/café (motor) > carrossel de menu > stories de rotina da casa. CTA de visita com localização.`;
+
 // Briefs de 1ª geração ancorados no catálogo real (segmento + nota estratégica do Gabriel).
 // Enriquecer com decisores/protocolos quando o Gabriel passar (igual à profundidade da Vivenda).
 const BRIEFS: Record<string, string> = {
@@ -90,6 +106,9 @@ const BRIEFS: Record<string, string> = {
   dom: DOM,
   stray: STRAY,
   babbo: BABBO,
+  dgust: DGUST,
+  kopi: KOPI,
+  lumiere: LUMIERE,
 };
 
 // Retorna o brief do cliente (ou "" se não houver). Casa por inclusão do nome normalizado.
