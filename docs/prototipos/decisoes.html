@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ARK · protótipo do app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · pre-emit critique: P4 H5 E4 S5 R5 V4 */
+:root{
+  --bg:#fafaf7;--surface:#fff;--ink:#0a0a0a;--txt:#262626;
+  --mute:#737373;--mute-2:#a3a3a3;--line:#e8e6e0;--line-2:#d4d0c4;
+  --accent:#FFC700;--accent-soft:#fff8dc;--accent-bg:#fffbeb;
+  --green:#19b36b;--green-bg:#e9f9ef;--red:#d63031;--red-bg:#fdecec;
+  --roxo-bg:#f6eeff;
+  --shadow:0 1px 2px rgba(0,0,0,.04);--shadow-lg:0 8px 28px rgba(0,0,0,.09);
+  --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  --font-display:'Fraunces',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:clip}
+body{background:var(--bg);color:var(--txt);font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;align-items:center;min-height:100dvh}
+.app{width:100%;max-width:600px;min-height:100dvh;display:flex;flex-direction:column}
+h1,h2,h3,b{overflow-wrap:anywhere;min-width:0}
+
+/* ============ INTRO ============ */
+#intro{position:fixed;inset:0;background:var(--ink);color:#fff;z-index:100;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:32px;transition:opacity .6s,visibility .6s}
+#intro.fora{opacity:0;visibility:hidden}
+#intro .marca{width:64px;height:64px;border-radius:18px;background:var(--accent);color:var(--ink);
+  display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:30px;margin-bottom:28px;
+  opacity:0;animation:sobe .7s .1s forwards}
+#intro h1{font-family:var(--font-display);font-weight:600;font-size:clamp(26px,7vw,38px);line-height:1.15;
+  letter-spacing:-.02em;max-width:420px;opacity:0;animation:sobe .7s .3s forwards}
+#intro h1 span{color:var(--accent)}
+#intro p{margin-top:14px;font-size:14px;color:#a3a3a3;line-height:1.65;max-width:340px;opacity:0;animation:sobe .7s .5s forwards}
+#intro .linha{margin:26px 0;width:44px;height:2px;background:var(--accent);opacity:0;animation:sobe .7s .6s forwards}
+#intro .fatos{display:flex;gap:26px;opacity:0;animation:sobe .7s .7s forwards;flex-wrap:wrap;justify-content:center}
+#intro .fato b{display:block;font-family:var(--font-display);font-size:22px;color:#fff}
+#intro .fato span{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#8a8a8a;font-weight:600}
+#intro button{margin-top:36px;background:var(--accent);color:var(--ink);border:none;border-radius:999px;
+  padding:15px 34px;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;
+  opacity:0;animation:sobe .7s .9s forwards}
+@keyframes sobe{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ============ TOPO ============ */
+.top{padding:22px 20px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;
+  background:linear-gradient(var(--bg) 78%,transparent);z-index:5}
+.mark{width:38px;height:38px;border-radius:12px;background:var(--ink);display:grid;place-items:center;
+  color:var(--accent);font-family:var(--font-display);font-weight:700;font-size:17px;flex-shrink:0}
+.top h1{font-size:19px;font-weight:800;letter-spacing:-.03em;color:var(--ink);font-family:var(--font-body)}
+.top .sub{font-size:12px;color:var(--mute);margin-top:1px}
+.pulse{margin-left:auto;display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--line);
+  border-radius:999px;padding:7px 13px;font-size:11.5px;font-weight:600;color:var(--mute);white-space:nowrap}
+.pulse i{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:pul 2.2s infinite}
+@keyframes pul{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ============ PÁGINAS ============ */
+.page{flex:1;display:none;flex-direction:column;padding:0 16px 110px}
+.page.on{display:flex}
+.fila-head{display:flex;align-items:baseline;justify-content:space-between;padding:8px 4px 12px;gap:10px}
+.fila-head b{font-size:13px;color:var(--ink);font-weight:700}
+.fila-head span{font-size:12px;color:var(--mute-2);text-align:right}
+
+/* cartões */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px;
+  box-shadow:var(--shadow);transition:transform .35s,opacity .35s,margin .35s,max-height .4s;overflow:hidden;max-height:640px}
+.card.saindo{transform:translateX(60px);opacity:0;max-height:0;padding-top:0;padding-bottom:0;margin-bottom:0;border-width:0}
+.c-top{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.c-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.c-cli{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.c-quando{margin-left:auto;font-size:11px;color:var(--mute-2);white-space:nowrap}
+.c-titulo{font-size:15.5px;font-weight:700;letter-spacing:-.015em;color:var(--ink);line-height:1.35;margin-bottom:6px}
+.c-det{font-size:13px;color:var(--mute);line-height:1.55;margin-bottom:14px}
+.c-preview{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin:-4px 0 14px;
+  font-size:12.5px;color:var(--txt);line-height:1.6;cursor:pointer}
+.c-preview:hover{border-color:var(--line-2)}
+.c-preview b{color:var(--ink)}
+.c-acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:none;border-radius:11px;padding:11px 16px;font-family:var(--font-body);font-size:13px;font-weight:700;
+  cursor:pointer;transition:transform .08s;white-space:nowrap}
+.btn:active{transform:scale(.96)}
+.btn.p{background:var(--ink);color:#fff;flex:1;min-width:130px}
+.btn.s{background:var(--surface);color:var(--ink);border:1px solid var(--line-2)}
+
+/* estado vazio */
+.vazio{display:none;flex-direction:column;align-items:center;text-align:center;padding:70px 30px}
+.vazio.on{display:flex}
+.vazio .e{font-size:52px;margin-bottom:16px}
+.vazio b{font-size:18px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin-bottom:6px}
+.vazio p{font-size:13.5px;color:var(--mute);line-height:1.6;max-width:300px}
+
+/* ============ SHEET (ver tudo) ============ */
+#veu{position:fixed;inset:0;background:rgba(10,10,10,.42);z-index:40;opacity:0;visibility:hidden;transition:.3s}
+#veu.on{opacity:1;visibility:visible}
+#sheet{position:fixed;left:50%;transform:translate(-50%,105%);bottom:0;width:100%;max-width:600px;z-index:50;
+  background:var(--surface);border-radius:22px 22px 0 0;max-height:86dvh;display:flex;flex-direction:column;
+  transition:transform .38s cubic-bezier(.32,.72,.25,1);box-shadow:0 -12px 44px rgba(0,0,0,.18)}
+#sheet.on{transform:translate(-50%,0)}
+#sheet .alca{width:38px;height:4px;border-radius:99px;background:var(--line-2);margin:10px auto 4px;flex-shrink:0}
+#sheet .sh-head{padding:10px 22px 14px;border-bottom:1px solid var(--line);flex-shrink:0}
+#sheet .sh-cli{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+#sheet h2{font-family:var(--font-display);font-weight:600;font-size:21px;letter-spacing:-.015em;color:var(--ink);margin-top:3px}
+#sheet .sh-body{padding:16px 22px 20px;overflow-y:auto;font-size:13.5px;line-height:1.6;color:var(--txt)}
+#sheet .sh-foot{padding:12px 22px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);
+  display:flex;gap:8px;flex-shrink:0;background:var(--surface);border-radius:0 0 0 0}
+.item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.item .dia{flex-shrink:0;width:52px;text-align:center;background:var(--bg);border:1px solid var(--line);
+  border-radius:10px;padding:6px 2px;font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase}
+.item .dia b{display:block;font-size:16px;color:var(--ink)}
+.item .oq b{display:block;font-size:13.5px;color:var(--ink);font-weight:700;margin-bottom:2px}
+.item .oq span{font-size:12.5px;color:var(--mute)}
+.tagf{display:inline-block;background:var(--accent-bg);border:1px solid var(--accent-soft);color:#8a6d00;
+  font-size:10px;font-weight:700;border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+.num-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:6px 0 14px}
+.num{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
+.num b{display:block;font-family:var(--font-display);font-size:19px;color:var(--ink)}
+.num span{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:600}
+.num.alerta b{color:var(--red)}
+.legenda-full{background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:12px;padding:13px 15px;margin-bottom:10px;font-size:13px;line-height:1.65}
+.legenda-full .lf-t{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin-bottom:5px}
+
+/* ============ CARTEIRA ============ */
+.grupo{margin-bottom:18px}
+.grupo>b{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);padding:0 4px 8px}
+.cli-row{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:7px;
+  display:flex;align-items:center;gap:11px;box-shadow:var(--shadow)}
+.cli-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.cli-row .nm{font-size:13.5px;font-weight:700;color:var(--ink)}
+.cli-row .st{font-size:11.5px;color:var(--mute);margin-top:1px}
+.cli-row .val{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap}
+.resumo-carteira{background:var(--ink);color:#fff;border-radius:18px;padding:18px;margin-bottom:16px}
+.resumo-carteira .rc-l{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#8a8a8a;font-weight:700}
+.resumo-carteira .rc-v{font-family:var(--font-display);font-size:30px;margin-top:2px}
+.resumo-carteira .rc-v small{font-size:13px;color:#a3a3a3;font-family:var(--font-body)}
+.resumo-carteira .rc-sub{font-size:12px;color:#a3a3a3;margin-top:6px;line-height:1.5}
+
+/* ============ CHAT ============ */
+.chat{flex:1;display:flex;flex-direction:column;gap:10px;padding-top:6px}
+.msg{max-width:84%;padding:12px 15px;border-radius:16px;font-size:13.5px;line-height:1.55}
+.msg.ia{background:var(--surface);border:1px solid var(--line);color:var(--txt);border-bottom-left-radius:6px;align-self:flex-start;box-shadow:var(--shadow)}
+.msg.eu{background:var(--ink);color:#fff;border-bottom-right-radius:6px;align-self:flex-end}
+.msg .quem{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute-2);margin-bottom:4px}
+.sugestoes{display:flex;gap:8px;flex-wrap:wrap;padding:6px 0}
+.sug{background:var(--surface);border:1px solid var(--line-2);border-radius:999px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer}
+.sug:hover{border-color:var(--ink)}
+.digitando{align-self:flex-start;color:var(--mute-2);font-size:12px;padding:4px 6px;display:none}
+.chatbar{position:fixed;bottom:82px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:568px;display:none;gap:8px;z-index:9}
+.chatbar.on{display:flex}
+.chatbar input{flex:1;background:var(--surface);border:1px solid var(--line-2);border-radius:999px;padding:13px 18px;
+  font-family:var(--font-body);font-size:13.5px;color:var(--ink);outline:none;box-shadow:var(--shadow-lg);min-width:0}
+.chatbar button{width:46px;height:46px;border-radius:50%;border:none;background:var(--accent);font-size:17px;cursor:pointer;box-shadow:var(--shadow-lg);flex-shrink:0}
+
+/* ============ TABS ============ */
+.tabs{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:4px;background:var(--surface);
+  border:1px solid var(--line);border-radius:999px;padding:5px;box-shadow:var(--shadow-lg);z-index:10;max-width:calc(100% - 24px)}
+.tab{border:none;background:none;font-family:var(--font-body);display:flex;align-items:center;gap:6px;border-radius:999px;
+  padding:10px 16px;font-size:12.5px;font-weight:700;color:var(--mute);cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--ink);color:#fff}
+.tab .badge{background:var(--accent);color:var(--ink);font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 7px}
+@media (max-width:374px){.tab{padding:10px 11px;font-size:11.5px}}
+</style>
+</head>
+<body>
+
+<!-- ============ INTRO ============ -->
+<div id="intro">
+  <div class="marca">A</div>
+  <h1>A agência que trabalha<br>enquanto você <span>decide</span></h1>
+  <p>Os agentes planejam, roteirizam, cobram e monitoram os 19 clientes. O que precisa do seu julgamento chega aqui — o resto anda sozinho.</p>
+  <div class="linha"></div>
+  <div class="fatos">
+    <div class="fato"><b>19</b><span>clientes ativos</span></div>
+    <div class="fato"><b>17</b><span>planos automáticos/mês</span></div>
+    <div class="fato"><b>5</b><span>decisões na fila</span></div>
+  </div>
+  <button onclick="entrar()">Entrar na agência</button>
+</div>
+
+<div class="app">
+  <div class="top">
+    <div class="mark">A</div>
+    <div>
+      <h1>ARK</h1>
+      <div class="sub" id="sub">5 decisões esperando você</div>
+    </div>
+    <div class="pulse"><i></i> agência rodando</div>
+  </div>
+
+  <!-- ============ DECISÕES ============ -->
+  <div class="page on" id="pg-dec">
+    <div class="fila-head"><b>Pra você decidir</b><span>o resto está andando sozinho</span></div>
+
+    <div class="card" data-c>
+      <div class="c-top">
+        <div class="c-ico" style="background:var(--accent-bg)">🗓️</div>
+        <span class="c-cli">Farmácia Vivenda</span><span class="c-quando">há 2h</span>
+      </div>
+      <div class="c-titulo">Plano de julho pronto: 10 posts + 3 captações</div>
+      <div class="c-det">Virada pós-Copa → série dos donos → esquenta "Manda a Receita do Pai". Captações 20, 23 e 28/07 com a Malu e o Samuel.</div>
+      <div class="c-preview" onclick="abrirSheet('vivenda')"><b>ter 21</b> · Reels · "A Copa acabou. Seu fígado percebeu." (NAC)<br><b>qui 23</b> · Reels · Série dos donos #1 — Abrindo a farmácia às 6h50<br><span style="color:var(--mute-2)">tocar pra ver as 10 ideias e as captações →</span></div>
+      <div class="c-acts">
+        <button class="btn p" onclick="resolver(this,'Plano da Vivenda aprovado — Lucas envia pro Remerson hoje.')">✓ Aprovar plano</button>
+        <button class="btn s" onclick="abrirSheet('vivenda')">Ver tudo</button>
+      </div>
+    </div>
+
+    <div class="card" data-c>
+      <div class="c-top">
+        <div class="c-ico" style="background:var(--roxo-bg)">✍️</div>
+        <span class="c-cli">Farmácia Vivenda</span><span class="c-quando">há 40min</span>
+      </div>
+      <div class="c-titulo">3 legendas prontas das edições do Samuel</div>
+      <div class="c-det">Geradas com o cérebro da Vivenda assim que as edições foram concluídas. Aprovando, já entram agendadas no calendário.</div>
+      <div class="c-preview" onclick="abrirSheet('legendas')">"O jogo acabou, a rotina começou…"<br><span style="color:var(--mute-2)">tocar pra ler as 3 completas →</span></div>
+      <div class="c-acts">
+        <button class="btn p" onclick="resolver(this,'3 legendas aprovadas e agendadas no calendário editorial.')">✓ Aprovar e agendar</button>
+        <button class="btn s" onclick="abrirSheet('legendas')">Ver tudo</button>
+      </div>
+    </div>
+
+    <div class="card" data-c>
+      <div class="c-top">
+        <div class="c-ico" style="background:var(--accent-bg)">📹</div>
+        <span class="c-cli">Fercon</span><span class="c-quando">hoje 07:00</span>
+      </div>
+      <div class="c-titulo">Agosto sem captação marcada (0 de 2)</div>
+      <div class="c-det">O contrato prevê 2 captações/mês. Olhando a agenda da equipe, terça <b>12/08</b> e quinta <b>21/08</b> estão livres pro Samuel.</div>
+      <div class="c-acts">
+        <button class="btn p" onclick="resolver(this,'Captações da Fercon propostas pra 12 e 21/08 — Lucas confirma com o cliente.')">✓ Propor 12 e 21/08</button>
+        <button class="btn s" onclick="abrirSheet('fercon')">Ver tudo</button>
+      </div>
+    </div>
+
+    <div class="card" data-c>
+      <div class="c-top">
+        <div class="c-ico" style="background:var(--red-bg)">⚠️</div>
+        <span class="c-cli">Stray House</span><span class="c-quando">seg 06:00</span>
+      </div>
+      <div class="c-titulo">Alcance das campanhas caiu na semana</div>
+      <div class="c-det">Investimento parecido, alcance 28% menor (13,8 mil → 10 mil pessoas). Padrão de criativo saturando. Plano da IA: renovar o banco de criativos com o Paulo.</div>
+      <div class="c-acts">
+        <button class="btn p" onclick="resolver(this,'Plano de reação do Stray aprovado — Danilo executa hoje e o briefing vai pro Paulo.')">✓ Executar plano</button>
+        <button class="btn s" onclick="abrirSheet('stray')">Ver números</button>
+      </div>
+    </div>
+
+    <div class="card" data-c>
+      <div class="c-top">
+        <div class="c-ico" style="background:var(--green-bg)">🧠</div>
+        <span class="c-cli">Bulldogs</span><span class="c-quando">ontem</span>
+      </div>
+      <div class="c-titulo">Cérebro incompleto: falta o Instagram</div>
+      <div class="c-det">Sem o @ eu planejo no escuro. Achei <b>@bulldogs.oficiall</b> nas buscas — é esse?</div>
+      <div class="c-acts">
+        <button class="btn p" onclick="resolver(this,'Cérebro do Bulldogs completo — próximo plano mensal já sai calibrado.')">✓ É esse</button>
+        <button class="btn s" onclick="abrirSheet('bulldogs')">Ver tudo</button>
+      </div>
+    </div>
+
+    <div class="vazio" id="vazio">
+      <div class="e">🏆</div>
+      <b>A agência está rodando</b>
+      <p>Nada esperando você. Os agentes seguem trabalhando — a próxima decisão chega por notificação.</p>
+    </div>
+  </div>
+
+  <!-- ============ CARTEIRA ============ -->
+  <div class="page" id="pg-cart">
+    <div class="resumo-carteira">
+      <div class="rc-l">Recorrência ARK Direto</div>
+      <div class="rc-v">R$ 18.700<small>/mês</small></div>
+      <div class="rc-sub">19 clientes ativos · 17 na roda automática de planejamento · churn do Babbo (−R$ 3.000/mês) pra repor no comercial</div>
+    </div>
+
+    <div class="grupo">
+      <b>ARK Direto</b>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--green)"></span><div><div class="nm">Farmácia Vivenda</div><div class="st">3 captações/mês · plano de julho em aprovação</div></div><span class="val">R$ 5.500</span></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--green)"></span><div><div class="nm">Sasse Gifts</div><div class="st">2 captações/mês</div></div><span class="val">R$ 4.500</span></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--accent)"></span><div><div class="nm">Fercon</div><div class="st">2 captações/mês · agosto sem data ⚠</div></div><span class="val">R$ 4.200</span></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--green)"></span><div><div class="nm">Fonseca & Cavalcanti</div><div class="st">1 captação/mês · compliance OAB</div></div><span class="val">R$ 2.500</span></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--green)"></span><div><div class="nm">Vaca Velha</div><div class="st">1 captação/mês</div></div><span class="val">R$ 2.000</span></div>
+    </div>
+
+    <div class="grupo">
+      <b>Squad Alpha · assessoria</b>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--red)"></span><div><div class="nm">Stray House</div><div class="st">alcance em queda — plano na fila</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--green)"></span><div><div class="nm">Dom Baruka</div><div class="st">CPA baixo · auditoria iFood em curso</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--green)"></span><div><div class="nm">Cachu Restaurante</div><div class="st">food porn qui-dom · ROAS acompanhado</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--green)"></span><div><div class="nm">Attraversiamo Café</div><div class="st">caso de sucesso · surfando a onda</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--green)"></span><div><div class="nm">Valhalla · Andradas-MG</div><div class="st">temática medieval · combos no tráfego</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--accent)"></span><div><div class="nm">4B Burger's</div><div class="st">recuperar vendas · ativar delivery</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--green)"></span><div><div class="nm">Vaca Velha (tráfego)</div><div class="st">gestão de campanhas</div></div></div>
+    </div>
+
+    <div class="grupo">
+      <b>Onboarding</b>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--mute-2)"></span><div><div class="nm">Pizzaria Dgust</div><div class="st">primeira linha editorial</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--mute-2)"></span><div><div class="nm">Kopi Coffee</div><div class="st">apresentação da marca</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--mute-2)"></span><div><div class="nm">Café Lumière</div><div class="st">posicionamento inicial</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--mute-2)"></span><div><div class="nm">Pizzaria Sabor a Lenha · Osasco-SP</div><div class="st">cadência nova pra 13 mil seguidores</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--mute-2)"></span><div><div class="nm">La Pizza Di Patrick</div><div class="st">o chef é a marca</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--mute-2)"></span><div><div class="nm">Bulldogs</div><div class="st">acessos sendo liberados · falta o @</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--mute-2)"></span><div><div class="nm">Lá em Casa</div><div class="st">casa em reestruturação · pautar com a Renata</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--mute-2)"></span><div><div class="nm">Brisa Doce Café</div><div class="st">inauguração</div></div></div>
+      <div class="cli-row"><span class="cli-dot" style="background:var(--mute-2)"></span><div><div class="nm">4B Burguers · Valhalla</div><div class="st">demais onboardings Alpha</div></div></div>
+    </div>
+  </div>
+
+  <!-- ============ JARVIS ============ -->
+  <div class="page" id="pg-jarvis">
+    <div class="chat" id="chat">
+      <div class="msg ia"><div class="quem">Jarvis</div>Boa noite, Senhor. A carteira está com 19 clientes ativos. Julho da Vivenda aprovado e em produção; a primeira captação é segunda-feira. Em que posso ajudar?</div>
+      <div class="sugestoes">
+        <span class="sug" onclick="pergunta(this.textContent)">Como está o Stray House?</span>
+        <span class="sug" onclick="pergunta(this.textContent)">Monta agosto da Sasse</span>
+        <span class="sug" onclick="pergunta(this.textContent)">Resumo da carteira</span>
+      </div>
+    </div>
+    <div class="digitando" id="dig">JARVIS está digitando…</div>
+  </div>
+</div>
+
+<!-- ============ SHEET ============ -->
+<div id="veu" onclick="fecharSheet()"></div>
+<div id="sheet">
+  <div class="alca"></div>
+  <div class="sh-head"><span class="sh-cli" id="sh-cli"></span><h2 id="sh-titulo"></h2></div>
+  <div class="sh-body" id="sh-body"></div>
+  <div class="sh-foot" id="sh-foot"></div>
+</div>
+
+<div class="chatbar" id="chatbar">
+  <input id="inp" placeholder="Fale com o JARVIS…" onkeydown="if(event.key==='Enter')enviar()">
+  <button onclick="enviar()">↑</button>
+</div>
+
+<div class="tabs">
+  <button class="tab on" id="tb-dec" onclick="ir('dec')">☑️ Decisões <span class="badge" id="bdg">5</span></button>
+  <button class="tab" id="tb-cart" onclick="ir('cart')">◆ Carteira</button>
+  <button class="tab" id="tb-jarvis" onclick="ir('jarvis')">✦ JARVIS</button>
+</div>
+
+<script>
+function entrar(){document.getElementById('intro').classList.add('fora')}
+
+/* ===== detalhes (ver tudo) ===== */
+const DETALHES={
+  vivenda:{cli:'Farmácia Vivenda',titulo:'Plano de Julho 2026',aprova:'Plano da Vivenda aprovado — Lucas envia pro Remerson hoje.',html:`
+    <p style="color:var(--mute);margin-bottom:14px">Arco do mês: virada pós-Copa → série dos donos → esquenta "Manda a Receita do Pai" (Dia dos Pais 09/08). Aprovação: Remerson · Produção: Yuri.</p>
+    <div class="item"><div class="dia">jul<b>21</b>ter</div><div class="oq"><b>A Copa acabou. Seu fígado percebeu.<span class="tagf">Reels</span></b><span>Virada pós-Copa: recuperação, rotina e NAC saindo do gancho de jogo.</span></div></div>
+    <div class="item"><div class="dia">jul<b>23</b>qui</div><div class="oq"><b>Série dos donos #1 — Abrindo a farmácia às 6h50<span class="tagf">Reels</span></b><span>O dia começa antes do balcão. Cortes a cada 3s.</span></div></div>
+    <div class="item"><div class="dia">jul<b>25</b>sáb</div><div class="oq"><b>#2 — O que meu pai toma todo dia<span class="tagf">Reels</span></b><span>(e por que eu manipulo pra ele) — primeira ponte pro Dia dos Pais.</span></div></div>
+    <div class="item"><div class="dia">jul<b>28</b>ter</div><div class="oq"><b>#3 — Três receitas que chegaram pelo WhatsApp<span class="tagf">Reels</span></b><span>Do pedido ao pote. Planta a mecânica da campanha.</span></div></div>
+    <div class="item"><div class="dia">jul<b>30</b>qui</div><div class="oq"><b>#4 — O café do dono: cafeína manipulada<span class="tagf">Reels</span></b><span>Performance com autoridade acessível.</span></div></div>
+    <div class="item"><div class="dia">jul<b>31</b>sex</div><div class="oq"><b>#5 — O produto que mais faz cliente voltar<span class="tagf">Reels</span></b><span>Creme de ureia na rotina, pico da seca de Brasília.</span></div></div>
+    <div class="item"><div class="dia">ago<b>s1</b></div><div class="oq"><b>Manda a Receita do Pai — como funciona<span class="tagf">Carrossel</span></b><span>Criativo campeão: receita no WhatsApp → orçamento em minutos. Brinde, não desconto.</span></div></div>
+    <div class="item"><div class="dia">ago<b>s1</b></div><div class="oq"><b>#6 — Um dia inteiro da loja em 40 segundos<span class="tagf">Reels</span></b><span>Corte a corte, do abrir ao fechar.</span></div></div>
+    <div class="item"><div class="dia">ago<b>s1</b></div><div class="oq"><b>#7 — NAC na prática: pra quem é, pra quem não é<span class="tagf">Reels</span></b><span>Sem bula, sem promessa.</span></div></div>
+    <div class="item"><div class="dia">ago<b>s2</b></div><div class="oq"><b>#8 — Pai de primeira viagem no balcão<span class="tagf">Reels</span></b><span>Fecho do arco na semana do Dia dos Pais.</span></div></div>
+    <h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:18px 0 6px">Captações</h3>
+    <div class="item"><div class="dia">jul<b>20</b>seg</div><div class="oq"><b>Bloco 1 · Malu + Yuri</b><span>Roteiros 1, 2 e 4 + take da virada pós-Copa.</span></div></div>
+    <div class="item"><div class="dia">jul<b>23</b>qui</div><div class="oq"><b>Bloco 2 · Samuel</b><span>Roteiros 3 e 5 — balcão e laboratório reais.</span></div></div>
+    <div class="item"><div class="dia">jul<b>28</b>ter</div><div class="oq"><b>Bloco 3 · Malu</b><span>Roteiros 6-8 + criativo da campanha pro tráfego.</span></div></div>`},
+  legendas:{cli:'Farmácia Vivenda',titulo:'3 legendas pra aprovar',aprova:'3 legendas aprovadas e agendadas no calendário editorial.',html:`
+    <div class="legenda-full"><div class="lf-t">Reels · virada pós-Copa · ter 21/07</div>"O jogo acabou, a rotina começou. Enquanto todo mundo guarda a camisa da seleção, seu corpo pede pra voltar ao normal — sono, alimentação e aquele apoio que o fígado merece. É disso que a gente cuida. 🧪 NAC manipulado na dose certa pra você. #FarmaciaVivenda #BemEstar"</div>
+    <div class="legenda-full"><div class="lf-t">Reels · série dos donos #1 · qui 23/07</div>"6h50 da manhã. A porta ainda fechada, o laboratório já acordado. O cuidado que chega até você começa bem antes do balcão — e é por isso que manipular aqui é diferente. 🌿 Vivenda, sua aliada do bem-estar."</div>
+    <div class="legenda-full"><div class="lf-t">Reels · série dos donos #2 · sáb 25/07</div>"Essa fórmula tem nome e sobrenome: a do meu pai. Cada frasco que sai daqui é pensado pra uma pessoa — nunca pra 'todo mundo'. Manipulação é isso: o remédio certo, na dose certa, pra VOCÊ. 💛"</div>
+    <p style="color:var(--mute);font-size:12.5px">Aprovando, as três entram agendadas no calendário editorial nos dias indicados.</p>`},
+  fercon:{cli:'Fercon',titulo:'Agosto sem captação',aprova:'Captações da Fercon propostas pra 12 e 21/08 — Lucas confirma com o cliente.',html:`
+    <p style="margin-bottom:12px">O contrato da Fercon prevê <b>2 captações por mês</b>. Agosto está zerado — e a Fercon é um cliente mais reativo que ativo: se a gente não provocar, a pauta não acontece.</p>
+    <div class="num-grid">
+      <div class="num alerta"><b>0 / 2</b><span>captações em agosto</span></div>
+      <div class="num"><b>ter 12/08</b><span>Samuel livre</span></div>
+      <div class="num"><b>qui 21/08</b><span>Samuel livre</span></div>
+    </div>
+    <p style="color:var(--mute);font-size:12.5px">Aprovando, o Lucas recebe a tarefa de confirmar as duas datas com o cliente e as captações entram na Produção.</p>`},
+  stray:{cli:'Stray House',titulo:'Campanhas · últimas 2 semanas',aprova:'Plano de reação do Stray aprovado — Danilo executa hoje e o briefing vai pro Paulo.',html:`
+    <p style="margin-bottom:12px">Relatórios semanais do Meta Ads (dados reais dos relatórios do grupo):</p>
+    <div class="num-grid">
+      <div class="num"><b>R$ 594</b><span>investido · 01–05/07</span></div>
+      <div class="num"><b>13.838</b><span>alcance · 01–05/07</span></div>
+      <div class="num"><b>R$ 552</b><span>investido · 08–12/07</span></div>
+      <div class="num alerta"><b>10.008</b><span>alcance · 08–12/07 (−28%)</span></div>
+    </div>
+    <p style="margin-bottom:12px">Investimento praticamente igual, alcance caindo — assinatura clássica de criativo saturando. O ROAS geral (~5) ainda é saudável: a hora de renovar é <b>agora</b>, antes de virar problema.</p>
+    <p><b>Plano da IA:</b> Danilo pausa o criativo mais antigo e sobe os 2 validados; briefing de vídeo novo vai pro Paulo (a equipe do cliente grava — modelo Alpha). Atenção redobrada no alinhamento: semana passada veio vídeo fora do briefing.</p>`},
+  bulldogs:{cli:'Bulldogs',titulo:'Completar o cérebro',aprova:'Cérebro do Bulldogs completo — próximo plano mensal já sai calibrado.',html:`
+    <p style="margin-bottom:12px">O que eu já sei do Bulldogs: hamburgueria, ~R$ 2.500/mês, veio por indicação, contato Rodrigo ("Rodrigão"), onboarding em andamento (acessos sendo liberados).</p>
+    <p style="margin-bottom:12px">O que falta: <b>o Instagram oficial</b>. Nas buscas achei <b>@bulldogs.oficiall</b> — loja na 311 Asa Norte + food truck. Se for esse, o próximo plano mensal já sai com a linguagem e o formato certos.</p>
+    <p style="color:var(--mute);font-size:12.5px">Se não for, me diz o @ certo que eu atualizo o cérebro na hora.</p>`},
+};
+let sheetAtual=null;
+function abrirSheet(k){
+  const d=DETALHES[k];if(!d)return;sheetAtual=k;
+  document.getElementById('sh-cli').textContent=d.cli;
+  document.getElementById('sh-titulo').textContent=d.titulo;
+  document.getElementById('sh-body').innerHTML=d.html;
+  document.getElementById('sh-foot').innerHTML=
+    '<button class="btn p" onclick="aprovarDoSheet()">✓ Aprovar</button><button class="btn s" onclick="fecharSheet()">Fechar</button>';
+  document.getElementById('veu').classList.add('on');
+  document.getElementById('sheet').classList.add('on');
+}
+function fecharSheet(){
+  document.getElementById('veu').classList.remove('on');
+  document.getElementById('sheet').classList.remove('on');
+}
+function aprovarDoSheet(){
+  const d=DETALHES[sheetAtual];fecharSheet();
+  const cards=[...document.querySelectorAll('[data-c]')];
+  const card=cards.find(c=>c.querySelector('.btn.p')?.getAttribute('onclick')?.includes(d.aprova.slice(0,20)));
+  if(card)resolver(card.querySelector('.btn.p'),d.aprova);
+}
+
+/* ===== fila ===== */
+let n=5;
+function resolver(btn,msgToast){
+  const card=btn.closest('[data-c]');if(!card||card.classList.contains('saindo'))return;
+  card.classList.add('saindo');
+  n--;
+  document.getElementById('bdg').textContent=n;
+  document.getElementById('sub').textContent=n>0?(n+' decis'+(n>1?'ões':'ão')+' esperando você'):'tudo decidido por hoje';
+  setTimeout(()=>{card.remove();if(n===0)document.getElementById('vazio').classList.add('on');},420);
+  registrarNoChat(msgToast); // no app real: dispara a ação no servidor e o JARVIS confirma
+}
+function registrarNoChat(t){
+  const c=document.getElementById('chat');
+  const d=document.createElement('div');
+  d.className='msg ia';d.innerHTML='<div class="quem">Jarvis</div>✓ '+t;
+  c.appendChild(d);
+}
+
+/* ===== navegação ===== */
+function ir(p){
+  ['dec','cart','jarvis'].forEach(k=>{
+    document.getElementById('pg-'+(k==='dec'?'dec':k==='cart'?'cart':'jarvis')).classList.toggle('on',p===k);
+    document.getElementById('tb-'+k).classList.toggle('on',p===k);
+  });
+  document.getElementById('chatbar').classList.toggle('on',p==='jarvis');
+  if(p==='jarvis')window.scrollTo(0,document.body.scrollHeight);
+  else window.scrollTo(0,0);
+}
+
+/* ===== chat ===== */
+const RESPOSTAS={
+  stray:'O Stray investiu R$ 552 na última semana e alcançou 10 mil pessoas — 28% menos que a semana anterior com o mesmo investimento. Criativo saturando. Deixei o plano de reação na sua fila de Decisões, Senhor.',
+  sasse:'Montando agosto da Sasse Gifts: mês do Dia dos Pais — unboxing de kits masculinos, prova social de quem recebeu e carrossel "ideias de presente pra pais difíceis". 8 ideias amarradas às 2 captações do contrato. Coloquei na sua fila pra aprovar.',
+  carteira:'19 clientes ativos, Senhor: 5 no ARK Direto (R$ 18.700/mês de recorrência), 7 em assessoria Alpha e 7 em onboarding. Pontos de atenção: Fercon sem captação em agosto e alcance do Stray em queda — os dois já estão na sua fila. O churn do Babbo (−R$ 3.000/mês) é a meta de reposição do comercial.',
+};
+function pergunta(t){document.getElementById('inp').value=t;enviar();}
+function enviar(){
+  const inp=document.getElementById('inp');const t=inp.value.trim();if(!t)return;
+  const c=document.getElementById('chat');
+  const eu=document.createElement('div');eu.className='msg eu';eu.textContent=t;c.appendChild(eu);
+  inp.value='';
+  const dig=document.getElementById('dig');dig.style.display='block';
+  window.scrollTo(0,document.body.scrollHeight);
+  setTimeout(()=>{
+    dig.style.display='none';
+    const k=t.toLowerCase();
+    let r='Entendido, Senhor. No app real eu executo isso agora — este protótipo mostra a conversa. O que mais?';
+    if(k.includes('stray'))r=RESPOSTAS.stray;
+    else if(k.includes('sasse')||k.includes('agosto'))r=RESPOSTAS.sasse;
+    else if(k.includes('carteira')||k.includes('resumo')||k.includes('clientes'))r=RESPOSTAS.carteira;
+    const ia=document.createElement('div');ia.className='msg ia';
+    ia.innerHTML='<div class="quem">Jarvis</div>'+r;c.appendChild(ia);
+    window.scrollTo(0,document.body.scrollHeight);
+  },900);
+}
+</script>
+</body>
+</html>

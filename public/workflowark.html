@@ -1941,6 +1941,29 @@ function wfaSetTheme(t){
           .mdb .bd li::before{content:"›";position:absolute;left:0;color:var(--yel-d);font-weight:800}
         </style>
         <div id="md-exec" style="margin-bottom:16px"></div>
+        <!-- DECISÕES DE HOJE: o que a agência preparou e espera o aval de CADA pessoa.
+             Estilo "fila de decisões" (protótipo aprovado pelo Gabriel 16/07): a IA/rotinas
+             produzem, o humano só aprova. Cada papel vê a sua fila. -->
+        <style>
+          #md-decisoes{margin-bottom:16px;display:none}
+          .dec-hd{display:flex;align-items:baseline;gap:10px;padding:0 2px 10px}
+          .dec-hd b{font-size:13px;font-weight:800;letter-spacing:-.01em}
+          .dec-hd span{font-size:11.5px;color:var(--mute)}
+          .dec-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:9px;transition:transform .3s,opacity .3s,max-height .35s,margin .35s,padding .35s;overflow:hidden;max-height:400px}
+          .dec-card.saindo{transform:translateX(50px);opacity:0;max-height:0;margin-bottom:0;padding-top:0;padding-bottom:0;border-width:0}
+          .dec-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+          .dec-ico{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:14px;flex-shrink:0}
+          .dec-cli{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}
+          .dec-t{font-size:14px;font-weight:700;letter-spacing:-.01em;line-height:1.35;margin-bottom:3px}
+          .dec-d{font-size:12.5px;color:var(--mute);line-height:1.5;margin-bottom:10px}
+          .dec-acts{display:flex;gap:7px;flex-wrap:wrap}
+          .dec-btn{border:none;border-radius:10px;padding:9px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+          .dec-btn.p{background:var(--ink,#111);color:#fff;flex:1;min-width:120px}
+          .dec-btn.s{background:#fff;color:var(--ink,#111);border:1px solid var(--line-2)}
+          body.aura-dark .dec-card{background:rgba(13,14,17,.6);border-color:var(--line)}
+          body.aura-dark .dec-btn.s{background:transparent;color:var(--txt)}
+        </style>
+        <div id="md-decisoes"></div>
         <div class="g4 stagger" id="md-kpis" style="margin-bottom:16px"></div>
 
         <div id="md-council-bar" style="display:none;margin-bottom:16px">
@@ -6912,6 +6935,88 @@ function mdTaskRow(kind,t){
 }
 /* Fila de aprovação (ref ARK OS): tarefas paradas em Aprovação, com moedinha por função e Revisar */
 const MD_APR_CORES={'Account Manager':'#ffc700','Gestor de Tráfego':'#5b8cff','Criador':'#ff7ab8','Edição':'#a78bfa','Editor':'#a78bfa'};
+/* ====== DECISÕES DE HOJE (fila por pessoa — visão "agência autônoma") ======
+   A agência produz sozinha (rotinas/IA); aqui cada pessoa vê SÓ o que espera o
+   aval dela e resolve com um toque. Tarefas de hoje = executor; roteiros do
+   Motor e legendas = gestor/admin; captações faltando no mês = account/gestor. */
+let _decMotor=null,_decFila=null,_decFetchTs=0;
+async function decCarregarNuvem(){
+  if(Date.now()-_decFetchTs<60000)return;_decFetchTs=Date.now();
+  try{const r=await cloudCall('load-key',{key:'wfa-motor-plano'});const v=r&&r.state&&r.state['wfa-motor-plano'];_decMotor=Array.isArray(v)?v:[];}catch(e){}
+  try{const r=await cloudCall('load-key',{key:'wfa-social-fila'});const v=r&&r.state&&r.state['wfa-social-fila'];_decFila=Array.isArray(v)?v:[];}catch(e){}
+  try{mdRenderDecisoes();}catch(e){}
+}
+function mdRenderDecisoes(){
+  const box=document.getElementById('md-decisoes');if(!box)return;
+  const myName=(WFA_MEMBER&&WFA_MEMBER.full_name)||'';
+  const role=(WFA_MEMBER&&WFA_MEMBER.role)||'';
+  const isManager=['admin','gestor'].includes(role)||!myName;
+  const today=hojeSP();
+  const _n=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const myFirst=_n(myName).split(/\s+/)[0]||'';
+  const cards=[];
+  // 1) minhas tarefas que vencem HOJE (qualquer papel — o "hoje é dia de..." de cada um)
+  (state.tarefas||[]).filter(t=>t.status!=='concluido'&&t.data===today&&(!myName||_n(t.resp).split(/\s+/)[0]===myFirst)).slice(0,3).forEach(t=>{
+    cards.push({ico:'⚡',bg:'#fffbeb',cli:mdClientName(t.clienteId)||'ARK',
+      t:'Hoje: '+(t.title||''),d:[t.funcao,'vence hoje'].filter(Boolean).join(' · '),
+      acts:`<button class="dec-btn p" onclick="mdDone('${t.id}')">✓ Concluir</button><button class="dec-btn s" onclick="mdSnooze('${t.id}')">Adiar</button><button class="dec-btn s" onclick="openTaskDetail('${t.id}')">Ver</button>`});
+  });
+  // 2) roteiros do Motor esperando aval (gestor/admin) — aprovar cria a captação na Produção
+  if(isManager&&Array.isArray(_decMotor)){
+    _decMotor.filter(r=>r&&r.status==='pendente').slice(0,3).forEach(r=>{
+      const dia=r.melhorDia?r.melhorDia.split('-').reverse().slice(0,2).join('/'):'';
+      cards.push({ico:'🎬',bg:'#fff8dc',cli:'Vivenda',
+        t:'Roteiro pronto: '+(r.titulo||''),
+        d:[(r.formato||'Reels'),dia?('sugerido '+dia):'',r.gancho?('“'+String(r.gancho).slice(0,70)+'…”'):''].filter(Boolean).join(' · '),
+        acts:`<button class="dec-btn p" onclick="decRoteiro('${r.id}','aprovado')">✓ Aprovar → captação</button><button class="dec-btn s" onclick="decRoteiro('${r.id}','descartado')">Descartar</button>`});
+    });
+  }
+  // 3) legendas esperando aprovação (gestor/admin)
+  if(isManager&&Array.isArray(_decFila)){
+    const pend=_decFila.filter(f=>f&&f.status==='pendente');
+    if(pend.length)cards.push({ico:'✍️',bg:'#f6eeff',cli:pend[0].cliente||'',
+      t:pend.length+' legenda'+(pend.length>1?'s':'')+' esperando aprovação',
+      d:'“'+String(pend[0].gancho||pend[0].tema||'').slice(0,80)+'…”',
+      acts:`<button class="dec-btn p" onclick="window.open('/postagens','_blank')">Revisar e aprovar</button>`});
+  }
+  // 4) captações do mês faltando por cliente com contrato (account/gestor)
+  if(isManager||myFirst==='lucas'){
+    const mes=today.slice(0,7);
+    const prod=(typeof loadProducao==='function'?loadProducao():[]);
+    const jaTemTarefa=cid=>(state.tarefas||[]).some(t=>t.status!=='concluido'&&t.clienteId===cid&&/^agendar .*captaç/i.test(t.title||''));
+    (typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE).filter(c=>c.cap>0).forEach(c=>{
+      const done=prod.filter(p=>p&&p.clienteId===c.id&&String(p.data||'').startsWith(mes)).length;
+      if(done<c.cap&&!jaTemTarefa(c.id))cards.push({ico:'📹',bg:'#fdecec',cli:c.nm,
+        t:'Mês com '+done+'/'+c.cap+' captações marcadas',
+        d:'O contrato prevê '+c.cap+'/mês — falta agendar '+(c.cap-done)+'.',
+        acts:`<button class="dec-btn p" onclick="decTarefaCaptacao('${c.id}','${String(c.nm||'').replace(/['"<>]/g,'')}',${c.cap-done})">✓ Criar tarefa de agendar</button>`});
+    });
+  }
+  if(!cards.length){box.style.display='none';box.innerHTML='';return;}
+  const sig=cards.map(c=>c.t).join('|');
+  if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+  box.style.display='';
+  box.innerHTML='<div class="dec-hd"><b>🎯 Decisões de hoje</b><span>a agência preparou — só falta o seu aval</span></div>'+
+    cards.slice(0,6).map(c=>`<div class="dec-card"><div class="dec-top"><span class="dec-ico" style="background:${c.bg}">${c.ico}</span><span class="dec-cli">${mdEsc(c.cli)}</span></div><div class="dec-t">${mdEsc(c.t)}</div><div class="dec-d">${mdEsc(c.d)}</div><div class="dec-acts">${c.acts}</div></div>`).join('');
+}
+async function decRoteiro(id,status){
+  try{
+    await cloudCall('save',{action:'motor-status',id:id,status:status});
+    _decMotor=(_decMotor||[]).map(r=>r&&r.id===id?Object.assign({},r,{status:status}):r);
+    toast(status==='aprovado'?'✓ Roteiro aprovado — captação criada na Produção':'Roteiro descartado');
+    const box=document.getElementById('md-decisoes');if(box)box.dataset.sig='';
+    mdRenderDecisoes();
+  }catch(e){toast('⚠ '+((e&&e.message)||'Falha ao decidir'));}
+}
+function decTarefaCaptacao(cid,nome,falta){
+  state.tarefas.unshift({id:'dec'+Date.now(),title:'Agendar '+falta+' captação(ões) de '+nome+' com o cliente',
+    desc:'Criada pela fila de Decisões do Meu Dia: o contrato prevê captações no mês e faltam '+falta+'.',
+    funcao:'Account',clienteId:cid,resp:'Lucas Rosi',data:hojeSP(),prio:'alta',status:'backlog',
+    tags:['captação'],checklist:[],criadaEm:new Date().toISOString()});
+  saveTarefas();toast('✓ Tarefa criada pro Lucas Rosi');
+  const box=document.getElementById('md-decisoes');if(box)box.dataset.sig='';
+  mdRenderDecisoes();
+}
 function mdRenderAprovacao(){
   const box=document.getElementById('md-aprovacao');if(!box)return;
   const list=(state.tarefas||[]).filter(t=>t.status==='aprovacao');
@@ -7345,6 +7450,8 @@ function renderMeuDia(){
   }
   // JARVIS: resumo do dia (lê a última notificação de resumo/ideia/conselho)
   mdRenderJarvis(late.length,todayT.length,pend.length);
+  // Decisões de hoje (fila por pessoa — agência autônoma)
+  try{mdRenderDecisoes();decCarregarNuvem();}catch(e){console.warn('dec',e);}
   // Fila de aprovação (ref ARK OS)
   try{mdRenderAprovacao();}catch(e){}
   // Inteligência Executiva (gestor/admin): problemas + oportunidades do estado real
