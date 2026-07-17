@@ -7016,9 +7016,12 @@ function mdRenderDecisoes(){
     const mes=today.slice(0,7);
     const prod=(typeof loadProducao==='function'?loadProducao():[]);
     const jaTemTarefa=cid=>(state.tarefas||[]).some(t=>t.status!=='concluido'&&t.clienteId===cid&&/^agendar .*captaç/i.test(t.title||''));
+    let capCards=0; // teto de 3 cartões de captação: senão eles afogam a fila (achado do teste)
     (typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE).filter(c=>c.cap>0).forEach(c=>{
+      if(capCards>=3)return;
       const done=prod.filter(p=>p&&p.clienteId===c.id&&String(p.data||'').startsWith(mes)).length;
       if(done<c.cap&&!jaTemTarefa(c.id)){
+        capCards++;
         const urg=(cliStatus[c.id]==='r'||diaDoMes>=15)?2:1;
         cards.push({urg:urg,ico:'📹',bg:'#fdecec',cli:c.nm,
           t:'Mês com '+done+'/'+c.cap+' captações marcadas',
@@ -7035,7 +7038,7 @@ function mdRenderDecisoes(){
   const URG_LBL=['pode esperar','importante','urgente'];
   box.style.display='';
   box.innerHTML='<div class="dec-hd"><b>🎯 Decisões de hoje</b><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou — só falta o seu aval')+'</span></div>'+
-    cards.slice(0,7).map(c=>`<div class="dec-card${c.urg===2?' u2':''}"><div class="dec-top"><span class="dec-ico" style="background:${c.bg}">${c.ico}</span><span class="dec-cli">${mdEsc(c.cli)}</span><span class="dec-urg u${c.urg}">${URG_LBL[c.urg]}</span></div><div class="dec-t">${mdEsc(c.t)}</div><div class="dec-d">${mdEsc(c.d)}</div><div class="dec-acts">${c.acts}</div></div>`).join('');
+    cards.slice(0,8).map(c=>`<div class="dec-card${c.urg===2?' u2':''}"><div class="dec-top"><span class="dec-ico" style="background:${c.bg}">${c.ico}</span><span class="dec-cli">${mdEsc(c.cli)}</span><span class="dec-urg u${c.urg}">${URG_LBL[c.urg]}</span></div><div class="dec-t">${mdEsc(c.t)}</div><div class="dec-d">${mdEsc(c.d)}</div><div class="dec-acts">${c.acts}</div></div>`).join('');
 }
 async function decRoteiro(id,status){
   try{
