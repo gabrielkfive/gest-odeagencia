@@ -1960,6 +1960,11 @@ function wfaSetTheme(t){
           .dec-btn{border:none;border-radius:10px;padding:9px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
           .dec-btn.p{background:var(--ink,#111);color:#fff;flex:1;min-width:120px}
           .dec-btn.s{background:#fff;color:var(--ink,#111);border:1px solid var(--line-2)}
+          .dec-urg{margin-left:auto;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border-radius:999px;padding:3px 9px;white-space:nowrap}
+          .dec-urg.u2{background:#fdecec;color:#c0392b}
+          .dec-urg.u1{background:#fffbeb;color:#8a6d00}
+          .dec-urg.u0{background:#f5f5f7;color:var(--mute)}
+          .dec-card.u2{border-left:3px solid #d63031}
           body.aura-dark .dec-card{background:rgba(13,14,17,.6);border-color:var(--line)}
           body.aura-dark .dec-btn.s{background:transparent;color:var(--txt)}
         </style>
@@ -6955,49 +6960,70 @@ function mdRenderDecisoes(){
   const _n=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   const myFirst=_n(myName).split(/\s+/)[0]||'';
   const cards=[];
-  // 1) minhas tarefas que vencem HOJE (qualquer papel — o "hoje é dia de..." de cada um)
-  (state.tarefas||[]).filter(t=>t.status!=='concluido'&&t.data===today&&(!myName||_n(t.resp).split(/\s+/)[0]===myFirst)).slice(0,3).forEach(t=>{
-    cards.push({ico:'⚡',bg:'#fffbeb',cli:mdClientName(t.clienteId)||'ARK',
-      t:'Hoje: '+(t.title||''),d:[t.funcao,'vence hoje'].filter(Boolean).join(' · '),
+  // URGÊNCIA lida do próprio sistema (pedido do Gabriel 16/07): 2=urgente, 1=importante,
+  // 0=normal. Sinais: tarefa atrasada/prio alta, cliente em vermelho, mês acabando.
+  const cliStatus={};(typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE).forEach(c=>{cliStatus[c.id]=c.status||'gr';});
+  const diaDoMes=parseInt(today.slice(8,10),10);
+  const mine=t=>!myName||_n(t.resp).split(/\s+/)[0]===myFirst;
+  // 1a) minhas tarefas ATRASADAS = o mais urgente que existe no sistema
+  (state.tarefas||[]).filter(t=>t.status!=='concluido'&&t.data&&t.data<today&&mine(t))
+    .sort((a,b)=>(a.data||'').localeCompare(b.data||'')).slice(0,2).forEach(t=>{
+    const dias=Math.max(1,Math.round((new Date(today)-new Date(t.data))/86400000));
+    cards.push({urg:2,ico:'🔥',bg:'#fdecec',cli:mdClientName(t.clienteId)||'ARK',
+      t:'Atrasada: '+(t.title||''),d:[t.funcao,dias+' dia'+(dias>1?'s':'')+' de atraso'].filter(Boolean).join(' · '),
       acts:`<button class="dec-btn p" onclick="mdDone('${t.id}')">✓ Concluir</button><button class="dec-btn s" onclick="mdSnooze('${t.id}')">Adiar</button><button class="dec-btn s" onclick="openTaskDetail('${t.id}')">Ver</button>`});
   });
-  // 2) roteiros do Motor esperando aval (gestor/admin) — aprovar cria a captação na Produção
+  // 1b) minhas tarefas que vencem HOJE — prio alta pesa mais
+  (state.tarefas||[]).filter(t=>t.status!=='concluido'&&t.data===today&&mine(t)).slice(0,3).forEach(t=>{
+    cards.push({urg:t.prio==='alta'?2:1,ico:'⚡',bg:'#fffbeb',cli:mdClientName(t.clienteId)||'ARK',
+      t:'Hoje: '+(t.title||''),d:[t.funcao,t.prio==='alta'?'prioridade ALTA · vence hoje':'vence hoje'].filter(Boolean).join(' · '),
+      acts:`<button class="dec-btn p" onclick="mdDone('${t.id}')">✓ Concluir</button><button class="dec-btn s" onclick="mdSnooze('${t.id}')">Adiar</button><button class="dec-btn s" onclick="openTaskDetail('${t.id}')">Ver</button>`});
+  });
+  // 2) roteiros do Motor esperando aval (gestor/admin) — urgente se o melhor dia está perto
   if(isManager&&Array.isArray(_decMotor)){
     _decMotor.filter(r=>r&&r.status==='pendente').slice(0,3).forEach(r=>{
       const dia=r.melhorDia?r.melhorDia.split('-').reverse().slice(0,2).join('/'):'';
-      cards.push({ico:'🎬',bg:'#fff8dc',cli:'Vivenda',
+      const perto=r.melhorDia&&(new Date(r.melhorDia)-new Date(today))/86400000<=3;
+      cards.push({urg:perto?2:1,ico:'🎬',bg:'#fff8dc',cli:'Vivenda',
         t:'Roteiro pronto: '+(r.titulo||''),
-        d:[(r.formato||'Reels'),dia?('sugerido '+dia):'',r.gancho?('“'+String(r.gancho).slice(0,70)+'…”'):''].filter(Boolean).join(' · '),
+        d:[(r.formato||'Reels'),dia?('sugerido '+dia+(perto?' — é já!':'')):'',r.gancho?('“'+String(r.gancho).slice(0,70)+'…”'):''].filter(Boolean).join(' · '),
         acts:`<button class="dec-btn p" onclick="decRoteiro('${r.id}','aprovado')">✓ Aprovar → captação</button><button class="dec-btn s" onclick="decRoteiro('${r.id}','descartado')">Descartar</button>`});
     });
   }
-  // 3) legendas esperando aprovação (gestor/admin)
+  // 3) legendas esperando aprovação (gestor/admin) — vídeo pronto parado = importante
   if(isManager&&Array.isArray(_decFila)){
     const pend=_decFila.filter(f=>f&&f.status==='pendente');
-    if(pend.length)cards.push({ico:'✍️',bg:'#f6eeff',cli:pend[0].cliente||'',
+    if(pend.length)cards.push({urg:1,ico:'✍️',bg:'#f6eeff',cli:pend[0].cliente||'',
       t:pend.length+' legenda'+(pend.length>1?'s':'')+' esperando aprovação',
       d:'“'+String(pend[0].gancho||pend[0].tema||'').slice(0,80)+'…”',
       acts:`<button class="dec-btn p" onclick="window.open('/postagens','_blank')">Revisar e aprovar</button>`});
   }
-  // 4) captações do mês faltando por cliente com contrato (account/gestor)
+  // 4) captações do mês faltando (account/gestor) — urgência cresce com o mês andando
+  //    e com a saúde do cliente (status vermelho = urgente sempre)
   if(isManager||myFirst==='lucas'){
     const mes=today.slice(0,7);
     const prod=(typeof loadProducao==='function'?loadProducao():[]);
     const jaTemTarefa=cid=>(state.tarefas||[]).some(t=>t.status!=='concluido'&&t.clienteId===cid&&/^agendar .*captaç/i.test(t.title||''));
     (typeof CLIENTES!=='undefined'?CLIENTES:CLIENTES_BASE).filter(c=>c.cap>0).forEach(c=>{
       const done=prod.filter(p=>p&&p.clienteId===c.id&&String(p.data||'').startsWith(mes)).length;
-      if(done<c.cap&&!jaTemTarefa(c.id))cards.push({ico:'📹',bg:'#fdecec',cli:c.nm,
-        t:'Mês com '+done+'/'+c.cap+' captações marcadas',
-        d:'O contrato prevê '+c.cap+'/mês — falta agendar '+(c.cap-done)+'.',
-        acts:`<button class="dec-btn p" onclick="decTarefaCaptacao('${c.id}','${String(c.nm||'').replace(/['"<>]/g,'')}',${c.cap-done})">✓ Criar tarefa de agendar</button>`});
+      if(done<c.cap&&!jaTemTarefa(c.id)){
+        const urg=(cliStatus[c.id]==='r'||diaDoMes>=15)?2:1;
+        cards.push({urg:urg,ico:'📹',bg:'#fdecec',cli:c.nm,
+          t:'Mês com '+done+'/'+c.cap+' captações marcadas',
+          d:'Contrato prevê '+c.cap+'/mês — falta agendar '+(c.cap-done)+(diaDoMes>=15?' e o mês já passou da metade':'')+(cliStatus[c.id]==='r'?' · cliente em alerta':'')+'.',
+          acts:`<button class="dec-btn p" onclick="decTarefaCaptacao('${c.id}','${String(c.nm||'').replace(/['"<>]/g,'')}',${c.cap-done})">✓ Criar tarefa de agendar</button>`});
+      }
     });
   }
   if(!cards.length){box.style.display='none';box.innerHTML='';return;}
-  const sig=cards.map(c=>c.t).join('|');
+  cards.sort((a,b)=>(b.urg||0)-(a.urg||0));
+  const sig=cards.map(c=>c.urg+c.t).join('|');
   if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+  const nUrg=cards.filter(c=>c.urg===2).length;
+  const URG_LBL=['pode esperar','importante','urgente'];
   box.style.display='';
-  box.innerHTML='<div class="dec-hd"><b>🎯 Decisões de hoje</b><span>a agência preparou — só falta o seu aval</span></div>'+
-    cards.slice(0,6).map(c=>`<div class="dec-card"><div class="dec-top"><span class="dec-ico" style="background:${c.bg}">${c.ico}</span><span class="dec-cli">${mdEsc(c.cli)}</span></div><div class="dec-t">${mdEsc(c.t)}</div><div class="dec-d">${mdEsc(c.d)}</div><div class="dec-acts">${c.acts}</div></div>`).join('');
+  box.innerHTML='<div class="dec-hd"><b>🎯 Decisões de hoje</b><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou — só falta o seu aval')+'</span></div>'+
+    cards.slice(0,7).map(c=>`<div class="dec-card${c.urg===2?' u2':''}"><div class="dec-top"><span class="dec-ico" style="background:${c.bg}">${c.ico}</span><span class="dec-cli">${mdEsc(c.cli)}</span><span class="dec-urg u${c.urg}">${URG_LBL[c.urg]}</span></div><div class="dec-t">${mdEsc(c.t)}</div><div class="dec-d">${mdEsc(c.d)}</div><div class="dec-acts">${c.acts}</div></div>`).join('');
 }
 async function decRoteiro(id,status){
   try{
