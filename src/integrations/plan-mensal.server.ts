@@ -29,6 +29,12 @@ const CARTEIRA: { nome: string; extra?: string }[] = [
   { nome: "Pizzaria Dgust", extra: "cliente novo em onboarding — primeira linha editorial." },
   { nome: "Kopi Coffee", extra: "cliente novo em onboarding — apresentar a marca." },
   { nome: "Café Lumière", extra: "cliente novo em onboarding — posicionamento inicial." },
+  { nome: "4B Burguers", extra: "recuperar vendas e ativar o delivery — CTA de pedido em tudo." },
+  { nome: "Pizzaria Sabor e Lenha", extra: "onboarding — aproveitar a audiência existente (~13k) com cadência nova." },
+  { nome: "Valhalla", extra: "temática medieval é o ativo; combos pro tráfego, renovar criativos." },
+  { nome: "Pizzaria Di Patrick", extra: "o chef Patrick é a marca — construir autoridade do pizzaiolo." },
+  { nome: "Lá em Casa", extra: "casa em reestruturação — pautas flexíveis, confirmar com a Renata antes de gravar." },
+  { nome: "Bulldogs", extra: "onboarding do zero — apresentar a casa e criar rotina." },
 ];
 
 // Mesma regra do planKey do app (workflowark.html): vivenda tem slot fixo.

@@ -92,6 +92,40 @@ PRIORIDADE: definir posicionamento (o que diferencia o Lumière) e construir pre
 TOM: charme e luz — estética afrancesada, doces finos, café com experiência. Instagramável por natureza.
 FORMATOS: Reels de ambiente/doce/café (motor) > carrossel de menu > stories de rotina da casa. CTA de visita com localização.`;
 
+const QUATROB = `4B BURGER'S — hamburgueria ARTESANAL. Squad Alpha. (IG e praça a confirmar com o grupo.)
+MOMENTO (jul/2026): vendas ABAIXO do esperado; plataformas de delivery quase zeradas (movimento é retirada). Captação em agendamento. Missão: recuperar venda e ativar o delivery.
+FOCO: (1) girar o delivery — criativo que termina em "pede agora"; (2) provar o artesanal (blend, chapa, montagem) pra justificar escolher a 4B.
+TOM: food porn direto — queijo derretendo, smash na chapa, mordida. Urgência leve de oferta.
+FORMATOS: Reels de preparo/mordida (motor) > combo/oferta da semana > bastidor do fogo. CTA SEMPRE com canal de pedido.`;
+
+const SABORLENHA = `PIZZARIA SABOR A LENHA (Osasco-SP) — pizzaria de forno a lenha (@pizzaria_saboralenha, ~13k seguidores, se posiciona como "a melhor pizzaria de Osasco"). Squad Alpha, cliente em ONBOARDING.
+MOMENTO: presença inicial com a ARK — estabelecer linha editorial e cadência aproveitando a audiência que já existe.
+TOM: rústico e caseiro — fogo, lenha, massa aberta na mão, queijo puxando. Orgulho de bairro ("a melhor de Osasco").
+FORMATOS: Reels de forno/pizza saindo (motor) > sabores da casa > bastidor do pizzaiolo. CTA de pedido/delivery da região.`;
+
+const VALHALLA = `VALHALLA (Andradas-MG) — 1ª hamburgueria MEDIEVAL de Andradas e região (@valhallaandradas, ~5,6k seguidores). Qua-dom, 18h à meia-noite. Squad Alpha.
+DIFERENCIAL: temática viking/medieval — nome, ambientação e linguagem são o ativo da marca. Usar o universo (Valhalla, banquete, guerreiro) nos ganchos.
+MOMENTO (jul/2026): tráfego Meta Ads ATIVO com relatório semanal; combos como carro-chefe (2 burgers + 2 fritas + 2 refris a partir de R$69,90 — "banquete pra dois").
+TOM: épico e divertido — fartura de guerreiro, comida de banquete. Sem frescura. Cidade do interior: proximidade com o público local.
+FORMATOS: Reels de combo/montagem (motor) > oferta da semana pro tráfego > ambientação temática. CTA de pedido; renovar criativos pro Ads não saturar.`;
+
+const DIPATRICK = `LA PIZZA DI PATRICK — pizzaria AUTORAL do pizzaiolo Patrick Catapano (@lapizzadipatrick): pizza contemporânea ítalo-brasileira. Squad Alpha, cliente novo (reunião de kickoff 02/07).
+DIFERENCIAL: o CHEF é a marca — autoridade do pizzaiolo, técnica, ingrediente. Não é pizzaria de bairro: é pizza de autor.
+FOCO: construir a audiência em cima do Patrick (rosto, mão na massa, técnica) + educar sobre o que faz uma pizza contemporânea ser diferente.
+TOM: craft/autoral — fermentação, forno, borda de leopardo, ingrediente escolhido. Sofisticado sem ser esnobe.
+FORMATOS: Reels do Patrick trabalhando (motor) > "por que minha massa fermenta 48h" (educativo) > sabor autoral do mês. CTA de reserva/pedido.`;
+
+const LAEMCASA = `LÁ EM CASA — restaurante de COZINHA AFETIVA, almoço self-service + delivery. Contrato 3 meses (~R$2.000/mês: 4 vídeos + 4 criativos). Contatos: Gilson (dono/decisor) e Renata (operação). (IG a confirmar no grupo.)
+MOMENTO (jul/2026): casa em REESTRUTURAÇÃO — cardápio novo e carta de drinks a caminho (movimento pra ocupar também fim de tarde/noite; captações começando ~16h). REGRA: confirmar pauta com a Renata ANTES de gravar — não criar mídia de prato que vai sair do cardápio.
+FOCO: comida com cara de casa (afeto, panela, tempero) + apresentar a nova fase quando lançar (drinks, novo cardápio) como acontecimento.
+TOM: acolhedor, "almoço de família" — vapor de panela, prato generoso, gente servindo.
+FORMATOS: Reels de buffet/prato do dia (motor) > teaser da nova fase > bastidor de cozinha. CTA de almoço e, na nova fase, do happy hour.`;
+
+const BULLDOGS = `BULLDOGS — hamburgueria. ~R$2.500/mês, veio por indicação; coordenação direta do Gabriel. Contato: Rodrigo ("Rodrigão"). Cliente novo (onboarding — acessos sendo liberados). (IG e praça a confirmar no grupo.)
+FOCO: primeira linha editorial — apresentar a casa e criar rotina de conteúdo do zero com o método ARK.
+TOM: raiz de hamburgueria — chapa, fumaça, generosidade. "Vamos pra cima, foguete 🚀" (energia do próprio grupo).
+FORMATOS: Reels de chapa/montagem (motor) > combos > bastidor. CTA de pedido/localização desde o início.`;
+
 // Briefs de 1ª geração ancorados no catálogo real (segmento + nota estratégica do Gabriel).
 // Enriquecer com decisores/protocolos quando o Gabriel passar (igual à profundidade da Vivenda).
 const BRIEFS: Record<string, string> = {
@@ -109,6 +143,12 @@ const BRIEFS: Record<string, string> = {
   dgust: DGUST,
   kopi: KOPI,
   lumiere: LUMIERE,
+  "4b": QUATROB,
+  "sabor e lenha": SABORLENHA,
+  valhalla: VALHALLA,
+  "di patrick": DIPATRICK,
+  "la em casa": LAEMCASA,
+  bulldog: BULLDOGS,
 };
 
 // Retorna o brief do cliente (ou "" se não houver). Casa por inclusão do nome normalizado.
