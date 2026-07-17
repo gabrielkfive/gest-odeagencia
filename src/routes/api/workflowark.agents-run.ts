@@ -42,7 +42,7 @@ const CLIENTES_CTX: { id: string; nm: string; seg: string; nota: string }[] = [
   { id: "cafe-lumiere", nm: "Café Lumière", seg: "Cafeteria", nota: "Cliente NOVO (jul/2026): onboarding, posicionamento e presença inicial." },
   { id: "dom", nm: "Dom Baruka", seg: "Restaurante (Squad Alpha)", nota: "URGENTE: cardápio + iFood + bebidas; auditoria iFood em curso." },
   { id: "stray", nm: "Stray House", seg: "Restaurante/bar (Squad Alpha)", nota: "Recuperação; ROAS ~5; subir criativos novos." },
-  { id: "babbo", nm: "Babbo Giovanni", seg: "Restaurante italiano (Squad Alpha)", nota: "Em ajuste; precisa de uma roteirização interessante de Reels, viável de gravar e exportável pro Drive." },
+  // (Babbo Giovanni: churn em 16/07/2026)
   { id: "ark", nm: "ARK Content", seg: "A PRÓPRIA agência (marketing de gastronomia/varejo) — cliente interno", nota:
       "OBJETIVO: marcar o MÁXIMO de reuniões comerciais (conversão: 10 reuniões = 1 fechamento, então volume de reuniões é tudo). " +
       "Criativo CAMPEÃO no ar no Meta (desde anteontem trouxe 3 reuniões): fala sobre fazer produção audiovisual profissional pra ir mais longe. " +

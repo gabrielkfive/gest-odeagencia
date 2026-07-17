@@ -5333,13 +5333,13 @@ const CLIENTES_BASE = [
   {id:'dom',nm:'Dom Baruka',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',meta:'URGENTE · cardápio + iFood + bebidas',extra:'Auditoria iFood em curso'},
   {id:'stray',nm:'Stray House',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Recuperação (não é mais urgente)',extra:'ROAS 5,08 · subir criativos'},
   {id:'cachu',nm:'Cachu Restaurante',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Ajustada ✓ · acompanhando ROAS',extra:'Food porn qui-dom'},
-  {id:'babbo',nm:'Babbo Giovanni',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Em ajuste · criar tarefa on-demand',extra:'Reels já entregue'},
   {id:'brisa',nm:'Brisa Doce Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · onboarding/inauguração',extra:'Aderir método'},
   {id:'attra',nm:'Attraversiamo Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',cap:1,meta:'Super saudável ✓ · bombando · 1 captação/mês',extra:'📹 1 captação/mês'},
   // Em onboarding
   {id:'4bburger',nm:'4B Burguers',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding',extra:'Onboarding em andamento',defaultSprint:0},
   {id:'saborlenha',nm:'Pizzaria Sabor e Lenha',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · último cliente',extra:'Onboarding em andamento',defaultSprint:0},
   // (Lunna's, Shopping dos Uniformes, Bellato e Bella Vita removidos do sistema a pedido do Gabriel)
+  // (Babbo Giovanni: churn em 16/07/2026)
 ];
 
 // Clientes personalizados (adicionados pelo Gabriel) — salvos na nuvem (wfa-clientes-custom).
@@ -5618,7 +5618,7 @@ const SPRINTS = [
   {n:2,nm:'Sprint 2',clis:['brisa','attra']},
   {n:3,nm:'Sprint 3',clis:['vaca','bellavita']},
   {n:4,nm:'Sprint 4',clis:['dom','cachu']},
-  {n:5,nm:'Sprint 5',clis:['stray','babbo']},
+  {n:5,nm:'Sprint 5',clis:['stray']},
   {n:6,nm:'Sprint 6',clis:['lunnas','fercon']},
   {n:7,nm:'Sprint 7',clis:['vivenda','shopping']},
 ];
@@ -10840,7 +10840,7 @@ const ALPHA_FLAGS=['HEALTHY','CARE','DANGER','CRITICAL'];
 const ALPHA_COLS=ALPHA_GROUPS.reduce((a,g)=>a.concat(g.cols),[]);
 const ALPHA_SEED=[
   {id:'al-brisa',nome:'Brisa Doce Café & Sorveteria',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Anual',valorContrato:'R$ 25.000,00',inicioContrato:'04/02/2026',fimContrato:'04/02/2027',onbInicio:'02/03/2026',onbFim:'06/03',onbTempo:'4',valorMensal:'R$ 2.083,33',lt:'12',ltv:'R$ 25.000,00',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:false,entregasQual:false,relacionamento:false,flag:'CRITICAL',obs:'Melhorar qualidade do criativo.',r1:false,r2:false,ropreAcao:'',prioridade:'Bonap',situacaoAtual:'Recorde no marketplace (Mercado Livre); pitch feito pra Shopee, cliente ainda não bateu o martelo.',dores:'Não quer investir enquanto não tiver resultado.',impacto:'',planoAcao:'',deadline:''},
-  {id:'al-babbo',nome:'Babbo Giovanni Vila Mascote',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Semestral',valorContrato:'R$ 18.000,00',inicioContrato:'02/05/2026',fimContrato:'02/11/2026',onbInicio:'09/09/2024',onbFim:'20/09',onbTempo:'11',valorMensal:'R$ 3.000,00',lt:'6',ltv:'R$ 18.000,00',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
+  {id:'al-babbo',nome:'Babbo Giovanni Vila Mascote',account:'Rosiron',plano:'Gold',status:'Churn',tipoContrato:'Semestral',valorContrato:'R$ 18.000,00',inicioContrato:'02/05/2026',fimContrato:'02/11/2026',onbInicio:'09/09/2024',onbFim:'20/09',onbTempo:'11',valorMensal:'R$ 3.000,00',lt:'6',ltv:'R$ 18.000,00',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'Churn em 16/07/2026 (estava em CARE, ROAS 50% da meta)',r1:false,r2:false,ropreAcao:''},
   {id:'al-dom',nome:'Dom Baruka (CAC 0)',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Trimestral',valorContrato:'R$ 6.000,00',inicioContrato:'16/04/2026',fimContrato:'16/07/2026',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
   {id:'al-cachu',nome:'Cachu Restaurante',account:'Rosiron',plano:'Gold',status:'Ativo',tipoContrato:'Anual',valorContrato:'R$ 24.000,00',inicioContrato:'02/04/2026',fimContrato:'02/04/2027',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
   {id:'al-attra',nome:'Attraversiamo Café',account:'Rosiron',plano:'Silver',status:'Ativo',tipoContrato:'Anual',valorContrato:'R$ 19.200,00',inicioContrato:'19/05/2026',fimContrato:'19/05/2027',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',nsmTipo:'ROAS',nsmMeta:'R$ 10,00',nsmReal:'R$ 5,00',pctMeta:'50,00%',budgetMidia:'R$ 1.200,00',investTrafego:'',pctBudget:'5,00%',roas:'8',entregasPrazo:true,entregasQual:true,relacionamento:true,flag:'CARE',obs:'',r1:false,r2:false,ropreAcao:''},
@@ -11011,7 +11011,7 @@ async function alphaExportXlsx(){
   }catch(e){console.error(e);if(typeof toast==='function')toast('Erro ao gerar o Excel');}
 }
 /* ---- Squad Alpha: sub-abas (replica as abas da planilha) + grades genéricas ---- */
-const ALPHA_CLIENTES_NOMES=['Brisa Doce Café & Sorveteria','Babbo Giovanni Vila Mascote','Dom Baruka (CAC 0)','Cachu Restaurante','Attraversiamo Café','Valhalla','Vaca Velha','4B Burguer','Stray House'];
+const ALPHA_CLIENTES_NOMES=['Brisa Doce Café & Sorveteria','Dom Baruka (CAC 0)','Cachu Restaurante','Attraversiamo Café','Valhalla','Vaca Velha','4B Burguer','Stray House'];
 function alphaSeedRows(prefix,defaults){return ALPHA_CLIENTES_NOMES.map((nm,i)=>Object.assign({id:prefix+i,cliente:nm},defaults));}
 const ALPHA_GRIDS={
   am:{title:'Account Manager',cols:[

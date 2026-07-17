@@ -74,11 +74,7 @@ PRIORIDADE: subir CRIATIVOS NOVOS com frequência (o ROAS aguenta investir mais;
 TOM: vibe de bar/noite — energia, drinks, ambiente, música, galera. Vender a EXPERIÊNCIA.
 FORMATOS: Reels de drink/ambiente noturno (motor) > eventos/agenda da semana > UGC da galera.`;
 
-const BABBO = `BABBO GIOVANNI (Squad Alpha) — restaurante italiano/pizzaria. Em ajuste. Contato: Fábio (dono).
-MODELO DE ENTREGA (assessoria Alpha): o lado do cliente grava (há quem "faz todos os vídeos da Babbo"; ideia em curso: a FILHA do Fábio apresentando com roteiro da ARK); a ARK entrega ROTEIROS prontos, valida criativos no grupo e sobe anúncios (foco em promoção). SEM captação da ARK.
-PRIORIDADE: roteirização de Reels INTERESSANTE, viável de gravar no restaurante e exportável pro Drive (workflow Alpha). Linha validada: comparação com orgulho ("essa é a pizzaria do meu pai — forno a lenha vs forno elétrico, ingrediente de verdade vs pizza de padaria").
-TOM: tradição italiana + apetite — massa fresca, queijo, molho, cantina aconchegante. Experiência italiana autêntica, voz de família.
-FORMATOS: Reels de prato/massa (motor) > processo artesanal (massa sendo feita) > ambiente família. Roteiros prontos e fáceis de executar na captação do cliente.`;
+// (Babbo Giovanni: churn em 16/07/2026 — brief removido)
 
 const DGUST = `PIZZARIA DGUST (Brasília) — pizzaria. Cliente NOVO (jul/2026): fase de ONBOARDING.
 PRIORIDADE: primeira linha editorial + primeiras captações. Estabelecer identidade visual do feed e cadência.
@@ -142,7 +138,6 @@ const BRIEFS: Record<string, string> = {
   vaca: VACA,
   dom: DOM,
   stray: STRAY,
-  babbo: BABBO,
   dgust: DGUST,
   kopi: KOPI,
   lumiere: LUMIERE,
