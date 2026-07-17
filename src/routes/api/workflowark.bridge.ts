@@ -129,6 +129,7 @@ export const Route = createFileRoute("/api/workflowark/bridge")({
               if (typeof e.title === "string" && e.title.trim()) t.title = e.title.slice(0, 140).trim();
               if (typeof e.desc === "string") t.desc = e.desc.slice(0, 500);
               if (typeof e.data === "string") t.data = e.data.slice(0, 10);
+              if (typeof e.clienteId === "string") t.clienteId = e.clienteId.slice(0, 40);
               if (["alta", "media", "baixa"].includes(e.prio)) t.prio = e.prio;
               mudou++;
             });
@@ -200,6 +201,54 @@ export const Route = createFileRoute("/api/workflowark/bridge")({
             if (upErr) return Response.json({ error: "falha ao salvar" }, { status: 500 });
           }
           return Response.json({ ok: true, criadas: criadas.length });
+        }
+
+        // Cadastrar clientes personalizados (append-only + dedupe por id/nome).
+        // Mesmo formato que o app usa em wfa-clientes-custom; Gabriel ajusta plano/valor no Editar.
+        if (body?.action === "clientes-add") {
+          const novos: any[] = Array.isArray(body.clientes) ? body.clientes : [];
+          if (!novos.length) return Response.json({ error: "sem clientes" }, { status: 400 });
+          const { data: cRow, error: cErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-clientes-custom").maybeSingle();
+          if (cErr) return Response.json({ error: "falha ao ler clientes" }, { status: 500 });
+          const clientes: any[] = Array.isArray(cRow?.data) ? cRow.data.slice() : [];
+          const existe = (id: string, nm: string) =>
+            clientes.some((c) => String(c?.id) === id || norm(String(c?.nm || "")) === norm(nm));
+          const criados: string[] = [];
+          novos.slice(0, 10).forEach((n) => {
+            const id = String(n?.id || "").slice(0, 40).trim();
+            const nm = String(n?.nm || "").slice(0, 80).trim();
+            if (!id || !nm || existe(id, nm)) return;
+            clientes.push({
+              id, nm,
+              tipo: n?.tipo === "Alpha" ? "Alpha" : "ARK",
+              plano: String(n?.plano || "A definir").slice(0, 40),
+              valor: Number(n?.valor) || 0,
+              status: "gr",
+              cap: Number(n?.cap) || 0,
+              meta: String(n?.meta || "Novo cliente · ajuste plano e valor no botão Editar").slice(0, 140),
+              extra: String(n?.extra || "Novo cliente").slice(0, 140),
+            });
+            criados.push(nm);
+          });
+          if (criados.length) {
+            const { error: upErr } = await db.from("workflowark_state").upsert({ key: "wfa-clientes-custom", data: clientes });
+            if (upErr) return Response.json({ error: "falha ao salvar" }, { status: 500 });
+          }
+          return Response.json({ ok: true, criados });
+        }
+
+        // Uma notificação avulsa (sem tarefa junto). Continua valendo a regra anti-flood:
+        // quem chama manda UM texto consolidado, não N avisos.
+        if (body?.action === "notificar") {
+          const texto = String(body?.texto || "").slice(0, 600).trim();
+          if (!texto) return Response.json({ error: "sem texto" }, { status: 400 });
+          const { data: nRow, error: nErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-notificacoes").maybeSingle();
+          if (nErr) return Response.json({ error: "falha ao ler notificações" }, { status: 500 });
+          const arr = Array.isArray(nRow?.data) ? nRow.data : [];
+          arr.unshift({ id: "brg" + Date.now(), ts: Date.now(), lido: false, tipo: "bridge", texto });
+          const { error: upErr } = await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) });
+          if (upErr) return Response.json({ error: "falha ao salvar" }, { status: 500 });
+          return Response.json({ ok: true });
         }
 
         return Response.json({ error: "action inválida" }, { status: 400 });
