@@ -224,6 +224,16 @@ export const Route = createFileRoute("/api/workflowark/state")({
         const ctx = await getContext(request);
         if ("error" in ctx) return ctx.error;
 
+        // Piloto automático do planejamento mensal: pega carona no load (waitUntil =
+        // segundo plano, não atrasa a resposta). Idempotente — no-op no resto do mês.
+        try {
+          const cw: any = await import("cloudflare:workers");
+          if (typeof cw?.waitUntil === "function") {
+            const { planMensalSeDevido } = await import("@/integrations/plan-mensal.server");
+            cw.waitUntil(planMensalSeDevido(ctx.db));
+          }
+        } catch { /* dev local: sem cloudflare:workers, sem piloto automático */ }
+
         // NUNCA devolve segredos/tokens ao cliente (Meta token, Google OAuth refresh token…)
         const isSensitive = (k: string) => /-(secret|oauth)$/.test(k);
         // BOOT LEVE: wfa-whatsapp (todas as conversas) é de longe o maior payload do estado

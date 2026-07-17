@@ -27,6 +27,7 @@ import { Route as ApiWorkflowarkSocialRunRouteImport } from './routes/api/workfl
 import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowark.sheet'
 import { Route as ApiWorkflowarkRemoteRouteImport } from './routes/api/workflowark.remote'
 import { Route as ApiWorkflowarkPortalRouteImport } from './routes/api/workflowark.portal'
+import { Route as ApiWorkflowarkBridgeRouteImport } from './routes/api/workflowark.bridge'
 import { Route as ApiWorkflowarkApproveRouteImport } from './routes/api/workflowark.approve'
 import { Route as ApiWorkflowarkAiCheckRouteImport } from './routes/api/workflowark.ai-check'
 import { Route as ApiWorkflowarkAgentsRunRouteImport } from './routes/api/workflowark.agents-run'
@@ -130,6 +131,11 @@ const ApiWorkflowarkPortalRoute = ApiWorkflowarkPortalRouteImport.update({
   path: '/api/workflowark/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWorkflowarkBridgeRoute = ApiWorkflowarkBridgeRouteImport.update({
+  id: '/api/workflowark/bridge',
+  path: '/api/workflowark/bridge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWorkflowarkApproveRoute = ApiWorkflowarkApproveRouteImport.update({
   id: '/api/workflowark/approve',
   path: '/api/workflowark/approve',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
+  '/api/workflowark/bridge': typeof ApiWorkflowarkBridgeRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
+  '/api/workflowark/bridge': typeof ApiWorkflowarkBridgeRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
+  '/api/workflowark/bridge': typeof ApiWorkflowarkBridgeRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
@@ -322,6 +331,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
+    | '/api/workflowark/bridge'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
     | '/api/workflowark/sheet'
@@ -354,6 +364,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
+    | '/api/workflowark/bridge'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
     | '/api/workflowark/sheet'
@@ -387,6 +398,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
+    | '/api/workflowark/bridge'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
     | '/api/workflowark/sheet'
@@ -420,6 +432,7 @@ export interface RootRouteChildren {
   ApiWorkflowarkAgentsRunRoute: typeof ApiWorkflowarkAgentsRunRoute
   ApiWorkflowarkAiCheckRoute: typeof ApiWorkflowarkAiCheckRoute
   ApiWorkflowarkApproveRoute: typeof ApiWorkflowarkApproveRoute
+  ApiWorkflowarkBridgeRoute: typeof ApiWorkflowarkBridgeRoute
   ApiWorkflowarkPortalRoute: typeof ApiWorkflowarkPortalRoute
   ApiWorkflowarkRemoteRoute: typeof ApiWorkflowarkRemoteRoute
   ApiWorkflowarkSheetRoute: typeof ApiWorkflowarkSheetRoute
@@ -556,6 +569,13 @@ declare module '@tanstack/react-router' {
       path: '/api/workflowark/portal'
       fullPath: '/api/workflowark/portal'
       preLoaderRoute: typeof ApiWorkflowarkPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/bridge': {
+      id: '/api/workflowark/bridge'
+      path: '/api/workflowark/bridge'
+      fullPath: '/api/workflowark/bridge'
+      preLoaderRoute: typeof ApiWorkflowarkBridgeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/workflowark/approve': {
@@ -700,6 +720,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWorkflowarkAgentsRunRoute: ApiWorkflowarkAgentsRunRoute,
   ApiWorkflowarkAiCheckRoute: ApiWorkflowarkAiCheckRoute,
   ApiWorkflowarkApproveRoute: ApiWorkflowarkApproveRoute,
+  ApiWorkflowarkBridgeRoute: ApiWorkflowarkBridgeRoute,
   ApiWorkflowarkPortalRoute: ApiWorkflowarkPortalRoute,
   ApiWorkflowarkRemoteRoute: ApiWorkflowarkRemoteRoute,
   ApiWorkflowarkSheetRoute: ApiWorkflowarkSheetRoute,

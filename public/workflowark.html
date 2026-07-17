@@ -3976,7 +3976,7 @@ function iniciarAutoSync(){
             <div><h3>Montar calendário do mês</h3><p>A IA usa o cérebro do cliente pra sugerir os posts.</p></div>
           </div>
           <div class="pl-form">
-            <div><label class="form-label" style="font-size:11px">Cliente</label><input id="pl-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda"></div>
+            <div><label class="form-label" style="font-size:11px">Cliente</label><input id="pl-cliente" class="form-input" placeholder="Ex: Farmácia Vivenda" list="pl-clientes-salvos" onchange="planTrocarCliente(this.value)"><datalist id="pl-clientes-salvos"></datalist></div>
             <div><label class="form-label" style="font-size:11px">Período</label><input id="pl-periodo" class="form-input" placeholder="Ex: Junho 2026 · semana da Copa"></div>
             <div class="full"><label class="form-label" style="font-size:11px">Foco especial (opcional)</label><input id="pl-foco" class="form-input" placeholder="Ex: creme de ureia em promoção, NAC, Copa"></div>
             <div><label class="form-label" style="font-size:11px">Qtd de ideias</label><input id="pl-qtd" class="form-input" type="number" value="8" min="3" max="16"></div>
@@ -9799,6 +9799,7 @@ function planSalvar(cliente,periodo,ideias){
   state.planejamento=state.planejamento||{};
   state.planejamento[planKey(cliente)]={cliente,periodo,ideias,updatedAt:Date.now()};
   try{localStorage.setItem('wfa-planejamento',JSON.stringify(state.planejamento));}catch(e){}
+  try{planDatalist();}catch(e){}
   // arquiva também na pasta do cliente no Drive (se tiver cliente nomeado)
   try{if(cliente&&typeof driveSalvarPlanejamento==='function')driveSalvarPlanejamento(cliente,periodo,ideias);}catch(e){}
 }
@@ -9843,6 +9844,7 @@ async function planGerarPortal(btn){
   finally{if(btn){btn.disabled=false;btn.textContent=old||'🌐 Portal do cliente';}}
 }
 function planOpen(){
+  planDatalist();
   if(_planIdeias&&_planIdeias.length)return; // ja tem algo na tela (guarda: boot pode chamar cedo)
   if(!_planIdeias)_planIdeias=[];
   const saved=state.planejamento||{};
@@ -9854,6 +9856,34 @@ function planOpen(){
   if(pi&&!pi.value)pi.value=pick.periodo||'';
   _planIdeias=pick.ideias||[];_planCliente=pick.cliente||'';
   if(_planIdeias.length){const v=document.getElementById('pl-views');if(v)v.style.display='flex';const e=document.getElementById('pl-empty');if(e)e.style.display='none';planRender();}
+}
+// Cada cliente tem seu planejamento salvo — trocar o nome no campo carrega o dele,
+// sem apagar o dos outros (pedido do Gabriel: um plano nunca some por causa do outro).
+function planTrocarCliente(nome){
+  const n=String(nome||'').trim();if(!n)return;
+  const saved=state.planejamento||{};
+  const pick=saved[planKey(n)];
+  const pi=document.getElementById('pl-periodo');
+  const v=document.getElementById('pl-views');const e=document.getElementById('pl-empty');
+  if(pick&&pick.ideias&&pick.ideias.length){
+    _planIdeias=pick.ideias;_planCliente=pick.cliente||n;
+    if(pi)pi.value=pick.periodo||'';
+    if(v)v.style.display='flex';if(e)e.style.display='none';
+    planRender();
+    toast&&toast('📂 Planejamento de '+(pick.cliente||n)+' carregado');
+  }else{
+    _planIdeias=[];_planCliente=n;
+    if(pi)pi.value='';
+    if(v)v.style.display='none';
+    const cal=document.getElementById('pl-cal');if(cal)cal.innerHTML='';
+    const out=document.getElementById('pl-out');if(out)out.innerHTML='';
+    if(e){e.style.display='';e.innerHTML='<div class="e">🗓️</div><b>Sem planejamento salvo pra '+mdEsc(n)+'</b>Clica em Montar planejamento que a IA monta o mês — os planos dos outros clientes continuam salvos.';}
+  }
+}
+function planDatalist(){
+  const dl=document.getElementById('pl-clientes-salvos');if(!dl)return;
+  const saved=state.planejamento||{};
+  dl.innerHTML=Object.values(saved).filter(p=>p&&p.cliente).map(p=>'<option value="'+mdEsc(p.cliente)+'">').join('');
 }
 async function planGerar(){
   const cliente=(document.getElementById('pl-cliente').value||'').trim();

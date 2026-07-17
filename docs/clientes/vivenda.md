@@ -2,7 +2,7 @@
 
 > Fonte única de contexto para os agentes de IA (roteirista, planejamento, legendas, atendimento).
 > Sempre que um agente for produzir algo da Vivenda, ele DEVE ler este arquivo primeiro.
-> Mantido por Gabriel + Claude. Última atualização: 2026-06-11.
+> Mantido por Gabriel + Claude. Última atualização: 2026-07-16.
 
 ---
 
@@ -48,21 +48,45 @@ puxar informação (a integrar com o sistema no futuro). Outro sistema da Vivend
 
 ---
 
-## 💊 Produtos em foco AGORA (Junho 2026)
-- **Creme de Ureia 10%** — ultra hidratante, produto TOP. **Super promoção** (≈900 em estoque, 200 acabaram de vencer → urgência real). Precisa de criação boa.
-- **NAC (N-acetilcisteína)** — funções renal/fígado, antioxidante ("dá uma limpada"). Gancho de Copa: todo mundo tomando uma → ajuda. Tratar com leveza por influenciadora.
-- **Cafeína** — linha de performance/novos produtos.
+## 💊 Produtos em foco AGORA (Julho 2026)
+- **NAC (N-acetilcisteína)** — sai do gancho de jogo, entra no gancho de ROTINA (recuperação,
+  fígado pós festa). Provou interesse real (53 curtidas, 14 comentários).
+- **Cafeína** — linha de performance; ângulo "por que a minha cafeína é manipulada".
+- **Creme de Ureia 10%** — herói de retenção ("o produto que mais faz cliente voltar");
+  julho é pico da seca em Brasília.
 
 ---
 
-## 🗓️ Plano de conteúdo — Copa + Vivenda (a partir de 2026-06-11)
-Série cinematográfica de Copa (2 vídeos) + reforços com influenciadores.
-- **Hoje (11/06):** vídeo 1 da série cinematográfica de Copa (já no ar).
-- **Amanhã (12/06):** vídeo para um(a) influenciador(a).
-- **Depois (13/06):** vídeo 2 da série — reforços: influenciadores **Leila, Renan, Esté**.
-- **Sábado (jogo do Brasil):** pode entrar FOTO no lugar do vídeo.
-- **Próxima semana:** mais postagens nessa linha **+** captação na Farmácia Vivenda (gravar/editar),
-  focando nos produtos acima (creme de ureia, NAC, cafeína).
+## 🗓️ Plano de conteúdo — Julho 2026: virada pós-Copa → Dia dos Pais (09/08)
+**O Brasil caiu e a Copa virou memória.** O Kit Copa saiu de cena sem funeral. O mês vira
+PONTE para o Mês dos Pais com foco em conversão qualificada. Produção: **Yuri**.
+Aprovação: **Remerson**.
+
+### O arco do mês (4 fases)
+1. **Virada pós-Copa (agora)** — recuperação, rotina e fígado pós festa fecham o trilho antigo.
+2. **Rotina dos donos** — a série dos proprietários roda, plantando os produtos herói na rotina real da loja.
+3. **Esquenta do Dia dos Pais** — campanha "Manda a Receita do Pai" entra no ar com o criativo campeão.
+4. **Semana do Dia dos Pais (early ago)** — pico: receita no WhatsApp, kit do pai no balcão.
+
+### Série dos proprietários (8 roteiros — donos filmados no dia a dia, engaja 4x mais que produto)
+1. Abrindo a farmácia às 6h50: o dia começa antes do balcão
+2. O que meu pai toma todo dia (e por que eu manipulo pra ele)
+3. Três receitas que chegaram hoje pelo WhatsApp, do pedido ao pote
+4. O café do dono: por que a minha cafeína é manipulada
+5. O produto que mais faz cliente voltar: creme de ureia na rotina
+6. Um dia inteiro da loja em 40 segundos, corte a corte
+7. NAC na prática: para quem é, para quem não é, sem bula
+8. Pai de primeira viagem no balcão: o que ele levou
+
+### Campanha "Manda a Receita do Pai" (Dia dos Pais 09/08)
+- **Mecânica:** foto da receita (do pai, do avô ou a própria) no WhatsApp → orçamento em
+  minutos, retirada na loja ou entrega.
+- **Por quê:** receita médica é o lead mais qualificado que existe (intenção máxima,
+  produto definido). R$ 2,84 por conversa no criativo campeão.
+- **Meta:** 40% de conversão com receita (vs 32% do atendimento comum).
+- **Regra de ouro: brinde, não desconto** (junho já concedeu R$ 222,5 mil em desconto).
+- Expansão por fase: semanas 1-2 nas praças de maior conversão (Taguatinga 35%,
+  Sobradinho 34%), depois rede inteira. Verba sugerida R$ 40/dia no criativo campeão.
 
 > Esse plano (Planejamento de Conteúdo) é a engrenagem que conecta:
 > **Planejamento → Roteirização → Legendas → Postagem.** Os agentes precisam conversar entre si.

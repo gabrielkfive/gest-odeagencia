@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vivenda Hub · Eventos 2026</title>
+<style>
+  :root {
+    --verde: #1B4332;
+    --verde-medio: #2D6A4F;
+    --verde-claro: #52B788;
+    --dourado: #C9A84C;
+    --dourado-claro: #E9C46A;
+    --creme: #F8F4EF;
+    --creme-escuro: #EDE8E0;
+    --cinza: #6B7280;
+    --branco: #FFFFFF;
+    --texto: #1C1917;
+    --texto-suave: #57534E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+    background: var(--creme);
+    color: var(--texto);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--verde);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.25);
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo-area { display: flex; align-items: center; gap: 14px; }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: var(--dourado);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .logo-text h1 { color: var(--branco); font-size: 1.15rem; font-weight: 700; letter-spacing: 0.3px; }
+  .logo-text p { color: var(--verde-claro); font-size: 0.72rem; letter-spacing: 1.8px; text-transform: uppercase; margin-top: 1px; }
+  .header-badge {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--branco);
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--verde) 0%, var(--verde-medio) 60%, #3A7A60 100%);
+    padding: 72px 32px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(201,168,76,0.18) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(82,183,136,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(201,168,76,0.2);
+    border: 1px solid rgba(201,168,76,0.5);
+    color: var(--dourado-claro);
+    font-size: 0.7rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 20px;
+    margin-bottom: 22px;
+  }
+  .hero h2 {
+    color: var(--branco);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h2 span { color: var(--dourado-claro); }
+  .hero p {
+    color: rgba(255,255,255,0.72);
+    font-size: 1.05rem;
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    background: var(--branco);
+    border-bottom: 1px solid var(--creme-escuro);
+    padding: 0 32px;
+  }
+  .stats-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: stretch;
+  }
+  .stat {
+    flex: 1;
+    padding: 22px 24px;
+    text-align: center;
+    border-right: 1px solid var(--creme-escuro);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num { font-size: 1.9rem; font-weight: 800; color: var(--verde); line-height: 1; }
+  .stat-label { font-size: 0.72rem; color: var(--cinza); letter-spacing: 0.8px; margin-top: 5px; text-transform: uppercase; }
+
+  /* SECTION WRAPPER */
+  .section-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .section-title {
+    font-size: 0.68rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--verde-medio);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .section-heading {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--verde);
+    margin-bottom: 8px;
+  }
+  .section-sub {
+    color: var(--texto-suave);
+    font-size: 0.95rem;
+    margin-bottom: 44px;
+    line-height: 1.5;
+  }
+
+  /* TIMELINE */
+  .timeline-section { padding: 64px 0; }
+  .timeline { position: relative; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 44px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--verde-claro), var(--dourado), var(--verde-claro));
+    border-radius: 2px;
+  }
+
+  .event-card {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 32px;
+    position: relative;
+    animation: fadeUp 0.5s ease both;
+  }
+  .event-card:nth-child(1) { animation-delay: 0.05s; }
+  .event-card:nth-child(2) { animation-delay: 0.12s; }
+  .event-card:nth-child(3) { animation-delay: 0.19s; }
+  .event-card:nth-child(4) { animation-delay: 0.26s; }
+  .event-card:nth-child(5) { animation-delay: 0.33s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .event-dot-wrap {
+    flex-shrink: 0;
+    width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding-top: 22px;
+  }
+  .event-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 3px solid var(--branco);
+    box-shadow: 0 0 0 2px var(--verde-medio);
+    z-index: 1;
+    flex-shrink: 0;
+  }
+  .event-month {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--cinza);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .event-body {
+    flex: 1;
+    background: var(--branco);
+    border-radius: 16px;
+    padding: 24px 28px;
+    border: 1px solid var(--creme-escuro);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .event-body:hover {
+    box-shadow: 0 8px 32px rgba(27,67,50,0.12);
+    transform: translateY(-2px);
+  }
+
+  .event-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .event-title-block {}
+  .event-date {
+    font-size: 0.68rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .event-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--verde);
+    line-height: 1.2;
+  }
+  .event-emoji {
+    font-size: 2rem;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+
+  .event-desc {
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+
+  .event-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+  .tag-produto { background: #E8F5EE; color: var(--verde-medio); border: 1px solid #B7DEC8; }
+  .tag-acao   { background: #FEF9EE; color: #8A6914; border: 1px solid #E8D48A; }
+  .tag-parceria { background: #EEF2FF; color: #3730A3; border: 1px solid #C7D2FE; }
+  .tag-brinde { background: #FFF0F5; color: #9D174D; border: 1px solid #F9A8D4; }
+
+  .event-highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .highlight {
+    background: var(--creme);
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--creme-escuro);
+  }
+  .highlight-label {
+    font-size: 0.62rem;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--cinza);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .highlight-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--verde);
+  }
+
+  /* COLOR CODES PER EVENT */
+  .ev-agosto-1 .event-dot { background: #F97316; box-shadow: 0 0 0 2px #F97316; }
+  .ev-agosto-1 .event-date { color: #C2410C; }
+
+  .ev-agosto-2 .event-dot { background: var(--verde-claro); box-shadow: 0 0 0 2px var(--verde-claro); }
+  .ev-agosto-2 .event-date { color: var(--verde-medio); }
+
+  .ev-setembro .event-dot { background: var(--dourado); box-shadow: 0 0 0 2px var(--dourado); }
+  .ev-setembro .event-date { color: #8A6914; }
+
+  .ev-outubro-1 .event-dot { background: #8B5CF6; box-shadow: 0 0 0 2px #8B5CF6; }
+  .ev-outubro-1 .event-date { color: #6D28D9; }
+
+  .ev-outubro-2 .event-dot { background: #EC4899; box-shadow: 0 0 0 2px #EC4899; }
+  .ev-outubro-2 .event-date { color: #BE185D; }
+
+  /* PRESCRITOR SECTION */
+  .prescritor-section {
+    padding: 64px 0;
+    background: linear-gradient(135deg, var(--verde) 0%, var(--verde-medio) 100%);
+  }
+  .prescritor-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .prescritor-info .section-title { color: var(--verde-claro); }
+  .prescritor-info .section-heading { color: var(--branco); }
+  .prescritor-info p { color: rgba(255,255,255,0.75); font-size: 0.95rem; line-height: 1.7; margin-bottom: 28px; }
+  .prescritor-benefits { list-style: none; }
+  .prescritor-benefits li {
+    color: rgba(255,255,255,0.85);
+    font-size: 0.9rem;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .prescritor-benefits li:last-child { border-bottom: none; }
+  .prescritor-benefits .icon {
+    width: 26px; height: 26px;
+    background: rgba(201,168,76,0.25);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .prescritor-form {
+    background: var(--branco);
+    border-radius: 20px;
+    padding: 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .prescritor-form h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--verde);
+    margin-bottom: 6px;
+  }
+  .prescritor-form p {
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--cinza);
+    margin-bottom: 6px;
+  }
+  .form-group input {
+    width: 100%;
+    border: 1.5px solid var(--creme-escuro);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 0.9rem;
+    color: var(--texto);
+    background: var(--creme);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .form-group input:focus {
+    border-color: var(--verde-claro);
+    box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
+    background: var(--branco);
+  }
+  .form-group input::placeholder { color: #A8A29E; }
+  .btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, var(--verde) 0%, var(--verde-medio) 100%);
+    color: var(--branco);
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 8px;
+    letter-spacing: 0.3px;
+  }
+  .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-submit:active { transform: translateY(0); }
+  .form-note {
+    font-size: 0.72rem;
+    color: var(--texto-suave);
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  /* PRODUCTS SECTION */
+  .products-section { padding: 64px 0; background: var(--branco); }
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .product-card {
+    border: 1.5px solid var(--creme-escuro);
+    border-radius: 16px;
+    padding: 28px;
+    transition: box-shadow 0.2s;
+  }
+  .product-card:hover { box-shadow: 0 8px 28px rgba(27,67,50,0.1); }
+  .product-icon { font-size: 2.2rem; margin-bottom: 14px; }
+  .product-name { font-size: 1rem; font-weight: 700; color: var(--verde); margin-bottom: 8px; }
+  .product-desc { font-size: 0.87rem; color: var(--texto-suave); line-height: 1.6; margin-bottom: 16px; }
+  .product-events {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--verde-medio);
+    background: #E8F5EE;
+    border: 1px solid #B7DEC8;
+    padding: 5px 10px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* FOOTER */
+  .footer {
+    background: var(--verde);
+    padding: 40px 32px;
+    text-align: center;
+  }
+  .footer p { color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-bottom: 6px; }
+  .footer strong { color: var(--dourado-claro); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .header-inner { padding: 14px 20px; }
+    .header-badge { display: none; }
+    .hero { padding: 52px 20px 60px; }
+    .stats-inner { flex-wrap: wrap; }
+    .stat { min-width: 50%; border-right: none; border-bottom: 1px solid var(--creme-escuro); }
+    .stat:nth-child(odd) { border-right: 1px solid var(--creme-escuro); }
+    .section-wrap { padding: 0 20px; }
+    .timeline::before { left: 30px; }
+    .event-dot-wrap { width: 64px; }
+    .prescritor-wrap { grid-template-columns: 1fr; }
+    .prescritor-info { order: 2; }
+    .prescritor-form { order: 1; }
+    .products-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo-area">
+      <div class="logo-icon">🌿</div>
+      <div class="logo-text">
+        <h1>Farmácia Vivenda</h1>
+        <p>Sua aliada do bem-estar</p>
+      </div>
+    </div>
+    <div class="header-badge">Hub de Eventos · 2026</div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Calendário Estratégico</div>
+  <h2>Presença em cada<br><span>momento que importa</span></h2>
+  <p>Nutrição Brasil, Café com Nutricionista, Jantar com Conhecimento e muito mais. Vivenda presente onde o bem-estar acontece.</p>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Eventos 2026</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Meses de ação</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2</div>
+      <div class="stat-label">Produtos em destaque</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">+500</div>
+      <div class="stat-label">Prescritores potenciais</div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE DE EVENTOS -->
+<section class="timeline-section">
+  <div class="section-wrap">
+    <div class="section-title">Calendário</div>
+    <h2 class="section-heading">Próximos eventos</h2>
+    <p class="section-sub">De agosto a outubro, a Vivenda marcará presença estratégica nas principais redes do segmento.</p>
+
+    <div class="timeline">
+
+      <!-- CHURRAS VIVENDA -->
+      <div class="event-card ev-agosto-1">
+        <div class="event-dot-wrap">
+          <div class="event-dot"></div>
+          <div class="event-month">AGO<br>2026</div>
+        </div>
+        <div class="event-body">
+          <div class="event-header">
+            <div class="event-title-block">
+              <div class="event-date">01 de agosto</div>
+              <div class="event-name">Churras Vivenda</div>
+            </div>
+            <div class="event-emoji">🍖</div>
+          </div>
+          <p class="event-desc">
+            Evento interno da Vivenda — momento de conexão, celebração e fortalecimento da cultura da marca. Oportunidade para reforçar o posicionamento entre a equipe e stakeholders próximos.
+          </p>
+          <div class="event-tags">
+            <span class="tag tag-acao">Evento Interno</span>
+            <span class="tag tag-brinde">Blusa do Time ⚽</span>
+          </div>
+          <div class="event-highlights">
+            <div class="highlight">
+              <div class="highlight-label">Data</div>
+              <div class="highlight-value">01/08/2026</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Tipo</div>
+              <div class="highlight-value">Celebração interna</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NUTRIÇÃO BRASIL -->
+      <div class="event-card ev-agosto-2">
+        <div class="event-dot-wrap">
+          <div class="event-dot"></div>
+          <div class="event-month">AGO<br>2026</div>
+        </div>
+        <div class="event-body">
+          <div class="event-header">
+            <div class="event-title-block">
+              <div class="event-date">27 · 28 · 29 de agosto</div>
+              <div class="event-name">Nutrição Brasil</div>
+            </div>
+            <div class="event-emoji">🔬</div>
+          </div>
+          <p class="event-desc">
+            Um dos maiores congressos de nutrição do país. A Vivenda terá espaço dedicado para forma farmacêutica, degustação e captação de prescritores. Produtos NAC e Cafeína em destaque, com lâminas técnicas individuais para cada um.
+          </p>
+          <div class="event-tags">
+            <span class="tag tag-produto">NAC</span>
+            <span class="tag tag-produto">Cafeína</span>
+            <span class="tag tag-acao">Forma Farmacêutica</span>
+            <span class="tag tag-acao">Degustação</span>
+            <span class="tag tag-acao">Goma Colágeno</span>
+            <span class="tag tag-acao">Fresh Drink</span>
+          </div>
+          <div class="event-highlights">
+            <div class="highlight">
+              <div class="highlight-label">Datas</div>
+              <div class="highlight-value">27–29/08/2026</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Destaque</div>
+              <div class="highlight-value">Área do Prescritor</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Brindes</div>
+              <div class="highlight-value">Disponíveis</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Material</div>
+              <div class="highlight-value">Lâminas técnicas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAFÉ COM NUTRICIONISTA -->
+      <div class="event-card ev-setembro">
+        <div class="event-dot-wrap">
+          <div class="event-dot"></div>
+          <div class="event-month">SET<br>2026</div>
+        </div>
+        <div class="event-body">
+          <div class="event-header">
+            <div class="event-title-block">
+              <div class="event-date">01 ou 02 de setembro</div>
+              <div class="event-name">Café com Nutricionista</div>
+            </div>
+            <div class="event-emoji">☕</div>
+          </div>
+          <p class="event-desc">
+            Evento de proximidade e relacionamento com nutricionistas de Brasília, em parceria com a AGES. Um ambiente íntimo para troca de conhecimento, com entrega de livros e apresentação dos protocolos exclusivos Vivenda. Palestrante a confirmar.
+          </p>
+          <div class="event-tags">
+            <span class="tag tag-parceria">Parceria AGES</span>
+            <span class="tag tag-acao">Palestra</span>
+            <span class="tag tag-brinde">Livro por nutricionista 📚</span>
+          </div>
+          <div class="event-highlights">
+            <div class="highlight">
+              <div class="highlight-label">Data</div>
+              <div class="highlight-value">01 ou 02/09/2026</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Parceria</div>
+              <div class="highlight-value">AGES</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Palestrante</div>
+              <div class="highlight-value">A confirmar</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Brinde</div>
+              <div class="highlight-value">1 livro/nutricionista</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JANTAR COM CONHECIMENTO -->
+      <div class="event-card ev-outubro-1">
+        <div class="event-dot-wrap">
+          <div class="event-dot"></div>
+          <div class="event-month">OUT<br>2026</div>
+        </div>
+        <div class="event-body">
+          <div class="event-header">
+            <div class="event-title-block">
+              <div class="event-date">06·07 ou 20·21 de outubro</div>
+              <div class="event-name">Jantar com Conhecimento</div>
+            </div>
+            <div class="event-emoji">🍽️</div>
+          </div>
+          <p class="event-desc">
+            Jantar de alto impacto com conteúdo científico — o evento premium da Vivenda para estreitar laços com prescritores e líderes de opinião. Inclui sorteio de blusa do time do coração para criar um momento memorável de conexão.
+          </p>
+          <div class="event-tags">
+            <span class="tag tag-acao">Evento Premium</span>
+            <span class="tag tag-brinde">Blusa do Time ⚽</span>
+            <span class="tag tag-acao">Conteúdo Científico</span>
+          </div>
+          <div class="event-highlights">
+            <div class="highlight">
+              <div class="highlight-label">Datas opção A</div>
+              <div class="highlight-value">06 e 07/10</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Datas opção B</div>
+              <div class="highlight-value">20 e 21/10</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Sorteio</div>
+              <div class="highlight-value">Blusa personalizada</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONGRESSO NUTRIÇÃO & ESTÉTICA -->
+      <div class="event-card ev-outubro-2">
+        <div class="event-dot-wrap">
+          <div class="event-dot"></div>
+          <div class="event-month">OUT<br>2026</div>
+        </div>
+        <div class="event-body">
+          <div class="event-header">
+            <div class="event-title-block">
+              <div class="event-date">29 e 30 de outubro</div>
+              <div class="event-name">Congresso Brasileiro de<br>Nutrição & Estética</div>
+            </div>
+            <div class="event-emoji">✨</div>
+          </div>
+          <p class="event-desc">
+            Congresso nacional que une nutrição funcional e estética — público altamente alinhado com os protocolos e produtos Vivenda. Excelente oportunidade para posicionamento da marca e geração de novos prescritores.
+          </p>
+          <div class="event-tags">
+            <span class="tag tag-produto">NAC</span>
+            <span class="tag tag-produto">Cafeína</span>
+            <span class="tag tag-acao">Congresso Nacional</span>
+            <span class="tag tag-acao">Nutrição + Estética</span>
+          </div>
+          <div class="event-highlights">
+            <div class="highlight">
+              <div class="highlight-label">Datas</div>
+              <div class="highlight-value">29 e 30/10/2026</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight-label">Perfil público</div>
+              <div class="highlight-value">Nutricionistas + Esteta</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ÁREA DO PRESCRITOR -->
+<section class="prescritor-section">
+  <div class="prescritor-wrap">
+    <div class="prescritor-info">
+      <div class="section-title">Para profissionais de saúde</div>
+      <h2 class="section-heading" style="color:white;">Área do<br>Prescritor</h2>
+      <p>Quer receber a visita dos nossos Representantes Vivenda? Preencha o formulário e nossa equipe entrará em contato para agendar.</p>
+      <ul class="prescritor-benefits">
+        <li>
+          <span class="icon">🧪</span>
+          Amostras e materiais técnicos exclusivos
+        </li>
+        <li>
+          <span class="icon">📋</span>
+          Lâminas científicas por produto (NAC, Cafeína e mais)
+        </li>
+        <li>
+          <span class="icon">🤝</span>
+          Visita personalizada no seu local de atendimento
+        </li>
+        <li>
+          <span class="icon">🎁</span>
+          Brindes disponíveis para prescritores
+        </li>
+      </ul>
+    </div>
+
+    <div class="prescritor-form">
+      <h3>Solicitar visita do representante</h3>
+      <p>Preencha os dados abaixo e nossa equipe entra em contato em até 48h.</p>
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" placeholder="Dr. / Dra. ..." />
+      </div>
+      <div class="form-group">
+        <label>Número (WhatsApp)</label>
+        <input type="tel" placeholder="(61) 9 0000-0000" />
+      </div>
+      <div class="form-group">
+        <label>Registro do Conselho (CRN / CRM / CRF)</label>
+        <input type="text" placeholder="Ex: CRN-1 · 12345" />
+      </div>
+      <div class="form-group">
+        <label>Local de atendimento</label>
+        <input type="text" placeholder="Clínica, consultório ou hospital..." />
+      </div>
+      <button class="btn-submit">Solicitar visita →</button>
+      <p class="form-note">Suas informações são tratadas com sigilo e usadas apenas para agendamento.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUTOS EM DESTAQUE -->
+<section class="products-section">
+  <div class="section-wrap">
+    <div class="section-title">Portfólio</div>
+    <h2 class="section-heading">Produtos em destaque nos eventos</h2>
+    <p class="section-sub">Formulações exclusivas da Vivenda que estarão em foco nos próximos meses.</p>
+
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-icon">⚗️</div>
+        <div class="product-name">NAC · N-Acetilcisteína</div>
+        <p class="product-desc">Antioxidante de alto desempenho com função renal e hepática. Formulação Vivenda com biodisponibilidade superior. Indicado para protocolos de detox e performance.</p>
+        <span class="product-events">Nutrição Brasil · Congresso</span>
+      </div>
+      <div class="product-card">
+        <div class="product-icon">⚡</div>
+        <div class="product-name">Cafeína · Linha Performance</div>
+        <p class="product-desc">Formulação técnica para atletas e praticantes de atividade física. Parte da linha de performance esportiva da Vivenda — produto em expansão no portfólio.</p>
+        <span class="product-events">Nutrição Brasil · Congresso</span>
+      </div>
+      <div class="product-card">
+        <div class="product-icon">🍬</div>
+        <div class="product-name">Goma de Colágeno</div>
+        <p class="product-desc">Forma farmacêutica inovadora em goma — alta aceitação pelo paciente e eficácia preservada. Degustação em destaque no Nutrição Brasil com o Fresh Drink.</p>
+        <span class="product-events">Nutrição Brasil (degustação)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p><strong>Farmácia Vivenda</strong> · Brasília · Sua aliada do bem-estar</p>
+  <p>Hub de eventos produzido pela <strong>ARK Content</strong></p>
+</footer>
+
+</body>
+</html>

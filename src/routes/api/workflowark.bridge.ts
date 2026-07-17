@@ -140,6 +140,68 @@ export const Route = createFileRoute("/api/workflowark/bridge")({
           return Response.json({ ok: true, alteradas: mudou });
         }
 
+        // Grava o planejamento mensal de UM cliente (mesmo formato do planSalvar do
+        // sistema: objeto por planKey). Substitui só a entrada daquele cliente.
+        if (body?.action === "planejamento-set") {
+          const cliente = String(body.cliente || "").slice(0, 80).trim();
+          const periodo = String(body.periodo || "").slice(0, 120).trim();
+          const ideias: any[] = Array.isArray(body.ideias) ? body.ideias.slice(0, 40) : [];
+          if (!cliente || !ideias.length) return Response.json({ error: "cliente e ideias obrigatórios" }, { status: 400 });
+          const planKey = norm(cliente).includes("vivenda") ? "vivenda" : norm(cliente).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "cliente";
+          const { data: pRow, error: pErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-planejamento").maybeSingle();
+          if (pErr) return Response.json({ error: "falha ao ler planejamento" }, { status: 500 });
+          const plano = pRow?.data && typeof pRow.data === "object" && !Array.isArray(pRow.data) ? { ...pRow.data } : {};
+          plano[planKey] = {
+            cliente, periodo,
+            ideias: ideias.map((i) => ({
+              tema: String(i?.tema || "").slice(0, 160),
+              angulo: String(i?.angulo || "").slice(0, 400),
+              legenda: String(i?.legenda || "").slice(0, 400),
+              dia: String(i?.dia || "").slice(0, 30),
+              formato: String(i?.formato || "").slice(0, 30),
+              produto: String(i?.produto || "").slice(0, 60),
+              data: /^\d{4}-\d{2}-\d{2}$/.test(String(i?.data || "")) ? String(i.data) : "",
+            })),
+            updatedAt: Date.now(),
+          };
+          const { error: upErr } = await db.from("workflowark_state").upsert({ key: "wfa-planejamento", data: plano });
+          if (upErr) return Response.json({ error: "falha ao salvar" }, { status: 500 });
+          return Response.json({ ok: true, planKey, ideias: plano[planKey].ideias.length });
+        }
+
+        // Agenda captações na Produção — append-only com dedupe por (clienteId+data).
+        if (body?.action === "producao-add") {
+          const novas: any[] = Array.isArray(body.captacoes) ? body.captacoes.slice(0, 20) : [];
+          if (!novas.length) return Response.json({ error: "sem captações" }, { status: 400 });
+          const { data: cRow, error: cErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-producao").maybeSingle();
+          if (cErr) return Response.json({ error: "falha ao ler produção" }, { status: 500 });
+          const producao: any[] = Array.isArray(cRow?.data) ? cRow.data.slice() : [];
+          const jaTem = new Set(producao.map((c) => String(c?.clienteId || "") + "|" + String(c?.data || "")));
+          const criadas: string[] = [];
+          novas.forEach((n, i) => {
+            const data = /^\d{4}-\d{2}-\d{2}$/.test(String(n?.data || "")) ? String(n.data) : "";
+            const cid = String(n?.clienteId || "").slice(0, 40);
+            if (!data || !cid || jaTem.has(cid + "|" + data)) return;
+            producao.push({
+              id: "brgcap" + Date.now() + "_" + i,
+              clienteId: cid,
+              data,
+              titulo: String(n?.titulo || "").slice(0, 140),
+              roteiro: String(n?.roteiro || "").slice(0, 2000),
+              status: "agendada",
+              origem: "claude-bridge",
+              videos: [],
+            });
+            jaTem.add(cid + "|" + data);
+            criadas.push(data);
+          });
+          if (criadas.length) {
+            const { error: upErr } = await db.from("workflowark_state").upsert({ key: "wfa-producao", data: producao });
+            if (upErr) return Response.json({ error: "falha ao salvar" }, { status: 500 });
+          }
+          return Response.json({ ok: true, criadas: criadas.length });
+        }
+
         return Response.json({ error: "action inválida" }, { status: 400 });
       },
     },
