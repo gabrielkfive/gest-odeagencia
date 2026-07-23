@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { authedFetch } from "@/lib/authed-fetch";
 
 // INTELIGÊNCIA DE DADOS (pedido do Gabriel, 13/07/2026).
 // Mesma camada de leitura que o Vivenda Hub ganhou, agora para a ARK:
@@ -49,21 +50,6 @@ const SERIF = "'Playfair Display', Georgia, serif";
 const SANS = "'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
 const FIN_ROLES = new Set(["admin", "gestor", "financeiro"]);
 
-async function authedFetch(action: string, payload?: Record<string, unknown>) {
-  let { data } = await supabase.auth.getSession();
-  let token = data.session?.access_token;
-  if (!token) { const r = await supabase.auth.refreshSession(); token = r.data.session?.access_token; }
-  if (!token) throw new Error("Sessão expirada. Entre novamente.");
-  const isLoad = action === "load";
-  const res = await fetch("/api/workflowark/state", {
-    method: isLoad ? "GET" : "POST",
-    headers: { Authorization: `Bearer ${token}`, ...(isLoad ? {} : { "Content-Type": "application/json" }) },
-    body: isLoad ? undefined : JSON.stringify(payload ?? {}),
-  });
-  const out = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(out.error || "Falha ao falar com o servidor.");
-  return out;
-}
 
 function hojeYmd(): string {
   // "hoje" no fuso de Brasília, nunca em UTC (mesma regra do resto do sistema).

@@ -13,7 +13,7 @@ import { chromium } from 'playwright-core';
 import { pathToFileURL } from 'url';
 import path from 'path';
 
-const alvo = pathToFileURL(path.resolve('public/workflowark.html')).href;
+const alvo = pathToFileURL(path.resolve(path.dirname(new URL(import.meta.url).pathname), '../public/workflowark.html')).href;
 const falhas = [];
 const checa = (cond, msg) => { if (!cond) falhas.push(msg); };
 
@@ -45,10 +45,10 @@ await page.waitForTimeout(2500);
 
 // injeta identidade de admin e roda o render direto (sem depender de login/nuvem)
 await page.evaluate(() => {
-  window.WFA_MEMBER = { full_name: 'Gabriel Andrade', role: 'admin' };
-  window._decMotor = [];      // nuvem vazia neste teste
-  window._decFila = [];
-  window._decFetchTs = Date.now(); // impede fetch real
+  WFA_MEMBER = { full_name: 'Gabriel Andrade', role: 'admin' }; // let escoped — window. não funciona
+  _decMotor = [];      // nuvem vazia neste teste
+  _decFila = [];
+  _decFetchTs = Date.now(); // impede fetch real
   state.tarefas = JSON.parse(localStorage.getItem('wfa-tarefas') || '[]');
   state.planejamento = JSON.parse(localStorage.getItem('wfa-planejamento') || '{}');
   mdRenderDecisoes();
@@ -58,7 +58,8 @@ await page.waitForTimeout(300);
 // 1) a fila apareceu com os cartões esperados?
 const fila = await page.evaluate(() => {
   const box = document.getElementById('md-decisoes');
-  if (!box || box.style.display === 'none') return null;
+  // computado, não inline: pega regra de stylesheet escondendo o bloco (bug de 17/07)
+  if (!box || getComputedStyle(box).display === 'none') return null;
   return [...box.querySelectorAll('.dec-card')].map(c => ({
     t: c.querySelector('.dec-t')?.textContent || '',
     urg: c.querySelector('.dec-urg')?.textContent || '',

@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { authedFetch } from "@/lib/authed-fetch";
 
 // Página AUTENTICADA: fila de aprovação do AGENTE SOCIAL MEDIA.
 // Mostra as propostas geradas por /api/workflowark/social-run (wfa-social-fila) e deixa o
@@ -38,21 +39,6 @@ const BORDER = "#2C2825";
 const SERIF = "'Playfair Display', Georgia, serif";
 const SANS = "'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
 
-async function authedFetch(action: string, payload?: Record<string, unknown>) {
-  let { data } = await supabase.auth.getSession();
-  let token = data.session?.access_token;
-  if (!token) { const r = await supabase.auth.refreshSession(); token = r.data.session?.access_token; }
-  if (!token) throw new Error("Sessão expirada. Entre novamente.");
-  const isLoad = action === "load";
-  const res = await fetch("/api/workflowark/state", {
-    method: isLoad ? "GET" : "POST",
-    headers: { Authorization: `Bearer ${token}`, ...(isLoad ? {} : { "Content-Type": "application/json" }) },
-    body: isLoad ? undefined : JSON.stringify(payload ?? {}),
-  });
-  const out = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(out.error || "Falha ao falar com o servidor.");
-  return out;
-}
 
 const FILTROS = [
   { k: "pendente", l: "⏳ Pendentes" },
