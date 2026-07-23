@@ -100,6 +100,7 @@ a{color:inherit;text-decoration:none}
 .tb-search{position:relative;display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px 6px 30px;font-size:12px;color:var(--mute);width:220px}
 .tb-search svg{position:absolute;left:9px;width:12px;height:12px}
 .tb-search input{background:transparent;border:none;outline:none;width:100%;color:var(--txt);font-size:12px}
+#search-close-mobile{display:none}
 .tb-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:6px;background:var(--yel);color:#000;font-size:11.5px;font-weight:700;border:1px solid var(--yel-d)}
 .tb-btn:hover{background:var(--yel-d)}
 .tb-btn svg{width:12px;height:12px}
@@ -9707,6 +9708,28 @@ async function jarvisRunActions(actions){
   return {did:det.length, detalhes:det};
 }
 function jarvisFalar(txt){jarvisSpeak(String(txt||'').replace(/[#*_`]/g,''));}
+async function jarvisMemoriaToggle(){
+  const panel=document.getElementById('jarvis-memoria-panel');
+  if(!panel)return;
+  if(panel.style.display!=='none'){panel.style.display='none';return;}
+  const lista=document.getElementById('jarvis-memoria-lista');
+  if(lista)lista.innerHTML='<span style="color:#9a9aa2">Carregando…</span>';
+  panel.style.display='block';
+  try{
+    const m=await cloudCall('load-key',{key:'wfa-jarvis-memory'});
+    const arr=Array.isArray(m)?m:[];
+    if(lista)lista.innerHTML=arr.length?arr.map((s,i)=>`<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)">${i+1}. ${mdEsc(String(s))}</div>`).join(''):'<span style="color:#9a9aa2">Nenhum registro ainda. Converse com o JARVIS para ele aprender sobre você.</span>';
+  }catch(e){if(lista)lista.innerHTML='<span style="color:#ef4444">Erro ao carregar.</span>';}
+}
+async function jarvisLimparMemoria(){
+  if(!confirm('Apagar toda a memória do JARVIS?'))return;
+  try{
+    await cloudCall('save',{action:'save-state',key:'wfa-jarvis-memory',data:[]});
+    const lista=document.getElementById('jarvis-memoria-lista');
+    if(lista)lista.innerHTML='<span style="color:#9a9aa2">Memória apagada, Senhor.</span>';
+    if(typeof toast==='function')toast('Memória do JARVIS apagada.');
+  }catch(e){if(typeof toast==='function')toast('Erro ao apagar memória.');}
+}
 function jarvisMic(){
   /* Turn-taking estilo ChatGPT (03/07): o modo antigo era tiro único e o Chrome
      finaliza em QUALQUER pausa de respiração, então o JARVIS respondia antes de
