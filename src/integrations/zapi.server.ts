@@ -306,7 +306,7 @@ export async function transcribeAudioBase64(base64: string): Promise<string> {
     // Trava de tamanho: áudio grande vira um array de bytes gigante e estoura o
     // limite de CPU/memória do Worker (Error 1102). ~1,3M de base64 ≈ 1MB de áudio
     // (uns 2-3 min de nota de voz). Acima disso, pula a transcrição (fica o placeholder).
-    if (base64.length > 1_300_000) return "";
+    if (base64.length > 1_300_000) return "[Áudio longo demais para transcrição automática]";
     const bin = atob(base64);
     const bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
@@ -405,7 +405,7 @@ export async function transcribeAudio(audioUrl?: string): Promise<string> {
     if (!resp.ok) return "";
     const buf = await resp.arrayBuffer();
     // Trava de tamanho (mesma razão do transcribeAudioBase64): áudio > ~1MB pula.
-    if (buf.byteLength > 1_000_000) return "";
+    if (buf.byteLength > 1_000_000) return "[Áudio longo demais para transcrição automática]";
     const bytes = [...new Uint8Array(buf)];
     const out: any = await ai.run("@cf/openai/whisper", { audio: bytes });
     return String(out?.text || "").trim();

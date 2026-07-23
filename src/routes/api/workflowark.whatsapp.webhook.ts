@@ -1,13 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { processWaWebhook } from "@/integrations/wa-webhook.server";
+import { zapiEnv } from "@/integrations/zapi.server";
 
 // Webhook chamado pela Evolution (ou Z-API) quando chega/sai uma mensagem ou muda a conexão.
-// SEM autenticação (é a Evolution quem chama, servidor-a-servidor). Sempre responde 200
-// pra não ficar reenviando. A lógica fica em wa-webhook.server (compartilhada com a rota curinga).
+// Se WEBHOOK_SECRET estiver configurado, exige o header X-Webhook-Token ou ?token= correto.
+// Sempre responde 200 pra não ficar reenviando. A lógica fica em wa-webhook.server.
+function webhookAuthorized(request: Request): boolean {
+  const secret = zapiEnv("WEBHOOK_SECRET");
+  if (!secret) return true; // sem secret configurado: aceita tudo (comportamento anterior)
+  const header = request.headers.get("x-webhook-token") || request.headers.get("x-api-key") || "";
+  if (header === secret) return true;
+  const url = new URL(request.url);
+  return url.searchParams.get("token") === secret;
+}
+
 export const Route = createFileRoute("/api/workflowark/whatsapp/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        if (!webhookAuthorized(request)) return Response.json({ error: "Unauthorized" }, { status: 401 });
         try {
           const body: any = await request.json().catch(() => ({}));
           await processWaWebhook(body);

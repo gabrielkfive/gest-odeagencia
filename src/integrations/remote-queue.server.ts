@@ -92,15 +92,6 @@ export async function remoteComplete(
 // fluxo normal de conversa/agente).
 const CMD_RE = /^\s*j[áa]?rvis\b[\s,:.!—-]*/i;
 
-function allowedPhones(): string[] {
-  let raw = "";
-  try {
-    // import estático de cloudflare:workers quebra no dev local; lê do process como fallback
-    raw = (typeof process !== "undefined" ? process.env?.REMOTE_ALLOWED_PHONES : "") || "";
-  } catch { raw = ""; }
-  return raw.split(",").map((s) => s.replace(/\D/g, "")).filter(Boolean);
-}
-
 export async function handleRemoteCommand(
   db: any,
   msg: { phone: string; fromMe: boolean; isGroup: boolean; text: string },
@@ -114,9 +105,7 @@ export async function handleRemoteCommand(
     const { env } = await import("cloudflare:workers");
     const raw = (env as Record<string, string | undefined>)?.REMOTE_ALLOWED_PHONES || "";
     whitelisted = raw.split(",").map((s) => s.replace(/\D/g, "")).includes(String(msg.phone).replace(/\D/g, ""));
-  } catch {
-    whitelisted = allowedPhones().includes(String(msg.phone).replace(/\D/g, ""));
-  }
+  } catch { /* sem CF env (dev local): só fromMe é autorizado */ }
   if (!msg.fromMe && !whitelisted) return false; // não autorizado: trata como mensagem comum
 
   const demanda = text.replace(CMD_RE, "").trim();

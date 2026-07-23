@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { authedFetch as cloudFetch } from "@/lib/authed-fetch";
 
 // CALENDÁRIO EDITORIAL (pendência da maratona de junho).
 // Grade mensal por cliente: o que vai ao ar em cada dia. Entradas manuais +
@@ -53,26 +54,13 @@ const SANS = "'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
 const STATUS_COR: Record<Entrada["status"], string> = { planejado: "#A89F92", agendado: GOLD, postado: "#4ade80" };
 const PROX_STATUS: Record<Entrada["status"], Entrada["status"]> = { planejado: "agendado", agendado: "postado", postado: "planejado" };
 
-async function authedFetch(action: string, payload?: Record<string, unknown>) {
-  let { data } = await supabase.auth.getSession();
-  let token = data.session?.access_token;
-  if (!token) { const r = await supabase.auth.refreshSession(); token = r.data.session?.access_token; }
-  if (!token) throw new Error("Sessão expirada. Entre novamente.");
-  const isLoad = action === "load";
-  const res = await fetch("/api/workflowark/state", {
-    method: isLoad ? "GET" : "POST",
-    headers: { Authorization: `Bearer ${token}`, ...(isLoad ? {} : { "Content-Type": "application/json" }) },
-    body: isLoad ? undefined : JSON.stringify(payload ?? {}),
-  });
-  const out = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(out.error || "Falha ao falar com o servidor.");
-  return out;
-}
 
 function ymd(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
-function hojeYmd(): string { return ymd(new Date()); }
+function hojeYmd(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+}
 
 function Calendario() {
   const [loading, setLoading] = useState(true);
@@ -88,6 +76,9 @@ function Calendario() {
   const [salvando, setSalvando] = useState(false);
   const [mostraFila, setMostraFila] = useState(false);
   const [plano, setPlano] = useState<PlanoItem[]>([]);
+
+  // QW-3: pré-seleciona o cliente do filtro ativo no compositor
+  useEffect(() => { if (clienteFiltro !== "todos") setNovoCliente(clienteFiltro); }, [clienteFiltro]);
   const [captacoes, setCaptacoes] = useState<Captacao[]>([]);
   const [mostraRoteiros, setMostraRoteiros] = useState(false);
   const [gerandoPlano, setGerandoPlano] = useState(false);
@@ -98,7 +89,7 @@ function Calendario() {
   const carregar = useCallback(async () => {
     setErr(""); setLoading(true);
     try {
-      const out = await authedFetch("load");
+      const out = await cloudFetch("load");
       const e = out?.state?.["wfa-editorial"];
       setEntradas(Array.isArray(e) ? e : []);
       const f = out?.state?.["wfa-social-fila"];
@@ -116,7 +107,7 @@ function Calendario() {
   async function persistir(prox: Entrada[]) {
     const anterior = entradas;
     setEntradas(prox); setSalvando(true);
-    try { await authedFetch("save-state", { action: "save-state", key: "wfa-editorial", data: prox }); }
+    try { await cloudFetch("save-state", { action: "save-state", key: "wfa-editorial", data: prox }); }
     catch (e) { setEntradas(anterior); setErr(e instanceof Error ? e.message : String(e)); }
     finally { setSalvando(false); }
   }
@@ -164,7 +155,7 @@ function Calendario() {
   async function gerarRoteiros() {
     setGerandoPlano(true); setErr(""); setAviso("");
     try {
-      const out = await authedFetch("motor-plano-mensal", { action: "motor-plano-mensal", mes: mesExibido });
+      const out = await cloudFetch("motor-plano-mensal", { action: "motor-plano-mensal", mes: mesExibido });
       setAviso(`✨ ${out.gerados ?? "Novos"} roteiros sugeridos pra Vivenda. Revise e aprove abaixo.`);
       await carregar();
       setMostraRoteiros(true);
@@ -175,7 +166,7 @@ function Calendario() {
   async function gerarLegendas() {
     setGerandoLegendas(true); setErr(""); setAviso("");
     try {
-      const out = await authedFetch("motor-gerar-legendas", { action: "motor-gerar-legendas" });
+      const out = await cloudFetch("motor-gerar-legendas", { action: "motor-gerar-legendas" });
       if (!out.gerados) setAviso(out.msg || "Nenhuma edição concluída esperando legenda.");
       else setAviso(`✍️ ${out.gerados} legenda(s) gerada(s). Aprove em /postagens — depois elas aparecem aqui pela fila.`);
       await carregar();
@@ -186,7 +177,7 @@ function Calendario() {
   async function decidirRoteiro(r: PlanoItem, status: "aprovado" | "descartado") {
     setBusyRoteiro(r.id); setErr("");
     try {
-      await authedFetch("motor-status", { action: "motor-status", id: r.id, status });
+      await cloudFetch("motor-status", { action: "motor-status", id: r.id, status });
       setPlano((prev) => prev.map((p) => (p.id === r.id ? { ...p, status } : p)));
       if (status === "aprovado") {
         // retroalimenta o calendário: roteiro aprovado já entra como planejado no melhor dia
@@ -248,6 +239,7 @@ function Calendario() {
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <a href="/app" style={{ color: "#A89F92", fontSize: 13, textDecoration: "none", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "7px 12px" }}>← Sistema</a>
             <button onClick={() => setMesBase(new Date(mesBase.getFullYear(), mesBase.getMonth() - 1, 1))} style={btn(SURFACE, "#CFC7B8", BORDER)}>‹</button>
             <b style={{ minWidth: 170, textAlign: "center", textTransform: "capitalize" }}>{mesNome}</b>
             <button onClick={() => setMesBase(new Date(mesBase.getFullYear(), mesBase.getMonth() + 1, 1))} style={btn(SURFACE, "#CFC7B8", BORDER)}>›</button>
@@ -368,7 +360,7 @@ function Calendario() {
                     ))}
                     {items.map((e) => (
                       <div key={e.id} title={`${e.cliente} · ${e.titulo} (${e.status}) — clique: muda status · shift+clique: remove`}
-                        onClick={(ev) => { ev.stopPropagation(); if (ev.shiftKey) remover(e.id); else ciclarStatus(e.id); }}
+                        onClick={(ev) => { ev.stopPropagation(); if (ev.shiftKey) { if (!confirm(`Remover "${e.titulo}"?`)) return; remover(e.id); } else ciclarStatus(e.id); }}
                         style={{ background: BG, border: `1px solid ${BORDER}`, borderLeft: `3px solid ${STATUS_COR[e.status]}`,
                           borderRadius: 6, padding: "3px 6px", marginBottom: 3, fontSize: 11, lineHeight: 1.35, overflow: "hidden" }}>
                         <b style={{ color: GOLD }}>{e.cliente}</b> <span style={{ color: "#E8E0D4" }}>{e.titulo}</span>

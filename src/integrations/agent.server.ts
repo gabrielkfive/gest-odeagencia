@@ -118,7 +118,8 @@ async function setSugestao(db: any, phone: string, sugestao: string) {
 
 export async function addNotificacao(db: any, n: { tipo: string; texto: string; phone?: string; nome?: string; tarefaId?: string }) {
   const key = "wfa-notificacoes";
-  const arr = Array.isArray(await readBlock(db, key, [])) ? await readBlock(db, key, []) : [];
+  const raw = await readBlock(db, key, []);
+  const arr = Array.isArray(raw) ? raw : [];
   arr.unshift({ id: "n" + Date.now() + Math.floor(Math.random() * 999), ts: Date.now(), lido: false, ...n });
   await db.from("workflowark_state").upsert({ key, data: arr.slice(0, 200) });
 }
