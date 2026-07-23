@@ -357,17 +357,33 @@ export const Route = createFileRoute("/api/workflowark/state")({
           return json({ ok: true, token });
         }
 
-        // Portal do cliente: gera um link público PERSISTENTE por cliente. O portal mostra
-        // dados AO VIVO (plano de conteúdo atual) e deixa o cliente abrir demandas.
+        // Portal do cliente: gera link PERSISTENTE e idempotente por cliente.
+        // Um clienteId sempre resulta no mesmo token — reusar evita tokens órfãos.
         if (action === "create-portal") {
           const cliente = String(body.cliente ?? "").trim();
           const planKey = String(body.planKey ?? "").trim();
           if (!cliente) return json({ error: "Diga o cliente." }, { status: 400 });
-          const token = ((globalThis.crypto?.randomUUID?.() ?? (Date.now() + "" + Math.random())) + "").replace(/[^a-zA-Z0-9]/g, "");
-          const data = { cliente, planKey, agency: "ARK Content", createdAt: new Date().toISOString() };
-          const { error } = await ctx.db
-            .from("workflowark_state")
-            .upsert({ key: `wfa-portal-${token}`, data, updated_by: ctx.user.id });
+          const clienteId = String(body.planKey ?? cliente).toLowerCase().replace(/[^a-z0-9]/g, "");
+
+          // Índice de tokens por clienteId (chave fixa no Supabase)
+          const tokensRaw = await (async () => {
+            const { data } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-portal-tokens").maybeSingle();
+            return data?.data ?? {};
+          })();
+          const tokens: Record<string, string> = typeof tokensRaw === "object" && tokensRaw ? tokensRaw : {};
+
+          let token = tokens[clienteId];
+          if (!token) {
+            token = ((globalThis.crypto?.randomUUID?.() ?? (Date.now() + "" + Math.random())) + "").replace(/[^a-zA-Z0-9]/g, "");
+            tokens[clienteId] = token;
+            const { error: idxErr } = await ctx.db.from("workflowark_state")
+              .upsert({ key: "wfa-portal-tokens", data: tokens, updated_by: ctx.user.id });
+            if (idxErr) return json({ error: "Não foi possível gerar o portal." }, { status: 500 });
+          }
+
+          const portalData = { cliente, planKey, agency: "ARK Content", createdAt: new Date().toISOString() };
+          const { error } = await ctx.db.from("workflowark_state")
+            .upsert({ key: `wfa-portal-${token}`, data: portalData, updated_by: ctx.user.id });
           if (error) return json({ error: "Não foi possível gerar o portal." }, { status: 500 });
           return json({ ok: true, token });
         }
