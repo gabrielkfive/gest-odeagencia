@@ -18,8 +18,14 @@ export function Boot({ done }: { done: () => void }) {
   const [line, setLine] = useState(0);
   useEffect(() => {
     if (reduced) { done(); return; }
-    const iv = setInterval(() => setLine((l) => l + 1), 380);
-    const end = setTimeout(done, 380 * BOOT_LINES.length + 420);
+    // Pula a boot se já foi exibida hoje — só aparece uma vez por dia
+    const hoje = new Date().toLocaleDateString("pt-BR");
+    try {
+      if (localStorage.getItem("wfa-boot-date") === hoje) { done(); return; }
+      localStorage.setItem("wfa-boot-date", hoje);
+    } catch { /* sem localStorage: continua normalmente */ }
+    const iv = setInterval(() => setLine((l) => l + 1), 180);
+    const end = setTimeout(done, 800);
     return () => { clearInterval(iv); clearTimeout(end); };
   }, [reduced, done]);
   return (
@@ -94,19 +100,24 @@ export function Donut({ pct }: { pct: number }) {
 export function StatusLine({ a, i }: { a: Agent; i: number }) {
   const [fase, setFase] = useState(0);
   useEffect(() => {
+    if (a.status !== "online") return;
     const iv = setInterval(() => setFase((f) => f + 1), 3600 + i * 340);
     return () => clearInterval(iv);
-  }, [i]);
+  }, [i, a.status]);
   const cor = a.status === "online" ? "var(--ok-ink)" : "var(--dim)";
   return (
     <div className="ag-st">
       <span className="dot" style={{ background: cor, color: cor }} />
-      <AnimatePresence mode="wait">
-        <motion.span key={fase} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -8, opacity: 0 }} transition={spring}>
-          {a.fazendo[fase % a.fazendo.length]}
-        </motion.span>
-      </AnimatePresence>
+      {a.status !== "online" ? (
+        <span>Em espera</span>
+      ) : (
+        <AnimatePresence mode="wait">
+          <motion.span key={fase} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -8, opacity: 0 }} transition={spring}>
+            {a.fazendo[fase % a.fazendo.length]}
+          </motion.span>
+        </AnimatePresence>
+      )}
     </div>
   );
 }

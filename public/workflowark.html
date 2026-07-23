@@ -1597,12 +1597,17 @@ function wfaSetTheme(t){
         </div>
       </div>
 
-      <div class="navitem" data-nav="tarefas">
+      <div class="navitem" data-toggle="atividades-menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         <span>Atividades</span>
-        <span class="badge" id="tarefas-badge">0</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <div class="subnav" id="atividades-menu" style="display:none">
+      <div class="subnav" id="atividades-menu">
+        <div class="subitem" data-nav="tarefas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Tarefas</span>
+          <span class="badge" id="tarefas-badge">0</span>
+        </div>
         <div class="subitem" data-nav="demandas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           <span>Demandas</span>
