@@ -152,11 +152,6 @@ export function AgentExpanded({ a, close }: { a: Agent; close: () => void }) {
     window.addEventListener("keydown", esc);
     return () => window.removeEventListener("keydown", esc);
   }, [close]);
-  const hist = [
-    { t: "09:40", x: "Última execução concluída sem erros." },
-    { t: "09:12", x: "Contexto do cliente carregado da memória." },
-    { t: "08:55", x: "Agente acordado pelo sistema." },
-  ];
   return (
     <>
       <motion.div className="veil" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -175,15 +170,6 @@ export function AgentExpanded({ a, close }: { a: Agent; close: () => void }) {
         </div>
         <motion.p className="desc" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           transition={{ ...spring, delay: 0.1 }}>{a.desc}</motion.p>
-        <motion.div className="hist" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          transition={{ delay: 0.18 }}>
-          {hist.map((h, i) => (
-            <motion.div className="h-it" key={i} initial={{ x: 14, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }} transition={{ ...spring, delay: 0.16 + i * 0.06 }}>
-              <span className="h-t">{h.t}</span><span>{h.x}</span>
-            </motion.div>
-          ))}
-        </motion.div>
       </motion.div>
       </div>
     </>
