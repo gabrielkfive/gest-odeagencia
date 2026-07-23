@@ -1626,6 +1626,8 @@ function wfaSetTheme(t){
         <span class="badge" id="producao-badge" style="display:none">0</span>
       </div>
 
+      <hr class="nav-sep" style="margin:6px 12px 2px;border:none;border-top:1px solid var(--line);opacity:0.5">
+
       <div class="navitem" data-toggle="perf-menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
         <span>Performance</span>
@@ -2065,7 +2067,7 @@ function wfaSetTheme(t){
                   <span class="md-count">Google</span>
                 </div>
                 <div class="md-agwrap">
-                  <iframe loading="lazy" id="md-agenda-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
+                  <iframe loading="lazy" id="md-agenda-iframe" data-src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
                 </div>
               </div>
             </div>
@@ -2513,7 +2515,14 @@ function wfaSetTheme(t){
         @media(max-width:1100px){#page-jarvis .jv-shell{grid-template-columns:1fr;height:auto}#page-jarvis .jv-chatcol{height:56vh}}
         @media(prefers-reduced-motion:reduce){#page-jarvis .jv-orb-big{animation:none}}
         </style>
-        <div class="page-head"><div class="page-title"><h1>JARVIS</h1><p>Seu assistente executor · converse, dê comandos, rode skills e acompanhe o núcleo local.</p></div></div>
+        <div class="page-head"><div class="page-title"><h1>JARVIS</h1><p>Seu assistente executor · converse, dê comandos, rode skills e acompanhe o núcleo local.</p></div><button class="tb-btn" onclick="jarvisMemoriaToggle()" style="flex-shrink:0;font-size:12px">🧠 Memória</button></div>
+        <div id="jarvis-memoria-panel" style="display:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:#9a9aa2;text-transform:uppercase">O que o JARVIS aprendeu sobre você</span>
+            <button class="jv-neu" style="padding:4px 12px;font-size:11px;color:#ef4444;border-color:rgba(239,68,68,.3)" onclick="jarvisLimparMemoria()">Limpar tudo</button>
+          </div>
+          <div id="jarvis-memoria-lista" style="font-size:12.5px;color:#e9e7e0;line-height:1.8"></div>
+        </div>
         <div class="jv-shell">
           <section class="jv-glass jv-chatcol">
             <div id="jarvis-msgs"></div>
@@ -3164,7 +3173,7 @@ function wfaSetTheme(t){
       <div class="page" id="page-reunioes">
         <div class="page-head"><div class="page-title"><h1>Reuniões · Google Agenda</h1><p>Agenda integrada da ARK Content · todas as reuniões e compromissos em tempo real.</p></div></div>
         <div id="gcal-wrap" style="height:calc(100vh - 140px);background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden">
-          <iframe loading="lazy" id="gcal-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo" style="border:0;width:100%;height:100%" frameborder="0" scrolling="no"></iframe>
+          <iframe loading="lazy" id="gcal-iframe" data-src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo" style="border:0;width:100%;height:100%" frameborder="0" scrolling="no"></iframe>
         </div>
       </div>
 
@@ -3888,7 +3897,7 @@ function iniciarAutoSync(){
       <!-- =================== COBRANÇAS =================== -->
       <div class="page" id="page-cobranca">
         <div class="page-head">
-          <div class="page-title"><h1>Cobranças do mês</h1><p id="cob-sub">Mensalidades ARK · vencimento puxado para o último dia útil · clique em "Abrir no WhatsApp" para enviar</p></div>
+          <div class="page-title"><h1>Cobranças do mês</h1><p id="cob-sub">Vencimento: dia 10 do mês (sexta anterior se cair no fim de semana) · clique em "Abrir no WhatsApp" para enviar</p></div>
           <div style="display:flex;gap:6px;align-items:center">
             <span id="cob-resumo" style="font-size:12px;color:var(--mute)"></span>
           </div>
@@ -5839,6 +5848,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='jarvis'){try{jarvisPageEnter();}catch(e){} try{jvHudInit();}catch(e){console.warn('jvhud',e);}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
+    if(p==='reunioes'){try{const g=document.getElementById('gcal-iframe');if(g&&!g.getAttribute('src')){const u=g.dataset.pendingSrc||g.dataset.src||'';if(u)g.setAttribute('src',u);}if(typeof applyCalendars==='function')applyCalendars();}catch(e){}}
     if(p==='whatsapp'&&WFA_WPP_OFF){try{document.querySelector('[data-nav="painel"]').click();}catch(e){}return;}
     if(p==='whatsapp'){try{wfaCarregarWhatsapp();}catch(e){} try{const _td=hojeSP();if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
@@ -6552,8 +6562,8 @@ function cobMensagem(c,data,venc){
   return m;
 }
 
-function renderCobranca(){
-  try{renderAcrec();}catch(e){console.warn('acrec',e);}
+function renderCobranca(skipAcrec){
+  if(!skipAcrec)try{renderAcrec();}catch(e){console.warn('acrec',e);}
   const wrap=document.getElementById('cob-wrap');if(!wrap)return;
   const venc=cobVencimento();
   const mesKey=cobMesKey();
@@ -6622,7 +6632,7 @@ function setCob(id,field,value){
   state.cobranca[id][field]=value;
   saveCobranca();
   clearTimeout(_cobTimer);
-  _cobTimer=setTimeout(()=>renderCobranca(),400);
+  _cobTimer=setTimeout(()=>renderCobranca(true),400);
 }
 function cobToggle(id,on,mes){
   if(!state.cobranca[id])state.cobranca[id]=Object.assign({resp:COB_RESP_DEFAULT[id]||'',whatsapp:'',pix:'',feitas:0},state.cobranca[id]||{});
@@ -8631,9 +8641,10 @@ function applyCalendars(){
   const src=currentUserCalSrc();
   const md=document.getElementById('md-agenda-iframe');
   const pg=document.getElementById('gcal-iframe');
-  if(!src)return; // sem agenda definida: mantém o que estiver
-  if(md){const u=calEmbedUrl(src,true);if(md.getAttribute('src')!==u)md.setAttribute('src',u);}
-  if(pg){const u=calEmbedUrl(src,false);if(pg.getAttribute('src')!==u)pg.setAttribute('src',u);}
+  // md-agenda (widget Meu Dia): usa url do usuário ou data-src como fallback — nunca fica vazio
+  if(md){const u=src?calEmbedUrl(src,true):(md.dataset.src||'');if(u&&md.getAttribute('src')!==u)md.setAttribute('src',u);}
+  // gcal (página Reuniões): lazy — só injeta se a página estiver ativa; guarda pendente caso contrário
+  if(pg){const u=src?calEmbedUrl(src,false):(pg.dataset.src||'');if(u&&pg.getAttribute('src')!==u){if(document.getElementById('page-reunioes')?.classList.contains('active'))pg.setAttribute('src',u);else pg.dataset.pendingSrc=u;}}
 }
 function renderGcal(){applyCalendars();}
 /* ============ WHATSAPP (Z-API) ============ */
