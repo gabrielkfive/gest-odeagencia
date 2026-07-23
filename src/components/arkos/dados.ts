@@ -52,7 +52,6 @@ export const TAREFAS_DEMO: TarefaLinha[] = [
 ];
 
 export const TAREFAS_DEMO_OPS: TarefaLinha[] = [
-  { id: "dmo1", tt: "Enviar relatório de junho da Babbo", cc: "Babbo · Relatórios", due: "atrasada" },
   { id: "dmo2", tt: "Cobrar aprovação do calendário do Cachu", cc: "Cachu · Social Media", due: "atrasada" },
   { id: "dmo3", tt: "Ajustar orçamento de tráfego da Fercon", cc: "Fercon · Tráfego", due: "atrasada" },
   ...TAREFAS_DEMO,
@@ -77,11 +76,17 @@ export const CLIENTES_BASE: ClienteInfo[] = [
   { id: "dom", nm: "Dom Baruka", tipo: "Alpha", plano: "Alpha Senior", status: "r", meta: "URGENTE · cardápio + iFood + bebidas" },
   { id: "stray", nm: "Stray House", tipo: "Alpha", plano: "Alpha Senior", status: "y", meta: "Recuperação · ROAS 5,08 · subir criativos" },
   { id: "cachu", nm: "Cachu Restaurante", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Ajustada · acompanhando ROAS" },
-  { id: "babbo", nm: "Babbo Giovanni", tipo: "Alpha", plano: "Alpha Senior", status: "y", meta: "Em ajuste · tarefas on-demand" },
   { id: "brisa", nm: "Brisa Doce Café", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Super saudável · onboarding/inauguração" },
   { id: "attra", nm: "Attraversiamo Café", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Bombando · 1 captação/mês" },
+  { id: "valhalla", nm: "Valhalla", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Squad Alpha · Andradas-MG" },
+  { id: "lapatrick", nm: "La Pizza Di Patrick", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Squad Alpha" },
+  { id: "laemcasa", nm: "La em Casa", tipo: "Alpha", plano: "Alpha Senior", status: "gr", meta: "Squad Alpha" },
   { id: "4bburger", nm: "4B Burger", tipo: "ARK", plano: "Onboarding", status: "gr", meta: "Em onboarding" },
   { id: "saborlenha", nm: "Pizzaria Sabor e Lenha", tipo: "ARK", plano: "Onboarding", status: "gr", meta: "Em onboarding" },
+  { id: "bulldogs", nm: "Bulldogs", tipo: "ARK", plano: "Onboarding", status: "gr", meta: "Em onboarding" },
+  { id: "kopi", nm: "Kopi Coffee", tipo: "ARK", plano: "Onboarding", status: "gr", meta: "Em onboarding · jul/2026" },
+  { id: "lumiere", nm: "Cafe Lumiere", tipo: "ARK", plano: "Onboarding", status: "gr", meta: "Em onboarding · jul/2026" },
+  { id: "dgust", nm: "Pizzaria DGust", tipo: "ARK", plano: "Onboarding", status: "gr", meta: "Em onboarding · jul/2026" },
 ];
 
 export const CLIENTES_NM: Record<string, string> =
