@@ -552,6 +552,8 @@ table.t tr.high{background:var(--yel-bg)}
   .topbar.search-active .tb-search{display:flex;position:fixed;top:0;left:0;right:0;z-index:1100;border-radius:0;border:none;border-bottom:1px solid var(--line);background:var(--surface);padding:10px 14px 10px 38px;width:100%;box-sizing:border-box}
   .topbar.search-active .tb-search input{font-size:14px}
   .topbar.search-active #search-toggle-mobile svg{color:var(--txt)}
+  #search-close-mobile{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;font-size:18px;line-height:1;cursor:pointer;color:var(--mute);padding:4px 6px;border-radius:6px}
+  .topbar.search-active #search-close-mobile{display:block}
   .tb-pill{display:none}
   .tb-right{gap:6px}
   .tb-btn{padding:7px 9px}
@@ -1790,7 +1792,7 @@ function wfaSetTheme(t){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
       <div class="tb-right">
-        <div class="tb-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="gsearch" placeholder="Buscar cliente, tarefa, processo, página…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onkeydown="if(event.key==='Escape'){gsearchClose();document.querySelector('.topbar')?.classList.remove('search-active');}"><div id="gsearch-res"></div></div>
+        <div class="tb-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="gsearch" placeholder="Buscar cliente, tarefa, processo, página…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onkeydown="if(event.key==='Escape'){gsearchClose();document.querySelector('.topbar')?.classList.remove('search-active');}"><div id="gsearch-res"></div><button id="search-close-mobile" aria-label="Fechar busca" onclick="closeMobileSearch()">✕</button></div>
         <button class="tb-btn tb-ic" onclick="wfaAparencia(true)" title="Personalizar aparência (tema claro ou escuro)" style="padding:6px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
         </button>
@@ -3901,7 +3903,7 @@ function iniciarAutoSync(){
         <div class="page-head">
           <div class="page-title"><h1>Acerto do mês</h1><p>Quem você precisa pagar e como · copie o Pix e marque como pago · <strong>visível só para você (admin)</strong></p></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button class="tb-btn" onclick="acertoSeedFromFin(true)">⤵ Trazer do Financeiro (dia 10)</button>
+            <button id="btn-acerto-seed" class="tb-btn" onclick="acertoSeedFromFin(true)">⤵ Trazer do Financeiro (dia 10)</button>
             <span id="acerto-resumo" style="font-size:12px;color:var(--mute)"></span>
           </div>
         </div>
@@ -5783,11 +5785,14 @@ function saveRegua(){localStorage.setItem('wfa-regua',JSON.stringify(state.regua
 function saveGcal(){localStorage.setItem('wfa-gcal',JSON.stringify(state.gcal||{}));}
 function saveCobranca(){localStorage.setItem('wfa-cobranca',JSON.stringify(state.cobranca));if(typeof cloudSave==='function')cloudSave('wfa-cobranca',state.cobranca);}
 
-function toast(msg){
+function toast(msg,dur){
   document.getElementById('toast-msg').textContent=msg;
   const t=document.getElementById('toast');
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2400);
+  if(t._toastTimer)clearTimeout(t._toastTimer);
+  // Erros (prefixo ⚠ ou "Erro ao sincronizar") ficam 6s; info normal fica 2.4s
+  const ms=dur!==undefined?dur:(/^⚠|Erro ao sincronizar/.test(msg)?6000:2400);
+  t._toastTimer=setTimeout(()=>t.classList.remove('show'),ms);
 }
 
 /* ============ MENU MOBILE (drawer) ============ */
@@ -6022,6 +6027,7 @@ if('speechSynthesis'in window){window.speechSynthesis.onvoiceschanged=()=>{_arkV
   #gsearch-res .gs-empty{padding:14px;color:var(--mute);font-size:12.5px;text-align:center}
 `;document.head.appendChild(css);})();
 function gsearchClose(){const r=document.getElementById('gsearch-res');if(r)r.classList.remove('open');}
+function closeMobileSearch(){document.querySelector('.topbar')?.classList.remove('search-active');gsearchClose();}
 document.addEventListener('click',(e)=>{const s=document.querySelector('.tb-search');if(s&&!s.contains(e.target))gsearchClose();});
 function gsGo(kind,arg){
   gsearchClose();const gi=document.getElementById('gsearch');if(gi)gi.value='';
@@ -6481,6 +6487,7 @@ function relatorioImprimir(){
     .rel-item{display:flex;gap:9px;font-size:13px;background:#faf9f6;border:1px solid #e6e6e6;border-radius:9px;padding:8px 11px}
     .rel-item .ok{color:#19b36b;font-weight:800}.rel-empty{font-size:12.5px;color:#888}
     .rel-foot{margin-top:24px;font-size:10.5px;color:#aaa;text-align:center}
+    @media print{.rel-kpis{grid-template-columns:repeat(2,1fr)}}
   </style></head><body>${html}<div class="rel-foot">Gerado pelo WorkFlowArk · ARK Content</div></body></html>`);
   w.document.close();
   setTimeout(()=>{try{w.focus();w.print();}catch(e){}},350);
@@ -6875,8 +6882,14 @@ function acertoSeedFromFin(force){
     state.acerto[id]=Object.assign({custom:true,fixo:true,cat:acertoClassify(x.nome),pix:'',obs:'',pagoMes:''},prev,{nome:x.nome,valor:String(x.valor||''),dia:'10'});
     n++;
   });
-  if(n){state.acerto.__seeded=true;saveAcerto();renderAcerto();if(force)toast(n+' pagamentos trazidos do Financeiro (dia 10) ✓');}
-  else if(force)toast('Nada para trazer · preencha a planilha primeiro');
+  if(n){
+    state.acerto.__seeded=true;saveAcerto();renderAcerto();
+    if(force){
+      toast(n+' pagamentos trazidos do Financeiro (dia 10) ✓');
+      const btn=document.getElementById('btn-acerto-seed');
+      if(btn){btn.disabled=true;btn.textContent='Importado ✓';setTimeout(()=>{btn.disabled=false;btn.textContent='⤵ Trazer do Financeiro (dia 10)';},3000);}
+    }
+  } else if(force)toast('Nada para trazer · preencha a planilha primeiro');
 }
 
 /* ============ JORNADA SPRINTS ============ */
@@ -8017,7 +8030,7 @@ function renderTaskLista(){
     const prio=t.prio==='alta'?'🔴 Alta':t.prio==='baixa'?'🟢 Baixa':'🟡 Média';
     return `<tr class="tl-row" onclick="openTaskDetail('${t.id}')"><td class="tl-tt">${escapeHtml(t.title)}</td><td>${c?escapeHtml(c.nm):'—'}</td><td>${escapeHtml(t.resp||'—')}</td><td class="${late?'tl-late':''}">${late?'⚠ ':''}${dataFmt}</td><td>${prio}</td><td><span class="tl-pill tl-st-${t.status}">${taskStatusLabel(t.status)}</span></td></tr>`;
   }).join('');
-  wfaSetHTML(document.getElementById('task-lista'),`<table class="tl-table"><thead><tr><th>Tarefa</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:20px">Nenhuma tarefa.</td></tr>'}</tbody></table>`);
+  wfaSetHTML(document.getElementById('task-lista'),`<table class="tl-table"><thead><tr><th>Tarefa</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:24px">Nenhuma tarefa encontrada — ajuste os filtros ou crie uma nova na aba <b>Kanban</b>.</td></tr>'}</tbody></table>`);
 }
 /* Calendário de tarefas: sempre abre no MÊS ATUAL (antes ancorava na tarefa
    mais antiga e ficava preso em meses passados). WFA_TCAL_OFF navega entre meses. */
@@ -8064,7 +8077,7 @@ function renderTaskPessoas(){
     const lista=arr.slice().sort((a,b)=>((a.data||'9999')<(b.data||'9999')?-1:1)).slice(0,6).map(t=>{const late=t.data&&t.data<today&&t.status!=='concluido';const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';return `<div class="tp-task ${late?'late':''}" onclick="openTaskDetail('${t.id}')"><span>${t.status==='concluido'?'✅ ':''}${escapeHtml(t.title.slice(0,38))}</span><span class="d">${late?'⚠ ':''}${dataFmt}</span></div>`;}).join('');
     return `<div class="tp-card"><div class="tp-head"><div class="tp-av">${initials(nm)}</div><div><div class="tp-nm">${escapeHtml(nm)}</div><div class="tp-sub">${ativos.length} ativas${atras?` · <span style="color:var(--red,#e0364f);font-weight:700">${atras} atrasada${atras>1?'s':''}</span>`:''}</div></div></div><div class="tp-bar">${seg('backlog','#bbb')}${seg('andamento','#ffd400')}${seg('aprovacao','#4a90ff')}${seg('concluido','#19b36b')}</div>${lista||'<div class="tp-sub">Sem tarefas</div>'}${arr.length>6?`<div class="tp-sub" style="margin-top:6px">+${arr.length-6} outras</div>`:''}</div>`;
   }).join('');
-  wfaSetHTML(document.getElementById('task-pessoas'),`<div class="tp-grid">${cards||'<div class="tp-sub">Nenhuma tarefa.</div>'}</div>`);
+  wfaSetHTML(document.getElementById('task-pessoas'),`<div class="tp-grid">${cards||'<div class="tp-sub" style="grid-column:1/-1;padding:28px;text-align:center">Nenhuma tarefa atribuída — crie no Kanban e defina um responsável para aparecer aqui.</div>'}</div>`);
 }
 function renderTaskDashboard(){
   const today=hojeSP();
@@ -11098,7 +11111,7 @@ function delDem(id){if(!confirm('Excluir demanda?'))return;saveDemandas(loadDema
 function renderDemandas(){
   const el=document.getElementById('dm-list');if(!el)return;
   const arr=loadDemandas();
-  if(!arr.length){el.innerHTML='<p class="muted" style="grid-column:1/-1;font-size:12px">Nenhuma demanda ainda.</p>';return;}
+  if(!arr.length){el.innerHTML='<p class="muted" style="grid-column:1/-1;font-size:12px">Nenhuma demanda ainda — novas chegam pelo Portal do cliente ou crie uma com o formulário acima.</p>';return;}
   el.innerHTML=arr.map(d=>`<div class="card" style="padding:11px${d.origem==='portal'?';border-left:3px solid var(--yel,#ffd400)':''}"><div style="display:flex;justify-content:space-between;align-items:start;gap:6px"><strong style="font-size:13px">${escapeHtml(d.titulo||'(sem título)')}</strong><div style="display:flex;gap:5px;align-items:center;flex-shrink:0">${d.origem==='portal'?'<span class="tag" style="background:#fff8e0;color:#b36200;border-color:#f0d68a">🌐 Portal</span>':''}<span class="tag ${d.status==='resolvida'?'yel':''}">${d.status}</span></div></div>${d.cliente?`<div style="font-size:11px;color:var(--mute);margin:2px 0 0">${escapeHtml(d.cliente)}</div>`:''}<div class="muted" style="font-size:10px;margin:4px 0">${new Date(d.criadaEm).toLocaleString('pt-BR')}</div>${d.mensagem?`<p style="font-size:12px;white-space:pre-wrap;margin-bottom:8px">${escapeHtml(d.mensagem)}</p>`:''}<div style="display:flex;gap:6px">${d.status==='resolvida'?`<button class="icobtn" onclick="setDemStatus('${d.id}','aberta')">Reabrir</button>`:`<button class="icobtn" onclick="setDemStatus('${d.id}','resolvida')">Resolver</button>`}<button class="icobtn" style="color:var(--red)" onclick="delDem('${d.id}')">Excluir</button></div></div>`).join('');
 }
 
