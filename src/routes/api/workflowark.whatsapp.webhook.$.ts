@@ -1,18 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { processWaWebhook } from "@/integrations/wa-webhook.server";
-import { zapiEnv } from "@/integrations/zapi.server";
+import { processWaWebhook, webhookAuthorized } from "@/integrations/wa-webhook.server";
 
 // Rota curinga: a Evolution v2.2.x posta cada evento num sub-caminho
 // (/webhook/qrcode-updated, /webhook/connection-update, /webhook/messages-upsert).
 // Esta rota captura qualquer sub-caminho e usa a MESMA lógica da rota base.
-function webhookAuthorized(request: Request): boolean {
-  const secret = zapiEnv("WEBHOOK_SECRET");
-  if (!secret) return true;
-  const header = request.headers.get("x-webhook-token") || request.headers.get("x-api-key") || "";
-  if (header === secret) return true;
-  const url = new URL(request.url);
-  return url.searchParams.get("token") === secret;
-}
 
 export const Route = createFileRoute("/api/workflowark/whatsapp/webhook/$")({
   server: {

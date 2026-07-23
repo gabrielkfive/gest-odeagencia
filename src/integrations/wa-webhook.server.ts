@@ -4,6 +4,17 @@
 // (ex.: /webhook/qrcode-updated, /webhook/connection-update, /webhook/messages-upsert).
 // O nome do evento também vem no corpo (body.event), então a lógica é a mesma.
 
+import { zapiEnv } from "@/integrations/zapi.server";
+
+export function webhookAuthorized(request: Request): boolean {
+  const secret = zapiEnv("WEBHOOK_SECRET");
+  if (!secret) return true;
+  const header = request.headers.get("x-webhook-token") || request.headers.get("x-api-key") || "";
+  if (header === secret) return true;
+  const url = new URL(request.url);
+  return url.searchParams.get("token") === secret;
+}
+
 // Detecta se o payload vem do Bridge (whatsmeow) ou da Evolution API.
 // Bridge: tem "sender" e "chatJID" mas NÃO tem "event" nem "data.key".
 function isBridgeWebhook(body: any): boolean {

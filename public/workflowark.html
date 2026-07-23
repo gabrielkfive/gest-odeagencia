@@ -547,6 +547,11 @@ table.t tr.high{background:var(--yel-bg)}
   .mob-menu{display:inline-flex}
   .topbar{padding:0 12px;gap:8px}
   .tb-search{display:none}
+  #search-toggle-mobile{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:none;background:transparent;cursor:pointer;color:var(--mute);border-radius:6px;flex-shrink:0}
+  #search-toggle-mobile:active{background:var(--bg)}
+  .topbar.search-active .tb-search{display:flex;position:fixed;top:0;left:0;right:0;z-index:1100;border-radius:0;border:none;border-bottom:1px solid var(--line);background:var(--surface);padding:10px 14px 10px 38px;width:100%;box-sizing:border-box}
+  .topbar.search-active .tb-search input{font-size:14px}
+  .topbar.search-active #search-toggle-mobile svg{color:var(--txt)}
   .tb-pill{display:none}
   .tb-right{gap:6px}
   .tb-btn{padding:7px 9px}
@@ -1776,8 +1781,11 @@ function wfaSetTheme(t){
       <div class="crumbs" id="crumbs">
         <span>WorkFlowArk</span><span class="sep">/</span><span class="here">Meu Dia</span>
       </div>
+      <button id="search-toggle-mobile" aria-label="Buscar" onclick="(function(){const tb=document.querySelector('.topbar');tb.classList.toggle('search-active');if(tb.classList.contains('search-active')){const i=document.getElementById('gsearch');if(i){i.focus();}}})()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
       <div class="tb-right">
-        <div class="tb-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="gsearch" placeholder="Buscar cliente, tarefa, processo, página…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onkeydown="if(event.key==='Escape')gsearchClose()"><div id="gsearch-res"></div></div>
+        <div class="tb-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="gsearch" placeholder="Buscar cliente, tarefa, processo, página…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onkeydown="if(event.key==='Escape'){gsearchClose();document.querySelector('.topbar')?.classList.remove('search-active');}"><div id="gsearch-res"></div></div>
         <button class="tb-btn tb-ic" onclick="wfaAparencia(true)" title="Personalizar aparência (tema claro ou escuro)" style="padding:6px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
         </button>
@@ -5415,9 +5423,17 @@ const CLIENTES_BASE = [
   {id:'cachu',nm:'Cachu Restaurante',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Ajustada ✓ · acompanhando ROAS',extra:'Food porn qui-dom'},
   {id:'brisa',nm:'Brisa Doce Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · onboarding/inauguração',extra:'Aderir método'},
   {id:'attra',nm:'Attraversiamo Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',cap:1,meta:'Super saudável ✓ · bombando · 1 captação/mês',extra:'📹 1 captação/mês'},
+  // Squad Alpha (expansão Andradas-MG e região)
+  {id:'valhalla',nm:'Valhalla',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Squad Alpha · Andradas-MG',extra:'Alpha',custom:true},
+  {id:'lapatrick',nm:'La Pizza Di Patrick',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Squad Alpha',extra:'Alpha',custom:true},
+  {id:'laemcasa',nm:'La em Casa',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Squad Alpha',extra:'Alpha',custom:true},
   // Em onboarding
   {id:'4bburger',nm:'4B Burguers',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding',extra:'Onboarding em andamento',defaultSprint:0},
   {id:'saborlenha',nm:'Pizzaria Sabor e Lenha',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · último cliente',extra:'Onboarding em andamento',defaultSprint:0},
+  {id:'bulldogs',nm:'Bulldogs',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
+  {id:'kopi',nm:'Kopi Coffee',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · jul/2026',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
+  {id:'lumiere',nm:'Cafe Lumiere',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · jul/2026',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
+  {id:'dgust',nm:'Pizzaria DGust',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · jul/2026',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
   // (Lunna's, Shopping dos Uniformes, Bellato e Bella Vita removidos do sistema a pedido do Gabriel)
   // (Babbo Giovanni: churn em 16/07/2026)
 ];
@@ -8324,7 +8340,10 @@ function updateBadges(){
   const today=hojeSP();
   const atrasadas=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
   updateCrmBadge();
-  document.getElementById('tarefas-badge').textContent=state.tarefas.filter(t=>t.status!=='concluido').length;
+  const urgentes=state.tarefas.filter(t=>t.status!=='concluido'&&t.data&&t.data<=today).length;
+  const badge=document.getElementById('tarefas-badge');
+  badge.textContent=urgentes;
+  badge.style.display=urgentes?'':'none';
 }
 
 /* ============ INIT ============ */
