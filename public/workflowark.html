@@ -2421,7 +2421,7 @@ function wfaSetTheme(t){
       <div class="page" id="page-lista-clientes">
         <div class="page-head">
           <div class="page-title"><h1>Lista de Clientes</h1><p>Carteira consolidada · ARK direta + Squad Alpha</p></div>
-          <div style="display:flex;gap:6px"><button class="icobtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtrar</button><button class="tb-btn dk" onclick="cliNovoOpen()">+ Novo cliente</button></div>
+          <div style="display:flex;gap:6px"><button class="tb-btn dk" onclick="cliNovoOpen()">+ Novo cliente</button></div>
         </div>
 
         <div class="cli-kpis" id="cli-kpis"></div>
@@ -3516,6 +3516,15 @@ function applyCloudState(remote){
     // (reset de brand, checklist etc.), apaga o valor local. Sem isto, a deleção ressuscitava.
     // Protege se o usuário acabou de recriar a chave (dirty/janela recente).
     if(value==null){ if(!wfaLocalAuth(key))WFA_LS_REMOVE(key); return; }
+    // Objeto keyed por clienteId (não-array): merge por cliente para dois membros não se sobrescreverem
+    if(key==='wfa-cliente-detalhes'){
+      let rObj=value;if(typeof rObj==='string'){try{rObj=JSON.parse(rObj);}catch(e){rObj={};}}
+      if(rObj&&typeof rObj==='object'&&!Array.isArray(rObj)){
+        let lObj={};try{lObj=JSON.parse(localStorage.getItem(key)||'{}');}catch(e){}
+        const merged=wfaLocalAuth(key)?Object.assign({},rObj,lObj):Object.assign({},lObj,rObj);
+        WFA_LS_SET(key,JSON.stringify(merged));return;
+      }
+    }
     // Listas append-heavy (server + cliente escrevem): MESCLA por id (nunca sobrescreve cego)
     if(WFA_MERGE_KEYS.includes(key)){
       let rArr=value; if(typeof rArr==='string'){try{rArr=JSON.parse(rArr);}catch(e){rArr=[];}}
@@ -8561,7 +8570,8 @@ function delCheck(i){
 }
 function delTaskFromModal(){
   const id=document.getElementById('td-id').value;
-  state.tarefas=state.tarefas.filter(x=>x.id!==id);addDeleted(id);saveTarefas();closeModal('modal-detail');toast('Excluída');
+  closeModal('modal-detail');
+  delTask(id);
 }
 
 /* Agenda e financeiro agora são iframes hardcoded — funções mantidas como stub para compatibilidade */
