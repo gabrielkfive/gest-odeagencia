@@ -312,7 +312,7 @@ export async function transcribeAudioBase64(base64: string): Promise<string> {
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     const out: any = await ai.run("@cf/openai/whisper", { audio: [...bytes] });
     return String(out?.text || "").trim();
-  } catch { return ""; }
+  } catch { return "[Áudio — não transcrito automaticamente]"; }
 }
 
 // Descreve uma imagem (base64) em 1 frase usando Claude (visão) — p/ o agente saber a relevância.
@@ -410,6 +410,6 @@ export async function transcribeAudio(audioUrl?: string): Promise<string> {
     const out: any = await ai.run("@cf/openai/whisper", { audio: bytes });
     return String(out?.text || "").trim();
   } catch {
-    return "";
+    return "[Áudio — não transcrito automaticamente]";
   }
 }

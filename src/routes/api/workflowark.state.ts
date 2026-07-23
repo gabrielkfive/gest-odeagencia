@@ -59,6 +59,8 @@ const STATE_KEYS = new Set([
   "wfa-acertosrec",
   // Pins de mapa dos clientes (latitude/longitude salvo pelo comercial no mapa).
   "wfa-cli-geo",
+  // Memória persistente do JARVIS (lida/apagada pelo painel 🧠 Memória na página JARVIS).
+  "wfa-jarvis-memory",
   // OBS: wfa-whatsapp é de propósito SERVER-OWNED (escrito pelo webhook). O cliente só LÊ;
   // não entra aqui pra um save do cliente nunca sobrescrever mensagens que chegaram no servidor.
 ]);
@@ -308,6 +310,14 @@ export const Route = createFileRoute("/api/workflowark/state")({
             if (error) return json({ error: "Não foi possível sincronizar." }, { status: 500 });
           }
           return json({ ok: true, saved: rows.length });
+        }
+
+        if (action === "load-key") {
+          const key = String(body.key ?? "");
+          if (!isStateKey(key)) return json({ error: "Bloco inválido" }, { status: 400 });
+          const { data, error } = await ctx.db.from("workflowark_state").select("data").eq("key", key).maybeSingle();
+          if (error) return json({ error: "Não foi possível carregar." }, { status: 500 });
+          return json(data?.data ?? null);
         }
 
         // AGENTE SOCIAL MEDIA: aprovar/recusar uma proposta da fila (wfa-social-fila).
