@@ -57,6 +57,8 @@ const STATE_KEYS = new Set([
   "wfa-briefings",
   // Solicitações de acerto a receber (ciclos e textos dos e-mails "SOLICITO ACERTO").
   "wfa-acertosrec",
+  // Pins de mapa dos clientes (latitude/longitude salvo pelo comercial no mapa).
+  "wfa-cli-geo",
   // OBS: wfa-whatsapp é de propósito SERVER-OWNED (escrito pelo webhook). O cliente só LÊ;
   // não entra aqui pra um save do cliente nunca sobrescrever mensagens que chegaram no servidor.
 ]);
@@ -780,8 +782,8 @@ export const Route = createFileRoute("/api/workflowark/state")({
           try {
             const r = await fetch("https://api.fish.audio/v1/tts", {
               method: "POST",
-              headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", model },
-              body: JSON.stringify({ text, reference_id: voice, format: "mp3" }),
+              headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ text, reference_id: voice, format: "mp3", model }),
             });
             if (!r.ok) { const e = await r.text().catch(() => ""); return json({ ok: false, error: "Fish Audio: " + r.status + " " + e.slice(0, 200) }, { status: 502 }); }
             const buf = await r.arrayBuffer();
@@ -841,7 +843,7 @@ PAPEL: você é o comandante operacional da agência (a mesma inteligência do C
 Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxima eficiência." / "Como desejar, Senhor. Reunindo o conselho." / "Permita-me sugerir priorizarmos a Vivenda hoje."${ctxInfo}`;
           const messages = msgs.length ? msgs.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "") })).filter((m: any) => m.content) : [{ role: "user", content: pergunta }];
           try {
-            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 400, system: sys, messages }) });
+            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01", "anthropic-beta": "prompt-caching-2024-07-31" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 400, system: [{ type: "text", text: sys, cache_control: { type: "ephemeral" } }], messages }) });
             const data: any = await r.json().catch(() => ({}));
             if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
             return json({ ok: true, reply: data?.content?.[0]?.text || "(sem resposta)" });
@@ -887,7 +889,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
             `\n\nCONTEXTO AGORA: ${JSON.stringify(ctx2).slice(0, 3500)}` +
             (memoria.length ? `\n\nO QUE VOCÊ JÁ APRENDEU SOBRE O GABRIEL: ${memoria.join("; ")}` : "");
           try {
-            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 700, system: sys, tools, messages: msgs.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "") })).filter((m: any) => m.content) }) });
+            const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01", "anthropic-beta": "prompt-caching-2024-07-31" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 700, system: [{ type: "text", text: sys, cache_control: { type: "ephemeral" } }], tools, messages: msgs.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "") })).filter((m: any) => m.content) }) });
             const d: any = await r.json().catch(() => ({}));
             if (!r.ok) return json({ error: d?.error?.message || "Falha na IA" }, { status: 502 });
             const blocks: any[] = Array.isArray(d?.content) ? d.content : [];
