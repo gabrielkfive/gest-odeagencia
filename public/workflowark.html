@@ -1837,7 +1837,7 @@ function wfaSetTheme(t){
         .md-person .pblock{font-size:10px;color:#d4d0c4;margin-top:6px;line-height:1.4;border-top:1px solid #2a2a2a;padding-top:6px}
         .md-person .pblock .x{color:var(--yel)}
       </style>
-      <div class="page" id="page-dashboard">
+      <div class="page active" id="page-dashboard">
         <div class="page-head">
           <div class="page-title">
             <h1 id="md-greet">Meu Dia</h1>
@@ -2075,7 +2075,7 @@ function wfaSetTheme(t){
       </div>
 
       <!-- =================== MEU PAINEL (widgets personalizáveis) =================== -->
-      <div class="page active" id="page-painel">
+      <div class="page" id="page-painel">
         <div class="page-head">
           <div class="page-title">
             <h1>Meu Painel</h1>
@@ -8364,8 +8364,8 @@ function restoreLastPage(){
   if(WFA_PAGE_RESTORED)return;
   try{
     const _lp=localStorage.getItem('wfa-current-page');
-    // Abertura nova (sem aba salva) OU já estava no painel → home = Meu Painel (já ativo no HTML).
-    if(!_lp || _lp==='painel'){ WFA_PAGE_RESTORED=true; return; }
+    // Abertura nova (sem aba salva) OU já estava no dashboard → home = Meu Dia (já ativo no HTML).
+    if(!_lp || _lp==='dashboard'){ WFA_PAGE_RESTORED=true; return; }
     // Recarregou trabalhando em outra aba → volta pra onde estava (não força o painel).
     const _el=document.querySelector('[data-nav="'+_lp+'"]');
     if(_el && _el.style.display!=='none'){ _el.click(); WFA_PAGE_RESTORED=true; }
