@@ -111,6 +111,15 @@ function AuthPage() {
 
   const submit = () => (mode === "signin" ? signIn() : signUp());
 
+  const forgotPassword = async () => {
+    if (!email.trim()) { setErr("Digite seu e-mail acima para receber o link de recuperação."); return; }
+    setLoading(true); setErr(null); setOk(null);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+    setLoading(false);
+    if (error) setErr("Não foi possível enviar o e-mail. Tente novamente.");
+    else setOk("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
+  };
+
   return (
     <div className="ax-wrap">
       <style>{CSS}</style>
@@ -194,6 +203,12 @@ function AuthPage() {
               {loading ? "Aguarde…" : mode === "signin" ? "Entrar" : "Criar conta"}
             </button>
 
+            {mode === "signin" && (
+              <button type="button" className="ax-forgot" onClick={forgotPassword} disabled={loading}>
+                Esqueci minha senha
+              </button>
+            )}
+
             <div className="ax-or"><span>ou</span></div>
 
             <button className="ax-btn ghost" onClick={signInGoogle} disabled={loading}>
@@ -249,6 +264,9 @@ const CSS = `
 .ax-btn.ghost{background:#fff;color:#0a0a0a;border:1px solid #e2e0d8}
 .ax-or{display:flex;align-items:center;gap:10px;color:#a3a3a3;font-size:11px;margin:2px 0}
 .ax-or::before,.ax-or::after{content:"";flex:1;height:1px;background:#e8e6e0}
+.ax-forgot{background:none;border:none;color:#737373;font-size:12px;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline;text-underline-offset:2px;align-self:center;margin-top:-4px}
+.ax-forgot:hover{color:#0a0a0a}
+.ax-forgot:disabled{opacity:.5;cursor:default}
 .ax-foot{margin-top:16px;font-size:10.5px;color:#a3a3a3;text-align:center;line-height:1.45}
 @media(max-width:860px){
   .ax-wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr}
