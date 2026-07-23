@@ -27,9 +27,20 @@ export const Route = createFileRoute("/api/workflowark/portal")({
         const db = await getDb();
         const portal = await readState(db, portalKey(token));
         if (!portal?.cliente) return json({ error: "Portal não encontrado." }, { status: 404 });
+
+        // Bloqueia acesso se o cliente está em churn
+        const customClients: any[] = (await readState(db, "wfa-clientes-custom")) || [];
+        const clienteNorm = String(portal.cliente).toLowerCase();
+        const clienteCustom = customClients.find((c: any) =>
+          String(c.nm || "").toLowerCase() === clienteNorm || String(c.id || "").toLowerCase() === clienteNorm
+        );
+        if (clienteCustom?.status === "churn") {
+          return json({ error: "Este portal não está mais disponível." }, { status: 403 });
+        }
+
         const plano = (await readState(db, "wfa-planejamento")) || {};
         const pk = portal.planKey && plano[portal.planKey] ? portal.planKey
-          : Object.keys(plano).find((k) => String(plano[k]?.cliente || "").toLowerCase() === String(portal.cliente).toLowerCase());
+          : Object.keys(plano).find((k) => String(plano[k]?.cliente || "").toLowerCase() === clienteNorm);
         const plan = pk ? plano[pk] : null;
         return json({
           ok: true,
@@ -64,6 +75,18 @@ export const Route = createFileRoute("/api/workflowark/portal")({
         });
         const { error } = await db.from("workflowark_state").upsert({ key: "wfa-demandas", data: list });
         if (error) return json({ error: "Não foi possível enviar a demanda." }, { status: 500 });
+
+        // Cria notificação interna para a equipe ver no sino
+        try {
+          const notifs: any[] = (await readState(db, "wfa-notificacoes")) || [];
+          notifs.unshift({
+            id: "portal-" + Date.now(),
+            texto: `🌐 Demanda do portal · ${portal.cliente}: "${titulo || "Demanda do cliente"}"`,
+            ts: new Date().toISOString(),
+          });
+          await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: notifs.slice(0, 200) });
+        } catch { /* não quebra o fluxo do cliente se a notificação falhar */ }
+
         return json({ ok: true });
       },
     },

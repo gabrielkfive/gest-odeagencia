@@ -445,6 +445,7 @@ table.t tr.high{background:var(--yel-bg)}
 .task-card:hover{box-shadow:var(--sh-3);transform:translateY(-3px);border-color:var(--line-2)}
 .task-card:active{cursor:grabbing}
 .task-card.dragging{opacity:.55;transform:scale(.97) rotate(-1.5deg);box-shadow:var(--sh-4)}
+.task-card.pending-delete{opacity:.45;border-left-color:var(--red)!important;outline:2px dashed var(--red);cursor:pointer}
 .task-card.priority-alta{border-left-color:var(--red)}
 .task-card.priority-baixa{border-left-color:#3b6fff}
 .task-card .tc-av{display:inline-grid;place-items:center;width:19px;height:19px;border-radius:var(--r-full);background:linear-gradient(135deg,var(--yel),var(--yel-d));color:#1a1407;font-size:8.5px;font-weight:800;letter-spacing:-.02em;box-shadow:var(--sh-1)}
@@ -1599,7 +1600,7 @@ function wfaSetTheme(t){
       <div class="subnav" id="atividades-menu" style="display:none">
         <div class="subitem" data-nav="demandas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          <span>Demandas (CRUD)</span>
+          <span>Demandas</span>
         </div>
         <div class="subitem" data-nav="rotinas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
@@ -2091,7 +2092,7 @@ function wfaSetTheme(t){
           <div class="aura-hero">
             <div class="sphere" aria-hidden="true"></div>
             <div class="eyebrow">Mission Control · ARK Content</div>
-            <h1 class="aura-saud">Boa tarde, Senhor 👋</h1>
+            <h1 class="aura-saud"></h1>
             <div class="ah-cards">
               <div class="ahc">
                 <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="l">Tarefas abertas</span></div>
@@ -3307,6 +3308,7 @@ function limparFiltros(){
 // prazos e a virada de mês. dataSP/hojeSP resolvem em qualquer fuso. en-CA = YYYY-MM-DD.
 function dataSP(d){return (d||new Date()).toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});}
 function hojeSP(){return dataSP(new Date());}
+function hojeYmd(){return new Date().toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}).split('/').reverse().join('-');}
 function tarefaPassaFiltro(t){
   const today=hojeSP();
   const em7=dataSP(new Date(Date.now()+7*86400000));
@@ -6575,10 +6577,13 @@ function cobCard(c,venc,mesKey){
   </div>`;
 }
 
+let _cobTimer;
 function setCob(id,field,value){
   if(!state.cobranca[id])state.cobranca[id]={};
   state.cobranca[id][field]=value;
-  saveCobranca();renderCobranca();
+  saveCobranca();
+  clearTimeout(_cobTimer);
+  _cobTimer=setTimeout(()=>renderCobranca(),400);
 }
 function cobToggle(id,on,mes){
   if(!state.cobranca[id])state.cobranca[id]=Object.assign({resp:COB_RESP_DEFAULT[id]||'',whatsapp:'',pix:'',feitas:0},state.cobranca[id]||{});
@@ -6617,7 +6622,7 @@ const ACREC_BASE=[
   {id:'verba-meta',nome:'Verba Meta Ads',valor:1000,freqMeses:1,diaSugerido:6,texto:'Solicito acerto referente a verba a ser inserida na plataforma do Meta Ads.\nValor: R$1000,00'},
 ];
 function acrecState(){try{return JSON.parse(localStorage.getItem('wfa-acertosrec')||'{}');}catch(e){return {};}}
-function acrecSave(s){localStorage.setItem('wfa-acertosrec',JSON.stringify(s));renderAcrec();}
+function acrecSave(s){localStorage.setItem('wfa-acertosrec',JSON.stringify(s));if(typeof cloudSave==='function')cloudSave('wfa-acertosrec',s);renderAcrec();}
 function acrecMesesDesde(ym){if(!ym)return 999;const [a,m]=ym.split('-').map(Number);const now=new Date();return (now.getFullYear()-a)*12+(now.getMonth()+1-m);}
 function acrecDevido(item,d){
   const meses=acrecMesesDesde(d.enviadoYm);
@@ -6740,11 +6745,14 @@ function acertoCard(it,mesKey){
     </div>
   </div>`;
 }
+let _acTimer;
 function setAcerto(id,field,value){
   if(!state.acerto)state.acerto={};
   if(!state.acerto[id])state.acerto[id]={};
   state.acerto[id][field]=value;
-  saveAcerto();renderAcerto();
+  saveAcerto();
+  clearTimeout(_acTimer);
+  _acTimer=setTimeout(()=>renderAcerto(),400);
 }
 function acertoToggle(id,on,mes){
   if(!state.acerto)state.acerto={};
@@ -7290,7 +7298,7 @@ function mdwBody(w,B){
     if(!h)h='<div class="mdw-empty">Nada pendente. Dia livre 🎯</div>';
     return {body:h,count:(B.late.length+B.todayT.length+B.pend.length)||null};
   }
-  if(w.t==='agenda'){return {body:`<iframe loading="lazy" class="mdw-agenda" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=0" scrolling="no"></iframe>`,count:'Google'};}
+  if(w.t==='agenda'){const _cs=currentUserCalSrc();const _cu=_cs?calEmbedUrl(_cs,true):'https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=0';return {body:`<iframe loading="lazy" class="mdw-agenda" src="${_cu}" scrolling="no"></iframe>`,count:'Google'};}
   if(w.t==='nota'){const s=mdwLoad();return {body:`<textarea class="mdw-nota" placeholder="Escreva uma nota rápida..." oninput="mdwNotaSave(this.value)">${mdEsc(s.nota||'')}</textarea>`,count:null};}
   if(w.t==='whatsapp'){
     if(WFA_WPP_OFF)return {body:'<div class="muted" style="font-size:11.5px;padding:14px;text-align:center">WhatsApp desativado</div>',count:null};
@@ -7531,7 +7539,7 @@ function renderMeuDia(){
   const tasks=(state.tarefas||[]);
   const myName=WFA_MEMBER&&WFA_MEMBER.full_name?WFA_MEMBER.full_name:null;
   const role=WFA_MEMBER&&WFA_MEMBER.role?WFA_MEMBER.role:null;
-  const isManager=!myName||MD_MANAGERS.includes(myName)||['admin','gestor'].includes(role);
+  const isManager=!!myName&&(MD_MANAGERS.includes(myName)||['admin','gestor'].includes(role));
   const notDone=t=>t.status!=='concluido';
   // saudação + data
   const dateStr=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
@@ -8580,7 +8588,7 @@ function applyCalendars(){
 }
 function renderGcal(){applyCalendars();}
 /* ============ WHATSAPP (Z-API) ============ */
-function wppOpen(phone){if(phone!==WPP_ACTIVE&&typeof WPP_SEL!=='undefined')WPP_SEL.clear();WPP_ACTIVE=phone;renderWhatsapp();}
+function wppOpen(phone){if(phone!==WPP_ACTIVE&&typeof WPP_SEL!=='undefined')WPP_SEL.clear();WPP_ACTIVE=phone;window.WPP_IMG_LOADING=false;renderWhatsapp();}
 function wppSetTab(t){WPP_TAB=t;renderWhatsapp();}
 // ---- mídia: monta o corpo da mensagem (texto ou foto/vídeo/áudio/doc) ----
 // Conserta áudio/vídeo do WhatsApp que vêm sem duração (OGG/Opus de nota de voz):
@@ -8908,7 +8916,7 @@ const ONBOARD_SLIDES=[
 ];
 let _obIdx=0;
 function onboardOpen(){_obIdx=0;onboardRender();document.getElementById('modal-onboard').classList.add('open');}
-function onboardClose(){document.getElementById('modal-onboard').classList.remove('open');try{localStorage.setItem('wfa-onboarded','1');}catch(e){}}
+function onboardClose(){document.getElementById('modal-onboard').classList.remove('open');try{localStorage.setItem('wfa-onboarded-'+(WFA_MEMBER&&WFA_MEMBER.id?WFA_MEMBER.id:'anon'),'1');}catch(e){}}
 function onboardNext(){if(_obIdx>=ONBOARD_SLIDES.length-1){onboardClose();return;}_obIdx++;onboardRender();}
 function onboardRender(){
   const s=ONBOARD_SLIDES[_obIdx];if(!s)return;
@@ -8919,7 +8927,7 @@ function onboardRender(){
   document.getElementById('ob-dots').innerHTML=ONBOARD_SLIDES.map((_,i)=>`<i class="${i===_obIdx?'on':''}"></i>`).join('');
   document.getElementById('ob-next').textContent=_obIdx>=ONBOARD_SLIDES.length-1?'Começar ✓':'Próximo →';
 }
-function onboardMaybeAuto(){try{if(localStorage.getItem('wfa-onboarded')!=='1')setTimeout(onboardOpen,1300);}catch(e){}}
+function onboardMaybeAuto(){try{const k='wfa-onboarded-'+(WFA_MEMBER&&WFA_MEMBER.id?WFA_MEMBER.id:'anon');if(localStorage.getItem(k)!=='1')setTimeout(onboardOpen,1300);}catch(e){}}
 /* ============ CONSELHO DE IA ============ */
 let _consData=null;
 function consPopular(){const sel=document.getElementById('cons-cliente');if(sel&&!sel.options.length)sel.innerHTML='<option value="">— sem cliente —</option>'+CLIENTES.filter(c=>c.status!=='churn').map(c=>`<option value="${mdEsc(c.nm)}">${mdEsc(c.nm)}</option>`).join('');consAutoRender();}
@@ -11048,7 +11056,7 @@ function renderDemandas(){
   const el=document.getElementById('dm-list');if(!el)return;
   const arr=loadDemandas();
   if(!arr.length){el.innerHTML='<p class="muted" style="grid-column:1/-1;font-size:12px">Nenhuma demanda ainda.</p>';return;}
-  el.innerHTML=arr.map(d=>`<div class="card" style="padding:11px"><div style="display:flex;justify-content:space-between;align-items:start;gap:6px"><strong style="font-size:13px">${escapeHtml(d.titulo||'(sem título)')}</strong><span class="tag ${d.status==='resolvida'?'yel':''}">${d.status}</span></div><div class="muted" style="font-size:10px;margin:4px 0">${new Date(d.criadaEm).toLocaleString('pt-BR')}</div>${d.mensagem?`<p style="font-size:12px;white-space:pre-wrap;margin-bottom:8px">${escapeHtml(d.mensagem)}</p>`:''}<div style="display:flex;gap:6px">${d.status==='resolvida'?`<button class="icobtn" onclick="setDemStatus('${d.id}','aberta')">Reabrir</button>`:`<button class="icobtn" onclick="setDemStatus('${d.id}','resolvida')">Resolver</button>`}<button class="icobtn" style="color:var(--red)" onclick="delDem('${d.id}')">Excluir</button></div></div>`).join('');
+  el.innerHTML=arr.map(d=>`<div class="card" style="padding:11px${d.origem==='portal'?';border-left:3px solid var(--yel,#ffd400)':''}"><div style="display:flex;justify-content:space-between;align-items:start;gap:6px"><strong style="font-size:13px">${escapeHtml(d.titulo||'(sem título)')}</strong><div style="display:flex;gap:5px;align-items:center;flex-shrink:0">${d.origem==='portal'?'<span class="tag" style="background:#fff8e0;color:#b36200;border-color:#f0d68a">🌐 Portal</span>':''}<span class="tag ${d.status==='resolvida'?'yel':''}">${d.status}</span></div></div>${d.cliente?`<div style="font-size:11px;color:var(--mute);margin:2px 0 0">${escapeHtml(d.cliente)}</div>`:''}<div class="muted" style="font-size:10px;margin:4px 0">${new Date(d.criadaEm).toLocaleString('pt-BR')}</div>${d.mensagem?`<p style="font-size:12px;white-space:pre-wrap;margin-bottom:8px">${escapeHtml(d.mensagem)}</p>`:''}<div style="display:flex;gap:6px">${d.status==='resolvida'?`<button class="icobtn" onclick="setDemStatus('${d.id}','aberta')">Reabrir</button>`:`<button class="icobtn" onclick="setDemStatus('${d.id}','resolvida')">Resolver</button>`}<button class="icobtn" style="color:var(--red)" onclick="delDem('${d.id}')">Excluir</button></div></div>`).join('');
 }
 
 /* ============ SQUAD ALPHA · réplica editável da planilha ============ */
@@ -13187,7 +13195,8 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
     auraHeroEnsure();
     var h=new Date().getHours();
     var s=h<5?'Boa madrugada':h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
-    auraSet('aura-saud',s+', Senhor 👋');
+    var _nm=(typeof WFA_MEMBER!=='undefined'&&WFA_MEMBER&&WFA_MEMBER.full_name)?mdFirst(WFA_MEMBER.full_name):'';
+    auraSet('aura-saud',s+(_nm?', '+_nm:'')+'! 👋');
     try{
       if(typeof mdwBuckets!=='function')return;
       var B=mdwBuckets();
