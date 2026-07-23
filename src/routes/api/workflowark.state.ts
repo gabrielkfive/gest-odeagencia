@@ -61,6 +61,9 @@ const STATE_KEYS = new Set([
   "wfa-cli-geo",
   // Memória persistente do JARVIS (lida/apagada pelo painel 🧠 Memória na página JARVIS).
   "wfa-jarvis-memory",
+  // Propostas geradas pelo Estrategista Comercial (propostas.html, iframe na aba Propostas).
+  // Dados ficavam só em localStorage ark_props_v1; agora sincronizam entre dispositivos.
+  "wfa-propostas",
   // OBS: wfa-whatsapp é de propósito SERVER-OWNED (escrito pelo webhook). O cliente só LÊ;
   // não entra aqui pra um save do cliente nunca sobrescrever mensagens que chegaram no servidor.
 ]);

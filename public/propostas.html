@@ -508,8 +508,10 @@ async function buscarIG() {
   }
 }
 
-// ---- Propostas salvas (localStorage) ----
-const LS='ark_props_v1';
+// ---- Propostas salvas (localStorage → cloud via wfa-propostas) ----
+const LS='wfa-propostas';
+// migração de dispositivos com dados em ark_props_v1
+(function(){try{const _o=localStorage.getItem('ark_props_v1');if(_o&&!localStorage.getItem(LS)){localStorage.setItem(LS,_o);localStorage.removeItem('ark_props_v1');}}catch(e){}}());
 const carregarLista = () => { try { return JSON.parse(localStorage.getItem(LS)||'[]'); } catch(e){ return []; } };
 const salvarLista = l => localStorage.setItem(LS, JSON.stringify(l));
 function coletarCampos() {
