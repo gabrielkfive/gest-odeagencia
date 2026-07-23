@@ -6419,7 +6419,7 @@ function relatorioCliente(id){
   document.getElementById('rel-body').innerHTML=`
     <div class="rel-head">
       <div class="rel-av">${cliInitials(c.nm).toUpperCase()}</div>
-      <div class="rel-htxt"><h2>${escapeHtml(c.nm)}</h2><p>${escapeHtml(c.plano||'—')} · ${stLabel} · ${relMesLabel()}</p></div>
+      <div class="rel-htxt"><h2>${escapeHtml(c.nm)}</h2><p>${(c.valor&&c.valor>0)?cobBRL(c.valor)+'/mês · ':''}${escapeHtml(c.plano||'—')} · ${stLabel} · ${relMesLabel()}</p></div>
     </div>
     <div class="rel-kpis">
       <div class="rel-kpi green"><div class="v">${d.conclMes.length}</div><div class="l">Entregue no mês</div></div>
@@ -6522,7 +6522,7 @@ function cobVencimento(ref){
   else if(dow===0)d=new Date(ref.getFullYear(),ref.getMonth(),8); // domingo -> sexta (8)
   return d;
 }
-function cobBRL(v){return 'R$ '+Number(v).toLocaleString('pt-BR');}
+function cobBRL(v){return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function cobDigits(s){let d=String(s||'').replace(/\D/g,'');if(d&&!d.startsWith('55')&&d.length>=10&&d.length<=11)d='55'+d;return d;}
 
 function cobMensagem(c,data,venc){
@@ -11824,7 +11824,7 @@ function renderCrm(){
   const fResp=document.getElementById('crm-filter-resp')?.value||'';
   const today=hojeSP();
   const filtered=arr.filter(l=>{
-    if(search&&!l.nm.toLowerCase().includes(search))return false;
+    if(search&&!['nm','contact','seg','obs'].some(k=>(l[k]||'').toLowerCase().includes(search)))return false;
     if(fSource&&l.source!==fSource)return false;
     if(fResp&&l.resp!==fResp)return false;
     return true;
