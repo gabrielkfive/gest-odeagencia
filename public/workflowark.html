@@ -2523,7 +2523,7 @@ function wfaSetTheme(t){
               </div>
               <input type="file" id="jarvis-file" style="display:none" accept=".txt,.md,.markdown,.html,.htm,.csv,.json,.rtf,.srt,.vtt,text/*" onchange="jarvisFileChosen(this)">
               <div style="display:flex;gap:8px;align-items:flex-end">
-                <button id="jarvis-conv" class="jv-neu" title="Modo conversa (voz)" style="flex-shrink:0;font-weight:700;padding:0 12px;height:40px" onclick="jarvisConversaToggle()">●</button>
+                <button id="jarvis-conv" class="jv-neu" title="Modo conversa (voz)" style="flex-shrink:0;font-weight:700;padding:0 10px;height:40px;font-size:11px" onclick="jarvisConversaToggle()">🎙 VOZ</button>
                 <button id="jarvis-mic" class="jv-neu" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;flex-shrink:0;height:40px;padding:0 11px">🎙️</button>
                 <button class="jv-neu" onclick="jarvisAttach()" title="Anexar documento" style="font-size:17px;flex-shrink:0;height:40px;padding:0 11px">📎</button>
                 <textarea id="jarvis-input" class="form-input" placeholder="Fale, digite ou cole um documento…  (Enter envia · Shift+Enter pula linha)" rows="1" style="flex:1;border-radius:14px;resize:none;max-height:160px;min-height:40px;padding:9px 14px;line-height:1.4;font-family:inherit" oninput="jarvisAutoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();jarvisSend();}"></textarea>
@@ -4516,7 +4516,7 @@ function iniciarAutoSync(){
             <div class="crm-g2">
               <div class="crm-fi"><label>Valor estimado (R$)</label><input id="crm-val" type="number" placeholder="3500"></div>
               <div class="crm-fi"><label>Estágio do pipeline</label>
-                <select id="crm-stage">
+                <select id="crm-stage" onchange="document.getElementById('crm-convert-btn').style.display=this.value==='4'?'':'none'">
                   <option value="0">Prospecção</option>
                   <option value="1">Diagnóstico</option>
                   <option value="2">Proposta enviada</option>
@@ -4543,6 +4543,7 @@ function iniciarAutoSync(){
           </div>
           <div class="crm-mfoot">
             <button class="icobtn" id="crm-del-btn" onclick="crmDeleteLead()" style="color:var(--red);display:none">Excluir lead</button>
+            <button class="icobtn" id="crm-convert-btn" onclick="crmConverterEmCliente()" style="display:none;color:var(--green,#19b36b)">⭐ Criar como cliente</button>
             <button class="icobtn" onclick="crmCloseModal()">Cancelar</button>
             <button class="tb-btn" onclick="crmSaveLead()">Salvar</button>
           </div>
@@ -4950,6 +4951,7 @@ function iniciarAutoSync(){
 </div>
 
 <!-- BOTÃO FLUTUANTE + MODAL: JARVIS (voz) -->
+<style>#jarvis-fab[data-voice='fallback']{border-color:#ef4444!important;opacity:.75;}</style>
 <button onclick="jarvisOpen()" title="JARVIS — fale comigo" id="jarvis-fab" style="position:fixed;bottom:18px;right:18px;z-index:9000;width:54px;height:54px;border-radius:50%;border:2px solid var(--yel,#ffd400);background:#0a0a0a;color:var(--yel,#ffd400);font-size:23px;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer">🎙️</button>
 <!-- MODAL: Resumo do dia (WhatsApp + voz JARVIS) -->
 <div class="modal-bg" id="modal-wpp-resumo">
@@ -6000,7 +6002,7 @@ async function jarvisSpeak(txt){
         _jarvisAudio.play().catch(()=>jarvisSpeakBrowser(txt));
         return;
       }
-      if(r&&r.nokey){_fishOff=true;if(typeof toast==='function')toast('🔊 Voz do navegador ativa (Fish Audio indisponível)');} // sem chave: não tenta de novo nesta sessão
+      if(r&&r.nokey){_fishOff=true;if(typeof toast==='function')toast('🔊 Voz do navegador ativa (Fish Audio indisponível)');try{document.getElementById('jarvis-fab')?.setAttribute('data-voice','fallback');}catch(e){}} // sem chave: não tenta de novo nesta sessão
     }catch(e){/* cai pro navegador */}
   }
   jarvisSpeakBrowser(txt);
@@ -6355,7 +6357,7 @@ function clienteSaudeReasons(id){
 }
 function renderClienteSaude(){
   const box=document.getElementById('cli-health');if(!box)return;
-  if(sessionStorage.getItem('wfa-saude-dismiss')==='1'){box.innerHTML='';return;}
+  if(localStorage.getItem('wfa-saude-dismiss')===hojeSP()){box.innerHTML='';return;}
   const items=CLIENTES.map(c=>clienteSaudeReasons(c.id)).filter(Boolean).sort((a,b)=>b.sev-a.sev);
   if(!items.length){box.innerHTML='';return;}
   const rows=items.map(it=>`<div class="csa-row">
@@ -6368,7 +6370,7 @@ function renderClienteSaude(){
   box.innerHTML=`<div class="csa-card">
     <div class="csa-head">
       <div class="csa-ttl"><span class="csa-bell">⚠️</span>Saúde dos clientes · ${items.length} ${items.length>1?'precisam':'precisa'} de atenção${nUrg?` · <b style="color:var(--red,#e0364f)">${nUrg} urgente${nUrg>1?'s':''}</b>`:''}</div>
-      <button class="csa-x" title="Dispensar até a próxima sessão" onclick="sessionStorage.setItem('wfa-saude-dismiss','1');renderClienteSaude();">✕</button>
+      <button class="csa-x" title="Dispensar por hoje" onclick="localStorage.setItem('wfa-saude-dismiss',hojeSP());renderClienteSaude();">✕</button>
     </div>
     <div class="csa-list">${rows}</div>
   </div>`;
@@ -9739,7 +9741,7 @@ function jarvisAfterSpeak(cb){
   document.addEventListener('jarvis-spoke',fire);
   setTimeout(fire,15000); // fallback se o evento não vier
 }
-function jarvisConvBtn(on){const b=document.getElementById('jarvis-conv');if(b){b.textContent=on?'■':'●';b.title=on?'Encerrar conversa (voz)':'Modo conversa (voz)';b.style.background=on?'#dc2626':'';b.style.color=on?'#fff':'';}}
+function jarvisConvBtn(on){const b=document.getElementById('jarvis-conv');if(b){b.textContent=on?'■ PARAR':'🎙 VOZ';b.title=on?'Encerrar conversa (voz)':'Modo conversa (voz)';b.style.background=on?'#dc2626':'';b.style.color=on?'#fff':'';}}
 function jarvisConversaToggle(){
   if(_jConv){jarvisConvStop();return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -11768,8 +11770,17 @@ function crmOpenModal(id){
     ['crm-nm','crm-contact','crm-val','crm-next','crm-due','crm-seg','crm-obs'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('crm-stage').value='0';
   }
+  document.getElementById('crm-convert-btn').style.display=document.getElementById('crm-stage').value==='4'?'':'none';
   modal.classList.add('open');
   setTimeout(()=>document.getElementById('crm-nm').focus(),80);
+}
+function crmConverterEmCliente(){
+  const nm=(document.getElementById('crm-nm')?.value||'').trim();
+  const val=document.getElementById('crm-val')?.value||'';
+  crmCloseModal();
+  cliNovoOpen();
+  if(nm)document.getElementById('cli-f-nome').value=nm;
+  if(val&&!isNaN(Number(val)))document.getElementById('cli-f-valor').value=Number(val);
 }
 function crmCloseModal(){document.getElementById('crm-modal').classList.remove('open');}
 function renderCrmHist(hist){
