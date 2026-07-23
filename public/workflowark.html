@@ -5457,7 +5457,7 @@ const CLIENTES_BASE = [
 function loadClientesCustom(){ try{ return JSON.parse(localStorage.getItem('wfa-clientes-custom')||'[]'); }catch(e){ return []; } }
 function saveClientesCustom(arr){ localStorage.setItem('wfa-clientes-custom', JSON.stringify(arr)); rebuildClientes(); if(typeof renderClientes==='function') renderClientes(); }
 let CLIENTES = CLIENTES_BASE.slice();
-function rebuildClientes(){ const custom=loadClientesCustom().map(c=>({...c,custom:true})); CLIENTES = CLIENTES_BASE.concat(custom); if(typeof fillClienteSelects==='function')fillClienteSelects(); }
+function rebuildClientes(){ const custom=loadClientesCustom().map(c=>({...c,custom:true})); const customIds=new Set(custom.map(c=>c.id)); CLIENTES = CLIENTES_BASE.filter(c=>!customIds.has(c.id)).concat(custom); if(typeof fillClienteSelects==='function')fillClienteSelects(); }
 rebuildClientes();
 // (Re)popula TODOS os selects de cliente (criar tarefa, filtro, modal de detalhe, conselho)
 // com a lista completa — inclui ARK Content e os clientes personalizados. Preserva a seleção.
@@ -5482,7 +5482,7 @@ function cliNovoOpen(){
   setTimeout(()=>document.getElementById('cli-f-nome').focus(),80);
 }
 function cliEditOpen(id){
-  const c=loadClientesCustom().find(x=>x.id===id); if(!c)return;
+  const c=CLIENTES.find(x=>x.id===id); if(!c)return;
   cliEditId=id;
   document.getElementById('cli-modal-title').textContent='Editar cliente';
   document.getElementById('cli-f-nome').value=c.nm||'';
@@ -5492,7 +5492,7 @@ function cliEditOpen(id){
   document.getElementById('cli-f-cap').value=c.cap||'';
   document.getElementById('cli-f-status').value=c.status||'gr';
   document.getElementById('cli-f-meta').value=c.meta||'';
-  document.getElementById('cli-del-btn').style.display='';
+  document.getElementById('cli-del-btn').style.display=c.custom?'':'none';
   document.getElementById('modal-cliente').classList.add('open');
 }
 function cliSlug(nm){return (nm||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,24)||('cli'+Date.now());}
@@ -5509,6 +5509,7 @@ function cliSave(){
   if(cliEditId){
     const c=arr.find(x=>x.id===cliEditId);
     if(c){c.nm=nm;c.tipo=tipo;c.plano=plano;c.valor=valor;c.cap=cap;c.status=status;c.meta=meta;c.extra=meta;}
+    else{arr.push({id:cliEditId,nm,tipo,plano,valor,cap,status,meta,extra:meta});}
     saveClientesCustom(arr);toast('Cliente atualizado ✓');
   }else{
     let id=cliSlug(nm); const all=CLIENTES_BASE.concat(arr);
@@ -6210,7 +6211,7 @@ function cliCard(c){
       <button class="cli-btn" onclick="event.stopPropagation();abrirCriativos('${c.id}')">📈 Criativos</button>
       <button class="cli-btn" onclick="event.stopPropagation();abrirOnboarding('${c.id}')">🚀 Onboarding</button>
       ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
-      ${c.custom?`<button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">Editar</button>`:''}
+      <button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">Editar</button>
     </div>
   </div>`;
 }
