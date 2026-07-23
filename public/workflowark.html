@@ -1534,11 +1534,11 @@ function wfaSetTheme(t){
 
     <div class="nav-label">Menu</div>
     <nav class="nav" id="nav">
-      <div class="navitem" data-nav="dashboard">
+      <div class="navitem active" data-nav="dashboard">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Meu Dia</span>
       </div>
-      <div class="navitem active" data-nav="painel">
+      <div class="navitem" data-nav="painel">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
         <span>Meu Painel</span>
       </div>
@@ -1945,7 +1945,7 @@ function wfaSetTheme(t){
              Estilo "fila de decisões" (protótipo aprovado pelo Gabriel 16/07): a IA/rotinas
              produzem, o humano só aprova. Cada papel vê a sua fila. -->
         <style>
-          #md-decisoes{margin-bottom:16px;display:none}
+          #md-decisoes{margin-bottom:16px}
           .dec-hd{display:flex;align-items:baseline;gap:10px;padding:0 2px 10px}
           .dec-hd b{font-size:13px;font-weight:800;letter-spacing:-.01em}
           .dec-hd span{font-size:11.5px;color:var(--mute)}
@@ -1967,59 +1967,109 @@ function wfaSetTheme(t){
           .dec-card.u2{border-left:3px solid #d63031}
           body.aura-dark .dec-card{background:rgba(13,14,17,.6);border-color:var(--line)}
           body.aura-dark .dec-btn.s{background:transparent;color:var(--txt)}
+          /* ===== layout APP do Meu Dia (fila à esquerda, mission control à direita) ===== */
+          #mdapp{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px;align-items:start}
+          @media(max-width:1024px){#mdapp{grid-template-columns:1fr}}
+          #mdapp-rail{display:flex;flex-direction:column;gap:16px;min-width:0}
+          #mdapp-main{min-width:0}
+          .rail-label{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);padding:2px 2px 8px;display:flex;align-items:center;gap:8px}
+          .rail-label::after{content:'';flex:1;height:1px;background:var(--line)}
+          /* KPIs compactos na coluna direita (2x2) */
+          #mdapp-rail #md-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
+          /* tarefas + agenda empilhadas na coluna */
+          #mdapp-rail .md-grid{display:grid;grid-template-columns:1fr;gap:16px}
+          /* atalhos das áreas */
+          .rail-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+          .rail-links button{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-family:inherit;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;text-align:left;box-shadow:var(--shadow);transition:transform .1s,border-color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+          .rail-links button:hover{border-color:var(--line-2)}
+          .rail-links button:active{transform:scale(.97)}
+          body.aura-dark .rail-links button{background:rgba(13,14,17,.6);border-color:var(--line);color:var(--txt)}
+          /* fila numerada (editorial): 01, 02, 03 na margem esquerda */
+          #md-decisoes{counter-reset:dec}
+          #md-decisoes .dec-card{display:grid;grid-template-columns:30px minmax(0,1fr);column-gap:12px;counter-increment:dec;padding:16px 18px}
+          #md-decisoes .dec-card::before{content:counter(dec,decimal-leading-zero);grid-column:1;grid-row:1/span 3;font-size:12px;font-weight:800;color:var(--mute-2,#a3a3a3);font-family:var(--mono,monospace);padding-top:3px;border-right:1px solid var(--line);margin-right:2px}
+          #md-decisoes .dec-card>*{grid-column:2}
+          #md-decisoes .dec-hd b{font-size:16px}
+          /* estado "agência rodando" quando a fila zera */
+          .dec-zero{background:#fff;border:1px solid var(--line);border-radius:18px;padding:34px 22px;text-align:center;box-shadow:var(--shadow)}
+          .dec-zero .e{font-size:38px;margin-bottom:8px}
+          .dec-zero b{display:block;font-size:16px;color:var(--ink);letter-spacing:-.01em;margin-bottom:4px}
+          .dec-zero p{margin:0;font-size:12.5px;color:var(--mute);line-height:1.6}
+          .dec-zero .pulse-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#19b36b;margin-right:6px;animation:decpul 2.2s infinite}
+          @keyframes decpul{0%,100%{opacity:1}50%{opacity:.3}}
+          body.aura-dark .dec-zero{background:rgba(13,14,17,.6);border-color:var(--line)}
         </style>
-        <div id="md-decisoes"></div>
-        <div class="g4 stagger" id="md-kpis" style="margin-bottom:16px"></div>
-
-        <div id="md-council-bar" style="display:none;margin-bottom:16px">
-          <button id="md-council-hd" onclick="mdToggleCouncil()" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 14px;cursor:pointer;font-family:inherit">
-            <span style="font-size:12.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px">
-              <span style="width:7px;height:7px;border-radius:50%;background:var(--yel);display:inline-block"></span>
-              Conselho de IA · <b id="md-council-n">0</b> debates de hoje
-            </span>
-            <span id="md-council-chev" style="font-size:11px;color:var(--mute);font-weight:700">ver ▾</span>
-          </button>
-          <div id="md-briefings" style="display:none;margin-top:10px"></div>
-        </div>
-
-        <div id="md-aprovacao" style="margin-bottom:16px;display:none"></div>
-
-        <div class="md-grid">
-          <div class="md-card">
-            <div class="md-hd">
-              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span id="md-tasks-title">Minhas tarefas</span></h3>
-              <span class="md-count" id="md-tasks-count">0</span>
-            </div>
-            <div class="md-bd" id="md-tasks"></div>
-          </div>
-
-          <div class="md-card">
-            <div class="md-hd">
-              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agenda de hoje</h3>
-              <span class="md-count">Google</span>
-            </div>
-            <div class="md-agwrap">
-              <iframe loading="lazy" id="md-agenda-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
+        <!-- LAYOUT APP (pedido do Gabriel 17/07, ref. protótipo docs/prototipos/decisoes.html):
+             coluna principal = fila de Decisões (o coração); coluna direita = mission control
+             (operação em dia, áreas, tarefas, agenda, JARVIS). No celular empilha, fila primeiro. -->
+        <div id="mdapp">
+          <div id="mdapp-main">
+            <div id="md-decisoes"></div>
+            <div id="md-aprovacao" style="margin-bottom:16px;display:none"></div>
+            <div id="md-council-bar" style="display:none;margin-bottom:16px">
+              <button id="md-council-hd" onclick="mdToggleCouncil()" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 14px;cursor:pointer;font-family:inherit">
+                <span style="font-size:12.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px">
+                  <span style="width:7px;height:7px;border-radius:50%;background:var(--yel);display:inline-block"></span>
+                  Conselho de IA · <b id="md-council-n">0</b> debates de hoje
+                </span>
+                <span id="md-council-chev" style="font-size:11px;color:var(--mute);font-weight:700">ver ▾</span>
+              </button>
+              <div id="md-briefings" style="display:none;margin-top:10px"></div>
             </div>
           </div>
-        </div>
 
-        <div id="md-team-wrap" style="display:none">
-          <div class="md-team">
-            <div class="md-team-hd">
-              <h2 class="t">Panorama do <span>time</span></h2>
-              <span class="pill" id="md-team-pill">VISÃO GESTOR</span>
+          <aside id="mdapp-rail">
+            <div>
+              <div class="rail-label">Operação em dia</div>
+              <div class="g4 stagger" id="md-kpis"></div>
             </div>
-            <div class="md-people" id="md-team"></div>
-          </div>
-        </div>
 
-        <!-- JARVIS: pedido do Gabriel, sai do topo e vira o fechamento da tela (o resumo vem
-             depois de já ver o que importa: vence hoje, tarefas, agenda, panorama do time) -->
-        <div id="md-jarvis" onclick="jarvisOpen()" title="Conversar com o JARVIS" style="cursor:pointer;margin-top:16px">
-          <div class="jv-hd"><div class="jv-orb"></div><div><div class="jv-ttl">Assistente ARK</div><div class="jv-nm">JARVIS · seu resumo de hoje</div></div><span style="margin-left:auto;font-size:11px;color:var(--yel);font-weight:700;white-space:nowrap">Conversar →</span></div>
-          <div class="jv-txt" id="md-jarvis-txt"></div>
-          <button class="jv-spk" onclick="event.stopPropagation();mdJarvisFalar()">🔊 JARVIS narra meu dia</button>
+            <div>
+              <div class="rail-label">Ir pra área</div>
+              <div class="rail-links">
+                <button onclick="document.querySelector('[data-nav=planejamento]')?.click()">🗓️ Estúdio · Planejamento</button>
+                <button onclick="document.querySelector('[data-nav=producao]')?.click()">📹 Produção</button>
+                <button onclick="document.querySelector('[data-nav=tarefas]')?.click()">✅ Tarefas</button>
+                <button onclick="window.open('/postagens','_blank')">✍️ Postagens</button>
+              </div>
+            </div>
+
+            <div class="md-grid">
+              <div class="md-card">
+                <div class="md-hd">
+                  <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span id="md-tasks-title">Minhas tarefas</span></h3>
+                  <span class="md-count" id="md-tasks-count">0</span>
+                </div>
+                <div class="md-bd" id="md-tasks"></div>
+              </div>
+
+              <div class="md-card">
+                <div class="md-hd">
+                  <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agenda de hoje</h3>
+                  <span class="md-count">Google</span>
+                </div>
+                <div class="md-agwrap">
+                  <iframe loading="lazy" id="md-agenda-iframe" src="https://calendar.google.com/calendar/embed?src=gabrielkomercial%40gmail.com&ctz=America%2FSao_Paulo&mode=AGENDA&showTitle=0&showPrint=0&showCalendars=0&showTz=0&showNav=1" scrolling="no"></iframe>
+                </div>
+              </div>
+            </div>
+
+            <div id="md-team-wrap" style="display:none">
+              <div class="md-team">
+                <div class="md-team-hd">
+                  <h2 class="t">Panorama do <span>time</span></h2>
+                  <span class="pill" id="md-team-pill">VISÃO GESTOR</span>
+                </div>
+                <div class="md-people" id="md-team"></div>
+              </div>
+            </div>
+
+            <div id="md-jarvis" onclick="jarvisOpen()" title="Conversar com o JARVIS" style="cursor:pointer">
+              <div class="jv-hd"><div class="jv-orb"></div><div><div class="jv-ttl">Assistente ARK</div><div class="jv-nm">JARVIS · seu resumo de hoje</div></div><span style="margin-left:auto;font-size:11px;color:var(--yel);font-weight:700;white-space:nowrap">Conversar →</span></div>
+              <div class="jv-txt" id="md-jarvis-txt"></div>
+              <button class="jv-spk" onclick="event.stopPropagation();mdJarvisFalar()">🔊 JARVIS narra meu dia</button>
+            </div>
+          </aside>
         </div>
       </div>
 
@@ -6955,7 +7005,7 @@ function mdRenderDecisoes(){
   const box=document.getElementById('md-decisoes');if(!box)return;
   const myName=(WFA_MEMBER&&WFA_MEMBER.full_name)||'';
   const role=(WFA_MEMBER&&WFA_MEMBER.role)||'';
-  const isManager=['admin','gestor'].includes(role)||!myName;
+  const isManager=!!myName&&(['admin','gestor'].includes(role)||MD_MANAGERS.includes(myName));
   const today=hojeSP();
   const _n=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   const myFirst=_n(myName).split(/\s+/)[0]||'';
@@ -7026,13 +7076,17 @@ function mdRenderDecisoes(){
         cards.push({urg:urg,ico:'📹',bg:'#fdecec',cli:c.nm,
           t:'Mês com '+done+'/'+c.cap+' captações marcadas',
           d:'Contrato prevê '+c.cap+'/mês — falta agendar '+(c.cap-done)+(diaDoMes>=15?' e o mês já passou da metade':'')+(cliStatus[c.id]==='r'?' · cliente em alerta':'')+'.',
-          acts:`<button class="dec-btn p" onclick="decTarefaCaptacao('${c.id}','${String(c.nm||'').replace(/['"<>]/g,'')}',${c.cap-done})">✓ Criar tarefa de agendar</button>`});
+          acts:`<button class="dec-btn p" onclick="decTarefaCaptacao('${c.id}','${String(c.nm||'').replace(/['"<>]/g,'')}',${c.cap-done})">✓ Criar tarefa de agendar</button><button class="dec-btn s" onclick="document.querySelector('[data-nav=producao]')?.click()">Ver Produção</button>`});
       }
     });
   }
-  if(!cards.length){box.style.display='none';box.innerHTML='';return;}
+  if(!cards.length){
+    box.style.display='';box.dataset.sig='zero';
+    box.innerHTML='<div class="dec-hd"><b>🎯 Decisões de hoje</b></div><div class="dec-zero"><div class="e">🏆</div><b>A agência está rodando</b><p><span class="pulse-dot"></span>Nada esperando você agora. Os agentes seguem trabalhando — a próxima decisão aparece aqui.</p></div>';
+    return;
+  }
   cards.sort((a,b)=>(b.urg||0)-(a.urg||0));
-  const sig=cards.map(c=>c.urg+c.t).join('|');
+  const sig=cards.map(c=>c.urg+c.t+(c.d||'')).join('|');
   if(box.dataset.sig===sig)return;box.dataset.sig=sig;
   const nUrg=cards.filter(c=>c.urg===2).length;
   const URG_LBL=['pode esperar','importante','urgente'];
@@ -8276,7 +8330,7 @@ if(state.tarefas.length===0){
 /* Meu Dia: render inicial + auto-atualização a cada minuto */
 try{renderMonthPill();renderIdentity();renderMeuDia();applyAccess();}catch(e){console.warn('renderMeuDia',e);}
 try{renderWidgets();}catch(e){console.warn('renderWidgets',e);} // Meu Painel é a home: renderiza os widgets já no boot (não depende do sync)
-setInterval(()=>{try{renderMonthPill();renderMeuDia();}catch(e){}},60000);
+setInterval(()=>{try{renderMonthPill();if(document.querySelector('#page-dashboard.active'))renderMeuDia();}catch(e){}},60000);
 try{restoreLastPage();}catch(e){} // tenta restaurar a aba já no boot (retenta após sync se RBAC ainda não liberou)
 
 /* Restaura a última aba aberta ao recarregar (chamada após o sync/RBAC; roda 1x) */
