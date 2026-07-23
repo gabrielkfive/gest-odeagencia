@@ -2017,6 +2017,9 @@ function wfaSetTheme(t){
           .dec-zero .pulse-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#19b36b;margin-right:6px;animation:decpul 2.2s infinite}
           @keyframes decpul{0%,100%{opacity:1}50%{opacity:.3}}
           body.aura-dark .dec-zero{background:rgba(13,14,17,.6);border-color:var(--line)}
+          @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+          .dec-card.skeleton{border:none;box-shadow:none;background:var(--line);animation:pulse 1.5s ease-in-out infinite}
+          body.aura-dark .dec-card.skeleton{background:rgba(255,255,255,.07)}
         </style>
         <!-- LAYOUT APP (pedido do Gabriel 17/07, ref. protótipo docs/prototipos/decisoes.html):
              coluna principal = fila de Decisões (o coração); coluna direita = mission control
@@ -12965,7 +12968,7 @@ function renderComercialFunil(data,useDef){
   const g=k=>{const v=data[k]!==undefined?data[k]:(useDef?COMERCIAL_DEFAULTS[k]:undefined);const m=String(v||'').replace(',','.').match(/[\d.]+/);return m?parseFloat(m[0]):0;};
   const leads=Math.round(g('leads_growth')+g('leads_trafego')+g('fonte_indicacao'));
   const _fechDigitado=Math.round(g('fechamentos_ark')+g('fechamentos_alpha'));
-  const _mesCrm=(typeof cobMesKey==='function')?cobMesKey():hojeYmd().slice(0,7);
+  const _mesCrm=(typeof cobMesKey==='function')?cobMesKey():hojeSP().slice(0,7);
   const _crmFech=(!_fechDigitado&&typeof loadCrm==='function')?loadCrm().filter(l=>l.stage===4&&(l.due||'').slice(0,7)===_mesCrm).length:0;
   const fech=_fechDigitado||_crmFech;
   const reunioes=Math.round(fech*2.2)||Math.round(leads*0.4); // estimativa (10 reuniões ~ 1 fechamento)
