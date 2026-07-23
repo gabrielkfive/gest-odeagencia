@@ -8111,7 +8111,22 @@ function taskMove(id,dir){
   const tmp=col[i].ord; col[i].ord=col[j].ord; col[j].ord=tmp; // troca
   saveTarefas();
 }
-function delTask(id){state.tarefas=state.tarefas.filter(x=>x.id!==id);addDeleted(id);saveTarefas();toast('Tarefa excluída');}
+const _delPending=new Map();
+function delTask(id){
+  if(_delPending.has(id)){
+    clearTimeout(_delPending.get(id));_delPending.delete(id);
+    const el=document.querySelector('.task-card[data-tid="'+id+'"]');
+    if(el){el.classList.remove('pending-delete');el.onclick=()=>openTaskDetail(id);}
+    toast('Exclusão cancelada');return;
+  }
+  const el=document.querySelector('.task-card[data-tid="'+id+'"]');
+  if(el){el.classList.add('pending-delete');el.onclick=()=>delTask(id);}
+  toast('Excluindo… toque no cartão para cancelar');
+  _delPending.set(id,setTimeout(()=>{
+    _delPending.delete(id);
+    state.tarefas=state.tarefas.filter(x=>x.id!==id);addDeleted(id);saveTarefas();toast('Tarefa excluída');
+  },3000));
+}
 
 /* Drag do Kanban: a coluna INTEIRA é área de soltar (não só onde já tem card),
    e soltar em qualquer altura reordena de verdade (like Trello). Pedido do Gabriel:
