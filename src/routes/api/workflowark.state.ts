@@ -242,7 +242,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
         } catch { /* dev local: sem cloudflare:workers, sem piloto automático */ }
 
         // NUNCA devolve segredos/tokens ao cliente (Meta token, Google OAuth refresh token…)
-        const isSensitive = (k: string) => /-(secret|oauth)$/.test(k);
+        const isSensitive = (k: string) => /-(secret|oauth)$/.test(k) || k === "wfa-portal-tokens";
         // BOOT LEVE: wfa-whatsapp (todas as conversas) é de longe o maior payload do estado
         // e não é necessário pra pintar a primeira tela. Fica fora do load inicial e o app
         // busca sob demanda com ?key=wfa-whatsapp (abaixo).
@@ -271,7 +271,14 @@ export const Route = createFileRoute("/api/workflowark/state")({
           .neq("key", "wfa-whatsapp");
         if (error) return json({ error: "Não foi possível carregar os dados." }, { status: 500 });
 
-        const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key)).map((row: any) => [row.key, row.data]));
+        const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key)).map((row: any) => {
+          // wfa-gcal: cada membro vê apenas sua própria entrada de agenda (não a de todos)
+          if (row.key === "wfa-gcal") {
+            const memberId = ctx.member.id;
+            return [row.key, { [memberId]: (row.data as any)?.[memberId] ?? null }];
+          }
+          return [row.key, row.data];
+        }));
         let members: WorkflowMember[] = [];
         if (ctx.isAdmin) {
           const result = await ctx.db
