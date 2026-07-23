@@ -154,7 +154,7 @@ function calcFinanceiro(
   const cliMap: Record<string, { nm: string; valor: number }> = { ...CLI_VALS };
   custom.forEach((c) => { if (c.id && c.valor) cliMap[c.id] = { nm: c.nm, valor: c.valor }; });
   Object.entries(cobranca).forEach(([id, d]) => {
-    if (id.startsWith("plan-") && d._plan && d._nome) cliMap[id] = { nm: d._nome, valor: Number(d._valor) || 0 };
+    if (d._nome) cliMap[id] = { nm: d._nome, valor: Number(d._valor) || 0 };
   });
   const mesesSet = new Set<string>();
   Object.values(cobranca).forEach((d) => { Object.keys(d.cobradoMeses || {}).forEach((mk) => mesesSet.add(mk)); if (d.cobradoMes) mesesSet.add(d.cobradoMes); });

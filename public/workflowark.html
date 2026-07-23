@@ -6544,7 +6544,7 @@ function renderCobranca(){
 
   const clientes=cobClientes();
   let totalReceber=0,jaCobradas=0;
-  clientes.forEach(c=>{const d=cobData(c);if(d.cobradoMes===mesKey)jaCobradas++;else totalReceber+=c.valor;});
+  clientes.forEach(c=>{const d=cobData(c);const cobrado=d.cobradoMes===mesKey||!!(d.cobradoMeses&&d.cobradoMeses[mesKey]);if(cobrado)jaCobradas++;else totalReceber+=c.valor;});
   const resumo=document.getElementById('cob-resumo');
   if(resumo)resumo.textContent=`${clientes.length} clientes · ${cobBRL(totalReceber)} a receber · ${jaCobradas} já cobradas`;
 
@@ -7353,7 +7353,7 @@ function mdwBody(w,B){
   if(w.t==='cobranca'){
     const reais=(typeof CLIENTES!=='undefined'?CLIENTES:[]).filter(c=>c.tipo==='ARK'&&c.valor>0&&c.status!=='churn');
     const mesKey=(typeof cobMesKey==='function')?cobMesKey():'';
-    const pend=reais.filter(c=>{const d=(typeof cobData==='function')?cobData(c):{};return d.cobradoMes!==mesKey;});
+    const pend=reais.filter(c=>{const d=(typeof cobData==='function')?cobData(c):{};return !(d.cobradoMes===mesKey||!!(d.cobradoMeses&&d.cobradoMeses[mesKey]));});
     const totalReceber=pend.reduce((s,c)=>s+(c.valor||0),0);
     const body=`<div class="mdw-kpis" style="grid-template-columns:1fr 1fr">
       <div class="mdw-kpi y"><div class="v">${pend.length}</div><div class="l">A cobrar</div></div>
@@ -7520,7 +7520,7 @@ function mdExecDados(){
   }catch(e){}
   try{
     if(typeof cobClientes==='function'){
-      const pend=cobClientes().filter(c=>cobData(c).cobradoMes!==mesKey);
+      const pend=cobClientes().filter(c=>{const d=cobData(c);return !(d.cobradoMes===mesKey||!!(d.cobradoMeses&&d.cobradoMeses[mesKey]));});
       const total=pend.reduce((a,c)=>a+(c.valor||0),0);
       const venc=cobVencimento();const diasVenc=Math.ceil((venc-new Date())/864e5);
       if(pend.length&&diasVenc<=6)problemas.push({ic:'💸',t:`${pend.length} cliente(s) sem cobrança do mês (R$ ${total.toLocaleString('pt-BR')}) e o vencimento é dia ${venc.getDate()}`,go:`document.querySelector('[data-nav="cobranca"]').click()`});
@@ -10927,7 +10927,7 @@ function finSyncFromPlanilha(opts){opts=opts||{};if(typeof planEnsure==='functio
     if(id.indexOf('plan-')!==0)return;
     const d=state.cobranca[id];if(!d||!d._plan)return;
     if(nomesAtuais.has(normName(d._nome||'')))return;
-    if(d.cobradoMes===cobMesKey())return;
+    const mk=cobMesKey();if(d.cobradoMes===mk||!!(d.cobradoMeses&&d.cobradoMeses[mk]))return;
     delete state.cobranca[id];
   });
   saveAcerto();saveCobranca();
