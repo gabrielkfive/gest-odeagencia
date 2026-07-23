@@ -5999,7 +5999,7 @@ async function jarvisSpeak(txt){
         _jarvisAudio.play().catch(()=>jarvisSpeakBrowser(txt));
         return;
       }
-      if(r&&r.nokey){_fishOff=true;} // sem chave: não tenta de novo nesta sessão
+      if(r&&r.nokey){_fishOff=true;if(typeof toast==='function')toast('🔊 Voz do navegador ativa (Fish Audio indisponível)');} // sem chave: não tenta de novo nesta sessão
     }catch(e){/* cai pro navegador */}
   }
   jarvisSpeakBrowser(txt);
@@ -9221,7 +9221,7 @@ var JV_LOCAL='http://localhost:8787';
 var JV_HUD={timer:null,skills:null,lastWords:0};
 function jvVisible(){var p=document.getElementById('page-jarvis');return p&&p.offsetParent!==null;}
 function jvFetch(path,opt){
-  var ctl=new AbortController();var t=setTimeout(function(){ctl.abort();},2500);
+  var ctl=new AbortController();var t=setTimeout(function(){ctl.abort();},1000);
   return fetch(JV_LOCAL+path,Object.assign({signal:ctl.signal},opt||{})).then(function(r){clearTimeout(t);return r.ok?r.json():Promise.reject(r.status);});
 }
 function jvNum(el,to){
@@ -13230,7 +13230,7 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
     var h=new Date().getHours();
     var s=h<5?'Boa madrugada':h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
     var _nm=(typeof WFA_MEMBER!=='undefined'&&WFA_MEMBER&&WFA_MEMBER.full_name)?mdFirst(WFA_MEMBER.full_name):'';
-    auraSet('aura-saud',s+(_nm?', '+_nm:'')+'! 👋');
+    auraSet('aura-saud',s+(_nm?', '+_nm:'')+', Senhor.');
     try{
       if(typeof mdwBuckets!=='function')return;
       var B=mdwBuckets();
