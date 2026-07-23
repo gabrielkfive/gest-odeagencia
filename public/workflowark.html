@@ -3325,7 +3325,7 @@ function hojeYmd(){return new Date().toLocaleDateString('pt-BR',{timeZone:'Ameri
 function tarefaPassaFiltro(t){
   const today=hojeSP();
   const em7=dataSP(new Date(Date.now()+7*86400000));
-  if(WFA_FILTROS.busca&&!(t.title||'').toLowerCase().includes(WFA_FILTROS.busca))return false;
+  if(WFA_FILTROS.busca&&!(t.title||'').toLowerCase().includes(WFA_FILTROS.busca)&&!(t.desc||'').toLowerCase().includes(WFA_FILTROS.busca))return false;
   if(WFA_FILTROS.prio&&t.prio!==WFA_FILTROS.prio)return false;
   if(WFA_FILTROS.resp&&t.resp!==WFA_FILTROS.resp)return false;
   if(WFA_FILTROS.cli&&t.clienteId!==WFA_FILTROS.cli)return false;
@@ -6915,7 +6915,7 @@ function renderSprints(){
         <div class="sc-meta"><span class="dot ${c.status==='churn'?'gray':c.status}"></span>${c.plano}${capInfo}${tarefasAtivas?` · <span style="color:var(--yel-d);font-weight:700">${tarefasAtivas} tarefas</span>`:''}</div>
       </div>`;
     }).join('');
-    return `<div class="sprint-col ${sp.n===2?'active':''}" data-spcol="${sp.n}"><div class="col-head"><h4><span class="dot ${sp.n===2?'y':'gray'}"></span>${sp.nm}</h4><span class="ct">${sp.clis.length}</span></div><div class="sp-drop" data-spdrop="${sp.n}" style="min-height:40px;display:flex;flex-direction:column;gap:8px">${clis||'<div class="muted" style="font-size:11px;padding:6px">Arraste clientes aqui</div>'}</div></div>`;
+    return `<div class="sprint-col" data-spcol="${sp.n}"><div class="col-head"><h4><span class="dot gray"></span>${sp.nm}</h4><span class="ct">${sp.clis.length}</span></div><div class="sp-drop" data-spdrop="${sp.n}" style="min-height:40px;display:flex;flex-direction:column;gap:8px">${clis||'<div class="muted" style="font-size:11px;padding:6px">Arraste clientes aqui</div>'}</div></div>`;
   }).join('');
   // drag-and-drop
   board.querySelectorAll('.sprint-card').forEach(card=>{
