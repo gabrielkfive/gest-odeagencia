@@ -2890,7 +2890,7 @@ function wfaSetTheme(t){
         <div class="g4" style="margin-bottom:14px" id="comercial-kpis">
           <div class="kpi"><div class="l">Leads Growth comprados</div><div class="v" contenteditable="true" data-com-key="leads_growth">4</div><div class="d" contenteditable="true" data-com-key="leads_growth_d">~R$700–900 invest.</div></div>
           <div class="kpi"><div class="l">Leads Tráfego ARK</div><div class="v" contenteditable="true" data-com-key="leads_trafego">~37</div><div class="d" contenteditable="true" data-com-key="leads_trafego_d">R$916 investidos</div></div>
-          <div class="kpi yel"><div class="l">Fechamentos ARK</div><div class="v" contenteditable="true" data-com-key="fechamentos_ark" style="color:inherit">5</div><div class="d" contenteditable="true" data-com-key="fechamentos_ark_d" style="color:#7a5c00">Sasse · Fonseca · Vaca Velha · Bella Vita · Brisa</div></div>
+          <div class="kpi yel"><div class="l">Fechamentos ARK</div><div class="v" contenteditable="true" data-com-key="fechamentos_ark" style="color:inherit">5</div><div class="d" contenteditable="true" data-com-key="fechamentos_ark_d" style="color:#7a5c00">Sasse · Fonseca · Vaca Velha · Brisa</div></div>
           <div class="kpi dk"><div class="l">Fechamento Alpha real</div><div class="v" contenteditable="true" data-com-key="fechamentos_alpha">1</div><div class="d" contenteditable="true" data-com-key="fechamentos_alpha_d">Attraversiamo · resto repasse matriz</div></div>
         </div>
 
@@ -12879,7 +12879,7 @@ document.addEventListener('blur',e=>{const t=e.target;if(t&&t.dataset&&t.dataset
 const COMERCIAL_DEFAULTS={
   leads_growth:'4',leads_growth_d:'~R$700–900 invest.',
   leads_trafego:'~37',leads_trafego_d:'R$916 investidos',
-  fechamentos_ark:'5',fechamentos_ark_d:'Sasse · Fonseca · Vaca Velha · Bella Vita · Brisa',
+  fechamentos_ark:'5',fechamentos_ark_d:'Sasse · Fonseca · Vaca Velha · Brisa',
   fechamentos_alpha:'1',fechamentos_alpha_d:'Attraversiamo · resto repasse matriz',
   fonte_indicacao:'~8',fonte_indicacao_d:'Mais qualificado. Depende de retenção alta.',
   fonte_trafego:'~37',fonte_trafego_d:'R$916 invest. · filtro a reformular',
@@ -12964,8 +12964,11 @@ function renderComercialFunil(data,useDef){
   const box=document.getElementById('comercial-funil');if(!box)return;
   const g=k=>{const v=data[k]!==undefined?data[k]:(useDef?COMERCIAL_DEFAULTS[k]:undefined);const m=String(v||'').replace(',','.').match(/[\d.]+/);return m?parseFloat(m[0]):0;};
   const leads=Math.round(g('leads_growth')+g('leads_trafego')+g('fonte_indicacao'));
-  const reunioes=Math.round((g('fechamentos_ark')+g('fechamentos_alpha'))*2.2)||Math.round(leads*0.4); // estimativa (10 reuniões ~ 1 fechamento)
-  const fech=Math.round(g('fechamentos_ark')+g('fechamentos_alpha'));
+  const _fechDigitado=Math.round(g('fechamentos_ark')+g('fechamentos_alpha'));
+  const _mesCrm=(typeof cobMesKey==='function')?cobMesKey():hojeYmd().slice(0,7);
+  const _crmFech=(!_fechDigitado&&typeof loadCrm==='function')?loadCrm().filter(l=>l.stage===4&&(l.due||'').slice(0,7)===_mesCrm).length:0;
+  const fech=_fechDigitado||_crmFech;
+  const reunioes=Math.round(fech*2.2)||Math.round(leads*0.4); // estimativa (10 reuniões ~ 1 fechamento)
   const metaF=g('meta_fecha')||0;
   const pct=(a,b)=>b?Math.round(a/b*100):0;
   const _aura=document.body.classList.contains('aura-dark'); // tema escuro pede barras vivas (as mesmas do Meu Mês)
@@ -12998,7 +13001,7 @@ function renderComercialFunil(data,useDef){
 document.querySelectorAll('[data-com-key]').forEach(el=>{
   el.style.outline='none';
   el.addEventListener('focus',()=>{el.style.background='var(--yel-soft)';});
-  el.addEventListener('blur',()=>{el.style.background='';});
+  el.addEventListener('blur',()=>{el.style.background='';try{comercialSalvarMes();}catch(e){}});
 });
 
 /* Init new modules */
