@@ -5626,7 +5626,7 @@ function cliDetalhe(id){
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
       <button class="icobtn" onclick="closeModal('modal-cli-detalhe');goRegua('${id}')">Régua dos 15</button>
       <button class="icobtn" onclick="closeModal('modal-cli-detalhe');document.querySelector('[data-nav=jornada]')&&document.querySelector('[data-nav=jornada]').click()">Ver na Jornada</button>
-      ${c.custom?`<button class="icobtn" onclick="closeModal('modal-cli-detalhe');cliEditOpen('${id}')">Editar cadastro</button>`:''}
+      <button class="icobtn" onclick="closeModal('modal-cli-detalhe');cliEditOpen('${id}')">Editar cadastro</button>
       <button class="tb-btn" style="margin-left:auto" onclick="closeModal('modal-cli-detalhe')">Pronto</button>
     </div>`;
   document.getElementById('modal-cli-detalhe').classList.add('open');
@@ -9194,6 +9194,13 @@ function jarvisPageEnter(){
   try{jarvisBootSound();}catch(e){}
   jarvisRender();
   setTimeout(()=>{const i=document.getElementById('jarvis-input');if(i)i.focus();},120);
+  // Safari/iOS: SpeechRecognition ausente — desativa botões de voz com aviso claro
+  if(!('SpeechRecognition' in window||'webkitSpeechRecognition' in window)){
+    const mic=document.getElementById('jarvis-mic');
+    if(mic){mic.title='Voz não disponível no Safari/iOS. Use o teclado.';mic.style.opacity='0.4';mic.disabled=true;}
+    const conv=document.getElementById('jarvis-conv');
+    if(conv){conv.title='Modo voz não disponível no Safari/iOS.';conv.style.opacity='0.4';conv.disabled=true;}
+  }
   // ao abrir, o JARVIS já dá o brief do dia (autônomo) — 1x por abertura de sessão
   if(_jarvisFirstOpen && !JARVIS_MSGS.length){ _jarvisFirstOpen=false; setTimeout(jarvisAutoBrief,700); }
 }
