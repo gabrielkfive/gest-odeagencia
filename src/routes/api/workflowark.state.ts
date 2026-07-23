@@ -1211,8 +1211,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
             "CONTEXTO DO CLIENTE:\n" + brief,
           ].join("\n");
 
-          const novasLegendas: any[] = [];
-          for (const tarefa of pendentes.slice(0, 5)) {
+          const resultados = await Promise.all(pendentes.slice(0, 5).map(async (tarefa) => {
             try {
               const userMsg = `Vídeo editado: ${tarefa.title}\n${tarefa.desc ? "Descrição: " + tarefa.desc : ""}`;
               const r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -1221,13 +1220,13 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
                 body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 800, system: sys, messages: [{ role: "user", content: userMsg }] }),
               });
               const d: any = await r.json().catch(() => ({}));
-              if (!r.ok) continue;
+              if (!r.ok) return null;
               let raw2 = (d?.content?.[0]?.text || "").replace(/```json|```/g, "").trim();
               const m2 = raw2.match(/\{[\s\S]*\}/);
-              if (!m2) continue;
+              if (!m2) return null;
               let parsed: any = {};
-              try { parsed = JSON.parse(m2[0]); } catch { continue; }
-              novasLegendas.push({
+              try { parsed = JSON.parse(m2[0]); } catch { return null; }
+              return {
                 id: `leg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
                 clienteId: "vivenda",
                 cliente: "Vivenda",
@@ -1244,9 +1243,10 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
                 captacao: "",
                 melhorDia: "",
                 hashtags: parsed.hashtags || "",
-              });
-            } catch { continue; }
-          }
+              };
+            } catch { return null; }
+          }));
+          const novasLegendas = resultados.filter(Boolean) as any[];
 
           if (novasLegendas.length) {
             const filaAtualizada = [...novasLegendas, ...fila].slice(0, 500);
