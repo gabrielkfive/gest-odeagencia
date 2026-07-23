@@ -18,7 +18,14 @@ export const Route = createFileRoute("/api/google/auth")({
           );
         }
         const origin = new URL(request.url).origin;
-        return new Response(null, { status: 302, headers: { Location: googleAuthUrl(origin) } });
+        const csrfState = crypto.randomUUID();
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: googleAuthUrl(origin, csrfState),
+            "Set-Cookie": `oauth_state=${csrfState}; HttpOnly; SameSite=Lax; Path=/; Max-Age=600`,
+          },
+        });
       },
     },
   },
