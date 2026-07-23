@@ -3321,7 +3321,6 @@ function limparFiltros(){
 // prazos e a virada de mês. dataSP/hojeSP resolvem em qualquer fuso. en-CA = YYYY-MM-DD.
 function dataSP(d){return (d||new Date()).toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});}
 function hojeSP(){return dataSP(new Date());}
-function hojeYmd(){return new Date().toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}).split('/').reverse().join('-');}
 function tarefaPassaFiltro(t){
   const today=hojeSP();
   const em7=dataSP(new Date(Date.now()+7*86400000));
@@ -6972,7 +6971,7 @@ function openSprint(n,cliId){
         <div class="as-title">${a.t} <span class="tag yel">média</span> <span style="font-size:10px;color:var(--mute);font-weight:600">${a.f}</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
           <div><label class="form-label" style="font-size:9px;margin-bottom:2px">Vencimento</label><input class="form-input" type="date" id="atv-data-${i}" value="${venc}" style="padding:5px 8px;font-size:11.5px"></div>
-          <div><label class="form-label" style="font-size:9px;margin-bottom:2px">Responsável</label><select class="form-select" id="atv-resp-${i}" style="padding:5px 8px;font-size:11.5px"><option>${RESPONSAVEIS_FN[a.f]||'Lucas Rosi'}</option>${allTeam().map(n=>`<option>${mdEsc(n)}</option>`).join('')}</select></div>
+          <div><label class="form-label" style="font-size:9px;margin-bottom:2px">Responsável</label><select class="form-select" id="atv-resp-${i}" style="padding:5px 8px;font-size:11.5px">${allTeam().map(n=>`<option${n===(RESPONSAVEIS_FN[a.f]||'Lucas Rosi')?' selected':''}>${mdEsc(n)}</option>`).join('')}</select></div>
         </div>
       </div>
     </div>
@@ -7981,7 +7980,7 @@ function renderTarefas(){
   document.getElementById('kpi-andamento').textContent=state.tarefas.filter(t=>t.status==='andamento').length;
   const today=hojeSP();
   document.getElementById('kpi-atrasadas').textContent=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
-  document.getElementById('kpi-concluidas').textContent=state.tarefas.filter(t=>t.status==='concluido'&&String(t.concluidaEm||t.criadaEm||'').startsWith(today)).length;
+  document.getElementById('kpi-concluidas').textContent=state.tarefas.filter(t=>t.status==='concluido'&&String(t.concluidaEm||'').startsWith(today)).length;
   // bind drag
   bindDrag();
   tarefaApplyView();
@@ -8524,7 +8523,7 @@ function saveTaskDetail(){
   t.desc=document.getElementById('td-desc').value;
   t.status=document.getElementById('td-status').value;
   taskStampSt(t,t.status);
-  if(t.status==='concluido')taskConcluir(t);else t.concluidaEm=null; // congela o cronômetro e carimba/limpa a entrega
+  if(t.status==='concluido'){if(!taskConcluir(t)){document.getElementById('td-status').value='andamento';return;}}else t.concluidaEm=null;
   t.prio=document.getElementById('td-prio').value;
   t.resp=document.getElementById('td-resp').value;
   t.data=document.getElementById('td-data').value;

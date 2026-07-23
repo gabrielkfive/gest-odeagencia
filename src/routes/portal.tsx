@@ -18,7 +18,8 @@ export const Route = createFileRoute("/portal")({
 });
 
 type Ideia = { data?: string; dia?: string; formato?: string; tema?: string; produto?: string; angulo?: string; legenda?: string };
-type Data = { cliente?: string; periodo?: string; ideias?: Ideia[]; agency?: string };
+type DemandaItem = { id: string; titulo: string; criadaEm?: string; status: string };
+type Data = { cliente?: string; periodo?: string; ideias?: Ideia[]; agency?: string; demandas?: DemandaItem[] };
 
 const GOLD = "#E3B341";
 const BG = "#0C0A09";
@@ -58,6 +59,7 @@ function Portal() {
       const j = await r.json();
       if (j?.error) { setErr(j.error); return; }
       setSent(true); setTitulo(""); setMsg("");
+      setD(prev => prev ? { ...prev, demandas: [{ id: "d" + Date.now(), titulo: titulo || "Demanda do cliente", criadaEm: new Date().toISOString(), status: "aberta" }, ...(prev.demandas || [])] } : prev);
     } catch { setErr("Não foi possível enviar. Tente novamente."); }
     finally { setSending(false); }
   }
@@ -121,6 +123,21 @@ function Portal() {
           </div>
         )}
 
+        {(d?.demandas?.length ?? 0) > 0 && (
+          <div style={{ marginTop: 30 }}>
+            <SectionTitle icon={<IconList />} text="Suas solicitações" />
+            {d!.demandas!.map(dm => (
+              <div key={dm.id} style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "13px 16px", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#F5F3F0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{dm.titulo}</div>
+                  {dm.criadaEm && <div style={{ fontSize: 12, color: "#6B645D", marginTop: 2 }}>{fmtDate(dm.criadaEm)}</div>}
+                </div>
+                <StatusChip status={dm.status} />
+              </div>
+            ))}
+          </div>
+        )}
+
         <p style={{ textAlign: "center", color: "#6B645D", fontSize: 11.5, marginTop: 36, letterSpacing: ".02em" }}>Powered by WorkFlowArk · ARK Content</p>
       </div>
     </div>
@@ -143,6 +160,22 @@ const globalCss = `
   @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 `;
 
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  aberta:    { label: "Recebida",      color: "#6FD17A" },
+  backlog:   { label: "Na fila",       color: "#A8A29E" },
+  andamento: { label: "Em andamento",  color: GOLD },
+  aprovacao: { label: "Aprovação",     color: "#93C5FD" },
+  concluido: { label: "Concluído",     color: "#86EFAC" },
+};
+function StatusChip({ status }: { status: string }) {
+  const s = STATUS_LABELS[status] || { label: status, color: "#A8A29E" };
+  return <span style={{ fontSize: 11, fontWeight: 700, color: s.color, background: s.color + "22", borderRadius: 8, padding: "3px 9px", whiteSpace: "nowrap", flexShrink: 0 }}>{s.label}</span>;
+}
+function fmtDate(s?: string) {
+  if (!s) return "";
+  try { return new Date(s).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }); } catch { return ""; }
+}
+function IconList() { return (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>); }
 function IconLock() { return (<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>); }
 function IconCheck({ size = 18 }: { size?: number }) { return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>); }
 function IconEdit({ size = 18 }: { size?: number }) { return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>); }

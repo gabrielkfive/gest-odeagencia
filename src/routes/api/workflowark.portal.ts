@@ -42,12 +42,20 @@ export const Route = createFileRoute("/api/workflowark/portal")({
         const pk = portal.planKey && plano[portal.planKey] ? portal.planKey
           : Object.keys(plano).find((k) => String(plano[k]?.cliente || "").toLowerCase() === clienteNorm);
         const plan = pk ? plano[pk] : null;
+
+        const demandasArr = (await readState(db, "wfa-demandas")) || [];
+        const minhasDemandas = (Array.isArray(demandasArr) ? demandasArr : [])
+          .filter((dm: any) => String(dm.cliente || "").toLowerCase() === clienteNorm && dm.origem === "portal")
+          .map((dm: any) => ({ id: dm.id, titulo: dm.titulo, criadaEm: dm.criadaEm, status: dm.status }))
+          .slice(0, 20);
+
         return json({
           ok: true,
           cliente: portal.cliente,
           agency: portal.agency || "ARK Content",
           periodo: plan?.periodo || "",
           ideias: Array.isArray(plan?.ideias) ? plan.ideias : [],
+          demandas: minhasDemandas,
         });
       },
 
