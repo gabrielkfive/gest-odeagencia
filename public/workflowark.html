@@ -1,4 +1,4 @@
-<!-- build 2026-07-27-merge-por-tarefa -->
+<!-- build 2026-07-27-cores-kanban-sem-setinha -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -439,6 +439,12 @@ table.t tr.high{background:var(--yel-bg)}
 .task-col-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:12px 4px 10px;margin:0 0 2px;background:linear-gradient(180deg,rgba(251,251,249,.96),rgba(251,251,249,.72));backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);border-bottom:1px solid var(--line)}
 .task-col-head h4{font-size:11px;font-weight:800;color:var(--ink-2);display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.09em}
 .task-col-head .ct{font-family:var(--mono);font-size:10.5px;background:#fff;color:var(--mute);padding:2px 9px;border-radius:var(--r-full);font-weight:700;border:1px solid var(--line);box-shadow:var(--sh-1)}
+/* Cor da etapa ATRÁS do nome da coluna (pedido do Gabriel: só o pontinho era pequeno demais) */
+.task-col-head h4{padding:3px 9px;border-radius:var(--r-full)}
+.task-col[data-status=backlog] .task-col-head h4{background:rgba(130,130,140,.14)}
+.task-col[data-status=andamento] .task-col-head h4{background:rgba(255,199,0,.20);color:#7a5c00}
+.task-col[data-status=aprovacao] .task-col-head h4{background:rgba(59,111,255,.14);color:#2c55c4}
+.task-col[data-status=concluido] .task-col-head h4{background:rgba(48,209,88,.16);color:#177a3d}
 /* CORREÇÃO: a área de soltar era só do tamanho dos cards (sobrava espaço "morto" embaixo
    onde o drop não registrava). Agora a lista preenche a coluna inteira — a coluna toda vira alvo. */
 .task-list{flex:1 0 auto;display:flex;flex-direction:column;gap:9px;min-height:60px}
@@ -1389,6 +1395,11 @@ body.aura-dark .task-col[data-status=concluido] .task-col-head{box-shadow:inset 
 body.aura-dark .task-col[data-status=andamento] .task-col-head h4{color:var(--yel)}
 body.aura-dark .task-col[data-status=aprovacao] .task-col-head h4{color:#8db0ff}
 body.aura-dark .task-col[data-status=concluido] .task-col-head h4{color:#4ade80}
+/* Cor da etapa atrás do nome também no escuro (tinta suave, sem gritar no preto) */
+body.aura-dark .task-col[data-status=backlog] .task-col-head h4{background:rgba(123,132,148,.16);color:#c7cdd8}
+body.aura-dark .task-col[data-status=andamento] .task-col-head h4{background:rgba(255,199,0,.12)}
+body.aura-dark .task-col[data-status=aprovacao] .task-col-head h4{background:rgba(91,140,255,.14)}
+body.aura-dark .task-col[data-status=concluido] .task-col-head h4{background:rgba(74,222,128,.12)}
 /* Chips de status (tabelas, réguas): mantêm cor viva no preto */
 body.aura-dark .chip.ok{background:rgba(34,197,94,.2);color:#4ade80}
 body.aura-dark .chip.bad{background:rgba(239,68,68,.2);color:#f87171}
@@ -1600,15 +1611,14 @@ function wfaSetTheme(t){
         </div>
       </div>
 
-      <!-- Atividades navega DIRETO pra Tarefas (badge na própria aba, sem clique extra);
-           o chevron é o único alvo que abre o submenu (Demandas/Rotinas). -->
+      <!-- Atividades navega DIRETO pra Tarefas (badge na própria aba, sem chevron nem
+           clique extra); Demandas/Rotinas ficam sempre visíveis logo abaixo. -->
       <div class="navitem" id="nav-atividades" data-nav="tarefas">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         <span>Atividades</span>
         <span class="badge" id="tarefas-badge">0</span>
-        <svg class="chev" onclick="event.stopPropagation();document.getElementById('nav-atividades').classList.toggle('open');document.getElementById('atividades-menu').classList.toggle('open');if(window.navIndicatorSync)navIndicatorSync();" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <div class="subnav" id="atividades-menu">
+      <div class="subnav open" id="atividades-menu">
         <div class="subitem" data-nav="demandas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           <span>Demandas</span>
