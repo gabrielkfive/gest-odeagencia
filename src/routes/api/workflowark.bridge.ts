@@ -131,6 +131,7 @@ export const Route = createFileRoute("/api/workflowark/bridge")({
               if (typeof e.data === "string") t.data = e.data.slice(0, 10);
               if (typeof e.clienteId === "string") t.clienteId = e.clienteId.slice(0, 40);
               if (["alta", "media", "baixa"].includes(e.prio)) t.prio = e.prio;
+              t.up = new Date().toISOString(); // carimbo: a edição da ponte vence cópia velha de cliente no merge
               mudou++;
             });
           }

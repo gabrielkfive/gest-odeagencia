@@ -1,4 +1,4 @@
-<!-- build 2026-07-27-kanban-adicionar-cartao -->
+<!-- build 2026-07-27-merge-por-tarefa -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -3507,7 +3507,17 @@ async function arkDailyAgentsKick(){
 function wfaMergeById(remoteArr,localArr,localPrevalece){
   const byId={}; const order=[];
   (Array.isArray(remoteArr)?remoteArr:[]).forEach(o=>{if(o&&o.id){if(!(o.id in byId))order.push(o.id);byId[o.id]=o;}});
-  (Array.isArray(localArr)?localArr:[]).forEach(o=>{if(o&&o.id){if(!(o.id in byId)){order.push(o.id);byId[o.id]=o;}else if(localPrevalece)byId[o.id]=o;}});
+  (Array.isArray(localArr)?localArr:[]).forEach(o=>{if(o&&o.id){if(!(o.id in byId)){order.push(o.id);byId[o.id]=o;}
+    else{
+      // Conflito no mesmo id: quem tem carimbo `up` mais novo vence, POR ITEM.
+      // Antes o aparelho "autoritário" (dirty) vencia a lista INTEIRA e desfazia
+      // mudança dos outros (tarefa concluída no celular "voltava" pro kanban).
+      const r=byId[o.id];
+      if(o.up&&r.up)byId[o.id]=(o.up>r.up)?o:r;
+      else if(o.up)byId[o.id]=o;
+      else if(r.up)byId[o.id]=r;
+      else if(localPrevalece)byId[o.id]=o;
+    }}});
   return order.map(id=>byId[id]);
 }
 const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes','wfa-crm','wfa-producao','wfa-briefings'];
@@ -3553,6 +3563,7 @@ function applyCloudState(remote){
   });
   WFA_CLOUD_MUTED=false;
   state.tarefas=JSON.parse(localStorage.getItem('wfa-tarefas')||'[]');
+  if(typeof wfaTarefaSnapshot==='function')wfaTarefaSnapshot();
   state.regua=JSON.parse(localStorage.getItem('wfa-regua')||'{}');
   // ANTI-PERDA: chaves de objeto único (não-mescladas) NÃO podem reidratar de uma
   // versão antiga enquanto há edição local não confirmada (dirty). Senão o que o
@@ -5794,7 +5805,17 @@ Object.defineProperty(state,'whatsapp',{
 });
 
 
-function saveTarefas(){localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));renderTarefas();renderSprints();updateBadges();}
+/* Carimbo por tarefa (t.up): só tarefas que REALMENTE mudaram desde o último save/sync
+   ganham timestamp novo. O merge usa esse carimbo pra decidir conflito por item.
+   O snapshot precisa ser refeito a cada rehidratação (boot e applyCloudState), senão
+   o primeiro save carimbaria a lista inteira e este aparelho venceria tudo. */
+let WFA_TAR_SNAP=new Map();
+function wfaTarefaJson(t){const c=Object.assign({},t);delete c.up;return JSON.stringify(c);}
+function wfaTarefaSnapshot(){WFA_TAR_SNAP=new Map();(state.tarefas||[]).forEach(t=>{if(t&&t.id)WFA_TAR_SNAP.set(t.id,wfaTarefaJson(t));});}
+function saveTarefas(){
+  try{(state.tarefas||[]).forEach(t=>{if(!t||!t.id)return;const j=wfaTarefaJson(t);if(WFA_TAR_SNAP.get(t.id)!==j){t.up=new Date().toISOString();WFA_TAR_SNAP.set(t.id,j);}});}catch(e){}
+  localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));renderTarefas();renderSprints();updateBadges();}
+wfaTarefaSnapshot();
 function saveRegua(){localStorage.setItem('wfa-regua',JSON.stringify(state.regua));}
 function saveGcal(){localStorage.setItem('wfa-gcal',JSON.stringify(state.gcal||{}));}
 function saveCobranca(){localStorage.setItem('wfa-cobranca',JSON.stringify(state.cobranca));if(typeof cloudSave==='function')cloudSave('wfa-cobranca',state.cobranca);}
