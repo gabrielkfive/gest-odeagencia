@@ -1,4 +1,4 @@
-<!-- build 2026-07-27-notif-inbox-mddone -->
+<!-- build 2026-07-27-propostas-expiram -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -10066,6 +10066,7 @@ function notifSaveRead(set){try{localStorage.setItem('wfa-notif-read',JSON.strin
 /* Abrir a aba já marca como lida toda notificação informativa (proposta pendente NÃO:
    ela segue contando no sino até ser aprovada/descartada). */
 function notifAutoLer(){
+  try{notifExpirarPropostas();}catch(e){}
   const s=notifReadSet();let n=0;
   (state.notificacoes||[]).forEach(x=>{
     const pendente=x.tarefaProposta&&!x.aprovada&&!x.descartada;
@@ -10073,6 +10074,16 @@ function notifAutoLer(){
   });
   if(n)notifSaveRead(s);
   renderNotificacoes();
+}
+/* Proposta de tarefa parada há 7+ dias expira sozinha (o sino vivia em 99+ com
+   dezenas de sugestões velhas do WhatsApp). Só roda logado: anônimo não pode salvar. */
+function notifExpirarPropostas(){
+  if(typeof WFA_MEMBER==='undefined'||!WFA_MEMBER||!WFA_MEMBER.id)return;
+  const corte=Date.now()-7*86400000;let n=0;
+  (state.notificacoes||[]).forEach(x=>{
+    if(x.tarefaProposta&&!x.aprovada&&!x.descartada&&x.ts&&x.ts<corte){x.descartada=true;x.expirada=true;n++;}
+  });
+  if(n){saveNotificacoes();toast(n+' proposta(s) antiga(s) de tarefa expiraram sozinhas');}
 }
 function renderNotificacoes(){
   const arr=(state.notificacoes&&Array.isArray(state.notificacoes))?state.notificacoes:[];
@@ -10102,7 +10113,7 @@ function renderNotificacoes(){
         <button class="tb-btn" onclick="notifDescartarTarefa('${n.id}')">Descartar</button>
       </div>`;
     }
-    const rod=n.tarefaProposta?(n.aprovada?' · tarefa criada ✓':(n.descartada?' · descartada':' · aguardando sua aprovação')):(n.tarefaId?' · tarefa criada':'');
+    const rod=n.tarefaProposta?(n.aprovada?' · tarefa criada ✓':(n.expirada?' · expirada (7 dias sem decisão)':(n.descartada?' · descartada':' · aguardando sua aprovação'))):(n.tarefaId?' · tarefa criada':'');
     return `<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid ${temProposta?'var(--yel,#ffd400)':'var(--line)'};display:flex;justify-content:space-between;gap:10px;align-items:center;${lida?'opacity:.55':''}">
       <div><div style="font-size:13px;font-weight:${lida?'500':'700'}">${mdEsc(n.texto||'')}</div><div style="font-size:11px;color:var(--mute);margin-top:3px">${dt}${rod}</div></div>
       ${acoes}
