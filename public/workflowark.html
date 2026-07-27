@@ -1,4 +1,4 @@
-<!-- build 2026-07-27-meudia-widgets-sem-wpp -->
+<!-- build 2026-07-27-notif-inbox-mddone -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -3303,7 +3303,7 @@ function wfaSetTheme(t){
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings','wfa-acertosrec','wfa-propostas'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings','wfa-acertosrec','wfa-propostas','wfa-notif-read'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -3541,8 +3541,13 @@ function applyCloudState(remote){
   let deletedSet=loadDeleted();
   try{ let rd=remote['wfa-deleted-ids']; if(typeof rd==='string')rd=JSON.parse(rd); if(Array.isArray(rd))rd.forEach(i=>deletedSet.add(i)); }catch(e){}
   WFA_LS_SET('wfa-deleted-ids',JSON.stringify([...deletedSet].slice(-3000)));
+  // Notificações lidas: UNIÃO remoto+local (como a lápide). Antes o "lido" vivia só no
+  // aparelho e todo navegador novo voltava com 99+ no sino.
+  try{ let rr=remote['wfa-notif-read']; if(typeof rr==='string')rr=JSON.parse(rr);
+    if(Array.isArray(rr)&&rr.length){const s=new Set();try{JSON.parse(localStorage.getItem('wfa-notif-read')||'[]').forEach(i=>s.add(i));}catch(e){}
+      rr.forEach(i=>s.add(i));WFA_LS_SET('wfa-notif-read',JSON.stringify([...s].slice(-2000)));} }catch(e){}
   Object.entries(remote||{}).forEach(([key,value])=>{
-    if(!isWfaCloudKey(key)||key==='wfa-deleted-ids')return;
+    if(!isWfaCloudKey(key)||key==='wfa-deleted-ids'||key==='wfa-notif-read')return;
     // DELEÇÃO propaga entre dispositivos: removeItem grava null no servidor. Ao ver null aqui
     // (reset de brand, checklist etc.), apaga o valor local. Sem isto, a deleção ressuscitava.
     // Protege se o usuário acabou de recriar a chave (dirty/janela recente).
@@ -5872,6 +5877,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(sub) sub.previousElementSibling?.classList.add('active');
     document.getElementById('page-'+p)?.classList.add('active');
     if((p==='painel'||p==='dashboard')&&typeof renderWidgets==='function'){try{renderWidgets();}catch(e){console.warn('painel',e);}}
+    if(p==='notificacoes'&&typeof notifAutoLer==='function'){try{notifAutoLer();}catch(e){}}
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     if(p==='alpha'&&typeof renderAlpha==='function'){try{renderAlpha();}catch(e){console.warn('alpha',e);}}
     if(p==='meumes'&&typeof renderMeumes==='function'){try{renderMeumes();}catch(e){console.warn('meumes',e);}}
@@ -7251,7 +7257,13 @@ function mdRenderAprovacao(){
       <button class="md-apr-btn" onclick="event.stopPropagation();openTaskDetail('${t.id}')">Revisar</button>
     </div>`;}).join('')}</div></div>`;
 }
-function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;taskConcluir(t);saveTarefas();renderMeuDia();if(typeof renderWidgets==='function')renderWidgets();toast('✓ Tarefa concluída · boa!');}
+function mdDone(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;
+  // Respeita o retorno do gate de POP: antes o toast de sucesso atropelava o aviso e a
+  // pessoa "concluía" no Meu Dia mas o cartão continuava vivo em Atividades.
+  const ok=taskConcluir(t);saveTarefas();renderMeuDia();if(typeof renderWidgets==='function')renderWidgets();
+  if(ok)toast('✓ Tarefa concluída · boa!');
+  else setTimeout(()=>{try{openTaskDetail(id);}catch(e){}},900); // abre o checklist que falta
+}
 function mdSnooze(id){const t=state.tarefas.find(x=>x.id===id);if(!t)return;const d=new Date();d.setDate(d.getDate()+1);t.data=dataSP(d);saveTarefas();renderMeuDia();toast('↻ Adiada para amanhã');}
 /* ====== PAINEL DE WIDGETS PERSONALIZÁVEIS (estilo Apple) ====== */
 const MDW_TYPES={
@@ -7682,11 +7694,11 @@ function renderMeuDia(){
   if(box){
     let html='';
     if(late.length){
-      html+='<div class="md-subhd">⚠ Atrasadas</div>'+late.slice(0,12).map(t=>mdTaskRow('late',t)).join('');
-      if(late.length>12)html+=`<div style="padding:8px 4px"><button class="icobtn" style="font-size:12px;color:var(--red)" onclick="mdVerAtrasadas()">+ ${late.length-12} atrasada(s), ver todas em Tarefas</button></div>`;
+      html+='<div class="md-subhd">⚠ Atrasadas</div>'+late.slice(0,6).map(t=>mdTaskRow('late',t)).join('');
+      if(late.length>6)html+=`<div style="padding:8px 4px"><button class="icobtn" style="font-size:12px;color:var(--red)" onclick="mdVerAtrasadas()">+ ${late.length-6} atrasada(s), ver todas em Tarefas</button></div>`;
     }
     if(todayT.length){html+='<div class="md-subhd">📅 Para hoje</div>'+todayT.map(t=>mdTaskRow('today',t)).join('');}
-    if(pend.length){html+='<div class="md-subhd">➜ Próximas</div>'+pend.slice(0,8).map(t=>mdTaskRow('soon',t)).join('');}
+    if(pend.length){html+='<div class="md-subhd">➜ Próximas</div>'+pend.slice(0,5).map(t=>mdTaskRow('soon',t)).join('');}
     if(!html)html='<div class="md-empty">Nada pendente no seu nome. Dia livre — ou hora de puxar algo do time. 🎯</div>';
     wfaSetHTML(box,html); /* escrita calma: sem repintar se nada mudou */
   }
@@ -10050,7 +10062,18 @@ async function wppSyncAvatars(silent){
 }
 /* ============ NOTIFICAÇÕES (assistente) ============ */
 function notifReadSet(){try{return new Set(JSON.parse(localStorage.getItem('wfa-notif-read')||'[]'));}catch(e){return new Set();}}
-function notifSaveRead(set){try{WFA_LS_SET('wfa-notif-read',JSON.stringify([...set]));}catch(e){}}
+function notifSaveRead(set){try{localStorage.setItem('wfa-notif-read',JSON.stringify([...set].slice(-2000)));}catch(e){}}
+/* Abrir a aba já marca como lida toda notificação informativa (proposta pendente NÃO:
+   ela segue contando no sino até ser aprovada/descartada). */
+function notifAutoLer(){
+  const s=notifReadSet();let n=0;
+  (state.notificacoes||[]).forEach(x=>{
+    const pendente=x.tarefaProposta&&!x.aprovada&&!x.descartada;
+    if(!pendente&&!s.has(x.id)){s.add(x.id);n++;}
+  });
+  if(n)notifSaveRead(s);
+  renderNotificacoes();
+}
 function renderNotificacoes(){
   const arr=(state.notificacoes&&Array.isArray(state.notificacoes))?state.notificacoes:[];
   const read=notifReadSet();
@@ -10060,24 +10083,28 @@ function renderNotificacoes(){
   const badgeTop=document.getElementById('notif-badge-top');
   if(badgeTop){badgeTop.textContent=naoLidas>99?'99+':naoLidas;badgeTop.style.display=naoLidas?'flex':'none';}
   const wrap=document.getElementById('notif-wrap');if(!wrap)return;
-  const show=arr.filter(n=>!read.has(n.id)); // só as NÃO lidas aparecem (lidas somem)
+  // Caixa de entrada: propostas pendentes no TOPO (até decidir), depois o histórico
+  // recente (lidas ficam esmaecidas em vez de sumir — antes só esvaziava clicando
+  // "ok" uma a uma e a aba vivia "lotada" com o sino em 99+).
+  const pendentes=arr.filter(n=>n.tarefaProposta&&!n.aprovada&&!n.descartada);
+  const historico=arr.filter(n=>!(n.tarefaProposta&&!n.aprovada&&!n.descartada)).slice(0,50);
+  const show=pendentes.concat(historico);
   if(!show.length){wrap.innerHTML='<div class="card" style="padding:24px;color:var(--mute)">✓ Tudo em dia — nenhuma notificação pendente.</div>';return;}
   wrap.innerHTML=show.map(n=>{
     const dt=n.ts?new Date(n.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
     // Sugestão de tarefa do WhatsApp: só vira cartão quando o Gabriel APROVA aqui.
     const temProposta=n.tarefaProposta&&!n.aprovada&&!n.descartada;
-    let acoes;
+    const lida=read.has(n.id)&&!temProposta;
+    let acoes='';
     if(temProposta){
       acoes=`<div style="display:flex;gap:6px;flex-shrink:0">
         <button class="tb-btn" style="background:#1a7f3c;border-color:#1a7f3c;color:#fff;font-weight:700" onclick="notifAprovarTarefa('${n.id}')">✓ Criar tarefa</button>
         <button class="tb-btn" onclick="notifDescartarTarefa('${n.id}')">Descartar</button>
       </div>`;
-    }else{
-      acoes=`<button class="tb-btn" onclick="marcarNotifLida('${n.id}')">ok</button>`;
     }
     const rod=n.tarefaProposta?(n.aprovada?' · tarefa criada ✓':(n.descartada?' · descartada':' · aguardando sua aprovação')):(n.tarefaId?' · tarefa criada':'');
-    return `<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid var(--yel,#ffd400);display:flex;justify-content:space-between;gap:10px;align-items:center">
-      <div><div style="font-size:13px;font-weight:700">${mdEsc(n.texto||'')}</div><div style="font-size:11px;color:var(--mute);margin-top:3px">${dt}${rod}</div></div>
+    return `<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid ${temProposta?'var(--yel,#ffd400)':'var(--line)'};display:flex;justify-content:space-between;gap:10px;align-items:center;${lida?'opacity:.55':''}">
+      <div><div style="font-size:13px;font-weight:${lida?'500':'700'}">${mdEsc(n.texto||'')}</div><div style="font-size:11px;color:var(--mute);margin-top:3px">${dt}${rod}</div></div>
       ${acoes}
     </div>`;
   }).join('');
