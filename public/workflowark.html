@@ -1,4 +1,4 @@
-<!-- build 2026-07-27-cores-kanban-sem-setinha -->
+<!-- build 2026-07-27-meudia-widgets-sem-wpp -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -1558,10 +1558,8 @@ function wfaSetTheme(t){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Meu Dia</span>
       </div>
-      <div class="navitem" data-nav="painel">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-        <span>Meu Painel</span>
-      </div>
+      <!-- Meu Painel fundido no Meu Dia (widgets no fim da página). O page-painel
+           segue no DOM escondido: é fonte do clone do hero e evita JS órfão. -->
       <div class="navitem" data-nav="reunioes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Reuniões · Agenda</span>
@@ -1773,12 +1771,8 @@ function wfaSetTheme(t){
       </div>
       </div>
 
-      <div class="navitem nav-wpp" data-nav="whatsapp" style="margin-top:10px;border-top:1px solid var(--line);padding-top:14px">
-        <img src="/whatsapp.svg" alt="WhatsApp" style="width:18px;height:18px;object-fit:contain;flex-shrink:0">
-        <span>WhatsApp</span>
-        <span class="badge" id="wpp-badge-nav" style="display:none;background:#25D366;color:#fff">0</span>
-      </div>
-
+      <!-- Botão WhatsApp removido da barra (pedido do Gabriel 27/07: não usa mais,
+           só bugava). A página e o código continuam; só não há mais entrada aqui. -->
     </nav>
 
     <div class="side-foot">
@@ -2101,6 +2095,18 @@ function wfaSetTheme(t){
             </div>
           </aside>
         </div>
+
+        <!-- Widgets (fusão Meu Painel → Meu Dia): board personalizável no fim da página -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:26px 0 12px">
+          <h2 style="font-size:17px;font-weight:800;letter-spacing:-.02em">Meus widgets</h2>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="icobtn" id="mdw-preset" onclick="mdwApplyPreset()" title="Montar o painel com os widgets certos pro seu papel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>Painel do meu papel</button>
+            <button class="icobtn" id="mdw-add" onclick="mdwAddOpen(event)" title="Adicionar widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button>
+            <button class="icobtn" id="mdw-edit-btn" onclick="mdwToggleEdit()" title="Reorganizar, redimensionar e remover widgets">✎ Editar</button>
+          </div>
+        </div>
+        <div id="mdw-board"></div>
+        <div id="mdw-addmenu"></div>
       </div>
 
       <!-- =================== MEU PAINEL (widgets personalizáveis) =================== -->
@@ -2109,11 +2115,6 @@ function wfaSetTheme(t){
           <div class="page-title">
             <h1>Meu Painel</h1>
             <p>Os widgets certos pro seu papel. Arraste, redimensione e personalize do seu jeito.</p>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center">
-            <button class="icobtn" id="mdw-preset" onclick="mdwApplyPreset()" title="Montar o painel com os widgets certos pro seu papel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>Painel do meu papel</button>
-            <button class="icobtn" id="mdw-add" onclick="mdwAddOpen(event)" title="Adicionar widget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button>
-            <button class="icobtn" id="mdw-edit-btn" onclick="mdwToggleEdit()" title="Reorganizar, redimensionar e remover widgets">✎ Editar</button>
           </div>
         </div>
         <!-- AURA/OS: fileira herói Mission Control (só aparece no tema aura-dark) -->
@@ -2147,8 +2148,6 @@ function wfaSetTheme(t){
             <button class="gbtn" data-aura-keep onclick="document.querySelector('[data-nav=tarefas]')&&document.querySelector('[data-nav=tarefas]').click()">Revisar fila</button>
           </div>
         </div>
-        <div id="mdw-board"></div>
-        <div id="mdw-addmenu"></div>
       </div>
 
       <!-- =================== SQUAD ALPHA (replica editável da planilha) =================== -->
@@ -2689,22 +2688,22 @@ function wfaSetTheme(t){
 
         <div class="task-board" id="task-board">
           <div class="task-col" data-status="backlog">
-            <div class="task-col-head"><h4><span class="dot gray"></span>Backlog</h4><span class="ct" id="ct-backlog">0</span></div>
+            <div class="task-col-head"><h4>Backlog</h4><span class="ct" id="ct-backlog">0</span></div>
             <div class="task-list" data-list="backlog"></div>
             <div class="qadd" data-qadd="backlog"><button class="add-task-btn" onclick="qaddOpen('backlog')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'backlog')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('backlog',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('backlog')">✕</button></div></div></div>
           </div>
           <div class="task-col" data-status="andamento">
-            <div class="task-col-head"><h4><span class="dot y"></span>Em Andamento</h4><span class="ct" id="ct-andamento">0</span></div>
+            <div class="task-col-head"><h4>Em Andamento</h4><span class="ct" id="ct-andamento">0</span></div>
             <div class="task-list" data-list="andamento"></div>
             <div class="qadd" data-qadd="andamento"><button class="add-task-btn" onclick="qaddOpen('andamento')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'andamento')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('andamento',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('andamento')">✕</button></div></div></div>
           </div>
           <div class="task-col" data-status="aprovacao">
-            <div class="task-col-head"><h4><span class="dot" style="background:var(--blue)"></span>Aprovação</h4><span class="ct" id="ct-aprovacao">0</span></div>
+            <div class="task-col-head"><h4>Aprovação</h4><span class="ct" id="ct-aprovacao">0</span></div>
             <div class="task-list" data-list="aprovacao"></div>
             <div class="qadd" data-qadd="aprovacao"><button class="add-task-btn" onclick="qaddOpen('aprovacao')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'aprovacao')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('aprovacao',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('aprovacao')">✕</button></div></div></div>
           </div>
           <div class="task-col" data-status="concluido">
-            <div class="task-col-head"><h4><span class="dot g"></span>Concluído</h4><span class="ct" id="ct-concluido">0</span></div>
+            <div class="task-col-head"><h4>Concluído</h4><span class="ct" id="ct-concluido">0</span></div>
             <div class="task-list" data-list="concluido"></div>
             <div class="qadd" data-qadd="concluido"><button class="add-task-btn" onclick="qaddOpen('concluido')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'concluido')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('concluido',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('concluido')">✕</button></div></div></div>
           </div>
@@ -5872,7 +5871,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     const sub=el.closest('.subnav');
     if(sub) sub.previousElementSibling?.classList.add('active');
     document.getElementById('page-'+p)?.classList.add('active');
-    if(p==='painel'&&typeof renderWidgets==='function'){try{renderWidgets();}catch(e){console.warn('painel',e);}}
+    if((p==='painel'||p==='dashboard')&&typeof renderWidgets==='function'){try{renderWidgets();}catch(e){console.warn('painel',e);}}
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     if(p==='alpha'&&typeof renderAlpha==='function'){try{renderAlpha();}catch(e){console.warn('alpha',e);}}
     if(p==='meumes'&&typeof renderMeumes==='function'){try{renderMeumes();}catch(e){console.warn('meumes',e);}}
@@ -5885,7 +5884,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
     if(p==='reunioes'){try{const g=document.getElementById('gcal-iframe');if(g&&!g.getAttribute('src')){const u=g.dataset.pendingSrc||g.dataset.src||'';if(u)g.setAttribute('src',u);}if(typeof applyCalendars==='function')applyCalendars();}catch(e){}}
-    if(p==='whatsapp'&&WFA_WPP_OFF){try{document.querySelector('[data-nav="painel"]').click();}catch(e){}return;}
+    if(p==='whatsapp'&&WFA_WPP_OFF){try{document.querySelector('[data-nav="dashboard"]').click();}catch(e){}return;}
     if(p==='whatsapp'){try{wfaCarregarWhatsapp();}catch(e){} try{const _td=hojeSP();if(localStorage.getItem('wfa-resumo-date')!==_td&&WFA_CLOUD_READY){localStorage.setItem('wfa-resumo-date',_td);setTimeout(()=>{try{wppResumo();}catch(e){}},900);}}catch(e){}}
     if(p==='planejamento'&&typeof planOpen==='function'){try{planOpen();}catch(e){console.warn('plan',e);}}
     if(p==='roteirista'){try{const c=document.getElementById('rot-cliente');const a=wfaClienteAtivo();if(c&&a)c.value=a;}catch(e){}}
@@ -7780,16 +7779,16 @@ rebuildPeople();
 
 /* ============ CONTROLE DE ACESSO (RBAC) ============ */
 const NAV_CATALOG=[
-  {k:'dashboard',l:'Meu Dia'},{k:'painel',l:'Meu Painel'},{k:'reunioes',l:'Reuniões · Agenda'},
+  {k:'dashboard',l:'Meu Dia'},{k:'reunioes',l:'Reuniões · Agenda'},
   {k:'lista-clientes',l:'Lista de Clientes'},{k:'jornada',l:'Jornada · Sprints'},{k:'regua',l:'Régua dos 15'},
   {k:'tarefas',l:'Tarefas'},{k:'demandas',l:'Demandas'},{k:'rotinas',l:'Rotinas'},
-  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'conselho',l:'Conselho de IA'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'whatsapp',l:'WhatsApp'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},{k:'propostas',l:'Propostas'},{k:'contratos',l:'Contratos'},
+  {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'conselho',l:'Conselho de IA'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},{k:'propostas',l:'Propostas'},{k:'contratos',l:'Contratos'},
   {k:'crm',l:'CRM · Pipeline'},
   {k:'organograma',l:'Organograma'},{k:'pops',l:'POPs por Função'},{k:'processos',l:'Processos'},
   {k:'agenda',l:'Agenda Junho'},{k:'meumes',l:'Meu Mês'},{k:'tutorial',l:'Tutorial / POPs'},{k:'integracoes',l:'Integrações'},
 ];
 const _ALL_NAV=NAV_CATALOG.map(s=>s.k);
-const _BASE_NAV=['dashboard','painel','reunioes','agenda','organograma','pops','processos','meumes'];
+const _BASE_NAV=['dashboard','reunioes','agenda','organograma','pops','processos','meumes'];
 const ROLE_ACCESS={
   admin:_ALL_NAV, gestor:_ALL_NAV,
   comercial:_BASE_NAV.concat(['comercial','crm','lista-clientes','jornada','regua','tarefas']),
@@ -8459,7 +8458,9 @@ function restoreLastPage(){
   try{
     const _lp=localStorage.getItem('wfa-current-page');
     // Abertura nova (sem aba salva) OU já estava no dashboard → home = Meu Dia (já ativo no HTML).
-    if(!_lp || _lp==='dashboard'){ WFA_PAGE_RESTORED=true; return; }
+    // Abas extintas (painel fundido no Meu Dia, whatsapp sem entrada) também caem aqui,
+    // senão o retry rodava pra sempre atrás de um navitem que não existe mais.
+    if(!_lp || _lp==='dashboard' || _lp==='painel' || _lp==='whatsapp'){ WFA_PAGE_RESTORED=true; return; }
     // Recarregou trabalhando em outra aba → volta pra onde estava (não força o painel).
     const _el=document.querySelector('[data-nav="'+_lp+'"]');
     if(_el && _el.style.display!=='none'){ _el.click(); WFA_PAGE_RESTORED=true; }
