@@ -1,4 +1,4 @@
-<!-- build 2026-07-27-recupera-maratona-23-07 -->
+<!-- build 2026-07-27-atividades-direto -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -1600,17 +1600,15 @@ function wfaSetTheme(t){
         </div>
       </div>
 
-      <div class="navitem" data-toggle="atividades-menu">
+      <!-- Atividades navega DIRETO pra Tarefas (badge na própria aba, sem clique extra);
+           o chevron é o único alvo que abre o submenu (Demandas/Rotinas). -->
+      <div class="navitem" id="nav-atividades" data-nav="tarefas">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         <span>Atividades</span>
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <span class="badge" id="tarefas-badge">0</span>
+        <svg class="chev" onclick="event.stopPropagation();document.getElementById('nav-atividades').classList.toggle('open');document.getElementById('atividades-menu').classList.toggle('open');if(window.navIndicatorSync)navIndicatorSync();" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="subnav" id="atividades-menu">
-        <div class="subitem" data-nav="tarefas">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          <span>Tarefas</span>
-          <span class="badge" id="tarefas-badge">0</span>
-        </div>
         <div class="subitem" data-nav="demandas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           <span>Demandas</span>
@@ -8975,9 +8973,9 @@ function tutorialNarrar(){
 }
 /* ============ ONBOARDING IMERSIVO (primeiro acesso) ============ */
 const ONBOARD_SLIDES=[
-  {art:'🗂️',title:'Tudo num lugar só',text:'Tarefas, clientes, financeiro, WhatsApp, Drive e os agentes de IA — o WorkFlowArk centraliza toda a operação da ARK.'},
+  {art:'🗂️',title:'Tudo num lugar só',text:'Tarefas, clientes, financeiro, WhatsApp, Drive e os agentes de IA. O WorkFlowArk centraliza toda a operação da ARK.'},
   {art:'☀️',title:'Comece pelo Meu Dia',text:'Sua tela inicial mostra o que vence hoje, o que está atrasado e o resumo do JARVIS. É de lá que você toca o dia.'},
-  {art:'whatsapp',title:'WhatsApp sempre à mão',text:'No topo você responde, encaminha, manda foto e áudio — e a IA sugere a resposta e resume o seu dia.'},
+  {art:'whatsapp',title:'WhatsApp sempre à mão',text:'No topo você responde, encaminha, manda foto e áudio, e a IA sugere a resposta e resume o seu dia.'},
   {art:'✨',title:'Agentes de IA trabalhando',text:'O Conselho debate seus clientes todo dia, o Roteirista cria roteiros e o JARVIS executa comandos e lê documentos que você anexa.'},
   {art:'✅',title:'Pronto pra operar',text:'Explore à vontade. O guia completo fica em "Tutorial & Conhecimento" sempre que precisar.'},
 ];
