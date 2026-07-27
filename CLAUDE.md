@@ -12,17 +12,17 @@ o sistema está em produção sendo usado pela equipe da ARK todos os dias.
 - Feature nova vai em rota React, não no monolito `public/workflowark.html` (9.6k linhas,
   congelado como legado — refatorar só aos poucos e com cuidado).
 
-### 2. Deploy = commit + push + `npx wrangler deploy` manual (CI QUEBRADO)
-- ⚠️ O CI (`.github/workflows/deploy.yml`) está QUEBRADO desde 03/07/2026: o passo
-  "Deploy para Cloudflare Workers" falha em TODO push (CLOUDFLARE_API_TOKEN do GitHub
-  inválido ou sem permissão). PUSH NÃO COLOCA NADA NO AR.
-- Incidente de 27/07: o Mac commitou 12 vezes em 23/07 achando que o CI deployava;
-  produção ficou 4 dias sem os fixes do financeiro. Recuperado com deploy manual.
-- Portanto: todo trabalho termina com commit + push E `npm run build` + `npx wrangler
-  deploy` + verificação do marcador na URL (skill deploy-verificado). Nunca deixar
+### 2. Deploy = SEMPRE commit + push junto (gotcha de durabilidade)
+- O CI (`.github/workflows/deploy.yml`) faz deploy a cada push e RECONSTRÓI do git.
+  FUNCIONANDO desde 27/07/2026 (secret CLOUDFLARE_API_TOKEN configurado; antes disso
+  o secret nunca existiu e TODO push falhou em silêncio de 03/07 a 27/07, deixando
+  produção 4 dias sem os fixes do financeiro da maratona de 23/07).
+- `npx wrangler deploy` manual SEM commit é revertido no próximo push de qualquer pessoa.
+- Portanto: todo deploy manual vem acompanhado de commit + push na hora. Nunca deixar
   o estado "no ar" diferente do que está no git.
-- Quando o token do CI for consertado (precisa do Gabriel: `gh auth login` + novo
-  token Cloudflare nos secrets do repo), atualizar esta regra.
+- Push feito? Confira o run: `gh run list --limit 1` TEM que terminar "success" antes
+  de dizer que está no ar; a verificação do marcador na URL continua valendo
+  (skill deploy-verificado). Falha silenciosa de CI foi exatamente o buraco de julho.
 
 ### 3. Equilíbrio de tokens (custo sob controle)
 - Toda chamada de IA com prompt caching no `system` (~80% menos custo de input).
