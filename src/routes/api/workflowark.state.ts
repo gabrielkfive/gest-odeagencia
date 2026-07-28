@@ -130,6 +130,31 @@ function isStateKey(key: string) {
 }
 
 async function getContext(request: Request) {
+  // ACESSO DE SERVIÇO (automações do Claude na nuvem / cron): header "x-run-key" com o
+  // segredo RUN_KEY dá o contexto do DONO (admin), sem sessão de navegador. Não usamos
+  // ?key= da query porque no GET ele já significa "qual bloco de estado carregar".
+  // Escreve como o Gabriel (updated_by = user_id real do dono, preserva FK/auditoria).
+  const svcKey = request.headers.get("x-run-key") || "";
+  if (svcKey) {
+    const { runSecret } = await import("@/integrations/run-auth.server");
+    const secret = await runSecret();
+    if (!secret || svcKey !== secret) {
+      return { error: json({ error: "Não autenticado" }, { status: 401 }) };
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin as any;
+    const ownerEmail = [...OWNER_EMAILS][0];
+    const { data: owner } = await db
+      .from("workflowark_members")
+      .select("*")
+      .eq("email", ownerEmail)
+      .maybeSingle();
+    if (!owner?.active) {
+      return { error: json({ error: "Conta de serviço indisponível." }, { status: 500 }) };
+    }
+    return { db, user: { id: owner.user_id }, member: owner as WorkflowMember, isAdmin: true };
+  }
+
   const token = readBearer(request);
   if (!token) return { error: json({ error: "Não autenticado" }, { status: 401 }) };
 
