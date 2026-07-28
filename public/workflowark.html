@@ -1,4 +1,4 @@
-<!-- build 2026-07-28-apple-v4 -->
+<!-- build 2026-07-28-menu-suave-v6 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -793,6 +793,11 @@ h1,h2,h3,h4{letter-spacing:-.022em;color:var(--ink)}
     opacity:1;width:auto;pointer-events:auto}
   .side.compact.peek .navitem .chev,.side.compact.peek .navitem .badge{display:flex}
   .side.compact.peek .crm-pill{justify-content:space-between;padding:8px 11px}
+  /* Expandindo A PARTIR do peek: segura o visual de overlay (mesma posição/largura) enquanto
+     a coluna do grid anima de 76px até 240px por baixo; no fim a barra assenta exatamente
+     onde o overlay estava. Sem isto ela caía no grid no 1º frame e "pulava"/encolhia. */
+  .side.expanding{width:240px;position:absolute;left:0;top:12px;bottom:12px;z-index:80;
+    border-radius:0 22px 22px 0;box-shadow:0 34px 64px -20px rgba(0,0,0,.55)}
 }
 @media (prefers-reduced-motion:reduce){.app,.side,.side-collapse-btn svg{transition:none!important}}
 
@@ -6029,10 +6034,18 @@ function toggleSideCompact(){
   const app=document.querySelector('.app'),side=document.querySelector('.side');
   if(!app||!side)return;
   const on=!side.classList.contains('compact');
+  // Expandindo a partir do peek: mantém o overlay parado enquanto o grid anima por baixo
+  // (classe .expanding); o hover não pode re-abrir o peek no meio da animação.
+  if(!on&&side.classList.contains('peek')){
+    side.classList.add('expanding');
+    clearTimeout(side._expandT);
+    side._expandT=setTimeout(()=>side.classList.remove('expanding'),430);
+  }
+  side.classList.remove('peek');
   side.classList.toggle('compact',on);
   app.classList.toggle('side-compact',on);
   try{localStorage.setItem('wfa-side-compact',on?'1':'0');}catch(e){}
-  if(on&&window.__sideSuppressPeek)window.__sideSuppressPeek(500);
+  if(window.__sideSuppressPeek)window.__sideSuppressPeek(on?600:600);
 }
 (function(){
   try{
@@ -8568,14 +8581,15 @@ function updateBadges(){
   const today=hojeSP();
   const atrasadas=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
   updateCrmBadge();
-  const urgentes=state.tarefas.filter(t=>t.status!=='concluido'&&t.data&&t.data<=today).length;
-  const hoje=urgentes-atrasadas;
+  const venceHoje=state.tarefas.filter(t=>t.status!=='concluido'&&t.data===today).length;
+  // O badge mostra o MESMO número do KPI "Ativas" da página (todas as não concluídas).
+  // Antes contava só as urgentes e o Gabriel estranhou 2x o "não bate" — número igual
+  // em todo lugar, detalhe das urgentes fica no tooltip.
+  const ativas=state.tarefas.filter(t=>t.status!=='concluido').length;
   const badge=document.getElementById('tarefas-badge');
-  badge.textContent=urgentes;
-  // o badge conta URGENTES (atrasadas + vencem hoje); "Ativas" na página conta TODAS as
-  // não concluídas — números diferentes de propósito. O title explica no hover.
-  badge.title=atrasadas+' atrasada(s) + '+hoje+' vence(m) hoje';
-  badge.style.display=urgentes?'':'none';
+  badge.textContent=ativas;
+  badge.title=ativas+' ativa(s): '+atrasadas+' atrasada(s) · '+venceHoje+' vence(m) hoje · '+(ativas-atrasadas-venceHoje)+' no prazo';
+  badge.style.display=ativas?'':'none';
 }
 
 /* ============ INIT ============ */

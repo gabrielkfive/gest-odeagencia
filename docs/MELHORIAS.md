@@ -141,3 +141,12 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
 - [x] **CI se auto-verifica:** passo "Smoke check pós-deploy" no deploy.yml compara o marcador do
   fonte com o que a URL de produção devolve; se não bater em 3 tentativas, a action fica vermelha.
 - Marcador `2026-07-28-apple-v4` em prod, mobile OK, 11/11 checks locais do pacote.
+
+### 2026-07-28 (rodada 5) — Badge que bate + menu sem pulo
+- [x] **Badge Atividades = KPI Ativas:** o número da sidebar agora é o mesmo "Ativas" da página
+  (todas as não concluídas). Gabriel estranhou 2x o "não bate"; o detalhe (atrasadas · vencem
+  hoje · no prazo) foi pro tooltip. Marcador `2026-07-28-badge-ativas-v5`.
+- [x] **Menu sem pulo ao expandir:** expandir a partir do "espiar" (peek) fazia a barra cair do
+  overlay pro grid no 1º frame e pular/encolher durante a animação. Agora a classe .expanding
+  segura o visual de overlay enquanto o grid anima por baixo e assenta no fim; peek é removido
+  no toggle e o hover fica suprimido 600ms. Marcador `2026-07-28-menu-suave-v6`, mobile OK.
