@@ -80,6 +80,54 @@ const TOOLS = [
       required: ["to", "message"],
     },
   },
+  {
+    name: "create_task",
+    description:
+      "Cria uma tarefa no Kanban do time (wfa-tarefas). Use para delegar trabalho. Começa em 'backlog'. prio: alta|media|baixa. resp = nome da pessoa (ex.: 'Samuel Magalhães').",
+    inputSchema: {
+      type: "object",
+      properties: {
+        title: { type: "string", description: "título da tarefa" },
+        resp: { type: "string", description: "responsável (nome, ex.: Samuel Magalhães)" },
+        prio: { type: "string", description: "alta | media | baixa (padrão media)" },
+        data: { type: "string", description: "data-alvo YYYY-MM-DD (opcional)" },
+        clienteId: { type: "string", description: "id do cliente (ex.: la-em-casa, vivenda)" },
+        funcao: { type: "string", description: "função/área (ex.: Edição, Social Media)" },
+      },
+      required: ["title", "resp"],
+    },
+  },
+  {
+    name: "update_lead",
+    description:
+      "Atualiza um lead do pipeline comercial (wfa-crm): mover de etapa (stage 0=Prospecção 1=Diagnóstico 2=Proposta 3=Negociação 4=Fechado 5=Perdido), mudar valor, próxima ação ou anexar observação.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        nome: { type: "string", description: "nome do lead (ex.: Royal face)" },
+        stage: { type: "number", description: "0..5 (4=Fechado, 5=Perdido)" },
+        val: { type: "number", description: "valor R$ (opcional)" },
+        next: { type: "string", description: "próxima ação (opcional)" },
+        obs: { type: "string", description: "observação a anexar (opcional)" },
+      },
+      required: ["nome"],
+    },
+  },
+  {
+    name: "add_despesa",
+    description:
+      "Registra uma despesa/pagamento (wfa-acerto), ex.: pagamento a um freelancer/parceiro. pago=true se já saiu.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        nome: { type: "string", description: "quem recebe (ex.: Victor Gabriel)" },
+        valor: { type: "number", description: "valor em reais" },
+        pago: { type: "boolean", description: "true se já foi pago" },
+        obs: { type: "string", description: "observação (opcional)" },
+      },
+      required: ["nome", "valor"],
+    },
+  },
 ];
 
 // ---- Execução de cada ferramenta ------------------------------------------
