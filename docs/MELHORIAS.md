@@ -159,3 +159,9 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
   Concluídas hoje agora contam o MESMO conjunto filtrado das colunas quando há filtro ativo.
   Verificado: filtro Samuel = 2 ativas/1 atrasada, batendo com as colunas. Sem filtro, global.
 - Marcador `2026-07-28-kpi-filtro-v7` verificado em prod.
+
+### 2026-07-28 (rodada 7) — Atalhos de teclado
+- [x] **Ctrl(Cmd)+K ou "/"** foca a busca global de qualquer lugar · **N** abre nova tarefa na aba
+  Tarefas. Nunca rouba tecla de quem está digitando (input/textarea/contenteditable).
+- Marcador `2026-07-28-atalhos-v8` em prod, mobile OK. Deploy manual já inclui o commit `a32b471`
+  do outro computador (rebase feito antes).

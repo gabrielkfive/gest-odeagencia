@@ -1,4 +1,4 @@
-<!-- build 2026-07-28-kpi-filtro-v7 -->
+<!-- build 2026-07-28-atalhos-v8 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -13402,6 +13402,21 @@ async function consChatSend(){
   consChatSaveHist(id,h);consChatPaint();
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape')consChatClose()});
+/* ===== Atalhos de teclado (padrão Apple/Linear) =====
+   Ctrl(Cmd)+K ou "/" foca a busca global · N abre nova tarefa na aba Tarefas.
+   Nunca rouba tecla de quem está digitando (input/textarea/contenteditable). */
+document.addEventListener('keydown',function(e){
+  const el=document.activeElement;
+  const digitando=el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.isContentEditable);
+  const k=(e.key||'').toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&k==='k'){e.preventDefault();const g=document.getElementById('gsearch');if(g){g.focus();g.select();}return;}
+  if(digitando)return;
+  if(k==='/'){e.preventDefault();const g=document.getElementById('gsearch');if(g){g.focus();g.select();}return;}
+  if(k==='n'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+    const pt=document.getElementById('page-tarefas');
+    if(pt&&pt.classList.contains('active')&&typeof openNovaTarefa==='function'){e.preventDefault();openNovaTarefa('backlog');}
+  }
+});
 document.addEventListener('click',function(e){
   if(e.target.closest&&e.target.closest('[data-nav="conselho"]'))setTimeout(consBancadaRender,300);
 },true);
