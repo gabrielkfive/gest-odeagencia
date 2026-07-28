@@ -76,3 +76,21 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
 ### Abertas (sugeridas hoje — track de vendas/UX)
 - [ ] CRM ↔ WhatsApp · Lembrete de follow quente · Cobrança em 1 clique · Importar leads em massa
 - [ ] Painel de vendas · Busca global · Dark mode · Atalhos · Templates WhatsApp · Relatório semanal
+
+### 2026-07-28 — Sync sem piscada e sem perda (piscada branca + "adicionei e sumiu" + Error 1102)
+- [x] **Piscada branca morta:** applyCloudState agora detecta mudança real e SÓ re-renderiza
+  quando algo mudou de fato (antes: ~20 render* a cada 6s, app inteiro piscava e perdia foco/scroll).
+- [x] **Fim do "adicionei e sumiu":** wfa-demandas, wfa-rotinas, wfa-clientes-custom e as planilhas
+  Alpha (wfa-alpha, am/gt/cr) entraram em WFA_MERGE_KEYS/WFA_TOMBSTONE_KEYS (mescla por id, como
+  o CRM). Deletes gravam lápide (delDem, delRot, alphaDelRow, gridDelRow, cliRemove, Bellato v2).
+  Carimbo `up` automático por item mudado (wfaStampUp) em toda lista mesclável: conflito entre
+  aparelhos resolve por item, edição não reverte mais.
+- [x] **União volta pro servidor:** quando a mescla recupera item que o remoto não tem, o cliente
+  reempurra a lista mesclada (antes o item ficava visível só num aparelho pra sempre).
+- [x] **Error 1102 aliviado:** sync condicional. GET /api/workflowark/state?since=<updated_at máx>
+  responde {unchanged:true} minúsculo quando nada mudou (o trigger do Postgres garante o carimbo).
+  Load completo de segurança a cada 10 ticks. Bônus: fallback de load-key via app pai não vira
+  mais save-state (bomba latente desarmada em app.tsx).
+- Verificado: Playwright local (0 re-render em 3 aplicações idênticas, união+lápide ok), build,
+  deploy manual, marcador `2026-07-28-sync-sem-piscada-sem-perda` confirmado em prod, teste
+  mobile ok, 18s observados no Chrome do Gabriel sem nenhum re-render e GETs com ?since=.

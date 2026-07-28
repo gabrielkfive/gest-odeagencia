@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./public/vendor/**)",
+      "Read(./public/tcc/**)",
+      "Read(./propostas/**)",
+      "Read(./public/propostas*.html)",
+      "Read(./public/relatorio-modelo.html)",
+      "Read(./_BACKUP*/**)"
+    ]
+  }
+}

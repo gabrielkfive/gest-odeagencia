@@ -31,9 +31,13 @@ function AppPage() {
           }
           if (!token) throw new Error("Sessão expirada. Entre novamente.");
 
-          const payload = e.data.action === "load" ? undefined : JSON.stringify(e.data.payload ?? {});
-          const response = await fetch("/api/workflowark/state", {
-            method: e.data.action === "load" ? "GET" : "POST",
+          const isGet = e.data.action === "load";
+          // GET condicional: repassa o ?since= do iframe (sync leve). No POST, inclui a
+          // action no corpo — sem ela, um fallback de "load-key" era lido como save-state.
+          const qs = isGet && e.data.payload?.since ? `?since=${encodeURIComponent(e.data.payload.since)}` : "";
+          const payload = isGet ? undefined : JSON.stringify({ action: e.data.action, ...(e.data.payload ?? {}) });
+          const response = await fetch("/api/workflowark/state" + qs, {
+            method: isGet ? "GET" : "POST",
             headers: {
               ...(payload ? { "Content-Type": "application/json" } : {}),
               Authorization: `Bearer ${token}`,

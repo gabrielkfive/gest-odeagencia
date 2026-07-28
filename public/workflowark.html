@@ -1,4 +1,4 @@
-<!-- build 2026-07-27-propostas-expiram -->
+<!-- build 2026-07-28-sync-sem-piscada-sem-perda -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -3371,7 +3371,7 @@ async function directCloudCall(action,payload){
   const to=setTimeout(()=>ctrl.abort(),25000);
   let resp;
   try{
-    resp=await fetch('/api/workflowark/state'+(action==='load-key'&&payload&&payload.key?('?key='+encodeURIComponent(payload.key)):''),{
+    resp=await fetch('/api/workflowark/state'+(action==='load-key'&&payload&&payload.key?('?key='+encodeURIComponent(payload.key)):(action==='load'&&payload&&payload.since?('?since='+encodeURIComponent(payload.since)):'')),{
       method:isLoad?'GET':'POST',
       headers:{...(!isLoad?{'Content-Type':'application/json'}:{}),Authorization:'Bearer '+token},
       body:isLoad?undefined:JSON.stringify(payload??{}),
@@ -3451,6 +3451,30 @@ let _wfaFlushing=false;
 // Empurrar do cliente daria 400 ("Bloco inválido") -> "Erro ao sincronizar" eterno, e ainda
 // poderia sobrescrever mensagens que chegaram no servidor. Então nunca enfileira essa chave.
 const WFA_NO_PUSH=new Set(['wfa-whatsapp']);
+/* TODA lista multiusuário (objetos com id) entra aqui: a puxada MESCLA por id em vez de
+   sobrescrever a lista inteira. Fora desta lista, "última escrita ganha" apaga a adição
+   do colega (era por isso que demanda/rotina/cliente/linha do Alpha "sumia"). */
+const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes','wfa-crm','wfa-producao','wfa-briefings','wfa-demandas','wfa-rotinas','wfa-clientes-custom','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr'];
+const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-crm','wfa-producao','wfa-briefings','wfa-demandas','wfa-rotinas','wfa-clientes-custom','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr']; // itens apagados nunca voltam
+/* CARIMBO POR ITEM (up): na hora de salvar uma lista mesclável, compara cada item com a
+   última foto conhecida e carimba `up` só no que realmente mudou. É o que permite à mescla
+   resolver conflito POR ITEM (quem editou por último vence) em vez de reverter edição.
+   As tarefas já têm o próprio mecanismo (wfaTarefaSnapshot) e ficam de fora. */
+const WFA_UP_SNAP={};
+function wfaSnapKey(key,arr){const m=new Map();(Array.isArray(arr)?arr:[]).forEach(o=>{if(o&&o.id){const c=Object.assign({},o);delete c.up;m.set(o.id,JSON.stringify(c));}});WFA_UP_SNAP[key]=m;}
+function wfaStampUp(key,value){
+  try{
+    if(key==='wfa-tarefas')return value;
+    const arr=JSON.parse(value);
+    if(!Array.isArray(arr))return value;
+    if(!WFA_UP_SNAP[key]){let prev=[];try{prev=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}wfaSnapKey(key,prev);}
+    const snap=WFA_UP_SNAP[key];
+    let stamped=false;
+    arr.forEach(o=>{if(o&&o.id){const c=Object.assign({},o);delete c.up;const j=JSON.stringify(c);if(snap.get(o.id)!==j){o.up=new Date().toISOString();stamped=true;}}});
+    wfaSnapKey(key,arr);
+    return stamped?JSON.stringify(arr):value;
+  }catch(e){return value;}
+}
 function cloudSave(key,value){
   if(!isWfaCloudKey(key)||WFA_CLOUD_MUTED||WFA_NO_PUSH.has(key))return; // MUTED = aplicando remoto
   WFA_DIRTY.add(key);
@@ -3483,7 +3507,10 @@ async function wfaFlush(){
     }
   }finally{_wfaFlushing=false;}
 }
-localStorage.setItem=function(key,value){WFA_LS_SET(key,value);cloudSave(key,value);};
+localStorage.setItem=function(key,value){
+  // listas mescláveis ganham carimbo `up` por item mudado (conflito entre aparelhos vira por item)
+  if(!WFA_CLOUD_MUTED&&typeof value==='string'&&WFA_MERGE_KEYS.includes(key))value=wfaStampUp(key,value);
+  WFA_LS_SET(key,value);cloudSave(key,value);};
 localStorage.removeItem=function(key){WFA_LS_REMOVE(key);cloudSave(key,null);};
 function collectLocalCloudState(){
   const entries={};
@@ -3529,36 +3556,38 @@ function wfaMergeById(remoteArr,localArr,localPrevalece){
     }}});
   return order.map(id=>byId[id]);
 }
-const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes','wfa-crm','wfa-producao','wfa-briefings'];
-const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-crm','wfa-producao','wfa-briefings']; // itens apagados nunca voltam
 /* LÁPIDE DE EXCLUSÃO: ids apagados ficam em wfa-deleted-ids (sincronizado). A mescla
    nunca ressuscita um id que está na lápide. Resolve "excluo e a tarefa volta". */
 function loadDeleted(){try{return new Set(JSON.parse(localStorage.getItem('wfa-deleted-ids')||'[]'));}catch(e){return new Set();}}
 function addDeleted(ids){const s=loadDeleted();(Array.isArray(ids)?ids:[ids]).forEach(i=>{if(i)s.add(i);});localStorage.setItem('wfa-deleted-ids',JSON.stringify([...s].slice(-3000)));}
 function applyCloudState(remote){
   WFA_CLOUD_MUTED=true;
+  // mudou=false ao fim => o remoto era idêntico ao local => NÃO re-renderiza nada.
+  // (Era o re-render incondicional a cada 6s que fazia o app inteiro piscar em branco.)
+  let mudou=false;const pushKeys=[];
+  const setIfDiff=(key,str)=>{if(localStorage.getItem(key)!==str){WFA_LS_SET(key,str);mudou=true;}};
   // 1) une a lápide (remoto + local) antes de mesclar as listas
   let deletedSet=loadDeleted();
   try{ let rd=remote['wfa-deleted-ids']; if(typeof rd==='string')rd=JSON.parse(rd); if(Array.isArray(rd))rd.forEach(i=>deletedSet.add(i)); }catch(e){}
-  WFA_LS_SET('wfa-deleted-ids',JSON.stringify([...deletedSet].slice(-3000)));
+  setIfDiff('wfa-deleted-ids',JSON.stringify([...deletedSet].slice(-3000)));
   // Notificações lidas: UNIÃO remoto+local (como a lápide). Antes o "lido" vivia só no
   // aparelho e todo navegador novo voltava com 99+ no sino.
   try{ let rr=remote['wfa-notif-read']; if(typeof rr==='string')rr=JSON.parse(rr);
     if(Array.isArray(rr)&&rr.length){const s=new Set();try{JSON.parse(localStorage.getItem('wfa-notif-read')||'[]').forEach(i=>s.add(i));}catch(e){}
-      rr.forEach(i=>s.add(i));WFA_LS_SET('wfa-notif-read',JSON.stringify([...s].slice(-2000)));} }catch(e){}
+      rr.forEach(i=>s.add(i));setIfDiff('wfa-notif-read',JSON.stringify([...s].slice(-2000)));} }catch(e){}
   Object.entries(remote||{}).forEach(([key,value])=>{
     if(!isWfaCloudKey(key)||key==='wfa-deleted-ids'||key==='wfa-notif-read')return;
     // DELEÇÃO propaga entre dispositivos: removeItem grava null no servidor. Ao ver null aqui
     // (reset de brand, checklist etc.), apaga o valor local. Sem isto, a deleção ressuscitava.
     // Protege se o usuário acabou de recriar a chave (dirty/janela recente).
-    if(value==null){ if(!wfaLocalAuth(key))WFA_LS_REMOVE(key); return; }
+    if(value==null){ if(!wfaLocalAuth(key)&&localStorage.getItem(key)!=null){WFA_LS_REMOVE(key);mudou=true;} return; }
     // Objeto keyed por clienteId (não-array): merge por cliente para dois membros não se sobrescreverem
     if(key==='wfa-cliente-detalhes'){
       let rObj=value;if(typeof rObj==='string'){try{rObj=JSON.parse(rObj);}catch(e){rObj={};}}
       if(rObj&&typeof rObj==='object'&&!Array.isArray(rObj)){
         let lObj={};try{lObj=JSON.parse(localStorage.getItem(key)||'{}');}catch(e){}
         const merged=wfaLocalAuth(key)?Object.assign({},rObj,lObj):Object.assign({},lObj,rObj);
-        WFA_LS_SET(key,JSON.stringify(merged));return;
+        setIfDiff(key,JSON.stringify(merged));return;
       }
     }
     // Listas append-heavy (server + cliente escrevem): MESCLA por id (nunca sobrescreve cego)
@@ -3568,14 +3597,27 @@ function applyCloudState(remote){
         let lArr=[];try{lArr=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
         let merged=wfaMergeById(rArr,lArr,wfaLocalAuth(key)); // local vence conflitos enquanto autoritário (dirty ou janela recente)
         if(WFA_TOMBSTONE_KEYS.includes(key))merged=merged.filter(o=>!deletedSet.has(o.id)); // remove apagados
-        WFA_LS_SET(key,JSON.stringify(merged));
+        setIfDiff(key,JSON.stringify(merged));
+        wfaSnapKey(key,merged); // baseline do carimbo `up` acompanha o estado recém-aplicado
+        // A UNIÃO VOLTA PRO SERVIDOR: se a mescla tem item que o remoto não tem (ou o remoto
+        // ainda carrega item apagado aqui), reempurra a lista mesclada. Sem isto, um item
+        // salvo com o servidor fora do ar ficava visível SÓ neste aparelho pra sempre
+        // ("adicionei no CRM e pros outros sumiu").
+        try{
+          const rIds=new Set(rArr.filter(o=>o&&o.id).map(o=>o.id));
+          if(merged.length!==rIds.size||merged.some(o=>!rIds.has(o.id)))pushKeys.push(key);
+        }catch(e){}
         return;
       }
     }
     if(wfaLocalAuth(key))return; // demais chaves: protege mudança local não confirmada (dirty ou janela recente)
-    WFA_LS_SET(key,typeof value==='string'?value:JSON.stringify(value));
+    setIfDiff(key,typeof value==='string'?value:JSON.stringify(value));
   });
   WFA_CLOUD_MUTED=false;
+  pushKeys.forEach(k=>{try{cloudSave(k,localStorage.getItem(k));}catch(e){}});
+  try{const mj=JSON.stringify([WFA_MEMBER,WFA_MEMBERS]);if(mj!==window._wfaMemberJson){window._wfaMemberJson=mj;mudou=true;}}catch(e){}
+  if(!window._wfaAppliedOnce){window._wfaAppliedOnce=true;mudou=true;} // 1ª aplicação sempre pinta a tela
+  if(!mudou)return; // nada mudou: mantém o DOM em paz (sem piscada, sem perder foco/scroll)
   state.tarefas=JSON.parse(localStorage.getItem('wfa-tarefas')||'[]');
   if(typeof wfaTarefaSnapshot==='function')wfaTarefaSnapshot();
   state.regua=JSON.parse(localStorage.getItem('wfa-regua')||'{}');
@@ -3710,6 +3752,7 @@ async function bootCloudSync(){
       Object.assign(remote,upload);
     }
     applyCloudState(remote);
+    if(res.t)WFA_STATE_T=res.t; // carimbo pro sync condicional dos próximos ticks
     WFA_CLOUD_READY=true;
     localStorage.setItem('wfa-cloud-last-sync',new Date().toISOString());
     toast('✓ Sincronizado');
@@ -3738,14 +3781,24 @@ async function bootCloudSync(){
 }
 // silent=true (auto-sync de 6s): NUNCA mostra toast de erro — blips de rede são normais e
 // os dados não se perdem (fila de reenvio). Só o clique manual no botão avisa em caso de erro.
+// SYNC CONDICIONAL: guarda o carimbo (updated_at máximo) do último estado aplicado e manda
+// como ?since= — se nada mudou no servidor, a resposta é minúscula ({unchanged:true}) e o
+// Worker quase não gasta CPU (menos Error 1102). A cada 10 ticks força um load completo de
+// segurança, cobrindo qualquer escritor que não bumpe o updated_at.
+let WFA_STATE_T=null;let _wfaSyncN=0;
 async function sincronizarAgora(silent){
   const btn=document.getElementById('btn-sync');
   if(btn&&!silent){btn.disabled=true;btn.textContent='↻ Sincronizando...';}
   try{
-    const res=await cloudCall('load');
-    const remote=res.state||{};
-    WFA_MEMBER=res.member||null;WFA_MEMBERS=res.members||[];
-    applyCloudState(remote);
+    _wfaSyncN++;
+    const since=(WFA_STATE_T&&_wfaSyncN%10!==0)?WFA_STATE_T:null;
+    const res=await cloudCall('load',since?{since}:undefined);
+    if(res&&res.t)WFA_STATE_T=res.t;
+    if(!(res&&res.unchanged)){
+      const remote=res.state||{};
+      WFA_MEMBER=res.member||WFA_MEMBER;WFA_MEMBERS=res.members||WFA_MEMBERS;
+      applyCloudState(remote);
+    }
     WFA_CLOUD_READY=true;
     localStorage.setItem('wfa-cloud-last-sync',new Date().toISOString());
     atualizarBadgeSync(true);
@@ -5566,6 +5619,7 @@ function cliSave(){
 function cliRemove(){
   if(!cliEditId)return;
   if(!confirm('Excluir este cliente do sistema?'))return;
+  if(typeof addDeleted==='function')addDeleted(cliEditId); // lápide: a mescla nunca ressuscita cliente apagado
   saveClientesCustom(loadClientesCustom().filter(x=>x.id!==cliEditId));
   closeModal('modal-cliente');toast('Cliente excluído');
 }
@@ -11215,7 +11269,7 @@ function addDemanda(){
   saveDemandas(arr);document.getElementById('dm-title').value='';document.getElementById('dm-msg').value='';toast('Demanda publicada');
 }
 function setDemStatus(id,s){const arr=loadDemandas();const d=arr.find(x=>x.id===id);if(d){d.status=s;saveDemandas(arr);}}
-function delDem(id){if(!confirm('Excluir demanda?'))return;saveDemandas(loadDemandas().filter(x=>x.id!==id));}
+function delDem(id){if(!confirm('Excluir demanda?'))return;addDeleted(id);saveDemandas(loadDemandas().filter(x=>x.id!==id));}
 function renderDemandas(){
   const el=document.getElementById('dm-list');if(!el)return;
   const arr=loadDemandas();
@@ -11269,7 +11323,7 @@ function alphaSet(id,k,v){const a=alphaRows();const r=a.find(x=>x.id===id);if(!r
 function alphaAddRow(){
   if(typeof ALPHA_ACTIVE!=='undefined'&&ALPHA_ACTIVE!=='acomp'){gridAddRow(ALPHA_ACTIVE);return;}
   const a=alphaRows();a.push({id:'al'+Date.now(),nome:'Novo cliente',account:'',plano:'Gold',status:'Ativo',flag:'CARE',entregasPrazo:false,entregasQual:false,relacionamento:false,r1:false,r2:false});saveAlpha(a);renderAlpha();const w=document.querySelector('#page-alpha .al-wrap');if(w)w.scrollTop=w.scrollHeight;if(typeof toast==='function')toast('Cliente Alpha adicionado');}
-function alphaDelRow(id){if(!confirm('Remover este cliente da planilha Alpha?'))return;saveAlpha(alphaRows().filter(x=>x.id!==id));renderAlpha();if(typeof toast==='function')toast('Removido');}
+function alphaDelRow(id){if(!confirm('Remover este cliente da planilha Alpha?'))return;addDeleted(id);saveAlpha(alphaRows().filter(x=>x.id!==id));renderAlpha();if(typeof toast==='function')toast('Removido');}
 function alphaCell(r,c){
   const v=r[c.k];
   if(c.t==='bool'){return `<td style="text-align:center"><input type="checkbox" class="al-chk" ${v?'checked':''} onchange="alphaSet('${r.id}','${c.k}',this.checked)"></td>`;}
@@ -11280,15 +11334,19 @@ function alphaCell(r,c){
   return `<td${stick}><input class="${cls}" value="${escapeHtml(v==null?'':String(v))}" onchange="alphaSet('${r.id}','${c.k}',this.value)"></td>`;
 }
 // Limpeza única: Bellato deu churn — remove dos dados já sincronizados (1x por aparelho).
+// v2: também grava a LÁPIDE dos ids removidos — agora que wfa-alpha é mesclado por id,
+// sem lápide um aparelho desatualizado ressuscitaria o Bellato pra todo mundo.
 function alphaMigrate(){
   try{
-    if(localStorage.getItem('wfa-alpha-rm-bellato')==='1')return;
+    if(localStorage.getItem('wfa-alpha-rm-bellato2')==='1')return;
     const a=loadAlpha();
     if(Array.isArray(a)){
-      const f=a.filter(r=>r.id!=='al-bellato'&&!/bellato/i.test(r.nome||''));
-      if(f.length!==a.length)saveAlpha(f);
+      const bel=a.filter(r=>r.id==='al-bellato'||/bellato/i.test(r.nome||''));
+      bel.forEach(r=>{if(r.id)addDeleted(r.id);});
+      addDeleted('al-bellato');
+      if(bel.length)saveAlpha(a.filter(r=>!bel.includes(r)));
     }
-    localStorage.setItem('wfa-alpha-rm-bellato','1');
+    localStorage.setItem('wfa-alpha-rm-bellato2','1');
   }catch(e){}
 }
 function renderAlpha(){
@@ -11494,7 +11552,7 @@ function gridSave(id,arr){try{localStorage.setItem(ALPHA_GRID_KEY[id],JSON.strin
 function gridRows(id){let a=gridLoad(id);if(!a){a=JSON.parse(JSON.stringify(ALPHA_GRIDS[id].seed));gridSave(id,a);}return a;}
 function gridSet(id,rid,k,v){const a=gridRows(id);const r=a.find(x=>x.id===rid);if(!r)return;r[k]=v;gridSave(id,a);}
 function gridAddRow(id){const a=gridRows(id);const row={id:'g'+Date.now()};ALPHA_GRIDS[id].cols.forEach(c=>{row[c.k]=(c.t==='bool'?false:'');});row[ALPHA_GRIDS[id].cols[0].k]='Novo cliente';a.push(row);gridSave(id,a);gridRender(id);}
-function gridDelRow(id,rid){if(!confirm('Remover esta linha?'))return;gridSave(id,gridRows(id).filter(x=>x.id!==rid));gridRender(id);}
+function gridDelRow(id,rid){if(!confirm('Remover esta linha?'))return;addDeleted(rid);gridSave(id,gridRows(id).filter(x=>x.id!==rid));gridRender(id);}
 function gridCell(id,r,c){
   const v=r[c.k];
   if(c.t==='bool')return `<td style="text-align:center"><input type="checkbox" class="al-chk" ${v?'checked':''} onchange="gridSet('${id}','${r.id}','${c.k}',this.checked)"></td>`;
@@ -11526,7 +11584,7 @@ function addRotina(){
   toast('Rotina criada · vai virar tarefa automaticamente');
   genRotinaTarefas(true);
 }
-function delRot(id){if(confirm('Excluir?'))saveRot(loadRot().filter(x=>x.id!==id));}
+function delRot(id){if(!confirm('Excluir?'))return;addDeleted(id);saveRot(loadRot().filter(x=>x.id!==id));}
 function toggleRot(id){const a=loadRot();const r=a.find(x=>x.id===id);if(r){r.ativo=!r.ativo;saveRot(a);}}
 /* ====== Rotinas → tarefas recorrentes ====== */
 const ROT_DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];

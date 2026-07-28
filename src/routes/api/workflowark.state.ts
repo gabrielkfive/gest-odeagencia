@@ -265,11 +265,28 @@ export const Route = createFileRoute("/api/workflowark/state")({
         // em TODA sincronização só para ser descartado pelo filtro isHeavy abaixo.
         // Com várias abas sincronizando ao mesmo tempo isso estourava a memória do
         // Worker (Error 1102 "exceeded resource limits" intermitente no load).
-        const { data: rows, error } = await ctx.db
+        //
+        // SYNC CONDICIONAL (?since=): o app manda o updated_at máximo que já aplicou.
+        // Só voltam as linhas que mudaram depois disso — na imensa maioria dos ticks de
+        // 6s NADA mudou e a resposta é {unchanged:true}, sem serializar o estado inteiro.
+        // O trigger workflowark_state_updated_at (BEFORE UPDATE) garante o carimbo em
+        // qualquer escrita, de qualquer escritor.
+        const since = String(u.searchParams.get("since") || "");
+        let q = ctx.db
           .from("workflowark_state")
           .select("key,data,updated_at")
           .neq("key", "wfa-whatsapp");
+        if (since) q = q.gt("updated_at", since);
+        const { data: rows, error } = await q;
         if (error) return json({ error: "Não foi possível carregar os dados." }, { status: 500 });
+
+        let maxT = since;
+        for (const row of rows ?? []) {
+          if (row.updated_at && (!maxT || String(row.updated_at) > maxT)) maxT = String(row.updated_at);
+        }
+        if (since && !(rows ?? []).length) {
+          return json({ unchanged: true, t: since, member: ctx.member });
+        }
 
         const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key)).map((row: any) => {
           // wfa-gcal: cada membro vê apenas sua própria entrada de agenda (não a de todos)
@@ -288,7 +305,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           members = result.data ?? [];
         }
 
-        return json({ state, member: ctx.member, members });
+        return json({ state, member: ctx.member, members, t: maxT || null });
       },
 
       POST: async ({ request }) => {

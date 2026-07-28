@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Performance · {{CLIENTE_NOME}}</title>
+<!-- modelo-relatorio-20260703-A · gerado pelo Agente de Relatório -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --bg2:#111114; --panel:#16161a; --panel2:#1c1c20;
+  --ink:#f5f5f2; --muted:#9a9aa2; --faint:#5a5a62;
+  --amber:{{ACCENT}};
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --display:"Sora","Segoe UI",system-ui,sans-serif;
+  --body:"Inter","Segoe UI",system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--display);letter-spacing:-.02em;line-height:1.12}
+h1{font-weight:800;font-size:clamp(38px,5.4vw,64px)}
+h2{font-weight:700;font-size:clamp(28px,3.6vw,44px)}
+h3{font-weight:700;font-size:clamp(19px,2vw,24px)}
+.amber{color:var(--amber)}
+strong{color:var(--ink);font-weight:600}
+
+/* page shell */
+.page{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:108px 8vw;border-bottom:1px solid var(--line);overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 90% -10%, {{ACCENT_GLOW}}, transparent 55%),
+    var(--bg);}
+.page.alt{background:
+    radial-gradient(110% 80% at 8% -10%, {{ACCENT_GLOW}}, transparent 55%),
+    var(--bg2);}
+.page::after{content:"";position:absolute;inset:22px;border:1px solid var(--line);border-radius:16px;pointer-events:none}
+.wrap{max-width:1080px;width:100%;margin:0 auto;position:relative;z-index:2}
+
+/* typography helpers */
+.kicker{font-family:var(--display);font-weight:600;letter-spacing:.3em;text-transform:uppercase;
+  font-size:12px;color:var(--amber);display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.kicker .dot{width:7px;height:7px;background:var(--amber);border-radius:50%;flex:none}
+.lead{color:var(--muted);font-size:clamp(16px,1.8vw,20px);line-height:1.65;max-width:60ch}
+.yl{width:56px;height:3px;background:var(--amber);border-radius:2px;margin:26px 0}
+.mt40{margin-top:40px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:34px}
+.stat{border-left:2px solid var(--amber);padding-left:20px}
+.stat .num{font-family:var(--display);font-weight:800;font-size:clamp(34px,4.2vw,50px);line-height:1;letter-spacing:-.03em;white-space:nowrap}
+.stat .lbl{color:var(--muted);font-size:15px;margin-top:10px;line-height:1.45}
+.stat .up{color:#4ade80;font-weight:600;font-size:14px;font-family:var(--display)}
+
+/* cards */
+.grid{display:grid;gap:22px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);
+  border-radius:16px;padding:28px}
+.card.amb{border-color:{{ACCENT_45}};background:linear-gradient(160deg,{{ACCENT_10}},rgba(255,255,255,.01))}
+.card h4{margin-bottom:10px;font-size:17px}
+.card p{font-size:15px;color:var(--muted)}
+.card .big{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.02em;line-height:1;margin-bottom:8px}
+
+/* split layout: text + print */
+.split{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
+.split.rev{grid-template-columns:.85fr 1.15fr}
+
+/* image frame (janela estilo insights) */
+.frame{background:var(--panel2);border:1px solid var(--line2);border-radius:14px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.55);max-width:360px;margin:0 auto;width:100%}
+.frame .cap{display:flex;align-items:center;gap:9px;padding:12px 16px;background:#202024;border-bottom:1px solid var(--line);
+  font-size:12.5px;color:var(--faint);font-family:var(--display);letter-spacing:.02em}
+.frame .cap .d{width:9px;height:9px;border-radius:50%;background:var(--amber);flex:none}
+.frame img{width:100%;display:block}
+.duo-frames{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+
+/* checklist */
+.clist{list-style:none;margin-top:26px;display:grid;gap:16px}
+.clist li{display:flex;gap:14px;align-items:flex-start;font-size:clamp(16px,1.7vw,19px);color:var(--muted)}
+.clist li strong{color:var(--ink)}
+.clist .ck{flex:none;width:24px;height:24px;border-radius:50%;background:{{ACCENT_12}};border:1px solid {{ACCENT_50}};
+  display:flex;align-items:center;justify-content:center;color:var(--amber);font-size:13px;font-weight:700;margin-top:3px}
+
+/* brandmark + page number */
+.brandmark{position:fixed;top:22px;left:30px;display:flex;align-items:center;gap:12px;z-index:80}
+.brandmark img{height:30px;width:auto}
+.brandmark .bm-tx{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.04em}
+.brandmark .bm-tx b{color:var(--amber)}
+.pg-no{position:absolute;bottom:38px;right:8vw;font-family:var(--display);font-size:12px;color:var(--faint);letter-spacing:.1em;z-index:3}
+.pg-no b{color:var(--ink)}
+
+/* cover */
+.cover{justify-content:center;text-align:center;align-items:center}
+.cover .logo{height:92px;width:auto;margin:0 auto 30px;filter:drop-shadow(0 10px 50px {{ACCENT_18}})}
+.cover .duo{display:flex;align-items:center;gap:16px;justify-content:center;font-family:var(--display);font-weight:700;
+  letter-spacing:.06em;font-size:14px;color:var(--muted);margin-bottom:30px;flex-wrap:wrap}
+.cover .duo b{color:var(--ink)}
+.cover .duo .x{color:var(--amber);font-size:18px}
+.cover h1{max-width:18ch;margin:0 auto}
+.cover .sub{margin:26px auto 0;max-width:54ch;font-size:clamp(16px,1.9vw,20px);color:var(--muted)}
+.cover .meta{margin-top:42px;display:flex;gap:26px;justify-content:center;align-items:center;flex-wrap:wrap;color:var(--faint);font-size:13px;font-family:var(--display);letter-spacing:.04em}
+.cover .meta .s{width:1px;height:18px;background:var(--line2)}
+.cover .scroll{margin-top:54px;color:var(--faint);font-size:12px;letter-spacing:.2em;text-transform:uppercase;animation:bob 2s infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* footer note */
+.foot{color:var(--faint);font-size:13px;font-family:var(--display);letter-spacing:.05em;margin-top:46px}
+
+@media screen and (max-width:900px){
+  .page{padding:90px 7vw}
+  .page::after{inset:12px}
+  .brandmark{left:18px;top:16px}
+  .brandmark .bm-tx{display:none}
+  .split,.split.rev{grid-template-columns:1fr;gap:36px}
+  .stats,.g3{grid-template-columns:1fr}
+  .duo-frames{grid-template-columns:1fr}
+  .pg-no{right:7vw}
+}
+@page{size:1440px 900px;margin:0}
+@media print{
+  body{background:#0a0a0b}
+  .page{height:900px;min-height:0;page-break-after:always;overflow:hidden;border-bottom:none}
+  .page:last-of-type{page-break-after:avoid}
+  .cover .scroll{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="brandmark">
+  <img src="{{LOGO_SRC}}" alt="{{MARCA_NOME}}">
+  <span class="bm-tx">{{MARCA_PRE}} <b>{{MARCA_POS}}</b></span>
+</div>
+
+<!-- 01 · CAPA -->
+<section class="page cover">
+  <div class="wrap">
+    <img class="logo" src="{{LOGO_SRC}}" alt="{{MARCA_NOME}}">
+    <div class="duo"><b>{{MARCA_CAPS}}</b> <span class="x">×</span> <b>{{CLIENTE_CAPS}}</b></div>
+    <h1>Relatório de <span class="amber">Performance</span></h1>
+    <p class="sub">Instagram, {{MES_NOME}} de {{ANO}}. {{FRASE_CAPA}}</p>
+    <div class="meta">
+      <span>RELATÓRIO MENSAL</span><span class="s"></span>
+      <span>INSTAGRAM</span><span class="s"></span>
+      <span>{{MES_CAPS}} / {{ANO}}</span>
+    </div>
+    <div class="scroll">role para ver os resultados ↓</div>
+  </div>
+  <div class="pg-no"><b>01</b> / 06</div>
+</section>
+
+<!-- 02 · RESUMO DO MÊS -->
+<section class="page alt">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <div class="kicker"><span class="dot"></span> Resumo do mês</div>
+        <h2>{{TITULO_RESUMO_A}} <span class="amber">{{TITULO_RESUMO_B}}</span></h2>
+        <div class="yl"></div>
+        <p class="lead">Os três números que resumem o mês: mais gente vendo, mais gente nova descobrindo a marca e mais gente ficando.</p>
+        <div class="stats">
+          <div class="stat">
+            <div class="num">{{VIEWS_A}}<span class="amber">{{VIEWS_B}}</span></div>
+            <div class="lbl">Visualizações<br><span class="up">{{VIEWS_DELTA}}</span></div>
+          </div>
+          <div class="stat">
+            <div class="num">{{NAOSEG_A}}<span class="amber">%</span></div>
+            <div class="lbl">Visualizações de não seguidores<br><span class="up">{{NAOSEG_DELTA}}</span></div>
+          </div>
+          <div class="stat">
+            <div class="num">{{SEG_A}}<span class="amber">{{SEG_B}}</span></div>
+            <div class="lbl">Seguidores<br><span class="up">{{SEG_DELTA}}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cap"><span class="d"></span> Instagram Insights · Resumo de {{MES_NOME}}</div>
+        <img src="{{PRINT1}}" alt="Resumo do mês no Instagram Insights">
+      </div>
+    </div>
+  </div>
+  <div class="pg-no"><b>02</b> / 06</div>
+</section>
+
+<!-- 03 · PRODUÇÃO DE CONTEÚDO -->
+<section class="page">
+  <div class="wrap">
+    <div class="split rev">
+      <div class="frame">
+        <div class="cap"><span class="d"></span> Instagram Insights · Publicações de {{MES_NOME}}</div>
+        <img src="{{PRINT2}}" alt="Calendário de publicações do mês">
+      </div>
+      <div>
+        <div class="kicker"><span class="dot"></span> Produção de conteúdo</div>
+        <h2>Mais consistência, <span class="amber">mais resultado.</span></h2>
+        <div class="yl"></div>
+        <p class="lead">{{LEAD_PRODUCAO}}</p>
+        <div class="stats">
+          <div class="stat">
+            <div class="num">{{REELS}}</div>
+            <div class="lbl">Reels publicados</div>
+          </div>
+          <div class="stat">
+            <div class="num">{{POSTS}}</div>
+            <div class="lbl">Posts no feed</div>
+          </div>
+          <div class="stat">
+            <div class="num">{{STORIES}}</div>
+            <div class="lbl">Stories no mês</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-no"><b>03</b> / 06</div>
+</section>
+
+<!-- 04 · CRESCIMENTO DE ALCANCE -->
+<section class="page alt">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <div class="kicker"><span class="dot"></span> Crescimento de alcance</div>
+        <h2>As visualizações estão <span class="amber">acelerando.</span></h2>
+        <div class="yl"></div>
+        <p class="lead">{{LEAD_ALCANCE}}</p>
+        <ul class="clist">
+          <li><span class="ck">✓</span><span>{{BULLET1}}</span></li>
+          <li><span class="ck">✓</span><span>{{BULLET2}}</span></li>
+          <li><span class="ck">✓</span><span>{{BULLET3}}</span></li>
+        </ul>
+      </div>
+      <div class="frame">
+        <div class="cap"><span class="d"></span> Instagram Insights · Visualizações no mês</div>
+        <img src="{{PRINT3}}" alt="Gráfico de visualizações do mês contra o anterior">
+      </div>
+    </div>
+  </div>
+  <div class="pg-no"><b>04</b> / 06</div>
+</section>
+
+<!-- 05 · CONTEÚDOS DE DESTAQUE -->
+<section class="page">
+  <div class="wrap">
+    <div class="split" style="grid-template-columns:1fr 1.15fr">
+      <div>
+        <div class="kicker"><span class="dot"></span> Conteúdos de destaque</div>
+        <h2>{{TITULO_DESTAQUE_A}} <span class="amber">{{TITULO_DESTAQUE_B}}</span> {{TITULO_DESTAQUE_C}}</h2>
+        <div class="yl"></div>
+        <p class="lead">{{LEAD_DESTAQUE}}</p>
+      </div>
+      <div class="duo-frames">
+        <div class="frame">
+          <div class="cap"><span class="d"></span> Mais visualizados</div>
+          <img src="{{PRINT4}}" alt="Conteúdos mais visualizados">
+        </div>
+        <div class="frame">
+          <div class="cap"><span class="d"></span> Curva da semana</div>
+          <img src="{{PRINT5}}" alt="Curva de visualizações da semana">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-no"><b>05</b> / 06</div>
+</section>
+
+<!-- 06 · CONCLUSÕES -->
+<section class="page alt">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Conclusões e próximos passos</div>
+    <h2>{{TITULO_CONCLUSAO_A}} <span class="amber">{{TITULO_CONCLUSAO_B}}</span> {{TITULO_CONCLUSAO_C}}</h2>
+    <div class="yl"></div>
+    <div class="grid g3 mt40">
+      <div class="card amb">
+        <div class="big amber">✓</div>
+        <h4>{{CONCL1_TITULO}}</h4>
+        <p>{{CONCL1_TEXTO}}</p>
+      </div>
+      <div class="card">
+        <div class="big">▶</div>
+        <h4>{{CONCL2_TITULO}}</h4>
+        <p>{{CONCL2_TEXTO}}</p>
+      </div>
+      <div class="card">
+        <div class="big">↑</div>
+        <h4>{{CONCL3_TITULO}}</h4>
+        <p>{{CONCL3_TEXTO}}</p>
+      </div>
+    </div>
+    <p class="foot">{{MARCA_CAPS}} · RELATÓRIO DE PERFORMANCE · {{CLIENTE_CAPS}} · {{MES_CAPS}} {{ANO}}</p>
+  </div>
+  <div class="pg-no"><b>06</b> / 06</div>
+</section>
+
+</body>
+</html>
