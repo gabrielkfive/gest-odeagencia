@@ -208,6 +208,68 @@ async function callTool(name: string, args: any): Promise<{ text: string; isErro
       return { text: `Enviado para ${target}.` };
     }
 
+    if (name === "create_task") {
+      const title = String(args?.title || "").trim();
+      const resp = String(args?.resp || "").trim();
+      if (!title || !resp) return { text: "title e resp obrigatórios.", isError: true };
+      const arr = (await loadBlock("wfa-tarefas")) || [];
+      if (!Array.isArray(arr)) return { text: "wfa-tarefas não é uma lista.", isError: true };
+      const now = new Date().toISOString();
+      const task = {
+        id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        title,
+        resp,
+        prio: args?.prio ? String(args.prio) : "media",
+        data: args?.data ? String(args.data) : "",
+        clienteId: args?.clienteId ? String(args.clienteId) : "",
+        funcao: args?.funcao ? String(args.funcao) : "",
+        status: "backlog",
+        ord: 0,
+        criadaEm: now,
+        up: now,
+        criadaPor: "claude-mcp",
+      };
+      arr.push(task);
+      await saveBlock("wfa-tarefas", arr);
+      return { text: `Tarefa criada (#${task.id}): "${title}" → ${resp} [${task.prio}]${task.data ? " até " + task.data : ""}.` };
+    }
+
+    if (name === "update_lead") {
+      const nome = String(args?.nome || "").trim();
+      if (!nome) return { text: "nome obrigatório.", isError: true };
+      const arr = (await loadBlock("wfa-crm")) || [];
+      if (!Array.isArray(arr)) return { text: "wfa-crm não é uma lista.", isError: true };
+      const lead = arr.find((l: any) => String(l?.nm || "").toLowerCase().includes(nome.toLowerCase()));
+      if (!lead) return { text: `Lead não encontrado: ${nome}`, isError: true };
+      if (args?.stage !== undefined && args?.stage !== null) lead.stage = Number(args.stage);
+      if (args?.val !== undefined && args?.val !== null) lead.val = Number(args.val);
+      if (args?.next !== undefined) lead.next = String(args.next);
+      if (args?.obs) lead.obs = String(lead.obs || "") + `\n[${new Date().toISOString().slice(0, 10)}] ${String(args.obs)}`;
+      lead.up = new Date().toISOString();
+      await saveBlock("wfa-crm", arr);
+      return { text: `Lead "${lead.nm}" atualizado${args?.stage !== undefined ? " (etapa " + args.stage + ")" : ""}.` };
+    }
+
+    if (name === "add_despesa") {
+      const nome = String(args?.nome || "").trim();
+      const valor = Number(args?.valor || 0);
+      if (!nome || !valor) return { text: "nome e valor obrigatórios.", isError: true };
+      const obj = (await loadBlock("wfa-acerto")) || {};
+      const chave = "fin-" + nome.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      (obj as any)[chave] = {
+        ...((obj as any)[chave] || {}),
+        _nome: nome,
+        _valor: valor,
+        pago: !!args?.pago,
+        status: args?.pago ? "pago" : "a pagar",
+        obs: args?.obs ? String(args.obs) : (obj as any)[chave]?.obs,
+        atualizadoEm: new Date().toISOString(),
+        atualizadoPor: "claude-mcp",
+      };
+      await saveBlock("wfa-acerto", obj);
+      return { text: `Despesa registrada: ${nome} R$${valor} (${args?.pago ? "pago" : "a pagar"}).` };
+    }
+
     return { text: `Ferramenta desconhecida: ${name}`, isError: true };
   } catch (e) {
     return { text: `Falha: ${(e as Error)?.message || "erro"}`, isError: true };
