@@ -95,6 +95,30 @@ function json(data: unknown, init?: ResponseInit) {
   return Response.json(data, init);
 }
 
+// BACKUP DIÁRIO: na 1ª carga do dia fotografa o estado inteiro (menos WhatsApp e os
+// próprios backups) em wfa-backup-<data> e aposenta snapshots com mais de 14 dias.
+// Pega carona no load via waitUntil, não atrasa resposta nenhuma. Se alguém zerar uma
+// lista por engano, dá pra restaurar o dia anterior direto no Supabase.
+async function backupDiarioSeDevido(db: any) {
+  try {
+    const hoje = hojeSP();
+    const { data: last } = await db.from("workflowark_state").select("data").eq("key", "wfa-backup-last").maybeSingle();
+    if ((last?.data as any)?.date === hoje) return;
+    await db.from("workflowark_state").upsert({ key: "wfa-backup-last", data: { date: hoje } });
+    const { data: rows } = await db
+      .from("workflowark_state").select("key,data")
+      .neq("key", "wfa-whatsapp").not("key", "like", "wfa-backup-%");
+    const snap = Object.fromEntries((rows ?? []).map((r: any) => [r.key, r.data]));
+    await db.from("workflowark_state").upsert({ key: `wfa-backup-${hoje}`, data: snap });
+    const lim = new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10);
+    const { data: olds } = await db.from("workflowark_state").select("key").like("key", "wfa-backup-2%");
+    for (const r of olds ?? []) {
+      const d = String(r.key).slice("wfa-backup-".length);
+      if (d && d < lim) await db.from("workflowark_state").delete().eq("key", r.key);
+    }
+  } catch { /* backup nunca derruba o load */ }
+}
+
 function readBearer(request: Request) {
   const header = request.headers.get("authorization") ?? "";
   const match = header.match(/^Bearer\s+(.+)$/i);
@@ -238,11 +262,12 @@ export const Route = createFileRoute("/api/workflowark/state")({
           if (typeof cw?.waitUntil === "function") {
             const { planMensalSeDevido } = await import("@/integrations/plan-mensal.server");
             cw.waitUntil(planMensalSeDevido(ctx.db));
+            cw.waitUntil(backupDiarioSeDevido(ctx.db));
           }
         } catch { /* dev local: sem cloudflare:workers, sem piloto automático */ }
 
         // NUNCA devolve segredos/tokens ao cliente (Meta token, Google OAuth refresh token…)
-        const isSensitive = (k: string) => /-(secret|oauth)$/.test(k) || k === "wfa-portal-tokens";
+        const isSensitive = (k: string) => /-(secret|oauth)$/.test(k) || k === "wfa-portal-tokens" || k.startsWith("wfa-backup-");
         // BOOT LEVE: wfa-whatsapp (todas as conversas) é de longe o maior payload do estado
         // e não é necessário pra pintar a primeira tela. Fica fora do load inicial e o app
         // busca sob demanda com ?key=wfa-whatsapp (abaixo).
@@ -275,7 +300,8 @@ export const Route = createFileRoute("/api/workflowark/state")({
         let q = ctx.db
           .from("workflowark_state")
           .select("key,data,updated_at")
-          .neq("key", "wfa-whatsapp");
+          .neq("key", "wfa-whatsapp")
+          .not("key", "like", "wfa-backup-%"); // snapshots diários nunca descem pro cliente
         if (since) q = q.gt("updated_at", since);
         const { data: rows, error } = await q;
         if (error) return json({ error: "Não foi possível carregar os dados." }, { status: 500 });

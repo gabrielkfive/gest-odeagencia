@@ -126,3 +126,18 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
   content-visibility:auto nos cards (navegador só pinta o que está na tela).
 - [x] **Regressão:** fuzz 800 ops / 3 aparelhos re-rodado pós-mudanças: PASSOU.
 - Marcador `2026-07-28-fluido-v3` verificado em prod (curl + DOM real no Chrome), mobile OK.
+
+### 2026-07-28 (rodada 4) — Apple v4: Desfazer, backup diário, Só minhas, FLIP, CI que se prova
+- [x] **Desfazer (padrão Apple, sem caixa de confirmação):** excluir lead/demanda/rotina e concluir
+  tarefa agora agem na hora e mostram toast com "Desfazer" (6,5s). Desfazer exclusão reinsere um
+  clone com id novo (a lápide é monotônica de propósito). Verificado: excluir→desfazer→volta.
+- [x] **Backup diário automático:** 1x/dia o servidor fotografa o estado inteiro em
+  wfa-backup-<data> (14 dias de retenção, carona no load via waitUntil). Snapshots nunca descem
+  pro cliente (excluídos das respostas). Restauração: Supabase Table Editor, key LIKE 'wfa-backup-%'.
+  CONFERIR amanhã no painel se o primeiro snapshot apareceu.
+- [x] **"Só minhas" no Kanban:** botão 👤 aplica/tira o filtro de responsável = membro logado.
+- [x] **Animação FLIP:** card desliza da posição velha pra nova ao mudar de coluna (0.28s,
+  respeita prefers-reduced-motion; cap 200 cards).
+- [x] **CI se auto-verifica:** passo "Smoke check pós-deploy" no deploy.yml compara o marcador do
+  fonte com o que a URL de produção devolve; se não bater em 3 tentativas, a action fica vermelha.
+- Marcador `2026-07-28-apple-v4` em prod, mobile OK, 11/11 checks locais do pacote.

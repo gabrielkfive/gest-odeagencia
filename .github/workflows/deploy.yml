@@ -37,3 +37,17 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: e85057a4ce95cb115958cbf045f7457c
+
+      # "Deployado" só depois de PROVAR que a URL de produção serve o build novo.
+      # Compara o marcador do fonte com o que o site devolve. Falhou = action vermelha.
+      - name: Smoke check pós-deploy (marcador em produção)
+        run: |
+          MARCA=$(grep -oP '(?<=<!-- build )[^ ]+' public/workflowark.html | head -1)
+          echo "Marcador esperado: $MARCA"
+          sleep 10
+          for i in 1 2 3; do
+            LIVE=$(curl -sL https://workflowark.arkcontent.workers.dev/workflowark.html | grep -o "build $MARCA" || true)
+            if [ -n "$LIVE" ]; then echo "OK: produção serve $MARCA"; exit 0; fi
+            echo "tentativa $i: ainda não propagou, aguardando 15s..."; sleep 15
+          done
+          echo "FALHA: produção NÃO está servindo o build novo ($MARCA)"; exit 1

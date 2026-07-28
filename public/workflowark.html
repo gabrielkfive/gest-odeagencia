@@ -1,4 +1,4 @@
-<!-- build 2026-07-28-fluido-v3 -->
+<!-- build 2026-07-28-apple-v4 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -2619,6 +2619,7 @@ function wfaSetTheme(t){
             <option value="hoje">📅 Vencem hoje</option>
             <option value="7dias">📆 Próximos 7 dias</option>
           </select>
+          <button class="icobtn" id="filt-minhas" onclick="filtSoMinhas()" title="Ver só as tarefas atribuídas a você">👤 Só minhas</button>
           <button class="icobtn" id="filt-limpar" onclick="limparFiltros()" style="display:none;color:var(--red)">✕ Limpar filtros</button>
         </div>
 
@@ -3334,7 +3335,22 @@ function aplicarFiltros(){
   WFA_FILTROS.data=document.getElementById('filt-data').value||'';
   const ativo=Object.values(WFA_FILTROS).some(v=>v!=='');
   document.getElementById('filt-limpar').style.display=ativo?'':'none';
+  const bm=document.getElementById('filt-minhas');
+  if(bm){const eu=(typeof WFA_MEMBER!=='undefined'&&WFA_MEMBER&&WFA_MEMBER.full_name)||'';bm.style.color=(WFA_FILTROS.resp&&eu&&WFA_FILTROS.resp.toLowerCase()===eu.toLowerCase())?'var(--yel,#b38600)':'';}
   renderTarefas();
+}
+/* "Só minhas": aplica o responsável = membro logado no filtro existente (toggle). */
+function filtSoMinhas(){
+  const sel=document.getElementById('filt-resp');if(!sel)return;
+  const eu=(typeof WFA_MEMBER!=='undefined'&&WFA_MEMBER&&(WFA_MEMBER.full_name||''))||'';
+  const btn=document.getElementById('filt-minhas');
+  if(sel.value&&eu&&sel.value===eu){sel.value='';if(btn)btn.style.color='';}
+  else{
+    const op=[...sel.options].find(o=>o.value&&eu&&normName(o.value)===normName(eu));
+    if(!op){toast('Seu usuário ('+(eu||'sem nome')+') não está na lista de responsáveis');return;}
+    sel.value=op.value;if(btn)btn.style.color='var(--yel,#b38600)';
+  }
+  aplicarFiltros();
 }
 function limparFiltros(){
   ['filt-busca','filt-prio','filt-resp','filt-cli','filt-data'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -5909,6 +5925,23 @@ function toast(msg,dur){
   const ms=dur!==undefined?dur:(/^⚠|Erro ao sincronizar/.test(msg)?6000:2400);
   t._toastTimer=setTimeout(()=>t.classList.remove('show'),ms);
 }
+/* Toast com ação (padrão Apple: nada de caixa de confirmação — age já e dá 6,5s pra Desfazer) */
+function toastAcao(msg,label,cb){
+  const el=document.getElementById('toast-msg');const t=document.getElementById('toast');
+  if(!el||!t){toast(msg);return;}
+  el.textContent=msg+' ';
+  const b=document.createElement('button');
+  b.textContent=label;
+  b.style.cssText='margin-left:10px;background:none;border:none;color:var(--yel,#ffc400);font-weight:800;cursor:pointer;font-size:12.5px;padding:2px 6px;text-decoration:underline';
+  b.onclick=()=>{t.classList.remove('show');try{cb();}catch(e){}};
+  el.appendChild(b);
+  t.classList.add('show');
+  if(t._toastTimer)clearTimeout(t._toastTimer);
+  t._toastTimer=setTimeout(()=>t.classList.remove('show'),6500);
+}
+/* Undo de exclusão: a lápide é monotônica (id apagado nunca volta, de propósito),
+   então desfazer = reinserir um CLONE com id novo. Conteúdo idêntico, id fresco. */
+function wfaReviver(obj,prefixo){const c=JSON.parse(JSON.stringify(obj));c.id=prefixo+Date.now();delete c.up;return c;}
 
 /* ============ MENU MOBILE (drawer) ============ */
 function toggleSide(force){
@@ -8099,6 +8132,11 @@ function adiarAtrasadas(){
 let WFA_SHOW_ALL_DONE=false; // Concluído mostra só as 30 mais recentes até pedirem todas
 function renderTarefas(){
   const STATS=['backlog','andamento','aprovacao','concluido'];
+  // FLIP: fotografa a posição dos cards ANTES do rebuild; no fim, anima do lugar velho pro
+  // novo (card desliza entre colunas em vez de teleportar). Respeita reduced-motion.
+  const _flip=new Map();
+  const _anima=!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if(_anima){try{document.querySelectorAll('#task-board .task-card').forEach(c=>{if(_flip.size<200)_flip.set(c.dataset.tid,c.getBoundingClientRect());});}catch(e){}}
   STATS.forEach(st=>{
     const list=document.querySelector(`[data-list="${st}"]`);if(!list)return;
     const _keepScroll=list.scrollTop; // re-render não pode "pular pro topo" no meio do trabalho
@@ -8132,6 +8170,18 @@ function renderTarefas(){
   const today=hojeSP();
   document.getElementById('kpi-atrasadas').textContent=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
   document.getElementById('kpi-concluidas').textContent=state.tarefas.filter(t=>t.status==='concluido'&&String(t.concluidaEm||'').startsWith(today)).length;
+  // FLIP: anima quem mudou de lugar
+  if(_anima&&_flip.size){try{
+    document.querySelectorAll('#task-board .task-card').forEach(c=>{
+      const o=_flip.get(c.dataset.tid);if(!o)return;
+      const n=c.getBoundingClientRect();
+      const dx=o.left-n.left,dy=o.top-n.top;
+      if((!dx&&!dy)||Math.abs(dx)+Math.abs(dy)>2000)return;
+      c.style.transition='none';c.style.transform=`translate(${dx}px,${dy}px)`;
+      requestAnimationFrame(()=>{c.style.transition='transform .28s cubic-bezier(.22,1,.36,1)';c.style.transform='';
+        setTimeout(()=>{c.style.transition='';},320);});
+    });
+  }catch(e){}}
   // bind drag
   bindDrag();
   tarefaApplyView();
@@ -8290,7 +8340,18 @@ function taskCard(t){
     </div>
   </div>`;
 }
-function moveTask(id,newSt){const t=state.tarefas.find(x=>x.id===id);if(!t)return;if(newSt==='concluido'){if(!taskConcluir(t)){renderTarefas();return;}}else{t.status=newSt;taskStampSt(t,newSt);}saveTarefas();toast(`Tarefa movida para ${newSt}`);}
+function moveTask(id,newSt){
+  const t=state.tarefas.find(x=>x.id===id);if(!t)return;
+  const stAntes=t.status;
+  if(newSt==='concluido'){
+    if(!taskConcluir(t)){renderTarefas();return;}
+    saveTarefas();
+    toastAcao('Tarefa concluída ✓','Desfazer',()=>{taskReabrir(t,stAntes);saveTarefas();toast('Tarefa reaberta');});
+    return;
+  }
+  t.status=newSt;taskStampSt(t,newSt);
+  saveTarefas();toast(`Tarefa movida para ${newSt}`);
+}
 // move a tarefa pra cima/baixo na mesma coluna (define ordem manual)
 function taskMove(id,dir){
   const t=state.tarefas.find(x=>x.id===id);if(!t)return;
@@ -11300,7 +11361,11 @@ function addDemanda(){
   saveDemandas(arr);document.getElementById('dm-title').value='';document.getElementById('dm-msg').value='';toast('Demanda publicada');
 }
 function setDemStatus(id,s){const arr=loadDemandas();const d=arr.find(x=>x.id===id);if(d){d.status=s;saveDemandas(arr);}}
-function delDem(id){if(!confirm('Excluir demanda?'))return;addDeleted(id);saveDemandas(loadDemandas().filter(x=>x.id!==id));}
+function delDem(id){
+  const dem=loadDemandas().find(x=>x.id===id);
+  addDeleted(id);saveDemandas(loadDemandas().filter(x=>x.id!==id));
+  toastAcao('Demanda excluída.','Desfazer',()=>{if(!dem)return;const a=loadDemandas();a.unshift(wfaReviver(dem,'d'));saveDemandas(a);toast('Demanda restaurada');});
+}
 function renderDemandas(){
   const el=document.getElementById('dm-list');if(!el)return;
   const arr=loadDemandas();
@@ -11615,7 +11680,11 @@ function addRotina(){
   toast('Rotina criada · vai virar tarefa automaticamente');
   genRotinaTarefas(true);
 }
-function delRot(id){if(!confirm('Excluir?'))return;addDeleted(id);saveRot(loadRot().filter(x=>x.id!==id));}
+function delRot(id){
+  const rot=loadRot().find(x=>x.id===id);
+  addDeleted(id);saveRot(loadRot().filter(x=>x.id!==id));
+  toastAcao('Rotina excluída.','Desfazer',()=>{if(!rot)return;const a=loadRot();a.unshift(wfaReviver(rot,'r'));saveRot(a);toast('Rotina restaurada');});
+}
 function toggleRot(id){const a=loadRot();const r=a.find(x=>x.id===id);if(r){r.ativo=!r.ativo;saveRot(a);}}
 /* ====== Rotinas → tarefas recorrentes ====== */
 const ROT_DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -12043,9 +12112,11 @@ function crmToggleHot(id){
   toast(l.hot?'🔥 Follow quente':'Removido do follow quente');
 }
 function crmDeleteLead(){
-  const id=document.getElementById('crm-edit-id').value;if(!id||!confirm('Excluir este lead permanentemente?'))return;
+  const id=document.getElementById('crm-edit-id').value;if(!id)return;
+  const lead=loadCrm().find(l=>l.id===id);
   if(typeof addDeleted==='function')addDeleted(id); // lápide: a mescla nunca ressuscita um lead apagado
-  saveCrm(loadCrm().filter(l=>l.id!==id));crmCloseModal();toast('Lead excluído');
+  saveCrm(loadCrm().filter(l=>l.id!==id));crmCloseModal();
+  toastAcao('Lead excluído.','Desfazer',()=>{if(!lead)return;const arr=loadCrm();arr.unshift(wfaReviver(lead,'crm'));saveCrm(arr);toast('Lead restaurado');});
 }
 function crmExportCSV(){
   const arr=loadCrm();if(!arr.length){toast('Nenhum lead para exportar');return;}
