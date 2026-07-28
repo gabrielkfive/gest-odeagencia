@@ -94,3 +94,23 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
 - Verificado: Playwright local (0 re-render em 3 aplicações idênticas, união+lápide ok), build,
   deploy manual, marcador `2026-07-28-sync-sem-piscada-sem-perda` confirmado em prod, teste
   mobile ok, 18s observados no Chrome do Gabriel sem nenhum re-render e GETs com ?since=.
+
+### 2026-07-28 (rodada 2) — Sólido v2: fuzz 1500 ops, lápide monotônica, Kanban sem bug de cor, Comercial ao vivo
+- [x] **Fuzz test do sync (funções reais):** 3 aparelhos virtuais, 1500 operações aleatórias com
+  quedas de rede e flush parcial. PEGOU bug real: a lápide (wfa-deleted-ids) era last-write-wins
+  no servidor e um aparelho desatualizado apagava a lápide do colega (item excluído ressuscitava).
+- [x] **Fix da lápide:** servidor faz UNIÃO (save-state de wfa-deleted-ids nunca perde id) e o
+  cliente reempurra a união quando percebe o servidor incompleto. Fuzz re-rodado: PASSOU
+  (0 sumiços, 0 ressurreições, convergência total nos 3 aparelhos + servidor).
+- [x] **Kanban x barra de rolagem:** quem rola agora é a .task-list; a coluna (faixa de cor,
+  cabeçalho, cantos) fica parada. Verificado em prod com coluna rolada 400px, cores intactas.
+- [x] **XSS:** escapeHtml em nome de cliente no card de tarefa e fonte/responsável no card do CRM.
+- [x] **Badge Atividades explicado:** conta URGENTES (atrasadas + vencem hoje), diferente do KPI
+  "Ativas" (todas não concluídas) — de propósito; tooltip no hover explica a conta.
+- [x] **Comercial ao vivo:** faixa "Ao vivo · CRM" (leads novos, fechados c/ valor, pipeline aberto)
+  por mês selecionado + Meta Ads do mês atual (investido, leads das campanhas, cliques) via
+  integração existente, com cache de 10 min e select de conta (lembrado em wfa-comercial._metaAcc).
+  Funil se alimenta do CRM quando os campos manuais estão vazios, mesma conta da faixa.
+  Meta aparece assim que o token for conectado em Ferramentas › Integrações.
+- [x] **/app estável:** 30 requests seguidos em prod = 30x HTTP 200, zero 1102 (pós sync condicional).
+- Marcador `2026-07-28-solido-v2` verificado em prod, teste mobile OK.

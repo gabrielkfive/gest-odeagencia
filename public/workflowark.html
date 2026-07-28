@@ -1,4 +1,4 @@
-<!-- build 2026-07-28-sync-sem-piscada-sem-perda -->
+<!-- build 2026-07-28-solido-v2 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -428,8 +428,11 @@ table.t tr.high{background:var(--yel-bg)}
 
 /* ===== task kanban · camada luce ===== */
 .task-board{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 10px;min-height:400px}
-.task-col{flex:0 0 288px;background:linear-gradient(180deg,#fbfbf9,#f4f4f1);border:1px solid var(--line);border-radius:var(--r-lg);padding:0 10px 10px;display:flex;flex-direction:column;gap:9px;max-height:calc(100vh - 220px);overflow-y:auto;box-shadow:var(--sh-1);position:relative;transition:box-shadow var(--t) var(--ease),background var(--t)}
-.task-col::-webkit-scrollbar{width:6px}.task-col::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px}
+/* Quem ROLA é a .task-list (só os cards). A coluna em si não rola: assim a faixa de cor,
+   o cabeçalho e os cantos arredondados ficam parados e a barra de rolagem nunca passa por
+   cima da cor da etapa (bug relatado: "cores dão bug por causa da barra de rolagem"). */
+.task-col{flex:0 0 288px;background:linear-gradient(180deg,#fbfbf9,#f4f4f1);border:1px solid var(--line);border-radius:var(--r-lg);padding:0 10px 10px;display:flex;flex-direction:column;gap:9px;max-height:calc(100vh - 220px);overflow:hidden;box-shadow:var(--sh-1);position:relative;transition:box-shadow var(--t) var(--ease),background var(--t)}
+.task-list::-webkit-scrollbar{width:6px}.task-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px}
 .task-col::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;border-radius:var(--r-lg) var(--r-lg) 0 0;background:var(--mute-2)}
 .task-col[data-status=backlog]::before{background:#a3a3a3}
 .task-col[data-status=andamento]::before{background:var(--yel)}
@@ -447,7 +450,7 @@ table.t tr.high{background:var(--yel-bg)}
 .task-col[data-status=concluido] .task-col-head h4{background:rgba(48,209,88,.16);color:#177a3d}
 /* CORREÇÃO: a área de soltar era só do tamanho dos cards (sobrava espaço "morto" embaixo
    onde o drop não registrava). Agora a lista preenche a coluna inteira — a coluna toda vira alvo. */
-.task-list{flex:1 0 auto;display:flex;flex-direction:column;gap:9px;min-height:60px}
+.task-list{flex:1 1 auto;display:flex;flex-direction:column;gap:9px;min-height:60px;overflow-y:auto;padding-right:2px}
 .task-card{background:#fff;border:1px solid var(--line);border-left:3px solid var(--yel);border-radius:var(--r-md);padding:12px 13px;cursor:grab;transition:transform var(--t) var(--ease-out),box-shadow var(--t) var(--ease-out),border-color var(--t);box-shadow:var(--sh-1)}
 .task-card:hover{box-shadow:var(--sh-3);transform:translateY(-3px);border-color:var(--line-2)}
 .task-card:active{cursor:grabbing}
@@ -2892,6 +2895,7 @@ function wfaSetTheme(t){
           <span id="comercial-mes-banner-txt">Visualizando dados de mês anterior. Edite os campos para registrar histórico.</span>
         </div>
 
+        <div id="comercial-live" style="margin-bottom:16px"></div>
         <div id="comercial-funil" style="margin-bottom:16px"></div>
 
         <!-- Capacidade em tempo real: o comercial para de vender no escuro -->
@@ -3568,8 +3572,12 @@ function applyCloudState(remote){
   const setIfDiff=(key,str)=>{if(localStorage.getItem(key)!==str){WFA_LS_SET(key,str);mudou=true;}};
   // 1) une a lápide (remoto + local) antes de mesclar as listas
   let deletedSet=loadDeleted();
-  try{ let rd=remote['wfa-deleted-ids']; if(typeof rd==='string')rd=JSON.parse(rd); if(Array.isArray(rd))rd.forEach(i=>deletedSet.add(i)); }catch(e){}
+  let lapideIncompleta=false; // servidor sem algum id que temos: reempurra a união
+  try{ let rd=remote['wfa-deleted-ids']; if(typeof rd==='string')rd=JSON.parse(rd);
+    if(Array.isArray(rd)){ const rs=new Set(rd); rd.forEach(i=>deletedSet.add(i));
+      if('wfa-deleted-ids' in remote)deletedSet.forEach(i=>{if(!rs.has(i))lapideIncompleta=true;}); } }catch(e){}
   setIfDiff('wfa-deleted-ids',JSON.stringify([...deletedSet].slice(-3000)));
+  if(lapideIncompleta)pushKeys.push('wfa-deleted-ids');
   // Notificações lidas: UNIÃO remoto+local (como a lápide). Antes o "lido" vivia só no
   // aparelho e todo navegador novo voltava com 99+ no sino.
   try{ let rr=remote['wfa-notif-read']; if(typeof rr==='string')rr=JSON.parse(rr);
@@ -8252,7 +8260,7 @@ function taskCard(t){
     ${tagsHtml}
     ${clHtml}
     <div class="tc-meta" style="margin-top:5px">
-      <span class="tc-cli">${c?c.nm:'—'}</span>
+      <span class="tc-cli">${c?escapeHtml(c.nm):'—'}</span>
       <span class="tc-date ${late?'late':''}" style="${dateStyle}">${late?'Atrasada · ':venceHoje?'Hoje · ':''}${dataFmt}</span>
     </div>
     <div class="tc-meta" style="margin-top:4px">
@@ -8481,8 +8489,12 @@ function updateBadges(){
   const atrasadas=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
   updateCrmBadge();
   const urgentes=state.tarefas.filter(t=>t.status!=='concluido'&&t.data&&t.data<=today).length;
+  const hoje=urgentes-atrasadas;
   const badge=document.getElementById('tarefas-badge');
   badge.textContent=urgentes;
+  // o badge conta URGENTES (atrasadas + vencem hoje); "Ativas" na página conta TODAS as
+  // não concluídas — números diferentes de propósito. O title explica no hover.
+  badge.title=atrasadas+' atrasada(s) + '+hoje+' vence(m) hoje';
   badge.style.display=urgentes?'':'none';
 }
 
@@ -12087,7 +12099,7 @@ function renderCrm(){
         return `<div class="crm-card stage-${si}${overdue?' crm-overdue':''}" draggable="true" data-lead="${l.id}" onclick="crmOpenModal('${l.id}')">
           <button class="crm-hot-btn${l.hot?' on':''}" title="Marcar como follow quente" onclick="event.stopPropagation();crmToggleHot('${l.id}')">🔥</button>
           <div class="nm">${escapeHtml(l.nm)}</div>
-          <div class="meta"><span class="crm-source-badge">${l.source||'—'}</span>${l.resp?`<span>${l.resp}</span>`:''}</div>
+          <div class="meta"><span class="crm-source-badge">${escapeHtml(l.source||'—')}</span>${l.resp?`<span>${escapeHtml(l.resp)}</span>`:''}</div>
           ${l.val?`<div class="val">R$ ${Number(l.val).toLocaleString('pt-BR')}</div>`:''}
           ${l.next?`<div class="next">${escapeHtml(l.next)}${l.due?` <span style="color:${overdue?'var(--red)':'var(--mute)'}">· ${crmFmtDate(l.due)}</span>`:''}</div>`:''}
         </div>`;
@@ -13091,14 +13103,77 @@ function renderComercialMes(){
     el.textContent=data[key]!==undefined?data[key]:(useDef?(COMERCIAL_DEFAULTS[key]||'—'):'—');
   });
   renderComercialFunil(data,useDef);
+  try{renderComercialLive();}catch(e){}
 }
+/* ===== COMERCIAL AO VIVO: números reais do CRM + Meta Ads da ARK =====
+   O CRM entra por mês selecionado; o Meta só no mês corrente (this_month), com cache
+   de 10 min pra não martelar a Graph API a cada sync. */
+function comercialCrmStats(mes){
+  const arr=(typeof loadCrm==='function')?loadCrm():[];
+  const criados=arr.filter(l=>String(l.created||'').slice(0,7)===mes);
+  const fechados=arr.filter(l=>l.stage===4&&String(l.due||l.created||'').slice(0,7)===mes);
+  const pipeline=arr.filter(l=>l.stage<4);
+  return {criados:criados.length,fechados:fechados.length,
+    valorFechado:fechados.reduce((s,l)=>s+(l.val||0),0),
+    pipeline:pipeline.length,valorPipeline:pipeline.reduce((s,l)=>s+(l.val||0),0)};
+}
+let _comLiveMeta={t:0,html:''};
+function renderComercialLive(){
+  const el=document.getElementById('comercial-live');if(!el)return;
+  const sel=document.getElementById('comercial-mes');
+  const mes=(sel&&sel.value)||cobMesKey();
+  const s=comercialCrmStats(mes);
+  const fmt=v=>Number(v||0).toLocaleString('pt-BR');
+  el.innerHTML=`<div class="card" style="padding:16px 18px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+      <div style="font-size:14px;font-weight:700;letter-spacing:-.02em">Ao vivo · CRM ${mes.split('-').reverse().join('/')}</div>
+      <div style="font-size:11px;color:var(--mute)">atualiza sozinho com o pipeline</div>
+    </div>
+    <div class="g3" style="gap:8px">
+      <div class="kpi"><div class="l">Leads novos no mês</div><div class="v">${s.criados}</div><div class="d">criados no CRM</div></div>
+      <div class="kpi green"><div class="l">Fechados no mês</div><div class="v">${s.fechados}</div><div class="d">${s.valorFechado?'R$ '+fmt(s.valorFechado):'sem valor lançado'}</div></div>
+      <div class="kpi yel"><div class="l">Pipeline aberto</div><div class="v">${s.pipeline}</div><div class="d">${s.valorPipeline?'R$ '+fmt(s.valorPipeline)+' em jogo':'—'}</div></div>
+    </div>
+    <div id="comercial-meta-live" style="margin-top:10px"></div>
+  </div>`;
+  if(mes===cobMesKey())comercialMetaLive();
+}
+async function comercialMetaLive(){
+  const box=document.getElementById('comercial-meta-live');if(!box)return;
+  if(_comLiveMeta.html&&Date.now()-_comLiveMeta.t<600000){box.innerHTML=_comLiveMeta.html;return;}
+  box.innerHTML='<div style="font-size:12px;color:var(--mute)">Meta Ads: carregando…</div>';
+  try{
+    const st=await cloudCall('save',{action:'meta-status'});
+    if(!st.configured){box.innerHTML='<div style="font-size:12px;color:var(--mute)">Meta Ads não conectado. Conecte o token em Ferramentas › Integrações e o investimento da ARK aparece aqui sozinho.</div>';return;}
+    if(st.error||!(st.accounts||[]).length){box.innerHTML='<div style="font-size:12px;color:#c0392b">Meta: '+mdEsc(st.error||'sem conta de anúncio no token')+'</div>';return;}
+    const all=loadComercialData();
+    const accId=(all._metaAcc&&st.accounts.some(a=>a.id===all._metaAcc))?all._metaAcc:st.accounts[0].id;
+    const acc=st.accounts.find(a=>a.id===accId)||st.accounts[0];
+    const r=await cloudCall('save',{action:'meta-relatorio',accountId:accId,preset:'this_month'});
+    const i=r.insights;
+    const fmt=v=>Number(v||0).toLocaleString('pt-BR');
+    const leadsMeta=(i&&Array.isArray(i.actions))?Number((i.actions.find(a=>/onsite_conversion\.lead|^lead$|messaging_conversation_started/i.test(a.action_type)||{}).value)||0):0;
+    const selHtml=st.accounts.length>1?`<select class="form-select" style="font-size:11px;padding:3px 8px;width:auto" onchange="comercialMetaAcc(this.value)">${st.accounts.map(a=>`<option value="${mdEsc(a.id)}" ${a.id===accId?'selected':''}>${mdEsc(a.name)}</option>`).join('')}</select>`:`<span style="font-size:11px;color:var(--mute)">${mdEsc(acc.name)}</span>`;
+    const html=i?`<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 8px"><div style="font-size:12.5px;font-weight:700">Meta Ads · mês atual</div>${selHtml}</div>
+      <div class="g3" style="gap:8px">
+        <div class="kpi"><div class="l">Investido</div><div class="v" style="font-size:17px">R$ ${fmt(i.spend)}</div><div class="d">no mês</div></div>
+        <div class="kpi"><div class="l">Leads das campanhas</div><div class="v" style="font-size:17px">${leadsMeta?fmt(leadsMeta):'—'}</div><div class="d">lead + conversas iniciadas</div></div>
+        <div class="kpi"><div class="l">Cliques</div><div class="v" style="font-size:17px">${fmt(i.clicks)}</div><div class="d">CTR ${(parseFloat(i.ctr||0)).toFixed(2)}% · CPC R$ ${(parseFloat(i.cpc||0)).toFixed(2)}</div></div>
+      </div>`:'<div style="font-size:12px;color:var(--mute)">Meta conectado, sem dados no mês ainda.</div>';
+    box.innerHTML=html;
+    _comLiveMeta={t:Date.now(),html};
+  }catch(e){box.innerHTML='<div style="font-size:12px;color:var(--mute)">Meta indisponível agora'+((e&&e.message)?' · '+mdEsc(e.message):'')+'</div>';}
+}
+function comercialMetaAcc(id){const all=loadComercialData();all._metaAcc=id;saveComercialData(all);_comLiveMeta={t:0,html:''};renderComercialLive();}
 function renderComercialFunil(data,useDef){
   const box=document.getElementById('comercial-funil');if(!box)return;
   const g=k=>{const v=data[k]!==undefined?data[k]:(useDef?COMERCIAL_DEFAULTS[k]:undefined);const m=String(v||'').replace(',','.').match(/[\d.]+/);return m?parseFloat(m[0]):0;};
-  const leads=Math.round(g('leads_growth')+g('leads_trafego')+g('fonte_indicacao'));
+  // Campos manuais vazios? O funil se alimenta sozinho do CRM (leads criados no mês).
+  const _mesSel=(document.getElementById('comercial-mes')||{}).value||cobMesKey();
+  const leads=Math.round(g('leads_growth')+g('leads_trafego')+g('fonte_indicacao'))||((typeof comercialCrmStats==='function')?comercialCrmStats(_mesSel).criados:0);
   const _fechDigitado=Math.round(g('fechamentos_ark')+g('fechamentos_alpha'));
-  const _mesCrm=(typeof cobMesKey==='function')?cobMesKey():hojeSP().slice(0,7);
-  const _crmFech=(!_fechDigitado&&typeof loadCrm==='function')?loadCrm().filter(l=>l.stage===4&&(l.due||'').slice(0,7)===_mesCrm).length:0;
+  // mesma conta da faixa "Ao vivo" (comercialCrmStats), senão funil e faixa divergem
+  const _crmFech=(!_fechDigitado&&typeof comercialCrmStats==='function')?comercialCrmStats(_mesSel).fechados:0;
   const fech=_fechDigitado||_crmFech;
   const reunioes=Math.round(fech*2.2)||Math.round(leads*0.4); // estimativa (10 reuniões ~ 1 fechamento)
   const metaF=g('meta_fecha')||0;

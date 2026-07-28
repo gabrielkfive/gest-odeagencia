@@ -318,9 +318,19 @@ export const Route = createFileRoute("/api/workflowark/state")({
         if (action === "save-state") {
           const key = String(body.key ?? "");
           if (!isStateKey(key)) return json({ error: "Bloco inválido" }, { status: 400 });
+          let data = body.data ?? null;
+          // LÁPIDE É MONOTÔNICA: wfa-deleted-ids só cresce. UNIÃO com o que já está no
+          // servidor em vez de substituir — um aparelho desatualizado não pode apagar a
+          // lápide do colega (era assim que item excluído "ressuscitava" pra todo mundo).
+          if (key === "wfa-deleted-ids" && Array.isArray(data)) {
+            const { data: row } = await ctx.db
+              .from("workflowark_state").select("data").eq("key", key).maybeSingle();
+            const atual: unknown[] = Array.isArray(row?.data) ? row.data : [];
+            data = [...new Set([...atual, ...data])].slice(-3000);
+          }
           const { error } = await ctx.db.from("workflowark_state").upsert({
             key,
-            data: body.data ?? null,
+            data,
             updated_by: ctx.user.id,
           });
           if (error) return json({ error: "Não foi possível salvar." }, { status: 500 });
