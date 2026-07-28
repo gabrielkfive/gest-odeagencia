@@ -114,3 +114,15 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
   Meta aparece assim que o token for conectado em Ferramentas › Integrações.
 - [x] **/app estável:** 30 requests seguidos em prod = 30x HTTP 200, zero 1102 (pós sync condicional).
 - Marcador `2026-07-28-solido-v2` verificado em prod, teste mobile OK.
+
+### 2026-07-28 (rodada 3) — Fluido v3: render seletivo, scroll preservado, board 3x mais leve
+- [x] **Render seletivo:** tarefas/CRM/demandas/rotinas/WhatsApp só reconstroem o DOM quando a
+  chave DELES mudou no sync (a lápide conta). Renders leves seguem sempre. Verificado: mudança
+  só em demandas = 0 re-render do Kanban.
+- [x] **Scroll preservado:** re-render do Kanban mantém o scrollTop de cada coluna (200→200 no teste).
+  Colega mexe em tarefa e a sua coluna não pula mais pro topo.
+- [x] **Concluído enxuto:** coluna mostra as 30 concluídas mais recentes (ordenadas por conclusão)
+  + botão "Mostrar todas (N)". Em prod: DOM caiu de 237 pra 30 cards, badge mantém o total real.
+  content-visibility:auto nos cards (navegador só pinta o que está na tela).
+- [x] **Regressão:** fuzz 800 ops / 3 aparelhos re-rodado pós-mudanças: PASSOU.
+- Marcador `2026-07-28-fluido-v3` verificado em prod (curl + DOM real no Chrome), mobile OK.

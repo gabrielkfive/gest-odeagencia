@@ -1,4 +1,4 @@
-<!-- build 2026-07-28-solido-v2 -->
+<!-- build 2026-07-28-fluido-v3 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -451,7 +451,7 @@ table.t tr.high{background:var(--yel-bg)}
 /* CORREÇÃO: a área de soltar era só do tamanho dos cards (sobrava espaço "morto" embaixo
    onde o drop não registrava). Agora a lista preenche a coluna inteira — a coluna toda vira alvo. */
 .task-list{flex:1 1 auto;display:flex;flex-direction:column;gap:9px;min-height:60px;overflow-y:auto;padding-right:2px}
-.task-card{background:#fff;border:1px solid var(--line);border-left:3px solid var(--yel);border-radius:var(--r-md);padding:12px 13px;cursor:grab;transition:transform var(--t) var(--ease-out),box-shadow var(--t) var(--ease-out),border-color var(--t);box-shadow:var(--sh-1)}
+.task-card{background:#fff;border:1px solid var(--line);border-left:3px solid var(--yel);border-radius:var(--r-md);padding:12px 13px;cursor:grab;transition:transform var(--t) var(--ease-out),box-shadow var(--t) var(--ease-out),border-color var(--t);box-shadow:var(--sh-1);content-visibility:auto;contain-intrinsic-size:auto 110px}
 .task-card:hover{box-shadow:var(--sh-3);transform:translateY(-3px);border-color:var(--line-2)}
 .task-card:active{cursor:grabbing}
 .task-card.dragging{opacity:.55;transform:scale(.97) rotate(-1.5deg);box-shadow:var(--sh-4)}
@@ -3568,8 +3568,8 @@ function applyCloudState(remote){
   WFA_CLOUD_MUTED=true;
   // mudou=false ao fim => o remoto era idêntico ao local => NÃO re-renderiza nada.
   // (Era o re-render incondicional a cada 6s que fazia o app inteiro piscar em branco.)
-  let mudou=false;const pushKeys=[];
-  const setIfDiff=(key,str)=>{if(localStorage.getItem(key)!==str){WFA_LS_SET(key,str);mudou=true;}};
+  let mudou=false;const pushKeys=[];const mudouK=new Set();
+  const setIfDiff=(key,str)=>{if(localStorage.getItem(key)!==str){WFA_LS_SET(key,str);mudou=true;mudouK.add(key);}};
   // 1) une a lápide (remoto + local) antes de mesclar as listas
   let deletedSet=loadDeleted();
   let lapideIncompleta=false; // servidor sem algum id que temos: reempurra a união
@@ -3588,7 +3588,7 @@ function applyCloudState(remote){
     // DELEÇÃO propaga entre dispositivos: removeItem grava null no servidor. Ao ver null aqui
     // (reset de brand, checklist etc.), apaga o valor local. Sem isto, a deleção ressuscitava.
     // Protege se o usuário acabou de recriar a chave (dirty/janela recente).
-    if(value==null){ if(!wfaLocalAuth(key)&&localStorage.getItem(key)!=null){WFA_LS_REMOVE(key);mudou=true;} return; }
+    if(value==null){ if(!wfaLocalAuth(key)&&localStorage.getItem(key)!=null){WFA_LS_REMOVE(key);mudou=true;mudouK.add(key);} return; }
     // Objeto keyed por clienteId (não-array): merge por cliente para dois membros não se sobrescreverem
     if(key==='wfa-cliente-detalhes'){
       let rObj=value;if(typeof rObj==='string'){try{rObj=JSON.parse(rObj);}catch(e){rObj={};}}
@@ -3624,8 +3624,12 @@ function applyCloudState(remote){
   WFA_CLOUD_MUTED=false;
   pushKeys.forEach(k=>{try{cloudSave(k,localStorage.getItem(k));}catch(e){}});
   try{const mj=JSON.stringify([WFA_MEMBER,WFA_MEMBERS]);if(mj!==window._wfaMemberJson){window._wfaMemberJson=mj;mudou=true;}}catch(e){}
-  if(!window._wfaAppliedOnce){window._wfaAppliedOnce=true;mudou=true;} // 1ª aplicação sempre pinta a tela
+  const _primeira=!window._wfaAppliedOnce;
+  if(_primeira){window._wfaAppliedOnce=true;mudou=true;} // 1ª aplicação sempre pinta a tela
   if(!mudou)return; // nada mudou: mantém o DOM em paz (sem piscada, sem perder foco/scroll)
+  // RENDER SELETIVO: os boards pesados (tarefas/CRM/demandas/rotinas) só reconstroem o DOM
+  // quando a chave DELES mudou (lápide conta: pode remover item). O resto é leve e roda sempre.
+  const _rr=(...ks)=>_primeira||ks.some(k=>mudouK.has(k));
   state.tarefas=JSON.parse(localStorage.getItem('wfa-tarefas')||'[]');
   if(typeof wfaTarefaSnapshot==='function')wfaTarefaSnapshot();
   state.regua=JSON.parse(localStorage.getItem('wfa-regua')||'{}');
@@ -3645,8 +3649,8 @@ function applyCloudState(remote){
   const jornada=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
   if(jornada&&typeof jornada==='object')SPRINTS.forEach(sp=>{sp.clis=jornada[sp.n]||[];});
   if(typeof rebuildPeople==='function')rebuildPeople();if(typeof fillRespSelects==='function')fillRespSelects();
-  renderClientes();renderSprints();renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();renderDemandas();renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function'&&!(typeof planIsEditing==='function'&&planIsEditing()))renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function')renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
-  if(typeof renderCrm==='function')renderCrm();
+  renderClientes();renderSprints();if(_rr('wfa-tarefas','wfa-clientes-custom','wfa-deleted-ids'))renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();if(_rr('wfa-demandas','wfa-deleted-ids'))renderDemandas();if(_rr('wfa-rotinas','wfa-deleted-ids'))renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function'&&!(typeof planIsEditing==='function'&&planIsEditing()))renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function'&&_rr('wfa-whatsapp'))renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
+  if(typeof renderCrm==='function'&&_rr('wfa-crm','wfa-deleted-ids'))renderCrm();
   if(typeof renderWidgets==='function')renderWidgets(); // Meu Painel é a home: widgets refletem os dados sincronizados
   if(typeof renderAlpha==='function'&&document.getElementById('page-alpha')&&document.getElementById('page-alpha').classList.contains('active'))renderAlpha();
   if(typeof renderAgenda==='function')renderAgenda();
@@ -8092,20 +8096,35 @@ function adiarAtrasadas(){
   if(typeof renderMeuDia==='function')renderMeuDia();
   toast('📅 '+atrasadas.length+' tarefa(s) movida(s) para amanhã');
 }
+let WFA_SHOW_ALL_DONE=false; // Concluído mostra só as 30 mais recentes até pedirem todas
 function renderTarefas(){
   const STATS=['backlog','andamento','aprovacao','concluido'];
   STATS.forEach(st=>{
     const list=document.querySelector(`[data-list="${st}"]`);if(!list)return;
+    const _keepScroll=list.scrollTop; // re-render não pode "pular pro topo" no meio do trabalho
     // status desconhecido (dado antigo/importado) cai no Backlog — nada some
     const _pr={alta:0,media:1,baixa:2};
-    const filt=state.tarefas.filter(t=>(t.status===st||(st==='backlog'&&!STATS.includes(t.status)))&&tarefaPassaFiltro(t))
+    let filt=state.tarefas.filter(t=>(t.status===st||(st==='backlog'&&!STATS.includes(t.status)))&&tarefaPassaFiltro(t))
       .sort((a,b)=>{ // manual (ordem) primeiro se definida; senão prioridade, depois data
         if(a.ord!=null&&b.ord!=null&&a.ord!==b.ord)return a.ord-b.ord;
         const p=(_pr[a.prio]??1)-(_pr[b.prio]??1); if(p)return p;
         return (a.data||'9999').localeCompare(b.data||'9999');
       });
-    wfaSetHTML(list,filt.map(taskCard).join('')||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`);
-    document.getElementById('ct-'+st).textContent=filt.length;
+    const totalCol=filt.length;
+    let maisBtn='';
+    // Concluído acumula centenas de cards e pesava o board inteiro: mostra as 30 mais
+    // recentes (por data de conclusão) e um botão pra abrir o resto quando precisar.
+    if(st==='concluido'){
+      filt=filt.slice().sort((a,b)=>String(b.concluidaEm||'').localeCompare(String(a.concluidaEm||'')));
+      if(!WFA_SHOW_ALL_DONE&&filt.length>30){
+        filt=filt.slice(0,30);
+        maisBtn=`<button class="icobtn" style="margin:6px auto;display:block;font-size:11px" onclick="WFA_SHOW_ALL_DONE=true;renderTarefas()">Mostrar todas (${totalCol})</button>`;
+      }
+    }
+    const html=filt.map(taskCard).join('');
+    wfaSetHTML(list,(html||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`)+maisBtn);
+    list.scrollTop=_keepScroll;
+    document.getElementById('ct-'+st).textContent=totalCol;
   });
   // KPIs — "Ativas" = não concluídas (o total cru de 200+ assustava o time logo de cara)
   document.getElementById('kpi-total').textContent=state.tarefas.filter(t=>t.status!=='concluido').length;
