@@ -1,4 +1,4 @@
-<!-- build 2026-07-28-menu-suave-v6 -->
+<!-- build 2026-07-28-kpi-filtro-v7 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -8177,12 +8177,15 @@ function renderTarefas(){
     list.scrollTop=_keepScroll;
     document.getElementById('ct-'+st).textContent=totalCol;
   });
-  // KPIs — "Ativas" = não concluídas (o total cru de 200+ assustava o time logo de cara)
-  document.getElementById('kpi-total').textContent=state.tarefas.filter(t=>t.status!=='concluido').length;
-  document.getElementById('kpi-andamento').textContent=state.tarefas.filter(t=>t.status==='andamento').length;
+  // KPIs — "Ativas" = não concluídas. Com FILTRO ativo, os KPIs contam o MESMO conjunto
+  // das colunas (filtrado): filtrar por Samuel e ver "Ativas 94" global não batia (print
+  // do Gabriel de 27/07). Sem filtro, comportamento de sempre.
+  const _kpiBase=Object.values(WFA_FILTROS).some(v=>v!=='')?state.tarefas.filter(tarefaPassaFiltro):state.tarefas;
+  document.getElementById('kpi-total').textContent=_kpiBase.filter(t=>t.status!=='concluido').length;
+  document.getElementById('kpi-andamento').textContent=_kpiBase.filter(t=>t.status==='andamento').length;
   const today=hojeSP();
-  document.getElementById('kpi-atrasadas').textContent=state.tarefas.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
-  document.getElementById('kpi-concluidas').textContent=state.tarefas.filter(t=>t.status==='concluido'&&String(t.concluidaEm||'').startsWith(today)).length;
+  document.getElementById('kpi-atrasadas').textContent=_kpiBase.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
+  document.getElementById('kpi-concluidas').textContent=_kpiBase.filter(t=>t.status==='concluido'&&String(t.concluidaEm||'').startsWith(today)).length;
   // FLIP: anima quem mudou de lugar
   if(_anima&&_flip.size){try{
     document.querySelectorAll('#task-board .task-card').forEach(c=>{

@@ -150,3 +150,12 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
   overlay pro grid no 1º frame e pular/encolher durante a animação. Agora a classe .expanding
   segura o visual de overlay enquanto o grid anima por baixo e assenta no fim; peek é removido
   no toggle e o hover fica suprimido 600ms. Marcador `2026-07-28-menu-suave-v6`, mobile OK.
+
+### 2026-07-28 (rodada 6) — Prints do Gabriel (pasta ARQUIVOS/GOOGLE/GMAIL) auditados
+- [x] **"+ Adicionar cartão" por cima dos cards (print de 27/07):** morto pela reforma da rodada 3
+  (lista rola dentro da coluna; o qadd ficou fora da área rolável). PROVADO em prod: lista rolada
+  300px, sobreposição 0px.
+- [x] **KPIs ignoravam o filtro (print de 27/07, filtro Samuel):** Ativas/Em andamento/Atrasadas/
+  Concluídas hoje agora contam o MESMO conjunto filtrado das colunas quando há filtro ativo.
+  Verificado: filtro Samuel = 2 ativas/1 atrasada, batendo com as colunas. Sem filtro, global.
+- Marcador `2026-07-28-kpi-filtro-v7` verificado em prod.
