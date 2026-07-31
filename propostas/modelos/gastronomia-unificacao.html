@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARK Content × {{CLIENTE_NOME}} · Proposta de Unificação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --bg2:#111114; --panel:#16161a; --panel2:#1c1c20;
+  --ink:#f5f5f2; --muted:#9a9aa2; --faint:#5a5a62;
+  --rose:#feef02; --rose-soft:#e3d502;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --display:"Sora","Segoe UI",system-ui,sans-serif;
+  --body:"Inter","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+img{display:block;max-width:100%}
+
+/* progress + brand chrome */
+.progress{position:fixed;left:0;top:0;height:3px;background:var(--rose);width:0;z-index:90;box-shadow:0 0 18px rgba(254,239,2,.6);transition:width .12s linear}
+.brandmark{position:fixed;top:22px;left:30px;display:flex;align-items:center;gap:12px;z-index:80}
+.brandmark img{height:30px;width:auto;border-radius:6px}
+.brandmark .bm-tx{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.04em}
+.brandmark .bm-tx b{color:var(--rose)}
+@media screen and (max-width:640px){.brandmark{left:18px;top:16px}.brandmark .bm-tx{display:none}}
+
+/* page shell */
+.page{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:108px 8vw;border-bottom:1px solid var(--line);overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 90% -10%, rgba(254,239,2,.06), transparent 55%),
+    radial-gradient(90% 70% at -10% 110%, rgba(254,239,2,.04), transparent 55%),
+    var(--bg);
+}
+.page.alt{background:
+    radial-gradient(110% 80% at 8% -10%, rgba(254,239,2,.05), transparent 55%),
+    var(--bg2);}
+.page::after{content:"";position:absolute;inset:22px;border:1px solid var(--line);border-radius:16px;pointer-events:none}
+.wrap{max-width:1080px;width:100%;margin:0 auto;position:relative;z-index:2}
+.pg-no{position:absolute;bottom:38px;right:8vw;font-family:var(--display);font-size:12px;color:var(--faint);letter-spacing:.1em;z-index:3}
+.pg-no b{color:var(--ink)}
+
+/* typography */
+.kicker{font-family:var(--display);font-weight:600;letter-spacing:.3em;text-transform:uppercase;
+  font-size:12px;color:var(--rose);display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.kicker .dot{width:7px;height:7px;background:var(--rose);border-radius:50%}
+h1{font-family:var(--display);font-weight:800;line-height:1.02;letter-spacing:-.025em;font-size:clamp(40px,7vw,84px)}
+h2{font-family:var(--display);font-weight:700;line-height:1.06;letter-spacing:-.02em;font-size:clamp(30px,5vw,56px)}
+h3{font-family:var(--display);font-weight:700;line-height:1.12;letter-spacing:-.01em;font-size:clamp(22px,3vw,32px)}
+h4{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.2}
+p{color:var(--muted);font-size:clamp(15px,1.5vw,18px);line-height:1.65}
+.lead{color:var(--muted);font-size:clamp(16px,1.8vw,20px);line-height:1.6;max-width:66ch}
+.rose{color:var(--rose)}
+.ink{color:var(--ink)}
+strong{color:var(--ink);font-weight:600}
+.yl{width:64px;height:3px;background:var(--rose);margin:26px 0;border-radius:2px}
+
+/* pills / badges */
+.tag{display:inline-block;background:var(--rose);color:#111;font-family:var(--display);font-weight:700;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:6px 13px;border-radius:3px}
+
+/* cards / grids */
+.grid{display:grid;gap:22px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);
+  border-radius:16px;padding:30px;transition:border-color .25s,transform .25s}
+.card:hover{border-color:rgba(254,239,2,.35);transform:translateY(-4px)}
+.card.amb{border-color:rgba(254,239,2,.45);background:linear-gradient(160deg,rgba(254,239,2,.10),rgba(254,239,2,.01))}
+.card h4{margin-bottom:10px}
+.card p{font-size:15px}
+
+/* image frame (instagram-style window) */
+.frame{background:var(--panel2);border:1px solid var(--line2);border-radius:14px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.frame .cap{display:flex;align-items:center;gap:9px;padding:12px 16px;background:#202024;border-bottom:1px solid var(--line);
+  font-size:12.5px;color:var(--faint);font-family:var(--display);letter-spacing:.02em}
+.frame .cap .d{width:9px;height:9px;border-radius:50%;background:var(--rose);flex:none}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:18px}
+.stat{border-left:2px solid var(--rose);padding-left:20px}
+.stat .num{font-family:var(--display);font-weight:800;font-size:clamp(38px,5.5vw,62px);line-height:1;letter-spacing:-.03em}
+.stat .lbl{color:var(--muted);font-size:15px;margin-top:10px;line-height:1.4}
+
+/* lists */
+.clist{list-style:none}
+.clist li{position:relative;padding:11px 0 11px 24px;border-bottom:1px solid var(--line);color:var(--ink);font-size:15.5px}
+.clist li:last-child{border-bottom:none}
+.clist li::before{content:"";position:absolute;left:0;top:19px;width:7px;height:7px;background:var(--rose);border-radius:50%}
+.clist li span{color:var(--muted);display:block;font-size:13.5px;margin-top:3px}
+.checks{list-style:none}
+.checks li{display:flex;gap:12px;align-items:flex-start;padding:9px 0;color:var(--ink);font-size:15.5px}
+.checks li::before{content:"✓";color:var(--rose);font-weight:800;flex:none;margin-top:1px}
+
+/* quote block */
+.quote{border-left:3px solid var(--rose);padding:22px 30px;background:rgba(254,239,2,.05);border-radius:0 10px 10px 0;margin:34px 0}
+.quote p{font-family:var(--display);font-weight:700;color:var(--ink);font-size:clamp(19px,2.4vw,27px);line-height:1.3}
+.quote .by{color:var(--rose);font-family:var(--body);font-weight:600;font-size:14px;margin-top:12px;letter-spacing:.04em}
+
+/* step header number */
+.stepwrap{display:grid;grid-template-columns:84px 1fr;gap:38px;align-items:start}
+.stepbadge{width:68px;height:68px;border-radius:18px;background:var(--rose);color:#111;font-family:var(--display);
+  font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center}
+.ghostnum{position:absolute;right:5vw;top:50%;transform:translateY(-50%);font-family:var(--display);font-weight:800;
+  font-size:34vmin;color:rgba(255,255,255,.022);line-height:.8;z-index:1;pointer-events:none}
+@media screen and (max-width:820px){.stepwrap{grid-template-columns:1fr;gap:18px}.ghostnum{display:none}}
+
+/* cover */
+.cover{justify-content:center;text-align:center;align-items:center}
+.cover .logo{height:96px;width:auto;margin:0 auto 30px;border-radius:20px;filter:drop-shadow(0 10px 50px rgba(254,239,2,.18))}
+.cover .duo{display:flex;align-items:center;gap:16px;justify-content:center;font-family:var(--display);font-weight:700;
+  letter-spacing:.06em;font-size:14px;color:var(--muted);margin-bottom:30px}
+.cover .duo b{color:var(--ink)}
+.cover .duo .x{color:var(--rose);font-size:18px}
+.cover h1{max-width:17ch;margin:0 auto}
+.cover .sub{margin:26px auto 0;max-width:58ch;font-size:clamp(16px,1.9vw,20px);color:var(--muted)}
+.cover .meta{margin-top:42px;display:flex;gap:26px;justify-content:center;align-items:center;flex-wrap:wrap;color:var(--faint);font-size:13px;font-family:var(--display);letter-spacing:.04em}
+.cover .meta .s{width:1px;height:18px;background:var(--line2)}
+.cover .scroll{margin-top:54px;color:var(--faint);font-size:12px;letter-spacing:.2em;text-transform:uppercase;animation:bob 2s infinite}
+@keyframes bob{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(6px);opacity:1}}
+
+/* insta profile card */
+.ig-card{padding:30px 28px;background:var(--panel)}
+.ig-head{display:flex;align-items:center;gap:18px}
+.ig-head img{width:74px;height:74px;border-radius:50%;border:2px solid var(--rose);object-fit:cover}
+.ig-user{font-family:var(--display);font-weight:700;font-size:18px;color:var(--ink)}
+.ig-sub{color:var(--faint);font-size:13px;margin-top:2px}
+.ig-nums{display:flex;gap:26px;margin:20px 0 6px}
+.ig-nums b{font-family:var(--display);font-size:18px}
+.ig-nums span{color:var(--faint);font-size:13px}
+.ig-bio{color:var(--muted);font-size:13.5px;line-height:1.5;margin-top:10px}
+
+/* projection table */
+.ptable{width:100%;border-collapse:collapse;margin-top:10px}
+.ptable th{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:left;padding:14px 18px;border-bottom:1px solid var(--line2)}
+.ptable th.hl{color:var(--rose)}
+.ptable td{padding:16px 18px;border-bottom:1px solid var(--line);color:var(--muted);font-size:15.5px}
+.ptable td b{font-family:var(--display);font-size:20px;color:var(--ink);font-weight:700}
+.ptable td.hl b{color:var(--rose)}
+.ptable tr:last-child td{border-bottom:none}
+
+/* plans */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:20px;align-items:stretch}
+.plan{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);
+  border-radius:18px;padding:34px 28px;position:relative;display:flex;flex-direction:column}
+.plan.feat{border-color:var(--rose);background:linear-gradient(170deg,rgba(254,239,2,.12),rgba(254,239,2,.01));transform:translateY(-10px)}
+.plan.feat::before{content:"RECOMENDADO PARA A {{CLIENTE_CURTO_CAPS}}";position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  background:var(--rose);color:#111;font-family:var(--display);font-weight:700;font-size:9.5px;letter-spacing:.12em;
+  padding:5px 14px;border-radius:20px;white-space:nowrap}
+.plan .pn{font-family:var(--display);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:13px;color:var(--rose)}
+.plan .pt{font-family:var(--display);font-weight:800;font-size:26px;margin:8px 0 4px}
+.plan .pd{font-size:13.5px;color:var(--faint);min-height:54px}
+.plan .div{height:1px;background:var(--line);margin:22px 0}
+.plan .checks{flex:1}
+.plan .checks li{font-size:14px;padding:7px 0}
+.price-row{display:flex;align-items:baseline;gap:5px;margin-top:18px}
+.price-row .cur{font-family:var(--display);font-weight:600;font-size:16px;color:var(--muted)}
+.price-row .val{font-family:var(--display);font-weight:800;font-size:38px;letter-spacing:-.02em;color:var(--ink)}
+.plan.feat .price-row .val{color:var(--rose)}
+.price-row .per{font-size:14px;color:var(--faint)}
+.price-sub{font-size:12.5px;color:var(--muted);margin-top:8px}
+.price-sub b{color:var(--ink);font-weight:600}
+
+/* CTA */
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--rose);color:#111;font-family:var(--display);
+  font-weight:700;font-size:15px;letter-spacing:.03em;padding:17px 38px;border-radius:8px;text-decoration:none;
+  transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(254,239,2,.25)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+
+/* responsive */
+@media screen and (max-width:820px){.g2,.g3,.g4,.stats,.plans{grid-template-columns:1fr}.plan.feat{transform:none}
+  .page{padding:90px 7vw}.page::after{inset:12px}.pg-no{right:7vw}}
+.mt8{margin-top:8px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mt40{margin-top:40px}
+.center{text-align:center}.mxauto{margin-left:auto;margin-right:auto}
+.note{color:var(--faint);font-size:12.5px;line-height:1.5}
+
+/* ===== PRINT / PDF ===== */
+@page{size:1280px 800px;margin:0}
+@media print{
+  .progress,.scroll{display:none}
+  body{background:var(--bg)}
+  .page{width:1280px;height:800px;min-height:0;padding:64px 92px;border-bottom:none;
+    page-break-after:always;break-inside:avoid}
+  .page::after{inset:18px}
+  .wrap{max-width:1060px}
+  h1{font-size:62px} h2{font-size:42px} h3{font-size:28px}
+  p{font-size:14.5px}.lead{font-size:17px}.card p{font-size:13.5px}
+  .clist li{font-size:14px;padding:9px 0 9px 22px}.clist li span{font-size:12.5px}
+  .clist li::before{top:16px}
+  .checks li{font-size:14px;padding:7px 0}
+  .quote{margin:26px 0;padding:18px 26px}.quote p{font-size:22px}
+  .stat .num{font-size:54px}.stat .lbl{font-size:13.5px}
+  .card{padding:24px}
+  .ghostnum{font-size:300px}
+  .cover .logo{height:88px}
+  .pg-no{bottom:30px;right:92px}
+  .card:hover{transform:none}
+  .grid{gap:18px}.plans{gap:18px}
+  /* compactação da página de investimento */
+  #p16 h2{font-size:34px}
+  #p16 .kicker{margin-bottom:14px}
+  #p16 .yl{margin:16px 0}
+  #p16 .plans{margin-top:14px;gap:16px}
+  #p16 .plan{padding:20px 18px}
+  #p16 .plan.feat{transform:translateY(0)}
+  #p16 .plan .pt{font-size:19px}
+  #p16 .plan .pd{min-height:0;font-size:11.5px}
+  #p16 .price-row{margin-top:10px}
+  #p16 .price-row .val{font-size:27px}
+  #p16 .plan .div{margin:12px 0}
+  #p16 .plan .checks li{font-size:12px;padding:4px 0}
+  #p16 .card.amb{padding:14px 20px}
+  #p16 .card.amb p{font-size:12.5px}
+  #p16 .mt40{margin-top:16px}
+  #p16 .note{font-size:10.5px;margin-top:8px}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="brandmark"><img src="{{LOGO}}" alt="ARK"><span class="bm-tx">ARK <b>CONTENT</b> × {{CLIENTE_NOME_CAPS}}</span></div>
+
+<!-- 01 CAPA -->
+<section class="page cover" id="p1">
+  <div class="wrap">
+    <img class="logo" src="{{LOGO}}" alt="ARK Content">
+    <div class="duo"><b>ARK CONTENT</b> <span class="x">×</span> <b>{{CLIENTE_NOME_CAPS}}</b></div>
+    <h1>Uma marca. Uma equipe. <span class="rose">Uma direção.</span></h1>
+    <p class="sub">Um plano de unificação para concentrar toda a divulgação da {{CLIENTE_CURTO}} em uma única operação: conteúdo, postagens, tráfego e relatórios com <strong>um só time e uma só meta: casa cheia.</strong></p>
+    <div class="meta"><span>PROPOSTA DE UNIFICAÇÃO</span><span class="s"></span><span>PREPARADA PARA A {{CLIENTE_NOME_CAPS}}</span><span class="s"></span><span>{{MES_ANO_CAPS}}</span><span class="s"></span><span>CONFIDENCIAL</span></div>
+    <div class="scroll">role para começar ↓</div>
+  </div>
+  <div class="pg-no"><b>01</b> / 17</div>
+</section>
+
+<!-- 02 CARTA -->
+<section class="page alt" id="p2">
+  <div class="wrap" style="max-width:880px">
+    <div class="kicker"><span class="dot"></span> Uma palavra antes de tudo</div>
+    <h2>Isso aqui <span class="rose">não é</span> uma proposta de apresentação.</h2>
+    <div class="yl"></div>
+    <p class="lead">A gente não precisa se apresentar. Já são <strong>{{MESES_JUNTOS}} meses de trabalho juntos</strong>: conhecemos a casa, a brasa, o balcão e o público da {{CLIENTE_CURTO}}. Esta proposta nasce de uma conversa real que tivemos: hoje existem duas frentes de marketing rodando em paralelo, e faz mais sentido concentrar tudo em uma só.</p>
+    <p class="lead mt24">O objetivo dela é simples: mostrar <span class="rose">com clareza e sem letra miúda</span> como fazer essa unificação do jeito certo, sem perder dinheiro no caminho e sem perder o ritmo do que já está funcionando.</p>
+    <p class="lead mt24">Foi escrita para ser lida em poucos minutos, direto ao ponto, com números reais e um plano claro.</p>
+    <div class="quote"><p>“A {{CLIENTE_CURTO}} não precisa de dois contratos. Precisa de uma operação inteira olhando para a mesma meta.”</p><div class="by">O ponto de partida desta proposta</div></div>
+  </div>
+  <div class="pg-no"><b>02</b> / 17</div>
+</section>
+
+<!-- 03 DIAGNOSTICO -->
+<section class="page" id="p3">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Diagnóstico · o ponto de partida</div>
+    <h2>Onde a {{CLIENTE_CURTO}} está <span class="rose">hoje.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g2 mt24" style="align-items:center">
+      <div>
+        <p class="lead">Uma casa com identidade forte, comida de verdade na brasa e um público que volta. A operação de marketing já roda: o que falta agora é <strong>concentrar as frentes</strong> para a marca crescer com mais força e menos custo.</p>
+        <ul class="clist mt24">
+          <li>Marca com personalidade própria <span>Nome forte, tema claro e uma proposta que o público entende na hora.</span></li>
+          <li>Conteúdo profissional em produção <span>Captação em câmera, {{VIDEOS_MES}} vídeos por mês, calendário editorial e postagens rodando com a ARK.</span></li>
+          <li>Duas frentes ativas em paralelo <span>ARK cuidando da divulgação do salão e da marca. Alpha cuidando do delivery e da performance.</span></li>
+          <li>Próximo passo natural <span>Unificar tudo em uma única operação, com uma única mensalidade e um único relatório.</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="frame">
+          <div class="cap"><span class="d"></span> instagram.com/{{CLIENTE_HANDLE}}</div>
+          <div class="ig-card">
+            <div class="ig-head">
+              <img src="{{CLIENTE_AVATAR}}" alt="{{CLIENTE_NOME}}">
+              <div>
+                <div class="ig-user">{{CLIENTE_HANDLE}}</div>
+                <div class="ig-sub">{{CLIENTE_NOME}} · Comida na brasa</div>
+              </div>
+            </div>
+            <div class="ig-nums">
+              <div><b>{{IG_POSTS}}</b> <span>posts</span></div>
+              <div><b class="rose">{{IG_SEGUIDORES}}</b> <span>seguidores</span></div>
+              <div><b>{{IG_SEGUINDO}}</b> <span>seguindo</span></div>
+            </div>
+            <div class="ig-bio">Perfil ativo, com produção profissional rodando. Exatamente o estágio em que concentrar as forças muda o jogo.</div>
+          </div>
+        </div>
+        <div class="stats" style="grid-template-columns:1fr 1fr;margin-top:22px">
+          <div class="stat"><div class="num">{{IG_SEGUIDORES}}</div><div class="lbl">seguidores acompanhando a casa hoje</div></div>
+          <div class="stat"><div class="num">{{MESES_JUNTOS}}</div><div class="lbl">meses de operação ARK já rodando</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-no"><b>03</b> / 17</div>
+</section>
+
+<!-- 04 CENARIO ATUAL -->
+<section class="page alt" id="p4">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> O cenário atual</div>
+    <h2>Duas operações. <span class="rose">Uma marca só.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Hoje a {{CLIENTE_CURTO}} mantém duas frentes de marketing ao mesmo tempo. As duas entregam, mas cada uma olha para um pedaço do negócio. Colocando lado a lado, fica claro o que cada uma faz:</p>
+    <div class="grid g2 mt40">
+      <div class="card amb"><h4 class="rose">ARK · divulgação do salão e da marca</h4>
+        <ul class="checks mt16">
+          <li>Captação de conteúdo em câmera, na casa</li>
+          <li>{{VIDEOS_MES}} vídeos por mês, editados e prontos</li>
+          <li>Calendário de conteúdo editorial mensal</li>
+          <li>Postagens no Instagram da casa</li>
+          <li>Imagens, banners e materiais da marca</li>
+        </ul>
+      </div>
+      <div class="card"><h4 class="rose">Alpha · delivery e performance</h4>
+        <ul class="checks mt16" style="opacity:.85">
+          <li>1 edição de vídeo por semana</li>
+          <li>Gestão de tráfego pago com otimizações</li>
+          <li>Relatórios semanais de campanha</li>
+          <li>Foco específico no canal de delivery</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-bottom:0"><p>Duas mensalidades, dois relatórios e duas metas para uma marca só. <span class="rose">Dá para simplificar.</span></p></div>
+  </div>
+  <div class="pg-no"><b>04</b> / 17</div>
+</section>
+
+<!-- 05 CONTRATO ALPHA -->
+<section class="page" id="p5">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Uma conversa honesta sobre o contrato</div>
+    <h2>Sair no impulso <span class="rose">custa caro.</span> Sair com plano, não.</h2>
+    <div class="yl"></div>
+    <p class="lead">Antes de qualquer decisão, é justo colocar os números do contrato Alpha na mesa. A rescisão antecipada prevê <strong>multa contratual</strong>, e as entregas já realizadas são <strong>descontadas de qualquer devolução</strong>. Ou seja: quem cancela no impulso esperando um estorno alto acaba frustrado e ainda perde o serviço do período.</p>
+    <div class="grid g2 mt40">
+      <div class="card"><h4 class="rose">Encerrar no impulso</h4>
+        <ul class="clist mt8">
+          <li>Multa de rescisão antecipada</li>
+          <li>Entregas já realizadas descontadas do valor</li>
+          <li>Estorno baixo ou nulo no fim da conta</li>
+          <li>Delivery fica sem tráfego da noite para o dia</li>
+        </ul>
+      </div>
+      <div class="card amb"><h4 class="rose">Encerrar do jeito certo</h4>
+        <ul class="clist mt8">
+          <li>Ciclo do contrato concluído conforme previsto</li>
+          <li>Sem multa e sem dinheiro deixado na mesa</li>
+          <li>ARK assume a frente completa em transição organizada</li>
+          <li>Campanhas migradas sem pausa e sem perda de histórico</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-bottom:0"><p>O melhor negócio aqui não é romper. É <span class="rose">migrar com inteligência.</span></p></div>
+  </div>
+  <div class="pg-no"><b>05</b> / 17</div>
+</section>
+
+<!-- 06 O QUE JA CONSTRUIMOS -->
+<section class="page alt" id="p6">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> O que já construímos juntos</div>
+    <h2>{{MESES_JUNTOS}} meses de operação que <span class="rose">já provou que funciona.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Esta não é uma promessa de quem chega agora. É a continuação de uma operação que já roda dentro da {{CLIENTE_CURTO}}, com rotina, entrega e padrão de marca.</p>
+    <div class="stats g4 mt40" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat"><div class="num rose">{{VIDEOS_ENTREGUES}}</div><div class="lbl"><strong>vídeos produzidos</strong><br>captados em câmera, editados e entregues</div></div>
+      <div class="stat"><div class="num">{{MESES_JUNTOS}}</div><div class="lbl"><strong>calendários editoriais</strong><br>planejados e executados mês a mês</div></div>
+      <div class="stat"><div class="num">{{VIDEOS_MES}}<span style="font-size:.45em">/mês</span></div><div class="lbl"><strong>ritmo de produção</strong><br>vídeos novos todo mês, sem depender de improviso</div></div>
+      <div class="stat"><div class="num">100<span style="font-size:.45em">%</span></div><div class="lbl"><strong>das postagens</strong><br>planejadas, produzidas e publicadas pela ARK</div></div>
+    </div>
+    <div class="card amb mt40">
+      <h4 class="rose">Por que isso importa agora</h4>
+      <p class="mt8 ink">Unificar não é recomeçar. A equipe já conhece a casa, o cardápio e o público. A migração da frente de performance acontece <strong>por cima de uma operação que já está de pé</strong>, sem curva de aprendizado e sem mês perdido.</p>
+    </div>
+    <p class="note mt16">Números da operação ARK na {{CLIENTE_CURTO}}, apurados em {{MES_COLETA}}.</p>
+  </div>
+  <div class="pg-no"><b>06</b> / 17</div>
+</section>
+
+<!-- 07 DESENHO DA UNIFICACAO -->
+<section class="page" id="p7">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> O desenho da unificação</div>
+    <h2>O que continua, o que migra e o que <span class="rose">se encerra.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">A unificação é uma troca de desenho, não uma troca de time. Tudo que já funciona continua exatamente onde está. O que muda é que a frente de performance passa a rodar dentro da mesma operação do conteúdo.</p>
+    <div class="grid g3 mt40">
+      <div class="card"><h4><span class="rose">01.</span> Continua na ARK</h4>
+        <ul class="clist mt8"><li>Captação em câmera na casa</li><li>{{VIDEOS_MES}} vídeos mensais editados</li><li>Calendário editorial e postagens</li><li>Imagens, banners e materiais</li></ul>
+      </div>
+      <div class="card amb"><h4><span class="rose">02.</span> Migra para a ARK</h4>
+        <ul class="clist mt8"><li>Gestão de tráfego pago da casa</li><li>Otimização semanal de campanhas</li><li>Relatório semanal de resultados</li><li>Edições extras da frente de performance</li></ul>
+      </div>
+      <div class="card"><h4><span class="rose">03.</span> Se encerra na Alpha</h4>
+        <ul class="clist mt8"><li>Contrato concluído conforme o ciclo previsto</li><li>Sem multa e sem expectativa de estorno</li><li>Histórico de campanhas preservado na migração</li><li>Encerramento formalizado e sem atrito</li></ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-bottom:0"><p>No fim da transição: <span class="rose">uma equipe, uma mensalidade, um relatório.</span></p></div>
+  </div>
+  <div class="pg-no"><b>07</b> / 17</div>
+</section>
+
+<!-- 08 TESE -->
+<section class="page alt" id="p8">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> A tese central</div>
+    <h2>Transformar a {{CLIENTE_CURTO}} na casa que o público <span class="rose">tem vontade de comer.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">O objetivo não é postar mais. É fazer marca: uma casa notável, profissional e desejada, onde o conteúdo desperta a fome e o tráfego leva a pessoa até a mesa ou até o pedido.</p>
+    <div class="grid g3 mt40">
+      <div class="card"><h4><span class="rose">01.</span> Desejo em vídeo</h4><p class="mt8">A brasa, a fumaça e o corte na câmera. Conteúdo que dá fome de verdade.</p></div>
+      <div class="card"><h4><span class="rose">02.</span> Prova social viva</h4><p class="mt8">Casa cheia, cliente voltando e bastidor real como rotina de conteúdo.</p></div>
+      <div class="card"><h4><span class="rose">03.</span> Feed com padrão</h4><p class="mt8">Consistência visual à altura da identidade da {{CLIENTE_CURTO}}.</p></div>
+      <div class="card"><h4><span class="rose">04.</span> CTAs que movem</h4><p class="mt8">Todo conteúdo apontando para o caminho: vir até a casa ou pedir.</p></div>
+      <div class="card"><h4><span class="rose">05.</span> Tráfego integrado</h4><p class="mt8">Campanhas e conteúdo na mesma mesa, um alimentando o outro toda semana.</p></div>
+      <div class="card amb"><h4 class="rose">O resultado</h4><p class="mt8 ink">Uma marca que trabalha o dia inteiro para deixar a casa <strong>cheia.</strong></p></div>
+    </div>
+  </div>
+  <div class="pg-no"><b>08</b> / 17</div>
+</section>
+
+<!-- 09 METODO -->
+<section class="page" id="p9" style="text-align:center;align-items:center">
+  <div class="wrap" style="max-width:860px">
+    <span class="tag">Método exclusivo</span>
+    <h1 class="mt24">O Método <span class="rose">ARK.</span></h1>
+    <div class="yl mxauto" style="margin-left:auto;margin-right:auto"></div>
+    <p class="lead mxauto" style="text-align:center">Quatro pilares operados por uma <strong>equipe integrada</strong>: estrategista, roteirista, gestor de tráfego, equipe audiovisual e account, todos na mesma mesa, olhando para a mesma meta. Não são dois fornecedores dividindo a marca. É um time inteiro cuidando da {{CLIENTE_CURTO}}.</p>
+    <div class="grid g2 mt40" style="text-align:left">
+      <div class="card"><h4><span class="rose">01.</span> Planejamento Estratégico</h4><p class="mt8">Posicionamento, público, funil e metas mensais. Direção antes de execução.</p></div>
+      <div class="card"><h4><span class="rose">02.</span> Linha Editorial</h4><p class="mt8">Calendário mensal com propósito: desejo, prova social, oferta e bastidor.</p></div>
+      <div class="card"><h4><span class="rose">03.</span> Tráfego Pago</h4><p class="mt8">Meta Ads segmentado por região, com otimização semanal e relatório.</p></div>
+      <div class="card"><h4><span class="rose">04.</span> Captação Audiovisual</h4><p class="mt8">{{VIDEOS_MES}} vídeos profissionais por mês, com roteiro, gravação e edição.</p></div>
+    </div>
+  </div>
+  <div class="pg-no"><b>09</b> / 17</div>
+</section>
+
+<!-- 10 PILAR 1 -->
+<section class="page alt" id="p10">
+  <span class="ghostnum">1</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">01</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 01 · Planejamento Estratégico</div>
+      <h3>Antes de crescer, direção.</h3>
+      <p class="lead mt16">Posicionamento, público, funil e metas mensais da casa. Todo mês, um calendário editorial com temas, formatos e CTAs alinhados ao objetivo do período. <strong>Nada vai ao ar sem saber para que serve.</strong></p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>Posicionamento e diferenciação da {{CLIENTE_CURTO}}</li><li>Funil do desejo à mesa e ao pedido</li><li>Metas mensais da operação</li><li>Calendário editorial mensal completo</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Estrategista <span>Formado em publicidade e propaganda, dono da direção do plano.</span></li><li>Account dedicado <span>O elo diário entre a {{CLIENTE_CURTO}} e toda a equipe.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>“Todo crescimento começa com direção.”</p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>10</b> / 17</div>
+</section>
+
+<!-- 11 PILAR 2 -->
+<section class="page" id="p11">
+  <span class="ghostnum">2</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">02</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 02 · Linha Editorial</div>
+      <h3>Uma linha editorial profissional, não posts soltos.</h3>
+      <p class="lead mt16">Pilares de conteúdo estruturados: desejo, prova social, oferta e bastidor. <strong>{{VIDEOS_MES}} vídeos por mês</strong> mais imagens e banners, com roteiro, copy, design e revisão incluídos, cada peça com papel definido no funil da casa.</p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>{{VIDEOS_MES}} vídeos mensais completos</li><li>Roteiros e legendas com propósito</li><li>Imagens e banners na identidade da casa</li><li>Postagens planejadas e publicadas</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Roteirista <span>Ganchos, roteiros e copy de cada peça.</span></li><li>Designer <span>Identidade da {{CLIENTE_CURTO}} aplicada em tudo.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>Cada conteúdo com um papel. Cada semana com <span class="rose">um objetivo.</span></p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>11</b> / 17</div>
+</section>
+
+<!-- 12 PILAR 3 -->
+<section class="page alt" id="p12">
+  <span class="ghostnum">3</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">03</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 03 · Tráfego Pago (Meta Ads)</div>
+      <h3>Tráfego que enche a casa, não que queima verba.</h3>
+      <p class="lead mt16">A frente que hoje roda na Alpha passa a rodar aqui, integrada ao conteúdo: campanhas segmentadas por região, remarketing e <strong>otimização semanal com relatório semanal</strong>, cobrindo salão e delivery na mesma estratégia.</p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>Campanhas segmentadas na região da casa</li><li>Criativos de performance a partir dos vídeos</li><li>Otimização semanal e remarketing</li><li>Relatório semanal de resultados</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Gestor de tráfego <span>Campanhas, testes e otimização semanal.</span></li><li>Estrategista <span>Oferta e ângulo de cada campanha.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>Verba pequena com direção vence verba grande <span class="rose">sem estratégia.</span></p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>12</b> / 17</div>
+</section>
+
+<!-- 13 PILAR 4 -->
+<section class="page" id="p13">
+  <span class="ghostnum">4</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">04</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 04 · Captação Audiovisual</div>
+      <h3>Vídeo profissional todo mês, sem depender de inspiração.</h3>
+      <p class="lead mt16"><strong>{{VIDEOS_MES}} vídeos profissionais por mês</strong> com roteiro, direção, gravação e edição. A captação em câmera dentro da casa constrói o acervo da {{CLIENTE_CURTO}} para feed, Reels e anúncios. É a parte mais pesada da operação, e é exatamente onde a ARK mais entrega.</p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>{{VIDEOS_MES}} vídeos profissionais por mês</li><li>Roteiro e direção de gravação</li><li>Edição pronta para Reels e anúncios</li><li>Acervo crescente de conteúdo da marca</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Equipe audiovisual <span>Captação e edição profissional.</span></li><li>Roteirista <span>Gancho e roteiro de cada vídeo.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>Comida que aparece bem na câmera é o novo <span class="rose">boca a boca.</span></p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>13</b> / 17</div>
+</section>
+
+<!-- 14 PROJECAO -->
+<section class="page alt" id="p14">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Viabilidade</div>
+    <h2>Retorno mensurável desde o primeiro ciclo de <span class="rose">30 dias.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g2 mt24" style="grid-template-columns:1.2fr 1fr;align-items:start">
+      <div class="card" style="padding:10px 6px">
+        <table class="ptable">
+          <tr><th>Projeção · operação unificada</th><th>Conservador</th><th class="hl">Realista</th></tr>
+          <tr><td>Leads gerados / mês</td><td><b>40</b></td><td class="hl"><b>60</b></td></tr>
+          <tr><td>Reservas e pedidos rastreáveis</td><td><b>16</b></td><td class="hl"><b>26</b></td></tr>
+          <tr><td>Novos clientes / mês</td><td><b>10</b></td><td class="hl"><b>18</b></td></tr>
+          <tr><td>Receita estimada</td><td><b>R$ 8 mil</b></td><td class="hl"><b>R$ 20 mil</b></td></tr>
+        </table>
+      </div>
+      <div class="card"><h4 class="rose">Premissas do modelo</h4>
+        <ul class="clist mt8">
+          <li>Mídia recomendada <span>R$ 800 a R$ 1.200 por mês em Meta Ads.</span></li>
+          <li>Custo por lead <span>R$ 15 a R$ 45 (gastronomia).</span></li>
+          <li>Conversão lead para pedido ou visita <span>30% a 50%.</span></li>
+          <li>Ticket médio <span>R$ 60 a R$ 180+ por mesa ou pedido.</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="note mt24">Projeções conservadoras, baseadas no histórico de casas atendidas pela ARK. Resultados dependem de investimento em mídia, sazonalidade e capacidade de atendimento da casa.</p>
+  </div>
+  <div class="pg-no"><b>14</b> / 17</div>
+</section>
+
+<!-- 15 A VIRADA -->
+<section class="page" id="p15">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Como acontece a virada</div>
+    <h2>Os primeiros <span class="rose">90 dias unificados.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g3 mt24">
+      <div class="card amb"><div class="tag">Semana 1 a 2</div><h4 class="mt16">Transição</h4><ul class="clist mt8"><li>Formalização do plano unificado</li><li>Migração de acessos e campanhas</li><li>Encerramento organizado do ciclo Alpha</li></ul></div>
+      <div class="card amb"><div class="tag">Semana 3 em diante</div><h4 class="mt16">Operação plena</h4><ul class="clist mt8"><li>Conteúdo e tráfego na mesma rotina</li><li>Relatório semanal no ar</li><li>Campanhas de salão e delivery ativas</li></ul></div>
+      <div class="card amb"><div class="tag">Mês 2 a 3</div><h4 class="mt16">Tração</h4><ul class="clist mt8"><li>Otimização com histórico de dados</li><li>Reunião mensal de resultado</li><li>Marca crescendo em uma direção só</li></ul></div>
+    </div>
+    <div class="card mt24" style="border-left:3px solid var(--rose)">
+      <h4 class="rose">O que precisamos da {{CLIENTE_CURTO}}</h4>
+      <p class="mt8 ink">Regularização da mensalidade em aberto na virada do plano · acessos ao Instagram e ao Meta Business Suite · 1 dia de gravação por mês · aprovação de conteúdo em até 24h · 1 reunião mensal. <strong>Só isso.</strong> Todo o resto é responsabilidade da equipe ARK.</p>
+    </div>
+  </div>
+  <div class="pg-no"><b>15</b> / 17</div>
+</section>
+
+<!-- 16 INVESTIMENTO -->
+<section class="page alt" id="p16">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Investimento</div>
+    <h2>Escolha o desenho da <span class="rose">operação.</span></h2>
+    <div class="yl"></div>
+    <div class="plans mt24">
+      <div class="plan">
+        <div class="pn">Essencial</div><div class="pt">Só a captação</div>
+        <div class="pd">Para quem quer apenas o conteúdo produzido, publicando por conta própria.</div>
+        <div class="price-row"><span class="cur">R$</span><span class="val">{{PRECO_ESSENCIAL}}</span><span class="per">/mês</span></div>
+        <div class="price-sub">Sem planejamento, roteirização e postagem</div>
+        <div class="div"></div>
+        <ul class="checks"><li>Captação em câmera na casa</li><li>{{VIDEOS_MES}} vídeos editados / mês</li><li>Imagens e banners da marca</li><li>Publicação por conta da casa</li><li>Sem calendário editorial e sem tráfego</li></ul>
+      </div>
+      <div class="plan feat">
+        <div class="pn">Operação Unificada</div><div class="pt">Tudo em um só lugar</div>
+        <div class="pd">Substitui as duas frentes atuais por uma operação completa, com uma única mensalidade.</div>
+        <div class="price-row"><span class="cur">R$</span><span class="val">{{PRECO_UNIFICADO}}</span><span class="per">/mês</span></div>
+        <div class="price-sub">Migração completa de campanhas no 1º mês, <b>sem custo de setup</b></div>
+        <div class="div"></div>
+        <ul class="checks"><li>Tudo que já roda hoje na ARK</li><li>Gestão de tráfego com otimização semanal</li><li>Relatório semanal de resultados</li><li>Edições da frente de performance</li><li>Salão e delivery na mesma estratégia</li></ul>
+      </div>
+      <div class="plan">
+        <div class="pn">Unificada Semestral</div><div class="pt">Compromisso 6 meses</div>
+        <div class="pd">A operação completa com condição especial pela previsibilidade do semestre.</div>
+        <div class="price-row"><span class="cur">R$</span><span class="val">{{PRECO_SEMESTRAL}}</span><span class="per">/mês</span></div>
+        <div class="price-sub">Total: <b>R$ {{TOTAL_SEMESTRAL}}</b> · economia de <b>R$ {{ECONOMIA_SEMESTRAL}}</b></div>
+        <div class="div"></div>
+        <ul class="checks"><li>Tudo da Operação Unificada</li><li>Tempo real para o método maturar</li><li>Otimização com histórico de dados</li><li>Marca construída para durar</li></ul>
+      </div>
+    </div>
+    <div class="card amb mt40">
+      <p class="ink">A conta é simples: hoje, as duas frentes somadas custam mais do que a Operação Unificada. Unificando, a {{CLIENTE_CURTO}} passa a ter <strong>uma equipe inteira</strong>, estrategista, roteirista, gestor de tráfego, audiovisual e account, por <span class="rose">menos do que paga hoje pelas duas separadas.</span></p>
+    </div>
+    <p class="note mt16">Valores referentes à gestão e produção ARK. O investimento em mídia paga (Meta Ads) é adicional, recomendado entre R$ 800 e R$ 1.200 por mês, e gerenciado pela ARK sem custo extra de gestão.</p>
+  </div>
+  <div class="pg-no"><b>16</b> / 17</div>
+</section>
+
+<!-- 17 CTA -->
+<section class="page" id="p17" style="text-align:center;align-items:center">
+  <div class="wrap" style="max-width:840px">
+    <span class="tag">Próximo passo</span>
+    <h1 class="mt24">Vamos encher a casa da <span class="rose">{{CLIENTE_CURTO}}?</span></h1>
+    <div class="yl mxauto"></div>
+    <p class="lead mxauto" style="text-align:center">A marca existe, a operação já roda e o público já responde. O que falta é concentrar tudo em uma direção só. É exatamente isso que esta unificação faz, com método, com equipe e sem dinheiro deixado na mesa.</p>
+    <div class="mt40" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a class="btn" href="#">Aprovar a unificação</a>
+      <a class="btn ghost" href="#">Falar com a ARK no WhatsApp</a>
+    </div>
+    <div class="mt40" style="display:flex;gap:26px;justify-content:center;flex-wrap:wrap;color:var(--muted);font-size:14px;font-family:var(--display)">
+      <span>Semana 1 · Formalização</span><span>Semana 2 · Migração</span><span>Semana 3 · Operação plena</span>
+    </div>
+    <p class="mt40 note" style="letter-spacing:.06em">ARK CONTENT · Marketing para gastronomia e hospitalidade<br>Proposta preparada exclusivamente para a {{CLIENTE_NOME}} · {{MES_ANO}} · Confidencial</p>
+  </div>
+  <div class="pg-no"><b>17</b> / 17</div>
+</section>
+
+<script>
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{const h=document.documentElement;const sc=h.scrollTop/(h.scrollHeight-h.clientHeight);prog.style.width=(sc*100)+'%';},{passive:true});
+// modo de verificação: ?page=N mostra só a página N
+const pp=new URLSearchParams(location.search).get('page');
+if(pp){document.querySelectorAll('.page').forEach((s,i)=>{if(i+1!==+pp)s.style.display='none';});}
+</script>
+</body>
+</html>
