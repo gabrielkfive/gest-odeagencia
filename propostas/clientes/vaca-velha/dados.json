@@ -1,13 +1,14 @@
 {
-  "modelo": "gastronomia-unificacao",
+  "modelo": "gastronomia-ark-alpha",
   "cliente_nome": "Vaca Velha",
   "cliente_nome_caps": "VACA VELHA",
   "cliente_curto": "Vaca Velha",
   "cliente_curto_caps": "VACA VELHA",
   "cliente_handle": "vacavelhabsb",
   "cliente_avatar": "avatar.png",
+  "cliente_ig_print": "ig-print.png",
   "ig_posts": "47",
-  "ig_seguidores": "6.441",
+  "ig_seguidores": "6.440",
   "ig_seguindo": "87",
   "mes_ano_caps": "AGOSTO / 2026",
   "mes_ano": "Agosto/2026",
@@ -15,9 +16,6 @@
   "meses_juntos": "3",
   "videos_mes": "8",
   "videos_entregues": "24",
-  "preco_essencial": "2.000",
-  "preco_unificado": "3.000",
-  "preco_semestral": "2.800",
-  "total_semestral": "16.800",
-  "economia_semestral": "1.200"
+  "investimento_atual": "4.000",
+  "preco_unificado": "3.000"
 }

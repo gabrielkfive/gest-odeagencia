@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARK Content + Alpha × {{CLIENTE_NOME}} · Proposta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --bg2:#111114; --panel:#16161a; --panel2:#1c1c20;
+  --ink:#f5f5f2; --muted:#9a9aa2; --faint:#5a5a62;
+  --rose:#feef02; --rose-soft:#e3d502;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --display:"Sora","Segoe UI",system-ui,sans-serif;
+  --body:"Inter","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+img{display:block;max-width:100%}
+
+.brandmark{position:fixed;top:22px;left:30px;display:flex;align-items:center;gap:12px;z-index:80}
+.brandmark img{height:30px;width:auto;border-radius:6px}
+.brandmark .bm-tx{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.04em}
+.brandmark .bm-tx b{color:var(--rose)}
+@media screen and (max-width:640px){.brandmark{left:18px;top:16px}.brandmark .bm-tx{display:none}}
+
+.page{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:108px 8vw;border-bottom:1px solid var(--line);overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 90% -10%, rgba(254,239,2,.06), transparent 55%),
+    radial-gradient(90% 70% at -10% 110%, rgba(254,239,2,.04), transparent 55%),
+    var(--bg);
+}
+.page.alt{background:
+    radial-gradient(110% 80% at 8% -10%, rgba(254,239,2,.05), transparent 55%),
+    var(--bg2);}
+.page::after{content:"";position:absolute;inset:22px;border:1px solid var(--line);border-radius:16px;pointer-events:none}
+.wrap{max-width:1080px;width:100%;margin:0 auto;position:relative;z-index:2}
+.pg-no{position:absolute;bottom:38px;right:8vw;font-family:var(--display);font-size:12px;color:var(--faint);letter-spacing:.1em;z-index:3}
+.pg-no b{color:var(--ink)}
+
+.kicker{font-family:var(--display);font-weight:600;letter-spacing:.3em;text-transform:uppercase;
+  font-size:12px;color:var(--rose);display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.kicker .dot{width:7px;height:7px;background:var(--rose);border-radius:50%}
+h1{font-family:var(--display);font-weight:800;line-height:1.02;letter-spacing:-.025em;font-size:clamp(40px,7vw,84px)}
+h2{font-family:var(--display);font-weight:700;line-height:1.06;letter-spacing:-.02em;font-size:clamp(30px,5vw,56px)}
+h3{font-family:var(--display);font-weight:700;line-height:1.12;letter-spacing:-.01em;font-size:clamp(22px,3vw,32px)}
+h4{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.2}
+p{color:var(--muted);font-size:clamp(15px,1.5vw,18px);line-height:1.65}
+.lead{color:var(--muted);font-size:clamp(16px,1.8vw,20px);line-height:1.6;max-width:66ch}
+.rose{color:var(--rose)}
+.ink{color:var(--ink)}
+strong{color:var(--ink);font-weight:600}
+.yl{width:64px;height:3px;background:var(--rose);margin:26px 0;border-radius:2px}
+
+.grid{display:grid;gap:22px}
+.g2{grid-template-columns:1fr 1fr}
+.card{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);
+  border-radius:16px;padding:30px}
+.card.amb{border-color:rgba(254,239,2,.45);background:linear-gradient(160deg,rgba(254,239,2,.10),rgba(254,239,2,.01))}
+.card h4{margin-bottom:10px}
+.card p{font-size:15px}
+
+.frame{background:var(--panel2);border:1px solid var(--line2);border-radius:14px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.frame .cap{display:flex;align-items:center;gap:9px;padding:12px 16px;background:#202024;border-bottom:1px solid var(--line);
+  font-size:12.5px;color:var(--faint);font-family:var(--display);letter-spacing:.02em}
+.frame .cap .d{width:9px;height:9px;border-radius:50%;background:var(--rose);flex:none}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:18px}
+.stat{border-left:2px solid var(--rose);padding-left:20px}
+.stat .num{font-family:var(--display);font-weight:800;font-size:clamp(34px,5vw,56px);line-height:1;letter-spacing:-.03em}
+.stat .lbl{color:var(--muted);font-size:15px;margin-top:10px;line-height:1.4}
+
+.checks{list-style:none}
+.checks li{display:flex;gap:12px;align-items:flex-start;padding:9px 0;color:var(--ink);font-size:15.5px}
+.checks li::before{content:"✓";color:var(--rose);font-weight:800;flex:none;margin-top:1px}
+
+.quote{border-left:3px solid var(--rose);padding:22px 30px;background:rgba(254,239,2,.05);border-radius:0 10px 10px 0;margin:34px 0}
+.quote p{font-family:var(--display);font-weight:700;color:var(--ink);font-size:clamp(19px,2.4vw,27px);line-height:1.3}
+.quote .by{color:var(--rose);font-family:var(--body);font-weight:600;font-size:14px;margin-top:12px;letter-spacing:.04em}
+
+.cover{justify-content:center;text-align:center;align-items:center}
+.cover .logo{height:96px;width:auto;margin:0 auto 30px;border-radius:20px;filter:drop-shadow(0 10px 50px rgba(254,239,2,.18))}
+.cover .duo{display:flex;align-items:center;gap:16px;justify-content:center;font-family:var(--display);font-weight:700;
+  letter-spacing:.06em;font-size:14px;color:var(--muted);margin-bottom:30px}
+.cover .duo b{color:var(--ink)}
+.cover .duo .x{color:var(--rose);font-size:18px}
+.cover h1{max-width:17ch;margin:0 auto}
+.cover .sub{margin:26px auto 0;max-width:58ch;font-size:clamp(16px,1.9vw,20px);color:var(--muted)}
+.cover .meta{margin-top:42px;display:flex;gap:26px;justify-content:center;align-items:center;flex-wrap:wrap;color:var(--faint);font-size:13px;font-family:var(--display);letter-spacing:.04em}
+.cover .meta .s{width:1px;height:18px;background:var(--line2)}
+
+.ptable{width:100%;border-collapse:collapse;margin-top:10px}
+.ptable th{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:left;padding:14px 18px;border-bottom:1px solid var(--line2)}
+.ptable td{padding:15px 18px;border-bottom:1px solid var(--line);color:var(--muted);font-size:15.5px}
+.ptable td b{font-family:var(--display);font-size:19px;color:var(--ink);font-weight:700}
+.ptable td.hl b{color:var(--rose)}
+.ptable tr:last-child td{border-bottom:none}
+.ptable tr.total td{background:rgba(254,239,2,.06);color:var(--ink)}
+.ptable tr.total td b{color:var(--rose);font-size:22px}
+
+.bigplan{max-width:640px;margin:26px auto 0;background:linear-gradient(170deg,rgba(254,239,2,.12),rgba(254,239,2,.01));
+  border:1px solid var(--rose);border-radius:20px;padding:38px 40px;text-align:left;position:relative}
+.bigplan .pn{font-family:var(--display);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:13px;color:var(--rose)}
+.bigplan .price-row{display:flex;align-items:baseline;gap:6px;margin-top:14px}
+.bigplan .cur{font-family:var(--display);font-weight:600;font-size:18px;color:var(--muted)}
+.bigplan .val{font-family:var(--display);font-weight:800;font-size:56px;letter-spacing:-.02em;color:var(--rose)}
+.bigplan .per{font-size:15px;color:var(--faint)}
+.bigplan .div{height:1px;background:var(--line);margin:20px 0}
+
+.anchor3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+.anchor3 .a{border:1px solid var(--line);border-radius:14px;padding:20px 22px;text-align:center}
+.anchor3 .a .t{font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.anchor3 .a .v{font-family:var(--display);font-weight:800;font-size:30px;margin-top:8px}
+.anchor3 .a.riscado .v{text-decoration:line-through;color:var(--faint)}
+.anchor3 .a.hl{border-color:var(--rose);background:rgba(254,239,2,.07)}
+.anchor3 .a.hl .v{color:var(--rose)}
+
+.note{color:var(--faint);font-size:12.5px;line-height:1.5}
+.mt8{margin-top:8px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mt40{margin-top:40px}
+.center{text-align:center}
+
+@media screen and (max-width:820px){.g2,.stats,.anchor3{grid-template-columns:1fr}
+  .page{padding:90px 7vw}.page::after{inset:12px}.pg-no{right:7vw}}
+
+/* ===== PRINT / PDF ===== */
+@page{size:1280px 800px;margin:0}
+@media print{
+  body{background:var(--bg)}
+  .page{width:1280px;height:800px;min-height:0;padding:64px 92px;border-bottom:none;
+    page-break-after:always;break-inside:avoid}
+  .page::after{inset:18px}
+  .wrap{max-width:1060px}
+  h1{font-size:60px} h2{font-size:40px} h3{font-size:26px}
+  p{font-size:14.5px}.lead{font-size:16.5px}.card p{font-size:13.5px}
+  .checks li{font-size:13.5px;padding:6px 0}
+  .quote{margin:24px 0;padding:18px 26px}.quote p{font-size:21px}
+  .stat .num{font-size:46px}.stat .lbl{font-size:13px;margin-top:7px}
+  .stats{gap:20px}
+  .card{padding:22px}
+  .cover .logo{height:88px}
+  .pg-no{bottom:30px;right:92px}
+  .grid{gap:16px}
+  .kicker{margin-bottom:16px}
+  .yl{margin:18px 0}
+  .ptable td{padding:11px 16px;font-size:13.5px}
+  .ptable td b{font-size:16.5px}
+  .ptable tr.total td b{font-size:19px}
+  .ptable th{padding:10px 16px}
+  .bigplan{padding:26px 32px;margin-top:18px}
+  .bigplan .val{font-size:44px}
+  .bigplan .div{margin:14px 0}
+  .bigplan .checks li{font-size:12.5px;padding:4px 0}
+  .anchor3{margin-top:16px;gap:14px}
+  .anchor3 .a{padding:14px 16px}
+  .anchor3 .a .v{font-size:24px}
+  .igshot{height:560px}
+}
+</style>
+</head>
+<body>
+
+<div class="brandmark"><img src="{{LOGO}}" alt="ARK"><span class="bm-tx">ARK <b>CONTENT</b> + ALPHA</span></div>
+
+<!-- 01 CAPA -->
+<section class="page cover" id="p1">
+  <div class="wrap">
+    <img class="logo" src="{{LOGO}}" alt="ARK Content">
+    <div class="duo"><b>ARK CONTENT</b> <span class="x">+</span> <b>ALPHA</b> <span class="x">×</span> <b>{{CLIENTE_NOME_CAPS}}</b></div>
+    <h1>Uma operação inteira. <span class="rose">Um contrato só.</span></h1>
+    <p class="sub">ARK e Alpha já trabalham juntas pela {{CLIENTE_NOME}}. Esta proposta junta tudo em uma única operação, com um único investimento e uma única meta: <strong>casa cheia.</strong></p>
+    <div class="meta"><span>PROPOSTA OBJETIVA · 5 PÁGINAS</span><span class="s"></span><span>{{CLIENTE_NOME_CAPS}}</span><span class="s"></span><span>{{MES_ANO_CAPS}}</span></div>
+  </div>
+  <div class="pg-no"><b>01</b> / 05</div>
+</section>
+
+<!-- 02 O QUE JA FOI FEITO -->
+<section class="page alt" id="p2">
+  <div class="wrap">
+    <div class="grid g2" style="align-items:center;grid-template-columns:1.25fr 1fr">
+      <div>
+        <div class="kicker"><span class="dot"></span> Últimos {{MESES_JUNTOS}} meses · dados reais</div>
+        <h2>O que já foi <span class="rose">entregue.</span></h2>
+        <div class="yl"></div>
+        <div class="stats">
+          <div class="stat"><div class="num rose">{{VIDEOS_ENTREGUES}}</div><div class="lbl">vídeos produzidos e postados no perfil</div></div>
+          <div class="stat"><div class="num rose">3</div><div class="lbl">calendários editoriais entregues, um por mês</div></div>
+          <div class="stat"><div class="num rose">{{VIDEOS_MES}}</div><div class="lbl">vídeos novos entrando todo mês</div></div>
+          <div class="stat"><div class="num rose">100%</div><div class="lbl">das postagens planejadas foram publicadas</div></div>
+        </div>
+        <p class="mt24">Captação profissional em câmera, edição, calendário, cronograma e postagem automatizada rodando sem falha. O perfil ao lado é o resultado: <strong>print real de {{MES_COLETA}}.</strong></p>
+      </div>
+      <div>
+        <div class="frame" style="max-width:340px;margin-left:auto">
+          <div class="cap"><span class="d"></span> instagram.com/{{CLIENTE_HANDLE}} · print real</div>
+          <img class="igshot" src="{{IG_PRINT}}" alt="Perfil real no Instagram" style="width:100%;height:auto;object-fit:cover;object-position:top">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg-no"><b>02</b> / 05</div>
+</section>
+
+<!-- 03 O QUE VOCE TEM HOJE -->
+<section class="page" id="p3">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Entregáveis ativos hoje</div>
+    <h2>Tudo isso já trabalha pela <span class="rose">{{CLIENTE_NOME}}.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g2">
+      <div class="card">
+        <h4>ARK CONTENT · marca e salão</h4>
+        <ul class="checks mt8">
+          <li>Captação profissional mensal em câmera</li>
+          <li>{{VIDEOS_MES}} vídeos editados por mês</li>
+          <li>Calendário editorial mensal</li>
+          <li>Cronograma com postagem automatizada no Instagram</li>
+          <li>Artes, capas e identidade visual do perfil</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>ALPHA · PLANO GOLD · delivery e performance</h4>
+        <ul class="checks mt8">
+          <li>Edição e narração de conteúdos</li>
+          <li>Campanhas segmentadas, orientadas a conversão</li>
+          <li>Gestão especializada do iFood</li>
+          <li>Estruturação de cardápio digital</li>
+          <li>Benchmarking de concorrentes</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card amb mt24">
+      <h4>Novo no plano Gold</h4>
+      <p><strong>Mentorias exclusivas</strong> com o time e <strong>acesso ao Alpha Partners</strong>, a rede de parceiros e benefícios da Alpha. Duas frentes que nenhum contrato antigo tinha.</p>
+    </div>
+  </div>
+  <div class="pg-no"><b>03</b> / 05</div>
+</section>
+
+<!-- 04 REGUA DE VALOR -->
+<section class="page alt" id="p4">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> A régua de valor</div>
+    <h2>Quanto isso custa <span class="rose">no mercado.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Preço médio praticado em Brasília para cada frente que hoje roda na {{CLIENTE_NOME}}, contratada separadamente:</p>
+    <table class="ptable mt16">
+      <tr><td>Captação profissional + edição de {{VIDEOS_MES}} vídeos por mês</td><td style="text-align:right"><b>R$ 2.400</b></td></tr>
+      <tr><td>Social media: calendário, cronograma e postagens</td><td style="text-align:right"><b>R$ 1.200</b></td></tr>
+      <tr><td>Gestão de tráfego pago com segmentação</td><td style="text-align:right"><b>R$ 1.500</b></td></tr>
+      <tr><td>Gestão de iFood + cardápio digital</td><td style="text-align:right"><b>R$ 600</b></td></tr>
+      <tr><td>Mentorias e direção estratégica</td><td style="text-align:right"><b>R$ 400</b></td></tr>
+      <tr class="total"><td><b>Valor de mercado do pacote completo</b></td><td style="text-align:right"><b>R$ 6.100/mês</b></td></tr>
+    </table>
+    <div class="quote"><p>Hoje a {{CLIENTE_NOME}} investe R$ {{INVESTIMENTO_ATUAL}} nas duas frentes. Já paga bem menos do que isso vale.</p><div class="by">E a proposta da próxima página melhora ainda mais.</div></div>
+  </div>
+  <div class="pg-no"><b>04</b> / 05</div>
+</section>
+
+<!-- 05 A PROPOSTA -->
+<section class="page" id="p5">
+  <div class="wrap center">
+    <div class="kicker" style="justify-content:center"><span class="dot"></span> A proposta, sem rodeio</div>
+    <h2>ARK + Alpha. <span class="rose">Operação unificada.</span></h2>
+    <div class="anchor3">
+      <div class="a riscado"><div class="t">Valor de mercado</div><div class="v">R$ 6.100</div></div>
+      <div class="a riscado"><div class="t">Investimento atual</div><div class="v">R$ {{INVESTIMENTO_ATUAL}}</div></div>
+      <div class="a hl"><div class="t">Operação unificada</div><div class="v">R$ {{PRECO_UNIFICADO}}</div></div>
+    </div>
+    <div class="bigplan">
+      <div class="pn">Plano único · tudo incluso</div>
+      <div class="price-row"><span class="cur">R$</span><span class="val">{{PRECO_UNIFICADO}}</span><span class="per">/mês</span></div>
+      <div class="div"></div>
+      <ul class="checks">
+        <li>Todos os entregáveis da ARK e do plano Gold da Alpha, mantidos</li>
+        <li>Mentorias exclusivas + acesso ao Alpha Partners</li>
+        <li>Um contrato, um relatório e uma equipe olhando para a mesma meta</li>
+        <li>Menos da metade do valor de mercado do pacote completo</li>
+      </ul>
+      <div class="div"></div>
+      <p class="note">Condição válida na virada para a operação unificada, com o ciclo atual concluído de forma organizada e a mensalidade em aberto quitada na migração.</p>
+    </div>
+  </div>
+  <div class="pg-no"><b>05</b> / 05</div>
+</section>
+
+</body>
+</html>

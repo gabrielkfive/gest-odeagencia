@@ -55,6 +55,9 @@ def main():
     ext = os.path.splitext(avatar)[1].lower()
     mime = 'image/png' if ext == '.png' else 'image/jpeg'
     html = html.replace('{{CLIENTE_AVATAR}}', b64(avatar, mime))
+    if dados.get('cliente_ig_print'):
+        igp = os.path.join(cliente_dir, dados['cliente_ig_print'])
+        html = html.replace('{{IG_PRINT}}', b64(igp, 'image/png'))
 
     # verificações
     sobras = sorted(set(re.findall(r'\{\{[A-Z_0-9]+\}\}', html)))
