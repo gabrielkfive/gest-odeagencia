@@ -1,0 +1,17 @@
+{
+  "modelo": "automotivo-seminovos",
+  "cliente_nome": "Localiza Seminovos",
+  "cliente_nome_caps": "LOCALIZA SEMINOVOS",
+  "cliente_curto": "Localiza Seminovos",
+  "cliente_curto_caps": "LOCALIZA SEMINOVOS",
+  "cliente_avatar": "avatar.png",
+  "mes_ano_caps": "JULHO / 2026",
+  "mes_ano": "Julho/2026",
+  "qtd_vendedores": "10",
+  "midia_vendedor": "2.000",
+  "captacao_mes": "1.500",
+  "rateio_vendedor": "150",
+  "total_vendedor": "2.150",
+  "total_midia": "20.000",
+  "total_operacao": "21.500"
+}

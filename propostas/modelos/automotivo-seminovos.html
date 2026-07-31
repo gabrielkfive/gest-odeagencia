@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARK Content × {{CLIENTE_NOME}} · Proposta Estratégica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --bg2:#111114; --panel:#16161a; --panel2:#1c1c20;
+  --ink:#f5f5f2; --muted:#9a9aa2; --faint:#5a5a62;
+  --rose:#feef02; --rose-soft:#e3d502;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --display:"Sora","Segoe UI",system-ui,sans-serif;
+  --body:"Inter","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+img{display:block;max-width:100%}
+
+/* progress + brand chrome */
+.progress{position:fixed;left:0;top:0;height:3px;background:var(--rose);width:0;z-index:90;box-shadow:0 0 18px rgba(254,239,2,.6);transition:width .12s linear}
+.brandmark{position:fixed;top:22px;left:30px;display:flex;align-items:center;gap:12px;z-index:80}
+.brandmark img{height:30px;width:auto;border-radius:6px}
+.brandmark .bm-tx{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.04em}
+.brandmark .bm-tx b{color:var(--rose)}
+@media screen and (max-width:640px){.brandmark{left:18px;top:16px}.brandmark .bm-tx{display:none}}
+
+/* page shell */
+.page{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:108px 8vw;border-bottom:1px solid var(--line);overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 90% -10%, rgba(254,239,2,.06), transparent 55%),
+    radial-gradient(90% 70% at -10% 110%, rgba(254,239,2,.04), transparent 55%),
+    var(--bg);
+}
+.page.alt{background:
+    radial-gradient(110% 80% at 8% -10%, rgba(254,239,2,.05), transparent 55%),
+    var(--bg2);}
+.page::after{content:"";position:absolute;inset:22px;border:1px solid var(--line);border-radius:16px;pointer-events:none}
+.wrap{max-width:1080px;width:100%;margin:0 auto;position:relative;z-index:2}
+.pg-no{position:absolute;bottom:38px;right:8vw;font-family:var(--display);font-size:12px;color:var(--faint);letter-spacing:.1em;z-index:3}
+.pg-no b{color:var(--ink)}
+
+/* typography */
+.kicker{font-family:var(--display);font-weight:600;letter-spacing:.3em;text-transform:uppercase;
+  font-size:12px;color:var(--rose);display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.kicker .dot{width:7px;height:7px;background:var(--rose);border-radius:50%}
+h1{font-family:var(--display);font-weight:800;line-height:1.02;letter-spacing:-.025em;font-size:clamp(40px,7vw,84px)}
+h2{font-family:var(--display);font-weight:700;line-height:1.06;letter-spacing:-.02em;font-size:clamp(30px,5vw,56px)}
+h3{font-family:var(--display);font-weight:700;line-height:1.12;letter-spacing:-.01em;font-size:clamp(22px,3vw,32px)}
+h4{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.2}
+p{color:var(--muted);font-size:clamp(15px,1.5vw,18px);line-height:1.65}
+.lead{color:var(--muted);font-size:clamp(16px,1.8vw,20px);line-height:1.6;max-width:66ch}
+.rose{color:var(--rose)}
+.ink{color:var(--ink)}
+strong{color:var(--ink);font-weight:600}
+.yl{width:64px;height:3px;background:var(--rose);margin:26px 0;border-radius:2px}
+
+/* pills / badges */
+.tag{display:inline-block;background:var(--rose);color:#111;font-family:var(--display);font-weight:700;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:6px 13px;border-radius:3px}
+
+/* cards / grids */
+.grid{display:grid;gap:22px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);
+  border-radius:16px;padding:30px;transition:border-color .25s,transform .25s}
+.card:hover{border-color:rgba(254,239,2,.35);transform:translateY(-4px)}
+.card.amb{border-color:rgba(254,239,2,.45);background:linear-gradient(160deg,rgba(254,239,2,.10),rgba(254,239,2,.01))}
+.card h4{margin-bottom:10px}
+.card p{font-size:15px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:18px}
+.stat{border-left:2px solid var(--rose);padding-left:20px}
+.stat .num{font-family:var(--display);font-weight:800;font-size:clamp(38px,5.5vw,62px);line-height:1;letter-spacing:-.03em}
+.stat .lbl{color:var(--muted);font-size:15px;margin-top:10px;line-height:1.4}
+
+/* lists */
+.clist{list-style:none}
+.clist li{position:relative;padding:11px 0 11px 24px;border-bottom:1px solid var(--line);color:var(--ink);font-size:15.5px}
+.clist li:last-child{border-bottom:none}
+.clist li::before{content:"";position:absolute;left:0;top:19px;width:7px;height:7px;background:var(--rose);border-radius:50%}
+.clist li span{color:var(--muted);display:block;font-size:13.5px;margin-top:3px}
+.checks{list-style:none}
+.checks li{display:flex;gap:12px;align-items:flex-start;padding:9px 0;color:var(--ink);font-size:15.5px}
+.checks li::before{content:"✓";color:var(--rose);font-weight:800;flex:none;margin-top:1px}
+
+/* quote block */
+.quote{border-left:3px solid var(--rose);padding:22px 30px;background:rgba(254,239,2,.05);border-radius:0 10px 10px 0;margin:34px 0}
+.quote p{font-family:var(--display);font-weight:700;color:var(--ink);font-size:clamp(19px,2.4vw,27px);line-height:1.3}
+.quote .by{color:var(--rose);font-family:var(--body);font-weight:600;font-size:14px;margin-top:12px;letter-spacing:.04em}
+
+/* step header number */
+.stepwrap{display:grid;grid-template-columns:84px 1fr;gap:38px;align-items:start}
+.stepbadge{width:68px;height:68px;border-radius:18px;background:var(--rose);color:#111;font-family:var(--display);
+  font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center}
+.ghostnum{position:absolute;right:5vw;top:50%;transform:translateY(-50%);font-family:var(--display);font-weight:800;
+  font-size:34vmin;color:rgba(255,255,255,.022);line-height:.8;z-index:1;pointer-events:none}
+@media screen and (max-width:820px){.stepwrap{grid-template-columns:1fr;gap:18px}.ghostnum{display:none}}
+
+/* cover */
+.cover{justify-content:center;text-align:center;align-items:center}
+.cover .logo{height:96px;width:auto;margin:0 auto 30px;border-radius:20px;filter:drop-shadow(0 10px 50px rgba(254,239,2,.18))}
+.cover .duo{display:flex;align-items:center;gap:16px;justify-content:center;font-family:var(--display);font-weight:700;
+  letter-spacing:.06em;font-size:14px;color:var(--muted);margin-bottom:30px}
+.cover .duo b{color:var(--ink)}
+.cover .duo .x{color:var(--rose);font-size:18px}
+.cover h1{max-width:19ch;margin:0 auto}
+.cover .sub{margin:26px auto 0;max-width:58ch;font-size:clamp(16px,1.9vw,20px);color:var(--muted)}
+.cover .meta{margin-top:42px;display:flex;gap:26px;justify-content:center;align-items:center;flex-wrap:wrap;color:var(--faint);font-size:13px;font-family:var(--display);letter-spacing:.04em}
+.cover .meta .s{width:1px;height:18px;background:var(--line2)}
+.cover .scroll{margin-top:54px;color:var(--faint);font-size:12px;letter-spacing:.2em;text-transform:uppercase;animation:bob 2s infinite}
+@keyframes bob{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(6px);opacity:1}}
+
+/* projection table */
+.ptable{width:100%;border-collapse:collapse;margin-top:10px}
+.ptable th{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:left;padding:14px 18px;border-bottom:1px solid var(--line2)}
+.ptable th.hl{color:var(--rose)}
+.ptable td{padding:16px 18px;border-bottom:1px solid var(--line);color:var(--muted);font-size:15.5px}
+.ptable td b{font-family:var(--display);font-size:20px;color:var(--ink);font-weight:700}
+.ptable td.hl b{color:var(--rose)}
+.ptable tr:last-child td{border-bottom:none}
+
+/* plans */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:20px;align-items:stretch}
+.plan{background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);
+  border-radius:18px;padding:34px 28px;position:relative;display:flex;flex-direction:column}
+.plan.feat{border-color:var(--rose);background:linear-gradient(170deg,rgba(254,239,2,.12),rgba(254,239,2,.01));transform:translateY(-10px)}
+.plan.feat::before{content:"O CORAÇÃO DO MODELO";position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  background:var(--rose);color:#111;font-family:var(--display);font-weight:700;font-size:9.5px;letter-spacing:.12em;
+  padding:5px 14px;border-radius:20px;white-space:nowrap}
+.plan .pn{font-family:var(--display);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:13px;color:var(--rose)}
+.plan .pt{font-family:var(--display);font-weight:800;font-size:26px;margin:8px 0 4px}
+.plan .pd{font-size:13.5px;color:var(--faint);min-height:54px}
+.plan .div{height:1px;background:var(--line);margin:22px 0}
+.plan .checks{flex:1}
+.plan .checks li{font-size:14px;padding:7px 0}
+.price-row{display:flex;align-items:baseline;gap:5px;margin-top:18px}
+.price-row .cur{font-family:var(--display);font-weight:600;font-size:16px;color:var(--muted)}
+.price-row .val{font-family:var(--display);font-weight:800;font-size:38px;letter-spacing:-.02em;color:var(--ink)}
+.plan.feat .price-row .val{color:var(--rose)}
+.price-row .per{font-size:14px;color:var(--faint)}
+.price-sub{font-size:12.5px;color:var(--muted);margin-top:8px}
+.price-sub b{color:var(--ink);font-weight:600}
+
+/* CTA */
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--rose);color:#111;font-family:var(--display);
+  font-weight:700;font-size:15px;letter-spacing:.03em;padding:17px 38px;border-radius:8px;text-decoration:none;
+  transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(254,239,2,.25)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+
+/* responsive */
+@media screen and (max-width:820px){.g2,.g3,.g4,.stats,.plans{grid-template-columns:1fr}.plan.feat{transform:none}
+  .page{padding:90px 7vw}.page::after{inset:12px}.pg-no{right:7vw}}
+.mt8{margin-top:8px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mt40{margin-top:40px}
+.center{text-align:center}.mxauto{margin-left:auto;margin-right:auto}
+.note{color:var(--faint);font-size:12.5px;line-height:1.5}
+
+/* ===== PRINT / PDF ===== */
+@page{size:1280px 800px;margin:0}
+@media print{
+  .progress,.scroll{display:none}
+  body{background:var(--bg)}
+  .page{width:1280px;height:800px;min-height:0;padding:64px 92px;border-bottom:none;
+    page-break-after:always;break-inside:avoid}
+  .page::after{inset:18px}
+  .wrap{max-width:1060px}
+  h1{font-size:62px} h2{font-size:42px} h3{font-size:28px}
+  p{font-size:14.5px}.lead{font-size:17px}.card p{font-size:13.5px}
+  .clist li{font-size:14px;padding:9px 0 9px 22px}.clist li span{font-size:12.5px}
+  .clist li::before{top:16px}
+  .checks li{font-size:14px;padding:7px 0}
+  .quote{margin:26px 0;padding:18px 26px}.quote p{font-size:22px}
+  .stat .num{font-size:54px}.stat .lbl{font-size:13.5px}
+  .card{padding:24px}
+  .ghostnum{font-size:300px}
+  .cover .logo{height:88px}
+  .pg-no{bottom:30px;right:92px}
+  .card:hover{transform:none}
+  .grid{gap:18px}.plans{gap:18px}
+  /* compactação da página de investimento */
+  #p14 h2{font-size:34px}
+  #p14 .kicker{margin-bottom:14px}
+  #p14 .yl{margin:16px 0}
+  #p14 .plans{margin-top:14px;gap:16px}
+  #p14 .plan{padding:20px 18px}
+  #p14 .plan.feat{transform:translateY(0)}
+  #p14 .plan .pt{font-size:19px}
+  #p14 .plan .pd{min-height:0;font-size:11.5px}
+  #p14 .price-row{margin-top:10px}
+  #p14 .price-row .val{font-size:27px}
+  #p14 .plan .div{margin:12px 0}
+  #p14 .plan .checks li{font-size:12px;padding:4px 0}
+  #p14 .card.amb{padding:14px 20px}
+  #p14 .card.amb p{font-size:12.5px}
+  #p14 .mt40{margin-top:16px}
+  #p14 .note{font-size:10.5px;margin-top:8px}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="brandmark"><img src="{{LOGO}}" alt="ARK"><span class="bm-tx">ARK <b>CONTENT</b> × {{CLIENTE_NOME_CAPS}}</span></div>
+
+<!-- 01 CAPA -->
+<section class="page cover" id="p1">
+  <div class="wrap">
+    <img class="logo" src="{{LOGO}}" alt="ARK Content">
+    <div class="duo"><b>ARK CONTENT</b> <span class="x">×</span> <b>{{CLIENTE_NOME_CAPS}}</b></div>
+    <h1>{{QTD_VENDEDORES}} vendedores. {{QTD_VENDEDORES}} canais de <span class="rose">venda.</span></h1>
+    <p class="sub">Um sistema de conteúdo profissional e tráfego pago que transforma cada vendedor da {{CLIENTE_CURTO}} em um canal digital de captação, com leads caindo direto no WhatsApp de <strong>quem vende.</strong></p>
+    <div class="meta"><span>PROPOSTA ESTRATÉGICA</span><span class="s"></span><span>PREPARADA PARA A {{CLIENTE_NOME_CAPS}}</span><span class="s"></span><span>{{MES_ANO_CAPS}}</span><span class="s"></span><span>CONFIDENCIAL</span></div>
+    <div class="scroll">role para começar ↓</div>
+  </div>
+  <div class="pg-no"><b>01</b> / 15</div>
+</section>
+
+<!-- 02 CARTA -->
+<section class="page alt" id="p2">
+  <div class="wrap" style="max-width:880px">
+    <div class="kicker"><span class="dot"></span> Uma palavra antes de tudo</div>
+    <h2>Carro não se vende mais <span class="rose">só no pátio.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Quem compra seminovo hoje chega na loja com a pesquisa pronta. Já viu o carro, já comparou preço, já leu sobre procedência. A decisão que falta é uma só: <strong>de quem comprar.</strong> E essa decisão é tomada antes da visita, no digital, olhando para uma pessoa, não para uma fachada.</p>
+    <p class="lead mt24">A {{CLIENTE_CURTO}} tem o que a maioria das lojas não tem: <strong>{{QTD_VENDEDORES}} vendedores de verdade</strong>, que conhecem carro, que sabem atender e que hoje dependem de quem entra pela porta. Esta proposta muda isso: coloca cada um deles para captar cliente todos os dias, com conteúdo profissional e mídia paga trabalhando por eles.</p>
+    <div class="quote"><p>“A loja que transforma vendedor em canal não espera cliente. <span class="rose">Ela busca.</span>”</p><div class="by">O ponto de partida desta proposta</div></div>
+  </div>
+  <div class="pg-no"><b>02</b> / 15</div>
+</section>
+
+<!-- 03 O MODELO -->
+<section class="page" id="p3">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> O modelo em uma página</div>
+    <h2>Como funciona a <span class="rose">máquina.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g3 mt24">
+      <div class="card"><h4><span class="rose">01.</span> Um dia de gravação por mês</h4><p class="mt8">A equipe audiovisual da ARK vai até a loja uma vez no mês e grava conteúdo profissional com os {{QTD_VENDEDORES}} vendedores: carros em destaque, ofertas e a cara de quem vende.</p></div>
+      <div class="card"><h4><span class="rose">02.</span> Conteúdo vira anúncio</h4><p class="mt8">Cada vídeo é editado e transformado em criativo de anúncio para o Meta (Instagram e Facebook), com roteiro e chamada pensados para gerar conversa no WhatsApp.</p></div>
+      <div class="card"><h4><span class="rose">03.</span> Mídia individual por vendedor</h4><p class="mt8">Cada vendedor investe R$ {{MIDIA_VENDEDOR}} por mês em Meta Ads. Os leads caem direto no WhatsApp dele, que atende, negocia e fecha.</p></div>
+    </div>
+    <div class="stats mt40">
+      <div class="stat"><div class="num rose">{{QTD_VENDEDORES}}</div><div class="lbl">vendedores anunciando ao mesmo tempo, cada um com a própria verba</div></div>
+      <div class="stat"><div class="num">R$ {{TOTAL_MIDIA}}</div><div class="lbl">de mídia mensal trabalhando para a marca {{CLIENTE_CURTO}} somando todos os vendedores</div></div>
+      <div class="stat"><div class="num">1</div><div class="lbl">diária de captação audiovisual por mês abastece todos os vendedores de conteúdo</div></div>
+    </div>
+  </div>
+  <div class="pg-no"><b>03</b> / 15</div>
+</section>
+
+<!-- 04 DIAGNOSTICO HONESTO -->
+<section class="page alt" id="p4">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> O diagnóstico honesto</div>
+    <h2>Vendedor esperando cliente é estoque <span class="rose">parado.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Hoje, a venda depende de quem entra na loja, dos portais e da sorte do plantão. Alguns vendedores até postam por conta própria: story do carro, foto do pátio, vídeo tremido. É esforço real, mas <strong>esforço sem direção não gira estoque.</strong></p>
+    <div class="grid g2 mt40">
+      <div class="card"><h4 class="rose">Hoje · cada um por si</h4>
+        <ul class="checks mt16" style="opacity:.85">
+          <li>Venda dependente de fluxo de loja e portais</li>
+          <li>Story amador, sem roteiro e sem padrão de marca</li>
+          <li>Nenhuma verba de mídia estruturada</li>
+          <li>Lead frio, disputado, sem dono definido</li>
+          <li>Vendedor bom e vendedor parado na mesma vitrine</li>
+        </ul>
+      </div>
+      <div class="card amb"><h4 class="rose">Com o sistema ARK</h4>
+        <ul class="checks mt16">
+          <li>Conteúdo profissional gravado todo mês na loja</li>
+          <li>Cada vendedor com anúncio rodando no Meta</li>
+          <li>Lead com dono: cai no WhatsApp de quem anunciou</li>
+          <li>Padrão de marca {{CLIENTE_CURTO}} em tudo que vai ao ar</li>
+          <li>Quem mais aparece, mais atende, mais vende</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-bottom:0"><p>Carro parado no pátio custa caro. Vendedor invisível <span class="rose">custa mais.</span></p></div>
+  </div>
+  <div class="pg-no"><b>04</b> / 15</div>
+</section>
+
+<!-- 05 O BARATO QUE SAI CARO -->
+<section class="page" id="p5">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Uma conversa honesta sobre investimento</div>
+    <h2>Impulsionar post não é <span class="rose">tráfego.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Apertar o botão de impulsionar é o que todo mundo faz, e é por isso que não funciona: verba pequena, público errado, criativo amador, lead que não responde. Vender carro pelo digital exige <strong>campanha de verdade</strong>, com segmentação, criativo profissional e otimização toda semana.</p>
+    <div class="grid g2 mt40">
+      <div class="card"><h4 class="rose">O impulsionamento amador</h4>
+        <ul class="clist mt8">
+          <li>Foto do pátio com verba aleatória</li>
+          <li>Público aberto, sem segmentação</li>
+          <li>Lead curioso, sem intenção de compra</li>
+          <li>Ninguém mede custo por lead nem por venda</li>
+          <li>Cada vendedor inventa o próprio jeito</li>
+        </ul>
+      </div>
+      <div class="card amb"><h4 class="rose">A operação profissional</h4>
+        <ul class="clist mt8">
+          <li>Criativos em vídeo gravados e editados pela ARK</li>
+          <li>Segmentação por região e intenção de compra</li>
+          <li>Campanhas de WhatsApp: lead direto na conversa</li>
+          <li>Otimização semanal e relatório de custo por lead</li>
+          <li>Um padrão único de marca para os {{QTD_VENDEDORES}} vendedores</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-bottom:0"><p>Verba com direção vira venda. Verba sem direção vira <span class="rose">boleto.</span></p></div>
+  </div>
+  <div class="pg-no"><b>05</b> / 15</div>
+</section>
+
+<!-- 06 A TESE -->
+<section class="page alt" id="p6">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> A tese central</div>
+    <h2>Cada vendedor é uma marca. A loja é uma <span class="rose">rede de mídia.</span></h2>
+    <div class="yl"></div>
+    <p class="lead">Gente compra carro de gente. Quando {{QTD_VENDEDORES}} vendedores aparecem com conteúdo profissional e mídia paga ao mesmo tempo, a {{CLIENTE_CURTO}} deixa de ter um perfil falando sozinho e passa a ter <strong>uma rede inteira ocupando o feed da cidade.</strong></p>
+    <div class="grid g3 mt40">
+      <div class="card"><h4><span class="rose">01.</span> Alcance multiplicado</h4><p class="mt8">{{QTD_VENDEDORES}} contas anunciando valem mais que uma conta grande: mais rostos, mais públicos, mais chances de o comprador certo ver o carro certo.</p></div>
+      <div class="card"><h4><span class="rose">02.</span> Lead com dono</h4><p class="mt8">O lead cai no WhatsApp de quem anunciou. Sem disputa de balcão, sem lead esfriando na fila: quem investe, colhe.</p></div>
+      <div class="card"><h4><span class="rose">03.</span> Meritocracia visível</h4><p class="mt8">Relatório mensal por vendedor: quem anuncia melhor, atende mais. O modelo premia quem joga o jogo.</p></div>
+      <div class="card"><h4><span class="rose">04.</span> Padrão de marca</h4><p class="mt8">Todo conteúdo sai com a identidade da {{CLIENTE_CURTO}}: profissional, padronizado, reconhecível.</p></div>
+      <div class="card"><h4><span class="rose">05.</span> Estoque girando</h4><p class="mt8">Carro parado entra na pauta de gravação e vira campanha. O digital trabalha exatamente onde o pátio precisa.</p></div>
+      <div class="card amb"><h4 class="rose">O resultado</h4><p class="mt8 ink">Uma loja onde <strong>todo vendedor capta</strong>, todos os dias, sem depender de quem entra pela porta.</p></div>
+    </div>
+  </div>
+  <div class="pg-no"><b>06</b> / 15</div>
+</section>
+
+<!-- 07 METODO -->
+<section class="page" id="p7" style="text-align:center;align-items:center">
+  <div class="wrap" style="max-width:860px">
+    <span class="tag">Método exclusivo</span>
+    <h1 class="mt24">O Método <span class="rose">ARK.</span></h1>
+    <div class="yl mxauto" style="margin-left:auto;margin-right:auto"></div>
+    <p class="lead mxauto" style="text-align:center">Quatro pilares operados por uma <strong>equipe integrada</strong>: estrategista, roteirista, equipe audiovisual, gestor de tráfego e account, todos na mesma mesa, olhando para a mesma meta. Não é um freelancer postando carro. É um time inteiro cuidando da captação da {{CLIENTE_CURTO}}.</p>
+    <div class="grid g2 mt40" style="text-align:left">
+      <div class="card"><h4><span class="rose">01.</span> Planejamento e Pauta</h4><p class="mt8">Todo mês, uma pauta de gravação alinhada ao estoque: quais carros, quais ofertas, quais vendedores em destaque.</p></div>
+      <div class="card"><h4><span class="rose">02.</span> Captação Audiovisual</h4><p class="mt8">Uma diária de gravação profissional por mês na loja, cobrindo os {{QTD_VENDEDORES}} vendedores.</p></div>
+      <div class="card"><h4><span class="rose">03.</span> Edição e Criativos</h4><p class="mt8">Vídeos editados no padrão da marca, prontos para Reels e transformados em criativos de anúncio.</p></div>
+      <div class="card"><h4><span class="rose">04.</span> Tráfego por Vendedor</h4><p class="mt8">Campanhas Meta Ads individuais, R$ {{MIDIA_VENDEDOR}} por vendedor, leads no WhatsApp de cada um.</p></div>
+    </div>
+  </div>
+  <div class="pg-no"><b>07</b> / 15</div>
+</section>
+
+<!-- 08 PILAR 1 -->
+<section class="page alt" id="p8">
+  <span class="ghostnum">1</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">01</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 01 · Planejamento e Pauta</div>
+      <h3>O estoque manda na pauta.</h3>
+      <p class="lead mt16">Antes de cada gravação, a ARK monta com a gerência a pauta do mês: os carros que precisam girar, as ofertas da vez e os vendedores de cada peça. <strong>Nada é gravado sem saber para que serve.</strong></p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>Pauta mensal de gravação alinhada ao estoque</li><li>Roteiros prontos para cada vendedor</li><li>Calendário de publicação do mês</li><li>Metas de leads por vendedor</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Estrategista <span>Formado em publicidade e propaganda, dono da direção do plano.</span></li><li>Account dedicado <span>O elo diário entre a {{CLIENTE_CURTO}} e toda a equipe.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>“Todo crescimento começa com direção.”</p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>08</b> / 15</div>
+</section>
+
+<!-- 09 PILAR 2 -->
+<section class="page" id="p9">
+  <span class="ghostnum">2</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">02</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 02 · Captação Audiovisual</div>
+      <h3>Um dia de gravação. Um mês de munição.</h3>
+      <p class="lead mt16">Uma vez por mês, a equipe audiovisual da ARK passa o dia na loja: grava os carros em destaque, as ofertas e os {{QTD_VENDEDORES}} vendedores com roteiro e direção. Ninguém precisa improvisar sozinho na frente da câmera. <strong>Quem aparece, aparece bem.</strong></p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>1 diária de gravação profissional por mês</li><li>Conteúdo com todos os vendedores da equipe</li><li>Carros e ofertas do estoque em destaque</li><li>Direção de gravação: roteiro, gancho e postura</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Equipe audiovisual <span>Captação profissional dentro da loja.</span></li><li>Roteirista <span>Gancho e roteiro de cada vídeo, vendedor por vendedor.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>Vídeo profissional é o novo <span class="rose">test drive.</span></p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>09</b> / 15</div>
+</section>
+
+<!-- 10 PILAR 3 -->
+<section class="page alt" id="p10">
+  <span class="ghostnum">3</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">03</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 03 · Edição e Criativos</div>
+      <h3>Da gravação para o feed, no padrão da marca.</h3>
+      <p class="lead mt16">Todo o material da diária é editado pela ARK: cortes dinâmicos, legenda, identidade visual da {{CLIENTE_CURTO}}. Cada vendedor recebe seus vídeos prontos para publicar, e os melhores viram <strong>criativos de anúncio</strong> desenhados para gerar conversa no WhatsApp.</p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>Vídeos editados para Reels e stories</li><li>Criativos de anúncio por vendedor</li><li>Identidade visual única para a equipe toda</li><li>Acervo crescente de conteúdo da loja</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Editor de vídeo <span>Cortes, legendas e padrão de marca.</span></li><li>Designer <span>Identidade {{CLIENTE_CURTO}} aplicada em cada peça.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>Cada conteúdo com um papel. Cada semana com <span class="rose">um objetivo.</span></p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>10</b> / 15</div>
+</section>
+
+<!-- 11 PILAR 4 -->
+<section class="page" id="p11">
+  <span class="ghostnum">4</span>
+  <div class="wrap"><div class="stepwrap">
+    <div class="stepbadge">04</div>
+    <div>
+      <div class="kicker"><span class="dot"></span> Pilar 04 · Tráfego por Vendedor</div>
+      <h3>R$ {{MIDIA_VENDEDOR}} por vendedor. Lead no WhatsApp de quem vende.</h3>
+      <p class="lead mt16">Cada vendedor investe <strong>R$ {{MIDIA_VENDEDOR}} por mês</strong> em Meta Ads, e a ARK opera tudo: campanha, segmentação por região e intenção, testes de criativo e otimização semanal. O lead chega nomeado, direto na conversa de quem anunciou.</p>
+      <div class="grid g2 mt24">
+        <div class="card"><h4 class="rose">Entregamos</h4><ul class="clist mt8"><li>Campanha individual para cada vendedor</li><li>Segmentação por região e intenção de compra</li><li>Otimização semanal das campanhas</li><li>Relatório mensal: leads e custo por lead, por vendedor</li></ul></div>
+        <div class="card"><h4 class="rose">Quem cuida</h4><ul class="clist mt8"><li>Gestor de tráfego <span>Campanhas, testes e otimização semanal.</span></li><li>Estrategista <span>Oferta e ângulo de cada campanha.</span></li></ul></div>
+      </div>
+      <div class="quote" style="margin-bottom:0"><p>Verba pequena com direção vence verba grande <span class="rose">sem estratégia.</span></p></div>
+    </div>
+  </div></div>
+  <div class="pg-no"><b>11</b> / 15</div>
+</section>
+
+<!-- 12 O CICLO DO MES -->
+<section class="page alt" id="p12">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> A rotina na prática</div>
+    <h2>O ciclo de <span class="rose">30 dias.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g3 mt24">
+      <div class="card amb"><div class="tag">Semana 1</div><h4 class="mt16">Pauta e gravação</h4><ul class="clist mt8"><li>Pauta fechada com a gerência</li><li>Diária de gravação na loja</li><li>Roteiro pronto para cada vendedor</li></ul></div>
+      <div class="card amb"><div class="tag">Semana 2</div><h4 class="mt16">Edição e lançamento</h4><ul class="clist mt8"><li>Vídeos editados e entregues</li><li>Criativos de anúncio no ar</li><li>Campanhas ativas para os {{QTD_VENDEDORES}} vendedores</li></ul></div>
+      <div class="card amb"><div class="tag">Semana 3 a 4</div><h4 class="mt16">Otimização e report</h4><ul class="clist mt8"><li>Ajuste semanal das campanhas</li><li>Leads chegando no WhatsApp de cada um</li><li>Relatório mensal por vendedor</li></ul></div>
+    </div>
+    <div class="card mt24" style="border-left:3px solid var(--rose)">
+      <h4 class="rose">O que precisamos da {{CLIENTE_CURTO}}</h4>
+      <p class="mt8 ink">1 dia de gravação por mês com a equipe disponível · acesso ao Meta Business e aos perfis · lista dos carros prioritários do estoque · WhatsApp de cada vendedor configurado. <strong>Só isso.</strong> Todo o resto é responsabilidade da equipe ARK.</p>
+    </div>
+  </div>
+  <div class="pg-no"><b>12</b> / 15</div>
+</section>
+
+<!-- 13 PROJECAO -->
+<section class="page" id="p13">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Viabilidade</div>
+    <h2>A conta que faz sentido para <span class="rose">quem vende carro.</span></h2>
+    <div class="yl"></div>
+    <div class="grid g2 mt24" style="grid-template-columns:1.2fr 1fr;align-items:start">
+      <div class="card" style="padding:10px 6px">
+        <table class="ptable">
+          <tr><th>Projeção mensal · por vendedor</th><th>Conservador</th><th class="hl">Realista</th></tr>
+          <tr><td>Conversas iniciadas no WhatsApp</td><td><b>80</b></td><td class="hl"><b>160</b></td></tr>
+          <tr><td>Atendimentos qualificados</td><td><b>25</b></td><td class="hl"><b>55</b></td></tr>
+          <tr><td>Vendas adicionais / vendedor</td><td><b>1 a 2</b></td><td class="hl"><b>3 a 4</b></td></tr>
+          <tr><td>Vendas adicionais / loja ({{QTD_VENDEDORES}} vendedores)</td><td><b>10+</b></td><td class="hl"><b>30+</b></td></tr>
+        </table>
+      </div>
+      <div class="card"><h4 class="rose">Premissas do modelo</h4>
+        <ul class="clist mt8">
+          <li>Mídia por vendedor <span>R$ {{MIDIA_VENDEDOR}} por mês em campanhas de WhatsApp no Meta.</span></li>
+          <li>Custo por conversa <span>R$ 12 a R$ 25, faixa comum no varejo automotivo.</span></li>
+          <li>Conversão conversa → venda <span>1% a 3%, dependendo do atendimento e do estoque.</span></li>
+          <li>Uma única venda <span>costuma pagar o investimento do mês inteiro do vendedor.</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="note mt24">Projeções estimadas com base em faixas praticadas no varejo automotivo em Meta Ads. Resultados dependem de estoque, preço, atendimento no WhatsApp e sazonalidade.</p>
+  </div>
+  <div class="pg-no"><b>13</b> / 15</div>
+</section>
+
+<!-- 14 INVESTIMENTO -->
+<section class="page alt" id="p14">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span> Investimento</div>
+    <h2>Simples de entender. Fácil de <span class="rose">dividir.</span></h2>
+    <div class="yl"></div>
+    <div class="plans mt24">
+      <div class="plan">
+        <div class="pn">Por vendedor</div><div class="pt">Mídia Meta Ads</div>
+        <div class="pd">Verba individual de anúncios, gerida pela ARK, com leads no WhatsApp do próprio vendedor.</div>
+        <div class="price-row"><span class="cur">R$</span><span class="val">{{MIDIA_VENDEDOR}}</span><span class="per">/mês</span></div>
+        <div class="price-sub">Investido integralmente em mídia · <b>{{QTD_VENDEDORES}} vendedores</b></div>
+        <div class="div"></div>
+        <ul class="checks"><li>Campanha individual no Meta</li><li>Segmentação por região e intenção</li><li>Otimização semanal</li><li>Relatório mensal por vendedor</li></ul>
+      </div>
+      <div class="plan feat">
+        <div class="pn">Para a loja toda</div><div class="pt">Captação mensal</div>
+        <div class="pd">1 diária de gravação profissional por mês, cobrindo os {{QTD_VENDEDORES}} vendedores e o estoque em destaque.</div>
+        <div class="price-row"><span class="cur">R$</span><span class="val">{{CAPTACAO_MES}}</span><span class="per">/mês</span></div>
+        <div class="price-sub">Rateado, sai por <b>R$ {{RATEIO_VENDEDOR}} por vendedor</b></div>
+        <div class="div"></div>
+        <ul class="checks"><li>Diária de gravação na loja</li><li>Roteiro e direção para cada vendedor</li><li>Edição no padrão da marca</li><li>Criativos de anúncio inclusos</li></ul>
+      </div>
+      <div class="plan">
+        <div class="pn">A conta fechada</div><div class="pt">Total por vendedor</div>
+        <div class="pd">Mídia individual mais o rateio da captação. O custo de virar um canal de venda digital.</div>
+        <div class="price-row"><span class="cur">R$</span><span class="val">{{TOTAL_VENDEDOR}}</span><span class="per">/mês</span></div>
+        <div class="price-sub">Operação completa da loja: <b>R$ {{TOTAL_OPERACAO}}/mês</b></div>
+        <div class="div"></div>
+        <ul class="checks"><li>R$ {{TOTAL_MIDIA}} de mídia ativa somada</li><li>Conteúdo profissional todo mês</li><li>Equipe ARK completa operando</li><li>Relatório consolidado da loja</li></ul>
+      </div>
+    </div>
+    <div class="card amb mt40">
+      <p class="ink">Para comparar: R$ {{TOTAL_VENDEDOR}} por mês é menos do que se gasta em portais para anunciar poucos carros. Aqui, essa verba coloca <strong>o vendedor com nome e rosto</strong> na frente do comprador da região, com uma <span class="rose">equipe inteira</span> por trás: estrategista, roteirista, audiovisual, editor, gestor de tráfego e account.</p>
+    </div>
+    <p class="note mt16">A verba de mídia (R$ {{MIDIA_VENDEDOR}} por vendedor) é paga diretamente à Meta e gerida pela ARK sem custo adicional de gestão. A captação mensal de R$ {{CAPTACAO_MES}} cobre a loja inteira em uma única diária.</p>
+  </div>
+  <div class="pg-no"><b>14</b> / 15</div>
+</section>
+
+<!-- 15 CTA -->
+<section class="page" id="p15" style="text-align:center;align-items:center">
+  <div class="wrap" style="max-width:840px">
+    <span class="tag">Próximo passo</span>
+    <h1 class="mt24">Vamos girar o estoque da <span class="rose">{{CLIENTE_CURTO}}?</span></h1>
+    <div class="yl mxauto"></div>
+    <p class="lead mxauto" style="text-align:center">A equipe existe, o estoque está no pátio e o comprador está no feed. O que falta é o sistema que liga uma coisa na outra. É exatamente isso que a ARK instala, com método e com equipe.</p>
+    <div class="mt40" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a class="btn" href="#">Aprovar proposta e começar</a>
+      <a class="btn ghost" href="#">Falar com a ARK no WhatsApp</a>
+    </div>
+    <div class="mt40" style="display:flex;gap:26px;justify-content:center;flex-wrap:wrap;color:var(--muted);font-size:14px;font-family:var(--display)">
+      <span>Semana 1 · Pauta e gravação</span><span>Semana 2 · Campanhas no ar</span><span>Semana 3 a 4 · Leads e otimização</span>
+    </div>
+    <p class="mt40 note" style="letter-spacing:.06em">ARK CONTENT · Marketing consultivo para o varejo automotivo<br>Proposta preparada exclusivamente para a {{CLIENTE_NOME}} · {{MES_ANO}} · Confidencial</p>
+  </div>
+  <div class="pg-no"><b>15</b> / 15</div>
+</section>
+
+<script>
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{const h=document.documentElement;const sc=h.scrollTop/(h.scrollHeight-h.clientHeight);prog.style.width=(sc*100)+'%';},{passive:true});
+// modo de verificação: ?page=N mostra só a página N
+const pp=new URLSearchParams(location.search).get('page');
+if(pp){document.querySelectorAll('.page').forEach((s,i)=>{if(i+1!==+pp)s.style.display='none';});}
+</script>
+</body>
+</html>

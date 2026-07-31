@@ -25,6 +25,7 @@ Nome do cliente, @ e números do Instagram (posts, seguidores, seguindo), mês d
 
 - `modelos/saude-odontologia.html`, modelo completo tokenizado (usado na Ahava). Estrutura: capa, carta honesta, diagnóstico com card real do Instagram, benchmark de mercado, case Fábula (0 a 40 pacientes no 1º mês), tese, Método ARK em 4 pilares com "quem cuida", projeção, primeiros 90 dias, planos e CTA.
 - `modelos/referencia-gastronomia-sal-e-fumaca.html`, referência de copy e estrutura para gastronomia (feita para a Sal & Fumaça com a marca Alpha).
+- `modelos/automotivo-seminovos.html`, modelo de 15 páginas para loja de seminovos com equipe de vendedores (usado na Localiza Seminovos). Estrutura comercial diferente: em vez de 3 planos, o investimento é mídia Meta individual por vendedor + 1 diária de captação mensal rateada pela loja. Tokens de números: QTD_VENDEDORES, MIDIA_VENDEDOR, CAPTACAO_MES, RATEIO_VENDEDOR, TOTAL_VENDEDOR, TOTAL_MIDIA, TOTAL_OPERACAO.
 
 **Novo segmento?** Peça pro Claude adaptar o modelo mais próximo: o que muda é o vocabulário (paciente/agenda vira cliente/casa cheia), o case e os benchmarks. O design e a argumentação (esforço sem direção, o barato que sai caro, equipe integrada vs freelancer) valem para qualquer segmento.
 
