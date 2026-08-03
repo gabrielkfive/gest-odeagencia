@@ -1,4 +1,4 @@
-<!-- build 2026-08-03-allhands-agosto-v1 -->
+<!-- build 2026-08-03-allhands-agosto-v2 -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -12992,8 +12992,8 @@ function ahBuildSlides(edit){
   // 4b · Agenda de agosto (ao vivo da Gestão do mês): captações + roteiros D-3
   let agoEvs=[];try{agoEvs=(loadAgendaEvents()||[]).filter(e=>String((e&&e.date)||'').slice(0,7)==='2026-08').sort((a,b)=>String(a.date).localeCompare(String(b.date)));}catch(e){}
   const agoLinha=e=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+String(e.date).slice(8,10)+'/08</td><td>'+(e.title||'')+'</td></tr>';
-  const agoCapt=agoEvs.filter(e=>/capta/i.test(e.title||'')).map(agoLinha).join('');
-  const agoRot=agoEvs.filter(e=>/roteiro/i.test(e.title||'')).map(agoLinha).join('');
+  const agoCapt=agoEvs.filter(e=>/^\s*capta/i.test(e.title||'')).map(agoLinha).join('');
+  const agoRot=agoEvs.filter(e=>/^\s*roteiro/i.test(e.title||'')).map(agoLinha).join('');
   S.push('<div><div class="ah-kick">Agenda de agosto · Gestão do mês</div><h2>Captações marcadas, roteiro 3 dias antes</h2>'+
     '<p class="lead">'+ahTxt('ago_agenda_intro','Todo cliente ARK com captação mensal proposta pro Samuel (manhã como padrão) e roteiro entregue pelo menos 3 dias antes. Lá em Casa no almoço, Vaca Velha no almoço ou fim de tarde, Fonseca 9h no escritório, Fercon à tarde, Vivenda toda terça 8h30.',edit)+'</p>'+
     '<div class="ah-grid g2" style="margin-top:14px">'+
