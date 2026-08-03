@@ -1,4 +1,4 @@
-<!-- build 2026-08-03-allhands-agosto-v2 -->
+<!-- build 2026-08-03-jornada-restore-fix -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -5875,7 +5875,10 @@ for(let i=8;i<=20;i++) SPRINTS.push({n:i,nm:'Sprint '+i,clis:[]});
 // Persistência da jornada (qual cliente está em qual sprint)
 (function restoreJornada(){
   const saved=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
-  if(saved && Array.isArray(saved)){
+  // saveJornada grava um MAPA {n:[ids]}; aceitar só Array fazia o restore falhar em todo
+  // boot, o board voltava pro layout padrão e o jornadaAutoInclui empurrava esse reset
+  // pra nuvem (cliente movido de sprint "voltava" sozinho pra equipe inteira).
+  if(saved && typeof saved==='object'){
     SPRINTS.forEach(sp=>{ sp.clis = saved[sp.n] || []; });
   }
   // Auto-coloca clientes base com defaultSprint que ainda não estão em nenhum sprint
