@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Páginas no ar · ARK Content</title>
+<!-- build-paginas-20260814-A -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --panel:#16161a; --ink:#f5f5f2; --muted:#9a9aa2; --faint:#5a5a62;
+  --amarelo:#feef02; --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --display:"Sora",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
+.top{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--line)}
+.top img{height:30px;border-radius:6px}
+.top .t{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.04em}
+.top .t b{color:var(--amarelo)}
+.nav{display:flex;gap:4px;margin-left:26px}
+.nav a{font-family:var(--display);font-weight:600;font-size:12.5px;color:var(--muted);text-decoration:none;padding:7px 14px;border-radius:999px;border:1px solid transparent}
+.nav a:hover{color:var(--ink);border-color:var(--line2)}
+.nav a.on{color:#111;background:var(--amarelo)}
+.wrap{max-width:1000px;margin:0 auto;padding:52px 28px}
+.kicker{font-family:var(--display);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:11px;color:var(--amarelo);margin-bottom:14px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,4.5vw,44px);letter-spacing:-.02em;line-height:1.08}
+.lead{color:var(--muted);font-size:16px;max-width:64ch;margin-top:14px}
+.filtros{display:flex;gap:8px;margin-top:30px;flex-wrap:wrap}
+.filtro{font-family:var(--display);font-weight:600;font-size:12.5px;padding:8px 16px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--muted);cursor:pointer}
+.filtro.on{background:var(--amarelo);color:#111;border-color:var(--amarelo)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.card{display:block;background:linear-gradient(180deg,var(--panel),rgba(22,22,26,.4));border:1px solid var(--line);border-radius:16px;padding:24px;text-decoration:none;color:var(--ink);transition:border-color .2s,transform .2s}
+.card:hover{border-color:rgba(254,239,2,.5);transform:translateY(-3px)}
+.card .cab{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.card .tipo{font-family:var(--display);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#111;background:var(--amarelo);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.card .tipo.prop{background:#4FD6C6}
+.card .tipo.soft{background:#c9b8ff}
+.card .cli{font-family:var(--display);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.card h2{font-family:var(--display);font-weight:700;font-size:18px;margin:12px 0 6px}
+.card p{color:var(--muted);font-size:13.5px}
+.card .url{display:block;margin-top:14px;font-family:var(--display);font-weight:600;font-size:12px;color:var(--amarelo);word-break:break-all}
+.nota{margin-top:34px;border-left:3px solid var(--amarelo);background:rgba(254,239,2,.05);border-radius:0 10px 10px 0;padding:16px 22px;color:var(--muted);font-size:13.5px}
+.nota b{color:var(--ink)}
+@media(max-width:760px){.cards{grid-template-columns:1fr}.nav{display:none}}
+</style>
+</head>
+<body>
+<div class="top">
+  <img src="/ark-logo.png" alt="ARK">
+  <span class="t">ARK <b>CONTENT</b> · Páginas</span>
+  <nav class="nav">
+    <a href="/comercial">Comercial</a>
+    <a href="/propostas">Propostas</a>
+    <a href="/contratos">Contratos</a>
+    <a href="/paginas" class="on">Páginas no ar</a>
+  </nav>
+</div>
+<div class="wrap">
+  <div class="kicker">Central de Páginas · ARK Content</div>
+  <h1>Tudo que a ARK tem <span style="color:var(--amarelo)">no ar.</span></h1>
+  <p class="lead">Planejamentos, propostas e softwares publicados como página, num lugar só. Clique pra abrir; cada card mostra o cliente, o tipo e a URL de produção.</p>
+
+  <div class="filtros" id="filtros">
+    <button class="filtro on" data-f="todos">Todas</button>
+    <button class="filtro" data-f="planejamento">Planejamentos</button>
+    <button class="filtro" data-f="proposta">Propostas</button>
+    <button class="filtro" data-f="software">Software e docs</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="nota">
+    <b>Página nova?</b> Toda página deployada em <b>*.arkcontent.workers.dev</b> entra aqui. É só pedir pro Claude adicionar o card (arquivo <b>public/paginas.html</b>) no próximo deploy do WorkFlowArk.
+  </div>
+</div>
+<script>
+var PAGINAS = [
+  {nome:"Planejamento Vivenda · Agosto 26", cliente:"Farmácia Vivenda", tipo:"planejamento",
+   url:"https://planejamento-vivenda.arkcontent.workers.dev",
+   desc:"O mês do nutricionista + a aba Novo Gama com o plano completo da 8ª loja. Tem resumo simples em /resumo."},
+  {nome:"Vivenda Hub", cliente:"Farmácia Vivenda", tipo:"software",
+   url:"https://vivenda-hub.arkcontent.workers.dev",
+   desc:"Software da diretoria: metas, conversão, desconto, carteira médica e projeções, atualizado a cada ciclo."},
+  {nome:"Plano da Loja 304", cliente:"Martino Fogo & Brasa", tipo:"planejamento",
+   url:"https://planejamento-martino.arkcontent.workers.dev",
+   desc:"Deck visual de 19 slides do planejamento estratégico da Loja 304."},
+  {nome:"Proposta Moenda · Vale do Café", cliente:"Moenda (Sônia Mattos)", tipo:"proposta",
+   url:"https://proposta-moenda.arkcontent.workers.dev",
+   desc:"Prévia de site + proposta comercial com planos de 2.500, 4.500 e 3.000 por mês."},
+  {nome:"Proposta Profox", cliente:"Profox", tipo:"proposta",
+   url:"https://proposta-profox.arkcontent.workers.dev",
+   desc:"Proposta de tráfego em 15 páginas com dados reais do Instagram e Biblioteca de Anúncios."},
+  {nome:"Proposta Sal & Fumaça", cliente:"Sal & Fumaça (Valter)", tipo:"proposta",
+   url:"https://proposta-sal-e-fumaca.arkcontent.workers.dev",
+   desc:"Documento comercial de 22 páginas do Método Alpha, com prints reais do sistema."},
+  {nome:"Docs da Franquia WorkFlowArk", cliente:"ARK · Franquia", tipo:"software",
+   url:"https://docs-workflowark.arkcontent.workers.dev",
+   desc:"Materiais da franquia WorkFlowArk: plano de negócio, aulas e playbooks."},
+  {nome:"WorkFlowArk", cliente:"ARK · interno", tipo:"software",
+   url:"https://workflowark.arkcontent.workers.dev",
+   desc:"O hub operacional da equipe: tarefas, financeiro, clientes, agentes e rotinas."}
+];
+var rotulo = {planejamento:"Planejamento", proposta:"Proposta", software:"Software"};
+var classe = {planejamento:"", proposta:"prop", software:"soft"};
+function render(f){
+  document.getElementById('cards').innerHTML = PAGINAS
+    .filter(function(p){ return f==='todos' || p.tipo===f; })
+    .map(function(p){
+      return '<a class="card" href="'+p.url+'" target="_blank" rel="noopener" data-t="'+p.tipo+'">'+
+        '<div class="cab"><span class="cli">'+p.cliente+'</span><span class="tipo '+classe[p.tipo]+'">'+rotulo[p.tipo]+'</span></div>'+
+        '<h2>'+p.nome+'</h2><p>'+p.desc+'</p>'+
+        '<span class="url">'+p.url.replace('https://','')+'</span></a>';
+    }).join('');
+}
+document.getElementById('filtros').addEventListener('click', function(ev){
+  var b = ev.target.closest('.filtro'); if(!b) return;
+  document.querySelectorAll('.filtro').forEach(function(x){ x.classList.remove('on'); });
+  b.classList.add('on');
+  render(b.dataset.f);
+});
+render('todos');
+</script>
+</body>
+</html>

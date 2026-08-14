@@ -13,6 +13,7 @@ import { Route as SistemaRouteImport } from './routes/sistema'
 import { Route as PropostasRouteImport } from './routes/propostas'
 import { Route as PostagensRouteImport } from './routes/postagens'
 import { Route as PortalRouteImport } from './routes/portal'
+import { Route as PaginasRouteImport } from './routes/paginas'
 import { Route as OsRouteImport } from './routes/os'
 import { Route as InteligenciaRouteImport } from './routes/inteligencia'
 import { Route as CalendarioRouteImport } from './routes/calendario'
@@ -21,6 +22,7 @@ import { Route as AprovarRouteImport } from './routes/aprovar'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TccApresentacaoRouteImport } from './routes/tcc.apresentacao'
+import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
 import { Route as ApiWorkflowarkSocialRunRouteImport } from './routes/api/workflowark.social-run'
@@ -62,6 +64,11 @@ const PortalRoute = PortalRouteImport.update({
   path: '/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaginasRoute = PaginasRouteImport.update({
+  id: '/paginas',
+  path: '/paginas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OsRoute = OsRouteImport.update({
   id: '/os',
   path: '/os',
@@ -99,6 +106,11 @@ const IndexRoute = IndexRouteImport.update({
 const TccApresentacaoRoute = TccApresentacaoRouteImport.update({
   id: '/tcc/apresentacao',
   path: '/tcc/apresentacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
@@ -213,11 +225,13 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof CalendarioRoute
   '/inteligencia': typeof InteligenciaRoute
   '/os': typeof OsRoute
+  '/paginas': typeof PaginasRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
   '/propostas': typeof PropostasRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
@@ -246,11 +260,13 @@ export interface FileRoutesByTo {
   '/calendario': typeof CalendarioRoute
   '/inteligencia': typeof InteligenciaRoute
   '/os': typeof OsRoute
+  '/paginas': typeof PaginasRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
   '/propostas': typeof PropostasRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
@@ -281,11 +297,13 @@ export interface FileRoutesById {
   '/calendario': typeof CalendarioRoute
   '/inteligencia': typeof InteligenciaRoute
   '/os': typeof OsRoute
+  '/paginas': typeof PaginasRoute
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
   '/propostas': typeof PropostasRoute
   '/sistema': typeof SistemaRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
@@ -316,11 +334,13 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/inteligencia'
     | '/os'
+    | '/paginas'
     | '/portal'
     | '/postagens'
     | '/propostas'
     | '/sistema'
     | '/app'
+    | '/api/mcp'
     | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
@@ -349,11 +369,13 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/inteligencia'
     | '/os'
+    | '/paginas'
     | '/portal'
     | '/postagens'
     | '/propostas'
     | '/sistema'
     | '/app'
+    | '/api/mcp'
     | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
@@ -383,11 +405,13 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/inteligencia'
     | '/os'
+    | '/paginas'
     | '/portal'
     | '/postagens'
     | '/propostas'
     | '/sistema'
     | '/_authenticated/app'
+    | '/api/mcp'
     | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
@@ -418,10 +442,12 @@ export interface RootRouteChildren {
   CalendarioRoute: typeof CalendarioRoute
   InteligenciaRoute: typeof InteligenciaRoute
   OsRoute: typeof OsRoute
+  PaginasRoute: typeof PaginasRoute
   PortalRoute: typeof PortalRoute
   PostagensRoute: typeof PostagensRoute
   PropostasRoute: typeof PropostasRoute
   SistemaRoute: typeof SistemaRoute
+  ApiMcpRoute: typeof ApiMcpRoute
   TccApresentacaoRoute: typeof TccApresentacaoRoute
   ApiAuthSeedEvaluatorsRoute: typeof ApiAuthSeedEvaluatorsRoute
   ApiAuthSignupRoute: typeof ApiAuthSignupRoute
@@ -471,6 +497,13 @@ declare module '@tanstack/react-router' {
       path: '/portal'
       fullPath: '/portal'
       preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paginas': {
+      id: '/paginas'
+      path: '/paginas'
+      fullPath: '/paginas'
+      preLoaderRoute: typeof PaginasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/os': {
@@ -527,6 +560,13 @@ declare module '@tanstack/react-router' {
       path: '/tcc/apresentacao'
       fullPath: '/tcc/apresentacao'
       preLoaderRoute: typeof TccApresentacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app': {
@@ -706,10 +746,12 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarioRoute: CalendarioRoute,
   InteligenciaRoute: InteligenciaRoute,
   OsRoute: OsRoute,
+  PaginasRoute: PaginasRoute,
   PortalRoute: PortalRoute,
   PostagensRoute: PostagensRoute,
   PropostasRoute: PropostasRoute,
   SistemaRoute: SistemaRoute,
+  ApiMcpRoute: ApiMcpRoute,
   TccApresentacaoRoute: TccApresentacaoRoute,
   ApiAuthSeedEvaluatorsRoute: ApiAuthSeedEvaluatorsRoute,
   ApiAuthSignupRoute: ApiAuthSignupRoute,
