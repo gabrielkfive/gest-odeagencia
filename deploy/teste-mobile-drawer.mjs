@@ -25,6 +25,20 @@ async function testaTema(tema) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.addInitScript((t) => {
     try { localStorage.setItem('wfa-theme', t); } catch (e) {}
+    // SESSAO FALSA: desde 20/08 o workflowark.html tem guarda de sessao no <head> e manda
+    // pro /auth sem token (era o furo de "estado carrega sem login"). Este teste e do
+    // DRAWER, nao do login, entao semeia um token valido pra chegar na tela. A guarda em
+    // si tem teste proprio em deploy/teste-guarda-sessao.mjs.
+    try {
+      localStorage.setItem('sb-fxfnonozzekxnxddxsnh-auth-token', JSON.stringify({
+        access_token: 'teste-local',
+        refresh_token: 'teste-local',
+        token_type: 'bearer',
+        expires_in: 3600,
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        user: { id: '00000000-0000-0000-0000-000000000000', email: 'teste@local' },
+      }));
+    } catch (e) {}
   }, tema);
   await page.goto(alvo);
   await page.waitForTimeout(3000); // boot + animações de entrada

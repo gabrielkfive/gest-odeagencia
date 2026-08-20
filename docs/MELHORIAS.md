@@ -34,6 +34,17 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
 12. ✅ **Widget Comercial · pipeline** — lê o CRM real: quem ativar/follow hoje, cotar (proposta), fechar (negociação) + valor. Pedido de Gabriel/Saulo.
 13. ✅ **Widget Minha Rotina por papel** — `ROTINA_POPS` derivado dos 22 POPs, com cadência e check diário que reseta sozinho (foge do "só Kanban").
 14. ✅ **Meu Dia + Meu Painel fundidos** numa home só ("Meu Dia" = painel personalizável com saudação); aba duplicada escondida (`HIDDEN_NAV`).
+15. ✅ **Segurança: painel não abre mais sem login.** `public/workflowark.html` é estático
+    em `/public`, então abrir a URL direto pintava o sistema inteiro a partir das 59 chaves
+    `wfa-*` do `localStorage`, sem sessão. O `signOut` do app pai limpava a sessão do
+    Supabase mas não esse cache, então cobrança, CRM, financeiro e clientes continuavam
+    na tela depois de sair. A API já exigia bearer token, o furo era de exibição.
+    Agora: guarda síncrona no `<head>` (sem token, apaga o cache e vai pro `/auth` antes
+    de qualquer paint), confirmação assíncrona no boot para token expirado, e o botão Sair
+    descarrega o que está pendente antes de limpar. Se sobrar escrita não confirmada, o
+    cache fica no aparelho de propósito, nunca perder dado vem primeiro, e quem protege a
+    exibição é a guarda. Trancado por `deploy/teste-guarda-sessao.mjs`, que reprova a
+    versão anterior. Pendência aberta em 27/07.
 > Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 

@@ -1,8 +1,36 @@
-<!-- build 2026-08-03-jornada-restore-fix -->
+<!-- build 2026-08-20-guarda-sessao -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<script>
+/* ===== GUARDA DE SESSAO (seguranca, 20/08/2026) =====
+   Este arquivo e estatico em /public. Ate hoje, abrir a URL direto pintava o painel
+   inteiro a partir do cache local (59 chaves wfa-* no localStorage), sem login, e o
+   signOut do app pai nao limpava esse cache. A API ja exigia bearer token; o furo era
+   so de exibicao, mas expunha cobranca, CRM, financeiro e clientes na tela.
+
+   Duas camadas:
+   1. SINCRONA (aqui): sem token do Supabase no localStorage, limpa o cache wfa-* e
+      manda pro /auth ANTES de qualquer paint. Sem flash de conteudo.
+   2. ASSINCRONA (wfaConfirmaSessao, junto do client Supabase): confirma se o token
+      ainda vale. Token expirado tambem cai fora.
+   Fail-open proposital em erro de storage: a regra n1 do projeto e o sistema nunca
+   sair do ar, e o servidor continua exigindo autenticacao de qualquer jeito. */
+(function(){
+  var SB_KEY='sb-fxfnonozzekxnxddxsnh-auth-token';
+  try{
+    if(localStorage.getItem(SB_KEY))return;              // tem sessao: segue o boot normal
+    window.__WFA_SEM_SESSAO=true;
+    for(var i=localStorage.length-1;i>=0;i--){           // de tras pra frente: o indice anda ao remover
+      var k=localStorage.key(i);
+      if(k&&k.indexOf('wfa-')===0)localStorage.removeItem(k);
+    }
+    document.documentElement.style.visibility='hidden';
+    location.replace('/auth');
+  }catch(e){/* storage bloqueado: deixa passar, servidor ainda barra */}
+})();
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>WorkFlowArk · Sistema ARK Content</title>
 <link rel="icon" type="image/png" href="/ark-mark.png?v=2">
@@ -1794,7 +1822,7 @@ function wfaSetTheme(t){
         <div class="rl" id="side-rl">—</div>
       </div>
       <div class="ico" title="Configurações" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
-      <div class="ico" title="Sair" onclick="window.parent.postMessage({type:'wfa-sair'},'*')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+      <div class="ico" title="Sair" onclick="wfaSair()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
     </div>
   </aside>
 
@@ -3329,6 +3357,50 @@ const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
+/* ===== GUARDA DE SESSAO, CAMADA 2 (assincrona) =====
+   A camada sincrona do <head> so ve SE existe token. Aqui confirmamos se ele ainda
+   VALE. Token expirado renderizava o painel inteiro do cache ate o primeiro erro de
+   sync, que era silencioso. Agora limpa o cache e manda pro /auth.
+   Watchdog proposital: se a checagem nao responder, NAO travamos a tela (regra n1). */
+async function wfaConfirmaSessao(){
+  try{
+    const {data:{session}}=await _wfaSb.auth.getSession();
+    if(session&&session.access_token)return true;
+    const nova=await _wfaSb.auth.refreshSession();      // token velho ainda pode renovar
+    if(nova&&nova.data&&nova.data.session&&nova.data.session.access_token)return true;
+  }catch(e){ return true; }                             // falha de rede nao expulsa ninguem
+  try{
+    wfaLimpaCacheLocal();
+    document.documentElement.style.visibility='hidden';
+    location.replace('/auth');
+  }catch(e){}
+  return false;
+}
+/* Limpa TODO o cache de estado local (as 59 chaves wfa-*). Usado no logout e quando a
+   sessao cai. Nao mexe na sessao do Supabase nem em chave de outro app. */
+function wfaLimpaCacheLocal(){
+  try{
+    for(var i=localStorage.length-1;i>=0;i--){
+      var k=localStorage.key(i);
+      if(k&&k.indexOf('wfa-')===0)localStorage.removeItem(k);
+    }
+  }catch(e){}
+}
+/* SAIR: descarrega o que ainda nao subiu ANTES de limpar o cache. Se sobrar escrita
+   pendente, o cache FICA no aparelho de proposito (nunca perder dado, regra n1) e quem
+   protege a exibicao e a guarda de sessao, que barra sem login. */
+async function wfaSair(){
+  try{
+    if(typeof sincronizarAgora==='function'){
+      await Promise.race([sincronizarAgora(true),new Promise(function(r){setTimeout(r,4000)})]);
+    }
+  }catch(e){}
+  try{
+    var sujo=(typeof WFA_DIRTY!=='undefined'&&WFA_DIRTY&&WFA_DIRTY.size>0);
+    if(!sujo)wfaLimpaCacheLocal();
+  }catch(e){}
+  try{window.parent.postMessage({type:'wfa-sair'},'*');}catch(e){}
+}
 const WFA_FIN_DEFAULT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml?widget=true&headers=false';
 var WFA_WPP_OFF=true; // WhatsApp DESLIGADO a pedido do Gabriel (03/07): some da sidebar,
 // do painel e de todo caminho de execução. Reversível: false religa. Dados intactos na nuvem.
@@ -3784,6 +3856,7 @@ function wfaSeedRotinasV1(){
 function isEmptyCloudValue(v){return v==null||(Array.isArray(v)&&v.length===0)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===0)||v==='';}
 async function bootCloudSync(){
   try{
+    if(!(await wfaConfirmaSessao()))return;   // sessao invalida: ja redirecionou pro /auth
     const local=collectLocalCloudState();
     const res=await cloudCall('load');
     const remote=res.state||{};
@@ -5516,7 +5589,7 @@ function iniciarAutoSync(){
         <div class="set-sect-t" style="margin-bottom:9px">Sincronização &amp; sessão</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
           <button class="icobtn" onclick="try{sincronizarAgora()}catch(e){}">↻ Sincronizar agora</button>
-          <button class="icobtn" style="color:var(--red)" onclick="window.parent.postMessage({type:'wfa-sair'},'*')">Sair da conta</button>
+          <button class="icobtn" style="color:var(--red)" onclick="wfaSair()">Sair da conta</button>
         </div>
         <div class="set-sect-t" style="margin-bottom:9px">Migração de dados</div>
         <p class="muted" style="font-size:10.5px;margin-bottom:9px">Traga tudo de outra versão (clientes nos sprints, tarefas, jornada, financeiro…). Exporte de um lado e importe no outro.</p>
