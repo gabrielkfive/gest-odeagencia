@@ -45,6 +45,17 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
     cache fica no aparelho de propósito, nunca perder dado vem primeiro, e quem protege a
     exibição é a guarda. Trancado por `deploy/teste-guarda-sessao.mjs`, que reprova a
     versão anterior. Pendência aberta em 27/07.
+16. ✅ **Supabase servido de casa, não de CDN.** O `workflowark.html` carregava a biblioteca
+    do Supabase de `cdn.jsdelivr.net` em versão flutuante (`@2`). Testado com o CDN
+    bloqueado: dá `supabase is not defined` na linha do `createClient`, o bloco de script
+    inteiro morre ali e tudo que é definido depois deixa de existir. A página continua
+    visível com o menu montado, então a equipe vê um painel que parece funcionar e está
+    morto, sem carregar dado, sem sincronizar, sem salvar e sem avisar. E `@2` flutuante
+    significava que um release menor podia quebrar a produção sem ninguém ter feito deploy.
+    Agora é `public/vendor/supabase-2.107.0.umd.js`, com a versão no nome, no mesmo padrão
+    do `vendor/docx.umd.js` que já existia, e na mesma versão que o app React usa. Mais uma
+    guarda: se a biblioteca não carregar por qualquer motivo, aparece um aviso claro com
+    botão de recarregar, em vez do painel meio morto.
 > Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 

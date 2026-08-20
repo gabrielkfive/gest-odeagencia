@@ -1,4 +1,4 @@
-<!-- build 2026-08-20-guarda-sessao -->
+<!-- build 2026-08-20-supabase-local -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -3350,7 +3350,38 @@ function wfaSetTheme(t){
           </table>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+        <!-- SUPABASE SERVIDO DE CASA (20/08/2026). Antes vinha de cdn.jsdelivr.net em
+             versao flutuante (@2). Dois problemas reais, os dois testados:
+             1. CDN fora do ar ou bloqueado = "supabase is not defined" na linha do
+                createClient, o bloco de script inteiro morre ali e TUDO que e definido
+                depois deixa de existir. A pagina continua visivel com o menu montado,
+                entao a equipe ve um painel que parece funcionar e esta morto: nao
+                carrega dado, nao sincroniza, nao salva, e nao avisa nada.
+             2. @2 e versao flutuante: um release menor do supabase-js podia quebrar a
+                producao sem ninguem ter feito deploy.
+             Agora e arquivo local com a versao no nome, igual ao vendor/docx.umd.js, e
+             na MESMA versao que o app React usa (2.107.0). -->
+        <script src="/vendor/supabase-2.107.0.umd.js"></script>
+        <script>
+        /* FALHA BARULHENTA: se por qualquer motivo a biblioteca nao carregar, avisa em vez
+           de deixar o painel meio morto. Sem isso o erro so aparece no console. */
+        if(typeof supabase==='undefined'){
+          document.addEventListener('DOMContentLoaded',function(){
+            var d=document.createElement('div');
+            d.setAttribute('role','alert');
+            d.style.cssText='position:fixed;inset:0;z-index:99999;display:flex;align-items:center;'+
+              'justify-content:center;padding:24px;background:#101218;color:#EDEFF4;'+
+              'font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif;text-align:center';
+            d.innerHTML='<div style="max-width:34em"><p style="font-size:20px;font-weight:700;margin:0 0 12px">'+
+              'O sistema nao conseguiu carregar por completo.</p>'+
+              '<p style="margin:0 0 18px;opacity:.8">Um componente essencial nao veio. Nada foi perdido, '+
+              'seus dados estao salvos. Recarregue a pagina; se continuar assim, avise o Gabriel.</p>'+
+              '<button onclick="location.reload()" style="font:inherit;font-weight:600;padding:10px 20px;'+
+              'border-radius:8px;border:0;background:#EDEFF4;color:#101218;cursor:pointer">Recarregar</button></div>';
+            document.body.appendChild(d);
+          });
+        }
+        </script>
 <script>
 /* ============ CLOUD SYNC ============ */
 const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings','wfa-acertosrec','wfa-propostas','wfa-notif-read'];
