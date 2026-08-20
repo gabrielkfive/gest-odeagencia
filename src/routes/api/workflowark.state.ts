@@ -135,6 +135,25 @@ function isStateKey(key: string) {
   return STATE_KEYS.has(key) || key.startsWith("wfa-ckl-");
 }
 
+// TOKEN DE LINK PUBLICO (portal do cliente e aprovacao de conteudo).
+// Estes links sao o unico segredo: quem tem a URL ve os dados daquele cliente, sem login,
+// e no caso do portal o token e PERSISTENTE, reusado pra sempre.
+// Antes havia um fallback silencioso pra Date.now() + Math.random(), que e previsivel:
+// se ele disparasse uma vez, aquele cliente ficava com um link adivinhavel permanente.
+// Agora sao dois geradores CRIPTOGRAFICOS e, se nenhum existir, falha. Nao gerar o link
+// e muito melhor do que gerar um que da pra adivinhar.
+function novoTokenPublico(): string | null {
+  const c = globalThis.crypto as Crypto | undefined;
+  const uuid = c?.randomUUID?.();
+  if (uuid) return uuid.replace(/[^a-zA-Z0-9]/g, "");
+  if (c?.getRandomValues) {
+    const b = new Uint8Array(24);
+    c.getRandomValues(b);
+    return Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+  }
+  return null;
+}
+
 async function getContext(request: Request) {
   // ACESSO DE SERVIÇO (automações do Claude na nuvem / cron): header "x-run-key" com o
   // segredo RUN_KEY dá o contexto do DONO (admin), sem sessão de navegador. Não usamos
@@ -452,7 +471,8 @@ export const Route = createFileRoute("/api/workflowark/state")({
           const cliente = String(body.cliente ?? "").trim();
           const ideias = Array.isArray(body.ideias) ? body.ideias : [];
           if (!ideias.length) return json({ error: "Não há ideias para aprovar." }, { status: 400 });
-          const token = ((globalThis.crypto?.randomUUID?.() ?? (Date.now() + "" + Math.random())) + "").replace(/[^a-zA-Z0-9]/g, "");
+          const token = novoTokenPublico();
+          if (!token) return json({ error: "Não foi possível gerar o link com segurança." }, { status: 500 });
           const data = {
             cliente,
             periodo: String(body.periodo ?? ""),
@@ -487,7 +507,9 @@ export const Route = createFileRoute("/api/workflowark/state")({
 
           let token = tokens[clienteId];
           if (!token) {
-            token = ((globalThis.crypto?.randomUUID?.() ?? (Date.now() + "" + Math.random())) + "").replace(/[^a-zA-Z0-9]/g, "");
+            const novo = novoTokenPublico();
+            if (!novo) return json({ error: "Não foi possível gerar o portal com segurança." }, { status: 500 });
+            token = novo;
             tokens[clienteId] = token;
             const { error: idxErr } = await ctx.db.from("workflowark_state")
               .upsert({ key: "wfa-portal-tokens", data: tokens, updated_by: ctx.user.id });

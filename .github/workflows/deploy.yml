@@ -81,6 +81,9 @@ jobs:
       - name: Chaves de sync (cliente x servidor)
         run: node deploy/teste-chaves-sync.mjs
 
+      - name: Segredos (token de link publico so de crypto)
+        run: node deploy/teste-segredos.mjs
+
       - name: Guarda de sessao (painel nao abre sem login)
         run: node deploy/teste-guarda-sessao.mjs https://workflowark.arkcontent.workers.dev/workflowark
 

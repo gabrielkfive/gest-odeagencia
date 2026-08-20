@@ -81,6 +81,14 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
     o lado seguro, e quem impede a exibição continua sendo a guarda, que redireciona antes de
     qualquer paint. O `teste-guarda-sessao.mjs` passou a exigir as duas coisas ao mesmo tempo,
     cache sincronizado limpo e dado só local intacto, e reprova a versão anterior.
+19. ✅ **Link de portal e de aprovação não podem mais nascer adivinháveis.** Esses links são o
+    único segredo: quem tem a URL vê os dados daquele cliente sem login, e no portal o token é
+    persistente, gerado uma vez e reusado para sempre. A geração tinha um plano B silencioso
+    para `Date.now() + Math.random()`, que é previsível. Bastava ele disparar uma vez para
+    aquele cliente ficar com um link permanente que dá para adivinhar. Agora são dois
+    geradores criptográficos e, se nenhum existir, o sistema recusa gerar o link, porque link
+    fraco e eterno é pior que link nenhum. Travado por `deploy/teste-segredos.mjs`, que reprova
+    a versão anterior apontando as duas linhas.
 > Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 
