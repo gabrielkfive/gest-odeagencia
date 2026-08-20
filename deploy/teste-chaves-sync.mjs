@@ -43,7 +43,34 @@ const stateKeys = new Set([...bloco.matchAll(/"([^"]+)"/g)].map((x) => x[1]));
 const empurraveis = [...cloudKeys].filter((k) => !noPush.has(k));
 const orfas = empurraveis.filter((k) => !stateKeys.has(k));
 
+// Invariantes vizinhos, conferidos a mao em 20/08 e trancados aqui pra nao dependerem de
+// alguem repetir a varredura. Sao o mesmo padrao: duas listas que precisam concordar.
+const problemas = [];
+
+// a) Chave que ganha carimbo de merge por item mas nao sincroniza: carimba e nao sobe.
+const RE_MERGE = /const WFA_MERGE_KEYS\s*=\s*(?:new Set\(\s*)?\[([\s\S]*?)\]/;
+const mm = html.match(RE_MERGE);
+if (mm) {
+  const mergeKeys = [...mm[1].matchAll(/'([^']+)'/g)].map((x) => x[1]);
+  mergeKeys
+    .filter((k) => !cloudKeys.has(k))
+    .forEach((k) => problemas.push(`${k}: esta em WFA_MERGE_KEYS mas nao em WFA_CLOUD_KEYS (carimba e nunca sobe)`));
+}
+
+// b) Chave de sync que o servidor trata como sensivel: ele nunca a devolve, entao o cliente
+//    salva e nunca recebe de volta. Espelha a regra do isSensitive no state.ts.
+const ehSensivel = (k) => /-(secret|oauth)$/.test(k) || k === 'wfa-portal-tokens' || k.startsWith('wfa-backup-');
+empurraveis
+  .filter(ehSensivel)
+  .forEach((k) => problemas.push(`${k}: sincroniza mas o servidor a trata como sensivel e nunca devolve`));
+
 console.log(`cliente empurra ${empurraveis.length} chaves; servidor libera ${stateKeys.size}`);
+
+if (problemas.length) {
+  console.log('TESTE DE CHAVES FALHOU: listas que deviam concordar sairam do lugar.');
+  problemas.forEach((p) => console.log('  - ' + p));
+  process.exit(1);
+}
 
 if (orfas.length) {
   console.log('TESTE DE CHAVES FALHOU: o cliente empurra chave que o servidor recusa.');
