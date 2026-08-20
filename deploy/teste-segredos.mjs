@@ -60,6 +60,21 @@ for (const [arq, rotulo] of ROTAS) {
   }
 }
 
+// 4) Endpoint externo nao pode ABRIR quando o segredo esta faltando.
+//    O webhook do WhatsApp fazia "if (!secret) return true", ou seja, sem WEBHOOK_SECRET
+//    configurado aceitava qualquer requisicao. Conferido em producao em 20/08: POST sem
+//    token e com token errado, os dois respondiam 200. Falta de segredo tem que FECHAR.
+const wa = await readFile('src/integrations/wa-webhook.server.ts', 'utf8');
+// Tira os comentarios ANTES de checar: o proprio comentario que explica o conserto
+// cita a frase antiga, e sem isto o teste se acusava sozinho.
+const waCodigo = wa.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+const semEspacos = waCodigo.replace(/\s+/g, ' ');
+if (!wa.includes('export function webhookAuthorized')) {
+  falhas.push('webhookAuthorized() sumiu de wa-webhook.server.ts');
+} else if (semEspacos.includes('if (!secret) return true')) {
+  falhas.push('webhookAuthorized() volta a ABRIR quando WEBHOOK_SECRET falta (deve recusar)');
+}
+
 if (falhas.length) {
   console.log('TESTE DE SEGREDOS FALHOU:');
   falhas.forEach((f) => console.log('  - ' + f));

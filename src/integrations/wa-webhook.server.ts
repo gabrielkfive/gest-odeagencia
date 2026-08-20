@@ -6,9 +6,29 @@
 
 import { zapiEnv } from "@/integrations/zapi.server";
 
+// FECHA POR PADRAO (20/08/2026). Antes era `if (!secret) return true`: sem WEBHOOK_SECRET
+// configurado, o webhook aceitava QUALQUER requisicao. Conferido em producao nesta data:
+// POST sem token e POST com token errado, os dois respondiam 200. Ou seja, quem soubesse a
+// URL podia injetar mensagem falsa de cliente, criando tarefa, notificacao e disparando
+// chamada de IA, que custa dinheiro.
+//
+// Agora, sem segredo configurado, RECUSA. Nada depende disso hoje (a Evolution esta fora do
+// ar), e quando voltar a primeira entrega devolve uma mensagem dizendo exatamente o que
+// fazer, visivel no log da Evolution e no observability do Worker. Falha barulhenta em vez
+// de porta aberta.
+//
+// Para ligar:  npx wrangler secret put WEBHOOK_SECRET
+// e configurar o mesmo valor na Evolution como header x-webhook-token (ou ?token=).
 export function webhookAuthorized(request: Request): boolean {
   const secret = zapiEnv("WEBHOOK_SECRET");
-  if (!secret) return true;
+  if (!secret) {
+    console.error(
+      "[webhook] RECUSADO: WEBHOOK_SECRET nao esta configurado. " +
+        "Configure com `npx wrangler secret put WEBHOOK_SECRET` e ponha o mesmo valor " +
+        "na Evolution (header x-webhook-token). Sem isso qualquer um poderia injetar mensagem.",
+    );
+    return false;
+  }
   const header = request.headers.get("x-webhook-token") || request.headers.get("x-api-key") || "";
   if (header === secret) return true;
   const url = new URL(request.url);

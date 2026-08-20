@@ -97,6 +97,16 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
     sistema. Exigia a chave da ponte, então não era buraco aberto, mas transformava uma chave
     vazada em acesso a todos os portais. As três agora usam a mesma regra, e o
     `teste-segredos.mjs` confere que continuam iguais.
+21. ✅ **O webhook do WhatsApp estava aberto para qualquer um.** A verificação era "se não há
+    segredo configurado, aceita". E a `WEBHOOK_SECRET` não estava configurada: conferido em
+    produção em 20/08, um POST sem token e um POST com token errado responderam 200 os dois.
+    Na prática, quem soubesse o endereço podia injetar mensagem falsa de cliente no sistema,
+    criando tarefa, gerando notificação e disparando chamada de IA, que custa dinheiro. Agora
+    é o contrário: sem segredo configurado, recusa, e devolve uma mensagem dizendo exatamente
+    qual comando rodar. Nada depende disso hoje porque a Evolution está fora do ar, então
+    fechar agora não quebra nada. **Quando a Evolution voltar, é preciso rodar
+    `npx wrangler secret put WEBHOOK_SECRET` e pôr o mesmo valor lá no header
+    `x-webhook-token`, senão as mensagens não entram.**
 > Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 
