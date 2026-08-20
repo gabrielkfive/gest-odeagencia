@@ -89,6 +89,14 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
     geradores criptográficos e, se nenhum existir, o sistema recusa gerar o link, porque link
     fraco e eterno é pior que link nenhum. Travado por `deploy/teste-segredos.mjs`, que reprova
     a versão anterior apontando as duas linhas.
+20. ✅ **A ponte externa era a mais frouxa das três, agora está alinhada.** Três rotas devolvem
+    estado do sistema para fora: a principal, o conector MCP e a ponte. As duas primeiras
+    recusam devolver `wfa-portal-tokens` e `wfa-backup-*`. A ponte não recusava. Ou seja, ela
+    aceitava devolver o mapa com o link de portal de todos os clientes de uma vez, e cada um
+    desses links abre os dados daquele cliente sem login, além de fotos do estado inteiro do
+    sistema. Exigia a chave da ponte, então não era buraco aberto, mas transformava uma chave
+    vazada em acesso a todos os portais. As três agora usam a mesma regra, e o
+    `teste-segredos.mjs` confere que continuam iguais.
 > Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 

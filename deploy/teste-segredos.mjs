@@ -41,6 +41,25 @@ if (!m) {
   falhas.push('novoTokenPublico() nao usa gerador criptografico.');
 }
 
+// 3) As TRES rotas que devolvem estado precisam barrar as mesmas chaves reservadas.
+//    Ate 20/08 a ponte era a mais frouxa e aceitava wfa-portal-tokens (o mapa de todos os
+//    links de portal dos clientes) e wfa-backup-* (foto do estado inteiro do sistema).
+//    Mesma armadilha das listas que precisam concordar e ninguem confere.
+const RESERVADAS = ['wfa-portal-tokens', 'wfa-backup-'];
+const ROTAS = [
+  ['src/routes/api/workflowark.state.ts', 'state'],
+  ['src/routes/api/mcp.ts', 'mcp'],
+  ['src/routes/api/workflowark.bridge.ts', 'bridge'],
+];
+for (const [arq, rotulo] of ROTAS) {
+  const txt = await readFile(arq, 'utf8');
+  for (const r of RESERVADAS) {
+    if (!txt.includes(r)) {
+      falhas.push(rotulo + ' (' + arq + ') nao barra "' + r + '" nas chaves reservadas');
+    }
+  }
+}
+
 if (falhas.length) {
   console.log('TESTE DE SEGREDOS FALHOU:');
   falhas.forEach((f) => console.log('  - ' + f));

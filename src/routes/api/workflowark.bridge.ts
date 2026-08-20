@@ -30,7 +30,14 @@ async function bridgeSecretOk(url: URL): Promise<boolean> {
   return !!run && key === run;
 }
 
-const isSensitive = (k: string) => /-(secret|oauth)$/.test(k);
+// MESMA regra do state.ts e do mcp.ts. Ate 20/08/2026 a ponte era a mais frouxa das tres:
+// so barrava -secret e -oauth, entao aceitava state=wfa-portal-tokens (o mapa de TODOS os
+// links de portal dos clientes, e cada link abre os dados daquele cliente sem login) e
+// state=wfa-backup-<data> (uma foto do estado inteiro do sistema). Exigia a BRIDGE_KEY, mas
+// era uma chave vazada virando acesso a todos os portais de uma vez.
+// Se mexer aqui, mexa nos tres. deploy/teste-segredos.mjs confere que continuam iguais.
+const isSensitive = (k: string) =>
+  /-(secret|oauth)$/.test(k) || k === "wfa-portal-tokens" || k.startsWith("wfa-backup-");
 // título normalizado p/ dedupe (sem acento, minúsculo, espaços colapsados)
 const norm = (s: string) =>
   String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
