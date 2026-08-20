@@ -69,6 +69,18 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
     limpar o cache, senão o logout apagaria justamente o dado que nunca subiu. Travado por
     `deploy/teste-chaves-sync.mjs`, que reprova a versão anterior apontando a chave e o
     conserto.
+18. ✅ **Correção da correção: a guarda de sessão estava apagando dado que não volta.** A
+    guarda do item 15 limpava TODAS as chaves `wfa-*` quando não havia sessão. Só que 25 delas
+    nunca vão para a nuvem, e três guardam trabalho de verdade: `wfa-rotina-checks` (os checks
+    diários de rotina), `wfa-allhands` (as narrações escritas no All Hands) e `wfa-cons-chat-*`
+    (histórico de conversa do conselho por cliente). Como não existem no servidor, não voltavam
+    no login seguinte. Bastava a sessão expirar de um dia para o outro e o trabalho sumia.
+    Agora a limpeza atinge só o que a nuvem devolve. A lista vem publicada pelo próprio app em
+    `wfa-sync-keys`, com fonte única em `WFA_CLOUD_KEYS`, então não existe segunda lista para
+    sair do lugar, que é exatamente o erro do item 17. Sem a lista, não apaga nada: falha para
+    o lado seguro, e quem impede a exibição continua sendo a guarda, que redireciona antes de
+    qualquer paint. O `teste-guarda-sessao.mjs` passou a exigir as duas coisas ao mesmo tempo,
+    cache sincronizado limpo e dado só local intacto, e reprova a versão anterior.
 > Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 

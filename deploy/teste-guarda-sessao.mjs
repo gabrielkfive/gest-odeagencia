@@ -66,9 +66,17 @@ async function abre(semearSessao) {
       if (sessionStorage.getItem('teste-semeado')) return;
       sessionStorage.setItem('teste-semeado', '1');
       // Cache de estado como se o aparelho ja tivesse sido usado logado.
+      // Chaves que SINCRONIZAM: tem que sumir sem sessao (voltam da nuvem no proximo login).
       localStorage.setItem('wfa-cobranca', JSON.stringify([{ cliente: 'SIGILOSO', valor: 9999 }]));
       localStorage.setItem('wfa-crm', JSON.stringify([{ lead: 'SIGILOSO' }]));
       localStorage.setItem('wfa-tarefas', JSON.stringify([{ titulo: 'SIGILOSO' }]));
+      // Chaves SO LOCAIS: tem que SOBREVIVER. Elas nao existem na nuvem, entao apagar seria
+      // perda definitiva do trabalho, e bastava a sessao expirar da noite pro dia.
+      localStorage.setItem('wfa-allhands', JSON.stringify({ nota: 'NARRACAO DO GABRIEL' }));
+      localStorage.setItem('wfa-rotina-checks', JSON.stringify({ '2026-08-20': { conteudo: [1, 2] } }));
+      localStorage.setItem('wfa-cons-chat-vivenda', JSON.stringify([{ m: 'historico do conselho' }]));
+      // A lista que a guarda usa pra saber o que pode apagar, publicada pelo proprio app.
+      localStorage.setItem('wfa-sync-keys', JSON.stringify(['wfa-cobranca', 'wfa-crm', 'wfa-tarefas']));
       if (args.semear) localStorage.setItem(args.chave, args.sessao);
       else localStorage.removeItem(args.chave);
     } catch (e) {}
@@ -77,16 +85,11 @@ async function abre(semearSessao) {
   await page.goto(alvo);
   await page.waitForTimeout(2500);
   const r = await page.evaluate(() => {
-    let restantes = 0;
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.indexOf('wfa-') === 0) restantes++;
-      }
-    } catch (e) { restantes = -1; }
+    const leu = (k) => { try { return localStorage.getItem(k); } catch (e) { return '?'; } };
     const side = document.querySelector('.side');
     return {
-      restantes,
+      sincronizadasRestantes: ['wfa-cobranca', 'wfa-crm', 'wfa-tarefas'].filter((k) => leu(k)),
+      locaisPerdidas: ['wfa-allhands', 'wfa-rotina-checks', 'wfa-cons-chat-vivenda'].filter((k) => !leu(k)),
       renderizou: !!side,
       visivel: document.documentElement.style.visibility !== 'hidden',
       url: location.href,
@@ -98,7 +101,14 @@ async function abre(semearSessao) {
 
 const sem = await abre(false);
 checa(!sem.renderizou || !sem.visivel, 'SEM SESSAO: o painel apareceu, a guarda nao barrou');
-checa(sem.restantes === 0, `SEM SESSAO: sobraram ${sem.restantes} chaves wfa-* no aparelho (deveria limpar tudo)`);
+checa(
+  sem.sincronizadasRestantes.length === 0,
+  `SEM SESSAO: cache sincronizado nao foi limpo, sobrou: ${sem.sincronizadasRestantes.join(', ')}`,
+);
+checa(
+  sem.locaisPerdidas.length === 0,
+  `SEM SESSAO: PERDA DE DADO. Chave que so existe no aparelho foi apagada e nao volta da nuvem: ${sem.locaisPerdidas.join(', ')}`,
+);
 
 const com = await abre(true);
 checa(com.renderizou, 'COM SESSAO: o painel NAO renderizou, a guarda barrou quem tem login');
@@ -111,4 +121,4 @@ if (falhas.length) {
   falhas.forEach((f) => console.log(' - ' + f));
   process.exit(1);
 }
-console.log('OK: sem sessao o painel nao abre e o cache wfa-* e apagado; com sessao o app renderiza normal.');
+console.log('OK: sem sessao o painel nao abre, o cache sincronizado e limpo, o dado so-local sobrevive; com sessao o app renderiza normal.');

@@ -1,4 +1,4 @@
-<!-- build 2026-08-20-notif-read-sync -->
+<!-- build 2026-08-20-limpeza-so-do-que-volta -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -22,9 +22,18 @@
   try{
     if(localStorage.getItem(SB_KEY))return;              // tem sessao: segue o boot normal
     window.__WFA_SEM_SESSAO=true;
-    for(var i=localStorage.length-1;i>=0;i--){           // de tras pra frente: o indice anda ao remover
-      var k=localStorage.key(i);
-      if(k&&k.indexOf('wfa-')===0)localStorage.removeItem(k);
+    // SO APAGA O QUE A NUVEM DEVOLVE. Nem toda chave wfa- sincroniza: rotina-checks,
+    // allhands e cons-chat-* vivem SO no aparelho. Apagar tudo destruiria esse trabalho
+    // pra sempre, e bastava a sessao expirar da noite pro dia. A lista vem gravada pelo
+    // proprio app (wfa-sync-keys), entao nao existe segunda lista pra sair do lugar.
+    // Sem a lista, NAO apaga nada: falha para o lado seguro, e a guarda ja barra a tela.
+    var sinc=[];try{sinc=JSON.parse(localStorage.getItem('wfa-sync-keys')||'[]');}catch(e){}
+    if(sinc&&sinc.length){
+      var alvo={};for(var n=0;n<sinc.length;n++)alvo[sinc[n]]=1;
+      for(var i=localStorage.length-1;i>=0;i--){         // de tras pra frente: o indice anda ao remover
+        var k=localStorage.key(i);
+        if(k&&(alvo[k]||k.indexOf('wfa-ckl-')===0))localStorage.removeItem(k);
+      }
     }
     document.documentElement.style.visibility='hidden';
     location.replace('/auth');
@@ -3411,9 +3420,13 @@ async function wfaConfirmaSessao(){
    sessao cai. Nao mexe na sessao do Supabase nem em chave de outro app. */
 function wfaLimpaCacheLocal(){
   try{
+    // Mesmo criterio da guarda do <head>: so sai o que volta da nuvem no proximo login.
+    // wfa-rotina-checks, wfa-allhands e wfa-cons-chat-* NAO sincronizam; apagar seria
+    // perda definitiva. Elas continuam no aparelho, e quem impede de aparecer sem login
+    // e a guarda, que redireciona antes de qualquer paint.
     for(var i=localStorage.length-1;i>=0;i--){
       var k=localStorage.key(i);
-      if(k&&k.indexOf('wfa-')===0)localStorage.removeItem(k);
+      if(k&&(isWfaCloudKey(k)))localStorage.removeItem(k);
     }
   }catch(e){}
 }
@@ -3501,6 +3514,10 @@ function tarefaPassaFiltro(t){
 const WFA_LS_SET = localStorage.setItem.bind(localStorage);
 const WFA_LS_REMOVE = localStorage.removeItem.bind(localStorage);
 function isWfaCloudKey(key){return WFA_CLOUD_KEYS.includes(key)||String(key).startsWith('wfa-ckl-');}
+// Publica a lista de chaves que sincronizam para a guarda de sessao do <head>, que roda
+// antes deste script existir. Fonte unica: WFA_CLOUD_KEYS. Gravado com o setter CRU, senao
+// o setItem sobrescrito tentaria empurrar essa chave de controle pra nuvem.
+try{WFA_LS_SET('wfa-sync-keys',JSON.stringify(WFA_CLOUD_KEYS));}catch(e){}
 function parseCloudValue(value){try{return JSON.parse(value);}catch{return value;}}
 async function directCloudCall(action,payload){
   const {data:{session}}=await _wfaSb.auth.getSession();
