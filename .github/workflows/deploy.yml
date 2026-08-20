@@ -37,6 +37,10 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: e85057a4ce95cb115958cbf045f7457c
+          # Pinado em 20/08/2026. Sem isto a action usava wrangler 3.90.0, que ja avisava
+          # "update available 4.125.0" em todo deploy. Versao PINADA de proposito: o que
+          # deploya producao nao pode mudar sozinho embaixo da gente.
+          wranglerVersion: '4.125.0'
 
       # "Deployado" só depois de PROVAR que a URL de produção serve o build novo.
       # Compara o marcador do fonte com o que o site devolve. Falhou = action vermelha.
