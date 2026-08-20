@@ -76,6 +76,11 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      # Estatico e instantaneo, roda antes dos de navegador. Pega a classe de bug em que o
+      # cliente empurra uma chave que o servidor recusa e a fila descarta em silencio.
+      - name: Chaves de sync (cliente x servidor)
+        run: node deploy/teste-chaves-sync.mjs
+
       - name: Guarda de sessao (painel nao abre sem login)
         run: node deploy/teste-guarda-sessao.mjs https://workflowark.arkcontent.workers.dev/workflowark
 

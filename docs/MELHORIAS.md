@@ -56,6 +56,19 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
     do `vendor/docx.umd.js` que já existia, e na mesma versão que o app React usa. Mais uma
     guarda: se a biblioteca não carregar por qualquer motivo, aparece um aviso claro com
     botão de recarregar, em vez do painel meio morto.
+17. ✅ **Notificação lida agora atravessa de aparelho.** O sino voltava cheio no celular
+    depois de você limpar no PC, mesmo com o conserto de 27/07 que dizia sincronizar. Causa:
+    `wfa-notif-read` estava na lista de sync do cliente, não estava na lista de bloqueio de
+    envio, e **não estava liberada no servidor**. Todo save voltava "Bloco inválido" e a fila
+    do cliente descartava em silêncio, então o código de união que o cliente tinha para essa
+    chave nunca rodava, porque nada conseguia escrever no servidor. Uma linha esquecida numa
+    lista, semanas de sintoma, zero mensagem de erro. Agora a chave está liberada e a união é
+    feita no servidor, monotônica igual à lápide de exclusão: "li" nunca vira "não li".
+    Dois guardas novos para a classe inteira do problema: o descarte definitivo deixou de ser
+    silencioso (registra a chave, avisa uma vez) e o Sair passa a contar essas chaves antes de
+    limpar o cache, senão o logout apagaria justamente o dado que nunca subiu. Travado por
+    `deploy/teste-chaves-sync.mjs`, que reprova a versão anterior apontando a chave e o
+    conserto.
 > Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 

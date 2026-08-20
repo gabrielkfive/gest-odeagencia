@@ -1,4 +1,4 @@
-<!-- build 2026-08-20-supabase-local -->
+<!-- build 2026-08-20-notif-read-sync -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -3427,7 +3427,10 @@ async function wfaSair(){
     }
   }catch(e){}
   try{
-    var sujo=(typeof WFA_DIRTY!=='undefined'&&WFA_DIRTY&&WFA_DIRTY.size>0);
+    // Bloco recusado em definitivo sai do WFA_DIRTY mas NAO chegou na nuvem. Sem contar o
+    // WFA_VENENO aqui, o logout limparia o cache e esse dado sumiria de vez.
+    var sujo=(typeof WFA_DIRTY!=='undefined'&&WFA_DIRTY&&WFA_DIRTY.size>0)
+      ||(typeof WFA_VENENO!=='undefined'&&WFA_VENENO&&WFA_VENENO.size>0);
     if(!sujo)wfaLimpaCacheLocal();
   }catch(e){}
   try{window.parent.postMessage({type:'wfa-sair'},'*');}catch(e){}
@@ -3578,6 +3581,8 @@ async function cloudCall(action,payload){
    na nuvem, ela fica "suja" e a puxada periódica NÃO sobrescreve o valor local.
    Assim uma falha de rede/payload grande nunca apaga tarefa/WhatsApp já editados. */
 const WFA_DIRTY=new Set();        // chaves com escrita ainda não confirmada
+const WFA_VENENO=new Set();       // chaves que o servidor recusou EM DEFINITIVO (nunca subiram)
+let _wfaVenenoAvisado=false;      // o aviso sai uma vez por sessao, nao a cada tentativa
 const WFA_PENDING=new Map();      // chave -> último valor a enviar
 // JANELA DE AUTORIDADE LOCAL: por ~15s após cada escrita local, a chave continua
 // "autoritária" mesmo depois do push confirmar e limpar o dirty. Sem isso, um load
@@ -3637,7 +3642,20 @@ async function wfaFlush(){
         // CHAVE VENENO: se o servidor recusa essa chave em definitivo (ex: "Bloco inválido"),
         // NÃO reenfileira — senão ela trava a fila e mantém o badge vermelho pra sempre.
         const permanente=/inv[áa]lido|bloco inv/i.test((e&&e.message)||'');
-        if(permanente){ WFA_DIRTY.delete(key); continue; } // descarta e segue pras outras
+        if(permanente){
+          // DESCARTE BARULHENTO (20/08/2026). Antes isto sumia sem deixar rastro: a chave
+          // saia do WFA_DIRTY, o badge voltava a verde no proximo sucesso e ninguem sabia
+          // que aquele bloco NUNCA chegou na nuvem. Foi assim que wfa-notif-read passou
+          // semanas sem sincronizar. Agora fica registrado e avisa uma vez.
+          WFA_DIRTY.delete(key);
+          WFA_VENENO.add(key);
+          console.error('[sync] servidor recusou o bloco "'+key+'" em definitivo. Ele NAO subiu.',e);
+          if(!_wfaVenenoAvisado){
+            _wfaVenenoAvisado=true;
+            try{ if(typeof toast==='function')toast('Um bloco de dados nao esta sincronizando. Avise o Gabriel.'); }catch(_){}
+          }
+          continue;
+        }
         // erro transitório: recoloca na fila SÓ se não chegou um valor mais novo enquanto
         // esta gravação estava em voo — senão o retry sobrescreve a edição nova com a antiga.
         if(!WFA_PENDING.has(key))WFA_PENDING.set(key,data);

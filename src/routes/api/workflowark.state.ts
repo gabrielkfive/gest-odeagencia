@@ -64,6 +64,12 @@ const STATE_KEYS = new Set([
   // Propostas geradas pelo Estrategista Comercial (propostas.html, iframe na aba Propostas).
   // Dados ficavam só em localStorage ark_props_v1; agora sincronizam entre dispositivos.
   "wfa-propostas",
+  // NOTIFICACOES LIDAS (20/08/2026). Faltava aqui desde 27/07: o cliente tem wfa-notif-read
+  // na lista de sync E tem codigo pra unir o que vem do servidor, mas a chave nao estava
+  // liberada, entao TODO save era recusado com "Bloco invalido" e a fila do cliente
+  // descartava em silencio. Resultado: marcar notificacao como lida nunca atravessava de
+  // aparelho, que era exatamente o "99+ eterno" que aquela sessao tentou resolver.
+  "wfa-notif-read",
   // OBS: wfa-whatsapp é de propósito SERVER-OWNED (escrito pelo webhook). O cliente só LÊ;
   // não entra aqui pra um save do cliente nunca sobrescrever mensagens que chegaram no servidor.
 ]);
@@ -378,6 +384,15 @@ export const Route = createFileRoute("/api/workflowark/state")({
               .from("workflowark_state").select("data").eq("key", key).maybeSingle();
             const atual: unknown[] = Array.isArray(row?.data) ? row.data : [];
             data = [...new Set([...atual, ...data])].slice(-3000);
+          }
+          // wfa-notif-read tambem e monotonica: "li esta notificacao" nunca desli. Uniao
+          // pelo mesmo motivo da lapide, senao o celular sobrescreveria o que foi lido no
+          // PC e o sino voltaria a encher. Corte em 2000 igual ao do cliente.
+          if (key === "wfa-notif-read" && Array.isArray(data)) {
+            const { data: row } = await ctx.db
+              .from("workflowark_state").select("data").eq("key", key).maybeSingle();
+            const atual: unknown[] = Array.isArray(row?.data) ? row.data : [];
+            data = [...new Set([...atual, ...data])].slice(-2000);
           }
           const { error } = await ctx.db.from("workflowark_state").upsert({
             key,
