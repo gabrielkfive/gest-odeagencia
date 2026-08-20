@@ -25,11 +25,26 @@ import path from 'path';
 let servidor = null;
 async function sobeServidor() {
   const html = await readFile(path.resolve('public/workflowark.html'));
-  servidor = createServer((req, res) => {
-    if (req.url && req.url.startsWith('/auth')) {
+  servidor = createServer(async (req, res) => {
+    const caminho = (req.url || '/').split('?')[0];
+    if (caminho.startsWith('/auth')) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end('<!doctype html><title>login</title><p>tela de login</p>');
       return;
+    }
+    // Serve os arquivos REAIS de public/. Sem isto, o /vendor/supabase vinha como HTML,
+    // a biblioteca nao carregava e o teste passava por motivo errado: a barra lateral e
+    // HTML estatico, entao "renderizou" continuava verdadeiro com o script morto.
+    if (caminho !== '/' && !caminho.endsWith('workflowark.html') && !caminho.endsWith('/workflowark')) {
+      try {
+        const arq = await readFile(path.resolve('public' + caminho));
+        const tipo = caminho.endsWith('.js') ? 'application/javascript' : 'application/octet-stream';
+        res.writeHead(200, { 'Content-Type': tipo });
+        res.end(arq);
+        return;
+      } catch (e) {
+        res.writeHead(404); res.end('nao encontrado'); return;
+      }
     }
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(html);

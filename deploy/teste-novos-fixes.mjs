@@ -1,4 +1,22 @@
 /*
+ ATENCAO: ESTE TESTE ESTA DESATUALIZADO (conferido em 20/08/2026).
+
+ Ele foi escrito em 23/07 e desde entao o produto mudou DE PROPOSITO em pontos que ele
+ ainda cobra. As 6 falhas atuais NAO sao regressao, sao o teste envelhecido:
+
+   hojeYmd()                  removido de proposito, virou hojeSP() no fallback do CRM
+   [data-nav="demandas"]      a navegacao mudou, Atividades abre direto em Tarefas e
+                              Demandas virou subnav
+   mdFirst() / saudacao       a home foi refeita quando Meu Painel foi fundido no Meu Dia
+
+ O que ele cobre de util continua valendo (timezone de Sao Paulo, saudacao por hora), e
+ essa parte PASSA. Antes de "consertar o produto" por causa dele, confira se a assercao
+ ainda faz sentido. Ele nao esta no CI justamente por isso.
+
+ Os testes vivos e no CI sao: teste-chaves-sync, teste-guarda-sessao, teste-mobile-drawer.
+ Rodam tambem contra producao passando a URL como primeiro argumento.
+*/
+/*
   Testes de edge case para os fixes aplicados em 2026-07-23:
     F1  wfa-cli-geo em STATE_KEYS           (workflowark.state.ts)
     F2  Fish Audio model no body JSON       (workflowark.state.ts)

@@ -10,10 +10,27 @@
  Uso: node deploy/teste-decisoes.mjs
 */
 import { chromium } from 'playwright-core';
-import { pathToFileURL } from 'url';
+import { pathToFileURL, fileURLToPath } from 'url';
 import path from 'path';
 
-const alvo = pathToFileURL(path.resolve(path.dirname(new URL(import.meta.url).pathname), '../public/workflowark.html')).href;
+// CAMINHO: usar fileURLToPath, NAO new URL(...).pathname. No Windows o pathname vem
+// como "/C:/Users/..." e o resolve gerava "C:\C:\Users\...", entao este teste
+// nao rodava nesta maquina havia tempo (falhava so na hora de abrir a pagina).
+const alvo = pathToFileURL(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public/workflowark.html')).href;
+// Sessao falsa: desde 20/08 o workflowark.html tem guarda de sessao e manda pro /auth sem
+// token. Estes testes sao de FUNCIONALIDADE, nao de login, entao precisam chegar na tela.
+async function semeiaSessao(page) {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('sb-fxfnonozzekxnxddxsnh-auth-token', JSON.stringify({
+        access_token: 'teste-local', refresh_token: 'teste-local', token_type: 'bearer',
+        expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600,
+        user: { id: '00000000-0000-0000-0000-000000000000', email: 'teste@local' },
+      }));
+    } catch (e) {}
+  });
+}
+
 const falhas = [];
 const checa = (cond, msg) => { if (!cond) falhas.push(msg); };
 
@@ -40,6 +57,7 @@ await page.addInitScript(({ HOJE, ONTEM }) => {
   } catch (e) {}
 }, { HOJE, ONTEM });
 
+await semeiaSessao(page);
 await page.goto(alvo);
 await page.waitForTimeout(2500);
 

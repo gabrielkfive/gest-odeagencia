@@ -1,4 +1,4 @@
-<!-- build 2026-08-20-limpeza-so-do-que-volta -->
+<!-- build 2026-08-20-vendor-relativo -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -3370,7 +3370,12 @@ function wfaSetTheme(t){
                 producao sem ninguem ter feito deploy.
              Agora e arquivo local com a versao no nome, igual ao vendor/docx.umd.js, e
              na MESMA versao que o app React usa (2.107.0). -->
-        <script src="/vendor/supabase-2.107.0.umd.js"></script>
+        <!-- Caminho RELATIVO de proposito. A pagina e servida em /workflowark e /workflowark.html,
+             os dois na raiz, entao relativo e absoluto dao no mesmo em producao. A diferenca e
+             que relativo tambem funciona ao abrir o arquivo direto do disco (file://), que e
+             como os testes de fumaca do deploy/ rodam. Com barra na frente, file:// procurava
+             na raiz do disco, o createClient estourava e o script inteiro morria. -->
+        <script src="vendor/supabase-2.107.0.umd.js"></script>
         <script>
         /* FALHA BARULHENTA: se por qualquer motivo a biblioteca nao carregar, avisa em vez
            de deixar o painel meio morto. Sem isso o erro so aparece no console. */
