@@ -51,3 +51,29 @@ jobs:
             echo "tentativa $i: ainda não propagou, aguardando 15s..."; sleep 15
           done
           echo "FALHA: produção NÃO está servindo o build novo ($MARCA)"; exit 1
+
+  # Testes de navegador contra a PRODUCAO ja no ar. Job separado de proposito: roda
+  # DEPOIS do deploy, entao nunca bloqueia a subida (regra n1, o sistema nao pode ficar
+  # refem de um teste instavel). Se ficar vermelho, o deploy ja aconteceu e o que temos
+  # e um aviso de regressao, que e exatamente o que faltava: ate hoje o CI provava que a
+  # VERSAO certa subiu, mas nao que o sistema continua FUNCIONANDO.
+  testes-producao:
+    needs: deploy
+    if: always() && needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Guarda de sessao (painel nao abre sem login)
+        run: node deploy/teste-guarda-sessao.mjs https://workflowark.arkcontent.workers.dev/workflowark
+
+      - name: Menu mobile (drawer escondido, abre e fecha)
+        run: node deploy/teste-mobile-drawer.mjs https://workflowark.arkcontent.workers.dev/workflowark
