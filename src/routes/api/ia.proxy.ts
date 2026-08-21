@@ -10,13 +10,27 @@ import { zapiEnv } from "@/integrations/zapi.server";
 // restringe o modelo a uma lista e limita max_tokens.
 
 const MODELOS_PERMITIDOS = new Set(["claude-sonnet-4-6", "claude-haiku-4-5-20251001"]);
-const PROXY_KEY_PADRAO = "ia-proxy-2026-ark-vivenda-8f3d1c7a2b";
+// SEM CHAVE PADRAO (20/08/2026). Havia aqui um valor fixo usado quando IA_PROXY_KEY nao
+// estava configurada. Este repositorio e PUBLICO, entao essa chave estava publicada no
+// GitHub, e o segredo nao estava configurado: conferido em producao nesta data, um POST com
+// a chave do codigo passou pela autenticacao (400 por falta de corpo, nao 401).
+// Na pratica, qualquer pessoa que lesse o repo fazia chamadas Claude Sonnet na conta da ARK.
+// Agora, sem IA_PROXY_KEY configurada, o proxy RECUSA.
+// Para ligar:  npx wrangler secret put IA_PROXY_KEY
 
 export const Route = createFileRoute("/api/ia/proxy")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const proxyKey = zapiEnv("IA_PROXY_KEY") || PROXY_KEY_PADRAO;
+        const proxyKey = zapiEnv("IA_PROXY_KEY");
+        if (!proxyKey) {
+          console.error(
+            "[ia-proxy] RECUSADO: IA_PROXY_KEY nao esta configurada. " +
+              "Configure com `npx wrangler secret put IA_PROXY_KEY`. " +
+              "Sem isso o proxy fica fechado, de proposito: a chave fixa antiga estava no repo publico.",
+          );
+          return Response.json({ error: "proxy nao configurado" }, { status: 503 });
+        }
         if (request.headers.get("x-proxy-key") !== proxyKey)
           return Response.json({ error: "unauthorized" }, { status: 401 });
 

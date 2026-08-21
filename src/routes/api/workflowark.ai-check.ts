@@ -5,7 +5,13 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/workflowark/ai-check")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }) => {
+        // AUTENTICADO desde 20/08/2026. Antes era aberto: qualquer GET disparava uma chamada
+        // real a API da Anthropic com a chave da ARK. Barato por chamada, mas e um endpoint
+        // publico que gasta dinheiro e da pra martelar. Diagnostico nao precisa ser publico.
+        const { isRunAuthorized } = await import("@/integrations/run-auth.server");
+        if (!(await isRunAuthorized(request, new URL(request.url))))
+          return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
         const { zapiEnv } = await import("@/integrations/zapi.server");
         const key = zapiEnv("ANTHROPIC_API_KEY");
         if (!key) return Response.json({ ok: false, reason: "sem ANTHROPIC_API_KEY" });

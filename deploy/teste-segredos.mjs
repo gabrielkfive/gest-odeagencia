@@ -14,7 +14,7 @@
 
  Uso: node deploy/teste-segredos.mjs
 */
-import { readFile } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 
 const ARQ = 'src/routes/api/workflowark.state.ts';
 const src = await readFile(ARQ, 'utf8');
@@ -73,6 +73,60 @@ if (!wa.includes('export function webhookAuthorized')) {
   falhas.push('webhookAuthorized() sumiu de wa-webhook.server.ts');
 } else if (semEspacos.includes('if (!secret) return true')) {
   falhas.push('webhookAuthorized() volta a ABRIR quando WEBHOOK_SECRET falta (deve recusar)');
+}
+
+// 5) Nenhuma rota pode ter segredo com VALOR PADRAO embutido no codigo.
+//    O /api/ia/proxy tinha PROXY_KEY_PADRAO = uma chave fixa, usada quando IA_PROXY_KEY nao
+//    estava configurada. Este repositorio e PUBLICO e o segredo nao estava configurado,
+//    entao a chave que liberava o Claude da ARK estava publicada no GitHub. Conferido em
+//    producao em 20/08: a chave do codigo passava pela autenticacao.
+//    Segredo ausente tem que FECHAR, nunca cair num valor escrito no fonte.
+const NL = String.fromCharCode(10);
+// Padrao ESTREITO de proposito: leitura de variavel de ambiente caindo num literal longo.
+// Heuristica larga demais gerava falso positivo em toda linha com a palavra "key" antes de
+// um ||, o que treina a ignorar o teste, que e pior do que nao ter teste.
+const LE_AMBIENTE = ['zapiEnv(', 'process.env', 'env?.', 'runSecret('];
+const NOME_SEGREDO = /KEY|TOKEN|SECRET|SENHA|PASSWORD/i;
+const LITERAL_LONGO = /["'][^"']{12,}["']/;
+const DIR = 'src/routes/api';
+for (const arq of await readdir(DIR)) {
+  if (!arq.endsWith('.ts')) continue;
+  const caminho = DIR + '/' + arq;
+  const txt = await readFile(caminho, 'utf8');
+  txt.split(NL).forEach((linha, i) => {
+    const corte = linha.indexOf('//');
+    const codigo = corte >= 0 ? linha.slice(0, corte) : linha;
+    const op = codigo.indexOf('||');
+    if (op < 0) return;
+    const esquerda = codigo.slice(0, op);
+    const direita = codigo.slice(op + 2);
+    if (!LE_AMBIENTE.some((x) => esquerda.includes(x))) return;
+    if (!NOME_SEGREDO.test(esquerda)) return;
+    const lit = direita.match(LITERAL_LONGO);
+    if (!lit) return;
+    if (lit[0].includes('wfa-')) return; // nome de bloco de estado, nao segredo
+    falhas.push(caminho + ':' + (i + 1) + ' segredo com valor padrao no codigo: ' + codigo.trim().slice(0, 70));
+  });
+
+  // O fallback nem sempre e um literal na MESMA linha: no caso real que originou este teste
+  // era uma constante, `const PROXY_KEY_PADRAO = "ia-proxy-..."`, usada depois no ||.
+  // Sem esta segunda checagem o teste passava nas duas versoes e nao guardava nada.
+  txt.split(NL).forEach((linha, i) => {
+    const corte = linha.indexOf('//');
+    const codigo = corte >= 0 ? linha.slice(0, corte) : linha;
+    const eq = codigo.indexOf('=');
+    if (eq < 0 || !codigo.trim().startsWith('const ')) return;
+    const nome = codigo.slice(0, eq);
+    if (!NOME_SEGREDO.test(nome) && !/PADRAO|DEFAULT|FALLBACK/i.test(nome)) return;
+    // So conta quando o lado direito e um literal PURO. `const key = zapiEnv("X_KEY")` e
+    // leitura de ambiente, nao segredo embutido, e sinalizar isso enche o teste de ruido.
+    const dir = codigo.slice(eq + 1).trim().replace(/;+$/, '');
+    const puro = /^["'][^"']*["']$/.test(dir);
+    if (!puro) return;
+    const lit = dir.match(LITERAL_LONGO);
+    if (!lit || lit[0].includes('wfa-')) return;
+    falhas.push(caminho + ':' + (i + 1) + ' constante de segredo com valor no codigo: ' + codigo.trim().slice(0, 70));
+  });
 }
 
 if (falhas.length) {

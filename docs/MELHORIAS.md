@@ -107,6 +107,18 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
     fechar agora não quebra nada. **Quando a Evolution voltar, é preciso rodar
     `npx wrangler secret put WEBHOOK_SECRET` e pôr o mesmo valor lá no header
     `x-webhook-token`, senão as mensagens não entram.**
+22. ✅ **Chave da IA e senha da banca não estão mais publicadas no GitHub.** Três coisas de uma
+    vez, todas por o repositório ser público. (a) O proxy interno de IA tinha uma chave fixa
+    escrita no código, usada quando o segredo não estava configurado. O segredo não estava
+    configurado, então essa chave, que libera o Claude Sonnet na conta da ARK, estava
+    publicada e funcionava. Conferido em produção. Removida, e agora o proxy recusa se o
+    segredo faltar. (b) O diagnóstico da IA não pedia autenticação nenhuma, então qualquer um
+    disparava uma chamada paga à Anthropic. Passou a exigir chave. (c) As três contas da banca
+    do TCC estavam vivas em produção com a senha `ArkAvaliacao2026`, que também estava no
+    código público. Testado: as três logavam. A senha saiu do código e passou a ser gerada
+    forte por execução. O desligamento das contas em si (`?off=1`) foi feito por você, porque
+    exige a chave de serviço. Travado por `deploy/teste-segredos.mjs`, que agora também recusa
+    qualquer segredo com valor fixo no código, em qualquer rota.
 > Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 

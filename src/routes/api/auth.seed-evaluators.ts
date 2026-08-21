@@ -10,7 +10,16 @@ function json(data: unknown, init?: ResponseInit) {
 // A antiga chave fixa "ark-2026" + senha conhecida no repo público eram uma porta de entrada
 // aberta; agora exige o segredo RUN_KEY (wrangler secret) e dá pra fechar as contas com &off=1.
 // (runSecret importado dinamicamente no handler — cloudflare:workers não existe no dev)
-const PASSWORD = "ArkAvaliacao2026";
+// SEM SENHA FIXA (20/08/2026). Havia aqui `const PASSWORD = "ArkAvaliacao2026"`, e este
+// repositorio e PUBLICO: a senha das 3 contas da banca estava publicada no GitHub e as
+// contas ficaram vivas com ela (conferido em producao nesta data, as 3 logavam). Agora a
+// senha e gerada FORTE por execucao, dentro do handler, ainda compartilhada entre os 3 e
+// devolvida na resposta pro admin repassar. Nunca mais vive no fonte.
+function novaSenhaAvaliador(): string {
+  const b = new Uint8Array(12);
+  crypto.getRandomValues(b);
+  return "Av" + Array.from(b, (x) => x.toString(36)).join("") + "!7";
+}
 const EVALUATORS = [
   { email: "professor1@workflowark.com.br", full_name: "Professor(a) Avaliador(a) 1" },
   { email: "professor2@workflowark.com.br", full_name: "Professor(a) Avaliador(a) 2" },
@@ -53,6 +62,8 @@ export const Route = createFileRoute("/api/auth/seed-evaluators")({
           return json({ ok: true, mensagem: "Contas de avaliação desativadas.", acessos: results });
         }
 
+        // Uma senha forte por execucao, compartilhada pelos 3 (a banca usa a mesma).
+        const PASSWORD = novaSenhaAvaliador();
         for (const ev of EVALUATORS) {
           const email = ev.email.toLowerCase();
           let user: any = null;
