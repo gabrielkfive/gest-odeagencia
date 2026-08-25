@@ -2727,6 +2727,40 @@ function wfaSetTheme(t){
           #page-tarefas .db-fill{height:100%;border-radius:999px;min-width:2px}
           #page-tarefas .db-val{width:58px;text-align:right;font-size:12px;font-weight:700;flex-shrink:0}
           @media(max-width:760px){#page-tarefas .db-grid{grid-template-columns:1fr}}
+          /* relatorio de execucao por area */
+          #task-relatorio .rl-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+          #task-relatorio .rl-pers{display:flex;gap:6px;flex-wrap:wrap}
+          #task-relatorio .rl-per{border:1px solid var(--bd);background:var(--card);color:var(--txt);border-radius:9px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer}
+          #task-relatorio .rl-per.on{background:#111;color:#fff;border-color:#111}
+          body.aura-dark #task-relatorio .rl-per.on{background:var(--yel);color:#111;border-color:var(--yel)}
+          #task-relatorio .rl-emit{border:none;background:var(--yel);color:#111;border-radius:9px;padding:8px 16px;font-size:12px;font-weight:800;cursor:pointer}
+          #task-relatorio .rl-cap{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--mute);margin-bottom:10px}
+          #task-relatorio .rl-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:16px}
+          #task-relatorio .rl-kpi{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:13px 11px;text-align:center}
+          #task-relatorio .rl-kpi .v{font-size:24px;font-weight:800;line-height:1.1}
+          #task-relatorio .rl-kpi .l{font-size:9.5px;font-weight:700;text-transform:uppercase;color:var(--mute);margin-top:5px;letter-spacing:.3px}
+          #task-relatorio .rl-kpi.grn .v{color:var(--green)}
+          #task-relatorio .rl-kpi.red .v{color:var(--red)}
+          #task-relatorio .rl-tab{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+          #task-relatorio .rl-tab th{text-align:left;font-size:9.5px;font-weight:700;text-transform:uppercase;color:var(--mute);padding:10px 9px;border-bottom:1px solid var(--bd);letter-spacing:.3px}
+          #task-relatorio .rl-tab td{padding:8px 9px;border-bottom:1px solid var(--bd)}
+          #task-relatorio .rl-tab .n{text-align:right;font-variant-numeric:tabular-nums}
+          #task-relatorio .rl-tab tr.rl-area td{font-weight:800;background:var(--bg2,rgba(128,128,128,.06))}
+          #task-relatorio .rl-tab tr.rl-pes td{color:var(--txt)}
+          #task-relatorio .rl-ind{display:inline-block;width:12px;height:1px;background:var(--mute);margin-right:9px;vertical-align:middle;opacity:.6}
+          #task-relatorio .rl-tab td.bad{color:var(--red);font-weight:700}
+          #task-relatorio .rl-na{color:var(--mute);opacity:.7}
+          #task-relatorio .rl-vazio{text-align:center;color:var(--mute);padding:26px}
+          #task-relatorio .rl-avi{background:rgba(255,199,0,.12);border:1px solid rgba(255,199,0,.4);border-radius:11px;padding:11px 13px;font-size:12.5px;line-height:1.5;margin-bottom:14px}
+          #task-relatorio .rl-cob{margin-top:18px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:15px}
+          #task-relatorio .rl-cob h3{font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--mute);letter-spacing:.4px}
+          #task-relatorio .rl-cob p{font-size:12px;color:var(--mute);margin:5px 0 12px}
+          #task-relatorio .rl-cobg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+          #task-relatorio .rl-cobg div{text-align:center}
+          #task-relatorio .rl-cobg b{display:block;font-size:19px;font-weight:800}
+          #task-relatorio .rl-cobg span{font-size:10px;color:var(--mute)}
+          @media(max-width:760px){#task-relatorio .rl-kpis{grid-template-columns:repeat(2,1fr)}#task-relatorio .rl-cobg{grid-template-columns:repeat(2,1fr)}#task-relatorio .rl-tab{display:block;overflow-x:auto}}
+
         </style>
         <div class="task-views" id="task-views">
           <button class="tv-btn on" data-tv="kanban" onclick="tarefaSetView('kanban')">▦ Kanban</button>
@@ -2734,6 +2768,7 @@ function wfaSetTheme(t){
           <button class="tv-btn" data-tv="calendario" onclick="tarefaSetView('calendario')">🗓️ Calendário</button>
           <button class="tv-btn" data-tv="pessoas" onclick="tarefaSetView('pessoas')">👥 Por Pessoa</button>
           <button class="tv-btn" data-tv="painel" onclick="tarefaSetView('painel')">📊 Painel</button>
+          <button class="tv-btn" data-tv="relatorio" onclick="tarefaSetView('relatorio')">📄 Relatório</button>
         </div>
 
         <div class="task-board" id="task-board">
@@ -2762,6 +2797,7 @@ function wfaSetTheme(t){
         <div id="task-calendario" class="task-altview" style="display:none"></div>
         <div id="task-pessoas" class="task-altview" style="display:none"></div>
         <div id="task-painel" class="task-altview" style="display:none"></div>
+        <div id="task-relatorio" class="task-altview" style="display:none"></div>
       </div>
 
       <!-- =================== RÉGUA DOS 15 =================== -->
@@ -8369,16 +8405,18 @@ function tarefaSetView(v){
 }
 function tarefaApplyView(){
   const board=document.getElementById('task-board');if(!board)return;
-  const lista=document.getElementById('task-lista'),cal=document.getElementById('task-calendario'),pess=document.getElementById('task-pessoas'),pnl=document.getElementById('task-painel');
+  const lista=document.getElementById('task-lista'),cal=document.getElementById('task-calendario'),pess=document.getElementById('task-pessoas'),pnl=document.getElementById('task-painel'),rel=document.getElementById('task-relatorio');
   board.style.display=WFA_TASK_VIEW==='kanban'?'':'none';
   if(lista)lista.style.display=WFA_TASK_VIEW==='lista'?'':'none';
   if(cal)cal.style.display=WFA_TASK_VIEW==='calendario'?'':'none';
   if(pess)pess.style.display=WFA_TASK_VIEW==='pessoas'?'':'none';
   if(pnl)pnl.style.display=WFA_TASK_VIEW==='painel'?'':'none';
+  if(rel)rel.style.display=WFA_TASK_VIEW==='relatorio'?'':'none';
   if(WFA_TASK_VIEW==='lista')renderTaskLista();
   else if(WFA_TASK_VIEW==='calendario')renderTaskCalendario();
   else if(WFA_TASK_VIEW==='pessoas')renderTaskPessoas();
   else if(WFA_TASK_VIEW==='painel')renderTaskDashboard();
+  else if(WFA_TASK_VIEW==='relatorio')renderTaskRelatorio();
 }
 function taskFiltradas(){return state.tarefas.filter(tarefaPassaFiltro);}
 function taskStatusLabel(s){return s==='backlog'?'Backlog':s==='andamento'?'Em Andamento':s==='aprovacao'?'Aprovação':s==='concluido'?'Concluído':s;}
@@ -8878,6 +8916,133 @@ function taskPopGate(t){
   const falta=cl.filter(x=>!x.done).length;
   if(falta){toast('⚠ POP incompleto: faltam '+falta+' passo(s) do checklist antes de concluir');return false;}
   return true;
+}
+
+const WFA_REL_BUILD='20260825-relatorio-area';
+/* ============ RELATÓRIO DE EXECUÇÃO POR ÁREA ============
+   Agregação pura em JS sobre state.tarefas. NÃO chama IA: relatório aqui é
+   contagem, não geração de texto. Custo por emissão = zero.
+   Fonte da verdade do "quando foi feito" é t.concluidaEm (carimbado em taskConcluir). */
+let WFA_REL_PER='mes';
+try{const p=localStorage.getItem('wfa-rel-per');if(p)WFA_REL_PER=p;}catch(e){}
+function relSetPer(p){WFA_REL_PER=p;try{localStorage.setItem('wfa-rel-per',p);}catch(e){}renderTaskRelatorio();}
+function relDia(iso){return String(iso||'').slice(0,10);}
+const REL_MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+function relPeriodo(){
+  const p2=n=>String(n).padStart(2,'0');
+  if(WFA_REL_PER==='7d')return{ini:dataSP(new Date(Date.now()-6*86400000)),fim:hojeSP(),label:'últimos 7 dias'};
+  if(WFA_REL_PER==='30d')return{ini:dataSP(new Date(Date.now()-29*86400000)),fim:hojeSP(),label:'últimos 30 dias'};
+  const ref=hojeSP().split('-');let y=+ref[0],m=+ref[1];
+  if(WFA_REL_PER==='mesant'){m--;if(m===0){m=12;y--;}}
+  const ultimo=new Date(y,m,0).getDate();
+  return{ini:y+'-'+p2(m)+'-01',fim:y+'-'+p2(m)+'-'+p2(ultimo),label:REL_MESES[m-1]+' de '+y};
+}
+function relDados(){
+  const per=relPeriodo(),hoje=hojeSP(),ts=taskFiltradas();
+  const feitasPer=ts.filter(t=>t.status==='concluido'&&t.concluidaEm&&relDia(t.concluidaEm)>=per.ini&&relDia(t.concluidaEm)<=per.fim);
+  const abertas=ts.filter(t=>t.status!=='concluido');
+  const mapa={};
+  const bucket=(a,p)=>{const k=a+'||'+p;return mapa[k]=mapa[k]||{area:a,pes:p,feitas:0,prazo:0,comPrazo:0,ciclo:[],abertas:0,atras:0,wip:0,clientes:{}};};
+  const fArea=t=>((t.funcao||'').trim())||'Sem área';
+  const fPes=t=>((t.resp||'').trim())||'Sem responsável';
+  feitasPer.forEach(t=>{const b=bucket(fArea(t),fPes(t));b.feitas++;
+    if(t.data){b.comPrazo++;if(relDia(t.concluidaEm)<=t.data)b.prazo++;}
+    if(t.criadaEm){const dd=(new Date(t.concluidaEm)-new Date(t.criadaEm))/86400000;if(dd>=0&&dd<400)b.ciclo.push(dd);}
+    if(t.clienteId)b.clientes[t.clienteId]=1;});
+  abertas.forEach(t=>{const b=bucket(fArea(t),fPes(t));b.abertas++;
+    if(t.data&&t.data<hoje)b.atras++;
+    if(t.status==='andamento')b.wip++;});
+  const linhas=Object.values(mapa);
+  const areas={};
+  linhas.forEach(l=>{const a=areas[l.area]=areas[l.area]||{area:l.area,feitas:0,prazo:0,comPrazo:0,ciclo:[],abertas:0,atras:0,wip:0,clientes:{},pessoas:[]};
+    a.feitas+=l.feitas;a.prazo+=l.prazo;a.comPrazo+=l.comPrazo;a.ciclo=a.ciclo.concat(l.ciclo);
+    a.abertas+=l.abertas;a.atras+=l.atras;a.wip+=l.wip;Object.keys(l.clientes).forEach(c=>a.clientes[c]=1);a.pessoas.push(l);});
+  const ordem=Object.values(areas).sort((x,y)=>(y.feitas-x.feitas)||(y.abertas-x.abertas));
+  ordem.forEach(a=>a.pessoas.sort((x,y)=>(y.feitas-x.feitas)||(y.abertas-x.abertas)));
+  // Cobertura do dado: mede a disciplina de preenchimento, não a produção.
+  const todasConcl=ts.filter(t=>t.status==='concluido');
+  const cob={
+    carimbo:todasConcl.length?Math.round(todasConcl.filter(t=>t.concluidaEm).length/todasConcl.length*100):null,
+    resp:ts.length?Math.round(ts.filter(t=>(t.resp||'').trim()).length/ts.length*100):null,
+    funcao:ts.length?Math.round(ts.filter(t=>(t.funcao||'').trim()).length/ts.length*100):null,
+    prazo:ts.length?Math.round(ts.filter(t=>t.data).length/ts.length*100):null,
+    semCarimbo:todasConcl.filter(t=>!t.concluidaEm).length
+  };
+  const tot={feitas:feitasPer.length,
+    prazo:linhas.reduce((s,l)=>s+l.prazo,0),comPrazo:linhas.reduce((s,l)=>s+l.comPrazo,0),
+    abertas:abertas.length,atras:abertas.filter(t=>t.data&&t.data<hoje).length,
+    wip:abertas.filter(t=>t.status==='andamento').length,
+    ciclo:linhas.reduce((s,l)=>s.concat(l.ciclo),[])};
+  return{per:per,areas:ordem,tot:tot,cob:cob,feitasPer:feitasPer,hoje:hoje};
+}
+function relMedia(arr){return arr.length?(arr.reduce((s,n)=>s+n,0)/arr.length):null;}
+function relPct(n,d){return d?Math.round(n/d*100):null;}
+function relCel(v,suf){return (v===null||v===undefined)?'<span class="rl-na">—</span>':v+(suf||'');}
+function renderTaskRelatorio(){
+  const el=document.getElementById('task-relatorio');if(!el)return;
+  const d=relDados();
+  const btn=(k,l)=>'<button class="rl-per'+(WFA_REL_PER===k?' on':'')+'" onclick="relSetPer(&quot;'+k+'&quot;)">'+l+'</button>';
+  const cic=relMedia(d.tot.ciclo);
+  const kpis='<div class="rl-kpis">'+
+    '<div class="rl-kpi grn"><div class="v">'+d.tot.feitas+'</div><div class="l">Concluídas no período</div></div>'+
+    '<div class="rl-kpi"><div class="v">'+relCel(relPct(d.tot.prazo,d.tot.comPrazo),'%')+'</div><div class="l">Entregues no prazo</div></div>'+
+    '<div class="rl-kpi"><div class="v">'+(cic===null?'—':cic.toFixed(1)+'d')+'</div><div class="l">Tempo médio de ciclo</div></div>'+
+    '<div class="rl-kpi"><div class="v">'+d.tot.wip+'</div><div class="l">Em execução agora</div></div>'+
+    '<div class="rl-kpi'+(d.tot.atras?' red':'')+'"><div class="v">'+d.tot.atras+'</div><div class="l">Atrasadas hoje</div></div>'+
+    '</div>';
+  let corpo='';
+  d.areas.forEach(a=>{
+    const ac=relMedia(a.ciclo);
+    corpo+='<tr class="rl-area"><td>'+escapeHtml(a.area)+'</td><td class="n">'+a.feitas+'</td><td class="n">'+relCel(relPct(a.prazo,a.comPrazo),'%')+'</td>'+
+      '<td class="n">'+(ac===null?'—':ac.toFixed(1))+'</td><td class="n">'+a.abertas+'</td><td class="n'+(a.atras?' bad':'')+'">'+a.atras+'</td>'+
+      '<td class="n">'+a.wip+'</td><td class="n">'+Object.keys(a.clientes).length+'</td></tr>';
+    a.pessoas.forEach(p=>{
+      const pc=relMedia(p.ciclo);
+      corpo+='<tr class="rl-pes"><td><span class="rl-ind"></span>'+escapeHtml(p.pes)+'</td><td class="n">'+p.feitas+'</td><td class="n">'+relCel(relPct(p.prazo,p.comPrazo),'%')+'</td>'+
+        '<td class="n">'+(pc===null?'—':pc.toFixed(1))+'</td><td class="n">'+p.abertas+'</td><td class="n'+(p.atras?' bad':'')+'">'+p.atras+'</td>'+
+        '<td class="n">'+p.wip+'</td><td class="n">'+Object.keys(p.clientes).length+'</td></tr>';
+    });
+  });
+  const tabela='<table class="rl-tab"><thead><tr><th>Área / pessoa</th><th class="n">Concluídas</th><th class="n">No prazo</th><th class="n">Ciclo (d)</th><th class="n">Em aberto</th><th class="n">Atrasadas</th><th class="n">Executando</th><th class="n">Clientes</th></tr></thead><tbody>'+
+    (corpo||'<tr><td colspan="8" class="rl-vazio">Nenhuma atividade no período.</td></tr>')+'</tbody></table>';
+  const alerta=d.cob.semCarimbo?'<div class="rl-avi"><b>'+d.cob.semCarimbo+' tarefa(s) concluídas sem data de conclusão.</b> Foram fechadas antes do carimbo existir, então ficam fora da contagem por período. As novas entram normalmente.</div>':'';
+  const cobertura='<div class="rl-cob"><h3>Cobertura do preenchimento</h3><p>Sem estes campos o relatório mede menos do que a equipe realmente faz.</p><div class="rl-cobg">'+
+    '<div><b>'+relCel(d.cob.resp,'%')+'</b><span>com responsável</span></div>'+
+    '<div><b>'+relCel(d.cob.funcao,'%')+'</b><span>com área</span></div>'+
+    '<div><b>'+relCel(d.cob.prazo,'%')+'</b><span>com prazo</span></div>'+
+    '<div><b>'+relCel(d.cob.carimbo,'%')+'</b><span>concluídas com data</span></div></div></div>';
+  el.innerHTML='<div class="rl-bar"><div class="rl-pers">'+btn('7d','7 dias')+btn('30d','30 dias')+btn('mes','Este mês')+btn('mesant','Mês passado')+'</div>'+
+    '<button class="rl-emit" onclick="relEmitir()">Emitir relatório</button></div>'+
+    '<div class="rl-cap">Execução por área · '+escapeHtml(d.per.label)+'</div>'+kpis+alerta+tabela+cobertura;
+}
+function relEmitir(){
+  const d=relDados();
+  const cic=relMedia(d.tot.ciclo);
+  let linhas='';
+  d.areas.forEach(a=>{
+    const ac=relMedia(a.ciclo);
+    linhas+='<tr class="ar"><td>'+escapeHtml(a.area)+'</td><td class="n">'+a.feitas+'</td><td class="n">'+relCel(relPct(a.prazo,a.comPrazo),'%')+'</td><td class="n">'+(ac===null?'—':ac.toFixed(1))+'</td><td class="n">'+a.abertas+'</td><td class="n">'+a.atras+'</td><td class="n">'+a.wip+'</td></tr>';
+    a.pessoas.forEach(p=>{const pc=relMedia(p.ciclo);
+      linhas+='<tr><td style="padding-left:20px">'+escapeHtml(p.pes)+'</td><td class="n">'+p.feitas+'</td><td class="n">'+relCel(relPct(p.prazo,p.comPrazo),'%')+'</td><td class="n">'+(pc===null?'—':pc.toFixed(1))+'</td><td class="n">'+p.abertas+'</td><td class="n">'+p.atras+'</td><td class="n">'+p.wip+'</td></tr>';});
+  });
+  const w=window.open('','_blank');if(!w){if(typeof toast==='function')toast('Libere pop-ups para emitir o relatório');return;}
+  w.document.write('<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><title>Execução por área · '+escapeHtml(d.per.label)+'</title><style>'+
+    '*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#111;padding:34px;max-width:920px;margin:0 auto}'+
+    'h1{font-size:21px}.sub{font-size:12px;color:#888;margin-top:4px}'+
+    '.k{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:20px 0}'+
+    '.k div{background:#faf9f6;border:1px solid #e6e6e6;border-radius:11px;padding:12px;text-align:center}'+
+    '.k b{display:block;font-size:22px;font-weight:800}.k span{font-size:9px;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:.3px}'+
+    'table{width:100%;border-collapse:collapse;font-size:12.5px}th{text-align:left;font-size:9.5px;text-transform:uppercase;color:#888;padding:8px 6px;border-bottom:1px solid #ddd}'+
+    'td{padding:7px 6px;border-bottom:1px solid #f0f0f0}.n{text-align:right}tr.ar td{font-weight:800;background:#faf9f6}'+
+    '.ft{margin-top:26px;font-size:10px;color:#aaa;text-align:center}@media print{body{padding:0}}'+
+    '</style></head><body><h1>Execução por área</h1><div class="sub">'+escapeHtml(d.per.label)+' · emitido em '+new Date().toLocaleDateString('pt-BR')+'</div>'+
+    '<div class="k"><div><b>'+d.tot.feitas+'</b><span>Concluídas</span></div><div><b>'+relCel(relPct(d.tot.prazo,d.tot.comPrazo),'%')+'</b><span>No prazo</span></div>'+
+    '<div><b>'+(cic===null?'—':cic.toFixed(1)+'d')+'</b><span>Ciclo médio</span></div><div><b>'+d.tot.wip+'</b><span>Executando</span></div><div><b>'+d.tot.atras+'</b><span>Atrasadas</span></div></div>'+
+    '<table><thead><tr><th>Área / pessoa</th><th class="n">Concl.</th><th class="n">No prazo</th><th class="n">Ciclo</th><th class="n">Aberto</th><th class="n">Atraso</th><th class="n">Execut.</th></tr></thead><tbody>'+
+    (linhas||'<tr><td colspan="7">Nenhuma atividade no período.</td></tr>')+'</tbody></table>'+
+    '<div class="ft">Gerado pelo WorkFlowArk · ARK Content</div></body></html>');
+  w.document.close();
+  setTimeout(function(){try{w.focus();w.print();}catch(e){}},350);
 }
 function taskConcluir(t){if(!t)return false;if(!taskPopGate(t)){if(t.status==='concluido')t.status='andamento';return false;}t.status='concluido';if(!t.concluidaEm)t.concluidaEm=new Date().toISOString();taskStopTimer(t);try{if(typeof pautaAvancar==='function')pautaAvancar(t);}catch(e){console.warn('pauta',e);}return true;}
 function taskReabrir(t,st){if(!t)return;t.status=st||'backlog';t.concluidaEm=null;}
@@ -9777,7 +9942,7 @@ function jarvisExecute(raw){
     if((re('conclu|finaliz') || (re('marc') && re('feit|pront|conclu'))) && mc&&mc[1]){
       const alvo=mc[1].replace(/\b(como|feita|feito|pronta|pronto|conclu[ií]da?|conclu[ií]do)\b/ig,'').trim();
       const tk=ARK_acharTarefa(alvo);
-      if(tk){ tk.status='concluido'; if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); if(typeof updateBadges==='function')updateBadges(); return 'Feito, Senhor. Marquei "'+tk.title+'" como concluída.'; }
+      if(tk){ if(typeof taskConcluir==='function')taskConcluir(tk); else {tk.status='concluido';if(!tk.concluidaEm)tk.concluidaEm=new Date().toISOString();} if(typeof saveTarefas==='function')saveTarefas(); if(typeof renderTarefas==='function')renderTarefas(); if(typeof renderMeuDia==='function')renderMeuDia(); if(typeof updateBadges==='function')updateBadges(); return 'Feito, Senhor. Marquei "'+tk.title+'" como concluída.'; }
       return 'Não localizei a tarefa "'+alvo+'", Senhor. Diga o nome como aparece na lista de Atividades.';
     }
   }
@@ -10062,7 +10227,7 @@ async function jarvisRunActions(actions){
       if(a.tool==='navegar'){ jarvisGo(i.pagina); }
       else if(a.tool==='abrir_cliente'){ const c=(CLIENTES||[]).find(x=>{const n=x.nm.toLowerCase();const q=String(i.nome||'').toLowerCase();return n.includes(q)||q.includes(n.split(' ')[0]);}); if(c&&typeof cliDetalhe==='function'){cliDetalhe(c.id);det.push('Abri a ficha de '+c.nm);} }
       else if(a.tool==='criar_tarefa'){ jarvisCriarTarefaObj(i); mexeuTarefa=true; const rp=i.responsavel?jarvisPessoa(i.responsavel):''; det.push('Criei "'+i.titulo+'"'+(rp?(' para '+rp.split(' ')[0]):'')); }
-      else if(a.tool==='concluir_tarefa'){ const tk=ARK_acharTarefa(i.titulo); if(tk){tk.status='concluido';mexeuTarefa=true;det.push('Concluí "'+tk.title+'"');} else det.push('Não achei a tarefa "'+i.titulo+'"'); }
+      else if(a.tool==='concluir_tarefa'){ const tk=ARK_acharTarefa(i.titulo); if(tk){if(typeof taskConcluir==='function')taskConcluir(tk);else{tk.status='concluido';if(!tk.concluidaEm)tk.concluidaEm=new Date().toISOString();}mexeuTarefa=true;det.push('Concluí "'+tk.title+'"');} else det.push('Não achei a tarefa "'+i.titulo+'"'); }
       else if(a.tool==='designar_tarefa'){ const tk=ARK_acharTarefa(i.titulo); const p=jarvisPessoa(i.responsavel); if(tk&&p){tk.resp=p;mexeuTarefa=true;det.push('"'+tk.title+'" passou para '+p.split(' ')[0]);} else det.push('Não consegui designar "'+i.titulo+'"'); }
       else if(a.tool==='mudar_tarefa'){ const tk=ARK_acharTarefa(i.titulo); if(tk){ if(i.data)tk.data=i.data; if(i.prioridade)tk.prio=i.prioridade; mexeuTarefa=true; det.push('Atualizei "'+tk.title+'"'+(i.data?(' para '+i.data.split('-').reverse().slice(0,2).join('/')):'')+(i.prioridade?(' ('+i.prioridade+')'):'')); } else det.push('Não achei "'+i.titulo+'"'); }
       else if(a.tool==='agendar_evento'){ await jarvisAgendarDireto(i.titulo,i.data,i.hora); det.push('Agendei "'+i.titulo+'" '+(i.data?i.data.split('-').reverse().slice(0,2).join('/'):'')+(i.hora?(' '+i.hora):'')); }
