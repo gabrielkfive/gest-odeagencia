@@ -1,4 +1,4 @@
-<!-- build 20260825-operacional-briefings -->
+<!-- build 20260825-operacional-marcas -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -1695,6 +1695,10 @@ function wfaSetTheme(t){
         <div class="subitem" data-nav="briefings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
           <span>Briefings</span>
+        </div>
+        <div class="subitem" data-nav="marcas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="14.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="15.5" r="2.5"/><path d="M12 2a10 10 0 1 0 0 20c.5 0 1-.4 1-1 0-.6-.4-1-1-1a2 2 0 0 1 0-4h2a6 6 0 0 0 0-12z"/></svg>
+          <span>Marcas</span>
         </div>
       </div>
 
@@ -5088,6 +5092,14 @@ function iniciarAutoSync(){
                 style="width:100%;height:calc(100vh - 120px);min-height:560px;border:1px solid var(--line);border-radius:14px;background:#0a0a0b;display:block"></iframe>
       </div>
 
+      <!-- MARCAS: manual de identidade do cliente. Hoje carrega a Moenda direto porque
+           e o unico que existe. Quando entrar o segundo, esta pagina vira uma lista e o
+           iframe passa a receber o manual escolhido, sem mexer no menu de novo. -->
+      <div class="page" id="page-marcas">
+        <iframe id="marcas-iframe" data-pending-src="/moenda" title="Manual de marca"
+                style="width:100%;height:calc(100vh - 120px);min-height:560px;border:1px solid var(--line);border-radius:14px;background:#FBF8F2;display:block"></iframe>
+      </div>
+
       <div class="page" id="page-producao">
         <style>
           #page-producao .pd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
@@ -6303,6 +6315,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if((p==='painel'||p==='dashboard')&&typeof renderWidgets==='function'){try{renderWidgets();}catch(e){console.warn('painel',e);}}
     if(p==='notificacoes'&&typeof notifAutoLer==='function'){try{notifAutoLer();}catch(e){}}
     if(p==='briefings'){try{const f=document.getElementById('briefing-iframe');if(f&&!f.getAttribute('src')){f.setAttribute('src',f.dataset.pendingSrc||'/briefing');}}catch(e){console.warn('briefing',e);}}
+    if(p==='marcas'){try{const f=document.getElementById('marcas-iframe');if(f&&!f.getAttribute('src')){f.setAttribute('src',f.dataset.pendingSrc||'/moenda');}}catch(e){console.warn('marcas',e);}}
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     if(p==='alpha'&&typeof renderAlpha==='function'){try{renderAlpha();}catch(e){console.warn('alpha',e);}}
     if(p==='meumes'&&typeof renderMeumes==='function'){try{renderMeumes();}catch(e){console.warn('meumes',e);}}
