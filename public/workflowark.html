@@ -4010,7 +4010,7 @@ async function bootCloudSync(){
     wfaSeedRotinasV1();      // rotinas semanais da equipe (1x, idempotente)
     // Seeds que ANTES rodavam no parse (e apagavam dados em navegador novo): agora aqui,
     // com a lista real do servidor já aplicada, então só ACRESCENTAM.
-    seedValhalla();seedSamuel();seedProcessos();
+    seedValhalla();seedSamuel();seedProcessos();saneamentoCarteira();
     wfaSeedHistoricoCob(['2026-06','2026-07']);   // preenche jun/jul como cobrado
     if(WFA_WPP_OFF){try{document.querySelectorAll('[data-nav="whatsapp"]').forEach(el=>el.style.display='none');}catch(e){}}
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
@@ -6034,6 +6034,91 @@ function colabAdd(){
 function colabRemove(nm){ saveColabCustom(loadColabCustom().filter(n=>n!==nm)); colabOpen(); toast('Removido'); }
 // Seed único do Samuel Magalhães (colaborador pedido pelo Gabriel).
 // Igual ao seedValhalla: só roda no bootCloudSync, depois do applyCloudState.
+/* ============ SANEAMENTO DA CARTEIRA (25/08/2026) ============
+   Roda uma vez por aparelho. Idempotente e aditiva: casa por nome normalizado,
+   nunca duplica, e so apaga duplicata exata. Toca apenas chaves que sincronizam
+   (wfa-clientes-custom, wfa-alpha, wfa-crm); dado so-local nao e alcancado. */
+const SAN_KEY='wfa-saneamento-carteira-v1';
+const SAN_CHURN=['dom','laemcasa','bulldogs'];
+const SAN_TIPO={'4bburger':'Alpha','saborlenha':'Alpha','kopi':'Alpha','lumiere':'Alpha','dgust':'Alpha'};
+const SAN_NOVOS=[
+  {id:'pikachu',nm:'Pikachu Burger',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Squad Alpha · praça a confirmar',extra:'Alpha'},
+  {id:'mundolivre',nm:'Mundo Livre Bar',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'MRR de mês único · trabalhar a renovação',extra:'São Bernardo do Campo/SP'},
+  {id:'brutus',nm:'Adega Brutus',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Sem leitura da conta · diagnosticar',extra:'Alpha'},
+  {id:'royalface',nm:'Royal Face Planaltina',tipo:'ARK',plano:'Gold',valor:3800,status:'y',cap:1,meta:'1 captação/mês · exige atenção próxima',extra:'📹 1 captação/mês · estética popular'},
+  {id:'eemface',nm:'EEMFACE Brasília',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Fechado 24/08/2026 · unidade de Manaus no mesmo contrato',extra:'Contrato novo',defaultSprint:0},
+  {id:'naeo',nm:'Naeo',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Cliente novo',extra:'Contrato novo',defaultSprint:0},
+  {id:'mazuki',nm:'Mazuki Regenera',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Fechado 24/08/2026 · clínica de tratamento de feridas',extra:'Entregáveis próprios',defaultSprint:0},
+  {id:'moenda',nm:'Moenda',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Turismo · Vale do Café',extra:'Entregáveis próprios',defaultSprint:0}
+];
+// Clientes Alpha que faltavam na planilha de acompanhamento do Squad.
+// Contrato em branco de proposito: preencher com o dado real, nunca com chute.
+const SAN_ALPHA_NOVOS=[
+  {id:'al-pikachu',nome:'Pikachu Burger'},{id:'al-dgust',nome:'Pizzaria DGust'},
+  {id:'al-mundolivre',nome:'Mundo Livre Bar'},{id:'al-saborlenha',nome:'Pizzaria Sabor a Lenha'},
+  {id:'al-kopi',nome:'Kopi Coffee'},{id:'al-brutus',nome:'Adega Brutus'},
+  {id:'al-lumiere',nome:'Café Lumière'},{id:'al-lapatrick',nome:'La Pizza di Patrick'}
+];
+function sanNorm(x){return String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');}
+function saneamentoCarteira(){
+  try{
+    if(localStorage.getItem(SAN_KEY))return;
+    var mexeu=0;
+    // --- carteira ---
+    var cust=[];try{cust=JSON.parse(localStorage.getItem('wfa-clientes-custom')||'[]');}catch(e){cust=[];}
+    if(!Array.isArray(cust))cust=[];
+    var base=(typeof CLIENTES_BASE!=='undefined')?CLIENTES_BASE:[];
+    var acha=function(id){return cust.find(function(c){return c&&c.id===id;});};
+    var deBase=function(id){var b=base.find(function(c){return c.id===id;});return b?JSON.parse(JSON.stringify(b)):null;};
+    var garante=function(id){var c=acha(id);if(c)return c;var b=deBase(id);if(!b)return null;b.custom=true;cust.push(b);return b;};
+    SAN_CHURN.forEach(function(id){var c=garante(id);if(c&&c.status!=='churn'){c.status='churn';c.saiuEm=c.saiuEm||'2026-08-25';mexeu++;}});
+    Object.keys(SAN_TIPO).forEach(function(id){var c=garante(id);if(c&&c.tipo!==SAN_TIPO[id]){c.tipo=SAN_TIPO[id];mexeu++;}});
+    SAN_NOVOS.forEach(function(n){
+      var jaId=base.some(function(c){return c.id===n.id;})||cust.some(function(c){return c&&c.id===n.id;});
+      var jaNome=base.concat(cust).some(function(c){return c&&sanNorm(c.nm)===sanNorm(n.nm);});
+      if(jaId||jaNome)return;
+      cust.push(Object.assign({custom:true},n));mexeu++;
+    });
+    // duplicata exata de nome dentro dos personalizados: fica a primeira
+    var vistos={},limpo=[];
+    cust.forEach(function(c){if(!c||!c.nm){limpo.push(c);return;}var k=sanNorm(c.nm);if(vistos[k]){mexeu++;return;}vistos[k]=1;limpo.push(c);});
+    cust=limpo;
+    localStorage.setItem('wfa-clientes-custom',JSON.stringify(cust));
+    if(typeof rebuildClientes==='function')rebuildClientes();
+    // --- planilha do Squad Alpha ---
+    var al=null;try{al=JSON.parse(localStorage.getItem('wfa-alpha')||'null');}catch(e){}
+    if(!Array.isArray(al)&&typeof ALPHA_SEED!=='undefined')al=JSON.parse(JSON.stringify(ALPHA_SEED));
+    if(Array.isArray(al)){
+      SAN_ALPHA_NOVOS.forEach(function(n){
+        if(al.some(function(r){return r&&(r.id===n.id||sanNorm(r.nome)===sanNorm(n.nome));}))return;
+        al.push({id:n.id,nome:n.nome,account:'',plano:'Gold',status:'Ativo',tipoContrato:'',valorContrato:'',
+          inicioContrato:'',fimContrato:'',onbInicio:'',onbFim:'',onbTempo:'',valorMensal:'',lt:'',ltv:'',
+          nsmTipo:'',nsmMeta:'',nsmReal:'',pctMeta:'',budgetMidia:'',investTrafego:'',pctBudget:'',roas:'',
+          entregasPrazo:false,entregasQual:false,relacionamento:false,flag:'CARE',
+          obs:'Contrato pendente: preencher inicio e fim',r1:false,r2:false,ropreAcao:''});
+        mexeu++;
+      });
+      // quem deu churn na carteira tambem sai de "Ativo" no acompanhamento
+      al.forEach(function(r){
+        if(!r)return;
+        var ch=['La em Casa','Dom Baruka','Bulldogs'].some(function(n){return sanNorm(r.nome).indexOf(sanNorm(n))===0;});
+        if(ch&&r.status!=='Churn'){r.status='Churn';mexeu++;}
+      });
+      localStorage.setItem('wfa-alpha',JSON.stringify(al));
+    }
+    // --- oportunidade no comercial ---
+    var crm=[];try{crm=JSON.parse(localStorage.getItem('wfa-crm')||'[]');}catch(e){crm=[];}
+    if(Array.isArray(crm)&&!crm.some(function(l){return l&&sanNorm(l.nm).indexOf('leader')===0;})){
+      crm.unshift({id:'crm-leader-2026',nm:'Leader Automóveis · Sobradinho',resp:'Gabriel',contact:'',
+        source:'Indicação',val:3500,stage:2,next:'Retomar a proposta de R$ 3.500',due:'',
+        seg:'Automotivo',obs:'Proposta apresentada: R$ 3.500/mês com 1 captação mensal e gestão de tráfego.',
+        created:new Date().toISOString(),hist:[]});
+      localStorage.setItem('wfa-crm',JSON.stringify(crm));mexeu++;
+    }
+    localStorage.setItem(SAN_KEY,'1');
+    if(mexeu&&typeof toast==='function')toast('Carteira saneada: '+mexeu+' ajustes');
+  }catch(e){console.warn('saneamentoCarteira',e);}
+}
 function seedSamuel(){
   try{
     if(localStorage.getItem('wfa-seed-samuel'))return;
@@ -6880,10 +6965,14 @@ function renderClientesKPIs(){
   const cap=ativos.reduce((s,c)=>s+(c.cap||0),0);
   const nArk=CLIENTES.filter(c=>c.tipo==='ARK'&&c.status!=='churn').length;
   const nAlpha=CLIENTES.filter(c=>c.tipo==='Alpha'&&c.status!=='churn').length;
+  // O número só vale se disser o que ele NÃO cobre. Cliente sem mensalidade
+  // cadastrada entrava como zero e sumia da conta, fazendo o MRR parecer certo.
+  const semValor=ativos.filter(c=>c.tipo!=='Interno'&&!c.valor).length;
+  const semCap=ativos.filter(c=>c.tipo!=='Interno'&&!c.cap).length;
   el.innerHTML=`
     <div class="cli-kpi dk"><div class="kl">Carteira ativa</div><div class="kv">${ativos.length}</div><div class="kd">${nArk} ARK · ${nAlpha} Alpha · ${churn} churn</div></div>
-    <div class="cli-kpi yel"><div class="kl">MRR ARK</div><div class="kv">R$ ${mrr.toLocaleString('pt-BR')}</div><div class="kd">mensalidades recorrentes</div></div>
-    <div class="cli-kpi"><div class="kl">Captações / mês</div><div class="kv">${cap}</div><div class="kd">produção de vídeo contratada</div></div>
+    <div class="cli-kpi yel"><div class="kl">MRR ARK</div><div class="kv">R$ ${mrr.toLocaleString('pt-BR')}</div><div class="kd">${semValor?`⚠ ${semValor} cliente(s) sem mensalidade cadastrada`:'mensalidades recorrentes'}</div></div>
+    <div class="cli-kpi"><div class="kl">Captações / mês</div><div class="kv">${cap}</div><div class="kd">${semCap?`⚠ ${semCap} cliente(s) sem captação cadastrada`:'produção de vídeo contratada'}</div></div>
     <div class="cli-kpi"><div class="kl">Saúde da carteira</div><div class="kv" style="font-size:14px;margin-top:2px">${saud} ok · ${ajuste} ajuste · ${urg} urgente</div><div class="cli-hbar">${saud?`<span style="flex:${saud};background:var(--green)"></span>`:''}${ajuste?`<span style="flex:${ajuste};background:#eab308"></span>`:''}${urg?`<span style="flex:${urg};background:var(--red)"></span>`:''}</div></div>`;
 }
 function goRegua(id){
@@ -8952,7 +9041,7 @@ function taskPopGate(t){
   return true;
 }
 
-const WFA_REL_BUILD='20260825-relatorio-area';
+const WFA_REL_BUILD='20260825-saneamento-carteira';
 /* ============ RELATÓRIO DE EXECUÇÃO POR ÁREA ============
    Agregação pura em JS sobre state.tarefas. NÃO chama IA: relatório aqui é
    contagem, não geração de texto. Custo por emissão = zero.
