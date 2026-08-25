@@ -84,6 +84,12 @@ jobs:
       - name: Segredos (token de link publico so de crypto)
         run: node deploy/teste-segredos.mjs
 
+      # Dois bugs que ja tinham sido consertados e VOLTARAM (25/08): regra clara escrita com
+      # ID vencia a regra de tema por especificidade (a vista Lista pintava branca no escuro)
+      # e o gate de POP revertia o cartao em silencio, com toast de sucesso por cima do aviso.
+      - name: Tema escuro e gate de POP (anti-regressao)
+        run: node deploy/teste-tema-escuro.mjs
+
       - name: Guarda de sessao (painel nao abre sem login)
         run: node deploy/teste-guarda-sessao.mjs https://workflowark.arkcontent.workers.dev/workflowark
 

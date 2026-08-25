@@ -1,4 +1,4 @@
-<!-- build 2026-08-20-vendor-relativo -->
+<!-- build 2026-08-25-tema-lista-e-gate-pop -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -54,6 +54,11 @@
   --bg:#fafaf7;--surface:#fff;--ink:#0a0a0a;--ink-2:#1a1a1a;
   --txt:#262626;--mute:#737373;--mute-2:#a3a3a3;
   --line:#e8e6e0;--line-2:#d4d0c4;
+  /* APELIDOS: --card/--bd/--o eram usados no CSS mas NUNCA definidos. Variavel indefinida
+     sem fallback invalida a declaracao: background virava transparente e border-color virava
+     currentColor (a vista Relatorio nascia sem cartao e com borda da cor do texto, nos 2 temas).
+     Como apontam pra --surface/--line, o modo escuro passa a valer de graca. */
+  --card:var(--surface);--bd:var(--line);--o:var(--orange);
   --yel:#FFC700;--yel-d:#d4a300;--yel-soft:#fff8dc;--yel-bg:#fffbeb;
   --red:#dc2626;--red-soft:#fee2e2;--green:#16a34a;--green-soft:#dcfce7;
   --blue:#111111;--blue-soft:#f5f5f5;--orange:#ea580c;--orange-soft:#fed7aa;
@@ -2691,6 +2696,20 @@ function wfaSetTheme(t){
           #page-tarefas .tl-st-andamento{background:#fff3cd;color:#8a6d00}
           #page-tarefas .tl-st-aprovacao{background:#e7f0ff;color:#2b62c4}
           #page-tarefas .tl-st-concluido{background:#e6f8ec;color:#127a3e}
+          /* MODO ESCURO DA VISTA LISTA: as regras claras acima usam ID (#page-tarefas .tl-table
+             = 1 id + 1 classe) e venciam a regra de tema (body.aura-dark .tl-table = 0 id + 2
+             classes), porque id ganha de classe. Resultado: a lista pintava BRANCA no escuro.
+             Estas regras tem 1 id + 2 classes, entao ganham. As pilulas e o hover nem tinham
+             versao escura. */
+          body.aura-dark #page-tarefas .tl-table{background:var(--surface);border-color:var(--line)}
+          body.aura-dark #page-tarefas .tl-table th{background:rgba(255,255,255,.05);color:var(--mute);border-bottom-color:var(--line)}
+          body.aura-dark #page-tarefas .tl-table td{border-bottom-color:var(--line)}
+          body.aura-dark #page-tarefas .tl-row:hover{background:rgba(255,255,255,.06)}
+          body.aura-dark #page-tarefas .tl-tt{color:var(--txt)}
+          body.aura-dark #page-tarefas .tl-st-backlog{background:rgba(255,255,255,.09);color:#b9b6ae}
+          body.aura-dark #page-tarefas .tl-st-andamento{background:rgba(255,199,0,.16);color:#ffcf3d}
+          body.aura-dark #page-tarefas .tl-st-aprovacao{background:rgba(59,111,255,.20);color:#8db0ff}
+          body.aura-dark #page-tarefas .tl-st-concluido{background:rgba(25,179,107,.18);color:#4fd396}
           #page-tarefas .tl-late{color:var(--red,#e0364f);font-weight:700}
           #page-tarefas .tcal{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
           #page-tarefas .tcal-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:800;text-transform:capitalize}
@@ -7257,9 +7276,11 @@ function acertoSeedFromFin(force){
 function jornadaAutoInclui(){
   let mudou=false;
   // remove ids orfaos (cliente que nao existe mais na carteira, ex.: 4B duplicado migrado)
+  // e tira da jornada quem deu churn: cliente que saiu nao ocupa mais sprint.
+  const vivo=id=>(CLIENTES||[]).some(c=>c.id===id&&c.status!=='churn');
   SPRINTS.forEach(sp=>{
     const antes=sp.clis.length;
-    sp.clis=sp.clis.filter(id=>(CLIENTES||[]).some(c=>c.id===id));
+    sp.clis=sp.clis.filter(vivo);
     if(sp.clis.length!==antes)mudou=true;
   });
   (CLIENTES||[]).forEach(c=>{
@@ -8557,7 +8578,9 @@ function moveTask(id,newSt){
   const t=state.tarefas.find(x=>x.id===id);if(!t)return;
   const stAntes=t.status;
   if(newSt==='concluido'){
-    if(!taskConcluir(t)){renderTarefas();return;}
+    // Recusado pelo gate de POP: repinta (o cartão volta pra coluna de origem) e ABRE o
+    // checklist que falta. Sem isso o cartão só "pulava de volta" sem explicação nenhuma.
+    if(!taskConcluir(t)){renderTarefas();setTimeout(()=>{try{openTaskDetail(id);}catch(_){}},900);return;}
     saveTarefas();
     toastAcao('Tarefa concluída ✓','Desfazer',()=>{taskReabrir(t,stAntes);saveTarefas();toast('Tarefa reaberta');});
     return;
@@ -8631,13 +8654,24 @@ function bindDrag(){
     list.addEventListener('drop',e=>{
       e.preventDefault();col.classList.remove('drop-on');
       const id=e.dataTransfer.getData('id');const t=state.tarefas.find(x=>x.id===id);if(!t)return;
-      const changedCol=t.status!==list.dataset.list;
-      t.status=list.dataset.list;
+      const destino=list.dataset.list;
+      const origem=t.status;                 // de onde o cartão saiu, pra poder devolver no lugar certo
+      const changedCol=origem!==destino;
+      t.status=destino;
       if(changedCol)taskStampSt(t,t.status);
-      if(t.status==='concluido')taskConcluir(t);else t.concluidaEm=null;
+      /* O gate de POP pode RECUSAR a conclusão. Antes o cartão caía em "andamento" e, logo depois,
+         o toast de sucesso ATROPELAVA o aviso "⚠ POP incompleto": a pessoa lia "Movida para
+         Concluído" e via o cartão em outra coluna, sem nunca saber o motivo. Pior no time de
+         edição, cujas tarefas são justamente as que carregam checklist de POP.
+         Agora respeita o retorno, devolve pra coluna de ORIGEM e abre o checklist que está
+         travando (mesmo padrão que o mdDone do Meu Dia já usava). */
+      let bloqueado=false;
+      if(t.status==='concluido'){ if(!taskConcluir(t)){bloqueado=true;t.status=origem;if(changedCol)taskStampSt(t,origem);} }
+      else t.concluidaEm=null;
       [...list.querySelectorAll('.task-card')].forEach((el,idx)=>{const tt=state.tarefas.find(x=>x.id===el.dataset.tid);if(tt)tt.ord=idx;});
       saveTarefas();
-      if(changedCol)toast('✓ Movida para '+taskStatusLabel(list.dataset.list));
+      if(bloqueado){renderTarefas();setTimeout(()=>{try{openTaskDetail(id);}catch(_){}},900);return;}
+      if(changedCol)toast('✓ Movida para '+taskStatusLabel(t.status));
     });
   });
 }
