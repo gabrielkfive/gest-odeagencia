@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "teste:mobile": "node deploy/teste-mobile-drawer.mjs",
-    "teste:tema": "node deploy/teste-tema-escuro.mjs"
+    "teste:tema": "node deploy/teste-tema-escuro.mjs",
+    "prova:visual": "node deploy/prova-visual.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
