@@ -1,9 +1,9 @@
 <!doctype html>
-<!-- build 20260825-briefing-3 -->
+<!-- build 20260825-briefing-4 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20260825-briefing-3">
+<meta name="build" content="20260825-briefing-4">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Briefing · ARK Content</title>
 <link rel="icon" href="/favicon.ico">
@@ -627,20 +627,71 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
   var NUVEM = "wfa-briefing-cliente";
   var idAtual = null;
 
-  function pegarToken(){
+  // O token do Supabase dura cerca de uma hora. A primeira versao desta pagina so LIA o
+  // token guardado e nunca o renovava, entao dava pra abrir o briefing e, minutos depois,
+  // o "Salvar" morrer com "Sessao invalida". Aconteceu de verdade, no meio da reuniao da
+  // Moenda: o token tinha vencido 67 segundos antes. Agora a pagina renova sozinha.
+  var SB_URL = "https://fxfnonozzekxnxddxsnh.supabase.co";
+  var SB_PUB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0";
+
+  function pegarSessao(){
     try {
       var cru = localStorage.getItem(SB_KEY);
       if (!cru) return null;
       var s = JSON.parse(cru);
-      if (s && s.access_token) return s.access_token;
-      if (s && s.currentSession && s.currentSession.access_token) return s.currentSession.access_token;
-      return null;
+      if (s && s.currentSession) return s.currentSession;
+      return s || null;
     } catch(e){ return null; }
   }
 
-  function api(metodo, corpo){
+  function pegarToken(){
+    var s = pegarSessao();
+    return (s && s.access_token) || null;
+  }
+
+  function venceEm(t){
+    try { return JSON.parse(atob(String(t).split(".")[1])).exp || 0; } catch(e){ return 0; }
+  }
+
+  function guardarSessao(nova){
+    try {
+      var cru = localStorage.getItem(SB_KEY);
+      var s = cru ? JSON.parse(cru) : null;
+      if (s && s.currentSession) { s.currentSession = nova; s.expiresAt = nova.expires_at; }
+      else s = nova;
+      localStorage.setItem(SB_KEY, JSON.stringify(s));
+    } catch(e){}
+  }
+
+  function renovar(){
+    var s = pegarSessao();
+    var rt = s && s.refresh_token;
+    if (!rt) return Promise.reject(new Error("sessão expirada, abra o WorkFlowArk numa aba e volte"));
+    return fetch(SB_URL + "/auth/v1/token?grant_type=refresh_token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SB_PUB, Authorization: "Bearer " + SB_PUB },
+      body: JSON.stringify({ refresh_token: rt })
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(j){
+        if (!r.ok || !j.access_token) throw new Error("sessão expirada, abra o WorkFlowArk numa aba e volte");
+        guardarSessao(j);
+        return j.access_token;
+      });
+    });
+  }
+
+  // Renova ANTES de chamar quando faltam menos de 60s, e ainda assim tenta de novo se o
+  // servidor devolver 401. Duas redes, porque perder briefing digitado em reuniao e o
+  // pior desfecho possivel aqui.
+  function garantirToken(){
     var t = pegarToken();
-    if (!t) return Promise.reject(new Error("sem sessão"));
+    if (!t) return Promise.reject(new Error("sem sessão do WorkFlowArk neste navegador"));
+    var falta = venceEm(t) - Math.floor(Date.now() / 1000);
+    if (falta > 60) return Promise.resolve(t);
+    return renovar();
+  }
+
+  function chamar(metodo, corpo, t){
     var url = "/api/workflowark/state" + (metodo === "GET" ? "?key=" + encodeURIComponent(NUVEM) : "");
     var cfg = { method: metodo, headers: { Authorization: "Bearer " + t } };
     if (metodo !== "GET") {
@@ -649,8 +700,22 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
     }
     return fetch(url, cfg).then(function(r){
       return r.json().catch(function(){ return {}; }).then(function(j){
-        if (!r.ok) throw new Error(j.error || "erro no sistema");
-        return j;
+        return { ok: r.ok, status: r.status, corpo: j };
+      });
+    });
+  }
+
+  function api(metodo, corpo){
+    return garantirToken().then(function(t){
+      return chamar(metodo, corpo, t).then(function(res){
+        if (res.ok) return res.corpo;
+        if (res.status !== 401) throw new Error(res.corpo.error || "erro no sistema");
+        return renovar().then(function(t2){
+          return chamar(metodo, corpo, t2).then(function(r2){
+            if (!r2.ok) throw new Error(r2.corpo.error || "erro no sistema");
+            return r2.corpo;
+          });
+        });
       });
     });
   }
