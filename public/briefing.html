@@ -1,9 +1,9 @@
 <!doctype html>
-<!-- build 20260825-briefing-1 -->
+<!-- build 20260825-briefing-2 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20260825-briefing-1">
+<meta name="build" content="20260825-briefing-2">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Briefing · ARK Content</title>
 <link rel="icon" href="/favicon.ico">
@@ -49,6 +49,15 @@ h1 em{font-style:normal;color:var(--amarelo)}
 .como b{color:var(--tinta);font-weight:600}
 
 .ident{margin-top:30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+
+.sistema{margin-top:18px;border:1px solid var(--linha);border-left:3px solid var(--linha2);padding:12px 16px}
+.sistema.ligado{border-left-color:var(--amarelo)}
+.sis-linha{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sis-estado{font-size:12.5px;font-weight:600;color:var(--tinta-fraca)}
+.sistema.ligado .sis-estado{color:var(--tinta)}
+.sis-abrir{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-fraca);margin-left:auto}
+.sistema select{font-family:var(--ui);font-size:13px;color:var(--tinta);background:var(--campo);border:1px solid var(--linha2);padding:7px 9px;max-width:280px}
+.sistema select:focus{outline:none;border-color:var(--amarelo)}
 
 .abas{position:sticky;top:0;z-index:20;background:var(--preto);border-bottom:1px solid var(--linha);margin:30px -22px 0;padding:11px 22px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .aba{font-family:var(--ui);font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--linha2);background:transparent;color:var(--tinta-fraca);padding:8px 14px;cursor:pointer}
@@ -133,6 +142,14 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
 
   <div class="ident" id="ident"></div>
 
+  <div class="sistema" id="sistema" hidden>
+    <div class="sis-linha">
+      <span class="sis-estado" id="sis-estado">Verificando sessão</span>
+      <label class="sis-abrir" for="sis-lista" id="sis-rotulo" hidden>Briefings salvos</label>
+      <select id="sis-lista" hidden><option value="">Abrir um salvo</option></select>
+    </div>
+  </div>
+
   <div class="abas" role="tablist">
     <button class="aba" role="tab" id="tab-iv" aria-controls="form-iv" aria-selected="true">Identidade visual</button>
     <button class="aba" role="tab" id="tab-site" aria-controls="form-site" aria-selected="false">Site</button>
@@ -151,6 +168,7 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
   <span class="prog" id="prog"></span>
   <button class="acao" id="btn-limpar" type="button">Limpar</button>
   <button class="acao" id="btn-copiar" type="button">Copiar</button>
+  <button class="acao" id="btn-salvar" type="button" hidden>Salvar no sistema</button>
   <button class="acao forte" id="btn-pdf" type="button">Gerar PDF</button>
 </div>
 <div class="aviso" id="aviso" hidden></div>
@@ -439,6 +457,11 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
       return;
     }
     dados = {}; guardar();
+    // Solta o vinculo com o briefing aberto. Sem isto, limpar e preencher outro cliente
+    // faria o proximo "Salvar" sobrescrever o briefing do cliente anterior.
+    idAtual = null;
+    var sel = document.getElementById("sis-lista");
+    if (sel) sel.value = "";
     for (k = 0; k < todos.length; k++) { todos[k].value = ""; todos[k].className = ""; }
     $("#topo-cliente").textContent = "";
     btnLimpar.setAttribute("data-confirmar", "0");
@@ -446,6 +469,158 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
     contar();
     avisar("Formulário em branco.");
   });
+
+  // ---------- ponte com o sistema ----------
+  // A pagina mora na mesma origem do WorkFlowArk, entao reaproveita a sessao que ja
+  // existe no navegador em vez de pedir login de novo. Sem sessao, tudo segue
+  // funcionando so que o briefing fica preso a este navegador, e a barra diz isso.
+  var SB_KEY = "sb-fxfnonozzekxnxddxsnh-auth-token";
+  var NUVEM = "wfa-briefing-cliente";
+  var idAtual = null;
+
+  function pegarToken(){
+    try {
+      var cru = localStorage.getItem(SB_KEY);
+      if (!cru) return null;
+      var s = JSON.parse(cru);
+      if (s && s.access_token) return s.access_token;
+      if (s && s.currentSession && s.currentSession.access_token) return s.currentSession.access_token;
+      return null;
+    } catch(e){ return null; }
+  }
+
+  function api(metodo, corpo){
+    var t = pegarToken();
+    if (!t) return Promise.reject(new Error("sem sessão"));
+    var url = "/api/workflowark/state" + (metodo === "GET" ? "?key=" + encodeURIComponent(NUVEM) : "");
+    var cfg = { method: metodo, headers: { Authorization: "Bearer " + t } };
+    if (metodo !== "GET") {
+      cfg.headers["Content-Type"] = "application/json";
+      cfg.body = JSON.stringify(corpo);
+    }
+    return fetch(url, cfg).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(j){
+        if (!r.ok) throw new Error(j.error || "erro no sistema");
+        return j;
+      });
+    });
+  }
+
+  function listaSalvos(){
+    // O servidor responde { state: { "<chave>": dados } }. Ler errado aqui seria grave:
+    // a lista viria vazia e o proximo "Salvar" gravaria um array vazio por cima de tudo.
+    return api("GET").then(function(j){
+      var d = j && j.state ? j.state[NUVEM] : null;
+      return Array.isArray(d) ? d : [];
+    });
+  }
+
+  function aplicar(){
+    var todos = document.querySelectorAll("textarea, input[type=text]");
+    for (var k = 0; k < todos.length; k++) {
+      var el = todos[k];
+      el.value = dados[el.id] || "";
+      el.className = el.value.trim() ? "cheio" : "";
+    }
+    $("#topo-cliente").textContent = (dados["id-cliente"] || "").trim();
+    contar();
+  }
+
+  function preencherLista(itens){
+    var sel = $("#sis-lista");
+    sel.innerHTML = "";
+    var vazio = document.createElement("option");
+    vazio.value = "";
+    vazio.textContent = itens.length ? "Abrir um salvo (" + itens.length + ")" : "Nenhum salvo ainda";
+    sel.appendChild(vazio);
+    itens.slice().sort(function(a, b){
+      return String(b.atualizadoEm || "").localeCompare(String(a.atualizadoEm || ""));
+    }).forEach(function(it){
+      var o = document.createElement("option");
+      o.value = it.id;
+      o.textContent = (it.cliente || "sem nome") + (it.data ? "  " + it.data : "");
+      sel.appendChild(o);
+    });
+    sel.hidden = false;
+    $("#sis-rotulo").hidden = false;
+  }
+
+  function ligarSistema(){
+    var caixa = $("#sistema");
+    caixa.hidden = false;
+    if (!pegarToken()) {
+      $("#sis-estado").textContent = "Sem sessão do WorkFlowArk neste navegador. O briefing fica salvo só aqui.";
+      return;
+    }
+    listaSalvos().then(function(itens){
+      caixa.className = "sistema ligado";
+      $("#sis-estado").textContent = "Ligado ao sistema. O que você salvar aparece em qualquer aparelho.";
+      $("#btn-salvar").hidden = false;
+      preencherLista(itens);
+    }).catch(function(e){
+      $("#sis-estado").textContent = "Sessão encontrada, mas o sistema recusou: " + e.message + ". Segue salvando só neste navegador.";
+    });
+  }
+
+  $("#sis-lista").addEventListener("change", function(){
+    var id = this.value;
+    if (!id) return;
+    listaSalvos().then(function(itens){
+      var it = null;
+      itens.forEach(function(x){ if (x.id === id) it = x; });
+      if (!it) { avisar("Esse briefing não está mais no sistema."); return; }
+      idAtual = it.id;
+      dados = {};
+      IDENT.forEach(function(par){ dados["id-" + par[0]] = it[par[0]] || ""; });
+      var r = it.respostas || {};
+      Object.keys(r).forEach(function(k){ dados[k] = r[k]; });
+      guardar();
+      aplicar();
+      avisar("Abriu o briefing de " + (it.cliente || "cliente sem nome") + ".");
+    }).catch(function(e){ avisar("Não consegui abrir: " + e.message); });
+  });
+
+  $("#btn-salvar").addEventListener("click", function(){
+    var cliente = (dados["id-cliente"] || "").trim();
+    if (!cliente) { avisar("Preencha o campo Cliente antes de salvar no sistema."); return; }
+    var btn = $("#btn-salvar");
+    btn.disabled = true;
+    btn.textContent = "Salvando";
+    listaSalvos().then(function(itens){
+      var respostas = {};
+      Object.keys(dados).forEach(function(k){
+        if (k.indexOf("id-") !== 0 && String(dados[k]).trim()) respostas[k] = dados[k];
+      });
+      var item = {
+        id: idAtual || ("br-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7)),
+        cliente: cliente,
+        quem: (dados["id-quem"] || "").trim(),
+        data: (dados["id-data"] || "").trim(),
+        contato: (dados["id-contato"] || "").trim(),
+        respostas: respostas,
+        atualizadoEm: new Date().toISOString()
+      };
+      idAtual = item.id;
+      var achou = false;
+      var novos = itens.map(function(x){
+        if (x.id === item.id) { achou = true; return item; }
+        return x;
+      });
+      if (!achou) novos.push(item);
+      return api("POST", { action: "save-state", key: NUVEM, data: novos }).then(function(){
+        preencherLista(novos);
+        $("#sis-lista").value = item.id;
+        avisar(achou ? "Atualizado no sistema." : "Salvo no sistema como briefing de " + cliente + ".");
+      });
+    }).catch(function(e){
+      avisar("Não salvou: " + e.message);
+    }).then(function(){
+      btn.disabled = false;
+      btn.textContent = "Salvar no sistema";
+    });
+  });
+
+  ligarSistema();
 
   window.addEventListener("beforeprint", montarDocumento);
   contar();
