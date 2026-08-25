@@ -1,0 +1,455 @@
+<!doctype html>
+<!-- build 20260825-briefing-1 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="build" content="20260825-briefing-1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Briefing · ARK Content</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --preto:#0a0a0b;
+  --carvao:#121214;
+  --campo:#0e0e10;
+  --tinta:#eceae6;
+  --tinta-fraca:#9a9aa2;
+  --amarelo:#feef02;
+  --linha:rgba(255,255,255,.10);
+  --linha2:rgba(255,255,255,.18);
+  --ui:"Archivo",Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--preto)}
+body{
+  background:var(--preto);color:var(--tinta);font-family:var(--ui);
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  padding-bottom:108px;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 22px}
+
+.topo{border-bottom:1px solid var(--linha);display:flex;align-items:center;gap:14px;padding:18px 0}
+.topo img{height:26px;width:auto;display:block}
+.topo .sep{width:1px;height:20px;background:var(--linha2)}
+.topo .onde{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--tinta-fraca)}
+.topo .cliente{margin-left:auto;font-size:12px;font-weight:600;color:var(--amarelo);letter-spacing:.04em;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.hero{padding:46px 0 0}
+.hero .faixa{display:inline-block;background:var(--amarelo);color:var(--preto);font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;padding:5px 10px;margin-bottom:18px}
+h1{font-size:clamp(34px,7vw,54px);font-weight:800;line-height:1.02;letter-spacing:-.03em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--amarelo)}
+.dek{color:var(--tinta-fraca);margin-top:14px;max-width:56ch;font-size:17px}
+
+.como{border:1px solid var(--linha);border-left:3px solid var(--amarelo);padding:18px 20px;margin-top:30px}
+.como p{font-size:14.5px;color:var(--tinta-fraca);margin-bottom:8px}
+.como p:last-child{margin-bottom:0}
+.como b{color:var(--tinta);font-weight:600}
+
+.ident{margin-top:30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+
+.abas{position:sticky;top:0;z-index:20;background:var(--preto);border-bottom:1px solid var(--linha);margin:30px -22px 0;padding:11px 22px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.aba{font-family:var(--ui);font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--linha2);background:transparent;color:var(--tinta-fraca);padding:8px 14px;cursor:pointer}
+.aba[aria-selected="true"]{background:var(--amarelo);color:var(--preto);border-color:var(--amarelo)}
+.aba:focus-visible{outline:2px solid var(--amarelo);outline-offset:2px}
+.contagem{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--tinta-fraca);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+
+.bloco{border:1px solid var(--linha);background:var(--carvao);padding:22px 24px;margin-top:16px;scroll-margin-top:72px}
+.bloco-topo{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.bloco-num{font-size:11px;font-weight:800;letter-spacing:.16em;color:var(--amarelo);font-variant-numeric:tabular-nums}
+.bloco h3{font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.porque{font-size:14px;color:var(--tinta-fraca);margin-bottom:20px;max-width:58ch}
+
+.campo{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+.campo:last-child{margin-bottom:0}
+label{font-size:15px;font-weight:600;color:var(--tinta)}
+textarea,input[type="text"]{font-family:var(--ui);font-size:15px;line-height:1.5;color:var(--tinta);background:var(--campo);border:1px solid var(--linha2);padding:10px 12px;width:100%;resize:vertical;border-radius:0}
+textarea{min-height:64px}
+textarea:focus,input:focus{outline:none;border-color:var(--amarelo)}
+textarea.cheio,input.cheio{border-left:3px solid var(--amarelo)}
+
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--carvao);border-top:1px solid var(--linha2);padding:13px 22px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.prog{font-size:12px;font-weight:600;color:var(--tinta-fraca);font-variant-numeric:tabular-nums;margin-right:auto}
+.prog b{color:var(--amarelo)}
+button.acao{font-family:var(--ui);font-size:13.5px;font-weight:700;letter-spacing:.03em;border:1px solid var(--linha2);background:transparent;color:var(--tinta);padding:10px 16px;cursor:pointer}
+button.acao:hover{border-color:var(--tinta-fraca)}
+button.acao:focus-visible{outline:2px solid var(--amarelo);outline-offset:2px}
+button.acao.forte{background:var(--amarelo);color:var(--preto);border-color:var(--amarelo)}
+.aviso{position:fixed;left:0;right:0;bottom:66px;z-index:31;background:var(--amarelo);color:var(--preto);font-size:12.5px;font-weight:700;padding:9px 22px;text-align:center;letter-spacing:.02em}
+footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:var(--tinta-fraca);font-size:13px}
+[hidden]{display:none !important}
+
+#documento{display:none}
+@page{size:A4;margin:0}
+@media print{
+  body{padding:0}
+  .topo,.hero,.como,.ident,.abas,#form-iv,#form-site,.barra,.aviso,footer,.wrap{display:none !important}
+  #documento{display:block}
+  .folha{width:210mm;padding:18mm 16mm;background:var(--preto);color:var(--tinta)}
+  .doc-topo{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--linha2);padding-bottom:14px;margin-bottom:26px}
+  .doc-topo img{height:24px}
+  .doc-etiqueta{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--tinta-fraca)}
+  .doc-data{margin-left:auto;font-size:10px;font-weight:600;color:var(--tinta-fraca)}
+  .doc-titulo{font-size:40px;font-weight:800;line-height:1.03;letter-spacing:-.03em;margin-bottom:8px}
+  .doc-titulo em{font-style:normal;color:var(--amarelo)}
+  .doc-sub{font-size:13px;color:var(--tinta-fraca);margin-bottom:30px}
+  .doc-ficha{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;border-top:1px solid var(--linha2);border-bottom:1px solid var(--linha2);padding:16px 0;margin-bottom:26px}
+  .doc-ficha .k{font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-fraca);display:block;margin-bottom:2px}
+  .doc-ficha .v{font-size:14px;font-weight:600}
+  .doc-secao{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--preto);background:var(--amarelo);padding:5px 9px;display:inline-block;margin:26px 0 14px}
+  .doc-bloco{margin-bottom:20px;break-inside:avoid;page-break-inside:avoid}
+  .doc-bloco h4{font-size:15px;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--linha)}
+  .doc-bloco h4 span{color:var(--amarelo);margin-right:7px}
+  .doc-q{font-size:11.5px;font-weight:700;color:var(--tinta-fraca);margin-top:11px}
+  .doc-r{font-size:13.5px;line-height:1.5;white-space:pre-wrap}
+  .doc-rodape{margin-top:34px;padding-top:12px;border-top:1px solid var(--linha);font-size:10px;color:var(--tinta-fraca)}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="topo">
+    <img src="/ark-logo.png" alt="ARK Content">
+    <span class="sep"></span>
+    <span class="onde">Briefing</span>
+    <span class="cliente" id="topo-cliente"></span>
+  </div>
+
+  <div class="hero">
+    <span class="faixa">Documento operacional</span>
+    <h1>As perguntas que<br>abrem <em>todo projeto</em></h1>
+    <p class="dek">O mesmo roteiro para todo cliente novo, de identidade visual e de site. Serve pra conduzir a reunião na ordem e sair dela com tudo escrito.</p>
+  </div>
+
+  <div class="como">
+    <p><b>Como usar.</b> Pergunte na ordem e escreva a resposta do jeito que o cliente falou, sem melhorar. Resposta que não veio fica em branco de propósito, campo vazio também é informação.</p>
+    <p><b>No fim,</b> use "Gerar PDF" e sai um documento da ARK com as respostas, pronto pra anexar no projeto. "Copiar" leva o mesmo conteúdo em texto.</p>
+    <p><b>Regra.</b> Pergunta que o cliente já respondeu antes não se repete na reunião. Preencha com o que já se sabe e siga.</p>
+  </div>
+
+  <div class="ident" id="ident"></div>
+
+  <div class="abas" role="tablist">
+    <button class="aba" role="tab" id="tab-iv" aria-controls="form-iv" aria-selected="true">Identidade visual</button>
+    <button class="aba" role="tab" id="tab-site" aria-controls="form-site" aria-selected="false">Site</button>
+    <span class="contagem" id="contagem"></span>
+  </div>
+
+  <section id="form-iv" role="tabpanel" aria-labelledby="tab-iv"></section>
+  <section id="form-site" role="tabpanel" aria-labelledby="tab-site" hidden></section>
+
+  <footer>Padrão ARK de briefing. Identidade visual em 7 blocos, site em 8 blocos.</footer>
+</div>
+
+<div id="documento"></div>
+
+<div class="barra">
+  <span class="prog" id="prog"></span>
+  <button class="acao" id="btn-limpar" type="button">Limpar</button>
+  <button class="acao" id="btn-copiar" type="button">Copiar</button>
+  <button class="acao forte" id="btn-pdf" type="button">Gerar PDF</button>
+</div>
+<div class="aviso" id="aviso" hidden></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var IDENT = [
+    ["cliente","Cliente"],
+    ["quem","Quem conduziu"],
+    ["data","Data da reunião"],
+    ["contato","Quem respondeu, e cargo"]
+  ];
+
+  var IV = [
+    ["Verdade do negócio","O que a empresa faz de fato, não o que ela gostaria de fazer.",[
+      "O que a empresa faz, em uma frase, do jeito que um cliente descreveria?",
+      "Há quanto tempo existe e como começou?",
+      "O que ela tem que o concorrente da esquina não tem?",
+      "Qual o nome exato que vai na marca, com grafia e acentuação?"]],
+    ["Quem decide","Quem vê, quem paga e quem aprova costumam ser três pessoas diferentes.",[
+      "Quem é o cliente que paga? Idade, ocupação, faixa de renda.",
+      "O que ele teme na hora de comprar?",
+      "Qual a objeção que mais aparece na venda?",
+      "Quem dá a palavra final sobre a marca, e quem mais opina?"]],
+    ["Território","Sensação antes de cor. Se o cliente responde com adjetivo, a paleta nasce dali.",[
+      "Se a marca fosse uma pessoa, como ela fala?",
+      "Três adjetivos que ela precisa transmitir.",
+      "Três adjetivos que ela não pode transmitir de jeito nenhum.",
+      "Ela está mais para artesanal ou industrial? Popular ou premium?"]],
+    ["Aplicação real","Onde a marca vive fisicamente define o limite de detalhe do desenho.",[
+      "Onde a marca vai aparecer fisicamente? Fachada, uniforme, embalagem, veículo, copo.",
+      "Vai ser bordada, gravada, recortada ou carimbada em algum lugar?",
+      "Qual a menor aplicação que ela precisa aguentar sem sumir?",
+      "Precisa funcionar em uma cor só, ou sobre fundo escuro?"]],
+    ["Proibições","O que não pode é mais rápido de descobrir do que o que pode.",[
+      "Que cor não pode, e por quê?",
+      "Que símbolo ou ideia já foi recusado antes?",
+      "Com qual concorrente ela não pode se parecer?",
+      "Existe exigência legal, de franquia ou de conselho de classe?"]],
+    ["Convivência","Marca que divide espaço tem regra diferente de marca sozinha.",[
+      "A marca divide espaço com outras? Quais?",
+      "Ela lidera a peça ou assina embaixo?",
+      "Existe marca-mãe, selo ou certificação obrigatória junto?"]],
+    ["Aprovação","Combinar isso na primeira reunião evita a terceira rodada de graça.",[
+      "Quem dá a palavra final na aprovação?",
+      "Quantas rodadas de ajuste estão previstas?",
+      "Qual a data que não pode furar, e por que ela existe?",
+      "Como o material aprovado vai ser entregue, e para quem?"]]
+  ];
+
+  var SITE = [
+    ["Trabalho do site","A única ação que o visitante precisa fazer. Se houver mais de uma, o site já nasce fraco.",[
+      "Qual a única ação que o visitante precisa fazer?",
+      "O que acontece imediatamente depois que ele faz isso?",
+      "Se o site só pudesse ter um botão, qual seria?"]],
+    ["Quem chega","De onde vem, com qual dúvida na cabeça e em qual aparelho.",[
+      "De onde vem o visitante? Busca, anúncio, indicação, perfil social.",
+      "Com qual dúvida na cabeça ele chega?",
+      "Em qual aparelho ele chega mais, celular ou computador?"]],
+    ["Conversão","O que conta como sucesso, e quem atende do outro lado.",[
+      "O que conta como sucesso? Mensagem, ligação, formulário, visita, compra.",
+      "Quem atende do outro lado, com nome?",
+      "Em quanto tempo essa pessoa responde?",
+      "Existe meta de quantidade por mês?"]],
+    ["Acervo","O que já existe define quanto do prazo vira produção nova.",[
+      "Que fotos já existem, e quem tirou?",
+      "Existe vídeo aproveitável?",
+      "Existe texto pronto, ou vamos escrever tudo?",
+      "Existe prova social? Depoimento, número, prêmio, cliente conhecido.",
+      "A ARK tem direito de uso de tudo isso?"]],
+    ["Funcionalidade","Cada função precisa de dono, senão vira página morta depois da entrega.",[
+      "Que funções o site precisa ter? Mapa, blog, agendamento, catálogo, loja, área logada.",
+      "Para cada função, quem alimenta ela depois da entrega?",
+      "Alguma função é obrigatória já no lançamento?"]],
+    ["Técnico","Descobrir isso na véspera do lançamento é o atraso clássico e evitável.",[
+      "O domínio já existe? Quem tem o acesso a ele?",
+      "Onde vai ser hospedado, e quem paga?",
+      "Precisa de mais de um idioma?",
+      "Precisa integrar com WhatsApp, CRM ou algum sistema interno?",
+      "Já existe pixel, analytics e Google Meu Negócio?"]],
+    ["Referência","O motivo dito em voz alta vale mais que o link.",[
+      "Um site que o cliente ama, e o motivo dito por ele.",
+      "Um site que ele odeia, e o motivo.",
+      "Um concorrente cujo site ele acompanha."]],
+    ["Manutenção","Definir agora decide se isso vira receita recorrente ou trabalho de graça.",[
+      "Quem atualiza o site depois da entrega?",
+      "Com que frequência ele muda?",
+      "Isso entra no contrato recorrente ou é cobrado à parte?",
+      "Quem responde se o site sair do ar?"]]
+  ];
+
+  var CHAVE = "ark-briefing-v1";
+  function $(s){ return document.querySelector(s); }
+  var dados = {};
+  try { var bruto = localStorage.getItem(CHAVE); if (bruto) dados = JSON.parse(bruto) || {}; } catch(e){ dados = {}; }
+  function guardar(){ try { localStorage.setItem(CHAVE, JSON.stringify(dados)); } catch(e){} }
+
+  function campo(id, rotulo, multi){
+    var div = document.createElement("div");
+    div.className = "campo";
+    var lab = document.createElement("label");
+    lab.setAttribute("for", id);
+    lab.textContent = rotulo;
+    var el = document.createElement(multi ? "textarea" : "input");
+    if (!multi) el.type = "text";
+    el.id = id;
+    el.value = dados[id] || "";
+    if (el.value.trim()) el.className = "cheio";
+    el.addEventListener("input", function(){
+      dados[id] = el.value;
+      el.className = el.value.trim() ? "cheio" : "";
+      guardar(); contar();
+      if (id === "id-cliente") $("#topo-cliente").textContent = el.value.trim();
+    });
+    div.appendChild(lab); div.appendChild(el);
+    return div;
+  }
+
+  var alvoIdent = $("#ident");
+  IDENT.forEach(function(par){ alvoIdent.appendChild(campo("id-" + par[0], par[1], false)); });
+  $("#topo-cliente").textContent = (dados["id-cliente"] || "").trim();
+
+  function montar(alvo, blocos, prefixo){
+    blocos.forEach(function(b, i){
+      var art = document.createElement("article");
+      art.className = "bloco";
+      var topo = document.createElement("div");
+      topo.className = "bloco-topo";
+      var num = document.createElement("span");
+      num.className = "bloco-num";
+      num.textContent = "0" + (i + 1);
+      var h = document.createElement("h3");
+      h.textContent = b[0];
+      topo.appendChild(num); topo.appendChild(h);
+      var p = document.createElement("p");
+      p.className = "porque";
+      p.textContent = b[1];
+      art.appendChild(topo); art.appendChild(p);
+      b[2].forEach(function(q, j){ art.appendChild(campo(prefixo + i + "-" + j, q, true)); });
+      alvo.appendChild(art);
+    });
+  }
+  montar($("#form-iv"), IV, "iv");
+  montar($("#form-site"), SITE, "st");
+
+  var abaIV = $("#tab-iv"), abaSite = $("#tab-site");
+  function trocar(ehIV){
+    abaIV.setAttribute("aria-selected", String(ehIV));
+    abaSite.setAttribute("aria-selected", String(!ehIV));
+    $("#form-iv").hidden = !ehIV;
+    $("#form-site").hidden = ehIV;
+  }
+  abaIV.addEventListener("click", function(){ trocar(true); });
+  abaSite.addEventListener("click", function(){ trocar(false); });
+
+  function contar(){
+    var ivT = document.querySelectorAll("#form-iv textarea");
+    var stT = document.querySelectorAll("#form-site textarea");
+    var ivF = 0, stF = 0, k;
+    for (k = 0; k < ivT.length; k++) if (ivT[k].value.trim()) ivF++;
+    for (k = 0; k < stT.length; k++) if (stT[k].value.trim()) stF++;
+    $("#prog").innerHTML = "<b>" + (ivF + stF) + "</b> de " + (ivT.length + stT.length) + " perguntas respondidas";
+    $("#contagem").textContent = "identidade " + ivF + "/" + ivT.length + "   site " + stF + "/" + stT.length;
+  }
+
+  function respostas(blocos, pre){
+    var saida = [];
+    blocos.forEach(function(b, i){
+      var feitas = [];
+      b[2].forEach(function(q, j){
+        var r = (dados[pre + i + "-" + j] || "").trim();
+        if (r) feitas.push([q, r]);
+      });
+      if (feitas.length) saida.push([i + 1, b[0], feitas]);
+    });
+    return saida;
+  }
+
+  function texto(){
+    var L = ["BRIEFING ARK", ""];
+    IDENT.forEach(function(par){
+      L.push(par[1] + ": " + ((dados["id-" + par[0]] || "").trim() || "não informado"));
+    });
+    [["IDENTIDADE VISUAL", IV, "iv"], ["SITE", SITE, "st"]].forEach(function(s){
+      var blocos = respostas(s[1], s[2]);
+      if (!blocos.length) return;
+      L.push("", s[0], "");
+      blocos.forEach(function(b){
+        L.push("Bloco " + b[0] + ". " + b[1]);
+        b[2].forEach(function(qr){ L.push("", qr[0], qr[1]); });
+        L.push("");
+      });
+    });
+    return L.join("\n");
+  }
+
+  function esc(t){
+    return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function montarDocumento(){
+    var cliente = (dados["id-cliente"] || "").trim() || "Cliente novo";
+    var h = [];
+    h.push('<div class="folha">');
+    h.push('<div class="doc-topo"><img src="/ark-logo.png" alt="ARK Content">');
+    h.push('<span class="doc-etiqueta">Briefing</span>');
+    h.push('<span class="doc-data">' + esc((dados["id-data"] || "").trim()) + '</span></div>');
+    h.push('<div class="doc-titulo">' + esc(cliente) + '<br><em>briefing</em></div>');
+    h.push('<p class="doc-sub">Respostas colhidas em reunião, registradas como foram ditas.</p>');
+    h.push('<div class="doc-ficha">');
+    IDENT.forEach(function(par){
+      h.push('<div><span class="k">' + esc(par[1]) + '</span><span class="v">' +
+             esc((dados["id-" + par[0]] || "").trim() || "não informado") + '</span></div>');
+    });
+    h.push('</div>');
+
+    var vazio = true;
+    [["Identidade visual", IV, "iv"], ["Site", SITE, "st"]].forEach(function(s){
+      var blocos = respostas(s[1], s[2]);
+      if (!blocos.length) return;
+      vazio = false;
+      h.push('<div class="doc-secao">' + esc(s[0]) + '</div>');
+      blocos.forEach(function(b){
+        var n = b[0] < 10 ? "0" + b[0] : String(b[0]);
+        h.push('<div class="doc-bloco"><h4><span>' + n + '</span>' + esc(b[1]) + '</h4>');
+        b[2].forEach(function(qr){
+          h.push('<div class="doc-q">' + esc(qr[0]) + '</div><div class="doc-r">' + esc(qr[1]) + '</div>');
+        });
+        h.push('</div>');
+      });
+    });
+    if (vazio) h.push('<p class="doc-r">Nenhuma pergunta respondida ainda.</p>');
+    h.push('<div class="doc-rodape">ARK Content Soluções de Marketing. Documento gerado a partir do formulário de briefing.</div>');
+    h.push('</div>');
+    $("#documento").innerHTML = h.join("");
+  }
+
+  var avisoT;
+  function avisar(msg){
+    var a = $("#aviso");
+    a.textContent = msg;
+    a.hidden = false;
+    clearTimeout(avisoT);
+    avisoT = setTimeout(function(){ a.hidden = true; }, 3500);
+  }
+
+  $("#btn-pdf").addEventListener("click", function(){
+    montarDocumento();
+    avisar("Na janela de impressão, escolha Salvar como PDF.");
+    setTimeout(function(){ window.print(); }, 250);
+  });
+
+  function copiarNaMao(t){
+    var ta = document.createElement("textarea");
+    ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); avisar("Respostas copiadas."); }
+    catch(e){ avisar("Não consegui copiar. Selecione o texto a mão."); }
+    ta.parentNode.removeChild(ta);
+  }
+
+  $("#btn-copiar").addEventListener("click", function(){
+    var t = texto();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function(){
+        avisar("Respostas copiadas.");
+      }).catch(function(){ copiarNaMao(t); });
+    } else { copiarNaMao(t); }
+  });
+
+  var btnLimpar = $("#btn-limpar");
+  btnLimpar.addEventListener("click", function(){
+    var todos = document.querySelectorAll("textarea, input[type=text]");
+    var feitos = 0, k;
+    for (k = 0; k < todos.length; k++) if (todos[k].value.trim()) feitos++;
+    if (feitos && btnLimpar.getAttribute("data-confirmar") !== "1") {
+      btnLimpar.setAttribute("data-confirmar", "1");
+      btnLimpar.textContent = "Limpar mesmo?";
+      avisar("Clique de novo para apagar " + feitos + " respostas.");
+      setTimeout(function(){
+        btnLimpar.setAttribute("data-confirmar", "0");
+        btnLimpar.textContent = "Limpar";
+      }, 4000);
+      return;
+    }
+    dados = {}; guardar();
+    for (k = 0; k < todos.length; k++) { todos[k].value = ""; todos[k].className = ""; }
+    $("#topo-cliente").textContent = "";
+    btnLimpar.setAttribute("data-confirmar", "0");
+    btnLimpar.textContent = "Limpar";
+    contar();
+    avisar("Formulário em branco.");
+  });
+
+  window.addEventListener("beforeprint", montarDocumento);
+  contar();
+})();
+</script>
+</body>
+</html>
