@@ -1,9 +1,9 @@
 <!doctype html>
-<!-- build 20260825-briefing-2 -->
+<!-- build 20260825-briefing-3 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20260825-briefing-2">
+<meta name="build" content="20260825-briefing-3">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Briefing · ARK Content</title>
 <link rel="icon" href="/favicon.ico">
@@ -79,6 +79,18 @@ textarea{min-height:64px}
 textarea:focus,input:focus{outline:none;border-color:var(--amarelo)}
 textarea.cheio,input.cheio{border-left:3px solid var(--amarelo)}
 
+.banco{margin-top:8px}
+.banco-abrir{font-family:var(--ui);font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amarelo);background:none;border:none;padding:2px 0;cursor:pointer;border-bottom:1px solid var(--linha2)}
+.banco-abrir:focus-visible{outline:2px solid var(--amarelo);outline-offset:2px}
+.banco-lista{margin-top:12px;border:1px solid var(--linha);padding:14px 15px;background:var(--campo)}
+.banco-familia{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-fraca);margin:14px 0 7px}
+.banco-familia:first-child{margin-top:0}
+.banco-linha{display:flex;flex-wrap:wrap;gap:6px}
+.etiqueta{font-family:var(--ui);font-size:12.5px;font-weight:600;color:var(--tinta-fraca);background:transparent;border:1px solid var(--linha2);padding:5px 10px;cursor:pointer}
+.etiqueta:hover{color:var(--tinta);border-color:var(--tinta-fraca)}
+.etiqueta.on{background:var(--amarelo);color:var(--preto);border-color:var(--amarelo)}
+.etiqueta:focus-visible{outline:2px solid var(--amarelo);outline-offset:2px}
+
 .barra{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--carvao);border-top:1px solid var(--linha2);padding:13px 22px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .prog{font-size:12px;font-weight:600;color:var(--tinta-fraca);font-variant-numeric:tabular-nums;margin-right:auto}
 .prog b{color:var(--amarelo)}
@@ -94,7 +106,7 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
 @page{size:A4;margin:0}
 @media print{
   body{padding:0}
-  .topo,.hero,.como,.ident,.abas,#form-iv,#form-site,.barra,.aviso,footer,.wrap{display:none !important}
+  .topo,.hero,.como,.ident,.sistema,.abas,#form-iv,#form-site,#form-social,.barra,.aviso,footer,.wrap{display:none !important}
   #documento{display:block}
   .folha{width:210mm;padding:18mm 16mm;background:var(--preto);color:var(--tinta)}
   .doc-topo{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--linha2);padding-bottom:14px;margin-bottom:26px}
@@ -153,11 +165,13 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
   <div class="abas" role="tablist">
     <button class="aba" role="tab" id="tab-iv" aria-controls="form-iv" aria-selected="true">Identidade visual</button>
     <button class="aba" role="tab" id="tab-site" aria-controls="form-site" aria-selected="false">Site</button>
+    <button class="aba" role="tab" id="tab-social" aria-controls="form-social" aria-selected="false">Redes sociais</button>
     <span class="contagem" id="contagem"></span>
   </div>
 
   <section id="form-iv" role="tabpanel" aria-labelledby="tab-iv"></section>
   <section id="form-site" role="tabpanel" aria-labelledby="tab-site" hidden></section>
+  <section id="form-social" role="tabpanel" aria-labelledby="tab-social" hidden></section>
 
   <footer>Padrão ARK de briefing. Identidade visual em 7 blocos, site em 8 blocos.</footer>
 </div>
@@ -262,6 +276,63 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
       "Quem responde se o site sair do ar?"]]
   ];
 
+  // Terceira aba. Nasceu de um formulario de diagnostico que o Gabriel ja usava, do qual
+  // aproveitei so o que serve pra conduzir reuniao, reescrito sem jargao. O que ficou de
+  // fora de proposito: escala de 1 a 5, "omnichannel", "remarketing" e as perguntas que
+  // so o cliente tecnico saberia responder.
+  var SOCIAL = [
+    ["Onde a marca está hoje","Retrato do que existe antes de propor qualquer coisa.",[
+      "Em quais redes a marca já tem perfil, e qual é o @ de cada uma?",
+      "Quem posta hoje, e com que frequência de verdade?",
+      "Existe calendário do que vai ser postado, ou é no dia?",
+      "O que já foi postado e deu certo? E o que deu errado?"]],
+    ["Como a marca é vista","Se o cliente acha que é vista de um jeito e não é, isso muda tudo.",[
+      "Como você acha que o cliente enxerga a marca hoje?",
+      "O que as pessoas mais comentam, elogiam ou reclamam?",
+      "Alguém já confundiu a marca com outra? Com qual?"]],
+    ["Quem a gente quer alcançar","Público não é faixa etária, é uma pessoa com um problema.",[
+      "Descreva uma pessoa real que compra de você.",
+      "O que ela quer resolver quando procura a marca?",
+      "O que faz ela desistir na hora de comprar?",
+      "Onde ela passa o tempo, rede por rede?"]],
+    ["Concorrência","Serve pra saber o que não repetir, não pra copiar.",[
+      "Quem são os três concorrentes que mais incomodam?",
+      "O que eles fazem melhor que a marca?",
+      "Existe algum perfil, de qualquer ramo, que você admira?"]],
+    ["O que a gente vai produzir","Formato definido evita a captação virar improviso.",[
+      "Que formatos entram? Reels, foto, carrossel, story, ao vivo.",
+      "Quem aparece na frente da câmera, com nome?",
+      "Quem grava, e com qual equipamento?",
+      "Tem produto ou lugar que não pode aparecer?"]],
+    ["Como vamos saber se deu certo","Combinado agora, cobrado depois sem discussão.",[
+      "O que precisa acontecer pra você dizer que valeu a pena?",
+      "Existe número acompanhado hoje? Qual, e onde?",
+      "Quem responde as mensagens que chegarem, e em quanto tempo?"]],
+    ["Limites","Descobrir isso depois de publicar é tarde.",[
+      "Tem assunto que a marca não toca de jeito nenhum?",
+      "Precisa de aprovação antes de publicar? De quem?",
+      "Existe exigência de conselho de classe ou regra do setor?"]]
+  ];
+
+  // Banco de adjetivos. Vira etiqueta clicavel nos campos de adjetivo, porque campo em
+  // branco pra "descreva a sensacao da marca" trava o cliente na reuniao.
+  var ADJETIVOS = [
+    ["Inovação e modernidade", ["Minimalista","Vanguardista","Tecnológico","Dinâmico","Geométrico","Disruptivo","Contemporâneo","Industrial","Fluido"]],
+    ["Luxo e prestígio", ["Premium","Exclusivo","Sóbrio","Atemporal","Majestoso","Ornado","Elegante","Corporativo"]],
+    ["Humano e orgânico", ["Artesanal","Ecológico","Acolhedor","Rústico","Holístico","Transparente","Genuíno"]],
+    ["Energia e impacto", ["Vibrante","Audacioso","Rebelde","Espirituoso","Lúdico","Provocativo","Cosmopolita"]],
+    ["Solidez e tradição", ["Robusto","Institucional","Sólido","Conservador","Metódico","Regional"]],
+    ["Artístico e conceitual", ["Cenográfico","Abstrato","Nostálgico","Vintage","Minimal chique","Eclético"]]
+  ];
+
+  // Campos que ganham etiquetas. Chave = id do campo, valor = grupos de opções.
+  // Só ACRESCENTA comportamento, nenhum id existente muda, então briefing já preenchido
+  // continua valendo.
+  var ETIQUETAS = {
+    "iv2-1": ADJETIVOS,
+    "iv2-2": ADJETIVOS
+  };
+
   var CHAVE = "ark-briefing-v1";
   function $(s){ return document.querySelector(s); }
   var dados = {};
@@ -286,7 +357,78 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
       if (id === "id-cliente") $("#topo-cliente").textContent = el.value.trim();
     });
     div.appendChild(lab); div.appendChild(el);
+
+    var grupos = ETIQUETAS[id];
+    if (grupos) div.appendChild(banco(el, grupos));
     return div;
+  }
+
+  // Banco de etiquetas: clicar acrescenta ou tira a palavra do campo. O campo continua
+  // livre pra digitar, a etiqueta e so um atalho pra destravar o cliente na reuniao.
+  function banco(el, grupos){
+    var caixa = document.createElement("div");
+    caixa.className = "banco";
+
+    var abrir = document.createElement("button");
+    abrir.type = "button";
+    abrir.className = "banco-abrir";
+    abrir.textContent = "Escolher da lista";
+    caixa.appendChild(abrir);
+
+    var lista = document.createElement("div");
+    lista.className = "banco-lista";
+    lista.hidden = true;
+    caixa.appendChild(lista);
+
+    function selecionadas(){
+      return el.value.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+    }
+    function pintar(){
+      var atuais = selecionadas().map(function(s){ return s.toLowerCase(); });
+      var todas = lista.querySelectorAll(".etiqueta");
+      for (var i = 0; i < todas.length; i++) {
+        var on = atuais.indexOf(todas[i].textContent.toLowerCase()) >= 0;
+        todas[i].className = on ? "etiqueta on" : "etiqueta";
+        todas[i].setAttribute("aria-pressed", String(on));
+      }
+    }
+
+    grupos.forEach(function(g){
+      var t = document.createElement("div");
+      t.className = "banco-familia";
+      t.textContent = g[0];
+      lista.appendChild(t);
+      var linha = document.createElement("div");
+      linha.className = "banco-linha";
+      g[1].forEach(function(palavra){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "etiqueta";
+        b.textContent = palavra;
+        b.addEventListener("click", function(){
+          var atuais = selecionadas();
+          var pos = -1;
+          for (var i = 0; i < atuais.length; i++) {
+            if (atuais[i].toLowerCase() === palavra.toLowerCase()) pos = i;
+          }
+          if (pos >= 0) atuais.splice(pos, 1); else atuais.push(palavra);
+          el.value = atuais.join(", ");
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          pintar();
+        });
+        linha.appendChild(b);
+      });
+      lista.appendChild(linha);
+    });
+
+    abrir.addEventListener("click", function(){
+      lista.hidden = !lista.hidden;
+      abrir.textContent = lista.hidden ? "Escolher da lista" : "Fechar a lista";
+      if (!lista.hidden) pintar();
+    });
+    el.addEventListener("input", function(){ if (!lista.hidden) pintar(); });
+
+    return caixa;
   }
 
   var alvoIdent = $("#ident");
@@ -315,25 +457,32 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
   }
   montar($("#form-iv"), IV, "iv");
   montar($("#form-site"), SITE, "st");
+  montar($("#form-social"), SOCIAL, "so");
 
-  var abaIV = $("#tab-iv"), abaSite = $("#tab-site");
-  function trocar(ehIV){
-    abaIV.setAttribute("aria-selected", String(ehIV));
-    abaSite.setAttribute("aria-selected", String(!ehIV));
-    $("#form-iv").hidden = !ehIV;
-    $("#form-site").hidden = ehIV;
+  var ABAS = [["tab-iv","form-iv"],["tab-site","form-site"],["tab-social","form-social"]];
+  function trocar(alvo){
+    ABAS.forEach(function(p){
+      var ativo = p[0] === alvo;
+      document.getElementById(p[0]).setAttribute("aria-selected", String(ativo));
+      document.getElementById(p[1]).hidden = !ativo;
+    });
   }
-  abaIV.addEventListener("click", function(){ trocar(true); });
-  abaSite.addEventListener("click", function(){ trocar(false); });
+  ABAS.forEach(function(p){
+    document.getElementById(p[0]).addEventListener("click", function(){ trocar(p[0]); });
+  });
 
   function contar(){
-    var ivT = document.querySelectorAll("#form-iv textarea");
-    var stT = document.querySelectorAll("#form-site textarea");
-    var ivF = 0, stF = 0, k;
-    for (k = 0; k < ivT.length; k++) if (ivT[k].value.trim()) ivF++;
-    for (k = 0; k < stT.length; k++) if (stT[k].value.trim()) stF++;
-    $("#prog").innerHTML = "<b>" + (ivF + stF) + "</b> de " + (ivT.length + stT.length) + " perguntas respondidas";
-    $("#contagem").textContent = "identidade " + ivF + "/" + ivT.length + "   site " + stF + "/" + stT.length;
+    var partes = [["#form-iv","identidade"],["#form-site","site"],["#form-social","redes"]];
+    var total = 0, feitos = 0, rotulo = [];
+    partes.forEach(function(p){
+      var t = document.querySelectorAll(p[0] + " textarea");
+      var f = 0;
+      for (var k = 0; k < t.length; k++) if (t[k].value.trim()) f++;
+      total += t.length; feitos += f;
+      rotulo.push(p[1] + " " + f + "/" + t.length);
+    });
+    $("#prog").innerHTML = "<b>" + feitos + "</b> de " + total + " perguntas respondidas";
+    $("#contagem").textContent = rotulo.join("   ");
   }
 
   function respostas(blocos, pre){
@@ -354,7 +503,7 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
     IDENT.forEach(function(par){
       L.push(par[1] + ": " + ((dados["id-" + par[0]] || "").trim() || "não informado"));
     });
-    [["IDENTIDADE VISUAL", IV, "iv"], ["SITE", SITE, "st"]].forEach(function(s){
+    [["IDENTIDADE VISUAL", IV, "iv"], ["SITE", SITE, "st"], ["REDES SOCIAIS", SOCIAL, "so"]].forEach(function(s){
       var blocos = respostas(s[1], s[2]);
       if (!blocos.length) return;
       L.push("", s[0], "");
@@ -388,7 +537,7 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
     h.push('</div>');
 
     var vazio = true;
-    [["Identidade visual", IV, "iv"], ["Site", SITE, "st"]].forEach(function(s){
+    [["Identidade visual", IV, "iv"], ["Site", SITE, "st"], ["Redes sociais", SOCIAL, "so"]].forEach(function(s){
       var blocos = respostas(s[1], s[2]);
       if (!blocos.length) return;
       vazio = false;
