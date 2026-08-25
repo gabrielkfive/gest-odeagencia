@@ -1,9 +1,9 @@
 <!doctype html>
-<!-- build 20260825-briefing-4 -->
+<!-- build 20260825-briefing-5 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20260825-briefing-4">
+<meta name="build" content="20260825-briefing-5">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Briefing · ARK Content</title>
 <link rel="icon" href="/favicon.ico">
@@ -805,6 +805,16 @@ footer{margin-top:56px;padding:22px 0 0;border-top:1px solid var(--linha);color:
       Object.keys(dados).forEach(function(k){
         if (k.indexOf("id-") !== 0 && String(dados[k]).trim()) respostas[k] = dados[k];
       });
+      // Se a pagina foi reaberta, idAtual volta nulo. Sem esta busca por nome, salvar
+      // criava um SEGUNDO briefing do mesmo cliente em vez de atualizar o que existe.
+      // Aconteceu de verdade com a Moenda: ficaram duas fichas, uma com 9 respostas e
+      // outra com 63, e alguem ia abrir a errada.
+      if (!idAtual) {
+        var alvo = cliente.toLowerCase();
+        itens.forEach(function(x){
+          if (String(x.cliente || "").trim().toLowerCase() === alvo) idAtual = x.id;
+        });
+      }
       var item = {
         id: idAtual || ("br-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7)),
         cliente: cliente,
