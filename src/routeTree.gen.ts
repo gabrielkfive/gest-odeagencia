@@ -29,6 +29,8 @@ import { Route as ApiWorkflowarkSocialRunRouteImport } from './routes/api/workfl
 import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowark.sheet'
 import { Route as ApiWorkflowarkRemoteRouteImport } from './routes/api/workflowark.remote'
 import { Route as ApiWorkflowarkPortalRouteImport } from './routes/api/workflowark.portal'
+import { Route as ApiWorkflowarkFinanceiroRunRouteImport } from './routes/api/workflowark.financeiro-run'
+import { Route as ApiWorkflowarkComercialRunRouteImport } from './routes/api/workflowark.comercial-run'
 import { Route as ApiWorkflowarkBridgeRouteImport } from './routes/api/workflowark.bridge'
 import { Route as ApiWorkflowarkApproveRouteImport } from './routes/api/workflowark.approve'
 import { Route as ApiWorkflowarkAiCheckRouteImport } from './routes/api/workflowark.ai-check'
@@ -143,6 +145,18 @@ const ApiWorkflowarkPortalRoute = ApiWorkflowarkPortalRouteImport.update({
   path: '/api/workflowark/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWorkflowarkFinanceiroRunRoute =
+  ApiWorkflowarkFinanceiroRunRouteImport.update({
+    id: '/api/workflowark/financeiro-run',
+    path: '/api/workflowark/financeiro-run',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiWorkflowarkComercialRunRoute =
+  ApiWorkflowarkComercialRunRouteImport.update({
+    id: '/api/workflowark/comercial-run',
+    path: '/api/workflowark/comercial-run',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiWorkflowarkBridgeRoute = ApiWorkflowarkBridgeRouteImport.update({
   id: '/api/workflowark/bridge',
   path: '/api/workflowark/bridge',
@@ -243,6 +257,8 @@ export interface FileRoutesByFullPath {
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
   '/api/workflowark/bridge': typeof ApiWorkflowarkBridgeRoute
+  '/api/workflowark/comercial-run': typeof ApiWorkflowarkComercialRunRoute
+  '/api/workflowark/financeiro-run': typeof ApiWorkflowarkFinanceiroRunRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
@@ -278,6 +294,8 @@ export interface FileRoutesByTo {
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
   '/api/workflowark/bridge': typeof ApiWorkflowarkBridgeRoute
+  '/api/workflowark/comercial-run': typeof ApiWorkflowarkComercialRunRoute
+  '/api/workflowark/financeiro-run': typeof ApiWorkflowarkFinanceiroRunRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
@@ -315,6 +333,8 @@ export interface FileRoutesById {
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
   '/api/workflowark/bridge': typeof ApiWorkflowarkBridgeRoute
+  '/api/workflowark/comercial-run': typeof ApiWorkflowarkComercialRunRoute
+  '/api/workflowark/financeiro-run': typeof ApiWorkflowarkFinanceiroRunRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
@@ -352,6 +372,8 @@ export interface FileRouteTypes {
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
     | '/api/workflowark/bridge'
+    | '/api/workflowark/comercial-run'
+    | '/api/workflowark/financeiro-run'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
     | '/api/workflowark/sheet'
@@ -387,6 +409,8 @@ export interface FileRouteTypes {
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
     | '/api/workflowark/bridge'
+    | '/api/workflowark/comercial-run'
+    | '/api/workflowark/financeiro-run'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
     | '/api/workflowark/sheet'
@@ -423,6 +447,8 @@ export interface FileRouteTypes {
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
     | '/api/workflowark/bridge'
+    | '/api/workflowark/comercial-run'
+    | '/api/workflowark/financeiro-run'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
     | '/api/workflowark/sheet'
@@ -459,6 +485,8 @@ export interface RootRouteChildren {
   ApiWorkflowarkAiCheckRoute: typeof ApiWorkflowarkAiCheckRoute
   ApiWorkflowarkApproveRoute: typeof ApiWorkflowarkApproveRoute
   ApiWorkflowarkBridgeRoute: typeof ApiWorkflowarkBridgeRoute
+  ApiWorkflowarkComercialRunRoute: typeof ApiWorkflowarkComercialRunRoute
+  ApiWorkflowarkFinanceiroRunRoute: typeof ApiWorkflowarkFinanceiroRunRoute
   ApiWorkflowarkPortalRoute: typeof ApiWorkflowarkPortalRoute
   ApiWorkflowarkRemoteRoute: typeof ApiWorkflowarkRemoteRoute
   ApiWorkflowarkSheetRoute: typeof ApiWorkflowarkSheetRoute
@@ -609,6 +637,20 @@ declare module '@tanstack/react-router' {
       path: '/api/workflowark/portal'
       fullPath: '/api/workflowark/portal'
       preLoaderRoute: typeof ApiWorkflowarkPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/financeiro-run': {
+      id: '/api/workflowark/financeiro-run'
+      path: '/api/workflowark/financeiro-run'
+      fullPath: '/api/workflowark/financeiro-run'
+      preLoaderRoute: typeof ApiWorkflowarkFinanceiroRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/comercial-run': {
+      id: '/api/workflowark/comercial-run'
+      path: '/api/workflowark/comercial-run'
+      fullPath: '/api/workflowark/comercial-run'
+      preLoaderRoute: typeof ApiWorkflowarkComercialRunRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/workflowark/bridge': {
@@ -763,6 +805,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWorkflowarkAiCheckRoute: ApiWorkflowarkAiCheckRoute,
   ApiWorkflowarkApproveRoute: ApiWorkflowarkApproveRoute,
   ApiWorkflowarkBridgeRoute: ApiWorkflowarkBridgeRoute,
+  ApiWorkflowarkComercialRunRoute: ApiWorkflowarkComercialRunRoute,
+  ApiWorkflowarkFinanceiroRunRoute: ApiWorkflowarkFinanceiroRunRoute,
   ApiWorkflowarkPortalRoute: ApiWorkflowarkPortalRoute,
   ApiWorkflowarkRemoteRoute: ApiWorkflowarkRemoteRoute,
   ApiWorkflowarkSheetRoute: ApiWorkflowarkSheetRoute,
