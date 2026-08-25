@@ -1,0 +1,601 @@
+<!doctype html>
+<!-- build 20260825-moenda-manual-1 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="build" content="20260825-moenda-manual-1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moenda · Manual de Marca</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Karla:wght@300;400;500;600;700&display=swap">
+<style>
+:root{
+  --grao-verde:#8A9A5B;
+  --cereja:#9E3B25;
+  --torra:#5B3A21;
+  --cafezal:#2F4A34;
+  --azulejo:#31558A;
+  --perola:#F3EEE4;
+  --ocre:#C9922E;
+  --telha:#B5603A;
+  --terra-clara:#DCD1BF;
+  --terra:#8A7963;
+  --tinta:#2B241D;
+  --tinta-fraca:#6E6155;
+  --linha:rgba(43,36,29,.14);
+  --papel:#FBF8F2;
+  --papel2:#F3EEE4;
+  --display:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --texto:"Karla",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;background:var(--papel)}
+body{
+  background:var(--papel);color:var(--tinta);font-family:var(--texto);
+  font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+
+#prog{position:fixed;top:0;left:0;height:3px;width:0;background:var(--cereja);z-index:60}
+
+.topo{
+  position:sticky;top:0;z-index:50;background:rgba(251,248,242,.92);
+  backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--linha);
+}
+.topo .in{max-width:1080px;margin:0 auto;padding:13px 28px;display:flex;align-items:center;gap:18px}
+.marca{font-family:var(--display);font-size:23px;font-weight:600;letter-spacing:.02em;line-height:1}
+.marca span{color:var(--cereja)}
+.topo .rot{font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--tinta-fraca)}
+.indice{margin-left:auto;display:flex;gap:16px;overflow-x:auto;scrollbar-width:none}
+.indice::-webkit-scrollbar{display:none}
+.indice a{
+  font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--tinta-fraca);text-decoration:none;white-space:nowrap;padding:3px 0;border-bottom:2px solid transparent;
+}
+.indice a:hover,.indice a.ativo{color:var(--tinta);border-bottom-color:var(--cereja)}
+@media (max-width:820px){.indice{display:none}}
+
+.capa{padding:12vh 0 14vh}
+.capa .eyebrow{font-size:11px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--cereja);margin-bottom:26px}
+.capa h1{
+  font-family:var(--display);font-weight:300;font-size:clamp(50px,10vw,116px);
+  line-height:.94;letter-spacing:-.02em;text-wrap:balance;
+}
+.capa h1 em{font-style:italic;color:var(--cereja)}
+.capa .sub{margin-top:30px;max-width:54ch;font-size:20px;color:var(--tinta-fraca);font-weight:300}
+.capa .meta{margin-top:44px;display:flex;gap:36px;flex-wrap:wrap;border-top:1px solid var(--linha);padding-top:20px}
+.capa .meta div{font-size:13px}
+.capa .meta .k{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-fraca);display:block;margin-bottom:3px}
+
+section{padding:9vh 0;border-top:1px solid var(--linha)}
+.sec-num{font-size:10.5px;font-weight:700;letter-spacing:.2em;color:var(--cereja);margin-bottom:12px}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(34px,5.2vw,54px);line-height:1.04;letter-spacing:-.015em;text-wrap:balance}
+h2 em{font-style:italic;color:var(--cereja)}
+.lead{margin-top:18px;max-width:62ch;font-size:19px;color:var(--tinta-fraca);font-weight:300}
+h3{font-family:var(--display);font-weight:600;font-size:26px;margin-bottom:8px;line-height:1.2}
+p{max-width:66ch}
+p + p{margin-top:14px}
+.mt{margin-top:44px}
+.mt2{margin-top:28px}
+strong{font-weight:700}
+.cita{
+  font-family:var(--display);font-style:italic;font-size:26px;line-height:1.36;
+  border-left:2px solid var(--cereja);padding-left:22px;max-width:52ch;color:var(--tinta);font-weight:400;
+}
+.cita cite{display:block;font-family:var(--texto);font-style:normal;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-fraca);margin-top:14px}
+
+.paleta{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:2px;margin-top:34px}
+.cor{border:none;text-align:left;cursor:pointer;font-family:var(--texto);padding:0;background:none}
+.cor .amostra{height:150px;display:block;position:relative}
+.cor .amostra::after{
+  content:"copiar";position:absolute;right:10px;bottom:10px;font-size:9.5px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;opacity:0;transition:opacity .18s;color:#fff;mix-blend-mode:difference;
+}
+.cor:hover .amostra::after,.cor:focus-visible .amostra::after{opacity:.9}
+.cor:focus-visible{outline:2px solid var(--cereja);outline-offset:3px}
+.cor .info{padding:11px 2px 0;display:block}
+.cor .nome{font-size:14px;font-weight:700;display:block}
+.cor .val{font-size:11.5px;color:var(--tinta-fraca);font-variant-numeric:tabular-nums;margin-top:2px;line-height:1.5;display:block}
+.cor .uso{font-size:12px;color:var(--tinta-fraca);margin-top:6px;line-height:1.4;display:block}
+
+.escala{margin-top:32px;border-top:1px solid var(--linha)}
+.escala .l{display:grid;grid-template-columns:150px 1fr;gap:22px;padding:20px 0;border-bottom:1px solid var(--linha);align-items:baseline}
+.escala .esp{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-fraca);line-height:1.6}
+@media (max-width:640px){.escala .l{grid-template-columns:1fr;gap:8px}}
+
+.simbolos{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px;margin-top:34px}
+.sim{border:1px solid var(--linha);background:#fff;padding:26px}
+.sim svg{width:100%;height:120px;display:block}
+.sim .cap{margin-top:16px;font-size:12.5px;color:var(--tinta-fraca);line-height:1.45;max-width:none}
+.sim .cap b{color:var(--tinta);display:block;font-size:13.5px;margin-bottom:3px}
+
+.regras{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:32px}
+.regra{border:1px solid var(--linha);padding:20px;background:#fff}
+.regra .sel{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+.regra.nao .sel{color:var(--cereja)}
+.regra.sim .sel{color:var(--cafezal)}
+.regra p{font-size:14.5px;color:var(--tinta-fraca);max-width:none}
+
+.itens{margin-top:30px;display:grid;gap:1px;background:var(--linha);border:1px solid var(--linha)}
+.item{background:var(--papel);padding:20px 22px;display:grid;grid-template-columns:38px 1fr;gap:18px;align-items:start}
+.item .n{font-family:var(--display);font-size:26px;color:var(--cereja);line-height:1}
+.item h4{font-size:16px;font-weight:700;margin-bottom:4px}
+.item p{font-size:14.5px;color:var(--tinta-fraca);max-width:64ch}
+
+.azul-faixa{height:64px;margin-top:34px;border:1px solid var(--linha)}
+
+.pend{background:var(--papel2);border-left:3px solid var(--ocre);padding:22px 26px;margin-top:26px}
+.pend h4{font-size:16px;font-weight:700;margin-bottom:6px}
+.pend p{font-size:15px;color:var(--tinta-fraca)}
+
+.baixar{
+  margin-top:34px;display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--texto);font-size:14px;font-weight:700;letter-spacing:.03em;
+  background:var(--tinta);color:var(--papel);border:1px solid var(--tinta);
+  padding:13px 22px;cursor:pointer;
+}
+.baixar:hover{background:var(--cereja);border-color:var(--cereja)}
+.baixar:focus-visible{outline:2px solid var(--cereja);outline-offset:3px}
+.dica{font-size:13px;color:var(--tinta-fraca);margin-top:12px;max-width:60ch}
+
+footer{padding:8vh 0 12vh;border-top:1px solid var(--linha);color:var(--tinta-fraca);font-size:13.5px}
+
+.rev{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+.rev.on{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rev{opacity:1;transform:none;transition:none}
+}
+#aviso{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:70;background:var(--tinta);color:var(--papel);font-size:13px;font-weight:600;padding:11px 20px}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<header class="topo">
+  <div class="in">
+    <span class="marca">Moenda<span>.</span></span>
+    <span class="rot">Manual de marca</span>
+    <nav class="indice" id="indice">
+      <a href="#territorio">Território</a>
+      <a href="#cor">Cor</a>
+      <a href="#tipo">Tipografia</a>
+      <a href="#simbolo">Símbolo</a>
+      <a href="#uso">Uso</a>
+      <a href="#imagem">Imagem</a>
+      <a href="#site">Site</a>
+      <a href="#pendencias">Decisões</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="capa">
+    <p class="eyebrow">ARK Content para Moenda &middot; 25 de agosto de 2026</p>
+    <h1>Uma grande<br><em>professora</em><br>do Vale do Café</h1>
+    <p class="sub">Este manual traduz em cor, tipo e forma o que a família disse na reunião de briefing. Cada regra aqui vem de uma frase dita, e a frase está citada ao lado.</p>
+    <div class="meta">
+      <div><span class="k">Cliente</span>Moenda, agência e operadora de turismo</div>
+      <div><span class="k">Decide</span>Sônia Mattos</div>
+      <div><span class="k">Base</span>Briefing de 25/08/2026, 63 respostas</div>
+      <div><span class="k">Primeiro grupo</span>4 a 7 de setembro de 2026</div>
+    </div>
+  </div>
+</div>
+
+<section id="territorio">
+  <div class="wrap">
+    <p class="sec-num rev">01</p>
+    <h2 class="rev">O que a marca <em>é</em>, antes de<br>parecer qualquer coisa</h2>
+    <p class="lead rev">A Moenda não vende passeio. Vende a visitação a esse passado do Brasil: a fazenda, a história dela e as pessoas que resgataram e preservam essa história. O concorrente vende queijo, café e foto. Esse é o eixo de toda decisão visual que vem depois.</p>
+
+    <div class="mt rev">
+      <blockquote class="cita">
+        Se essa empresa fosse uma pessoa, ela seria uma grande professora. Elegante, inteligente, conhecedora, acolhedora, convidativa. Você está entregue ao conhecimento daquela pessoa, à aura daquela pessoa.
+        <cite>Rodrigo de Mattos, na reunião</cite>
+      </blockquote>
+    </div>
+
+    <div class="itens rev">
+      <div class="item"><span class="n">01</span><div><h4>Romântica</h4><p>No sentido de encantar, não de enfeitar. A marca convida, não grita.</p></div></div>
+      <div class="item"><span class="n">02</span><div><h4>Calorosa</h4><p>Recebe. A primeira mensagem no site já é a primeira hospitalidade da viagem.</p></div></div>
+      <div class="item"><span class="n">03</span><div><h4>Acolhedora</h4><p>Ninguém precisa saber história para se sentir bem-vindo. A professora explica sem humilhar.</p></div></div>
+    </div>
+
+    <div class="mt regras rev">
+      <div class="regra nao">
+        <p class="sel">Nunca</p>
+        <p>Frio, complicado, difícil, chato, pesado, arrogante, pedante, lento, distante, cansativo.</p>
+      </div>
+      <div class="regra nao">
+        <p class="sel">Atenção especial em "pesado"</p>
+        <p>Muita gente que nunca veio diz que essas fazendas têm karma pesado por causa da escravidão, e usa isso de desculpa. Nada na comunicação pode sugerir ou induzir isso.</p>
+      </div>
+      <div class="regra sim">
+        <p class="sel">Sobre o passado</p>
+        <p>O definidor não é a dor, é a construção. A cultura, a culinária, a beleza e a arte que esse legado permitiu. Protagonismo com fala, nunca fantasia de novela.</p>
+      </div>
+      <div class="regra nao">
+        <p class="sel">Tom de voz</p>
+        <p>Contemporâneo, sem maneirismo e sem tentar parecer jovem. Sônia foi literal: nada de "e aí galera". Sem apelo retrô e sem futurismo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cor">
+  <div class="wrap">
+    <p class="sec-num rev">02</p>
+    <h2 class="rev">Cor</h2>
+    <p class="lead rev">A regra veio pronta da reunião, na formulação do Rodrigo: qualquer cor funciona em tonalidade pastel ou tom de terra, o que não funciona é a versão gritante. Roxo e lilás estão fora porque não existe nada com essa cor no que o visitante vai ver.</p>
+
+    <h3 class="mt rev">Núcleo, o café</h3>
+    <p class="rev">Sônia deu a paleta sem saber que estava dando: o grão nasce verde, amadurece vermelho, é torrado marrom, e a folha do cafezal fecha o conjunto. Quatro cores de um objeto só.</p>
+    <div class="paleta rev" id="paleta-cafe"></div>
+
+    <h3 class="mt rev">Apoio, o azulejo português</h3>
+    <p class="rev">Entrou no fim da reunião e resolveu o que faltava: o azulejo está nas fazendas, é histórico sem ser passadista, e dá o azul, o branco perolado e os detalhes florais.</p>
+    <div class="paleta rev" id="paleta-azulejo"></div>
+    <div class="azul-faixa rev" id="faixa"></div>
+
+    <h3 class="mt rev">Terra, o chão de tudo</h3>
+    <div class="paleta rev" id="paleta-terra"></div>
+
+    <button class="baixar rev" id="btn-ase" type="button">Baixar paleta para Photoshop (.ase)</button>
+    <p class="dica rev">Arquivo Adobe Swatch Exchange. No Photoshop: Janela, Amostras, menu do painel, Importar amostras. Funciona também no Illustrator e no InDesign. Clique em qualquer cor acima para copiar o hexadecimal.</p>
+
+    <div class="mt regras rev">
+      <div class="regra nao"><p class="sel">Proibido</p><p>Roxo, lilás e variações. Qualquer cor em versão gritante ou berrante.</p></div>
+      <div class="regra sim"><p class="sel">Permitido</p><p>Primárias com vida, amarelo, azul, vermelho e verde, e todas as demais em pastel e tom de terra.</p></div>
+      <div class="regra sim"><p class="sel">Contraste</p><p>Texto em Tinta sobre Pérola ou Papel. Cereja só em detalhe e chamada, nunca em bloco grande de texto.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="tipo">
+  <div class="wrap">
+    <p class="sec-num rev">03</p>
+    <h2 class="rev">Tipografia</h2>
+    <p class="lead rev">Sônia rejeitou a fonte atual com um argumento preciso: ela é romântica e arredondada, mas não dialoga com a imagem. Pediu algo um pouco mais antigo e refinado, com referência histórica, sem virar retrô.</p>
+
+    <div class="mt2 rev">
+      <h3>Cormorant Garamond, para títulos</h3>
+      <p>Um garalde contemporâneo de contraste alto e traço fino. Tem a origem histórica que a marca precisa e a elegância da professora, sem parecer documento antigo. O itálico é o recurso emocional da marca, usar com parcimônia.</p>
+    </div>
+    <div class="mt2 rev">
+      <h3>Karla, para texto</h3>
+      <p>Grotesca humanista, contemporânea e legível em corpo pequeno, inclusive em folheteria e em celular. Faz o contraponto que impede o conjunto de ficar cerimonioso demais.</p>
+    </div>
+
+    <div class="escala rev">
+      <div class="l"><span class="esp">Display<br>Cormorant 300<br>50 a 116px</span><span style="font-family:var(--display);font-weight:300;font-size:clamp(40px,7vw,70px);line-height:1">Vale do Café</span></div>
+      <div class="l"><span class="esp">Título de seção<br>Cormorant 400<br>34 a 54px</span><span style="font-family:var(--display);font-weight:400;font-size:40px;line-height:1.05">As fazendas históricas</span></div>
+      <div class="l"><span class="esp">Destaque<br>Cormorant itálico<br>26px</span><span style="font-family:var(--display);font-style:italic;font-size:26px">uma grande professora</span></div>
+      <div class="l"><span class="esp">Subtítulo<br>Karla 300<br>19 a 20px</span><span style="font-weight:300;font-size:19px">Três dias entre fazendas tombadas, café especial e queijo premiado.</span></div>
+      <div class="l"><span class="esp">Texto<br>Karla 400<br>17px</span><span style="font-size:17px">O roteiro sai do Rio pela manhã e a primeira parada é a roda d'água vista por dentro da casa.</span></div>
+      <div class="l"><span class="esp">Etiqueta<br>Karla 700<br>11px, 0.2em</span><span style="font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase">Roteiro de três dias</span></div>
+    </div>
+    <p class="dica rev">As duas famílias são gratuitas e de uso comercial livre, do Google Fonts. Instale no sistema para usar no Photoshop, e o mesmo arquivo serve para o site, sem divergência entre a peça impressa e a tela.</p>
+  </div>
+</section>
+
+<section id="simbolo">
+  <div class="wrap">
+    <p class="sec-num rev">04</p>
+    <h2 class="rev">Símbolo</h2>
+    <p class="lead rev">O ícone atual tem um problema diagnosticado na própria reunião, e ele é sério: cada pessoa leu uma coisa diferente. Sônia e André viram roda de carroça. Rodrigo viu leme de navio.</p>
+
+    <div class="mt rev">
+      <blockquote class="cita">
+        Pode ser uma roda de carroça, pode ser um leme de navio, pode ser várias coisas. Ou seja, pode ser muita coisa e logo não é nada.
+        <cite>Rodrigo de Mattos</cite>
+      </blockquote>
+    </div>
+
+    <p class="mt2 rev">A saída não é abandonar o círculo, é ancorá-lo no objeto real. Sônia mostrou na câmera uma moenda de cana de uns 40 anos: <strong>dois cilindros que giram em eixos paralelos</strong>. Esse par de cilindros é o que nenhuma roda de carroça e nenhum leme têm. Três caminhos para explorar, do mais literal ao mais abstrato.</p>
+
+    <div class="simbolos rev">
+      <div class="sim">
+        <svg viewBox="0 0 200 120" fill="none" stroke="#2B241D" stroke-width="3" role="img" aria-label="Dois cilindros paralelos">
+          <circle cx="72" cy="60" r="34"/><circle cx="128" cy="60" r="34"/>
+          <circle cx="72" cy="60" r="9" fill="#9E3B25" stroke="none"/><circle cx="128" cy="60" r="9" fill="#9E3B25" stroke="none"/>
+          <line x1="72" y1="26" x2="72" y2="94"/><line x1="128" y1="26" x2="128" y2="94"/>
+        </svg>
+        <p class="cap"><b>Os dois cilindros</b>É o mecanismo da moenda e de nada mais. Resolve a ambiguidade de uma vez. Aguenta bordado e carimbo.</p>
+      </div>
+      <div class="sim">
+        <svg viewBox="0 0 200 120" fill="none" stroke="#2B241D" stroke-width="3" role="img" aria-label="Engrenagem e eixo">
+          <circle cx="100" cy="60" r="36"/>
+          <circle cx="100" cy="60" r="12" fill="#2F4A34" stroke="none"/>
+          <g stroke-linecap="round">
+            <line x1="100" y1="14" x2="100" y2="30"/><line x1="100" y1="90" x2="100" y2="106"/>
+            <line x1="54" y1="60" x2="70" y2="60"/><line x1="130" y1="60" x2="146" y2="60"/>
+            <line x1="67" y1="27" x2="78" y2="38"/><line x1="122" y1="82" x2="133" y2="93"/>
+            <line x1="133" y1="27" x2="122" y2="38"/><line x1="78" y1="82" x2="67" y2="93"/>
+          </g>
+        </svg>
+        <p class="cap"><b>A engrenagem</b>Vem dos eixos de ferro expostos dentro da casa da Ponte Alta, que a própria Sônia aponta como ponto de destaque do roteiro.</p>
+      </div>
+      <div class="sim">
+        <svg viewBox="0 0 200 120" fill="none" role="img" aria-label="Grão de café estilizado">
+          <ellipse cx="100" cy="60" rx="30" ry="42" stroke="#2B241D" stroke-width="3"/>
+          <path d="M100 20 C 84 40, 84 80, 100 100" stroke="#9E3B25" stroke-width="3" fill="none"/>
+        </svg>
+        <p class="cap"><b>O grão</b>Reserva para quando a marca precisar de um selo pequeno. Sozinho é genérico demais para ser a marca principal.</p>
+      </div>
+    </div>
+    <p class="dica rev">Estes desenhos são direção, não arte final. Servem para a família reagir antes do designer investir horas, que foi exatamente o que o Rodrigo pediu ao dizer para deixar a equipe criar.</p>
+  </div>
+</section>
+
+<section id="uso">
+  <div class="wrap">
+    <p class="sec-num rev">05</p>
+    <h2 class="rev">Uso da marca</h2>
+    <p class="lead rev">As exigências abaixo não são preferência de designer, saíram das respostas do briefing sobre aplicação real.</p>
+
+    <div class="itens rev">
+      <div class="item"><span class="n">01</span><div><h4>Tamanho mínimo: um doce de leite</h4><p>A resposta literal da família. Na prática, o símbolo precisa aguentar 12 mm de largura sem fechar os vãos. Qualquer detalhe que suma nesse tamanho sai do desenho.</p></div></div>
+      <div class="item"><span class="n">02</span><div><h4>Uma cor só, e sobre fundo escuro</h4><p>Obrigatório. Toda versão precisa existir em positivo, negativo e monocromático, porque vai ser bordada, gravada, recortada e carimbada.</p></div></div>
+      <div class="item"><span class="n">03</span><div><h4>Área de respiro</h4><p>Margem livre igual à altura de um cilindro do símbolo em todos os lados. Nada entra nessa margem, nem foto, nem texto, nem selo de fazenda.</p></div></div>
+      <div class="item"><span class="n">04</span><div><h4>A marca lidera, sempre</h4><p>A Moenda divide espaço com as marcas das fazendas, mas assina em cima. Nenhuma fazenda tem contato próprio exposto: quem quer conhecer entra pelo WhatsApp da Moenda.</p></div></div>
+      <div class="item"><span class="n">05</span><div><h4>Papelaria antes de brinde</h4><p>Prioridade declarada pela Sônia. Ela já produziu cerca de 10 folheterias para a região e é categórica: o impresso persiste, a caneca acaba na casa do neto. Um caderno com mapa e fotos das fazendas vem antes de qualquer chaveiro.</p></div></div>
+      <div class="item"><span class="n">06</span><div><h4>Onde a marca vive</h4><p>Fachada, uniforme, embalagem, veículo, copo e a papelaria. Cachaça artesanal, café, doce, sabonete e vela de café ficam para quando houver verba e volume.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="imagem">
+  <div class="wrap">
+    <p class="sec-num rev">06</p>
+    <h2 class="rev">Imagem</h2>
+    <p class="lead rev">Sônia definiu três personagens centrais, e essa é a regra de curadoria de toda foto do site e das redes. Natureza aparece, mas como fundo e suporte, nunca como assunto.</p>
+
+    <div class="itens rev">
+      <div class="item"><span class="n">01</span><div><h4>Patrimônio</h4><p>A maioria das fazendas é tombada pelo estado, algumas pelo IPHAN. É o atrativo declarado e a qualificação que diferencia. Mesmo quem vem pelo queijo recebe o patrimônio.</p></div></div>
+      <div class="item"><span class="n">02</span><div><h4>Presença negra</h4><p>Duzentos anos de escravidão produziram toda a riqueza da região. A regra da Sônia é clara: sem glamourizar e sem transformar pessoas em personagem de novela. Quem atua nas fazendas são historiadores e pedagogas, com fala potente, e é assim que aparecem.</p></div></div>
+      <div class="item"><span class="n">03</span><div><h4>Café</h4><p>A planta, o grão, o cafezal. Sônia observa que o café é plástico: serve de cor, de marca d'água e de elemento decorativo. E não é café do passado, é agroecológico, orgânico, especial, mandado para concurso.</p></div></div>
+    </div>
+
+    <div class="mt regras rev">
+      <div class="regra sim"><p class="sel">Acervo que já existe</p><p>Fotos de 2000 na Fazenda Ponte Alta com os proprietários, que mostram trajetória e não só passado. Um vídeo de 2023 usado em Portugal, apresentando um Brasil sem clichê. Três a cinco materiais aproveitáveis, alguns de qualidade inferior mas com valor de testemunho.</p></div>
+      <div class="regra sim"><p class="sel">A captar em setembro</p><p>Prova social com número e detalhe operacional, e a história da Sônia contada por terceiros. A primeira saída, de 4 a 7 de setembro, com 21 pessoas, é a captação.</p></div>
+      <div class="regra nao"><p class="sel">Cuidado jurídico</p><p>Nenhuma imagem de fazenda entra sem termo de adesão assinado. Rodrigo insistiu: nome, telefone e assinatura no papel, não aceite verbal.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="site">
+  <div class="wrap">
+    <p class="sec-num rev">07</p>
+    <h2 class="rev">O site, seção por <em>seção</em></h2>
+    <p class="lead rev">A rolagem tem um trabalho só: fazer o visitante entender, em segundos, que isto não é mais uma praia. Rodrigo disse a frase que define a arquitetura da página: o cliente precisa identificar imediatamente se isso é ou não é para ele.</p>
+
+    <div class="itens rev">
+      <div class="item"><span class="n">01</span><div><h4>Abertura, a tese</h4><p>Tela cheia com foto de fazenda e a promessa em Cormorant grande. Nada de menu pesado. A primeira dobra responde "o que é isso" sem o visitante rolar.</p></div></div>
+      <div class="item"><span class="n">02</span><div><h4>Por que aqui e não mais uma praia</h4><p>A objeção real não é distância, é ignorância da oferta. Esta seção compara de frente: Búzios, Paraty e o Vale, com tempo de viagem explícito. Muita gente acha que 160 km são 5 horas.</p></div></div>
+      <div class="item"><span class="n">03</span><div><h4>As três modalidades</h4><p>Roteiro de 3 a 4 dias com hospedagem, bate e volta do Rio, e o roteiro regional para quem já está em Conservatória. Cada um com sua duração e seu público, porque são três decisões de compra diferentes.</p></div></div>
+      <div class="item"><span class="n">04</span><div><h4>O Mapa Vivo do Vale</h4><p>O diferencial do projeto. Rolagem que fixa o mapa enquanto o itinerário avança ao lado, revelando cidade, fazenda e parada. Clicar abre a referência. É também o argumento visual de que os pontos se interconectam, vantagem que a Sônia aponta sobre a Toscana e o Vale do Loire.</p></div></div>
+      <div class="item"><span class="n">05</span><div><h4>Quem conduz</h4><p>A autoridade da Sônia contada sem autoelogio. Trinta e dois anos, o Preservale, e o fato de que ela ensinou a região a fazer isso. Aqui entra a foto de 2000 com os proprietários.</p></div></div>
+      <div class="item"><span class="n">06</span><div><h4>As fazendas</h4><p>Cada uma com história curta, tombamento e o que se vê. Diferencial declarado: nenhum site da região, nem das fazendas nem das agências, tem a história. Distinguir claramente as visitáveis das que aparecem só por ilustração.</p></div></div>
+      <div class="item"><span class="n">07</span><div><h4>Prova</h4><p>Depoimento com número e detalhe. Entra depois de setembro, com o material da primeira saída.</p></div></div>
+      <div class="item"><span class="n">08</span><div><h4>A porta, com filtro</h4><p>Botão de WhatsApp visível, e a qualificação acontece dentro da conversa, em três ou quatro perguntas automáticas no máximo. Em paralelo, lista de espera com vagas limitadas para o roteiro mais caro. Foi o acordo entre o Rodrigo, que queria formulário, e a Sônia, que lembrou que o público é 50+ e cada etapa a mais derruba gente.</p></div></div>
+    </div>
+
+    <div class="mt regras rev">
+      <div class="regra sim"><p class="sel">Como a rolagem se comporta</p><p>Revelação suave a cada seção que entra na tela, mapa fixo enquanto o roteiro corre ao lado, e barra de progresso no topo. Tudo desligado automaticamente para quem pediu menos movimento no sistema. Esta página que você está lendo usa o mesmo comportamento, serve de referência viva.</p></div>
+      <div class="regra nao"><p class="sel">O que não fazer na rolagem</p><p>Nada de animação que segura o dedo do usuário nem de efeito que atrasa a leitura. O público é 50+ no celular. Movimento serve para conduzir o olho, não para exibir técnica.</p></div>
+      <div class="regra sim"><p class="sel">Idiomas</p><p>Português, inglês e espanhol no contrato, francês depois. É vantagem competitiva real: só uma fazenda da região recebe em outra língua, e de forma precária.</p></div>
+      <div class="regra sim"><p class="sel">Obrigatório no lançamento</p><p>WhatsApp e processamento de pagamento com reserva. O site nasce com as datas de fim de semana disponíveis, porque a expectativa é de compra já na primeira semana.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="pendencias">
+  <div class="wrap">
+    <p class="sec-num rev">08</p>
+    <h2 class="rev">O que ainda depende <em>da família</em></h2>
+    <p class="lead rev">Nada aqui trava o começo, mas cada item destes muda uma decisão de design se chegar tarde.</p>
+
+    <div class="pend rev">
+      <h4>O nome e o domínio</h4>
+      <p>moenda.com.br está indisponível. Surgiu "Moendas do Vale" na reunião e Rodrigo pediu para a família decidir com calma. Isso muda o desenho da assinatura, então é a decisão mais urgente.</p>
+    </div>
+    <div class="pend rev">
+      <h4>A submarca "Fazendas"</h4>
+      <p>Rodrigo propôs uma linha de produto chamada Fazendas, para competir na cabeça do turista com Paraty, Búzios e Angra, na lógica de Apple e iPhone. Sônia contrapôs uma solução mais barata: a palavra Fazenda com caligrafia própria sempre que aparecer o nome de uma propriedade. Ficou com asterisco. São dois projetos de tamanhos bem diferentes.</p>
+    </div>
+    <div class="pend rev">
+      <h4>As marcas das fazendas</h4>
+      <p>Lista das propriedades, com marca em arquivo utilizável, selos e certificações. Junto, o termo de adesão assinado de cada uma.</p>
+    </div>
+    <div class="pend rev">
+      <h4>Seleção de imagens de moenda</h4>
+      <p>Rodrigo se ofereceu para mandar uma curadoria de imagens do universo, e Sônia vai pedir a foto da roda d'água vista por dentro da casa da Ponte Alta. Isso alimenta direto a fase de símbolo.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    ARK Content Soluções de Marketing. Manual construído a partir do briefing de 25 de agosto de 2026, com Sônia Mattos, André Mattos, Rodrigo de Mattos e Nilo. Toda regra deste documento tem origem em uma resposta registrada, e as citações são literais.
+  </div>
+</footer>
+
+<div id="aviso" hidden></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var CAFE = [
+    ["Grão Verde","#8A9A5B","O café antes de amadurecer. Fundo de área ampla e apoio."],
+    ["Cereja","#9E3B25","O grão maduro. Cor de ação e destaque. Nunca em bloco de texto."],
+    ["Torra","#5B3A21","O grão torrado. Texto sobre claro, e superfície em peça impressa."],
+    ["Cafezal","#2F4A34","A folha. Fundo escuro da marca e base de fotografia."]
+  ];
+  var AZULEJO = [
+    ["Azulejo","#31558A","O azul das fazendas. Detalhe, moldura e ícone."],
+    ["Pérola","#F3EEE4","O branco do azulejo. Fundo padrão de peça e de seção."],
+    ["Ocre","#C9922E","Sinalização e chamada secundária."],
+    ["Telha","#B5603A","Ligação entre o azulejo e a terra. Uso pontual."]
+  ];
+  var TERRA = [
+    ["Terra Clara","#DCD1BF","Divisórias, fundos alternados e papel."],
+    ["Terra","#8A7963","Texto de apoio e legenda."],
+    ["Tinta","#2B241D","Texto principal. Nunca preto puro."]
+  ];
+
+  function hexRgb(h){
+    var n = parseInt(h.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function hexCmyk(h){
+    var r = hexRgb(h).map(function(v){ return v / 255; });
+    var k = 1 - Math.max(r[0], r[1], r[2]);
+    if (k >= 1) return [0,0,0,100];
+    var c = (1 - r[0] - k) / (1 - k), m = (1 - r[1] - k) / (1 - k), y = (1 - r[2] - k) / (1 - k);
+    return [c,m,y,k].map(function(v){ return Math.round(v * 100); });
+  }
+
+  function avisar(t){
+    var a = document.getElementById("aviso");
+    a.textContent = t; a.hidden = false;
+    clearTimeout(avisar.t);
+    avisar.t = setTimeout(function(){ a.hidden = true; }, 2200);
+  }
+
+  function pintar(alvo, lista){
+    var el = document.getElementById(alvo);
+    lista.forEach(function(c){
+      var nome = c[0], hex = c[1], uso = c[2];
+      var rgb = hexRgb(hex), cmyk = hexCmyk(hex);
+      var b = document.createElement("button");
+      b.className = "cor";
+      b.type = "button";
+      b.setAttribute("aria-label", "Copiar " + hex + ", " + nome);
+      var am = document.createElement("span");
+      am.className = "amostra";
+      am.style.background = hex;
+      var info = document.createElement("span");
+      info.className = "info";
+      var n1 = document.createElement("span"); n1.className = "nome"; n1.textContent = nome;
+      var n2 = document.createElement("span"); n2.className = "val";
+      n2.innerHTML = hex.toUpperCase() + "<br>RGB " + rgb.join(" ") + "<br>CMYK " + cmyk.join(" ");
+      var n3 = document.createElement("span"); n3.className = "uso"; n3.textContent = uso;
+      info.appendChild(n1); info.appendChild(n2); info.appendChild(n3);
+      b.appendChild(am); b.appendChild(info);
+      b.addEventListener("click", function(){
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(hex.toUpperCase()).then(function(){
+            avisar(hex.toUpperCase() + " copiado");
+          }).catch(function(){ avisar("Copie a mão: " + hex.toUpperCase()); });
+        } else { avisar("Copie a mão: " + hex.toUpperCase()); }
+      });
+      el.appendChild(b);
+    });
+  }
+  pintar("paleta-cafe", CAFE);
+  pintar("paleta-azulejo", AZULEJO);
+  pintar("paleta-terra", TERRA);
+
+  (function(){
+    var f = document.getElementById("faixa");
+    var cores = ["#31558A","#F3EEE4","#C9922E","#F3EEE4","#2F4A34","#F3EEE4","#B5603A","#F3EEE4"];
+    f.style.display = "grid";
+    f.style.gridTemplateColumns = "repeat(" + cores.length + ",1fr)";
+    cores.forEach(function(c){
+      var d = document.createElement("div");
+      d.style.background = c;
+      f.appendChild(d);
+    });
+  })();
+
+  // Adobe Swatch Exchange: cabecalho ASEF, versao 1.0, contagem de blocos, e um
+  // bloco 0x0001 por cor, com nome em UTF-16BE e RGB em float de 32 bits.
+  function gerarASE(grupos){
+    function u16(v){ return [(v >> 8) & 255, v & 255]; }
+    function u32(v){ return [(v >>> 24) & 255, (v >>> 16) & 255, (v >>> 8) & 255, v & 255]; }
+    function f32(v){
+      var b = new ArrayBuffer(4);
+      new DataView(b).setFloat32(0, v, false);
+      return Array.prototype.slice.call(new Uint8Array(b));
+    }
+    var blocos = [], total = 0;
+    grupos.forEach(function(g){ total += g[1].length; });
+    grupos.forEach(function(g){
+      g[1].forEach(function(c){
+        var nome = g[0] + " " + c[0];
+        var corpo = [];
+        corpo = corpo.concat(u16(nome.length + 1));
+        for (var i = 0; i < nome.length; i++) corpo = corpo.concat(u16(nome.charCodeAt(i)));
+        corpo = corpo.concat(u16(0));
+        corpo = corpo.concat([82, 71, 66, 32]);
+        var rgb = hexRgb(c[1]);
+        corpo = corpo.concat(f32(rgb[0] / 255), f32(rgb[1] / 255), f32(rgb[2] / 255));
+        corpo = corpo.concat(u16(0));
+        blocos = blocos.concat(u16(1), u32(corpo.length), corpo);
+      });
+    });
+    var saida = [65, 83, 69, 70];
+    saida = saida.concat(u16(1), u16(0), u32(total), blocos);
+    return new Uint8Array(saida);
+  }
+
+  document.getElementById("btn-ase").addEventListener("click", function(){
+    try {
+      var dados = gerarASE([["Café", CAFE], ["Azulejo", AZULEJO], ["Terra", TERRA]]);
+      var url = URL.createObjectURL(new Blob([dados], {type: "application/octet-stream"}));
+      var a = document.createElement("a");
+      a.href = url; a.download = "moenda-paleta.ase";
+      document.body.appendChild(a); a.click(); a.parentNode.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      avisar("moenda-paleta.ase baixado, 11 cores");
+    } catch(e) {
+      avisar("Não consegui gerar o arquivo");
+    }
+  });
+
+  var prog = document.getElementById("prog");
+  function medir(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    prog.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + "%";
+  }
+  window.addEventListener("scroll", medir, {passive:true});
+  window.addEventListener("resize", medir);
+  medir();
+
+  var reduz = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var revs = document.querySelectorAll(".rev");
+  var i;
+  if (reduz || !("IntersectionObserver" in window)) {
+    for (i = 0; i < revs.length; i++) revs[i].classList.add("on");
+  } else {
+    var obs = new IntersectionObserver(function(ent){
+      ent.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add("on"); obs.unobserve(e.target); } });
+    }, {rootMargin: "0px 0px -12% 0px", threshold: 0.06});
+    for (i = 0; i < revs.length; i++) obs.observe(revs[i]);
+  }
+
+  var secoes = document.querySelectorAll("section[id]");
+  var links = document.querySelectorAll("#indice a");
+  if ("IntersectionObserver" in window) {
+    var obs2 = new IntersectionObserver(function(ent){
+      ent.forEach(function(e){
+        if (!e.isIntersecting) return;
+        for (var j = 0; j < links.length; j++) {
+          links[j].classList.toggle("ativo", links[j].getAttribute("href") === "#" + e.target.id);
+        }
+      });
+    }, {rootMargin: "-45% 0px -50% 0px"});
+    for (i = 0; i < secoes.length; i++) obs2.observe(secoes[i]);
+  }
+})();
+</script>
+</body>
+</html>
