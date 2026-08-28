@@ -55,6 +55,10 @@ const STATE_KEYS = new Set([
   "wfa-motor-plano",
   // Briefings estruturados que disparam a cadeia de pauta (roteiro → design → edição).
   "wfa-briefings",
+  // Planejamentos de onboarding: cada item vira a apresentacao do cliente
+  // (Operacional > Planejamentos). O HTML e montado no navegador; aqui so
+  // fica o conteudo dos campos.
+  "wfa-planejamentos",
   // Briefing de ENTRADA de cliente novo (identidade visual e site), preenchido na
   // página /briefing. Nome parecido com o de cima, papel diferente: aquele é pauta de
   // conteúdo, este é a reunião que abre o projeto. Só a página /briefing escreve aqui,
