@@ -32,8 +32,19 @@ const CONTA = process.env.CLOUDFLARE_ACCOUNT_ID || 'e85057a4ce95cb115958cbf045f7
 const SUFIXO = '.arkcontent.workers.dev';
 const TIMEOUT = 15000;
 
-/** Workers que existem mas nao sao pagina para o Gabriel abrir. */
-const NAO_E_PAGINA = new Set([]);
+/**
+ * Workers que existem mas nao entram na Central: duplicata ou versao superada.
+ * Achados pela primeira rodada com a API em 30/08/2026. Valeria apagar os dois
+ * la na Cloudflare, ai estas linhas somem.
+ */
+const NAO_E_PAGINA = new Set([
+  // Deploy antigo do proprio WorkFlowArk, de antes do nome atual. Responde 307
+  // igual ao workflowark.arkcontent.workers.dev, que e o que a equipe usa.
+  'arkcontent',
+  // Primeira versao da proposta da Mazuchi, substituida por proposta-mazuchi,
+  // que e a que fechou o contrato e ja esta cadastrada.
+  'proposta-taisa',
+]);
 
 const args = process.argv.slice(2);
 const STRICT = args.includes('--strict');
