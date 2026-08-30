@@ -136,12 +136,14 @@ function AuthPage() {
           Trabalhar na ARK não é brincadeira. É método, ritmo e resultado, todo santo dia.
         </p>
         <div className="ax-badges">
-          {/* Numeros vindos do painel de KPIs da propria carteira (pagina Clientes),
-              conferidos em 30/08/2026: carteira ativa 27, sendo 15 ARK e 11 Alpha,
-              e 11 captacoes por mes. Quando a carteira mudar, e so olhar la e atualizar aqui. */}
+          {/* Quem entra aqui e a equipe, entao o selo fala de quem a ARK e, nao de
+              recorte interno de carteira. Carteira ativa (27) sai do painel de KPIs da
+              pagina Clientes, conferida em 30/08/2026. Posicionamento e metodo vem de
+              "A Agencia ARK" e "Metodo dos 5 Eixos". */}
+          <span>+500 clientes atendidos</span>
           <span>27 clientes ativos</span>
-          <span>15 ARK Direto · 11 Squad Alpha</span>
-          <span>11 captações por mês</span>
+          <span>Especialistas em gastronomia</span>
+          <span>Método dos 5 Eixos</span>
         </div>
       </div>
 
