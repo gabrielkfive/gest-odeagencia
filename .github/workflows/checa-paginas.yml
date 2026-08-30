@@ -1,0 +1,38 @@
+# Confere se a Central de Paginas (/paginas) esta em dia com o que a ARK tem no ar.
+#
+# Workflow SEPARADO do deploy de proposito. O cadastro em public/paginas.html e manual,
+# entao pagina publicada de outra pasta nao gera push aqui e passaria despercebida. Um
+# workflow proprio permite rodar todo dia, e nao so quando alguem mexe neste repo.
+#
+# NUNCA falha. Isto e um aviso, nao um portao (regra n1: nada bloqueia producao). O
+# resultado aparece no resumo da execucao, na aba Actions.
+name: Checa Paginas no ar
+
+on:
+  schedule:
+    # 12:00 UTC = 09:00 de Brasilia, todo dia.
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy WorkFlowArk']
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  checa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Sem npm ci de proposito: o script so usa a biblioteca padrao do Node.
+      # Isso deixa a checagem em segundos e imune a quebra de dependencia.
+      - name: Conferir cadastro contra o que esta no ar
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node deploy/checa-paginas.mjs

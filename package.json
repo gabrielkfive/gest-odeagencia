@@ -15,7 +15,8 @@
     "teste:safari": "node deploy/teste-safari-ios.mjs",
     "teste:arrastar": "node deploy/teste-arrastar-tarefas.mjs",
     "teste:projetos": "node deploy/teste-projetos.mjs",
-    "prova:visual": "node deploy/prova-visual.mjs"
+    "prova:visual": "node deploy/prova-visual.mjs",
+    "checa:paginas": "node deploy/checa-paginas.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
