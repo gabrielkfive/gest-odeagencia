@@ -37,6 +37,7 @@ h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,4.5vw,44px);l
 .card .cab{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
 .card .tipo{font-family:var(--display);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#111;background:var(--amarelo);padding:4px 10px;border-radius:999px;white-space:nowrap}
 .card .tipo.prop{background:#4FD6C6}
+.card .tipo.site{background:#7ee787}
 .card .tipo.soft{background:#c9b8ff}
 .card .cli{font-family:var(--display);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:600}
 .card h2{font-family:var(--display);font-weight:700;font-size:18px;margin:12px 0 6px}
@@ -67,6 +68,7 @@ h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,4.5vw,44px);l
     <button class="filtro on" data-f="todos">Todas</button>
     <button class="filtro" data-f="planejamento">Planejamentos</button>
     <button class="filtro" data-f="proposta">Propostas</button>
+    <button class="filtro" data-f="site">Sites de cliente</button>
     <button class="filtro" data-f="software">Software e docs</button>
   </div>
 
@@ -78,6 +80,30 @@ h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,4.5vw,44px);l
 </div>
 <script>
 var PAGINAS = [
+  {nome:"Site Mazuchi Regenera", cliente:"Mazuchi Regenera (Taisa)", tipo:"site",
+   url:"https://mazuchi.arkcontent.workers.dev",
+   desc:"Site de conversão da clínica de laserterapia e feridas, com SEO técnico e dois posts de blog em /blog."},
+  {nome:"Plano Estratégico Mazuchi", cliente:"Mazuchi Regenera (Taisa)", tipo:"planejamento",
+   url:"https://plano-mazuchi.arkcontent.workers.dev",
+   desc:"Apresentação de 16 seções: diagnóstico, os três públicos, referências, roteiros, mídia e banco de ideias."},
+  {nome:"Identidade Visual Mazuchi", cliente:"Mazuchi Regenera (Taisa)", tipo:"proposta",
+   url:"https://plano-mazuchi.arkcontent.workers.dev/identidade/",
+   desc:"Proposta de marca: assinatura, símbolo do ponto de laser, paleta e tipografia. Aguardando aprovação."},
+  {nome:"Proposta Mazuchi Regenera", cliente:"Mazuchi Regenera (Taisa)", tipo:"proposta",
+   url:"https://proposta-mazuchi.arkcontent.workers.dev",
+   desc:"Proposta comercial que fechou o contrato de 6 meses, com prévia de site e as três fases de investimento."},
+  {nome:"Site Moenda", cliente:"Moenda (Sônia Mattos)", tipo:"site",
+   url:"https://moenda.arkcontent.workers.dev",
+   desc:"Site da marca Moenda, no Vale do Café. Publicado em 25/08."},
+  {nome:"Plano Estratégico EMFACE", cliente:"EMFACE", tipo:"planejamento",
+   url:"https://plano-emface.arkcontent.workers.dev",
+   desc:"Plano de 15 seções com diagnóstico, benchmarking, roteiros técnicos, mídia paga e cronograma."},
+  {nome:"Roteiros ARK · Nutrição Brasil", cliente:"Farmácia Vivenda", tipo:"planejamento",
+   url:"https://roteiros-ark-nutricao.arkcontent.workers.dev",
+   desc:"Roteiros da campanha A gente vai junto, para o Nutrição Brasil 2026."},
+  {nome:"Roteiros Nutrição Brasil", cliente:"Farmácia Vivenda", tipo:"planejamento",
+   url:"https://roteiros-nutricao-brasil.arkcontent.workers.dev",
+   desc:"Roteiros da linha Antes da receita chegar, para o evento Nutrição Brasil."},
   {nome:"Planejamento Vivenda · Agosto 26", cliente:"Farmácia Vivenda", tipo:"planejamento",
    url:"https://planejamento-vivenda.arkcontent.workers.dev",
    desc:"O mês do nutricionista. Resumo simples em /resumo."},
@@ -109,8 +135,8 @@ var PAGINAS = [
    url:"https://workflowark.arkcontent.workers.dev",
    desc:"O hub operacional da equipe: tarefas, financeiro, clientes, agentes e rotinas."}
 ];
-var rotulo = {planejamento:"Planejamento", proposta:"Proposta", software:"Software"};
-var classe = {planejamento:"", proposta:"prop", software:"soft"};
+var rotulo = {planejamento:"Planejamento", proposta:"Proposta", site:"Site", software:"Software"};
+var classe = {planejamento:"", proposta:"prop", site:"site", software:"soft"};
 function render(f){
   document.getElementById('cards').innerHTML = PAGINAS
     .filter(function(p){ return f==='todos' || p.tipo===f; })
