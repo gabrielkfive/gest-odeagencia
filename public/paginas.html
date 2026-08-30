@@ -37,8 +37,12 @@ h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,4.5vw,44px);l
 .card .cab{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
 .card .tipo{font-family:var(--display);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#111;background:var(--amarelo);padding:4px 10px;border-radius:999px;white-space:nowrap}
 .card .tipo.prop{background:#4FD6C6}
+.card .tipo.brief{background:#ffb27a}
+.card .tipo.rot{background:#ff9ec7}
 .card .tipo.site{background:#7ee787}
 .card .tipo.soft{background:#c9b8ff}
+.filtro b{font-weight:700;opacity:.55;margin-left:2px}
+.filtro.on b{opacity:.6}
 .card .cli{font-family:var(--display);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:600}
 .card h2{font-family:var(--display);font-weight:700;font-size:18px;margin:12px 0 6px}
 .card p{color:var(--muted);font-size:13.5px}
@@ -62,15 +66,11 @@ h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,4.5vw,44px);l
 <div class="wrap">
   <div class="kicker">Central de Páginas · ARK Content</div>
   <h1>Tudo que a ARK tem <span style="color:var(--amarelo)">no ar.</span></h1>
-  <p class="lead">Planejamentos, propostas e softwares publicados como página, num lugar só. Clique pra abrir; cada card mostra o cliente, o tipo e a URL de produção.</p>
+  <p class="lead">Propostas, briefings, planos estratégicos, roteiros, sites de cliente e software, num lugar só. Filtre pelo contexto, clique pra abrir; cada card mostra o cliente e a URL de produção.</p>
 
-  <div class="filtros" id="filtros">
-    <button class="filtro on" data-f="todos">Todas</button>
-    <button class="filtro" data-f="planejamento">Planejamentos</button>
-    <button class="filtro" data-f="proposta">Propostas</button>
-    <button class="filtro" data-f="site">Sites de cliente</button>
-    <button class="filtro" data-f="software">Software e docs</button>
-  </div>
+  <!-- Os botoes sao montados por montaFiltros() a partir de TIPOS e do que existe
+       em PAGINAS. Nao escrever filtro na mao aqui, ou volta a lista paralela. -->
+  <div class="filtros" id="filtros"></div>
 
   <div class="cards" id="cards"></div>
 
@@ -83,7 +83,7 @@ var PAGINAS = [
   {nome:"Site Mazuchi Regenera", cliente:"Mazuchi Regenera (Taisa)", tipo:"site",
    url:"https://mazuchi.arkcontent.workers.dev",
    desc:"Site de conversão da clínica de laserterapia e feridas, com SEO técnico e dois posts de blog em /blog."},
-  {nome:"Plano Estratégico Mazuchi", cliente:"Mazuchi Regenera (Taisa)", tipo:"planejamento",
+  {nome:"Plano Estratégico Mazuchi", cliente:"Mazuchi Regenera (Taisa)", tipo:"plano",
    url:"https://plano-mazuchi.arkcontent.workers.dev",
    desc:"Apresentação de 16 seções: diagnóstico, os três públicos, referências, roteiros, mídia e banco de ideias."},
   {nome:"Identidade Visual Mazuchi", cliente:"Mazuchi Regenera (Taisa)", tipo:"proposta",
@@ -98,28 +98,28 @@ var PAGINAS = [
   {nome:"Site Moenda", cliente:"Moenda (Sônia Mattos)", tipo:"site",
    url:"https://moenda.arkcontent.workers.dev",
    desc:"Site da marca Moenda, no Vale do Café. Publicado em 25/08."},
-  {nome:"Plano Estratégico EMFACE", cliente:"EMFACE", tipo:"planejamento",
+  {nome:"Plano Estratégico EMFACE", cliente:"EMFACE", tipo:"plano",
    url:"https://plano-emface.arkcontent.workers.dev",
    desc:"Plano de 15 seções com diagnóstico, benchmarking, roteiros técnicos, mídia paga e cronograma."},
-  {nome:"Roteiros ARK · Nutrição Brasil", cliente:"Farmácia Vivenda", tipo:"planejamento",
+  {nome:"Roteiros ARK · Nutrição Brasil", cliente:"Farmácia Vivenda", tipo:"roteiro",
    url:"https://roteiros-ark-nutricao.arkcontent.workers.dev",
    desc:"Roteiros da campanha A gente vai junto, para o Nutrição Brasil 2026."},
-  {nome:"Roteiros Nutrição Brasil", cliente:"Farmácia Vivenda", tipo:"planejamento",
+  {nome:"Roteiros Nutrição Brasil", cliente:"Farmácia Vivenda", tipo:"roteiro",
    url:"https://roteiros-nutricao-brasil.arkcontent.workers.dev",
    desc:"Roteiros da linha Antes da receita chegar, para o evento Nutrição Brasil."},
-  {nome:"Planejamento Vivenda · Agosto 26", cliente:"Farmácia Vivenda", tipo:"planejamento",
+  {nome:"Planejamento Vivenda · Agosto 26", cliente:"Farmácia Vivenda", tipo:"plano",
    url:"https://planejamento-vivenda.arkcontent.workers.dev",
    desc:"O mês do nutricionista. Resumo simples em /resumo."},
-  {nome:"Plano Novo Gama + Campanha", cliente:"Drogaria Vivenda Novo Gama", tipo:"planejamento",
+  {nome:"Plano Novo Gama + Campanha", cliente:"Drogaria Vivenda Novo Gama", tipo:"plano",
    url:"https://planejamento-vivenda.arkcontent.workers.dev/novo-gama/",
    desc:"O plano da 8ª loja: números da 1ª semana, metas, roteiros de oferta e tráfego. Campanha de lançamento em /campanha."},
-  {nome:"Roteiros Novo Gama", cliente:"Drogaria Vivenda Novo Gama", tipo:"planejamento",
+  {nome:"Roteiros Novo Gama", cliente:"Drogaria Vivenda Novo Gama", tipo:"roteiro",
    url:"https://roteiros-novo-gama.arkcontent.workers.dev",
    desc:"Roteiros de gravação da inauguração: visita do Remerson e da Graziela e rotina da equipe da loja."},
   {nome:"Vivenda Hub", cliente:"Farmácia Vivenda", tipo:"software",
    url:"https://vivenda-hub.arkcontent.workers.dev",
    desc:"Software da diretoria: metas, conversão, desconto, carteira médica e projeções, atualizado a cada ciclo."},
-  {nome:"Plano da Loja 304", cliente:"Martino Fogo & Brasa", tipo:"planejamento",
+  {nome:"Plano da Loja 304", cliente:"Martino Fogo & Brasa", tipo:"plano",
    url:"https://planejamento-martino.arkcontent.workers.dev",
    desc:"Deck visual de 19 slides do planejamento estratégico da Loja 304."},
   {nome:"Proposta Moenda · Vale do Café", cliente:"Moenda (Sônia Mattos)", tipo:"proposta",
@@ -138,14 +138,39 @@ var PAGINAS = [
    url:"https://workflowark.arkcontent.workers.dev",
    desc:"O hub operacional da equipe: tarefas, financeiro, clientes, agentes e rotinas."}
 ];
-var rotulo = {planejamento:"Planejamento", proposta:"Proposta", site:"Site", software:"Software"};
-var classe = {planejamento:"", proposta:"prop", site:"site", software:"soft"};
+// Fonte unica dos contextos. A ordem daqui e a ordem dos filtros na tela.
+// Card com tipo novo so precisa de uma linha aqui, o filtro aparece sozinho.
+var TIPOS = [
+  {id:"proposta",  rotulo:"Proposta",  filtro:"Propostas",           classe:"prop"},
+  {id:"briefing",  rotulo:"Briefing",  filtro:"Briefings",           classe:"brief"},
+  {id:"plano",     rotulo:"Plano",     filtro:"Planos estratégicos", classe:""},
+  {id:"roteiro",   rotulo:"Roteiro",   filtro:"Roteiros",            classe:"rot"},
+  {id:"site",      rotulo:"Site",      filtro:"Sites de cliente",    classe:"site"},
+  {id:"software",  rotulo:"Software",  filtro:"Software e docs",     classe:"soft"}
+];
+var porId = {};
+TIPOS.forEach(function(t){ porId[t.id] = t; });
+
+// Os botoes saem dos dados, nao de uma lista paralela no HTML. Assim contexto sem
+// nenhuma pagina nao vira filtro vazio, e nao existe lista pra sair de sincronia.
+function montaFiltros(){
+  var usados = {};
+  PAGINAS.forEach(function(p){ usados[p.tipo] = (usados[p.tipo]||0) + 1; });
+  var html = '<button class="filtro on" data-f="todos">Todas <b>'+PAGINAS.length+'</b></button>';
+  TIPOS.forEach(function(t){
+    if(!usados[t.id]) return;
+    html += '<button class="filtro" data-f="'+t.id+'">'+t.filtro+' <b>'+usados[t.id]+'</b></button>';
+  });
+  document.getElementById('filtros').innerHTML = html;
+}
+
 function render(f){
   document.getElementById('cards').innerHTML = PAGINAS
     .filter(function(p){ return f==='todos' || p.tipo===f; })
     .map(function(p){
+      var t = porId[p.tipo] || {rotulo:p.tipo, classe:''};
       return '<a class="card" href="'+p.url+'" target="_blank" rel="noopener" data-t="'+p.tipo+'">'+
-        '<div class="cab"><span class="cli">'+p.cliente+'</span><span class="tipo '+classe[p.tipo]+'">'+rotulo[p.tipo]+'</span></div>'+
+        '<div class="cab"><span class="cli">'+p.cliente+'</span><span class="tipo '+t.classe+'">'+t.rotulo+'</span></div>'+
         '<h2>'+p.nome+'</h2><p>'+p.desc+'</p>'+
         '<span class="url">'+p.url.replace('https://','')+'</span></a>';
     }).join('');
@@ -156,6 +181,7 @@ document.getElementById('filtros').addEventListener('click', function(ev){
   b.classList.add('on');
   render(b.dataset.f);
 });
+montaFiltros();
 render('todos');
 </script>
 </body>

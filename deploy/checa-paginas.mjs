@@ -92,13 +92,21 @@ function lerCadastradas(caminho) {
   if (!bloco) throw new Error('Nao achei o array PAGINAS em ' + caminho);
 
   const itens = [];
-  const re = /\{nome:"([^"]+)"[\s\S]*?url:"([^"]+)"/g;
+  const re = /\{nome:"([^"]+)", cliente:"[^"]*", tipo:"([a-z]+)"[\s\S]*?url:"([^"]+)"/g;
   let m;
   while ((m = re.exec(bloco[1])) !== null) {
-    itens.push({ nome: m[1], url: m[2] });
+    itens.push({ nome: m[1], tipo: m[2], url: m[3] });
   }
   if (itens.length === 0) throw new Error('PAGINAS existe mas veio vazio, regex desatualizada?');
   return itens;
+}
+
+/** Le os contextos validos do proprio paginas.html, para nao virar lista paralela. */
+function lerTipos(caminho) {
+  const html = readFileSync(caminho, 'utf8');
+  const bloco = html.match(/var TIPOS\s*=\s*\[([\s\S]*?)\n\];/);
+  if (!bloco) return [];
+  return [...bloco[1].matchAll(/\{id:"([a-z]+)"/g)].map((m) => m[1]);
 }
 
 /** mazuchi.arkcontent.workers.dev/blog/ -> mazuchi */
@@ -200,6 +208,19 @@ async function main() {
   const jaTem = new Set(cadastradas.map((p) => subdominio(p.url)).filter(Boolean));
   log(`  Cadastradas: ${cadastradas.length} cards, ${jaTem.size} subdominios distintos.`);
 
+  // Card com contexto que nao existe em TIPOS renderiza com o id cru no lugar do
+  // rotulo, e o filtro dele nunca aparece. Erro silencioso, entao vale avisar.
+  const tiposValidos = new Set(lerTipos(ARQUIVO));
+  const orfaos = tiposValidos.size
+    ? cadastradas.filter((p) => p.tipo && !tiposValidos.has(p.tipo))
+    : [];
+  if (orfaos.length) {
+    log(`  ATENCAO: ${orfaos.length} card(s) com contexto fora de TIPOS:`);
+    orfaos.forEach((o) => log(`    ${o.nome} -> tipo:"${o.tipo}"`));
+    resumo(`## Central de Paginas\n\n${orfaos.length} card(s) com contexto que nao existe em TIPOS: `
+      + orfaos.map((o) => `\`${o.nome}\` (\`${o.tipo}\`)`).join(', '));
+  }
+
   const token = process.env.CLOUDFLARE_API_TOKEN;
   let nomes = token ? await viaApi(token) : null;
   const via = nomes ? 'API da Cloudflare' : 'varredura dos wrangler locais';
@@ -250,7 +271,10 @@ async function main() {
       log(card + '\n');
       md += card + '\n';
     }
-    md += '```\n\nTipos validos: `planejamento`, `proposta`, `site`, `software`.\n';
+    const tipos = lerTipos(ARQUIVO);
+    const lista = tipos.length ? tipos.map((t) => '`' + t + '`').join(', ') : 'ver TIPOS em paginas.html';
+    log(`  Contextos validos: ${tipos.join(', ') || '(nao consegui ler TIPOS)'}\n`);
+    md += '```\n\nContextos validos: ' + lista + '.\n';
   }
 
   if (quebradas.length) {
