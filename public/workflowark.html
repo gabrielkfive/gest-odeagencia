@@ -4069,7 +4069,7 @@ async function bootCloudSync(){
     wfaSeedRotinasV1();      // rotinas semanais da equipe (1x, idempotente)
     // Seeds que ANTES rodavam no parse (e apagavam dados em navegador novo): agora aqui,
     // com a lista real do servidor já aplicada, então só ACRESCENTAM.
-    seedValhalla();seedSamuel();seedProcessos();saneamentoCarteira();
+    seedValhalla();seedSamuel();seedProcessos();saneamentoCarteira();saneamentoBriefingV2();
     wfaSeedHistoricoCob(['2026-06','2026-07']);   // preenche jun/jul como cobrado
     if(WFA_WPP_OFF){try{document.querySelectorAll('[data-nav="whatsapp"]').forEach(el=>el.style.display='none');}catch(e){}}
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
@@ -5998,12 +5998,24 @@ const CLIENTES_BASE = [
   // ARK Content (cliente interno: aparece em tarefas/filtros, fora da carteira e da cobrança)
   {id:'ark',nm:'ARK Content',tipo:'Interno',plano:'Interno',valor:0,status:'gr',meta:'Marketing e operação da própria ARK',extra:'Tarefas internas da agência'},
   // ARK Direto
-  {id:'vivenda',nm:'Vivenda',tipo:'ARK',plano:'Plano X',valor:5500,status:'gr',cap:3,meta:'Maior ticket · 3 captações/mês',extra:'📹 3 captações/mês · prioritário'},
-  {id:'fercon',nm:'Fercon',tipo:'ARK',plano:'Gold',valor:4200,status:'gr',cap:2,meta:'Ampliou · 2 captações/mês',extra:'📹 2 captações/mês · mais reativo que ativo'},
-  {id:'sasse',nm:'Sasse Gifts',tipo:'ARK',plano:'Plano X',valor:4500,status:'gr',cap:2,meta:'2 captações/mês',extra:'📹 2 captações/mês'},
-  {id:'fonseca',nm:'Fonseca & Cavalcanti',tipo:'ARK',plano:'Gold',valor:2500,status:'gr',cap:1,meta:'1 captação/mês · próxima fase',extra:'📹 1 captação · Compliance OAB'},
+  {id:'vivenda',nm:'Vivenda',tipo:'ARK',plano:'Plano X',valor:5500,status:'gr',cap:3,meta:'Maior ticket · 3 a 4 captações/mês',extra:'📹 3 a 4 captações/mês · TikTok Shop e representantes'},
+  {id:'fercon',nm:'Fercon',tipo:'ARK',plano:'Gold',valor:4200,status:'gr',cap:2,meta:'Prioridade: Google Ads · 1 a 2 captações/mês',extra:'📹 1 a 2 captações/mês · site acordado e não priorizado pelo cliente'},
+  {id:'sasse',nm:'Sasse Gifts',tipo:'ARK',plano:'Plano X',valor:4500,status:'r',cap:1,meta:'AVISO PRÉVIO · fechar as entregas pendentes',extra:'📹 1 captação/mês · brindes corporativos, fabricação própria'},
+  {id:'fonseca',nm:'Fonseca & Cavalcanti',tipo:'ARK',plano:'Gold',valor:2500,status:'r',cap:1,meta:'Feedback negativo · Google Ads e landing page atrasados',extra:'📹 1 captação · Compliance OAB · contrato acaba em ~6 meses'},
   {id:'vaca',nm:'Vaca Velha',tipo:'ARK',plano:'Gold',valor:2000,status:'gr',cap:1,meta:'1 captação/mês (2ª às vezes em 30d)',extra:'📹 1 captação · mês sim/mês não p/ a 2ª'},
+  // Promovidos do seed de saneamento (25/08) para ca em 30/08. Viviam so em
+  // wfa-clientes-custom, gravados DEPOIS da sincronizacao: aparelho novo, ou nuvem
+  // fora do ar, abria o sistema sem eles, e os projetos apontavam pra cliente que
+  // nao existia. Os ids sao os mesmos de la (eemface e mazuki estao escritos assim
+  // desde 25/08) pra nao orfanar tarefa e cobranca que ja referenciam esses ids.
+  // Os dados seguem o briefing de 27/08, que o Gabriel confirmou como fonte da verdade.
+  {id:'royalface',nm:'Royal Face Planaltina',tipo:'ARK',plano:'Gold',valor:3800,status:'gr',cap:1,meta:'Meta do cliente: R$ 10 mil/dia e R$ 100 mil/mês',extra:'📹 1 captação/mês · franquia com 5 unidades · pendente: conteúdos da 2ª captação e Google Ads'},
+  {id:'eemface',nm:'EmFace',tipo:'ARK',plano:'Onboarding',valor:0,status:'gr',cap:1,meta:'Onboarding · Brasília e Manaus no mesmo contrato',extra:'📹 1 captação/mês, só em Brasília · não gosta de áudio · falta valor de contrato'},
+  {id:'mazuki',nm:'Mazuchi Regenera',tipo:'ARK',plano:'Onboarding 6 meses',valor:2500,status:'gr',cap:1,meta:'Onboarding · projeto de 6 meses · laserterapia',extra:'📹 1 captação/mês · R$ 3.000 de entrada + 5x R$ 2.500 (contrato de 25/08)'},
   // Alpha
+  // Babbo Giovanni: estava marcado como churn em 16/07/2026, mas o briefing de 27/08
+  // o traz ATIVO e critico ("muito critico"), em resgate. O briefing venceu.
+  {id:'babbo',nm:'Babbo Giovanni',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',cap:1,meta:'CRÍTICO · resgate do cliente · captação de bônus',extra:'📹 1 captação de bônus (6 a 8 vídeos) · risco real de perda'},
   {id:'dom',nm:'Dom Baruka',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',meta:'URGENTE · cardápio + iFood + bebidas',extra:'Auditoria iFood em curso'},
   {id:'stray',nm:'Stray House',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Recuperação (não é mais urgente)',extra:'ROAS 5,08 · subir criativos'},
   {id:'cachu',nm:'Cachu Restaurante',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Ajustada ✓ · acompanhando ROAS',extra:'Food porn qui-dom'},
@@ -6021,7 +6033,7 @@ const CLIENTES_BASE = [
   {id:'lumiere',nm:'Cafe Lumiere',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · jul/2026',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
   {id:'dgust',nm:'Pizzaria DGust',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · jul/2026',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
   // (Lunna's, Shopping dos Uniformes, Bellato e Bella Vita removidos do sistema a pedido do Gabriel)
-  // (Babbo Giovanni: churn em 16/07/2026)
+  // (Babbo Giovanni voltou pra lista acima em 30/08/2026: o briefing de 27/08 o traz ativo)
 ];
 
 // Clientes personalizados (adicionados pelo Gabriel) — salvos na nuvem (wfa-clientes-custom).
@@ -6274,14 +6286,13 @@ function colabRemove(nm){ saveColabCustom(loadColabCustom().filter(n=>n!==nm)); 
 const SAN_KEY='wfa-saneamento-carteira-v1';
 const SAN_CHURN=['dom','laemcasa','bulldogs'];
 const SAN_TIPO={'4bburger':'Alpha','saborlenha':'Alpha','kopi':'Alpha','lumiere':'Alpha','dgust':'Alpha'};
+// Royal Face, EmFace e Mazuchi sairam daqui em 30/08 e foram pra CLIENTES_BASE:
+// cliente de verdade nao pode depender de um seed que roda depois do sync.
 const SAN_NOVOS=[
   {id:'pikachu',nm:'Pikachu Burger',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Squad Alpha · praça a confirmar',extra:'Alpha'},
   {id:'mundolivre',nm:'Mundo Livre Bar',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'MRR de mês único · trabalhar a renovação',extra:'São Bernardo do Campo/SP'},
   {id:'brutus',nm:'Adega Brutus',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Sem leitura da conta · diagnosticar',extra:'Alpha'},
-  {id:'royalface',nm:'Royal Face Planaltina',tipo:'ARK',plano:'Gold',valor:3800,status:'y',cap:1,meta:'1 captação/mês · exige atenção próxima',extra:'📹 1 captação/mês · estética popular'},
-  {id:'eemface',nm:'EEMFACE Brasília',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Fechado 24/08/2026 · unidade de Manaus no mesmo contrato',extra:'Contrato novo',defaultSprint:0},
   {id:'naeo',nm:'Naeo',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Cliente novo',extra:'Contrato novo',defaultSprint:0},
-  {id:'mazuki',nm:'Mazuki Regenera',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Fechado 24/08/2026 · clínica de tratamento de feridas',extra:'Entregáveis próprios',defaultSprint:0},
   {id:'moenda',nm:'Moenda',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Turismo · Vale do Café',extra:'Entregáveis próprios',defaultSprint:0}
 ];
 // Clientes Alpha que faltavam na planilha de acompanhamento do Squad.
@@ -6351,6 +6362,50 @@ function saneamentoCarteira(){
     localStorage.setItem(SAN_KEY,'1');
     if(mexeu&&typeof toast==='function')toast('Carteira saneada: '+mexeu+' ajustes');
   }catch(e){console.warn('saneamentoCarteira',e);}
+}
+/* ===== CARTEIRA x BRIEFING DE 27/08/2026 (saneamento v2, 30/08) =====
+   O briefing que o Caio fechou virou a fonte da verdade da carteira, e tres
+   clientes estavam gravados com nome ou valor diferentes do que o documento diz:
+
+     royalface  "Royal Face Planaltina"  estava amarelo, o briefing diz urgencia tranquila
+     eemface    "EEMFACE Brasilia"       o briefing chama de EmFace, e o contrato cobre
+                                          Brasilia E Manaus, entao o nome enganava
+     mazuki     "Mazuki Regenera"        o briefing e o contrato assinado escrevem
+                                          MazuCHI, e o valor (R$ 2.500/mes) estava zerado
+
+   Nao cria cliente: so corrige o que o saneamento v1 (25/08) ja gravou, casando por
+   ID. Roda uma vez por aparelho, e idempotente, e toca so wfa-clientes-custom, que
+   sincroniza. Se o cliente nao existir no aparelho, ignora e deixa o v1 cuidar. */
+const SAN2_KEY='wfa-saneamento-briefing-v2';
+const SAN2_AJUSTES={
+  royalface:{status:'gr',meta:'Meta do cliente: R$ 10 mil/dia e R$ 100 mil/m\u00eas',
+             extra:'\uD83D\uDCF9 1 capta\u00e7\u00e3o/m\u00eas \u00b7 franquia com 5 unidades \u00b7 pendente: conte\u00fados da 2\u00aa capta\u00e7\u00e3o e Google Ads'},
+  eemface:{nm:'EmFace',plano:'Onboarding',cap:1,status:'gr',
+           meta:'Onboarding \u00b7 Bras\u00edlia e Manaus no mesmo contrato',
+           extra:'\uD83D\uDCF9 1 capta\u00e7\u00e3o/m\u00eas, s\u00f3 em Bras\u00edlia \u00b7 n\u00e3o gosta de \u00e1udio \u00b7 falta valor de contrato'},
+  mazuki:{nm:'Mazuchi Regenera',plano:'Onboarding 6 meses',valor:2500,cap:1,status:'gr',
+          meta:'Onboarding \u00b7 projeto de 6 meses \u00b7 laserterapia',
+          extra:'\uD83D\uDCF9 1 capta\u00e7\u00e3o/m\u00eas \u00b7 R$ 3.000 de entrada + 5x R$ 2.500 (contrato de 25/08)'}
+};
+function saneamentoBriefingV2(){
+  try{
+    if(localStorage.getItem(SAN2_KEY))return;
+    var cust=[];try{cust=JSON.parse(localStorage.getItem('wfa-clientes-custom')||'[]');}catch(e){cust=[];}
+    if(!Array.isArray(cust)){localStorage.setItem(SAN2_KEY,'1');return;}
+    var mexeu=0;
+    cust.forEach(function(c){
+      if(!c||!c.id)return;
+      var aj=SAN2_AJUSTES[c.id]; if(!aj)return;
+      Object.keys(aj).forEach(function(k){ if(c[k]!==aj[k]){c[k]=aj[k];mexeu++;} });
+    });
+    if(mexeu){
+      localStorage.setItem('wfa-clientes-custom',JSON.stringify(cust));
+      if(typeof rebuildClientes==='function')rebuildClientes();
+      if(typeof renderClientes==='function')renderClientes();
+    }
+    localStorage.setItem(SAN2_KEY,'1');
+    if(mexeu&&typeof toast==='function')toast('Carteira alinhada ao briefing: '+mexeu+' ajustes');
+  }catch(e){console.warn('saneamentoBriefingV2',e);}
 }
 function seedSamuel(){
   try{
@@ -8300,7 +8355,7 @@ function relatorioImprimir(){
       particularidades:'Projeto com dinâmica familiar.',
       antes:'É preciso transpor a responsabilidade do projeto para uma operação mais organizada.\nO Vinicius é acelerado, então clareza sobre prioridades, prazos e próximos passos.'}},
 
-    {nm:'Sasse Gifts',cid:'sasse',temp:'y',br:{
+    {nm:'Sasse Gifts',cid:'sasse',temp:'r',br:{
       segmento:'Brindes corporativos, com fabricação própria',status:'Aviso prévio',
       objetivo:'Aquisição no mercado corporativo.',
       entregas:'Produção audiovisual\nGestão das redes sociais\nTráfego pago\n1 captação mensal\nPlanejamento estratégico mensal',
@@ -8335,7 +8390,7 @@ function relatorioImprimir(){
       antes:'O perfil do Paulo é mais passivo, então conduzir com clareza e objetividade.\nO projeto está em atenção por causa dos feedbacks negativos.'}},
 
     {nm:'Vivenda',cid:'vivenda',temp:'gr',br:{
-      segmento:'Farmácia de manipulação',status:'Ativo',
+      segmento:'Farmácia de manipulação',status:'Ativo',status:'Ativo',
       responsaveis:'Yuri, responsável interno pelo marketing. Demandas de mídia offline e representantes.\nHemerson, dono. Planejamento e decisões estratégicas.\nGabriel, diretor. Centraliza quase tudo que é da agência.',
       objetivo:'Aumentar a receita.',
       entregas:'Materiais gráficos e físicos\n12 a 16 postagens mensais\nTráfego pago no Meta Ads e Google Ads\nGestão das redes sociais\nCobertura de eventos\nAssistência ao time de representantes, com formulários e materiais\nMateriais de mídia offline sob demanda\nPlanejamento estratégico\nTikTok Shop\n3 a 4 captações mensais',
@@ -8350,7 +8405,7 @@ function relatorioImprimir(){
       esperando:'Não.',
       antes:'Mapear quais demandas podem ser antecipadas para aliviar a operação do Gabriel.'}},
 
-    {nm:'Royal Face',cid:'',temp:'gr',br:{
+    {nm:'Royal Face Planaltina',cid:'royalface',temp:'gr',br:{
       segmento:'Clínica de estética, franquia com 5 unidades',status:'Ativo',
       responsaveis:'Thais, gestora e principal responsável pelas decisões. É tranquila e tem boa relação com a equipe.\nMaiara, comercial e contato para as demandas do dia a dia. É mais exigente e cobra as entregas com mais intensidade.',
       objetivo:'Aumentar a autoridade da marca e a geração de demanda. Meta comercial de R$ 10 mil em vendas por dia e R$ 100 mil por mês.',
@@ -8369,7 +8424,7 @@ function relatorioImprimir(){
       particularidades:'Franquia com 5 unidades e potencial de expansão.\nSomos a primeira empresa de Brasília a fechar com uma das unidades.\nNível de urgência tranquilo.',
       antes:'Entender o potencial de expansão para as outras unidades.\nTer clareza sobre o andamento da segunda captação e do Google Ads.'}},
 
-    {nm:'EmFace',cid:'',temp:'y',br:{
+    {nm:'EmFace',cid:'eemface',temp:'gr',br:{
       segmento:'Clínica de estética, unidades em Brasília e Manaus',status:'Onboarding',
       objetivo:'Aumentar a receita.',
       entregas:'1 captação mensal\n6 a 8 vídeos por mês\nTráfego pago no Meta Ads e Google Ads\nConteúdos para as duas unidades, cerca de 4 para Manaus e 4 para Brasília',
@@ -8384,10 +8439,10 @@ function relatorioImprimir(){
       prioridade:'Seguir o processo padrão de onboarding e estruturar as entregas iniciais.',
       promessa:'A princípio não. O comercial criou expectativa de geração de vendas.',
       verbal:'Necessário alinhar a questão do Instituto.',
-      particularidades:'A captação audiovisual acontece só em Brasília.\nTudo precisa estar muito bem alinhado.\nO cliente não gosta de comunicação por áudio.\nÀs vezes coloca demandas em teste para ver se a agência aceita.',
+      particularidades:'PENDÊNCIA INTERNA: o valor de contrato não está no briefing, então o cliente entrou na carteira com R$ 0 e não soma no MRR. Passar o valor para o Gabriel.\nA captação audiovisual acontece só em Brasília.\nTudo precisa estar muito bem alinhado.\nO cliente não gosta de comunicação por áudio.\nÀs vezes coloca demandas em teste para ver se a agência aceita.',
       antes:'Ter domínio das particularidades de personalidade já levantadas.\nGarantir que toda demanda esteja alinhada antes de ser executada.'}},
 
-    {nm:'Mazuchi Regenera',cid:'',temp:'gr',br:{
+    {nm:'Mazuchi Regenera',cid:'mazuki',temp:'gr',br:{
       segmento:'Clínica de laserterapia, tratamento de feridas',status:'Onboarding',
       tempo:'Projeto com cerca de 1 semana.',
       responsaveis:'Taisa, principal contato da agência.\nRodrigo, marido da Taisa.',
@@ -8406,7 +8461,7 @@ function relatorioImprimir(){
       particularidades:'O projeto é propriedade da agência nos primeiros 6 meses. Tudo que for desenvolvido nesse período fica sob responsabilidade da agência, e a transposição acontece depois do sexto mês.\nCliente veio por indicação da Fonseca & Cavalcanti.\nSão clientes tranquilos.',
       antes:'Garantir que o cronograma inicial esteja bem alinhado, principalmente captação e site.'}},
 
-    {nm:'Babbo Giovanni',cid:'',temp:'r',br:{
+    {nm:'Babbo Giovanni',cid:'babbo',temp:'r',br:{
       segmento:'Pizzaria',status:'Crítico',
       responsaveis:'Fabio, dono.',
       objetivo:'Aumentar a receita.',
@@ -8423,7 +8478,7 @@ function relatorioImprimir(){
       esperando:'Venda e resultado.',
       promessa:'Existe expectativa de resultado depois da captação.',
       verbal:'Captação de bônus com 6 a 8 vídeos.',
-      particularidades:'Pacote Alpha.\nCliente em situação crítica, bastante insatisfeito com os resultados e inseguro sobre o próprio negócio.\nExiste risco de perda do cliente caso a percepção de valor não seja recuperada.\nATENÇÃO: no cadastro de clientes do sistema este cliente consta como churn em 16/07/2026, e o briefing de 27/08 o traz como ativo. Confirmar com o Lucas.',
+      particularidades:'Pacote Alpha.\nCliente em situação crítica, bastante insatisfeito com os resultados e inseguro sobre o próprio negócio.\nExiste risco de perda do cliente caso a percepção de valor não seja recuperada.\nO cadastro do sistema trazia este cliente como churn em 16/07/2026. O briefing de 27/08 o traz ativo, e o briefing prevaleceu: voltou para a carteira em 30/08 como crítico.',
       antes:'É um cliente crítico e insatisfeito, a conversa precisa estar muito bem preparada.\nTer clareza sobre o que já foi entregue, o que será feito na captação e qual o plano para recuperar a confiança.'}}
   ];
 })();

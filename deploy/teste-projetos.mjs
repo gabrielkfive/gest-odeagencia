@@ -174,7 +174,45 @@ async function main() {
     return t.length === 1 && t[0].id === 'sentinela' && t[0].status === 'backlog';
   }), 'wfa-tarefas continua intacto (kanban operacional preservado)');
 
-  console.log('\n8. Console limpo');
+  console.log('\n8. Carteira integra (o briefing de 27/08 e a fonte da verdade)');
+  const carteira = await page.evaluate(() => {
+    const cli = (typeof CLIENTES !== 'undefined' ? CLIENTES : []);
+    const norm = (x) => String(x || '').toLowerCase().normalize('NFD')
+      .replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
+    const ids = {}, nomes = {}, dupId = [], dupNome = [];
+    cli.forEach((c) => {
+      if (ids[c.id]) dupId.push(c.id); else ids[c.id] = 1;
+      const k = norm(c.nm);
+      if (nomes[k]) dupNome.push(c.nm); else nomes[k] = 1;
+    });
+    const proj = JSON.parse(localStorage.getItem('wfa-projetos') || '[]');
+    const orfaos = proj.filter((p) => p.clienteId && !ids[p.clienteId]).map((p) => p.cliente + ' -> ' + p.clienteId);
+    const semVinculo = proj.filter((p) => !p.clienteId).map((p) => p.cliente);
+    const acha = (n) => cli.filter((c) => norm(c.nm).indexOf(norm(n)) === 0)[0] || null;
+    return {
+      dupId, dupNome, orfaos, semVinculo,
+      babbo: acha('Babbo Giovanni'),
+      sasse: acha('Sasse'),
+      fonseca: acha('Fonseca'),
+      mazuchi: acha('Mazuchi Regenera'),
+      mazuki: !!acha('Mazuki'),
+      eemface: !!acha('EEMFACE'),
+    };
+  });
+  checa(carteira.dupId.length === 0, 'nenhum id de cliente repetido' + (carteira.dupId.length ? ': ' + carteira.dupId.join(', ') : ''));
+  checa(carteira.dupNome.length === 0, 'nenhum cliente repetido por nome' + (carteira.dupNome.length ? ': ' + carteira.dupNome.join(', ') : ''));
+  checa(carteira.orfaos.length === 0, 'nenhum projeto aponta pra cliente inexistente' + (carteira.orfaos.length ? ': ' + carteira.orfaos.join(' | ') : ''));
+  checa(carteira.semVinculo.length === 0, 'todo projeto do briefing esta amarrado a um cliente' + (carteira.semVinculo.length ? ': ' + carteira.semVinculo.join(', ') : ''));
+  // o briefing manda: Babbo voltou de churn, Sasse esta em aviso previo, Fonseca em feedback negativo
+  checa(carteira.babbo && carteira.babbo.status === 'r', 'Babbo Giovanni esta ativo e critico, nao churn');
+  checa(carteira.sasse && carteira.sasse.status === 'r', 'Sasse marcada como aviso previo');
+  checa(carteira.fonseca && carteira.fonseca.status === 'r', 'Fonseca marcada como atencao (feedback negativo)');
+  // nomes que o briefing e o contrato assinado corrigiram
+  checa(!!carteira.mazuchi && !carteira.mazuki, 'e "Mazuchi Regenera", nao "Mazuki"');
+  checa(carteira.mazuchi && carteira.mazuchi.valor === 2500, 'Mazuchi com o valor do contrato assinado (R$ 2.500/mes)');
+  checa(!carteira.eemface, 'nao existe mais "EEMFACE", o cliente se chama EmFace');
+
+  console.log('\n9. Console limpo');
   const relevantes = erros.filter((e) => !/Failed to fetch|NetworkError|supabase|fetch/i.test(e));
   checa(relevantes.length === 0, 'nenhum erro de JS na pagina' + (relevantes.length ? ': ' + relevantes.join(' | ') : ''));
 
