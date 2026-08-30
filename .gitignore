@@ -46,3 +46,6 @@ __pycache__/
 .superpowers/
 remote/.env
 remote/*.log
+
+# screenshots do teste de Safari/iOS
+deploy/_saida-safari/
