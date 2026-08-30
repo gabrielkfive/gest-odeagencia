@@ -1,4 +1,4 @@
-<!-- build 20260830-fix-planejamentos-script -->
+<!-- build 20260830-apple-toque -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -1201,6 +1201,39 @@ body.aura-light .aura-goal .gv,body.aura-light .aura-goal .donut-wrap .pct{color
   .ah-present .ahd{min-height:100dvh}
   #page-jarvis .jv-shell{height:calc(100dvh - 168px)}
   #com-embed iframe{height:calc(100dvh - 210px)!important}
+}
+
+/* ============ APPLE: TOQUE E AREA SEGURA (auditoria WebKit 30/08) ============ */
+/* Medido com deploy/teste-safari-ios.mjs no motor do Safari, iPhone 14 Pro. */
+
+/* 1. ZOOM AO DIGITAR. O iOS da zoom na pagina inteira quando o campo tem fonte
+      menor que 16px, e nao desfaz sozinho: a pessoa digita e a tela fica torta.
+      Estavam assim 141 dos 189 campos. So vale pra tela de toque, o desktop
+      continua com a tipografia compacta de sempre. */
+/* !important porque regras de classe (.tb-search input, .qadd-input) venciam
+   por especificidade e o zoom continuava. So dentro do @media de toque. */
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px!important}
+}
+
+/* 2. AREA SEGURA. iPhone com notch e barra de gestos: sem isso o conteudo
+      encosta na borda e o ultimo item da lista fica atras da barra de baixo. */
+@supports (padding:max(0px)){
+  .topbar{padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right))}
+  .side{padding-bottom:env(safe-area-inset-bottom)}
+  .main{padding-bottom:env(safe-area-inset-bottom)}
+  .toast{bottom:calc(20px + env(safe-area-inset-bottom))}
+  #ia-fab{bottom:calc(18px + env(safe-area-inset-bottom))}
+}
+
+/* 3. TOQUE. Sem o flash cinza do Safari a cada toque, sem recarregar a pagina
+      quando a lista chega no fim (ja apagou o que estava sendo digitado), e as
+      acoes que so apareciam no hover ficam visiveis: no dedo nao existe hover. */
+@media (hover:none){
+  a,button,.navitem,.subitem,.card,.task-card,.crm-card,.sprint-card{-webkit-tap-highlight-color:transparent}
+  html,body{overscroll-behavior-y:contain}
+  #page-drive .dz-card .dz-del{display:flex}
+  .cal-d .ev .ev-del,.cal-d:hover .add-ev,.cal-d .add-ev{opacity:1}
 }
 /* Modais com o fundo desfocado do ARK OS: a página inteira recua atrás do vidro,
    e o modal chega com uma mola suave (mesma cara em todo navegador) */
