@@ -157,6 +157,48 @@ const leEstado = () => {
   return { porStatus, naTela };
 };
 
+// Arrasto INTERROMPIDO por uma repintada no meio, que e o que a puxada da nuvem faz
+// a cada poucos segundos. Reproduz o "vai e volta": o cartao ia pra coluna e voltava.
+const ARRASTA_COM_REPINTADA = async (args) => {
+  const { idCartao, seletorDestino } = args;
+  const disp = (el, tipo, x, y, fim) => {
+    let ev;
+    const dados = { identifier: 1, target: el, clientX: x, clientY: y, pageX: x, pageY: y };
+    try {
+      const t = new Touch(dados);
+      ev = new TouchEvent(tipo, { bubbles: true, cancelable: true, touches: fim ? [] : [t], changedTouches: [t] });
+    } catch (e) {
+      ev = new Event(tipo, { bubbles: true, cancelable: true });
+      ev.touches = fim ? [] : [dados];
+      ev.changedTouches = [dados];
+    }
+    el.dispatchEvent(ev);
+  };
+  const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+  const card = document.querySelector('.task-card[data-tid="' + idCartao + '"]');
+  if (!card) return { erro: 'cartao nao esta na tela' };
+  const destino = document.querySelector(seletorDestino);
+  if (!destino) return { erro: 'coluna de destino nao encontrada' };
+  destino.scrollIntoView({ block: 'nearest', inline: 'center' });
+  await espera(280);
+  const rc = card.getBoundingClientRect(), rd = destino.getBoundingClientRect();
+  const dentro = (v, max) => Math.max(8, Math.min(v, max - 8));
+  const x0 = dentro(rc.left + rc.width / 2, innerWidth), y0 = dentro(rc.top + 12, innerHeight);
+  const alvoX = dentro(rd.left + rd.width / 2, innerWidth), alvoY = dentro(rd.top + 14, innerHeight);
+
+  disp(card, 'touchstart', x0, y0);
+  await espera(320);
+  disp(card, 'touchmove', (x0 + alvoX) / 2, (y0 + alvoY) / 2);
+  await espera(60);
+  renderTarefas();          // <<< a puxada da nuvem repinta bem no meio do arrasto
+  await espera(60);
+  disp(card, 'touchmove', alvoX, alvoY);
+  await espera(60);
+  disp(card, 'touchend', alvoX, alvoY, true);
+  await espera(500);
+  return { erro: null };
+};
+
 async function cenario(nomeMotor, motor, contexto, filtro, modo = 'toque') {
   const browser = await motor.launch({ headless: true, ...(motor === chromium ? { channel: 'chrome' } : {}) });
   const ctx = await browser.newContext(contexto);
@@ -194,9 +236,13 @@ async function cenario(nomeMotor, motor, contexto, filtro, modo = 'toque') {
   }
   checa(seqs[0] === seqs[1] && seqs[1] === seqs[2], `[${rotulo}] ordem estavel entre repintadas (foi: ${seqs.join(' | ')})`);
 
+  await page.evaluate(() => { window.TAREFAS_ANTES = JSON.parse(JSON.stringify(state.tarefas)); });
+
   // 2. ARRASTA COM O DEDO de Backlog para Em andamento
   const alvoId = visiveis[0];
-  const r = modo === 'mouse'
+  const r = modo === 'repintada'
+    ? await page.evaluate(ARRASTA_COM_REPINTADA, { idCartao: alvoId, seletorDestino: '.task-list[data-list="andamento"]' })
+    : modo === 'mouse'
     ? await page.evaluate(ARRASTA_COM_MOUSE, { idCartao: alvoId, seletorDestino: '.task-list[data-list="andamento"]' })
     : await page.evaluate(ARRASTA_COM_DEDO, { idCartao: alvoId, seletorDestino: '.task-list[data-list="andamento"]', cancelar: false });
   checa(!r.erro, `[${rotulo}] arrasto executou (${r.erro || 'ok'})`);
@@ -234,6 +280,19 @@ async function cenario(nomeMotor, motor, contexto, filtro, modo = 'toque') {
   // Rodando por file://, o app tenta falar com a API e o navegador barra por CORS.
   // Isso e do ambiente do teste, nao do sistema, entao nao conta como falha.
   const RUIDO = /access control checks|Not allowed to load local resource|Cross origin|Failed to fetch|Load failed/i;
+  // 6. PUXADA VELHA: a nuvem responde com o estado de ANTES do arrasto (resposta que ja
+  //    estava no ar quando a pessoa soltou). Isso nao pode desfazer o que acabou de mover.
+  if (modo !== 'mouse') {
+    const voltou = await page.evaluate((idAlvo) => {
+      const antes = JSON.parse(JSON.stringify(TAREFAS_ANTES || []));
+      if (!antes.length) return 'sem baseline';
+      applyCloudState({ 'wfa-tarefas': antes });
+      const t = state.tarefas.find((x) => x.id === idAlvo);
+      return t ? t.status : 'sumiu';
+    }, alvoId);
+    checa(voltou === 'andamento', `[${rotulo}] puxada velha da nuvem nao desfaz o arrasto (ficou: ${voltou})`);
+  }
+
   for (const e of [...new Set(erros)]) if (!RUIDO.test(e)) falhas.push(`[${rotulo}] erro de JS: ${e}`);
   await browser.close();
 }
@@ -246,6 +305,7 @@ await cenario('iphone-webkit', webkit, { ...iphone }, { nome: 'funcionario', cam
 await cenario('iphone-webkit', webkit, { ...iphone }, { nome: 'cliente', campo: 'filt-cli', valor: 'c1' });
 await cenario('desktop-chrome', chromium, desktopToque, { nome: 'funcionario', campo: 'filt-resp', valor: 'Ana' });
 await cenario('desktop-chrome', chromium, desktopToque, { nome: 'funcionario', campo: 'filt-resp', valor: 'Ana' }, 'mouse');
+await cenario('iphone-webkit', webkit, { ...iphone }, { nome: 'funcionario', campo: 'filt-resp', valor: 'Ana' }, 'repintada');
 await cenario('macbook-safari', webkit, { viewport: { width: 1440, height: 900 } }, { nome: 'cliente', campo: 'filt-cli', valor: 'c1' }, 'mouse');
 
 console.log('=== PASSOU ===');

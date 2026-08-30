@@ -1,5 +1,4 @@
-<!-- build 20260830-arrastar-amarrado -->
-<!doctype html>
+<!-- build 20260830-versao-e-ordem -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -3915,6 +3914,7 @@ function applyCloudState(remote){
   const _rr=(...ks)=>_primeira||ks.some(k=>mudouK.has(k));
   state.tarefas=JSON.parse(localStorage.getItem('wfa-tarefas')||'[]');
   if(typeof wfaTarefaSnapshot==='function')wfaTarefaSnapshot();
+  if(_primeira&&typeof taskSaneiaOrdem==='function')setTimeout(taskSaneiaOrdem,1200);   // ordem legada, uma vez so
   state.regua=JSON.parse(localStorage.getItem('wfa-regua')||'{}');
   // ANTI-PERDA: chaves de objeto único (não-mescladas) NÃO podem reidratar de uma
   // versão antiga enquanto há edição local não confirmada (dirty). Senão o que o
@@ -9296,6 +9296,28 @@ function taskReordena(id,status,idDepois){
   resto.forEach((t,i)=>{t.ord=i;});
 }
 
+/* SANEAMENTO UNICO DA ORDEM (30/08). O dado real da ARK carrega meses do bug antigo:
+   na carteira do Gabriel eram 167 ord repetidos em Concluido e 40 tarefas sem ord no
+   Backlog. Com ord repetido o desempate vira prioridade/data e a coluna parece
+   embaralhar. Renumera cada coluna UMA vez, pela mesma regra do board, entao dois
+   aparelhos que rodarem isso chegam exatamente ao MESMO resultado (nao gera briga de
+   sincronizacao). A marca fica so no aparelho: a chave nao esta em WFA_CLOUD_KEYS. */
+function taskSaneiaOrdem(){
+  try{
+    if(localStorage.getItem('wfa-ord-saneado-v1')==='1')return;
+    if(!Array.isArray(state.tarefas)||!state.tarefas.length)return;
+    let sujo=false;
+    TASK_STATS.forEach(st=>{
+      const col=taskColuna(st);
+      const nums=col.map(t=>t.ord).filter(o=>o!=null);
+      if(nums.length!==col.length||new Set(nums).size!==nums.length)sujo=true;
+    });
+    WFA_LS_SET('wfa-ord-saneado-v1','1');
+    if(!sujo)return;
+    TASK_STATS.forEach(taskRenumera);
+    saveTarefas();
+  }catch(e){}
+}
 /* Drag do Kanban: a coluna INTEIRA é área de soltar (não só onde já tem card),
    e soltar em qualquer altura reordena de verdade (like Trello). Pedido do Gabriel:
    "não importa se é no meio, em cima, embaixo da caixa, tem que dar pra jogar pro lado". */
@@ -15001,6 +15023,55 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
     if(ativo){manda(origem,'dragend',ultimo);}
     limpa();
   },{passive:true});
+})();
+
+/* ============ AVISO DE VERSAO NOVA (30/08) ============
+   O sistema vive dentro de um iframe que fica aberto o dia inteiro. O _headers ja
+   manda revalidar, mas revalidacao so acontece em requisicao NOVA: quem nao recarrega
+   a aba continua rodando o build antigo por dias. Aconteceu hoje: o fix do arrastar
+   estava no ar e a equipe testando a versao velha, entao o bug 'continuava'.
+
+   Aqui a pagina compara o proprio build com o que esta no servidor. Se mudou, avisa.
+   Recarrega sozinha so quando a tela esta parada (nada aberto, ninguem digitando,
+   nada por sincronizar), senao espera o clique: recarregar por cima de alguem
+   preenchendo tarefa seria trocar um problema por outro. */
+(function(){
+  const MEU=(function(){try{for(const n of document.childNodes)if(n.nodeType===8&&/build\s/.test(n.nodeValue||''))return n.nodeValue.trim();}catch(e){}return '';})();
+  if(!MEU)return;
+  let avisando=false;
+  function ocupado(){
+    if(document.querySelector('.modal-bg.open,.crm-modal.open'))return true;
+    const a=document.activeElement;
+    if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return true;
+    if(a&&a.isContentEditable)return true;
+    try{if(typeof WFA_DIRTY!=='undefined'&&WFA_DIRTY.size)return true;}catch(e){}
+    try{if(typeof WFA_PENDING!=='undefined'&&WFA_PENDING.size)return true;}catch(e){}
+    return false;
+  }
+  function avisa(){
+    if(avisando)return; avisando=true;
+    const b=document.createElement('button');
+    b.id='wfa-nova-versao';
+    b.textContent='Nova versao do sistema. Atualizar';
+    b.style.cssText='position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:100000;'+
+      'background:#FFC700;color:#101014;border:0;border-radius:999px;padding:11px 18px;font:600 13px/1 inherit;'+
+      'box-shadow:0 10px 28px rgba(0,0,0,.35);cursor:pointer';
+    b.onclick=()=>location.reload();
+    document.body.appendChild(b);
+    // Se ninguem estiver no meio de nada, atualiza sozinha depois de um minuto.
+    const tentar=setInterval(()=>{if(!ocupado()){clearInterval(tentar);location.reload();}},60000);
+  }
+  async function confere(){
+    if(avisando)return;
+    try{
+      const t=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'');
+      const m=String(t).slice(0,300).match(/build\s[^\s>]+/);   // o nome do build TEM hifen, entao nao pode cortar nele
+      if(m&&MEU.indexOf(m[0])===-1)avisa();
+    }catch(e){}
+  }
+  setTimeout(confere,20000);
+  setInterval(confere,5*60000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)confere();});
 })();
 </script>
 </body>
