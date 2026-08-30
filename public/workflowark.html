@@ -1711,6 +1711,13 @@ function wfaSetTheme(t){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
           <span>Rotinas</span>
         </div>
+        <!-- PROJETOS: gestao de projeto por cliente no modelo do Caio (quadro com
+             homologacao do cliente, etiquetas de papel e sprint, prontuario).
+             Fica ao lado de Tarefas, sem alterar o kanban operacional. -->
+        <div class="subitem" data-nav="projetos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span>Projetos</span>
+        </div>
       </div>
 
       <div class="navitem" data-toggle="oper-menu">
@@ -3504,7 +3511,7 @@ function wfaSetTheme(t){
         </script>
 <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings','wfa-acertosrec','wfa-propostas','wfa-notif-read','wfa-planejamentos'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings','wfa-acertosrec','wfa-propostas','wfa-notif-read','wfa-planejamentos','wfa-projetos'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -3727,8 +3734,8 @@ const WFA_NO_PUSH=new Set(['wfa-whatsapp']);
 /* TODA lista multiusuário (objetos com id) entra aqui: a puxada MESCLA por id em vez de
    sobrescrever a lista inteira. Fora desta lista, "última escrita ganha" apaga a adição
    do colega (era por isso que demanda/rotina/cliente/linha do Alpha "sumia"). */
-const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes','wfa-crm','wfa-producao','wfa-briefings','wfa-planejamentos','wfa-demandas','wfa-rotinas','wfa-clientes-custom','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr'];
-const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-crm','wfa-producao','wfa-briefings','wfa-planejamentos','wfa-demandas','wfa-rotinas','wfa-clientes-custom','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr']; // itens apagados nunca voltam
+const WFA_MERGE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-conselho-briefings','wfa-notificacoes','wfa-crm','wfa-producao','wfa-briefings','wfa-planejamentos','wfa-demandas','wfa-rotinas','wfa-clientes-custom','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-projetos'];
+const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-crm','wfa-producao','wfa-briefings','wfa-planejamentos','wfa-demandas','wfa-rotinas','wfa-clientes-custom','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-projetos']; // itens apagados nunca voltam
 /* CARIMBO POR ITEM (up): na hora de salvar uma lista mesclável, compara cada item com a
    última foto conhecida e carimba `up` só no que realmente mudou. É o que permite à mescla
    resolver conflito POR ITEM (quem editou por último vence) em vez de reverter edição.
@@ -5177,6 +5184,117 @@ function iniciarAutoSync(){
         <div id="pl-editor"></div>
         <div id="pl-list"></div>
       </div>
+
+      <!-- PROJETOS (Atividades > Projetos). Estrutura pedida pelo Caio no video de 28/08:
+           cada cliente tem UM projeto, com quadro de 6 colunas (a novidade e a coluna
+           "Homologacao do cliente", separada da homologacao interna), etiquetas de PAPEL
+           e de SPRINT, e um Prontuario de 5 paginas que tira os acessos do grupo de
+           WhatsApp e centraliza num lugar so.
+           NAO mexe na aba Atividades > Tarefas: este quadro tem dados proprios
+           (wfa-projetos) e roda em paralelo ao kanban operacional que ja existe. -->
+      <div class="page" id="page-projetos">
+        <style>
+          #page-projetos .pj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+          #page-projetos .pj-c{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;cursor:pointer;transition:transform .16s var(--ease-out),box-shadow .16s var(--ease-out)}
+          #page-projetos .pj-c:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+          #page-projetos .pj-c h3{font-size:16px;font-weight:720;letter-spacing:-.02em;margin:0}
+          #page-projetos .pj-c .sub{font-size:11.5px;color:var(--mute);margin-top:3px}
+          #page-projetos .pj-temp{width:8px;height:8px;border-radius:99px;display:inline-block;margin-right:6px;vertical-align:middle}
+          #page-projetos .pj-temp.gr{background:var(--green)}#page-projetos .pj-temp.y{background:var(--yel)}#page-projetos .pj-temp.r{background:var(--red)}
+          #page-projetos .pj-bar{height:5px;background:var(--blue-soft);border-radius:99px;overflow:hidden;margin:14px 0 7px}
+          #page-projetos .pj-bar i{display:block;height:100%;background:var(--yel);border-radius:99px;transition:width .3s var(--ease)}
+          #page-projetos .pj-mini{display:flex;gap:12px;font-size:11px;color:var(--mute);flex-wrap:wrap}
+          #page-projetos .pj-mini b{color:var(--ink);font-weight:700}
+          #page-projetos .pj-empty{padding:40px;text-align:center;color:var(--mute);border:1px dashed var(--line);border-radius:16px}
+
+          #page-projetos .pj-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+          #page-projetos .pj-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+          #page-projetos .pj-tab{font-size:12.5px;font-weight:640;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--txt);cursor:pointer;transition:.15s}
+          #page-projetos .pj-tab:hover{border-color:var(--line-2)}
+          #page-projetos .pj-tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+          #page-projetos .pj-board{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:11px;overflow-x:auto;padding-bottom:10px;align-items:start}
+          #page-projetos .pj-col{background:var(--blue-soft);border:1px solid var(--line);border-radius:14px;padding:10px;min-height:120px}
+          #page-projetos .pj-col.over{border-color:var(--yel);background:var(--yel-bg)}
+          #page-projetos .pj-colh{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin-bottom:9px;padding:0 3px}
+          #page-projetos .pj-colh .n{margin-left:auto;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:1px 7px;font-size:10px;color:var(--txt)}
+          #page-projetos .pj-dot{width:7px;height:7px;border-radius:99px;flex:none}
+          #page-projetos .pj-t{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:11px 12px;margin-bottom:8px;cursor:grab;transition:box-shadow .15s,border-color .15s}
+          #page-projetos .pj-t:hover{box-shadow:var(--sh-2);border-color:var(--line-2)}
+          #page-projetos .pj-t.drag{opacity:.4}
+          #page-projetos .pj-t .tt{font-size:12.8px;font-weight:600;line-height:1.4;color:var(--ink)}
+          #page-projetos .pj-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+          #page-projetos .pj-tag{font-size:9.5px;font-weight:750;padding:2.5px 7px;border-radius:99px;letter-spacing:.01em;white-space:nowrap}
+          #page-projetos .pj-tag.sp{background:var(--yel-soft);color:var(--yel-d);border:1px solid var(--yel)}
+          #page-projetos .pj-venc{font-size:10.5px;color:var(--mute);margin-top:7px;display:flex;align-items:center;gap:5px}
+          #page-projetos .pj-venc.late{color:var(--red);font-weight:700}
+          #page-projetos .pj-add{width:100%;font-size:11.5px;color:var(--mute);border:1px dashed var(--line);border-radius:10px;padding:7px;background:none;text-align:center}
+          #page-projetos .pj-add:hover{color:var(--ink);border-color:var(--line-2)}
+
+          #page-projetos .pj-tb{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+          #page-projetos .pj-tb th{background:var(--blue-soft);text-align:left;padding:10px 12px;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);border-bottom:1px solid var(--line)}
+          #page-projetos .pj-tb td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--txt)}
+          #page-projetos .pj-tb tr:last-child td{border-bottom:none}
+          #page-projetos .pj-tb tbody tr{cursor:pointer}
+          #page-projetos .pj-tb tbody tr:hover{background:var(--blue-soft)}
+
+          #page-projetos .pr-wrap{display:grid;grid-template-columns:190px 1fr;gap:16px;align-items:start}
+          #page-projetos .pr-nav{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;position:sticky;top:0}
+          #page-projetos .pr-nav button{display:block;width:100%;text-align:left;font-size:12.8px;font-weight:600;padding:9px 11px;border-radius:9px;color:var(--txt);transition:.14s}
+          #page-projetos .pr-nav button:hover{background:var(--blue-soft)}
+          #page-projetos .pr-nav button.on{background:var(--ink);color:var(--bg)}
+          #page-projetos .pr-body{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
+          #page-projetos .pr-body h2{font-size:19px;font-weight:740;letter-spacing:-.025em;margin:0 0 3px}
+          #page-projetos .pr-body .lede{font-size:12.5px;color:var(--mute);margin-bottom:18px}
+          #page-projetos .pr-sec{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
+          #page-projetos .pr-sec.first{border-top:none;margin-top:0;padding-top:0}
+          #page-projetos .pr-sec h4{font-size:13.5px;font-weight:720;margin:0 0 11px;color:var(--ink)}
+          #page-projetos .pr-f{margin-bottom:11px}
+          #page-projetos .pr-f label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);margin-bottom:5px;font-weight:700}
+          #page-projetos .pr-f input,#page-projetos .pr-f textarea,#page-projetos .pr-f select,
+          #page-projetos .pj-f input,#page-projetos .pj-f textarea,#page-projetos .pj-f select{width:100%;background:var(--blue-soft);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:9px 11px;font:inherit;font-size:13px}
+          #page-projetos .pr-f textarea{min-height:76px;resize:vertical;line-height:1.55}
+          #page-projetos .pr-f input:focus,#page-projetos .pr-f textarea:focus,#page-projetos .pr-f select:focus{outline:none;border-color:var(--yel)}
+          #page-projetos .pr-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+          #page-projetos .pr-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+          #page-projetos .pr-lin{background:var(--blue-soft);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:9px}
+          #page-projetos .pr-lin .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+          #page-projetos .pr-lin .top b{font-size:12.5px}
+          #page-projetos .pr-pend{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--red-soft);color:var(--red)}
+          #page-projetos .pr-ok{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--green-soft);color:var(--green)}
+          @media(max-width:900px){
+            #page-projetos .pr-wrap{grid-template-columns:1fr}
+            #page-projetos .pr-nav{position:static;display:flex;gap:6px;overflow-x:auto}
+            #page-projetos .pr-nav button{white-space:nowrap;width:auto}
+            #page-projetos .pr-2,#page-projetos .pr-3{grid-template-columns:1fr}
+            #page-projetos .pj-board{grid-template-columns:repeat(6,minmax(180px,1fr))}
+          }
+        </style>
+
+        <!-- VISTA 1: carteira de projetos -->
+        <div id="pj-lista">
+          <div class="page-head">
+            <div class="page-title">
+              <h1>Projetos</h1>
+              <p>Um projeto por cliente, no modelo do Caio. Quadro com homologação interna e do cliente, etiquetas de papel e de sprint, e o prontuário com briefing, arquivos, senhas, ata de otimização e lições aprendidas.</p>
+            </div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap">
+              <button class="tb-btn alt" id="pj-seed">Criar os projetos do briefing</button>
+              <button class="tb-btn dk" id="pj-novo">+ Novo projeto</button>
+            </div>
+          </div>
+          <div class="g4" style="margin-bottom:16px">
+            <div class="kpi"><div class="l">Projetos</div><div class="v" id="pj-k1">0</div></div>
+            <div class="kpi yel"><div class="l">Tarefas abertas</div><div class="v" id="pj-k2">0</div></div>
+            <div class="kpi"><div class="l">Em homologação</div><div class="v" id="pj-k3">0</div></div>
+            <div class="kpi red"><div class="l">Atrasadas</div><div class="v" id="pj-k4">0</div></div>
+          </div>
+          <div class="pj-grid" id="pj-cards"></div>
+        </div>
+
+        <!-- VISTA 2: projeto aberto -->
+        <div id="pj-detalhe" style="display:none"></div>
+      </div>
       <div class="page" id="page-marcas">
         <iframe id="marcas-iframe" data-pending-src="/moenda" title="Manual de marca"
                 style="width:100%;height:calc(100vh - 120px);min-height:560px;border:1px solid var(--line);border-radius:14px;background:#FBF8F2;display:block"></iframe>
@@ -6398,6 +6516,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='notificacoes'&&typeof notifAutoLer==='function'){try{notifAutoLer();}catch(e){}}
     if(p==='briefings'){try{const f=document.getElementById('briefing-iframe');if(f&&!f.getAttribute('src')){f.setAttribute('src',f.dataset.pendingSrc||'/briefing');}}catch(e){console.warn('briefing',e);}}
     if(p==='planejamentos'&&typeof renderPlanos==='function'){try{renderPlanos();}catch(e){console.warn('planos',e);}}
+    if(p==='projetos'&&typeof renderProjetos==='function'){try{renderProjetos();}catch(e){console.warn('projetos',e);}}
     if(p==='marcas'){try{const f=document.getElementById('marcas-iframe');if(f&&!f.getAttribute('src')){f.setAttribute('src',f.dataset.pendingSrc||'/moenda');}}catch(e){console.warn('marcas',e);}}
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     if(p==='alpha'&&typeof renderAlpha==='function'){try{renderAlpha();}catch(e){console.warn('alpha',e);}}
@@ -7263,9 +7382,11 @@ function relatorioImprimir(){
     }
     if(b.dataset.plDel){
       if(!confirm('Excluir o planejamento de '+(p.cliente||'sem nome')+'?')) return;
-      try{var del=JSON.parse(localStorage.getItem('wfa-deleted-ids')||'{}');
-        if(!del[KEY])del[KEY]=[]; del[KEY].push(id);
-        localStorage.setItem('wfa-deleted-ids',JSON.stringify(del));}catch(e){}
+      /* wfa-deleted-ids e um ARRAY simples no resto do sistema (loadDeleted faz
+         new Set(array)). Aqui gravava um OBJETO {chave:[ids]}: new Set(objeto)
+         estoura, loadDeleted devolve vazio e a lapide INTEIRA some, deixando tarefa
+         e demanda apagada ressuscitar vinda de outro aparelho. */
+      try{if(typeof addDeleted==='function')addDeleted(id);}catch(e){}
       save(arr.filter(function(x){return x.id!==id;}));
       if(editando&&editando.id===id){editando=null;document.getElementById('pl-editor').innerHTML='';document.getElementById('pl-fechar').style.display='none';}
       return;
@@ -7506,6 +7627,805 @@ function relatorioImprimir(){
     '<p class="lede" style="margin:26px auto 0;text-align:center">A partir daqui \u00e9 execu\u00e7\u00e3o, e ela come\u00e7a assim que a data da capta\u00e7\u00e3o estiver fechada.</p>'+
     '</div></div></body></html>';
   }
+})();
+/* ============ PROJETOS (Atividades > Projetos) ============
+   Modelo de gestao de projeto por cliente que o Caio passou no video de 28/08/2026.
+   Reproduz o que ele mostrou no ClickUp, dentro do sistema:
+
+   1) QUADRO de 6 colunas. A diferenca pro kanban da aba Atividades e a coluna
+      "Homologacao do cliente", separada da homologacao interna. Nas palavras dele:
+      "nada adianta ser homologado so pela gente", tem entrega que o cliente aprova.
+   2) ETIQUETAS em dois eixos, PAPEL (po, cs, roteirista, editor, trafego...) e SPRINT.
+      Era o pedido explicito: "principalmente as etiquetas tanto de responsavel quanto
+      de sprint". O filtro do topo cruza os dois.
+   3) PRONTUARIO de 5 paginas (briefing, arquivos, senhas, ata de otimizacao, licoes
+      aprendidas). Nasce pra tirar os acessos do grupo de WhatsApp: "caso a gente perca
+      o backup de alguem... vamos centralizar em um canal unico".
+   4) SPRINT de 7 dias. Cada planning abre a sprint seguinte e a review escreve a licao.
+
+   NAO ENCOSTA em wfa-tarefas nem na aba Atividades: dados proprios em wfa-projetos,
+   mescla por id + lapide, igual planejamentos e producao. */
+(function(){
+  var KEY='wfa-projetos';
+  var aberto=null;      // id do projeto aberto
+  var vista='quadro';   // quadro | lista | prontuario
+  var prPag='briefing'; // pagina do prontuario
+  var filtro={papel:'',sprint:'',busca:''};
+
+  /* As 6 colunas do quadro, na ordem que ele desenhou. */
+  var COLS=[
+    {k:'backlog',   n:'Backlog',                 c:'#8a8a8a'},
+    {k:'iniciar',   n:'A iniciar',               c:'#2b62c4'},
+    {k:'andamento', n:'Em andamento',            c:'#7c3aed'},
+    {k:'homolog',   n:'Homologação',             c:'#d4a300'},
+    {k:'homologcli',n:'Homologação do cliente',  c:'#ea580c'},
+    {k:'concluido', n:'Concluído',               c:'#16a34a'}
+  ];
+
+  /* Etiquetas de PAPEL. Sao as mesmas que aparecem no filtro dele. */
+  var PAPEIS=[
+    {k:'po',      n:'po',                     c:'#ea580c'},
+    {k:'cs',      n:'cs',                     c:'#7c3aed'},
+    {k:'rot',     n:'roteirista',             c:'#d4a300'},
+    {k:'editor',  n:'editor de vídeo',        c:'#16a34a'},
+    {k:'trafego', n:'gestor de tráfego',      c:'#2b62c4'},
+    {k:'track',   n:'gestor de trackeamento', c:'#0891b2'},
+    {k:'design',  n:'design',                 c:'#db2777'},
+    {k:'designlp',n:'design de LP',           c:'#9333ea'},
+    {k:'fixa',    n:'fixa',                   c:'#64748b'}
+  ];
+
+  /* TEMPLATE da sprint 1. Ele pediu "deixar essas tasks montadas" pra nao comecar
+     do zero em cliente nenhum. Sai do backlog visivel no video, na mesma ordem. */
+  var TEMPLATE=[
+    ['Refinamento e implementação das tasks padrão na planning',['po']],
+    ['Priorização e atribuição de responsáveis',['po']],
+    ['Marcar a reunião com o cliente para formatação da Oferta',['cs']],
+    ['Formalizar oferta irresistível',['po']],
+    ['Marcar reunião de Onboarding',['cs']],
+    ['Realizar reunião de onboarding',['cs']],
+    ['Marcar reunião de kick-off com o cliente (apresentar o PDF do estratégico)',['cs','po']],
+    ['Coletar e preencher os dados do cliente no prontuário',['cs']],
+    ['Recolher os acessos e registrar na página Senhas do prontuário',['track']],
+    ['Roteirizar 8 vídeos',['rot']],
+    ['Roteirizar 3 cases em vídeo falado pelo cliente',['rot']],
+    ['Agendar a captação com data, local e responsável',['po']],
+    ['Editar os vídeos da captação',['editor']],
+    ['Montar a landing page',['designlp']],
+    ['Estruturar a campanha no Meta Ads',['trafego']],
+    ['Estruturar a campanha no Google Ads',['trafego']],
+    ['Configurar rastreamento e conversões',['track']],
+    ['Registrar a ata de otimização da semana',['trafego']],
+    ['Rodar a review e escrever a lição aprendida',['po']]
+  ];
+
+  function uid(p){return p+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function hoje(){try{return (typeof hojeSP==='function')?hojeSP():new Date().toISOString().slice(0,10);}catch(e){return new Date().toISOString().slice(0,10);}}
+  function maisDias(d,n){var t=new Date(d+'T12:00:00');t.setDate(t.getDate()+n);return t.toISOString().slice(0,10);}
+  function br(d){return d?String(d).split('-').reverse().join('/'):'';}
+  function load(){try{var a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+  function save(arr){
+    try{localStorage.setItem(KEY,JSON.stringify(arr));}catch(e){}
+    try{if(typeof scheduleSync==='function')scheduleSync();}catch(e){}
+    render();
+  }
+  function get(id){return load().filter(function(p){return p.id===id;})[0]||null;}
+  function grava(p){
+    p.atualizadoEm=hoje();
+    var arr=load(),i=-1;
+    arr.forEach(function(x,ix){if(x.id===p.id)i=ix;});
+    if(i<0)arr.push(p);else arr[i]=p;
+    save(arr);
+  }
+  function papel(k){var r=null;PAPEIS.forEach(function(p){if(p.k===k)r=p;});return r;}
+  function col(k){var r=COLS[0];COLS.forEach(function(c){if(c.k===k)r=c;});return r;}
+
+  /* Projeto zerado. Ja nasce com a sprint 1 aberta e o template no backlog. */
+  function novo(clienteId,nome,semTemplate){
+    var d=hoje();
+    return {
+      id:uid('pj'), clienteId:clienteId||'', cliente:nome||'', temp:'gr',
+      sprint:1, sprintIni:d, sprintDias:7, criadoEm:d, atualizadoEm:d,
+      tarefas: semTemplate?[]:TEMPLATE.map(function(t){
+        return {id:uid('pt'),t:t[0],st:'backlog',papeis:t[1].slice(),sprint:1,venc:'',resp:'',obs:''};
+      }),
+      pront:{briefing:{},arquivos:[],senhas:[],atas:[],licoes:[]}
+    };
+  }
+
+  /* ---------- KPIs e cartoes da carteira ---------- */
+  function abertas(p){return (p.tarefas||[]).filter(function(t){return t.st!=='concluido';}).length;}
+  function feitas(p){return (p.tarefas||[]).filter(function(t){return t.st==='concluido';}).length;}
+  function pct(p){var tot=(p.tarefas||[]).length;return tot?Math.round(feitas(p)/tot*100):0;}
+  function atrasadas(p){var d=hoje();return (p.tarefas||[]).filter(function(t){return t.st!=='concluido'&&t.venc&&t.venc<d;}).length;}
+
+  function renderLista(){
+    var arr=load();
+    var el=document.getElementById('pj-cards'); if(!el)return;
+    var k1=document.getElementById('pj-k1'),k2=document.getElementById('pj-k2'),
+        k3=document.getElementById('pj-k3'),k4=document.getElementById('pj-k4');
+    if(k1)k1.textContent=arr.length;
+    if(k2)k2.textContent=arr.reduce(function(s,p){return s+abertas(p);},0);
+    if(k3)k3.textContent=arr.reduce(function(s,p){return s+(p.tarefas||[]).filter(function(t){return t.st==='homolog'||t.st==='homologcli';}).length;},0);
+    if(k4)k4.textContent=arr.reduce(function(s,p){return s+atrasadas(p);},0);
+
+    if(!arr.length){
+      el.innerHTML='<div class="pj-empty">Nenhum projeto ainda.<br><br>'+
+        'Clique em <b>Criar os projetos do briefing</b> para trazer os 8 clientes do documento que o Caio mandou, já com o prontuário preenchido, '+
+        'ou em <b>Novo projeto</b> para montar um do zero.</div>';
+      return;
+    }
+    var d=hoje();
+    el.innerHTML=arr.map(function(p){
+      var at=atrasadas(p), fim=maisDias(p.sprintIni||d,(p.sprintDias||7));
+      return '<div class="pj-c" data-open="'+esc(p.id)+'">'+
+        '<h3><span class="pj-temp '+esc(p.temp||'gr')+'"></span>'+esc(p.cliente||'Sem nome')+'</h3>'+
+        '<div class="sub">Sprint '+(p.sprint||1)+' · fecha em '+esc(br(fim))+'</div>'+
+        '<div class="pj-bar"><i style="width:'+pct(p)+'%"></i></div>'+
+        '<div class="pj-mini">'+
+          '<span><b>'+pct(p)+'%</b> pronto</span>'+
+          '<span><b>'+abertas(p)+'</b> abertas</span>'+
+          (at?'<span style="color:var(--red)"><b style="color:var(--red)">'+at+'</b> atrasada'+(at>1?'s':'')+'</span>':'')+
+        '</div></div>';
+    }).join('');
+  }
+
+  /* ---------- Projeto aberto ---------- */
+  function tarefasFiltradas(p){
+    var b=(filtro.busca||'').toLowerCase();
+    return (p.tarefas||[]).filter(function(t){
+      if(filtro.papel&&(t.papeis||[]).indexOf(filtro.papel)<0)return false;
+      if(filtro.sprint&&String(t.sprint||'')!==String(filtro.sprint))return false;
+      if(b&&String(t.t||'').toLowerCase().indexOf(b)<0)return false;
+      return true;
+    });
+  }
+
+  function tagsHTML(t){
+    var h=(t.papeis||[]).map(function(k){
+      var pp=papel(k); if(!pp)return '';
+      return '<span class="pj-tag" style="background:'+pp.c+'22;color:'+pp.c+';border:1px solid '+pp.c+'55">'+esc(pp.n)+'</span>';
+    }).join('');
+    if(t.sprint)h+='<span class="pj-tag sp">sprint '+(String(t.sprint).length<2?'0':'')+esc(t.sprint)+'</span>';
+    return h;
+  }
+
+  function cardHTML(t){
+    var d=hoje(), late=t.venc&&t.venc<d&&t.st!=='concluido';
+    return '<div class="pj-t" draggable="true" data-tid="'+esc(t.id)+'">'+
+      '<div class="tt">'+esc(t.t)+'</div>'+
+      '<div class="pj-tags">'+tagsHTML(t)+'</div>'+
+      (t.venc?'<div class="pj-venc'+(late?' late':'')+'">'+(late?'⚠ ':'📅 ')+esc(br(t.venc))+(t.resp?' · '+esc(t.resp):'')+'</div>'
+             :(t.resp?'<div class="pj-venc">'+esc(t.resp)+'</div>':''))+
+      '</div>';
+  }
+
+  function quadroHTML(p){
+    var ts=tarefasFiltradas(p);
+    return '<div class="pj-board">'+COLS.map(function(c){
+      var lst=ts.filter(function(t){return t.st===c.k;});
+      return '<div class="pj-col" data-col="'+c.k+'">'+
+        '<div class="pj-colh"><span class="pj-dot" style="background:'+c.c+'"></span>'+esc(c.n)+'<span class="n">'+lst.length+'</span></div>'+
+        lst.map(cardHTML).join('')+
+        '<button class="pj-add" data-newtask="'+c.k+'">+ Tarefa</button>'+
+        '</div>';
+    }).join('')+'</div>';
+  }
+
+  function listaHTML(p){
+    var ts=tarefasFiltradas(p).slice().sort(function(a,b){return (a.sprint||0)-(b.sprint||0);});
+    if(!ts.length)return '<div class="pj-empty">Nenhuma tarefa com esse filtro.</div>';
+    return '<table class="pj-tb"><thead><tr>'+
+      '<th style="width:44%">Tarefa</th><th>Etapa</th><th>Etiquetas</th><th>Prazo</th><th>Responsável</th>'+
+      '</tr></thead><tbody>'+ts.map(function(t){
+        var c=col(t.st), d=hoje(), late=t.venc&&t.venc<d&&t.st!=='concluido';
+        return '<tr data-tid="'+esc(t.id)+'">'+
+          '<td><b>'+esc(t.t)+'</b></td>'+
+          '<td><span class="pj-tag" style="background:'+c.c+'22;color:'+c.c+';border:1px solid '+c.c+'55">'+esc(c.n)+'</span></td>'+
+          '<td><div class="pj-tags" style="margin:0">'+tagsHTML(t)+'</div></td>'+
+          '<td'+(late?' style="color:var(--red);font-weight:700"':'')+'>'+esc(br(t.venc))+'</td>'+
+          '<td>'+esc(t.resp||'')+'</td></tr>';
+      }).join('')+'</tbody></table>';
+  }
+
+  /* ---------- Prontuario ---------- */
+  var PR_PAGS=[
+    {k:'briefing', n:'Briefing geral'},
+    {k:'arquivos', n:'Arquivos'},
+    {k:'senhas',   n:'Senhas e acessos'},
+    {k:'atas',     n:'Ata de otimização'},
+    {k:'licoes',   n:'Lições aprendidas'}
+  ];
+
+  /* Os campos do briefing seguem o documento que a ARK acabou de fechar (o link que o
+     Caio mandou no grupo), pra esse doc poder morrer e o sistema virar a fonte. */
+  var BR_CAMPOS=[
+    ['Contexto do projeto',[
+      ['segmento','Segmento','i'],['status','Situação','sel:Ativo|Onboarding|Aviso prévio|Crítico'],
+      ['tempo','Há quanto tempo a empresa existe','i'],['ticket','Ticket médio','i'],
+      ['responsaveis','Responsáveis e particularidades de cada um','t'],
+      ['objetivo','Objetivo principal do cliente ao nos contratar','t']
+    ]],
+    ['Escopo contratado',[
+      ['entregas','O que foi acordado de entrega','t'],
+      ['conteudos','Quantidade de conteúdos','t'],
+      ['trafego','Tráfego pago','t'],
+      ['site','Site ou landing page','t'],
+      ['social','Social media','t']
+    ]],
+    ['Situação atual',[
+      ['entregue','O que já foi entregue','t'],
+      ['andamento','O que está em andamento','t'],
+      ['pendente','O que está pendente','t'],
+      ['prioridade','Prioridade atual','t'],
+      ['prazos','Prazos importantes','t']
+    ]],
+    ['Relação com o cliente',[
+      ['esperando','Existe algo que o cliente está esperando','t'],
+      ['promessa','Houve promessa de resultado','t'],
+      ['verbal','Acordado verbalmente fora do contrato','t'],
+      ['contato','Com qual frequência o cliente quer contato','i'],
+      ['particularidades','Particularidades','t'],
+      ['antes','O que preciso saber antes de falar com o cliente','t']
+    ]]
+  ];
+
+  function campoHTML(p,f){
+    var v=(p.pront.briefing||{})[f[0]]||'';
+    if(f[2]==='t')return '<div class="pr-f"><label>'+esc(f[1])+'</label><textarea data-br="'+f[0]+'">'+esc(v)+'</textarea></div>';
+    if(String(f[2]).indexOf('sel:')===0){
+      var ops=f[2].slice(4).split('|');
+      return '<div class="pr-f"><label>'+esc(f[1])+'</label><select data-br="'+f[0]+'"><option value=""></option>'+
+        ops.map(function(o){return '<option'+(v===o?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></div>';
+    }
+    return '<div class="pr-f"><label>'+esc(f[1])+'</label><input data-br="'+f[0]+'" value="'+esc(v)+'"></div>';
+  }
+
+  function prontHTML(p){
+    var body='';
+    if(prPag==='briefing'){
+      body='<h2>Briefing geral</h2><div class="lede">O que qualquer pessoa da ARK precisa saber antes de falar com esse cliente. Salva sozinho ao sair do campo.</div>'+
+        BR_CAMPOS.map(function(s,ix){
+          return '<div class="pr-sec'+(ix?'':' first')+'"><h4>'+esc(s[0])+'</h4>'+s[1].map(function(f){return campoHTML(p,f);}).join('')+'</div>';
+        }).join('');
+    }
+    if(prPag==='arquivos'){
+      var ar=p.pront.arquivos||[];
+      body='<h2>Arquivos</h2><div class="lede">Drive geral, drive de depoimentos, base de leads, formulários. O link mora aqui, não no grupo.</div>'+
+        (ar.length?ar.map(function(a){
+          return '<div class="pr-lin"><div class="top"><b>'+esc(a.nm||'Sem nome')+'</b>'+
+            '<button class="icobtn" data-rm="arquivos:'+esc(a.id)+'">Remover</button></div>'+
+            (a.url?'<a href="'+esc(a.url)+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--yel-d);word-break:break-all">'+esc(a.url)+'</a>':'<span style="font-size:12px;color:var(--mute)">sem link</span>')+
+            (a.obs?'<div style="font-size:12px;color:var(--mute);margin-top:6px">'+esc(a.obs)+'</div>':'')+'</div>';
+        }).join(''):'<div class="pj-empty">Nenhum arquivo registrado.</div>')+
+        '<div class="pr-sec"><h4>Adicionar arquivo</h4><div class="pr-3">'+
+        '<div class="pr-f"><label>Nome</label><input id="ar-nm" placeholder="Drive de depoimentos"></div>'+
+        '<div class="pr-f"><label>Link</label><input id="ar-url" placeholder="https://"></div>'+
+        '<div class="pr-f"><label>Observação</label><input id="ar-obs"></div></div>'+
+        '<button class="tb-btn dk" data-add="arquivo">Adicionar</button></div>';
+    }
+    if(prPag==='senhas'){
+      var sn=p.pront.senhas||[];
+      body='<h2>Senhas e acessos</h2><div class="lede">Tira os acessos do grupo de WhatsApp, que era o risco que o Caio levantou. Marque como pendente o que a agência ainda não recebeu.</div>'+
+        (sn.length?sn.map(function(s){
+          return '<div class="pr-lin"><div class="top"><b>'+esc(s.nm||'Sem nome')+'</b>'+
+            '<span>'+(s.pend?'<span class="pr-pend">pendente</span>':'<span class="pr-ok">ok</span>')+
+            ' <button class="icobtn" data-toggle-pend="'+esc(s.id)+'">Alternar</button>'+
+            ' <button class="icobtn" data-rm="senhas:'+esc(s.id)+'">Remover</button></span></div>'+
+            '<div style="font-size:12px;color:var(--mute)">'+esc(s.user||'')+(s.obs?' · '+esc(s.obs):'')+'</div></div>';
+        }).join(''):'<div class="pj-empty">Nenhum acesso registrado.</div>')+
+        '<div class="pr-sec"><h4>Adicionar acesso</h4><div class="pr-3">'+
+        '<div class="pr-f"><label>Onde</label><input id="sn-nm" placeholder="Business Manager"></div>'+
+        '<div class="pr-f"><label>Usuário ou e-mail</label><input id="sn-user"></div>'+
+        '<div class="pr-f"><label>Observação</label><input id="sn-obs" placeholder="quem tem, onde está guardado"></div></div>'+
+        '<button class="tb-btn dk" data-add="senha">Adicionar</button>'+
+        '<div style="font-size:11.5px;color:var(--mute);margin-top:9px">Registre onde a senha está guardada, não a senha em si.</div></div>';
+    }
+    if(prPag==='atas'){
+      var at=p.pront.atas||[];
+      body='<h2>Ata de otimização</h2><div class="lede">A verba do mês e o que o gestor de tráfego mexeu em cada rodada. É o que permite medir o trabalho de otimização, exatamente o ponto que o Caio levantou.</div>'+
+        (at.length?at.map(function(a){
+          return '<div class="pr-lin"><div class="top"><b>'+esc(br(a.data))+'</b>'+
+            '<button class="icobtn" data-rm="atas:'+esc(a.id)+'">Remover</button></div>'+
+            '<div style="font-size:12px"><b>Verba do mês:</b> '+esc(a.verba||'não informada')+'</div>'+
+            (a.distrib?'<div style="font-size:12px;margin-top:4px"><b>Distribuição:</b> '+esc(a.distrib)+'</div>':'')+
+            (a.otim?'<div style="font-size:12px;margin-top:6px;white-space:pre-wrap">'+esc(a.otim)+'</div>':'')+'</div>';
+        }).join(''):'<div class="pj-empty">Nenhuma ata registrada.</div>')+
+        '<div class="pr-sec"><h4>Nova ata</h4><div class="pr-3">'+
+        '<div class="pr-f"><label>Data</label><input id="at-data" type="date" value="'+hoje()+'"></div>'+
+        '<div class="pr-f"><label>Verba do mês</label><input id="at-verba" placeholder="R$ 2.000"></div>'+
+        '<div class="pr-f"><label>Distribuição</label><input id="at-dist" placeholder="Meta 70% / Google 30%"></div></div>'+
+        '<div class="pr-f"><label>O que foi otimizado</label><textarea id="at-otim" placeholder="Uma linha por ajuste."></textarea></div>'+
+        '<button class="tb-btn dk" data-add="ata">Registrar ata</button></div>';
+    }
+    if(prPag==='licoes'){
+      var lc=p.pront.licoes||[];
+      body='<h2>Lições aprendidas</h2><div class="lede">O resumo de cada review e o refinamento que sai dela. Uma por sprint.</div>'+
+        (lc.length?lc.map(function(l){
+          return '<div class="pr-lin"><div class="top"><b>Sprint '+esc(l.sprint||'')+' · '+esc(br(l.data))+'</b>'+
+            '<button class="icobtn" data-rm="licoes:'+esc(l.id)+'">Remover</button></div>'+
+            (l.aprend?'<div style="font-size:12.5px;white-space:pre-wrap"><b>Aprendemos:</b> '+esc(l.aprend)+'</div>':'')+
+            (l.mudar?'<div style="font-size:12.5px;margin-top:6px;white-space:pre-wrap"><b>Muda na próxima:</b> '+esc(l.mudar)+'</div>':'')+'</div>';
+        }).join(''):'<div class="pj-empty">Nenhuma lição registrada.</div>')+
+        '<div class="pr-sec"><h4>Nova lição</h4><div class="pr-2">'+
+        '<div class="pr-f"><label>Sprint</label><input id="lc-sp" type="number" min="1" value="'+(p.sprint||1)+'"></div>'+
+        '<div class="pr-f"><label>Data</label><input id="lc-data" type="date" value="'+hoje()+'"></div></div>'+
+        '<div class="pr-f"><label>O que aprendemos nesta sprint</label><textarea id="lc-ap"></textarea></div>'+
+        '<div class="pr-f"><label>O que muda na próxima</label><textarea id="lc-md"></textarea></div>'+
+        '<button class="tb-btn dk" data-add="licao">Registrar lição</button></div>';
+    }
+    return '<div class="pr-wrap"><div class="pr-nav">'+
+      PR_PAGS.map(function(x){return '<button data-prpag="'+x.k+'" class="'+(prPag===x.k?'on':'')+'">'+esc(x.n)+'</button>';}).join('')+
+      '</div><div class="pr-body">'+body+'</div></div>';
+  }
+
+  function renderDetalhe(){
+    var el=document.getElementById('pj-detalhe'); if(!el)return;
+    var p=get(aberto);
+    if(!p){aberto=null;render();return;}
+    var fim=maisDias(p.sprintIni||hoje(),(p.sprintDias||7));
+    var sprints=[];(p.tarefas||[]).forEach(function(t){if(t.sprint&&sprints.indexOf(t.sprint)<0)sprints.push(t.sprint);});
+    sprints.sort(function(a,b){return a-b;});
+
+    el.innerHTML=
+      '<div class="pj-head"><div>'+
+        '<button class="icobtn" data-voltar="1" style="margin-bottom:9px">← Todos os projetos</button>'+
+        '<div class="page-title"><h1><span class="pj-temp '+esc(p.temp||'gr')+'"></span>'+esc(p.cliente||'Sem nome')+'</h1>'+
+        '<p>Sprint '+(p.sprint||1)+', de '+esc(br(p.sprintIni))+' a '+esc(br(fim))+
+        ' · '+pct(p)+'% concluído · '+abertas(p)+' tarefas abertas</p></div></div>'+
+        '<div style="display:flex;gap:7px;flex-wrap:wrap;align-items:flex-start">'+
+          '<button class="tb-btn alt" data-planning="1" title="Fecha a sprint atual, abre a próxima e leva o que está em A iniciar para Em andamento">Abrir próxima sprint</button>'+
+          '<button class="tb-btn dk" data-newtask="backlog">+ Tarefa</button>'+
+          '<button class="icobtn" data-delproj="1" style="color:var(--red)">Excluir</button>'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="pj-tabs">'+
+        ['quadro','lista','prontuario'].map(function(v){
+          var n=v==='quadro'?'Quadro':(v==='lista'?'Lista':'Prontuário');
+          return '<button class="pj-tab'+(vista===v?' on':'')+'" data-vista="'+v+'">'+n+'</button>';
+        }).join('')+
+      '</div>'+
+
+      (vista==='prontuario'?'':
+        '<div class="filter-bar">'+
+          '<input class="form-input" id="pj-busca" style="flex:1;min-width:150px;max-width:240px" placeholder="🔍 Buscar tarefa..." value="'+esc(filtro.busca)+'">'+
+          '<select class="form-select" id="pj-fpapel" style="width:180px"><option value="">Toda etiqueta de papel</option>'+
+            PAPEIS.map(function(x){return '<option value="'+x.k+'"'+(filtro.papel===x.k?' selected':'')+'>'+esc(x.n)+'</option>';}).join('')+
+          '</select>'+
+          '<select class="form-select" id="pj-fsprint" style="width:130px"><option value="">Toda sprint</option>'+
+            sprints.map(function(s){return '<option value="'+s+'"'+(String(filtro.sprint)===String(s)?' selected':'')+'>sprint '+(String(s).length<2?'0':'')+s+'</option>';}).join('')+
+          '</select>'+
+          (filtro.papel||filtro.sprint||filtro.busca?'<button class="icobtn" data-limpar="1" style="color:var(--red)">✕ Limpar</button>':'')+
+        '</div>')+
+
+      (vista==='quadro'?quadroHTML(p):(vista==='lista'?listaHTML(p):prontHTML(p)));
+
+    if(vista!=='prontuario')ligarDrag();
+  }
+
+  function render(){
+    var l=document.getElementById('pj-lista'), d=document.getElementById('pj-detalhe');
+    if(!l||!d)return;
+    if(aberto){l.style.display='none';d.style.display='';renderDetalhe();}
+    else{l.style.display='';d.style.display='none';renderLista();}
+  }
+  window.renderProjetos=render;
+
+  /* ---------- Arrastar entre colunas ---------- */
+  var arrastando=null;
+  function ligarDrag(){
+    var root=document.getElementById('pj-detalhe'); if(!root)return;
+    root.querySelectorAll('.pj-t').forEach(function(c){
+      c.addEventListener('dragstart',function(ev){
+        arrastando=c.dataset.tid; c.classList.add('drag');
+        try{ev.dataTransfer.effectAllowed='move';ev.dataTransfer.setData('text/plain',arrastando);}catch(e){}
+      });
+      c.addEventListener('dragend',function(){c.classList.remove('drag');arrastando=null;});
+    });
+    root.querySelectorAll('.pj-col').forEach(function(cl){
+      cl.addEventListener('dragover',function(ev){ev.preventDefault();cl.classList.add('over');try{ev.dataTransfer.dropEffect='move';}catch(e){}});
+      cl.addEventListener('dragleave',function(){cl.classList.remove('over');});
+      cl.addEventListener('drop',function(ev){
+        ev.preventDefault();cl.classList.remove('over');
+        var tid=arrastando; try{tid=ev.dataTransfer.getData('text/plain')||arrastando;}catch(e){}
+        if(!tid)return;
+        var p=get(aberto); if(!p)return;
+        (p.tarefas||[]).forEach(function(t){
+          if(t.id===tid){
+            t.st=cl.dataset.col;
+            t.fim=(t.st==='concluido')?hoje():'';
+          }
+        });
+        grava(p);
+      });
+    });
+  }
+
+  /* ---------- Modal de tarefa ---------- */
+  function modal(html){
+    var m=document.getElementById('pj-modal');
+    if(!m){
+      m=document.createElement('div');m.id='pj-modal';
+      m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:center;justify-content:center;padding:18px';
+      document.body.appendChild(m);
+      m.addEventListener('click',function(ev){if(ev.target===m)fecharModal();});
+    }
+    m.innerHTML='<div class="pj-f" style="background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;width:min(560px,100%);max-height:88vh;overflow:auto">'+html+'</div>';
+    m.style.display='flex';
+  }
+  function fecharModal(){var m=document.getElementById('pj-modal');if(m)m.style.display='none';}
+
+  function abrirTarefa(tid,stInicial){
+    var p=get(aberto); if(!p)return;
+    var t=tid?(p.tarefas||[]).filter(function(x){return x.id===tid;})[0]:null;
+    var ehNova=!t;
+    if(ehNova)t={id:'',t:'',st:stInicial||'backlog',papeis:[],sprint:p.sprint||1,venc:'',resp:'',obs:''};
+    modal(
+      '<h3 style="font-size:17px;font-weight:720;margin:0 0 16px">'+(ehNova?'Nova tarefa':'Editar tarefa')+'</h3>'+
+      '<div class="pr-f"><label>Tarefa</label><input id="tk-t" value="'+esc(t.t)+'" placeholder="O que precisa ser feito"></div>'+
+      '<div class="pr-2">'+
+        '<div class="pr-f"><label>Etapa</label><select id="tk-st">'+COLS.map(function(c){return '<option value="'+c.k+'"'+(t.st===c.k?' selected':'')+'>'+esc(c.n)+'</option>';}).join('')+'</select></div>'+
+        '<div class="pr-f"><label>Sprint</label><input id="tk-sp" type="number" min="1" value="'+esc(t.sprint||1)+'"></div>'+
+      '</div>'+
+      '<div class="pr-2">'+
+        '<div class="pr-f"><label>Prazo</label><input id="tk-venc" type="date" value="'+esc(t.venc||'')+'"></div>'+
+        '<div class="pr-f"><label>Responsável</label><input id="tk-resp" value="'+esc(t.resp||'')+'" placeholder="Nome de quem executa"></div>'+
+      '</div>'+
+      '<div class="pr-f"><label>Etiquetas de papel</label><div style="display:flex;gap:6px;flex-wrap:wrap">'+
+        PAPEIS.map(function(x){
+          var on=(t.papeis||[]).indexOf(x.k)>=0;
+          return '<button type="button" class="pj-tag" data-pp="'+x.k+'" style="cursor:pointer;padding:5px 11px;font-size:11px;background:'+(on?x.c:'transparent')+';color:'+(on?'#fff':x.c)+';border:1px solid '+x.c+'">'+esc(x.n)+'</button>';
+        }).join('')+'</div></div>'+
+      '<div class="pr-f"><label>Observação</label><textarea id="tk-obs" style="min-height:64px">'+esc(t.obs||'')+'</textarea></div>'+
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+
+        (ehNova?'':'<button class="icobtn" data-tkdel="'+esc(t.id)+'" style="color:var(--red);margin-right:auto">Excluir</button>')+
+        '<button class="tb-btn alt" data-tkcancel="1">Cancelar</button>'+
+        '<button class="tb-btn dk" data-tksave="'+esc(t.id||'')+'">Salvar</button>'+
+      '</div>'
+    );
+    var m=document.getElementById('pj-modal');
+    m.dataset.papeis=(t.papeis||[]).join(',');
+    m.querySelectorAll('[data-pp]').forEach(function(b){
+      b.addEventListener('click',function(){
+        var cur=(m.dataset.papeis||'').split(',').filter(Boolean);
+        var k=b.dataset.pp, ix=cur.indexOf(k), pp=papel(k);
+        if(ix>=0)cur.splice(ix,1);else cur.push(k);
+        m.dataset.papeis=cur.join(',');
+        var on=cur.indexOf(k)>=0;
+        b.style.background=on?pp.c:'transparent';
+        b.style.color=on?'#fff':pp.c;
+      });
+    });
+  }
+
+  /* ---------- Eventos ---------- */
+  document.addEventListener('click',function(ev){
+    var pg=document.getElementById('page-projetos');
+    var m=document.getElementById('pj-modal');
+    var dentroModal=m&&m.style.display!=='none'&&m.contains(ev.target);
+    if(!dentroModal&&(!pg||!pg.contains(ev.target)))return;
+
+    var b=ev.target.closest('[data-open],[data-voltar],[data-vista],[data-prpag],[data-newtask],[data-tid],'+
+      '[data-add],[data-rm],[data-toggle-pend],[data-tksave],[data-tkcancel],[data-tkdel],[data-limpar],'+
+      '[data-planning],[data-delproj],#pj-novo,#pj-seed');
+    if(!b)return;
+
+    if(b.id==='pj-novo'){
+      var nm=prompt('Nome do cliente ou do projeto:');
+      if(!nm||!nm.trim())return;
+      var cid='';
+      try{(typeof CLIENTES!=='undefined'?CLIENTES:[]).forEach(function(c){
+        if(String(c.nm).toLowerCase()===nm.trim().toLowerCase())cid=c.id;});}catch(e){}
+      var p=novo(cid,nm.trim());
+      var arr=load();arr.push(p);save(arr);
+      aberto=p.id;vista='quadro';render();
+      try{toast('Projeto criado com as tarefas padrão da sprint 1');}catch(e){}
+      return;
+    }
+    if(b.id==='pj-seed'){semear();return;}
+    if(b.dataset.open!=null){aberto=b.dataset.open;vista='quadro';prPag='briefing';filtro={papel:'',sprint:'',busca:''};render();return;}
+    if(b.dataset.voltar!=null){aberto=null;render();return;}
+    if(b.dataset.vista){vista=b.dataset.vista;renderDetalhe();return;}
+    if(b.dataset.prpag){prPag=b.dataset.prpag;renderDetalhe();return;}
+    if(b.dataset.limpar!=null){filtro={papel:'',sprint:'',busca:''};renderDetalhe();return;}
+    if(b.dataset.newtask!=null){abrirTarefa(null,b.dataset.newtask);return;}
+    if(b.dataset.tkcancel!=null){fecharModal();return;}
+
+    if(b.dataset.planning!=null){
+      var pp=get(aberto); if(!pp)return;
+      if(!confirm('Fechar a sprint '+(pp.sprint||1)+' e abrir a sprint '+((pp.sprint||1)+1)+'?\n\nO que está em "A iniciar" vai para "Em andamento" e recebe a etiqueta da nova sprint.'))return;
+      pp.sprint=(pp.sprint||1)+1;
+      pp.sprintIni=hoje();
+      (pp.tarefas||[]).forEach(function(t){
+        if(t.st==='iniciar'){t.st='andamento';t.sprint=pp.sprint;}
+        else if(t.st!=='concluido'&&!t.sprint)t.sprint=pp.sprint;
+      });
+      grava(pp);
+      try{toast('Sprint '+pp.sprint+' aberta. Registre a lição da anterior no prontuário.');}catch(e){}
+      return;
+    }
+
+    if(b.dataset.delproj!=null){
+      var pd=get(aberto); if(!pd)return;
+      if(!confirm('Excluir o projeto de '+(pd.cliente||'sem nome')+' com todas as tarefas e o prontuário?'))return;
+      try{if(typeof addDeleted==='function')addDeleted(pd.id);}catch(e){}
+      save(load().filter(function(x){return x.id!==pd.id;}));
+      aberto=null;render();
+      return;
+    }
+
+    if(b.dataset.tksave!=null){
+      var p2=get(aberto); if(!p2)return;
+      var tt=(document.getElementById('tk-t').value||'').trim();
+      if(!tt){try{toast('Escreva o nome da tarefa');}catch(e){}return;}
+      var mm=document.getElementById('pj-modal');
+      var dados={
+        t:tt,
+        st:document.getElementById('tk-st').value,
+        sprint:parseInt(document.getElementById('tk-sp').value,10)||1,
+        venc:document.getElementById('tk-venc').value||'',
+        resp:(document.getElementById('tk-resp').value||'').trim(),
+        obs:(document.getElementById('tk-obs').value||'').trim(),
+        papeis:(mm.dataset.papeis||'').split(',').filter(Boolean)
+      };
+      var id=b.dataset.tksave;
+      if(id){
+        (p2.tarefas||[]).forEach(function(t){if(t.id===id)Object.keys(dados).forEach(function(k){t[k]=dados[k];});});
+      }else{
+        dados.id=uid('pt');p2.tarefas=p2.tarefas||[];p2.tarefas.push(dados);
+      }
+      grava(p2);fecharModal();
+      return;
+    }
+
+    if(b.dataset.tkdel!=null){
+      var p3=get(aberto); if(!p3)return;
+      if(!confirm('Excluir esta tarefa?'))return;
+      p3.tarefas=(p3.tarefas||[]).filter(function(t){return t.id!==b.dataset.tkdel;});
+      grava(p3);fecharModal();
+      return;
+    }
+
+    if(b.dataset.tid&&!dentroModal){abrirTarefa(b.dataset.tid);return;}
+
+    if(b.dataset.add){
+      var p4=get(aberto); if(!p4)return;
+      var v=function(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';};
+      if(b.dataset.add==='arquivo'){
+        if(!v('ar-nm')){try{toast('Dê um nome ao arquivo');}catch(e){}return;}
+        p4.pront.arquivos=p4.pront.arquivos||[];
+        p4.pront.arquivos.push({id:uid('ar'),nm:v('ar-nm'),url:v('ar-url'),obs:v('ar-obs')});
+      }
+      if(b.dataset.add==='senha'){
+        if(!v('sn-nm')){try{toast('Diga onde é o acesso');}catch(e){}return;}
+        p4.pront.senhas=p4.pront.senhas||[];
+        p4.pront.senhas.push({id:uid('sn'),nm:v('sn-nm'),user:v('sn-user'),obs:v('sn-obs'),pend:!v('sn-user')});
+      }
+      if(b.dataset.add==='ata'){
+        p4.pront.atas=p4.pront.atas||[];
+        p4.pront.atas.unshift({id:uid('at'),data:v('at-data')||hoje(),verba:v('at-verba'),distrib:v('at-dist'),otim:v('at-otim')});
+      }
+      if(b.dataset.add==='licao'){
+        p4.pront.licoes=p4.pront.licoes||[];
+        p4.pront.licoes.unshift({id:uid('lc'),sprint:parseInt(v('lc-sp'),10)||p4.sprint||1,data:v('lc-data')||hoje(),aprend:v('lc-ap'),mudar:v('lc-md')});
+      }
+      grava(p4);
+      return;
+    }
+
+    if(b.dataset.rm){
+      var p5=get(aberto); if(!p5)return;
+      var par=b.dataset.rm.split(':'), lista=par[0], rid=par[1];
+      if(!confirm('Remover este item?'))return;
+      p5.pront[lista]=(p5.pront[lista]||[]).filter(function(x){return x.id!==rid;});
+      grava(p5);
+      return;
+    }
+
+    if(b.dataset.togglePend){
+      var p6=get(aberto); if(!p6)return;
+      (p6.pront.senhas||[]).forEach(function(s){if(s.id===b.dataset.togglePend)s.pend=!s.pend;});
+      grava(p6);
+      return;
+    }
+  });
+
+  /* Busca: redesenha SO o quadro/lista, senao o campo perde o foco a cada tecla. */
+  document.addEventListener('input',function(ev){
+    if(ev.target.id!=='pj-busca')return;
+    filtro.busca=ev.target.value;
+    var p=get(aberto); if(!p)return;
+    var q=document.querySelector('#pj-detalhe .pj-board'), l=document.querySelector('#pj-detalhe .pj-tb');
+    if(q){q.outerHTML=quadroHTML(p);ligarDrag();}
+    else if(l){l.outerHTML=listaHTML(p);}
+  });
+
+  document.addEventListener('change',function(ev){
+    var t=ev.target;
+    if(t.id==='pj-fpapel'){filtro.papel=t.value;renderDetalhe();return;}
+    if(t.id==='pj-fsprint'){filtro.sprint=t.value;renderDetalhe();return;}
+    if(t.dataset&&t.dataset.br!=null){
+      var p=get(aberto); if(!p)return;
+      p.pront.briefing=p.pront.briefing||{};
+      p.pront.briefing[t.dataset.br]=t.value;
+      /* grava SEM redesenhar: redesenhar aqui tiraria o foco do proximo campo */
+      p.atualizadoEm=hoje();
+      var arr=load(),i=-1;arr.forEach(function(x,ix){if(x.id===p.id)i=ix;});
+      if(i>=0){
+        arr[i]=p;
+        try{localStorage.setItem(KEY,JSON.stringify(arr));}catch(e){}
+        try{if(typeof scheduleSync==='function')scheduleSync();}catch(e){}
+      }
+      return;
+    }
+  });
+
+  /* ---------- Semear os clientes do briefing de 27/08 ----------
+     Conteudo tirado do documento que o Caio compartilhou no grupo. Nao duplica:
+     pula cliente que ja tem projeto. */
+  function semear(){
+    var jaTem={};
+    load().forEach(function(p){jaTem[String(p.cliente||'').toLowerCase()]=1;});
+    var arr=load(), criados=0;
+    SEED.forEach(function(s){
+      if(jaTem[s.nm.toLowerCase()])return;
+      var p=novo(s.cid||'',s.nm);
+      p.temp=s.temp||'gr';
+      p.pront.briefing=s.br;
+      arr.push(p);criados++;
+    });
+    if(!criados){try{toast('Todos os clientes do briefing já têm projeto');}catch(e){}return;}
+    save(arr);
+    try{toast(criados+' projeto(s) criado(s) com o briefing preenchido');}catch(e){}
+  }
+
+  var SEED=[
+    {nm:'Fercon',cid:'fercon',temp:'gr',br:{
+      segmento:'Materiais de construção',status:'Ativo',
+      responsaveis:'Vinicius, sócio da empresa e primo do Lucas. Sem experiência com marketing, bastante acelerado.\nRodrigo, filho de um dos sócios. Trabalha com Photoshop, tem alguma noção de marketing e reprova bastante material.\nBruno, designer responsável pelo projeto, fala direto com o pessoal da Fercon.',
+      entregas:'1 a 2 captações mensais\nGestão de tráfego no Meta Ads e Google Ads\n12 posts mensais\nGestão das redes sociais\nCriação do site\nOutras plataformas de venda, como Mercado Livre\nPlanejamento estratégico mensal\nMateriais de mídia offline para os totens, sob demanda',
+      conteudos:'12 posts mensais no Instagram\n6 a 8 vídeos por mês\nO restante entre estáticos e carrosséis\nMateriais para totens sob demanda',
+      trafego:'Meta Ads e Google Ads. O Google ainda não está funcionando.',
+      site:'Acordado em contrato, mas o cliente ainda não priorizou.',
+      social:'Sim.',
+      entregue:'Todas as entregas, menos o site. Postagens recorrentes.',
+      andamento:'Postagens às segundas, quartas e sextas.',
+      pendente:'Google Ads\nSite',
+      prioridade:'Google Ads.',
+      esperando:'A princípio não. Validar com o Lucas.',
+      promessa:'A princípio nenhuma.',
+      verbal:'Validar com o Lucas.',
+      particularidades:'Projeto com dinâmica familiar.',
+      antes:'É preciso transpor a responsabilidade do projeto para uma operação mais organizada.\nO Vinicius é acelerado, então clareza sobre prioridades, prazos e próximos passos.'}},
+
+    {nm:'Sasse Gifts',cid:'sasse',temp:'y',br:{
+      segmento:'Brindes corporativos, com fabricação própria',status:'Aviso prévio',
+      objetivo:'Aquisição no mercado corporativo.',
+      entregas:'Produção audiovisual\nGestão das redes sociais\nTráfego pago\n1 captação mensal\nPlanejamento estratégico mensal',
+      conteudos:'A definir com o Lucas.',
+      trafego:'A validar quais plataformas estão contempladas.',
+      site:'A validar.',
+      entregue:'A princípio todas as entregas, menos o site.',
+      andamento:'Postagens às segundas, quartas e sextas.',
+      pendente:'Google Ads\nSite',
+      prioridade:'Google Ads.',
+      esperando:'A princípio não. Validar com o Lucas.',
+      promessa:'A princípio nenhuma.',
+      verbal:'Validar com o Lucas.',
+      particularidades:'Está em aviso prévio. Validar informações com o Lucas.',
+      antes:'Validar o contexto do aviso prévio e quais entregas ainda precisam ser concluídas antes do encerramento.'}},
+
+    {nm:'Fonseca & Cavalcanti',cid:'fonseca',temp:'r',br:{
+      segmento:'Advocacia especializada em resolução de fraudes bancárias',status:'Ativo',
+      responsaveis:'João Fonseca, dono e responsável pela área cível. É mais velho e mora em Portugal.\nPaulo Cavalcanti, braço direito do João, toca o negócio no Brasil. O CS fala principalmente com ele.',
+      objetivo:'Profissionalizar a marca e aumentar a aquisição de novos clientes.',
+      entregas:'Gestão de tráfego\nGestão das redes sociais\n1 captação mensal\nIdentidade visual\nLanding page\nPlanejamento estratégico mensal',
+      conteudos:'8 conteúdos por mês, publicando segundas e quartas\n6 a 8 vídeos\nQuando não fechar os 8 em vídeo, completar com estáticos',
+      trafego:'Google Ads e Meta Ads.',
+      site:'Landing page incluída no projeto.',
+      entregue:'Tudo, menos o Google Ads e a landing page.',
+      andamento:'Google Ads\nLanding page',
+      pendente:'Google Ads\nLanding page',
+      prazos:'Google Ads: próxima semana.\nLanding page: próximos 10 dias.\nMarco mencionado: 26/08.',
+      prioridade:'Google Ads e landing page.',
+      esperando:'Foi prometido um acompanhamento mais cuidadoso do projeto.',
+      particularidades:'Temperatura amarelo indo para vermelho, por feedback negativo.\nO contrato termina em aproximadamente 6 meses.',
+      antes:'O perfil do Paulo é mais passivo, então conduzir com clareza e objetividade.\nO projeto está em atenção por causa dos feedbacks negativos.'}},
+
+    {nm:'Vivenda',cid:'vivenda',temp:'gr',br:{
+      segmento:'Farmácia de manipulação',status:'Ativo',
+      responsaveis:'Yuri, responsável interno pelo marketing. Demandas de mídia offline e representantes.\nHemerson, dono. Planejamento e decisões estratégicas.\nGabriel, diretor. Centraliza quase tudo que é da agência.',
+      objetivo:'Aumentar a receita.',
+      entregas:'Materiais gráficos e físicos\n12 a 16 postagens mensais\nTráfego pago no Meta Ads e Google Ads\nGestão das redes sociais\nCobertura de eventos\nAssistência ao time de representantes, com formulários e materiais\nMateriais de mídia offline sob demanda\nPlanejamento estratégico\nTikTok Shop\n3 a 4 captações mensais',
+      conteudos:'12 a 16 postagens mensais. O restante sob demanda.',
+      trafego:'Meta Ads e Google Ads.',
+      site:'A página já existe e funciona. Sem necessidade de alteração agora.',
+      social:'Sim.',
+      andamento:'Entregas semanais de rotina.',
+      pendente:'A princípio nada.',
+      prazos:'A princípio nenhum prazo crítico.',
+      prioridade:'Antecipar as demandas de mídia e planejamento das próximas semanas, para reduzir a concentração no Gabriel.',
+      esperando:'Não.',
+      antes:'Mapear quais demandas podem ser antecipadas para aliviar a operação do Gabriel.'}},
+
+    {nm:'Royal Face',cid:'',temp:'gr',br:{
+      segmento:'Clínica de estética, franquia com 5 unidades',status:'Ativo',
+      responsaveis:'Thais, gestora e principal responsável pelas decisões. É tranquila e tem boa relação com a equipe.\nMaiara, comercial e contato para as demandas do dia a dia. É mais exigente e cobra as entregas com mais intensidade.',
+      objetivo:'Aumentar a autoridade da marca e a geração de demanda. Meta comercial de R$ 10 mil em vendas por dia e R$ 100 mil por mês.',
+      entregas:'Gestão de tráfego no Meta Ads e Google Ads\nCaptação audiovisual\nPlanejamento estratégico\n6 a 8 vídeos por captação\n4 criativos para anúncios',
+      trafego:'Hoje apenas Meta Ads. Google Ads pendente.',
+      site:'Não está no contrato e não há demanda atual.',
+      social:'Não está incluso. A Maiara publica os conteúdos.',
+      entregue:'1ª captação realizada, com 6 vídeos entregues.\n2ª captação realizada, com 7 a 8 vídeos ainda pendentes.',
+      andamento:'Entrega dos conteúdos da segunda captação.',
+      pendente:'Conteúdos da segunda captação\nGoogle Ads',
+      prazos:'Entregar conteúdos específicos para setembro, mantendo as entregas de rotina.',
+      prioridade:'1. Entregar os conteúdos da segunda captação.\n2. Estruturar o Google Ads.',
+      esperando:'A princípio não.',
+      promessa:'A princípio não. O comercial criou expectativa de R$ 10 mil por dia e R$ 100 mil por mês.',
+      verbal:'Não.',
+      particularidades:'Franquia com 5 unidades e potencial de expansão.\nSomos a primeira empresa de Brasília a fechar com uma das unidades.\nNível de urgência tranquilo.',
+      antes:'Entender o potencial de expansão para as outras unidades.\nTer clareza sobre o andamento da segunda captação e do Google Ads.'}},
+
+    {nm:'EmFace',cid:'',temp:'y',br:{
+      segmento:'Clínica de estética, unidades em Brasília e Manaus',status:'Onboarding',
+      objetivo:'Aumentar a receita.',
+      entregas:'1 captação mensal\n6 a 8 vídeos por mês\nTráfego pago no Meta Ads e Google Ads\nConteúdos para as duas unidades, cerca de 4 para Manaus e 4 para Brasília',
+      conteudos:'6 a 8 vídeos por mês, divididos entre as duas unidades.',
+      trafego:'Meta Ads e Google Ads, nas duas unidades.',
+      site:'Não está incluso.',
+      social:'Não está incluso.',
+      entregue:'Nada ainda. O projeto está em onboarding.',
+      andamento:'Onboarding.',
+      pendente:'Todas as tarefas de rotina previstas no projeto.',
+      prazos:'Entrega do planejamento estratégico.\nCaptação prevista para a próxima semana.\nAlinhar o roteiro antes da captação.',
+      prioridade:'Seguir o processo padrão de onboarding e estruturar as entregas iniciais.',
+      promessa:'A princípio não. O comercial criou expectativa de geração de vendas.',
+      verbal:'Necessário alinhar a questão do Instituto.',
+      particularidades:'A captação audiovisual acontece só em Brasília.\nTudo precisa estar muito bem alinhado.\nO cliente não gosta de comunicação por áudio.\nÀs vezes coloca demandas em teste para ver se a agência aceita.',
+      antes:'Ter domínio das particularidades de personalidade já levantadas.\nGarantir que toda demanda esteja alinhada antes de ser executada.'}},
+
+    {nm:'Mazuchi Regenera',cid:'',temp:'gr',br:{
+      segmento:'Clínica de laserterapia, tratamento de feridas',status:'Onboarding',
+      tempo:'Projeto com cerca de 1 semana.',
+      responsaveis:'Taisa, principal contato da agência.\nRodrigo, marido da Taisa.',
+      objetivo:'Aumentar a receita.',
+      entregas:'Tráfego pago no Meta Ads e Google Ads\nManual de identidade visual\n1 captação mensal\n4 a 6 vídeos mensais\nLanding page\nPlanejamento estratégico\nProjeto com duração de 6 meses',
+      conteudos:'4 a 6 vídeos mensais.',
+      trafego:'Meta Ads e Google Ads.',
+      site:'Landing page incluída.',
+      social:'Não está incluído.',
+      entregue:'Nada ainda.',
+      andamento:'Onboarding.',
+      pendente:'Todas as entregas iniciais do projeto.\nCaptação audiovisual.\nApresentação do planejamento estratégico.',
+      prioridade:'1. Captação.\n2. Site e landing page.\n3. Estruturação das demais entregas do onboarding.',
+      esperando:'Existe um conteúdo para edição. O cliente já enviou os materiais e a equipe está editando.',
+      promessa:'A princípio não.',
+      particularidades:'O projeto é propriedade da agência nos primeiros 6 meses. Tudo que for desenvolvido nesse período fica sob responsabilidade da agência, e a transposição acontece depois do sexto mês.\nCliente veio por indicação da Fonseca & Cavalcanti.\nSão clientes tranquilos.',
+      antes:'Garantir que o cronograma inicial esteja bem alinhado, principalmente captação e site.'}},
+
+    {nm:'Babbo Giovanni',cid:'',temp:'r',br:{
+      segmento:'Pizzaria',status:'Crítico',
+      responsaveis:'Fabio, dono.',
+      objetivo:'Aumentar a receita.',
+      entregas:'Gestão de tráfego nos dois canais\nOtimização do cardápio\nAuditoria das redes sociais\nComo bônus, 1 captação com 6 a 8 vídeos',
+      conteudos:'Não foi acordada quantidade específica. Haverá uma captação de bônus com 6 a 8 vídeos.',
+      trafego:'Meta Ads e Google Ads.',
+      site:'Não está incluso. O cardápio digital já está pronto, na plataforma Accon.',
+      social:'Não está incluso.',
+      entregue:'Otimização do cardápio\nEdição dos vídeos enviados pelo cliente\nRelatórios\nPlano estratégico',
+      andamento:'Captação de bônus e resgate do cliente.',
+      pendente:'Captação de bônus\nResgate do cliente',
+      prazos:'Nenhum prazo específico.',
+      prioridade:'Captação.',
+      esperando:'Venda e resultado.',
+      promessa:'Existe expectativa de resultado depois da captação.',
+      verbal:'Captação de bônus com 6 a 8 vídeos.',
+      particularidades:'Pacote Alpha.\nCliente em situação crítica, bastante insatisfeito com os resultados e inseguro sobre o próprio negócio.\nExiste risco de perda do cliente caso a percepção de valor não seja recuperada.\nATENÇÃO: no cadastro de clientes do sistema este cliente consta como churn em 16/07/2026, e o briefing de 27/08 o traz como ativo. Confirmar com o Lucas.',
+      antes:'É um cliente crítico e insatisfeito, a conversa precisa estar muito bem preparada.\nTer clareza sobre o que já foi entregue, o que será feito na captação e qual o plano para recuperar a confiança.'}}
+  ];
 })();
 function renderClientesKPIs(){
   const el=document.getElementById('cli-kpis'); if(!el)return;

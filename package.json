@@ -14,6 +14,7 @@
     "teste:tema": "node deploy/teste-tema-escuro.mjs",
     "teste:safari": "node deploy/teste-safari-ios.mjs",
     "teste:arrastar": "node deploy/teste-arrastar-tarefas.mjs",
+    "teste:projetos": "node deploy/teste-projetos.mjs",
     "prova:visual": "node deploy/prova-visual.mjs"
   },
   "dependencies": {

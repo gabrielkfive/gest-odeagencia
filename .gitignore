@@ -49,3 +49,6 @@ remote/*.log
 
 # screenshots do teste de Safari/iOS
 deploy/_saida-safari/
+
+# provas visuais do teste de Projetos (geradas a cada run)
+deploy/prova-projetos-*.png
