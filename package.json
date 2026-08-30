@@ -13,6 +13,7 @@
     "teste:mobile": "node deploy/teste-mobile-drawer.mjs",
     "teste:tema": "node deploy/teste-tema-escuro.mjs",
     "teste:safari": "node deploy/teste-safari-ios.mjs",
+    "teste:arrastar": "node deploy/teste-arrastar-tarefas.mjs",
     "prova:visual": "node deploy/prova-visual.mjs"
   },
   "dependencies": {

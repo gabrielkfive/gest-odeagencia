@@ -1,4 +1,4 @@
-<!-- build 20260830-apple-toque -->
+<!-- build 20260830-arrastar-amarrado -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -9012,13 +9012,8 @@ function renderTarefas(){
     const list=document.querySelector(`[data-list="${st}"]`);if(!list)return;
     const _keepScroll=list.scrollTop; // re-render não pode "pular pro topo" no meio do trabalho
     // status desconhecido (dado antigo/importado) cai no Backlog — nada some
-    const _pr={alta:0,media:1,baixa:2};
     let filt=state.tarefas.filter(t=>(t.status===st||(st==='backlog'&&!STATS.includes(t.status)))&&tarefaPassaFiltro(t))
-      .sort((a,b)=>{ // manual (ordem) primeiro se definida; senão prioridade, depois data
-        if(a.ord!=null&&b.ord!=null&&a.ord!==b.ord)return a.ord-b.ord;
-        const p=(_pr[a.prio]??1)-(_pr[b.prio]??1); if(p)return p;
-        return (a.data||'9999').localeCompare(b.data||'9999');
-      });
+      .sort(taskCmp);   // ordem unica do board, ver taskCmp
     const totalCol=filt.length;
     let maisBtn='';
     // Concluído acumula centenas de cards e pesava o board inteiro: mostra as 30 mais
@@ -9233,9 +9228,7 @@ function moveTask(id,newSt){
 // move a tarefa pra cima/baixo na mesma coluna (define ordem manual)
 function taskMove(id,dir){
   const t=state.tarefas.find(x=>x.id===id);if(!t)return;
-  const _pr={alta:0,media:1,baixa:2};
-  const col=state.tarefas.filter(x=>x.status===t.status||(t.status==='backlog'&&!['backlog','andamento','aprovacao','concluido'].includes(x.status)))
-    .sort((a,b)=>{ if(a.ord!=null&&b.ord!=null&&a.ord!==b.ord)return a.ord-b.ord; const p=(_pr[a.prio]??1)-(_pr[b.prio]??1); if(p)return p; return (a.data||'9999').localeCompare(b.data||'9999'); });
+  const col=taskColuna(t.status).sort(taskCmp);   // mesma ordem do board
   const i=col.findIndex(x=>x.id===id); const j=i+dir; if(j<0||j>=col.length)return;
   col.forEach((x,k)=>x.ord=k); // fixa a ordem atual
   const tmp=col[i].ord; col[i].ord=col[j].ord; col[j].ord=tmp; // troca
@@ -9258,6 +9251,51 @@ function delTask(id){
   },3000));
 }
 
+/* ============ ORDEM DAS TAREFAS (uma so regra pro board inteiro) ============
+   Bug de campo: cartao sumia e reaparecia em outro lugar da coluna, e piorava com
+   filtro por cliente ou por funcionario. Eram duas coisas somadas:
+
+   1. O comparador nao era TRANSITIVO. Tarefa com ord definido contra tarefa com ord
+      nulo caia na prioridade, mas duas com ord se comparavam pelo ord. Comparador
+      assim faz o sort devolver ordem diferente a cada repintada, com o mesmo dado.
+      Agora ord ausente vale infinito (vai pro fim) e existe desempate final por id,
+      entao a ordem e sempre a mesma.
+
+   2. Ao soltar, o codigo numerava so os cartoes VISIVEIS (0,1,2...). Com filtro
+      ligado, esses numeros colidiam com os das tarefas escondidas da mesma coluna,
+      e quando o filtro saia a coluna aparecia embaralhada. Agora quem renumera e
+      taskRenumera/taskReordena, que enxergam a coluna inteira, filtro ou nao. */
+let WFA_DROP_FEITO=false;   // o drop chegou a acontecer? (ver dragend)
+const _PRIO_PESO={alta:0,media:1,baixa:2};
+const TASK_STATS=['backlog','andamento','aprovacao','concluido'];
+function taskCmp(a,b){
+  const oa=(a.ord==null?Infinity:a.ord), ob=(b.ord==null?Infinity:b.ord);
+  if(oa!==ob)return oa-ob;
+  const pr=(_PRIO_PESO[a.prio]??1)-(_PRIO_PESO[b.prio]??1); if(pr)return pr;
+  const dt=String(a.data||'9999').localeCompare(String(b.data||'9999')); if(dt)return dt;
+  return String(a.id).localeCompare(String(b.id));
+}
+// Todas as tarefas da coluna, inclusive as que o filtro esconde. Status desconhecido
+// (dado antigo importado) conta como backlog, igual o render faz.
+function taskColuna(status){
+  return state.tarefas.filter(t=>t.status===status||(status==='backlog'&&!TASK_STATS.includes(t.status)));
+}
+function taskRenumera(status){
+  taskColuna(status).sort(taskCmp).forEach((t,i)=>{t.ord=i;});
+}
+/* Poe a tarefa logo antes de quem ficou embaixo dela na tela (idDepois), ou no fim
+   da coluna. A ancora e um cartao visivel, e o resto da coluna mantem a ordem
+   relativa que ja tinha: por isso funciona igual com filtro ligado ou desligado. */
+function taskReordena(id,status,idDepois){
+  const lista=taskColuna(status).sort(taskCmp);
+  const movida=lista.find(t=>t.id===id); if(!movida)return;
+  const resto=lista.filter(t=>t.id!==id);
+  let pos=resto.length;
+  if(idDepois){const k=resto.findIndex(t=>t.id===idDepois); if(k>=0)pos=k;}
+  resto.splice(pos,0,movida);
+  resto.forEach((t,i)=>{t.ord=i;});
+}
+
 /* Drag do Kanban: a coluna INTEIRA é área de soltar (não só onde já tem card),
    e soltar em qualquer altura reordena de verdade (like Trello). Pedido do Gabriel:
    "não importa se é no meio, em cima, embaixo da caixa, tem que dar pra jogar pro lado". */
@@ -9277,7 +9315,12 @@ function bindDrag(){
   document.querySelectorAll('.task-card').forEach(c=>{
     if(c.__dragBound)return;c.__dragBound=1;
     c.addEventListener('dragstart',e=>{e.dataTransfer.setData('id',c.dataset.tid);e.dataTransfer.effectAllowed='move';requestAnimationFrame(()=>c.classList.add('dragging'));});
+    c.addEventListener('dragstart',()=>{WFA_DROP_FEITO=false;});
     c.addEventListener('dragend',e=>{c.classList.remove('dragging');document.querySelectorAll('.task-col.drop-on').forEach(x=>x.classList.remove('drop-on'));
+      /* Soltou fora de qualquer coluna: o preview do dragover ja tinha movido o cartao
+         no DOM. Sem repintar, ele fica na coluna errada ate a proxima repintada e da a
+         impressao de que sumiu e voltou sozinho. */
+      if(!WFA_DROP_FEITO){document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});renderTarefas();return;}
       // o drag mexe no DOM por fora do render: invalida o cache pro próximo render repintar de verdade
       document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});
     });
@@ -9310,7 +9353,16 @@ function bindDrag(){
       let bloqueado=false;
       if(t.status==='concluido'){ if(!taskConcluir(t)){bloqueado=true;t.status=origem;if(changedCol)taskStampSt(t,origem);} }
       else t.concluidaEm=null;
-      [...list.querySelectorAll('.task-card')].forEach((el,idx)=>{const tt=state.tarefas.find(x=>x.id===el.dataset.tid);if(tt)tt.ord=idx;});
+      /* Ancora a posicao pelo cartao que ficou LOGO ABAIXO na tela e renumera a
+         coluna inteira (as escondidas pelo filtro tambem). Antes numerava so o que
+         estava visivel e os numeros colidiam com os das escondidas. */
+      if(!bloqueado){
+        const naTela=[...list.querySelectorAll('.task-card')].map(el=>el.dataset.tid);
+        const k=naTela.indexOf(id);
+        taskReordena(id,t.status,k>=0?naTela[k+1]:null);
+        if(changedCol)taskRenumera(origem);   // a coluna de origem fecha os buracos
+      }
+      WFA_DROP_FEITO=true;
       saveTarefas();
       if(bloqueado){renderTarefas();setTimeout(()=>{try{openTaskDetail(id);}catch(_){}},900);return;}
       if(changedCol)toast('✓ Movida para '+taskStatusLabel(t.status));
@@ -14814,6 +14866,141 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
   /* boot leve: 1a passada so na pagina visivel (rapida); a varredura completa vai pro idle */
   requestAnimationFrame(function(){auraNormalize(document.querySelector('.page.active')||undefined)});
   setTimeout(auraNormalize,1500);
+})();
+
+/* ============ ARRASTAR COM O DEDO (iPhone e iPad, 30/08) ============
+   O drag-and-drop do HTML5 e de mouse: no iOS nenhum evento de drag dispara, e
+   TODO navegador de iPhone usa WebKit, entao nao adianta trocar de navegador. Na
+   pratica, no celular nao dava pra mover lead de etapa no CRM, tarefa de coluna,
+   cliente de sprint, evento de dia na agenda nem reordenar os cartoes do Meu Dia.
+
+   Esta camada traduz toque em dragstart/dragover/dragleave/drop, com um dataTransfer
+   proprio. Nenhuma regra de negocio foi duplicada aqui: quem decide o que acontece ao
+   soltar continua sendo o mesmo codigo que o mouse ja usava. Consertou la, conserta
+   nos dois. */
+(function(){
+  if(!('ontouchstart' in window))return;             // sem toque, o caminho nativo do mouse segue igual
+  const ZONAS='[data-spdrop],.task-list,.crm-col,.cal-d,#mdw-board .mdw';
+  const SEGURAR=200;   // ms parado antes de virar arrasto. Abaixo disso e rolagem ou toque.
+  const FOLGA=10;      // px de movimento que ainda contam como rolagem da pagina
+  const BORDA=54;      // px da borda onde a coluna comeca a rolar sozinha
+  const PASSO=16;      // px por quadro dessa rolagem
+
+  let origem=null,clone=null,zona=null,timer=null,ativo=false;
+  let x0=0,y0=0,offX=0,offY=0,dt=null,rolavel=null,ultimo=null,laco=0;
+
+  // dataTransfer de mentira: os handlers so usam setData/getData/effectAllowed/dropEffect.
+  function novoDT(){
+    const m=new Map();
+    return {effectAllowed:'',dropEffect:'',types:[],files:null,
+      setData:(k,v)=>{m.set(String(k),String(v));},
+      getData:(k)=>m.get(String(k))||'',
+      clearData:()=>m.clear(),setDragImage:()=>{}};
+  }
+  function manda(el,tipo,t){
+    if(!el)return;
+    const ev=new Event(tipo,{bubbles:true,cancelable:true});
+    Object.defineProperty(ev,'dataTransfer',{value:dt});
+    ev.clientX=t?t.clientX:0; ev.clientY=t?t.clientY:0; ev.relatedTarget=null;
+    el.dispatchEvent(ev);
+  }
+  function rolante(el){
+    for(let n=el;n&&n!==document.body;n=n.parentElement){
+      const cs=getComputedStyle(n);
+      if(/(auto|scroll)/.test(cs.overflowX)&&n.scrollWidth>n.clientWidth+4)return n;
+      if(/(auto|scroll)/.test(cs.overflowY)&&n.scrollHeight>n.clientHeight+4)return n;
+    }
+    return null;
+  }
+  // Rola sozinho perto da borda: sem isso nao da pra levar um lead pra uma etapa que
+  // esta fora da tela, e o CRM tem 6 etapas lado a lado no celular.
+  function rolaBorda(){
+    if(!ativo){laco=0;return;}
+    laco=requestAnimationFrame(rolaBorda);
+    const t=ultimo; if(!t)return;
+    const cx=rolavel||(zona&&rolante(zona))||(origem&&rolante(origem)); if(!cx)return;
+    rolavel=cx;
+    const r=cx.getBoundingClientRect();
+    if(cx.scrollWidth>cx.clientWidth+4){
+      if(t.clientX>r.right-BORDA)cx.scrollLeft+=PASSO;
+      else if(t.clientX<r.left+BORDA)cx.scrollLeft-=PASSO;
+    }
+    if(cx.scrollHeight>cx.clientHeight+4){
+      if(t.clientY>r.bottom-BORDA)cx.scrollTop+=PASSO;
+      else if(t.clientY<r.top+BORDA)cx.scrollTop-=PASSO;
+    }
+  }
+  function comeca(t){
+    if(!origem)return;
+    ativo=true; dt=novoDT(); ultimo=t;
+    const r=origem.getBoundingClientRect();
+    offX=x0-r.left; offY=y0-r.top;
+    clone=origem.cloneNode(true);
+    clone.style.cssText='position:fixed;left:0;top:0;margin:0;z-index:99999;pointer-events:none;'+
+      'opacity:.94;width:'+r.width+'px;height:'+r.height+'px;box-shadow:0 18px 44px rgba(0,0,0,.4);'+
+      'transform:translate('+r.left+'px,'+r.top+'px) rotate(1.5deg);transition:none';
+    document.body.appendChild(clone);
+    origem.style.opacity='.35';
+    try{if(navigator.vibrate)navigator.vibrate(8);}catch(e){}
+    manda(origem,'dragstart',t);
+    laco=requestAnimationFrame(rolaBorda);
+    move(t);
+  }
+  function move(t){
+    ultimo=t;
+    if(clone)clone.style.transform='translate('+(t.clientX-offX)+'px,'+(t.clientY-offY)+'px) rotate(1.5deg)';
+    const sob=document.elementFromPoint(t.clientX,t.clientY);   // o clone nao entra: pointer-events none
+    const nova=sob&&sob.closest?sob.closest(ZONAS):null;
+    if(nova!==zona){ if(zona)manda(zona,'dragleave',t); zona=nova; rolavel=null; }
+    if(zona)manda(zona,'dragover',t);   // todo quadro: e o dragover que faz o preview de posicao
+  }
+  function termina(t){
+    if(zona){manda(zona,'drop',t);manda(zona,'dragleave',t);}
+    manda(origem,'dragend',t);
+    limpa();
+  }
+  function limpa(){
+    if(timer){clearTimeout(timer);timer=null;}
+    if(laco){cancelAnimationFrame(laco);laco=0;}
+    if(clone&&clone.parentNode)clone.parentNode.removeChild(clone);
+    if(origem)origem.style.opacity='';
+    clone=null;origem=null;zona=null;ativo=false;dt=null;rolavel=null;ultimo=null;
+  }
+
+  document.addEventListener('touchstart',function(e){
+    if(e.touches.length!==1)return;
+    const alvo=e.target;
+    if(!alvo||!alvo.closest)return;
+    if(alvo.closest('button,a,input,select,textarea,[contenteditable="true"]'))return;  // botao dentro do card continua sendo botao
+    const el=alvo.closest('[draggable="true"]'); if(!el)return;
+    limpa();
+    origem=el; const t=e.touches[0]; x0=t.clientX; y0=t.clientY;
+    timer=setTimeout(function(){comeca(t);},SEGURAR);
+  },{passive:true});
+
+  document.addEventListener('touchmove',function(e){
+    if(!origem)return;
+    const t=e.touches[0]; if(!t)return;
+    if(!ativo){
+      // mexeu antes de segurar: era rolagem da pagina, entao devolve o toque pro navegador
+      if(Math.abs(t.clientX-x0)>FOLGA||Math.abs(t.clientY-y0)>FOLGA)limpa();
+      return;
+    }
+    e.preventDefault();   // a partir daqui a pagina nao rola junto com o dedo
+    move(t);
+  },{passive:false});
+
+  document.addEventListener('touchend',function(e){
+    if(!origem)return;
+    if(!ativo){limpa();return;}          // foi toque simples: deixa o onclick do card correr
+    e.preventDefault();                   // arrastou: nao vira clique, senao abre o modal do card
+    termina(e.changedTouches[0]);
+  },{passive:false});
+
+  document.addEventListener('touchcancel',function(){
+    if(ativo){manda(origem,'dragend',ultimo);}
+    limpa();
+  },{passive:true});
 })();
 </script>
 </body>
