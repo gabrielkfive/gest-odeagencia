@@ -1,4 +1,4 @@
-<!-- build 20260828-planejamentos -->
+<!-- build 20260830-fix-planejamentos-script -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -7035,8 +7035,11 @@ function relatorioImprimir(){
     .rel-item .ok{color:#19b36b;font-weight:800}.rel-empty{font-size:12.5px;color:#888}
     .rel-foot{margin-top:24px;font-size:10.5px;color:#aaa;text-align:center}
     @media print{.rel-kpis{grid-template-columns:repeat(2,1fr)}}
-  </style></head><body>${html}<div class="rel-foot">Gerado pelo WorkFlowArk · ARK Content</div>
-<script>
+  </style></head><body>${html}<div class="rel-foot">Gerado pelo WorkFlowArk · ARK Content</div></body></html>`);
+  w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(e){}},350);
+}
+
 /* ============ PLANEJAMENTOS (Operacional) ============
    Gera a apresentacao de onboarding no padrao da ARK: preto, amarelo #FFAA00,
    cards arredondados, radar e gauge. Cada plano vive em wfa-planejamentos
@@ -7471,11 +7474,6 @@ function relatorioImprimir(){
     '</div></div></body></html>';
   }
 })();
-</script>
-</body></html>`);
-  w.document.close();
-  setTimeout(()=>{try{w.focus();w.print();}catch(e){}},350);
-}
 function renderClientesKPIs(){
   const el=document.getElementById('cli-kpis'); if(!el)return;
   const ativos=CLIENTES.filter(c=>c.status!=='churn');
