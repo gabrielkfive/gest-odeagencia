@@ -136,9 +136,12 @@ function AuthPage() {
           Trabalhar na ARK não é brincadeira. É método, ritmo e resultado, todo santo dia.
         </p>
         <div className="ax-badges">
-          <span>15+ clientes ativos</span>
-          <span>ARK Direto · Squad Alpha</span>
-          <span>+214% em 5 meses</span>
+          {/* Numeros vindos do painel de KPIs da propria carteira (pagina Clientes),
+              conferidos em 30/08/2026: carteira ativa 27, sendo 15 ARK e 11 Alpha,
+              e 11 captacoes por mes. Quando a carteira mudar, e so olhar la e atualizar aqui. */}
+          <span>27 clientes ativos</span>
+          <span>15 ARK Direto · 11 Squad Alpha</span>
+          <span>11 captações por mês</span>
         </div>
       </div>
 
