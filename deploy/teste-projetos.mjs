@@ -197,6 +197,13 @@ async function main() {
       mazuchi: acha('Mazuchi Regenera'),
       mazuki: !!acha('Mazuki'),
       eemface: !!acha('EEMFACE'),
+      emface: acha('EmFace'),
+      royal: acha('Royal Face'),
+      // so os clientes do briefing de 27/08 (os que tem projeto): sao esses que o
+      // Gabriel mandou alinhar. Alpha entra com 0 de proposito, e cobrado por fora.
+      semValor: proj.map((p) => cli.filter((c) => c.id === p.clienteId)[0])
+        .filter((c) => c && c.tipo === 'ARK' && c.status !== 'churn' && !(c.valor > 0))
+        .map((c) => c.nm),
     };
   });
   checa(carteira.dupId.length === 0, 'nenhum id de cliente repetido' + (carteira.dupId.length ? ': ' + carteira.dupId.join(', ') : ''));
@@ -211,6 +218,12 @@ async function main() {
   checa(!!carteira.mazuchi && !carteira.mazuki, 'e "Mazuchi Regenera", nao "Mazuki"');
   checa(carteira.mazuchi && carteira.mazuchi.valor === 2500, 'Mazuchi com o valor do contrato assinado (R$ 2.500/mes)');
   checa(!carteira.eemface, 'nao existe mais "EEMFACE", o cliente se chama EmFace');
+  // valores de contrato: nenhum veio do briefing, entao ficam travados aqui pra
+  // ninguem zerar sem perceber e o MRR passar a mentir pra baixo em silencio
+  checa(carteira.emface && carteira.emface.valor === 3000, 'EmFace com R$ 3.000/mes (conferido no Financeiro)');
+  checa(carteira.royal && carteira.royal.valor === 3800, 'Royal Face com R$ 3.800/mes');
+  checa(carteira.semValor.length === 0,
+    'nenhum cliente ARK ativo entra no MRR com R$ 0' + (carteira.semValor.length ? ': ' + carteira.semValor.join(', ') : ''));
 
   console.log('\n9. Console limpo');
   const relevantes = erros.filter((e) => !/Failed to fetch|NetworkError|supabase|fetch/i.test(e));

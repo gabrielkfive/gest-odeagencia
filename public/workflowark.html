@@ -6010,7 +6010,7 @@ const CLIENTES_BASE = [
   // desde 25/08) pra nao orfanar tarefa e cobranca que ja referenciam esses ids.
   // Os dados seguem o briefing de 27/08, que o Gabriel confirmou como fonte da verdade.
   {id:'royalface',nm:'Royal Face Planaltina',tipo:'ARK',plano:'Gold',valor:3800,status:'gr',cap:1,meta:'Meta do cliente: R$ 10 mil/dia e R$ 100 mil/mês',extra:'📹 1 captação/mês · franquia com 5 unidades · pendente: conteúdos da 2ª captação e Google Ads'},
-  {id:'eemface',nm:'EmFace',tipo:'ARK',plano:'Onboarding',valor:0,status:'gr',cap:1,meta:'Onboarding · Brasília e Manaus no mesmo contrato',extra:'📹 1 captação/mês, só em Brasília · não gosta de áudio · falta valor de contrato'},
+  {id:'eemface',nm:'EmFace',tipo:'ARK',plano:'Onboarding',valor:3000,status:'gr',cap:1,meta:'Onboarding · Brasília e Manaus no mesmo contrato',extra:'📹 1 captação/mês, só em Brasília · não gosta de áudio'},
   {id:'mazuki',nm:'Mazuchi Regenera',tipo:'ARK',plano:'Onboarding 6 meses',valor:2500,status:'gr',cap:1,meta:'Onboarding · projeto de 6 meses · laserterapia',extra:'📹 1 captação/mês · R$ 3.000 de entrada + 5x R$ 2.500 (contrato de 25/08)'},
   // Alpha
   // Babbo Giovanni: estava marcado como churn em 16/07/2026, mas o briefing de 27/08
@@ -6373,6 +6373,11 @@ function saneamentoCarteira(){
      mazuki     "Mazuki Regenera"        o briefing e o contrato assinado escrevem
                                           MazuCHI, e o valor (R$ 2.500/mes) estava zerado
 
+   O valor da EmFace (R$ 3.000/mes) veio do Gabriel em 30/08, conferido por ele na
+   aba Financeiro. O briefing nao traz valor de contrato de ninguem: os outros dois
+   vieram de contrato assinado (Mazuchi 25/08) e do cadastro que ja existia
+   (Royal Face, R$ 3.800).
+
    Nao cria cliente: so corrige o que o saneamento v1 (25/08) ja gravou, casando por
    ID. Roda uma vez por aparelho, e idempotente, e toca so wfa-clientes-custom, que
    sincroniza. Se o cliente nao existir no aparelho, ignora e deixa o v1 cuidar. */
@@ -6380,9 +6385,9 @@ const SAN2_KEY='wfa-saneamento-briefing-v2';
 const SAN2_AJUSTES={
   royalface:{status:'gr',meta:'Meta do cliente: R$ 10 mil/dia e R$ 100 mil/m\u00eas',
              extra:'\uD83D\uDCF9 1 capta\u00e7\u00e3o/m\u00eas \u00b7 franquia com 5 unidades \u00b7 pendente: conte\u00fados da 2\u00aa capta\u00e7\u00e3o e Google Ads'},
-  eemface:{nm:'EmFace',plano:'Onboarding',cap:1,status:'gr',
+  eemface:{nm:'EmFace',plano:'Onboarding',valor:3000,cap:1,status:'gr',
            meta:'Onboarding \u00b7 Bras\u00edlia e Manaus no mesmo contrato',
-           extra:'\uD83D\uDCF9 1 capta\u00e7\u00e3o/m\u00eas, s\u00f3 em Bras\u00edlia \u00b7 n\u00e3o gosta de \u00e1udio \u00b7 falta valor de contrato'},
+           extra:'\uD83D\uDCF9 1 capta\u00e7\u00e3o/m\u00eas, s\u00f3 em Bras\u00edlia \u00b7 n\u00e3o gosta de \u00e1udio'},
   mazuki:{nm:'Mazuchi Regenera',plano:'Onboarding 6 meses',valor:2500,cap:1,status:'gr',
           meta:'Onboarding \u00b7 projeto de 6 meses \u00b7 laserterapia',
           extra:'\uD83D\uDCF9 1 capta\u00e7\u00e3o/m\u00eas \u00b7 R$ 3.000 de entrada + 5x R$ 2.500 (contrato de 25/08)'}
@@ -8439,7 +8444,7 @@ function relatorioImprimir(){
       prioridade:'Seguir o processo padrão de onboarding e estruturar as entregas iniciais.',
       promessa:'A princípio não. O comercial criou expectativa de geração de vendas.',
       verbal:'Necessário alinhar a questão do Instituto.',
-      particularidades:'PENDÊNCIA INTERNA: o valor de contrato não está no briefing, então o cliente entrou na carteira com R$ 0 e não soma no MRR. Passar o valor para o Gabriel.\nA captação audiovisual acontece só em Brasília.\nTudo precisa estar muito bem alinhado.\nO cliente não gosta de comunicação por áudio.\nÀs vezes coloca demandas em teste para ver se a agência aceita.',
+      particularidades:'A captação audiovisual acontece só em Brasília.\nTudo precisa estar muito bem alinhado.\nO cliente não gosta de comunicação por áudio.\nÀs vezes coloca demandas em teste para ver se a agência aceita.',
       antes:'Ter domínio das particularidades de personalidade já levantadas.\nGarantir que toda demanda esteja alinhada antes de ser executada.'}},
 
     {nm:'Mazuchi Regenera',cid:'mazuki',temp:'gr',br:{
