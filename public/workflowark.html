@@ -5966,6 +5966,9 @@ function iniciarAutoSync(){
           <button class="tb-btn" onclick="importarDados()">⬆ Importar dados</button>
         </div>
 
+        <div class="set-sect-t" style="margin-bottom:9px">Rotinas de uma vez só</div>
+        <div id="set-rotinas" style="margin-bottom:18px"></div>
+
         <div class="set-sect-t" style="margin-bottom:9px">JARVIS</div>
         <p class="muted" style="font-size:10.5px;margin-bottom:9px">Abra o JARVIS batendo <b>2 palmas</b> (usa o microfone; você autoriza uma vez). Toca um som de inicialização ao abrir.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
@@ -6022,7 +6025,7 @@ const CLIENTES_BASE = [
   // Babbo Giovanni: estava marcado como churn em 16/07/2026, mas o briefing de 27/08
   // o traz ATIVO e critico ("muito critico"), em resgate. O briefing venceu.
   {id:'babbo',nm:'Babbo Giovanni',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',cap:1,meta:'CRÍTICO · resgate do cliente · captação de bônus',extra:'📹 1 captação de bônus (6 a 8 vídeos) · risco real de perda'},
-  {id:'dom',nm:'Dom Baruka',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'r',meta:'URGENTE · cardápio + iFood + bebidas',extra:'Auditoria iFood em curso'},
+  {id:'dom',nm:'Dom Baruka',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'churn',saiuEm:'2026-08-25',meta:'Saiu em 25/08/2026',extra:'Churn'},
   {id:'stray',nm:'Stray House',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Recuperação (não é mais urgente)',extra:'ROAS 5,08 · subir criativos'},
   {id:'cachu',nm:'Cachu Restaurante',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Ajustada ✓ · acompanhando ROAS',extra:'Food porn qui-dom'},
   {id:'brisa',nm:'Brisa Doce Café',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Super saudável ✓ · onboarding/inauguração',extra:'Aderir método'},
@@ -6030,14 +6033,27 @@ const CLIENTES_BASE = [
   // Squad Alpha (expansão Andradas-MG e região)
   {id:'valhalla',nm:'Valhalla',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Squad Alpha · Andradas-MG',extra:'Alpha',custom:true},
   {id:'lapatrick',nm:'La Pizza Di Patrick',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Squad Alpha',extra:'Alpha',custom:true},
-  {id:'laemcasa',nm:'La em Casa',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Squad Alpha',extra:'Alpha',custom:true},
-  // Em onboarding
-  {id:'4bburger',nm:'4B Burguers',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding',extra:'Onboarding em andamento',defaultSprint:0},
-  {id:'saborlenha',nm:'Pizzaria Sabor e Lenha',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · último cliente',extra:'Onboarding em andamento',defaultSprint:0},
-  {id:'bulldogs',nm:'Bulldogs',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
-  {id:'kopi',nm:'Kopi Coffee',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · jul/2026',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
-  {id:'lumiere',nm:'Cafe Lumiere',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · jul/2026',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
-  {id:'dgust',nm:'Pizzaria DGust',tipo:'ARK',plano:'—',valor:0,status:'gr',cap:0,meta:'Em onboarding · jul/2026',extra:'Onboarding em andamento',defaultSprint:0,custom:true},
+  {id:'laemcasa',nm:'La em Casa',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'churn',saiuEm:'2026-08-25',meta:'Saiu em 25/08/2026',extra:'Churn'},
+  // Squad Alpha (entraram como ARK e o saneamento de 25/08 corrigiu para Alpha)
+  {id:'4bburger',nm:'4B Burguers',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',cap:0,meta:'Squad Alpha · hamburgueria',extra:'Alpha · sem mensalidade, entra pelo pacote',defaultSprint:0},
+
+  {id:'saborlenha',nm:'Pizzaria Sabor e Lenha',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',cap:0,meta:'Squad Alpha · pizzaria',extra:'Alpha · sem mensalidade, entra pelo pacote',defaultSprint:0},
+
+  {id:'bulldogs',nm:'Bulldogs',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'churn',saiuEm:'2026-08-25',cap:0,meta:'Saiu em 25/08/2026',extra:'Churn',defaultSprint:0},
+  {id:'kopi',nm:'Kopi Coffee',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',cap:0,meta:'Squad Alpha · cafeteria',extra:'Alpha · sem mensalidade, entra pelo pacote',defaultSprint:0},
+
+  {id:'lumiere',nm:'Cafe Lumiere',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',cap:0,meta:'Squad Alpha · cafeteria',extra:'Alpha · sem mensalidade, entra pelo pacote',defaultSprint:0},
+
+  {id:'dgust',nm:'Pizzaria DGust',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',cap:0,meta:'Squad Alpha · pizzaria',extra:'Alpha · sem mensalidade, entra pelo pacote',defaultSprint:0},
+
+  // Promovidos do seed de saneamento (25/08) para ca em 31/08. Mesma razao dos
+  // outros tres: cliente de verdade nao pode nascer numa rotina que so roda depois
+  // da sincronizacao, senao aparelho novo abre o sistema sem ele.
+  {id:'pikachu',nm:'Pikachu Burger',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'gr',meta:'Squad Alpha · praça a confirmar',extra:'Alpha'},
+  {id:'mundolivre',nm:'Mundo Livre Bar',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'MRR de mês único · trabalhar a renovação',extra:'São Bernardo do Campo/SP'},
+  {id:'brutus',nm:'Adega Brutus',tipo:'Alpha',plano:'Alpha Senior',valor:0,status:'y',meta:'Sem leitura da conta · diagnosticar',extra:'Alpha'},
+  {id:'naeo',nm:'Naeo',tipo:'ARK',plano:'A definir',valor:0,status:'gr',cap:0,meta:'Cliente novo · falta plano e valor',extra:'Contrato novo',defaultSprint:0},
+  {id:'moenda',nm:'Moenda',tipo:'ARK',plano:'A definir',valor:0,status:'gr',cap:0,meta:'Turismo · Vale do Café · falta plano e valor',extra:'Contrato novo',defaultSprint:0},
   // (Lunna's, Shopping dos Uniformes, Bellato e Bella Vita removidos do sistema a pedido do Gabriel)
   // (Babbo Giovanni voltou pra lista acima em 30/08/2026: o briefing de 27/08 o traz ativo)
 ];
@@ -6418,6 +6434,42 @@ function saneamentoBriefingV2(){
     if(mexeu&&typeof toast==='function')toast('Carteira alinhada ao briefing: '+mexeu+' ajustes');
   }catch(e){console.warn('saneamentoBriefingV2',e);}
 }
+/* ROTINAS DE UMA VEZ SO. Cada uma marca uma chave no navegador quando roda, e
+   nunca mais roda naquele aparelho. Elas foram uteis pra corrigir dado em campo,
+   mas criam um ponto cego: o mesmo sistema pode estar diferente em dois celulares
+   e ninguem sabe. A partir de 31/08 nenhum CLIENTE depende delas (a carteira toda
+   vive em CLIENTES_BASE, e o teste-projetos trava isso), mas as rotinas continuam
+   existindo pra quem ja tem dado antigo salvo. Isto aqui so mostra o estado. */
+const WFA_ROTINAS=[
+  ['wfa-seed-clientes-v6','Clientes novos de julho'],
+  ['wfa-seed-rotinas-v1','Rotinas semanais da equipe'],
+  ['wfa-seed-valhalla','Valhalla no Squad Alpha'],
+  ['wfa-seed-samuel','Samuel na equipe'],
+  ['wfa-seed-processos','Processos padrao'],
+  ['wfa-limpeza-conselho-v1','Limpeza das tarefas do conselho'],
+  ['wfa-saneamento-carteira-v1','Saneamento da carteira (25/08)'],
+  ['wfa-saneamento-briefing-v2','Carteira x briefing (30/08)']
+];
+window.wfaRotinasEstado=function(){
+  return WFA_ROTINAS.map(function(r){
+    var v=null; try{v=localStorage.getItem(r[0]);}catch(e){}
+    return {chave:r[0],nome:r[1],rodou:v!=null};
+  });
+};
+window.wfaRotinasRender=function(){
+  var el=document.getElementById('set-rotinas'); if(!el)return;
+  var st=wfaRotinasEstado(), n=st.filter(function(r){return r.rodou;}).length;
+  el.innerHTML='<p class="muted" style="font-size:10.5px;margin-bottom:9px">'+
+    n+' de '+st.length+' j\u00e1 rodaram <b>neste aparelho</b>. Cada uma roda uma vez s\u00f3 e serve para acertar dado antigo. Nenhum cliente depende delas: a carteira inteira vive no c\u00f3digo.</p>'+
+    '<div style="display:flex;flex-direction:column;gap:5px">'+
+    st.map(function(r){
+      return '<div style="display:flex;align-items:center;gap:8px;font-size:11.5px">'+
+        '<span style="width:7px;height:7px;border-radius:99px;flex:none;background:'+(r.rodou?'var(--green)':'var(--mute-2)')+'"></span>'+
+        '<span style="flex:1">'+mdEsc(r.nome)+'</span>'+
+        '<span style="color:var(--mute);font-size:10.5px">'+(r.rodou?'j\u00e1 rodou':'ainda n\u00e3o')+'</span>'+
+      '</div>';
+    }).join('')+'</div>';
+};
 function seedSamuel(){
   try{
     if(localStorage.getItem('wfa-seed-samuel'))return;
@@ -9939,6 +9991,7 @@ function renderMonthPill(){
 function setTab(name){
   document.querySelectorAll('#modal-settings .set-tab').forEach(b=>b.classList.toggle('active',b.dataset.st===name));
   document.querySelectorAll('#modal-settings .set-pane').forEach(p=>p.classList.toggle('active',p.dataset.stp===name));
+  if(name==='conta'){try{wfaRotinasRender();}catch(e){}}
 }
 function openSettings(){
   const dl=document.getElementById('set-people');

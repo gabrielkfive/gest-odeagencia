@@ -330,7 +330,49 @@ async function main() {
   await page.locator('#pj-modal [data-tkcancel]').click();
   await page.waitForTimeout(300);
 
-  console.log('\n11. Console limpo');
+  console.log('\n11. A carteira nao depende mais de seed');
+  // O saneamento roda uma vez por aparelho, DEPOIS do sync. Enquanto ele for a
+  // fonte de algum cliente, aparelho novo abre o sistema com a carteira errada.
+  // Este bloco exige que o codigo ja diga a verdade, e o seed vire confirmacao.
+  const seeds = await page.evaluate(() => {
+    const base = {};
+    CLIENTES_BASE.forEach((c) => { base[c.id] = c; });
+    const faltando = (typeof SAN_NOVOS !== 'undefined' ? SAN_NOVOS : [])
+      .filter((n) => !base[n.id]).map((n) => n.nm);
+    const churnErrado = (typeof SAN_CHURN !== 'undefined' ? SAN_CHURN : [])
+      .filter((id) => base[id] && base[id].status !== 'churn')
+      .map((id) => base[id].nm + ' (esta ' + base[id].status + ')');
+    const tipoErrado = Object.entries(typeof SAN_TIPO !== 'undefined' ? SAN_TIPO : {})
+      .filter(([id, tp]) => base[id] && base[id].tipo !== tp)
+      .map(([id, tp]) => base[id].nm + ' (esta ' + base[id].tipo + ', devia ser ' + tp + ')');
+    const arkZero = CLIENTES_BASE
+      .filter((c) => c.tipo === 'ARK' && c.status !== 'churn' && !(c.valor > 0) && c.id !== 'ark')
+      .map((c) => c.nm + (c.plano === 'A definir' ? ' [a definir]' : ' [SEM MOTIVO]'));
+    return { faltando, churnErrado, tipoErrado, arkZero };
+  });
+  checa(seeds.faltando.length === 0,
+    'todo cliente do seed ja existe no codigo' + (seeds.faltando.length ? ': falta ' + seeds.faltando.join(', ') : ''));
+  checa(seeds.churnErrado.length === 0,
+    'quem o seed marca como churn ja esta churn no codigo' + (seeds.churnErrado.length ? ': ' + seeds.churnErrado.join(', ') : ''));
+  checa(seeds.tipoErrado.length === 0,
+    'quem o seed reclassifica ja esta com o tipo certo no codigo' + (seeds.tipoErrado.length ? ': ' + seeds.tipoErrado.join(', ') : ''));
+  const semMotivo = seeds.arkZero.filter((s) => s.includes('SEM MOTIVO'));
+  checa(semMotivo.length === 0,
+    'nenhum cliente ARK ativo com R$ 0 sem estar marcado "A definir"' + (semMotivo.length ? ': ' + semMotivo.join(', ') : ''));
+  if (seeds.arkZero.length) console.log('       (aguardando plano e valor: ' + seeds.arkZero.map((s) => s.split(' [')[0]).join(', ') + ')');
+
+  // e da pra VER quais rotinas de uma vez so ja rodaram neste aparelho
+  const rot = await page.evaluate(() => {
+    const st = (typeof wfaRotinasEstado === 'function') ? wfaRotinasEstado() : null;
+    setTab('conta');
+    const el = document.getElementById('set-rotinas');
+    return { n: st ? st.length : 0, pintou: !!(el && el.textContent.trim()), txt: el ? el.textContent : '' };
+  });
+  checa(rot.n >= 8, 'as rotinas de uma vez so estao listadas (' + rot.n + ')');
+  checa(rot.pintou, 'a aba Conta mostra o estado delas');
+  checa(/neste aparelho/.test(rot.txt), 'o texto deixa claro que o estado e DESTE aparelho');
+
+  console.log('\n12. Console limpo');
   const relevantes = erros.filter((e) => !/Failed to fetch|NetworkError|supabase|fetch/i.test(e));
   checa(relevantes.length === 0, 'nenhum erro de JS na pagina' + (relevantes.length ? ': ' + relevantes.join(' | ') : ''));
 
