@@ -372,7 +372,50 @@ async function main() {
   checa(rot.pintou, 'a aba Conta mostra o estado delas');
   checa(/neste aparelho/.test(rot.txt), 'o texto deixa claro que o estado e DESTE aparelho');
 
-  console.log('\n12. Console limpo');
+  console.log('\n12. O modal de tarefa tem estilo de verdade');
+  // O modal nasce em document.body, FORA de #page-projetos. Todo o CSS do formulario
+  // e escrito com escopo #page-projetos, entao ele ja foi ao ar uma vez com o rotulo
+  // colado no campo e os campos crus do navegador (31/08/2026). Este bloco trava isso:
+  // se alguem mexer no CSS e esquecer do escopo #pj-modal, o teste cai.
+  await page.evaluate(() => document.querySelector('[data-nav="projetos"]').click());
+  await page.waitForTimeout(500);
+  // a aba lembra onde parou: as secoes acima deixaram um projeto aberto
+  await page.locator('#pj-detalhe [data-voltar]').click().catch(() => {});
+  await page.waitForTimeout(400);
+  await page.locator('#pj-cards .pj-c', { hasText: 'Fercon' }).first().click();
+  await page.waitForTimeout(500);
+  await page.locator('#pj-detalhe [data-col="backlog"] .pj-t').first().click();
+  await page.waitForTimeout(500);
+  const estilo = await page.evaluate(() => {
+    const box = document.querySelector('#pj-modal .pj-f');
+    if (!box) return null;
+    const lab = box.querySelector('.pr-f label');
+    const inp = box.querySelector('#tk-t');
+    const dupla = box.querySelector('.pr-2');
+    const cs = (el) => getComputedStyle(el);
+    const fundo = cs(box).backgroundColor;
+    // so rgba() carrega alfa. rgb() e opaco, e um regex frouxo aqui le o azul como alfa.
+    const alfa = (fundo.match(/^rgba\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*([\d.]+)\s*\)$/) || [])[1];
+    return {
+      label: cs(lab).display,
+      colide: lab.getBoundingClientRect().bottom > inp.getBoundingClientRect().top + 1,
+      largura: Math.round(inp.getBoundingClientRect().width),
+      caixa: Math.round(box.getBoundingClientRect().width),
+      colunas: cs(dupla).gridTemplateColumns.split(' ').length,
+      opaco: alfa === undefined || Number(alfa) === 1,
+    };
+  });
+  checa(!!estilo, 'o modal de tarefa abre');
+  checa(estilo && estilo.label === 'block', 'o rotulo fica em cima do campo, nao ao lado (display block)');
+  checa(estilo && !estilo.colide, 'rotulo e campo nao se sobrepoem');
+  checa(estilo && estilo.largura > estilo.caixa * 0.8,
+    'o campo ocupa a largura da caixa (' + (estilo && estilo.largura) + 'px de ' + (estilo && estilo.caixa) + 'px)');
+  checa(estilo && estilo.colunas === 2, 'Etapa/Sprint e Prazo/Estimativa ficam em duas colunas');
+  checa(estilo && estilo.opaco, 'a caixa do modal e opaca: a pagina nao aparece atras dela');
+  await page.locator('#pj-modal [data-tkcancel]').click();
+  await page.waitForTimeout(300);
+
+  console.log('\n13. Console limpo');
   const relevantes = erros.filter((e) => !/Failed to fetch|NetworkError|supabase|fetch/i.test(e));
   checa(relevantes.length === 0, 'nenhum erro de JS na pagina' + (relevantes.length ? ': ' + relevantes.join(' | ') : ''));
 
