@@ -1,4 +1,4 @@
-<!-- build 20260831-modal-tarefa-estilo -->
+<!-- build 20260831-allhands-setembro -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -3126,7 +3126,7 @@ function wfaSetTheme(t){
 
       <!-- =================== ORGANOGRAMA =================== -->
       <div class="page" id="page-organograma">
-        <div class="page-head"><div class="page-title"><h1>Organograma Oficial</h1><p>Quem faz o quê na ARK · 5 áreas + edição transversal · ARK direta + Squad Alpha</p></div><button class="tb-btn dk" onclick="colabOpen()">+ Adicionar pessoa</button></div>
+        <div class="page-head"><div class="page-title"><h1>Organograma Oficial</h1><p>Quem faz o quê na ARK · CEO e COO · 6 áreas + edição transversal · ARK direta + Squad Alpha</p></div><button class="tb-btn dk" onclick="colabOpen()">+ Adicionar pessoa</button></div>
 
         <style>
           .org-ceo{background:#000;color:#fff;border-radius:12px;padding:18px 24px;text-align:center;max-width:420px;margin:0 auto 0;border:2px solid var(--yel)}
@@ -3134,7 +3134,11 @@ function wfaSetTheme(t){
           .org-ceo .nm{font-size:22px;font-weight:800;margin-top:8px;letter-spacing:-.02em}
           .org-ceo .rl{font-size:11px;color:var(--yel);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
           .org-conn{width:2px;height:24px;background:var(--line-2);margin:0 auto}
-          .org-areas{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+          .org-coo{background:var(--surface);border:2px solid var(--line-2);border-radius:12px;padding:12px 20px;text-align:center;max-width:340px;margin:0 auto}
+          .org-coo .badge{display:inline-block;background:var(--ink);color:var(--bg);font-size:9.5px;font-weight:800;letter-spacing:.12em;padding:3px 10px;border-radius:20px;font-family:var(--mono)}
+          .org-coo .nm{font-size:17px;font-weight:800;margin-top:7px;letter-spacing:-.02em;color:var(--ink)}
+          .org-coo .rl{font-size:10.5px;color:var(--mute);letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
+          .org-areas{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
           .org-area{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px}
           .org-area.featured{background:#000;color:#fff;border-color:#000}
           .org-area .ico-sm{font-family:var(--mono);font-size:10px;color:var(--mute);font-weight:700}
@@ -3159,6 +3163,18 @@ function wfaSetTheme(t){
           .ed-title span{color:var(--yel)}
           .ed-pill{background:var(--yel);color:#000;font-size:9.5px;font-weight:800;letter-spacing:.08em;padding:3px 9px;border-radius:20px;font-family:var(--mono)}
           .org-editors-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+          .org-saidas{margin-top:14px;background:var(--blue-soft);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+          .org-saidas .os-h{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute);font-weight:800;margin-bottom:6px}
+          .org-saidas .os-l{font-size:12.5px;line-height:1.6;color:var(--txt)}
+          .org-saidas b{color:var(--ink);font-weight:750}
+          @media(max-width:1200px){#page-organograma .org-areas{grid-template-columns:repeat(3,1fr)}}
+          @media(max-width:900px){
+            #page-organograma .org-areas{grid-template-columns:repeat(2,1fr)}
+            #page-organograma .org-editors-grid{grid-template-columns:repeat(2,1fr)}
+          }
+          @media(max-width:560px){
+            #page-organograma .org-areas,#page-organograma .org-editors-grid{grid-template-columns:1fr}
+          }
           .org-ed{display:flex;align-items:center;gap:9px;background:#1a1a1a;padding:8px 10px;border-radius:8px}
           .av-md{width:30px;height:30px;border-radius:50%;background:var(--yel);color:#000;display:grid;place-items:center;font-weight:800;font-size:12px;font-family:var(--mono);flex-shrink:0}
           .nm-md{font-size:12.5px;font-weight:700;color:#fff}
@@ -3171,6 +3187,12 @@ function wfaSetTheme(t){
           <div class="rl">Liderança · Visão Estratégica · Closing</div>
         </div>
         <div class="org-conn"></div>
+        <div class="org-coo">
+          <div class="badge">COO</div>
+          <div class="nm">DANILO DE LIMA</div>
+          <div class="rl">Operação · Tráfego · Dados do comercial</div>
+        </div>
+        <div class="org-conn"></div>
 
         <div class="org-areas">
           <div class="org-area">
@@ -3178,42 +3200,59 @@ function wfaSetTheme(t){
             <h5>Comercial</h5>
             <div class="desc-sm">Captação, fechamento, relacionamento.</div>
             <div class="org-m"><div class="av-sm">G</div><div><div class="nm-sm">Gabriel <span class="tag-sm">HEAD</span></div><div class="rl-sm">Closer</div></div></div>
-            <div class="org-m"><div class="av-sm">S</div><div><div class="nm-sm">Saulo</div><div class="rl-sm">CSO · BDR · Cardápios</div></div></div>
+            <div class="org-m"><div class="av-sm">S</div><div><div class="nm-sm">Saulo</div><div class="rl-sm">CSO · Closer · BDR · SDR</div></div></div>
+            <div class="org-m"><div class="av-sm">D</div><div><div class="nm-sm">Danilo <span class="tag-sm">NOVO</span></div><div class="rl-sm">Análise de dados · ponte com marketing</div></div></div>
           </div>
 
           <div class="org-area">
-            <div class="ico-sm">02</div><div class="lbl">Marketing & Criação</div>
+            <div class="ico-sm">02</div><div class="lbl">Marketing</div>
             <h5>Marketing</h5>
-            <div class="desc-sm">Estratégia, conteúdo e design.</div>
-            <div class="org-m"><div class="av-sm">B</div><div><div class="nm-sm">Bruno <span class="tag-sm">HEAD</span></div><div class="rl-sm">Estrategista</div></div></div>
-            <div class="org-m"><div class="av-sm">M</div><div><div class="nm-sm">M. Portela</div><div class="rl-sm">Diretor de Arte</div></div></div>
-            <div class="org-m"><div class="av-sm">M</div><div><div class="nm-sm">Maria Luiza</div><div class="rl-sm">Social Media</div></div></div>
+            <div class="desc-sm">Demanda, funil e posicionamento.</div>
+            <div class="org-m"><div class="av-sm">G</div><div><div class="nm-sm">Gabriel <span class="tag-sm">HEAD</span></div><div class="rl-sm">Frente de marketing · propostas</div></div></div>
+            <div class="org-m"><div class="av-sm">G</div><div><div class="nm-sm">Guilherme <span class="tag-sm">NOVO</span></div><div class="rl-sm">Geração de demanda · funil</div></div></div>
+            <div class="org-m"><div class="av-sm">C</div><div><div class="nm-sm">Caio <span class="tag-sm">NOVO</span></div><div class="rl-sm">Geração de demanda · funil</div></div></div>
+            <div class="org-m"><div class="av-sm">D</div><div><div class="nm-sm">Danilo</div><div class="rl-sm">Dados e performance</div></div></div>
+            <div class="org-m"><div class="av-sm">S</div><div><div class="nm-sm">Saulo</div><div class="rl-sm">Marketing físico · vestuário e peças</div></div></div>
           </div>
 
           <div class="org-area featured">
-            <div class="ico-sm">03</div><div class="lbl">Operação · Tráfego</div>
-            <h5>Operação</h5>
-            <div class="desc-sm">Tráfego, performance, processos.</div>
-            <div class="org-m"><div class="av-sm">D</div><div><div class="nm-sm">Danilo <span class="tag-sm">COO</span></div><div class="rl-sm">Dono do operacional · Tráfego</div></div></div>
-            <div class="org-m"><div class="av-sm">G</div><div><div class="nm-sm">Giuseppe</div><div class="rl-sm">Consultor Tráfego</div></div></div>
+            <div class="ico-sm">03</div><div class="lbl">Criação</div>
+            <h5>Criação</h5>
+            <div class="desc-sm">Design, arte e edição. Quem está disponível.</div>
+            <div class="org-m"><div class="av-sm">B</div><div><div class="nm-sm">Bruno</div><div class="rl-sm">Designer · projeto Fercon</div></div></div>
+            <div class="org-m"><div class="av-sm">M</div><div><div class="nm-sm">M. Portela</div><div class="rl-sm">Designer</div></div></div>
+            <div class="org-m"><div class="av-sm">D</div><div><div class="nm-sm">Darmã <span class="tag-sm">TESTE</span></div><div class="rl-sm">Em formação · caminho p/ diretor de arte</div></div></div>
+            <div class="org-m"><div class="av-sm">M</div><div><div class="nm-sm">Maria Luiza</div><div class="rl-sm">Social media · edição Alpha</div></div></div>
+            <div class="org-m"><div class="av-sm">S</div><div><div class="nm-sm">Samuel</div><div class="rl-sm">Editor</div></div></div>
+            <div class="org-m"><div class="av-sm">C</div><div><div class="nm-sm">Christopher Mike</div><div class="rl-sm">Editor</div></div></div>
+            <div class="org-m"><div class="av-sm">V</div><div><div class="nm-sm">Victor</div><div class="rl-sm">Editor</div></div></div>
           </div>
 
           <div class="org-area">
-            <div class="ico-sm">04</div><div class="lbl">Customer Success</div>
+            <div class="ico-sm">04</div><div class="lbl">Operação · Tráfego</div>
+            <h5>Tráfego</h5>
+            <div class="desc-sm">Mídia paga, performance, processos.</div>
+            <div class="org-m"><div class="av-sm">D</div><div><div class="nm-sm">Danilo <span class="tag-sm">COO</span></div><div class="rl-sm">Gestor de tráfego</div></div></div>
+            <div class="org-m"><div class="av-sm">G</div><div><div class="nm-sm">Guilherme <span class="tag-sm">NOVO</span></div><div class="rl-sm">Consultor de tráfego</div></div></div>
+          </div>
+
+          <div class="org-area">
+            <div class="ico-sm">05</div><div class="lbl">Customer Success</div>
             <h5>Sucesso Cliente</h5>
             <div class="desc-sm">Account, retenção, upsell.</div>
             <div class="org-m"><div class="av-sm">L</div><div><div class="nm-sm">Lucas Rosi <span class="tag-sm">HEAD</span></div><div class="rl-sm">Account · CS</div></div></div>
-            <div class="org-m"><div class="av-sm">B</div><div><div class="nm-sm">Bruno</div><div class="rl-sm">Apoio em contas</div></div></div>
+            <div class="org-m"><div class="av-sm">C</div><div><div class="nm-sm">Caio <span class="tag-sm">PO</span></div><div class="rl-sm">Apoio ao Lucas · formação como PO</div></div></div>
           </div>
 
           <div class="org-area">
-            <div class="ico-sm">05</div><div class="lbl">Captação Audiovisual</div>
+            <div class="ico-sm">06</div><div class="lbl">Captação Audiovisual</div>
             <h5>Captação</h5>
             <div class="desc-sm">Direção de cena, set, áudio e luz.</div>
-            <div class="org-m"><div class="av-sm">M</div><div><div class="nm-sm">Márcio <span class="tag-sm">SR</span></div><div class="rl-sm">Audiovisual Sênior</div></div></div>
-            <div class="org-m"><div class="av-sm">H</div><div><div class="nm-sm">Henrique</div><div class="rl-sm">Captação · Câmera</div></div></div>
+            <div class="org-m"><div class="av-sm">S</div><div><div class="nm-sm">Samuel</div><div class="rl-sm">Captação · Câmera</div></div></div>
+            <div class="org-m"><div class="av-sm">C</div><div><div class="nm-sm">Christopher Mike</div><div class="rl-sm">Captação · Câmera</div></div></div>
             <div class="org-m"><div class="av-sm">V</div><div><div class="nm-sm">Victor</div><div class="rl-sm">Captação · Câmera</div></div></div>
             <div class="org-m"><div class="av-sm">A</div><div><div class="nm-sm">Anderson</div><div class="rl-sm">Captação · Câmera</div></div></div>
+            <div class="org-m"><div class="av-sm">H</div><div><div class="nm-sm">Henrique</div><div class="rl-sm">Captação · Câmera</div></div></div>
             <div class="org-m"><div class="av-sm">M</div><div><div class="nm-sm">Maria Clara</div><div class="rl-sm">Social · Cobertura</div></div></div>
           </div>
         </div>
@@ -3224,10 +3263,16 @@ function wfaSetTheme(t){
             <div class="ed-pill">ATENDE TODAS AS ÁREAS</div>
           </div>
           <div class="org-editors-grid">
-            <div class="org-ed"><div class="av-md">M</div><div><div class="nm-md">Márcio</div><div class="rl-md">Editor Principal · Sênior</div></div></div>
-            <div class="org-ed"><div class="av-md">L</div><div><div class="nm-md">Luckas Gomes</div><div class="rl-md">Editor · Colorização</div></div></div>
+            <div class="org-ed"><div class="av-md">M</div><div><div class="nm-md">Maria Luiza</div><div class="rl-md">Edição Alpha · Social</div></div></div>
             <div class="org-ed"><div class="av-md">S</div><div><div class="nm-md">Samuel Magalhães</div><div class="rl-md">Edição · Captação</div></div></div>
+            <div class="org-ed"><div class="av-md">C</div><div><div class="nm-md">Christopher Mike</div><div class="rl-md">Edição · Captação</div></div></div>
+            <div class="org-ed"><div class="av-md">V</div><div><div class="nm-md">Victor</div><div class="rl-md">Edição · Captação</div></div></div>
           </div>
+        </div>
+
+        <div class="org-saidas">
+          <div class="os-h">Mudanças de setembro</div>
+          <div class="os-l"><b>Bruno</b> deixa a estratégia de marketing e o apoio em contas, segue como designer no projeto Fercon. <b>M. Portela</b> sai do marketing e segue em design. <b>Giuseppe</b> sai do tráfego, entra <b>Guilherme</b>. <b>Márcio</b> e <b>Luckas Gomes</b> saíram da edição, e o Márcio também da captação. <b>Caio</b> entra como PO junto ao Lucas.</div>
         </div>
       </div>
 
@@ -6280,7 +6325,10 @@ function seedValhalla(){
 }
 
 // ---- Equipe: base + colaboradores personalizados (nuvem · wfa-colab-custom) ----
-const TEAM_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Saulo','Bruno','Maria Luiza','Samuel Magalhães','M. Portela','Luckas Gomes','Omar','Henrique','Nicolas','Giuseppe','Márcio','Kaique','Lush','Anderson','João Gabriel','Maria Clara'];
+/* Roster do organograma de setembro/2026. Sairam Marcio, Luckas Gomes e Giuseppe;
+   entraram Caio (PO), Guilherme (trafego), Christopher Mike, Victor e Darma.
+   Tirar da lista so muda o seletor: tarefa ja salva guarda o nome em texto. */
+const TEAM_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Saulo','Caio Neves','Guilherme','Bruno','Maria Luiza','Samuel Magalhães','M. Portela','Christopher Mike','Victor','Darmã','Omar','Henrique','Nicolas','Kaique','Lush','Anderson','João Gabriel','Maria Clara'];
 function loadColabCustom(){ try{ return JSON.parse(localStorage.getItem('wfa-colab-custom')||'[]'); }catch(e){ return []; } }
 function saveColabCustom(arr){ localStorage.setItem('wfa-colab-custom', JSON.stringify(arr)); if(typeof rebuildPeople==='function')rebuildPeople(); fillRespSelects(); if(typeof renderMeuDia==='function')renderMeuDia(); }
 // Lista completa da equipe (base + adicionados), sem duplicar.
@@ -15139,19 +15187,33 @@ function ahCaptacoes(){try{const evs=loadAgendaEvents()||[];const mk=(typeof cob
 function ahPerPessoa(){
   const ts=state.tarefas||[];
   const nz=s=>String(s||'').trim().toLowerCase();
-  // Roster consolidado. "Concluídas" = parâmetros do Gabriel (a gente não tem o número exato no sistema).
-  // "Em andamento" = puxado AO VIVO do sistema por responsável (quem está cadastrado).
+  /* Nada de numero de parametro aqui. As duas colunas sao contagem ao vivo:
+     o kanban de Atividades mais o quadro de Projetos por cliente. Numero que
+     ninguem consegue conferir na tela vira discussao na reuniao. */
+  let pjs=[];try{pjs=JSON.parse(localStorage.getItem('wfa-projetos')||'[]')||[];}catch(e){}
+  const pjTar=[];pjs.forEach(x=>(x.tarefas||[]).forEach(t=>pjTar.push(t)));
   const roster=[
-    {nm:'Danilo de Lima',fn:'Tráfego · COO',feitas:'72+'},
-    {nm:'Lucas Rosi',fn:'Account · CS',feitas:'60+'},
-    {nm:'Maria Luiza',fn:'Social · Criação',feitas:'20+'},
-    {nm:'Samuel Magalhães',fn:'Edição · Captação',feitas:'20+'},
-    {nm:'M. Portela',fn:'Design',feitas:'~20'},
-    {nm:'Bruno',fn:'Design · Estrategista',feitas:'10+'},
-    {nm:'Saulo',fn:'Comercial · BDR',feitas:'3 rotas'},
-    {nm:'Gabriel Andrade',fn:'CEO · Operação · Closer',feitas:'Sistema+Fechamentos'},
+    {nm:'Danilo de Lima',fn:'COO · Gestor de trafego'},
+    {nm:'Lucas Rosi',fn:'Head de CS · Account'},
+    {nm:'Caio Neves',fn:'PO · Geracao de demanda'},
+    {nm:'Guilherme',fn:'Consultor de trafego'},
+    {nm:'Maria Luiza',fn:'Social · Edicao Alpha'},
+    {nm:'Samuel Magalhães',fn:'Edicao · Captacao'},
+    {nm:'Christopher Mike',fn:'Edicao · Captacao'},
+    {nm:'Victor',fn:'Edicao · Captacao'},
+    {nm:'M. Portela',fn:'Design'},
+    {nm:'Bruno',fn:'Design · Fercon'},
+    {nm:'Darmã',fn:'Criacao · em formacao'},
+    {nm:'Saulo',fn:'CSO · Closer · BDR · SDR'},
+    {nm:'Gabriel Andrade',fn:'CEO · Comercial · Marketing'},
   ];
-  roster.forEach(p=>{p.andamento=ts.filter(t=>t.status!=='concluido'&&nz(t.resp)===nz(p.nm)).length;});
+  roster.forEach(p=>{
+    const meu=t=>nz(t.resp)===nz(p.nm);
+    p.feitas=ts.filter(t=>t.status==='concluido'&&meu(t)).length
+            +pjTar.filter(t=>t.st==='concluido'&&meu(t)).length;
+    p.andamento=ts.filter(t=>t.status!=='concluido'&&meu(t)).length
+               +pjTar.filter(t=>t.st!=='concluido'&&meu(t)).length;
+  });
   return roster;
 }
 function ahData(){
@@ -15181,7 +15243,10 @@ function ahData(){
 function ahStat(num,lab,det,cls){return '<div class="stat '+(cls||'')+'"><div class="num '+(cls==='y'?'':(cls||''))+'">'+num+'</div><div class="lab">'+lab+'</div>'+(det?'<div class="det">'+det+'</div>':'')+'</div>';}
 function ahBuildSlides(edit){
   const d=ahData();
-  const mes=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,x=>x.toUpperCase());
+  /* O mes do deck e fixo, nao vem do relogio. A All Hands de setembro e montada
+     ainda em agosto, e o relogio faria a capa mentir. Para virar o mes, troque
+     a chave set_mes_label em wfa-allhands ou este texto. */
+  const mes=(ahNarr().set_mes_label||'Setembro de 2026');
   const hoje=new Date().toLocaleDateString('pt-BR');
   const c=d.c,fin=d.fin;
   const S=[];
@@ -15193,184 +15258,197 @@ function ahBuildSlides(edit){
   S.push('<div class="cover"><img class="ah-cover-logo" src="/ark-logo.png" alt="ARK">'+
     '<h1 style="margin-top:14px">All Hands<br><span class="y">'+mes+'</span></h1>'+
     '<p class="lead" style="margin-top:20px">Onde chegamos, o que cada área entregou e o que cada um vai puxar no mês.</p>'+
-    '<div style="margin-top:22px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">Comercial · Social · Tráfego · CS · Captação · Design</span><span class="pill">'+hoje+'</span></div></div>');
+    '<div style="margin-top:22px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">Comercial · Marketing · Criação · Tráfego · CS · Captação</span><span class="pill">'+hoje+'</span></div></div>');
 
   // 2 · De onde viemos
-  S.push('<div><div class="ah-kick">De onde viemos</div><h2>Em ~10 meses a casa virou outra</h2>'+
+  S.push('<div><div class="ah-kick">De onde viemos</div><h2>Em ~11 meses a casa virou outra</h2>'+
     '<p class="lead">'+ahTxt('vinda','Saímos de 4 para uma carteira grande, abrimos a frente Squad Alpha e formalizamos o que estava só na cabeça dos sócios: organograma, 22 POPs e o Método dos 5 Eixos. A virada é essa: parar de depender de talento solto e passar a rodar no processo.',edit)+'</p>'+
     '<div class="ah-grid g3" style="margin-top:16px">'+
     card('Identidade','Foco em gastronomia de Brasília, narrativa institucional explícita.')+
     card('Estratégia','Plano comercial, campanhas de captação e a frente Alpha.')+
-    card('Pessoas & Processos','5 áreas, trilha Júnior/Pleno/Sênior e 22 POPs no sistema.')+
+    card('Pessoas &amp; Processos','6 áreas, trilha Júnior/Pleno/Sênior e 22 POPs no sistema.')+
     '</div></div>');
 
-  // 3 · Termômetro do mês
-  S.push('<div><div class="ah-kick">Julho em uma tela</div><h2>Os números do mês</h2>'+
+  // 3 · Termômetro do mês que fechou
+  S.push('<div><div class="ah-kick">Agosto em uma tela</div><h2>Os números do mês que fechou</h2>'+
     '<div class="ah-grid g4" style="margin-top:14px">'+
     ahStat(d.carteira,'Clientes na carteira',d.arkN+' ARK · '+d.alphaN+' Alpha','y')+
-    ahStat(ahTxt('ago_pulse_capt','13',edit),'Captações em julho','Vivenda 5 · Lá em Casa 2 · agenda do mês','green')+
-    ahStat(ahTxt('ago_pulse_alinh','20+',edit),'Alinhamentos','ARK, ALPHA, Comercial e Vivenda toda semana','amber')+
-    ahStat(ahTxt('ago_pulse_mrr','R$ 3.800',edit),'MRR recorrente','Bulldogs R$ 2.500 · Vaca Velha R$ 1.350','y')+
+    ahStat(ahTxt('set_pulse_capt','a definir',edit),'Captações em agosto','clique no número e preencha','green')+
+    ahStat(ahTxt('set_pulse_alinh','a definir',edit),'Alinhamentos','ARK, ALPHA, Comercial e Vivenda','amber')+
+    ahStat(ahTxt('set_pulse_mrr','a definir',edit),'MRR recorrente','contratos ativos','y')+
     '</div>'+
-    '<p style="margin-top:14px;color:#9a9aa2;font-size:14px">Leitura rápida: julho entregou muito mais que junho. Agosto é <b style="color:#fff">mês de virada de chave</b>: recorrência pra dentro e metas objetivas por frente.</p></div>');
+    '<p style="margin-top:14px;color:#9a9aa2;font-size:14px">'+ahTxt('set_pulse_leitura','Leitura rápida: agosto consolidou a operação. Setembro é o mês em que a estrutura ganha gente nova e o processo passa a ser cobrado dentro do sistema.',edit)+'</p></div>');
 
-  // 4 · Comercial + pipeline
+  // 4 · Comercial + funil
   const fmax=Math.max(d.leads,1);
   const fun=[['Leads gerados',d.leads,'#ffc400'],['Reuniões (estim.)',d.reun,'#9a9aa2'],['Fechamentos',d.fech,'#30d158']]
     .map(s=>'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:170px;font-size:13px;color:#bdbdc4">'+s[0]+'</div><div class="funbar"><div class="funfill" style="width:'+Math.max(s[1]/fmax*100,8)+'%;background:'+s[2]+'">'+s[1]+'</div></div></div>').join('');
-  S.push('<div><div class="ah-kick">Comercial · Saulo + Gabriel</div><h2>Recorrência: a virada de chave de agosto</h2>'+
+  S.push('<div><div class="ah-kick">Comercial · Saulo + Gabriel + Danilo</div><h2>O comercial ganha leitura de dados</h2>'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 6px"><h3 style="margin:0">Funil do mês</h3><span style="color:#30d158;font-weight:800;font-family:Sora">'+d.conv+'% lead para fechamento</span></div>'+fun+
     '<div class="ah-grid g3" style="margin-top:14px">'+
-    card('💰 MRR hoje: R$ 3.800',ahTxt('ago_pipe_mrr','Bulldogs (R$ 2.500) e Vaca Velha (R$ 1.350) pagando todo mês. Meta objetiva: +R$ 1.200 de MRR na Alpha pra ficar tranquilo com a taxa de franquia e focar em atender bem.',edit))+
-    card('🎯 Meta ARK: 5 MRR ou 5 TCV',ahTxt('ago_pipe_meta','Fechar até 31/08. Caixa pra dentro. Oportunidades já na primeira semana: Profox e Localiza, contatos de baixo custo que profissionalizam e trazem case.',edit))+
-    cardR('⚠️ Growth Hub: R$ 3 mil sem retorno',ahTxt('ago_pipe_growth','Restam R$ 987 de saldo e zero conversão. O lead que ia fechar adiou e avalia fechar unidade. Precisamos de leads próprios: o criativo de captação aguarda a reedição do Samuel.',edit))+
+    card('Danilo volta ao comercial',ahTxt('set_pipe_danilo','Não como closer, BDR ou SDR. Danilo entra para ler dado, medir o que o funil está dizendo e ficar perto do marketing. É a ponte que faltava entre o que a gente investe e o que a gente fecha.',edit))+
+    card('Saulo com o escopo limpo',ahTxt('set_pipe_saulo','CSO, closer, BDR e SDR. A frente de cardápios sai do escopo dele, que não é o que ele vai tocar de fato. Menos frente aberta, mais fechamento.',edit))+
+    card('Meta do trimestre',ahTxt('set_pipe_meta','Recorrência para dentro e funil com número visível toda semana. O CRM é a fonte, não a memória de ninguém.',edit))+
     '</div></div>');
 
-  // 4b · Agenda de agosto (ao vivo da Gestão do mês): captações + roteiros D-3
-  let agoEvs=[];try{agoEvs=(loadAgendaEvents()||[]).filter(e=>String((e&&e.date)||'').slice(0,7)==='2026-08').sort((a,b)=>String(a.date).localeCompare(String(b.date)));}catch(e){}
-  const agoLinha=e=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+String(e.date).slice(8,10)+'/08</td><td>'+(e.title||'')+'</td></tr>';
-  const agoCapt=agoEvs.filter(e=>/^\s*capta/i.test(e.title||'')).map(agoLinha).join('');
-  const agoRot=agoEvs.filter(e=>/^\s*roteiro/i.test(e.title||'')).map(agoLinha).join('');
-  S.push('<div><div class="ah-kick">Agenda de agosto · Gestão do mês</div><h2>Captações marcadas, roteiro 3 dias antes</h2>'+
-    '<p class="lead">'+ahTxt('ago_agenda_intro','Todo cliente ARK com captação mensal proposta pro Samuel (manhã como padrão) e roteiro entregue pelo menos 3 dias antes. Lá em Casa no almoço, Vaca Velha no almoço ou fim de tarde, Fonseca 9h no escritório, Fercon à tarde, Vivenda toda terça 8h30.',edit)+'</p>'+
+  // 5 · Agenda do mês (ao vivo da Gestão do mês)
+  let setEvs=[];try{setEvs=(loadAgendaEvents()||[]).filter(e=>String((e&&e.date)||'').slice(0,7)==='2026-09').sort((a,b)=>String(a.date).localeCompare(String(b.date)));}catch(e){}
+  const setLinha=e=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+String(e.date).slice(8,10)+'/09</td><td>'+(e.title||'')+'</td></tr>';
+  const setCapt=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).map(setLinha).join('');
+  const setRot=setEvs.filter(e=>/^\s*roteiro/i.test(e.title||'')).map(setLinha).join('');
+  S.push('<div><div class="ah-kick">Agenda de setembro · Gestão do mês</div><h2>Captações marcadas, roteiro 3 dias antes</h2>'+
+    '<p class="lead">'+ahTxt('set_agenda_intro','Todo cliente ARK com captação mensal marcada e roteiro entregue pelo menos 3 dias antes. A agenda mora na aba Gestão do mês, e o que aparece aqui é exatamente o que está lá.',edit)+'</p>'+
     '<div class="ah-grid g2" style="margin-top:14px">'+
-    '<div><h3>Captações</h3><table><tbody>'+(agoCapt||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table></div>'+
-    '<div><h3>Entrega de roteiros</h3><table><tbody>'+(agoRot||'<tr><td>—</td></tr>')+'</tbody></table></div>'+
+    '<div><h3>Captações</h3><table><tbody>'+(setCapt||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table></div>'+
+    '<div><h3>Entrega de roteiros</h3><table><tbody>'+(setRot||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table></div>'+
     '</div></div>');
 
-  // 5 · Cada área no mês
+  // 6 · Cada área no mês
   S.push('<div><div class="ah-kick">Cada área no mês</div><h2>O que cada frente entregou</h2>'+
     '<div class="ah-grid g3" style="margin-top:12px">'+
-    card('Comercial · Saulo + Gabriel',ahTxt('ago_area_com','Julho colocou o MRR de pé: Bulldogs e Vaca Velha renovando todo mês. Dia 31/07 saíram 3 propostas em um dia (Vaca Velha, Profox e Localiza). Agosto: 5 MRR ou 5 TCV.',edit))+
-    card('Account & CS · Lucas',ahTxt('ago_area_cs','Onboarding do Bulldogs, workshops na Sasse (atendimento ao WhatsApp em 30 e 31/07) e a régua diária da carteira rodando.',edit))+
-    card('Social & Criação · Maria Luiza + Samuel',ahTxt('ago_area_social','Linha editorial e criativos na carteira inteira. Em agosto todo cliente ARK ganha roteiro mensal entregue 3 dias antes da captação.',edit))+
-    card('Operação & Tráfego · Danilo',ahTxt('ago_area_traf','Danilo assume o operacional como dono a partir de agosto, pra Gabriel e Saulo focarem em comercial, marketing, financeiro e RH. Tráfego segue com ele.',edit))+
-    card('Captação · Samuel + Victor',ahTxt('ago_area_capt','13 captações em julho, recorde. Victor entra no time de captação audiovisual. A agenda de agosto já está programada com datas propostas pro Samuel.',edit))+
-    card('Marketing ARK · Bruno + Portela + Malu',ahTxt('ago_area_design','Os três que mais produzem viram o motor do marketing da própria ARK. De agosto a dezembro: instaurar o marketing da casa com potência e criativo.',edit))+
+    card('Comercial · Saulo + Gabriel',ahTxt('set_area_com','Propostas e fechamentos do mês, com o funil registrado no CRM. Danilo entra na leitura de dados a partir de setembro.',edit))+
+    card('Marketing · Gabriel + Gui + Caio',ahTxt('set_area_mkt','Frente nova de geração de demanda. Gui e Caio entram como especialistas para montar o funil da própria ARK.',edit))+
+    card('Criação · Bruno, Portela, Darmã, Malu',ahTxt('set_area_criacao','Área separada e com nome próprio. Bruno no projeto Fercon, Portela em design, Darmã em formação, Malu na frente Alpha.',edit))+
+    card('Tráfego · Danilo + Guilherme',ahTxt('set_area_traf','Guilherme entra como consultor e operacionaliza a frente. Danilo segue como gestor de tráfego e sobe para COO.',edit))+
+    card('Sucesso do cliente · Lucas + Caio',ahTxt('set_area_cs','Régua da carteira rodando. Caio entra ao lado do Lucas e se forma como PO da operação.',edit))+
+    card('Captação · Samuel, Christopher, Victor',ahTxt('set_area_capt','Time de câmera montado, com Anderson, Henrique e Maria Clara na cobertura. Agora existe gente disponível de verdade.',edit))+
     '</div></div>');
 
-  // 6 · Execução por pessoa
+  // 7 · Execução por pessoa
   const ppRows=d.pp.map(p=>'<tr><td style="font-weight:600;color:#f5f5f2">'+p.nm+'</td><td style="color:#9a9aa2">'+p.fn+'</td><td class="n">'+p.feitas+'</td><td class="n">'+(p.andamento||0)+'</td></tr>').join('');
   S.push('<div><div class="ah-kick">Execução por profissional</div><h2>Quem entregou o quê</h2>'+
     '<div class="ah-grid g4" style="margin:12px 0">'+
-    ahStat(ahTxt('exec_total','100+',edit),'Entregas no mês','soma das frentes','green')+
+    ahStat(ahTxt('set_exec_total','a definir',edit),'Entregas no mês','soma das frentes','green')+
     ahStat(d.totAnd,'Em andamento','ao vivo, no sistema')+
-    ahStat(ahTxt('exec_traf','72+',edit),'Demandas de tráfego','Danilo','amber')+
-    ahStat(ahTxt('exec_acc','60+',edit),'Atendimentos','Lucas na carteira')+
+    ahStat(ahTxt('set_exec_traf','a definir',edit),'Demandas de tráfego','Danilo','amber')+
+    ahStat(ahTxt('set_exec_acc','a definir',edit),'Atendimentos','Lucas na carteira')+
     '</div>'+
-    '<table><thead><tr><th>Pessoa</th><th>Função</th><th style="text-align:right">Entregas (mês)</th><th style="text-align:right">Em andamento</th></tr></thead><tbody>'+ppRows+'</tbody></table>'+
-    '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Entregas do mês são estimativas por função. Em andamento vem ao vivo de quem usa o sistema, quem não usa (Portela, Henrique) tem ainda mais fora do quadro. Motivo de sobra pra ter processo e todo mundo dentro.</p></div>');
+    '<table><thead><tr><th>Pessoa</th><th>Função</th><th style="text-align:right">Concluídas</th><th style="text-align:right">Em andamento</th></tr></thead><tbody>'+ppRows+'</tbody></table>'+
+    '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Em andamento vem ao vivo de quem usa o sistema. Quem não usa tem entrega fora do quadro, e é exatamente por isso que a coluna existe.</p></div>');
 
-  // 6b · O sistema (WorkFlowArk)
+  // 8 · Gente nova
+  S.push('<div><div class="ah-kick">Gente nova na estrutura</div><h2>Caio e Guilherme entram para destravar</h2>'+
+    '<p class="lead">'+ahTxt('set_novos_intro','Setembro traz duas entradas que mudam a forma como a operação roda. Não é reforço de braço, é gente que assume frente.',edit)+'</p>'+
+    '<div class="ah-grid g2" style="margin-top:14px">'+
+    cardG('Caio · PO e geração de demanda',ahTxt('set_novo_caio','Caio organiza as demandas, acompanha prazos e alinha entrega com cliente. Fica ao lado do Lucas no sucesso do cliente e se forma como PO. Também entra no marketing para montar funil.',edit))+
+    cardG('Guilherme · tráfego e demanda',ahTxt('set_novo_gui','Guilherme assume a operação de tráfego como consultor, no lugar do Giuseppe, e entra junto com o Caio na frente de geração de demanda.',edit))+
+    card('Danilo sobe para COO',ahTxt('set_novo_danilo','Danilo sai da cadeira do operacional e assume o COO. Segue como gestor de tráfego e volta ao comercial pela leitura de dados.',edit))+
+    card('Darmã em formação',ahTxt('set_novo_darma','Mês de teste. Caminho para diretor de arte, com direcionamento de captações, marcação e acompanhamento, além de planejamento estratégico.',edit))+
+    '</div></div>');
+
+  // 9 · Organograma
+  S.push('<div><div class="ah-kick">Quem faz o quê</div><h2>Organograma · 6 áreas sob CEO e COO</h2>'+
+    '<p class="lead">Gabriel no CEO, Danilo no COO. Abaixo, seis áreas com dono. A Criação vira área própria, separada do Marketing, para ficar claro quem está disponível.</p>'+
+    '<div class="ah-grid g3" style="margin-top:16px">'+
+    card('01 · Comercial','Gabriel como closer. Saulo em CSO, closer, BDR e SDR. Danilo entra em análise de dados e ponte com o marketing.')+
+    card('02 · Marketing','Gabriel como head e propostas. Gui e Caio em geração de demanda. Danilo em dados. Saulo no marketing físico, vestuário e peças.')+
+    card('03 · Criação','Bruno no projeto Fercon, M. Portela em design, Darmã em formação, Maria Luiza, Samuel, Christopher Mike e Victor.')+
+    card('04 · Tráfego','Danilo como gestor de tráfego. Guilherme entra como consultor no lugar do Giuseppe.')+
+    card('05 · Sucesso do cliente','Lucas Rosi como head. Caio entra de apoio e em formação como PO. Bruno sai da função.')+
+    card('06 · Captação','Samuel, Christopher Mike, Victor, Anderson, Henrique e Maria Clara.')+
+    '</div>'+
+    '<p style="margin-top:12px;color:#9a9aa2;font-size:13px">Saíram da estrutura: Márcio e Luckas Gomes da edição, Márcio também da captação, e Giuseppe do tráfego. O organograma completo fica na aba Conhecimento.</p></div>');
+
+  // 10 · O sistema
   S.push('<div><div class="ah-kick">O que construímos</div><h2>WorkFlowArk: a casa num lugar só</h2>'+
     '<p class="lead">'+ahTxt('sistema_intro','O maior projeto do período. Trello, planilha do Alpha, cobrança, agenda e relatórios viraram um sistema só, no ar, usado todo dia. O que estava na cabeça dos sócios virou processo que a equipe opera.',edit)+'</p>'+
     '<div class="ah-grid g3" style="margin-top:16px">'+
-    card('Operação','Kanban de tarefas, CRM de pipeline, Jornada e Sprints por cliente.')+
-    card('Rotina & caixa','Cobrança e Acerto, Agenda por pessoa, Financeiro ao vivo e War Room com semáforo.')+
+    card('Operação','Kanban de tarefas, CRM de pipeline, Jornada e Projetos por cliente.')+
+    card('Rotina &amp; caixa','Cobrança e Acerto, Agenda por pessoa, Financeiro ao vivo e War Room com semáforo.')+
     card('IA a favor','Planejamento, Roteirista e Legendas, Conselho de IA, JARVIS e portal do cliente.')+
     '</div></div>');
 
-  // 6c · Como usar
+  // 11 · O que mudou no sistema
+  S.push('<div><div class="ah-kick">O sistema em setembro</div><h2>O que mudou para a operação caber no quadro</h2>'+
+    '<p class="lead">'+ahTxt('set_sistema_intro','As mudanças deste mês saíram da leitura do Caio como PO. Todas atacam a mesma coisa: saber quanto trabalho existe, de quem ele é, e quanto tempo custa.',edit)+'</p>'+
+    '<div class="ah-grid g3" style="margin-top:14px">'+
+    card('Projeto por cliente','Quadro de 6 colunas, com homologação interna e homologação do cliente separadas, etiquetas de papel e de sprint, e prontuário do cliente em 5 páginas.')+
+    card('Tempo por tarefa','Cada tarefa carrega estimativa em horas. Sem isso não dá para dizer se a semana cabe.')+
+    card('Capacity da equipe','O resumo do mês passa a mostrar o tempo operacional do time, quanto está em aberto por pessoa e quanto ainda está sem estimativa.')+
+    card('A ARK como cliente','A própria ARK entra no modelo de projeto. O marketing da casa passa a ser cobrado igual ao de cliente pagante.')+
+    card('Etiquetas próprias','A equipe cria etiqueta nova quando o trabalho pede, sem depender de alguém mexer no código.')+
+    card('Um quadro só','O kanban da aba Atividades passa a usar o mesmo modelo da aba Projetos. Uma linguagem só para a operação inteira.')+
+    '</div></div>');
+
+  // 12 · Como usar
   S.push('<div><div class="ah-kick">Como usar no dia a dia</div><h2>O combinado com o sistema</h2>'+
     '<div class="ah-grid g2" style="margin-top:14px">'+
-    card('Mexeu, moveu o card',ahTxt('uso1','Kanban: Backlog, Semana, Execução, Aprovação, Concluído. Se não está no Kanban, não aconteceu.',edit))+
-    card('Toda tarefa com dono',ahTxt('uso2','Marque o responsável. É isso que faz o quadro de execução da equipe ser real.',edit))+
+    card('Mexeu, moveu o card',ahTxt('uso1','Backlog, A iniciar, Em andamento, Homologação, Homologação do cliente e Concluído. Se não está no quadro, não aconteceu.',edit))+
+    card('Toda tarefa com dono e com tempo',ahTxt('uso2','Marque o responsável e a estimativa em horas. É isso que faz o capacity da equipe existir.',edit))+
     card('CRM sempre vivo',ahTxt('uso3','Todo lead e conversa registrados. O comercial mora aqui.',edit))+
     card('Cliente no link',ahTxt('uso4','Aprovação de conteúdo e portal do cliente por link, sem WhatsApp solto.',edit))+
     '</div>'+
     '<div class="note" style="margin-top:14px"><h3>Regra de ouro</h3><p>Se não está no sistema, não foi feito. Quanto mais a equipe usa, mais o próprio All Hands se preenche sozinho.</p></div></div>');
 
-  // 7 · O que destravou
+  // 13 · O que destravou
   S.push('<div><div class="ah-kick">O que funcionou</div><h2>O que destravou no mês</h2>'+
     '<div class="ah-grid g2" style="margin-top:12px">'+
-    cardG('Recorrência de pé',ahTxt('ago_conq1','Bulldogs (R$ 2.500/mês) e Vaca Velha (R$ 1.350/mês) renovando mensalmente. R$ 3.800 de MRR que não depende de fechamento novo.',edit))+
-    cardG('Recorde de captações',ahTxt('ago_conq2','13 captações em julho, com a Vivenda gravando quase toda semana. O ritmo virou rotina, não evento.',edit))+
-    cardG('Comercial em volume',ahTxt('ago_conq3','Ritual toda semana (alinhamento de Comercial e Marketing) e 3 propostas grandes entregues em um único dia (31/07).',edit))+
-    cardG('Cliente sendo treinado',ahTxt('ago_conq4','Workshops na Sasse (WhatsApp e atendimento) mostram a ARK indo além da entrega: a gente profissionaliza o cliente.',edit))+
+    cardG('Estrutura com nome',ahTxt('set_conq1','A Criação virou área própria e o time de câmera passou a ter gente disponível de verdade. Dá para marcar captação sem depender de uma pessoa só.',edit))+
+    cardG('PO na operação',ahTxt('set_conq2','Com o Caio acompanhando demanda e prazo, a fila deixa de morar no WhatsApp e passa a morar no quadro.',edit))+
+    cardG('Projeto por cliente no ar',ahTxt('set_conq3','Cada cliente ganhou quadro, sprint e prontuário. O que era combinado de reunião virou tarefa com dono.',edit))+
+    cardG('Processos prontos para importar',ahTxt('set_conq4','O material da franquia já descreve os processos por área. O próximo passo é trazer isso para dentro do sistema, em linguagem que a equipe lê rápido.',edit))+
     '</div></div>');
 
-  // 8 · Gargalos reais
+  // 14 · Gargalos
   S.push('<div><div class="ah-kick">O que ainda trava</div><h2>Gargalos reais, com dono e ação</h2>'+
     '<div class="ah-grid g3" style="margin-top:12px">'+
-    cardR('Growth Hub sem conversão',ahTxt('ago_garg1','R$ 3 mil investidos e nenhum retorno. Restam R$ 987. Lead principal adiou e avalia fechar unidade. Decisão: não recarregar sem conversão, gerar lead próprio.',edit))+
-    cardR('Criativo de captação parado',ahTxt('ago_garg2','Gerado semana passada, aguarda reedição do Samuel. Enquanto não sai, não há campanha de captação de leads no ar. Destravar nesta semana.',edit))+
-    cardR('Acessos e primeiros anúncios pendentes',ahTxt('ago_garg3','4B Burger, Café Lumière, Sabor e Lenha, Di Patrick e D\'Gust com acesso de conta de anúncio ou primeiro anúncio em aberto no sistema. Danilo assume e zera a fila.',edit))+
-    cardR('Gabriel operando demais',ahTxt('ago_garg4','CEO, desenvolvedor e organizador ao mesmo tempo. Danilo assume o operacional pra Gabriel e Saulo focarem em comercial, marketing, financeiro e RH.',edit))+
-    cardR('Vivenda precisa de dono no marketing',ahTxt('ago_garg5','Conversa em andamento com o Vinícius (estrategista do grupo do Nazo e Caminito). Pouca disponibilidade, muito gás. Alguém tem que olhar essa frente.',edit))+
+    cardR('Estimativa em branco',ahTxt('set_garg1','Tarefa sem hora estimada deixa o capacity mentir. Enquanto o time não preencher, a conta de carga fica pela metade. Dono: cada responsável.',edit))+
+    cardR('Quem não usa o sistema',ahTxt('set_garg2','Entrega feita fora do quadro não aparece em lugar nenhum e vira retrabalho de cobrança. Dono: Caio, com apoio do Lucas.',edit))+
+    cardR('POPs desatualizados',ahTxt('set_garg3','POPs por função e processos por área ainda não refletem o material da franquia. Precisa ser importado e reescrito. Dono: Gabriel.',edit))+
+    cardR('Gabriel operando demais',ahTxt('set_garg4','CEO, desenvolvedor e organizador ao mesmo tempo. Com Danilo no COO e Caio no PO, a saída é delegar de verdade.',edit))+
+    cardR('Onboarding dos novos',ahTxt('set_garg5','Caio e Guilherme precisam de acesso, contexto de cliente e leitura dos POPs na primeira semana, senão o ganho demora um mês para aparecer.',edit))+
     '</div></div>');
 
-  // 9 · Time (debate)
-  S.push('<div><div class="ah-kick">Time · pra puxar o debate</div><h2>O que muda a partir de agosto</h2>'+
-    '<p class="lead">'+ahTxt('ago_time_debate','O time entregou muito em julho. Agora cada frente ganha dono claro, e o organograma foi atualizado: sai quem ficou pra trás, entra quem performa.',edit)+'</p>'+
-    '<div class="ah-grid g3" style="margin-top:14px">'+
-    card('Danilo dono do operacional',ahTxt('ago_time_danilo','Danilo assume de fato o operacional. Gabriel e Saulo se concentram em comercial, marketing, financeiro e RH.',edit))+
-    card('Saulo · comercial + cardápios',ahTxt('ago_time_saulo','Além do comercial, Saulo pega a frente de criação de cardápios. É um risco novo: ainda vamos medir, organizar e definir como roda.',edit))+
-    card('Time enxuto e forte',ahTxt('ago_time_org','Saem Kaique e Lush (edição), Nicolas e João Gabriel (captação). Entra o Victor na captação audiovisual. Lucas e Bruno seguem no sucesso do cliente.',edit))+
-    '</div></div>');
-
-  // 10 · Agosto · alavancas
-  S.push('<div><div class="ah-kick">Para onde vamos · Agosto</div><h2>Mês de virada de chave</h2>'+
+  // 15 · Para onde vamos
+  S.push('<div><div class="ah-kick">Para onde vamos · Setembro</div><h2>Mês de estrutura em pé</h2>'+
     '<div class="ah-grid g2" style="margin-top:12px">'+
-    card('🥇 Recorrência pra dentro',ahTxt('ago_alav1','+R$ 1.200 de MRR na Alpha (cobre a taxa de franquia) e 5 MRR ou 5 TCV na ARK até 31/08. Meta objetiva, básica e inegociável.',edit))+
-    card('🥈 Leads próprios no ar',ahTxt('ago_alav2','Reeditar o criativo com o Samuel e subir a campanha de captação. CRM ativo e as duas oportunidades da semana: Profox e Localiza.',edit))+
-    card('🥉 Marketing da ARK',ahTxt('ago_alav3','Bruno, Portela e Malu instauram o marketing da própria casa. Daqui a dezembro são 4 meses: potência e criativo pra crescer de verdade.',edit))+
-    card('🛡️ Rotina de conteúdo blindada',ahTxt('ago_alav4','Todo cliente ARK com captação mensal marcada e roteiro 3 dias antes. Agenda de agosto já programada na Gestão do mês.',edit))+
+    card('Operação dentro do quadro',ahTxt('set_alav1','Toda tarefa com responsável e estimativa. Capacity da equipe visível na virada da semana.',edit))+
+    card('Funil próprio com Gui e Caio',ahTxt('set_alav2','Geração de demanda da ARK montada por quem entrou para isso, com número medido no CRM.',edit))+
+    card('Tráfego operado',ahTxt('set_alav3','Guilherme assume a rotina de campanha e o Danilo passa a olhar dado de comercial e de marketing junto.',edit))+
+    card('Conhecimento importado',ahTxt('set_alav4','Processos por área e POPs reescritos a partir do material da franquia, em linguagem simples.',edit))+
     '</div></div>');
 
-  // 11 · OKRs por função
-  S.push('<div><div class="ah-kick">OKRs de agosto · por função</div><h2>O que cada um vai puxar</h2>'+
+  // 16 · OKRs por função
+  S.push('<div><div class="ah-kick">OKRs de setembro · por função</div><h2>O que cada um vai puxar</h2>'+
     '<div class="ah-grid g2" style="margin-top:12px">'+
-    card('Comercial · Saulo + Gabriel',ahTxt('ago_okr_com','5 MRR ou 5 TCV na ARK, +R$ 1.200 de MRR na Alpha, Profox e Localiza trabalhadas já na primeira semana, CRM sem lead parado.',edit))+
-    card('Account & CS · Lucas',ahTxt('ago_okr_cs','Onboarding impecável do Bulldogs, ativação diária da carteira, 0% de churn e a régua de contato rodando em todos os clientes.',edit))+
-    card('Operação & Tráfego · Danilo',ahTxt('ago_okr_traf','Assumir o operacional como dono, zerar a fila de acessos e primeiros anúncios pendentes e subir a campanha de captação da ARK.',edit))+
-    card('Criação, Edição & Captação · Malu, Samuel, Portela, Victor',ahTxt('ago_okr_creator','Roteiro de todo cliente ARK entregue 3 dias antes da captação, agenda de agosto cumprida e o marketing da ARK no ar.',edit))+
+    card('Comercial · Saulo + Gabriel + Danilo',ahTxt('set_okr_com','Funil registrado no CRM sem lead parado, recorrência para dentro e leitura semanal de dado feita pelo Danilo.',edit))+
+    card('Sucesso do cliente · Lucas + Caio',ahTxt('set_okr_cs','Régua rodando na carteira inteira, zero churn por silêncio e o backlog de cada cliente no quadro, com dono e prazo.',edit))+
+    card('Tráfego · Danilo + Guilherme',ahTxt('set_okr_traf','Guilherme com a rotina de campanha assumida, fila de acessos zerada e relatório de performance na segunda até 12h.',edit))+
+    card('Criação e Captação',ahTxt('set_okr_criacao','Roteiro entregue 3 dias antes de cada captação, agenda do mês cumprida e tarefa com estimativa preenchida. Bruno, Portela, Darmã, Malu, Samuel, Christopher e Victor.',edit))+
     '</div></div>');
 
-  // 12 · Compromisso
+  // 17 · Compromisso
   S.push('<div class="cover"><div class="ah-kick">Compromisso do mês</div>'+
-    '<h2 style="font-size:44px;max-width:1000px;margin-top:10px">'+ahTxt('ago_compromisso','Agosto é virada de chave: recorrência pra dentro, marketing próprio no ar e cada frente com dono. Cada um sai daqui com um compromisso.',edit)+'</h2>'+
-    '<div style="margin-top:20px"><span class="pill y">+R$ 1.200 MRR Alpha</span><span class="pill y">5 MRR ou 5 TCV</span><span class="pill y">Roteiro 3 dias antes</span><span class="pill y">Marketing ARK no ar</span></div>'+
+    '<h2 style="font-size:44px;max-width:1000px;margin-top:10px">'+ahTxt('set_compromisso','Setembro é o mês em que a estrutura fica em pé: gente nova com frente definida, tarefa com dono e com tempo, e a operação inteira dentro do quadro.',edit)+'</h2>'+
+    '<div style="margin-top:20px"><span class="pill y">Tarefa com dono e com hora</span><span class="pill y">Capacity visível</span><span class="pill y">Roteiro 3 dias antes</span><span class="pill y">Funil próprio no ar</span></div>'+
     '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffc400">VAMOS JUNTOS ●</p></div>');
 
-  // 13 · Organograma & Estrutura
-  S.push('<div><div class="ah-kick">Quem faz o quê</div><h2>Organograma · 5 áreas, 2 frentes</h2>'+
-    '<p class="lead">ARK Content opera com 5 áreas. Squad Alpha Senior espelha a mesma estrutura com foco regional.</p>'+
-    '<div class="ah-grid g3" style="margin-top:16px">'+
-    card('🧠 Coordenação Geral · Gabriel','Comercial, marketing, financeiro e RH. Decide o que, não executa o como. O operacional agora é do Danilo.')+
-    card('📢 Comercial · Saulo + Gabriel','Prospecção, discovery e funil (Saulo, que também pega cardápios). Closing estratégico (Gabriel). Meta: 5 MRR ou 5 TCV.')+
-    card('📋 Account & CS · Lucas + Bruno','Régua diária, onboarding, reuniões de resultado e relação com o cliente. Dono da carteira, não secretário do cliente.')+
-    card('🎯 Operação & Tráfego · Danilo','Dono do operacional a partir de agosto. Campanhas, ROAS, leads pagos e a fila de acessos zerada.')+
-    card('🎬 Conteúdo & Captação · Malu + Samuel + Portela + Victor','Produção, roteiro 3 dias antes, captação e entrega. Victor entra; saem Kaique, Lush, Nicolas e João Gabriel.')+
-    card('⚡ Marketing ARK · Bruno + Portela + Malu','A frente nova: o marketing da própria casa, de agosto a dezembro, com a potência de quem mais produz.')+
-    '</div></div>');
-
-  // 14 · Método 5 Eixos
+  // 18 · Método 5 Eixos
   S.push('<div><div class="ah-kick">A metodologia que sustenta tudo</div><h2>Método dos 5 Eixos</h2>'+
-    '<p>Cinco dimensões interdependentes — todas assentadas sobre uma premissa central: <b style="color:#fff">o gestor-operador precisa dominar o ofício</b>. Sem domínio técnico, nenhum eixo se sustenta.</p>'+
+    '<p>Cinco dimensões interdependentes, todas assentadas sobre uma premissa central: <b style="color:#fff">o gestor-operador precisa dominar o ofício</b>. Sem domínio técnico, nenhum eixo se sustenta.</p>'+
     '<div class="ah-grid g3" style="margin-top:16px">'+
-    card('01 · Identidade Estratégica','Posicionamento claro, proposta de valor definida, nicho e diferencial. Sem isso a agência compete por preço — e perde sempre.')+
-    card('02 · Pessoas & Cultura','Time com papéis claros, metas individuais e cultura de dono. Cada um sabe o que entrega e por que isso importa.')+
-    card('03 · Processos & POPs','22 POPs documentados, rituais semanais e mensais, sistema rodando. O que funciona uma vez funciona sempre.')+
-    card('04 · Comercial & Pipeline','Máquina de captação previsível: SDR + closer + tráfego próprio. Meta de receita com funil visível toda semana.')+
-    card('05 · Inteligência & Sistema','WorkFlowArk como plataforma de decisão: dados, tarefas, clientes, JARVIS e integrações — tudo em um lugar só.')+
-    card('A virada','A ARK cresceu +143% em 6 meses porque aplicou o método. Não por acidente — por processo.')+
+    card('01 · Identidade Estratégica','Posicionamento claro, proposta de valor definida, nicho e diferencial. Sem isso a agência compete por preço e perde sempre.')+
+    card('02 · Pessoas &amp; Cultura','Time com papéis claros, metas individuais e cultura de dono. Cada um sabe o que entrega e por que isso importa.')+
+    card('03 · Processos &amp; POPs','22 POPs documentados, rituais semanais e mensais, sistema rodando. O que funciona uma vez funciona sempre.')+
+    card('04 · Comercial &amp; Pipeline','Máquina de captação previsível: SDR, closer e tráfego próprio. Meta de receita com funil visível toda semana.')+
+    card('05 · Inteligência &amp; Sistema','WorkFlowArk como plataforma de decisão: dados, tarefas, clientes, JARVIS e integrações, tudo em um lugar só.')+
+    card('A virada','A ARK cresceu aplicando o método. Não por acidente, por processo.')+
     '</div></div>');
 
-  // 15 · Reconhecimentos
-  S.push('<div class="cover"><div class="ah-kick">Julho foi de vocês</div>'+
-    '<h2 style="font-size:44px;max-width:1000px;margin-top:10px">'+ahTxt('ago_reconhec','Julho foi o mês de mais entrega da história da ARK. Cada captação, cada workshop e cada proposta saiu da mão de vocês.',edit)+'</h2>'+
+  // 19 · Reconhecimento
+  S.push('<div class="cover"><div class="ah-kick">Agosto foi de vocês</div>'+
+    '<h2 style="font-size:44px;max-width:1000px;margin-top:10px">'+ahTxt('set_reconhec','Cada captação, cada entrega e cada proposta saiu da mão de vocês. A estrutura de setembro só existe porque agosto foi entregue.',edit)+'</h2>'+
     '<div style="margin-top:22px">'+
-    '<span class="pill y">🏆 13 captações no mês</span>'+
-    '<span class="pill y">📄 3 propostas em um único dia</span>'+
-    '<span class="pill y">💰 R$ 3.800 de MRR recorrente</span>'+
-    '<span class="pill">Workshops na Sasse</span>'+
+    '<span class="pill y">Carteira em '+d.carteira+' clientes</span>'+
+    '<span class="pill y">Projeto por cliente no ar</span>'+
+    '<span class="pill">Time de criação com nome</span>'+
     '<span class="pill">WorkFlowArk rodando todo dia</span>'+
     '</div>'+
     '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffc400">OBRIGADO ●</p></div>');
 
-  // 16 · Financeiro (sócios)
+  // 20 · Financeiro (sócios)
   const topRec=fin.rec.slice().sort((a,b)=>mmNum(b.valor)-mmNum(a.valor)).slice(0,5)
-    .map(x=>'<tr><td>'+(x.nome||'—')+'</td><td class="n">'+mmBRL(mmNum(x.valor))+'</td></tr>').join('')||'<tr><td>Sem dados</td><td class="n">—</td></tr>';
+    .map(x=>'<tr><td>'+(x.nome||'sem nome')+'</td><td class="n">'+mmBRL(mmNum(x.valor))+'</td></tr>').join('')||'<tr><td>Sem dados</td><td class="n">0</td></tr>';
   S.push('<div><div class="ah-kick">Fechamento financeiro · sócios</div><h2>O caixa do mês</h2>'+
     '<div class="ah-grid g4" style="margin:12px 0">'+
     ahStat(mmBRL(fin.tRec),'A receber','','green')+
@@ -15379,7 +15457,7 @@ function ahBuildSlides(edit){
     ahStat(mmK(d.alMRR),'MRR Alpha',d.alphaN+' clientes','amber')+
     '</div>'+
     '<div class="ah-grid g2"><div><h3>Maiores a receber</h3><table>'+topRec+'</table></div>'+
-    '<div class="note" style="align-self:start"><h3>Saúde financeira</h3><p>Margem saudável fica entre 12% e 15%. Estamos acima — crescendo com resultado real, não só com receita.</p></div></div>'+
+    '<div class="note" style="align-self:start"><h3>Saúde financeira</h3><p>Margem saudável fica entre 12% e 15%. Acima disso é crescimento com resultado real, não só receita.</p></div></div>'+
     '<p style="margin-top:10px;color:#5a5a62;font-size:12px">Números ao vivo da Minha Planilha. Detalhe completo na aba Financeiro.</p></div>');
 
   return S;
@@ -15387,7 +15465,7 @@ function ahBuildSlides(edit){
 window.ahIdx=0;window.ahSlides=[];
 function ahWrap(html,i,total){
   const nn=String(i+1).padStart(2,'0'),tt=String(total).padStart(2,'0');
-  const mes=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,x=>x.toUpperCase());
+  const mes=(ahNarr().set_mes_label||'Setembro de 2026');
   return '<div class="ahd">'+
     '<div class="ah-chrome"><div class="ah-brand"><img src="/ark-logo.png" alt="ARK"><span>ARK<b>·</b>ALL HANDS</span></div><div class="ah-pageno">'+nn+' <i>/</i> '+tt+'</div></div>'+
     '<div class="ah-body">'+html+'</div>'+
