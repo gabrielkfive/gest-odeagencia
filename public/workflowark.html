@@ -5213,6 +5213,12 @@ function iniciarAutoSync(){
           #page-projetos .pj-tab:hover{border-color:var(--line-2)}
           #page-projetos .pj-tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
+          #page-projetos .pj-cargabar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 0 13px;padding:9px 12px;background:var(--blue-soft);border:1px solid var(--line);border-radius:12px}
+          #page-projetos .pj-cargabar .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);font-weight:800;margin-right:3px}
+          #page-projetos .pj-carga{font-size:11.5px;color:var(--txt);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+          #page-projetos .pj-carga b{font-weight:700}
+          #page-projetos .pj-carga.sem{color:var(--red);border-color:var(--red)}
+          #page-projetos .pj-carga.tot{background:var(--ink);color:var(--bg);border-color:var(--ink);margin-left:auto}
           #page-projetos .pj-board{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:11px;overflow-x:auto;padding-bottom:10px;align-items:start}
           #page-projetos .pj-col{background:var(--blue-soft);border:1px solid var(--line);border-radius:14px;padding:10px;min-height:120px}
           #page-projetos .pj-col.over{border-color:var(--yel);background:var(--yel-bg)}
@@ -7710,7 +7716,7 @@ function relatorioImprimir(){
   var aberto=null;      // id do projeto aberto
   var vista='quadro';   // quadro | lista | prontuario
   var prPag='briefing'; // pagina do prontuario
-  var filtro={papel:'',sprint:'',busca:''};
+  var filtro={papel:'',sprint:'',resp:'',busca:''};
 
   /* As 6 colunas do quadro, na ordem que ele desenhou. */
   var COLS=[
@@ -7779,6 +7785,10 @@ function relatorioImprimir(){
     save(arr);
   }
   function papel(k){var r=null;PAPEIS.forEach(function(p){if(p.k===k)r=p;});return r;}
+  /* A equipe sai da MESMA fonte do resto do sistema (base + quem o Gabriel
+     adicionou nas Configuracoes). Antes o responsavel era texto livre: dava pra
+     digitar qualquer coisa e nao dava pra filtrar por pessoa nem somar carga. */
+  function equipe(){try{return (typeof allTeam==='function')?allTeam():[];}catch(e){return [];}}
   function col(k){var r=COLS[0];COLS.forEach(function(c){if(c.k===k)r=c;});return r;}
 
   /* Projeto zerado. Ja nasce com a sprint 1 aberta e o template no backlog. */
@@ -7837,6 +7847,7 @@ function relatorioImprimir(){
     return (p.tarefas||[]).filter(function(t){
       if(filtro.papel&&(t.papeis||[]).indexOf(filtro.papel)<0)return false;
       if(filtro.sprint&&String(t.sprint||'')!==String(filtro.sprint))return false;
+      if(filtro.resp&&String(t.resp||'')!==filtro.resp)return false;
       if(b&&String(t.t||'').toLowerCase().indexOf(b)<0)return false;
       return true;
     });
@@ -7858,7 +7869,34 @@ function relatorioImprimir(){
       '<div class="pj-tags">'+tagsHTML(t)+'</div>'+
       (t.venc?'<div class="pj-venc'+(late?' late':'')+'">'+(late?'⚠ ':'📅 ')+esc(br(t.venc))+(t.resp?' · '+esc(t.resp):'')+'</div>'
              :(t.resp?'<div class="pj-venc">'+esc(t.resp)+'</div>':''))+
+      (t.horas?'<div class="pj-venc">⏱ '+esc(t.horas)+'h estimadas</div>':'')+
       '</div>';
+  }
+
+  /* CARGA DA SPRINT. O Caio pediu "quanto tempo cada tarefa normalmente demanda"
+     justamente pra saber se a sprint cabe no time. Soma as horas das tarefas AINDA
+     NAO concluidas, por pessoa, e mostra o que esta sem dono e sem estimativa. So
+     conta o que passa pelo filtro, entao filtrar por sprint mostra a carga dela. */
+  function cargaHTML(p){
+    var ts=tarefasFiltradas(p).filter(function(t){return t.st!=='concluido';});
+    var por={}, semDono=0, semEstim=0, total=0;
+    ts.forEach(function(t){
+      var hs=parseFloat(t.horas)||0;
+      total+=hs;
+      if(!hs)semEstim++;
+      if(!t.resp){semDono+=hs;return;}
+      por[t.resp]=(por[t.resp]||0)+hs;
+    });
+    var nomes=Object.keys(por).sort(function(a,b){return por[b]-por[a];});
+    if(!total&&!semEstim)return '';
+    var um=function(x){return Math.round(x*10)/10;};
+    var chips=nomes.map(function(n){
+      return '<span class="pj-carga"><b>'+esc(n)+'</b> '+um(por[n])+'h</span>';
+    }).join('');
+    if(semDono)chips+='<span class="pj-carga sem"><b>sem responsável</b> '+um(semDono)+'h</span>';
+    if(semEstim)chips+='<span class="pj-carga sem"><b>sem estimativa</b> '+semEstim+' tarefa'+(semEstim>1?'s':'')+'</span>';
+    return '<div class="pj-cargabar"><span class="lbl">Carga em aberto</span>'+chips+
+      '<span class="pj-carga tot"><b>total</b> '+um(total)+'h</span></div>';
   }
 
   function quadroHTML(p){
@@ -8057,8 +8095,11 @@ function relatorioImprimir(){
           '<select class="form-select" id="pj-fsprint" style="width:130px"><option value="">Toda sprint</option>'+
             sprints.map(function(s){return '<option value="'+s+'"'+(String(filtro.sprint)===String(s)?' selected':'')+'>sprint '+(String(s).length<2?'0':'')+s+'</option>';}).join('')+
           '</select>'+
-          (filtro.papel||filtro.sprint||filtro.busca?'<button class="icobtn" data-limpar="1" style="color:var(--red)">✕ Limpar</button>':'')+
-        '</div>')+
+          '<select class="form-select" id="pj-fresp" style="width:170px"><option value="">Todo responsável</option>'+
+            equipe().map(function(n){return '<option value="'+esc(n)+'"'+(filtro.resp===n?' selected':'')+'>'+esc(n)+'</option>';}).join('')+
+          '</select>'+
+          (filtro.papel||filtro.sprint||filtro.resp||filtro.busca?'<button class="icobtn" data-limpar="1" style="color:var(--red)">✕ Limpar</button>':'')+
+        '</div>'+cargaHTML(p))+
 
       (vista==='quadro'?quadroHTML(p):(vista==='lista'?listaHTML(p):prontHTML(p)));
 
@@ -8121,7 +8162,7 @@ function relatorioImprimir(){
     var p=get(aberto); if(!p)return;
     var t=tid?(p.tarefas||[]).filter(function(x){return x.id===tid;})[0]:null;
     var ehNova=!t;
-    if(ehNova)t={id:'',t:'',st:stInicial||'backlog',papeis:[],sprint:p.sprint||1,venc:'',resp:'',obs:''};
+    if(ehNova)t={id:'',t:'',st:stInicial||'backlog',papeis:[],sprint:p.sprint||1,venc:'',resp:'',horas:'',obs:''};
     modal(
       '<h3 style="font-size:17px;font-weight:720;margin:0 0 16px">'+(ehNova?'Nova tarefa':'Editar tarefa')+'</h3>'+
       '<div class="pr-f"><label>Tarefa</label><input id="tk-t" value="'+esc(t.t)+'" placeholder="O que precisa ser feito"></div>'+
@@ -8131,8 +8172,17 @@ function relatorioImprimir(){
       '</div>'+
       '<div class="pr-2">'+
         '<div class="pr-f"><label>Prazo</label><input id="tk-venc" type="date" value="'+esc(t.venc||'')+'"></div>'+
-        '<div class="pr-f"><label>Responsável</label><input id="tk-resp" value="'+esc(t.resp||'')+'" placeholder="Nome de quem executa"></div>'+
+        '<div class="pr-f"><label>Estimativa (horas)</label><input id="tk-horas" type="number" min="0" step="0.5" value="'+esc(t.horas||'')+'" placeholder="ex: 2"></div>'+
       '</div>'+
+      '<div class="pr-f"><label>Responsável</label><select id="tk-resp"><option value="">A definir</option>'+
+        (function(){
+          var eq=equipe().slice();
+          /* quem ja estava na tarefa mas saiu da equipe continua aparecendo: sem isso,
+             salvar a tarefa apagaria o responsavel sem ninguem perceber */
+          if(t.resp&&eq.indexOf(t.resp)<0)eq.push(t.resp);
+          return eq.map(function(n){return '<option value="'+esc(n)+'"'+(t.resp===n?' selected':'')+'>'+esc(n)+'</option>';}).join('');
+        })()+
+      '</select></div>'+
       '<div class="pr-f"><label>Etiquetas de papel</label><div style="display:flex;gap:6px;flex-wrap:wrap">'+
         PAPEIS.map(function(x){
           var on=(t.papeis||[]).indexOf(x.k)>=0;
@@ -8185,11 +8235,11 @@ function relatorioImprimir(){
       return;
     }
     if(b.id==='pj-seed'){semear();return;}
-    if(b.dataset.open!=null){aberto=b.dataset.open;vista='quadro';prPag='briefing';filtro={papel:'',sprint:'',busca:''};render();return;}
+    if(b.dataset.open!=null){aberto=b.dataset.open;vista='quadro';prPag='briefing';filtro={papel:'',sprint:'',resp:'',busca:''};render();return;}
     if(b.dataset.voltar!=null){aberto=null;render();return;}
     if(b.dataset.vista){vista=b.dataset.vista;renderDetalhe();return;}
     if(b.dataset.prpag){prPag=b.dataset.prpag;renderDetalhe();return;}
-    if(b.dataset.limpar!=null){filtro={papel:'',sprint:'',busca:''};renderDetalhe();return;}
+    if(b.dataset.limpar!=null){filtro={papel:'',sprint:'',resp:'',busca:''};renderDetalhe();return;}
     if(b.dataset.newtask!=null){abrirTarefa(null,b.dataset.newtask);return;}
     if(b.dataset.tkcancel!=null){fecharModal();return;}
 
@@ -8227,6 +8277,7 @@ function relatorioImprimir(){
         sprint:parseInt(document.getElementById('tk-sp').value,10)||1,
         venc:document.getElementById('tk-venc').value||'',
         resp:(document.getElementById('tk-resp').value||'').trim(),
+        horas:parseFloat(document.getElementById('tk-horas').value)||0,
         obs:(document.getElementById('tk-obs').value||'').trim(),
         papeis:(mm.dataset.papeis||'').split(',').filter(Boolean)
       };
@@ -8306,6 +8357,7 @@ function relatorioImprimir(){
     var t=ev.target;
     if(t.id==='pj-fpapel'){filtro.papel=t.value;renderDetalhe();return;}
     if(t.id==='pj-fsprint'){filtro.sprint=t.value;renderDetalhe();return;}
+    if(t.id==='pj-fresp'){filtro.resp=t.value;renderDetalhe();return;}
     if(t.dataset&&t.dataset.br!=null){
       var p=get(aberto); if(!p)return;
       p.pront.briefing=p.pront.briefing||{};

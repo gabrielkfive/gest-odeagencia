@@ -226,11 +226,69 @@ async function main() {
   checa(carteira.semValor.length === 0,
     'nenhum cliente ARK ativo entra no MRR com R$ 0' + (carteira.semValor.length ? ': ' + carteira.semValor.join(', ') : ''));
 
-  console.log('\n9. Console limpo');
+  console.log('\n9. Responsavel de verdade e estimativa de horas');
+  await page.evaluate(() => document.querySelector('[data-nav="projetos"]').click());
+  await page.waitForTimeout(400);
+  await page.locator('#pj-cards .pj-c', { hasText: 'Fercon' }).first().click();
+  await page.waitForTimeout(500);
+
+  // o filtro de responsavel sai da equipe do sistema, nao de uma lista fixa
+  const equipeFiltro = await page.evaluate(() => {
+    const s = document.getElementById('pj-fresp');
+    const team = (typeof allTeam === 'function' ? allTeam() : []);
+    return { existe: !!s, n: s ? s.options.length - 1 : 0, team: team.length };
+  });
+  checa(equipeFiltro.existe, 'filtro por responsavel existe no quadro');
+  checa(equipeFiltro.n === equipeFiltro.team && equipeFiltro.team > 0,
+    'o filtro lista a equipe inteira do sistema (' + equipeFiltro.n + ' pessoas)');
+
+  // atribuir pessoa e horas numa tarefa
+  await page.locator('#pj-detalhe [data-col="backlog"] .pj-t').first().click();
+  await page.waitForTimeout(400);
+  const ehSelect = await page.evaluate(() => {
+    const el = document.getElementById('tk-resp');
+    return el ? el.tagName : 'AUSENTE';
+  });
+  checa(ehSelect === 'SELECT', 'responsavel virou lista da equipe, nao texto livre (achou ' + ehSelect + ')');
+
+  const pessoa = await page.evaluate(() => (typeof allTeam === 'function' ? allTeam() : [])[1]);
+  await page.selectOption('#tk-resp', pessoa);
+  await page.fill('#tk-horas', '3.5');
+  await page.locator('#pj-modal [data-tksave]').click();
+  await page.waitForTimeout(500);
+
+  const gravou2 = await page.evaluate((nome) => {
+    const arr = JSON.parse(localStorage.getItem('wfa-projetos') || '[]');
+    const p = arr.filter((x) => x.cliente === 'Fercon')[0];
+    const t = (p.tarefas || []).filter((x) => x.resp === nome)[0];
+    return t ? { resp: t.resp, horas: t.horas } : null;
+  }, pessoa);
+  checa(!!gravou2 && gravou2.resp === pessoa, 'responsavel gravou em wfa-projetos');
+  checa(!!gravou2 && gravou2.horas === 3.5, 'estimativa de 3,5h gravou como numero (achou ' + (gravou2 && gravou2.horas) + ')');
+
+  // a carga da sprint soma as horas por pessoa
+  const carga = await page.textContent('#pj-detalhe .pj-cargabar').catch(() => '');
+  checa(/Carga em aberto/.test(carga || ''), 'a faixa de carga da sprint aparece');
+  checa((carga || '').includes(pessoa) && (carga || '').includes('3.5h'),
+    'a carga mostra ' + pessoa + ' com 3.5h');
+  checa(/sem estimativa/.test(carga || ''), 'a carga avisa quantas tarefas estao sem estimativa');
+
+  // filtrar por essa pessoa deixa so a tarefa dela
+  await page.selectOption('#pj-fresp', pessoa);
+  await page.waitForTimeout(400);
+  const soDela = await page.locator('#pj-detalhe .pj-t').count();
+  checa(soDela === 1, 'filtrar por pessoa deixa so a tarefa dela (achou ' + soDela + ')');
+  await page.locator('#pj-detalhe [data-limpar]').click();
+  await page.waitForTimeout(400);
+  checa(await page.locator('#pj-detalhe .pj-t').count() === 19, 'limpar traz as 19 de volta');
+
+  console.log('\n10. Console limpo');
   const relevantes = erros.filter((e) => !/Failed to fetch|NetworkError|supabase|fetch/i.test(e));
   checa(relevantes.length === 0, 'nenhum erro de JS na pagina' + (relevantes.length ? ': ' + relevantes.join(' | ') : ''));
 
-  // prova visual
+  // prova visual. Volta pra carteira primeiro: as secoes acima deixam um projeto
+  // aberto, e clicar no menu nao fecha (a aba lembra onde parou, de proposito).
+  await page.locator('#pj-detalhe [data-voltar]').click().catch(() => {});
   await page.evaluate(() => document.querySelector('[data-nav="projetos"]').click());
   await page.waitForTimeout(500);
   await page.screenshot({ path: 'deploy/prova-projetos-carteira.png' });
