@@ -222,6 +222,7 @@ async function main() {
   // ninguem zerar sem perceber e o MRR passar a mentir pra baixo em silencio
   checa(carteira.emface && carteira.emface.valor === 3000, 'EmFace com R$ 3.000/mes (conferido no Financeiro)');
   checa(carteira.royal && carteira.royal.valor === 3800, 'Royal Face com R$ 3.800/mes');
+  checa(carteira.sasse && carteira.sasse.valor === 3000, 'Sasse com R$ 3.000/mes');
   checa(carteira.semValor.length === 0,
     'nenhum cliente ARK ativo entra no MRR com R$ 0' + (carteira.semValor.length ? ': ' + carteira.semValor.join(', ') : ''));
 

@@ -70,7 +70,7 @@ export const CLIENTES_BASE: ClienteInfo[] = [
   { id: "ark", nm: "ARK Content", tipo: "Interno", plano: "Interno", status: "gr", meta: "Marketing e operação da própria ARK" },
   { id: "vivenda", nm: "Vivenda", tipo: "ARK", plano: "Plano X", status: "gr", meta: "Maior ticket · 3 captações/mês · prioritário", valor: 5500 },
   { id: "fercon", nm: "Fercon", tipo: "ARK", plano: "Gold", status: "gr", meta: "Ampliou · 2 captações/mês", valor: 4200 },
-  { id: "sasse", nm: "Sasse Gifts", tipo: "ARK", plano: "Plano X", status: "gr", meta: "2 captações/mês", valor: 4500 },
+  { id: "sasse", nm: "Sasse Gifts", tipo: "ARK", plano: "Plano X", status: "r", meta: "AVISO PRÉVIO · fechar as entregas pendentes", valor: 3000 },
   { id: "fonseca", nm: "Fonseca & Cavalcanti", tipo: "ARK", plano: "Gold", status: "gr", meta: "1 captação/mês · próxima fase", valor: 2500 },
   { id: "vaca", nm: "Vaca Velha", tipo: "ARK", plano: "Gold", status: "gr", meta: "1 captação/mês", valor: 2000 },
   { id: "dom", nm: "Dom Baruka", tipo: "Alpha", plano: "Alpha Senior", status: "r", meta: "URGENTE · cardápio + iFood + bebidas" },
