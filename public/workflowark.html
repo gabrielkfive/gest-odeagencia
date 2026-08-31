@@ -8114,6 +8114,36 @@ function relatorioImprimir(){
   }
   window.renderProjetos=render;
 
+  /* PONTES PRO RESTO DO SISTEMA (usadas pelo Meu Dia). Sao as duas unicas coisas
+     que o modulo expoe, de proposito: quem le as tarefas de fora nao mexe nelas. */
+
+  // Abre a aba Projetos ja no projeto certo, e se vier tarefa, com ela aberta.
+  window.pjAbrir=function(pid,tid){
+    try{document.querySelector('[data-nav="projetos"]').click();}catch(e){}
+    aberto=pid; vista='quadro'; prPag='briefing';
+    filtro={papel:'',sprint:'',resp:'',busca:''};
+    render();
+    if(tid)setTimeout(function(){try{abrirTarefa(tid);}catch(e){}},140);
+  };
+
+  // Tarefas em aberto de quem o "casa" aceitar. O casamento de nome vem de fora
+  // porque o Meu Dia ja tem a regra tolerante dele ("Gabriel" casa com
+  // "Gabriel Andrade"), e duas regras diferentes esconderiam tarefa de alguem.
+  window.pjTarefasDe=function(casa){
+    var out=[];
+    load().forEach(function(p){
+      (p.tarefas||[]).forEach(function(t){
+        if(t.st==='concluido')return;
+        if(!t.resp)return;
+        if(typeof casa==='function'&&!casa(t.resp))return;
+        out.push({projId:p.id,projNome:p.cliente||'Projeto',id:t.id,titulo:t.t,
+                  st:t.st,stNome:col(t.st).n,venc:t.venc||'',horas:t.horas||0,
+                  sprint:t.sprint||'',resp:t.resp});
+      });
+    });
+    return out;
+  };
+
   /* ---------- Arrastar entre colunas ---------- */
   var arrastando=null;
   function ligarDrag(){
@@ -9077,6 +9107,22 @@ function mdInitial(n){return ((n||'?').trim()[0]||'?').toUpperCase();}
 function mdEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function mdClientName(id){try{const c=CLIENTES.find(x=>x.id===id);return c?c.nm:'';}catch(e){return '';}}
 function mdKpi(cls,label,val,sub){return `<div class="kpi ${cls}"><div class="l">${mdEsc(label)}</div><div class="v">${val}</div><div class="d">${mdEsc(sub||'')}</div></div>`;}
+/* Linha de tarefa vinda da aba Projetos. So leitura: nao tem concluir nem adiar,
+   porque essas acoes vivem no quadro do projeto (e mexer aqui exigiria duplicar a
+   regra de sprint). O botao Abrir leva pro lugar certo. */
+function mdProjRow(kind,t){
+  const meta=[t.projNome,t.stNome,t.sprint?('sprint '+(String(t.sprint).length<2?'0':'')+t.sprint):''].filter(Boolean).map(mdEsc).join(' \u00b7 ');
+  const chip=kind==='late'?'<span class="tk-chip md-chip-late">Atrasada</span>'
+    :kind==='today'?'<span class="tk-chip md-chip-today">Hoje</span>'
+    :(t.venc?`<span class="tk-chip md-chip-soon">${mdEsc(t.venc.split('-').reverse().slice(0,2).join('/'))}</span>`:'<span class="tk-chip md-chip-soon">Sem data</span>');
+  const ir=`event.stopPropagation();pjAbrir('${t.projId}','${t.id}')`;
+  return `<div class="md-task ${kind==='late'?'late':kind==='today'?'today':''}">
+    <span class="pr media"></span>
+    <div class="tk-main" onclick="${ir}" style="cursor:pointer"><div class="tk-t">${mdEsc(t.titulo||'Sem t\u00edtulo')}</div><div class="tk-m">${meta}${t.horas?' \u00b7 '+mdEsc(t.horas)+'h':''}</div></div>
+    ${chip}
+    <div class="md-act"><button class="ab" title="Abrir no projeto" onclick="${ir}">Abrir</button></div>
+  </div>`;
+}
 function mdTaskRow(kind,t){
   const cli=mdClientName(t.clienteId);
   const meta=[t.funcao,cli].filter(Boolean).map(mdEsc).join(' · ');
@@ -9693,6 +9739,7 @@ function renderMeuDia(){
   if(tt)tt.textContent=myName?'Minhas tarefas':'Tarefas do time';
   // lista de tarefas
   const box=document.getElementById('md-tasks');
+  let nProjTotal=0;
   if(box){
     let html='';
     if(late.length){
@@ -9701,11 +9748,35 @@ function renderMeuDia(){
     }
     if(todayT.length){html+='<div class="md-subhd">📅 Para hoje</div>'+todayT.map(t=>mdTaskRow('today',t)).join('');}
     if(pend.length){html+='<div class="md-subhd">➜ Próximas</div>'+pend.slice(0,5).map(t=>mdTaskRow('soon',t)).join('');}
-    if(!html)html='<div class="md-empty">Nada pendente no seu nome. Dia livre — ou hora de puxar algo do time. 🎯</div>';
+    /* DOS PROJETOS. Bloco separado de proposito: os KPIs e o panorama do time
+       acima contam o kanban de Atividades, e somar as duas fontes ali dobraria o
+       numero de quem trabalha nas duas. Aqui a pessoa ve, e clica pra ir. */
+    try{
+      if(typeof pjTarefasDe==='function'){
+        const meus=pjTarefasDe(function(r){return isMine({resp:r});});
+        nProjTotal=meus.length;
+        if(meus.length){
+          const pl=meus.filter(t=>t.venc&&t.venc<today);
+          const ph=meus.filter(t=>t.venc===today);
+          const pp=meus.filter(t=>!t.venc||t.venc>today)
+            .sort((a,b)=>((a.venc||'9999')+'').localeCompare((b.venc||'9999')+''));
+          const resumo=[pl.length?pl.length+' atrasada'+(pl.length>1?'s':''):'',
+                        ph.length?ph.length+' para hoje':'',
+                        pp.length?pp.length+' pr\u00f3xima'+(pp.length>1?'s':''):'']
+                        .filter(Boolean).join(' \u00b7 ');
+          html+='<div class="md-subhd">\uD83D\uDCCB Dos projetos'+(resumo?' \u00b7 '+resumo:'')+'</div>';
+          html+=pl.slice(0,4).map(t=>mdProjRow('late',t)).join('');
+          html+=ph.map(t=>mdProjRow('today',t)).join('');
+          html+=pp.slice(0,4).map(t=>mdProjRow('soon',t)).join('');
+        }
+      }
+    }catch(e){console.warn('md projetos',e);}
+
+    if(!html)html='<div class="md-empty">Nada pendente no seu nome. Dia livre, ou hora de puxar algo do time. 🎯</div>';
     wfaSetHTML(box,html); /* escrita calma: sem repintar se nada mudou */
   }
   const tc=document.getElementById('md-tasks-count');
-  if(tc)tc.textContent=(late.length+todayT.length+pend.length);
+  if(tc)tc.textContent=(late.length+todayT.length+pend.length+nProjTotal);
   // Panorama do time (gestores)
   const wrap=document.getElementById('md-team-wrap');
   if(isManager){

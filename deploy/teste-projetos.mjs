@@ -282,7 +282,55 @@ async function main() {
   await page.waitForTimeout(400);
   checa(await page.locator('#pj-detalhe .pj-t').count() === 19, 'limpar traz as 19 de volta');
 
-  console.log('\n10. Console limpo');
+  console.log('\n10. A tarefa do projeto aparece no Meu Dia de quem e dela');
+  // simula a pessoa logada (no teste local nao existe sessao) e manda o Meu Dia repintar
+  const meuDia = await page.evaluate((nome) => {
+    // WFA_MEMBER e `let` no escopo global do script, nao propriedade de window:
+    // atribuir com window.WFA_MEMBER criaria outra variavel e o Meu Dia continuaria
+    // achando que ninguem esta logado.
+    WFA_MEMBER = { full_name: nome, role: 'admin' };
+    renderMeuDia();
+    const box = document.getElementById('md-tasks');
+    return {
+      html: box ? box.innerHTML : '',
+      txt: box ? box.textContent : '',
+      contador: (document.getElementById('md-tasks-count') || {}).textContent,
+    };
+  }, pessoa);
+  checa(/Dos projetos/.test(meuDia.txt), 'o bloco "Dos projetos" aparece no Meu Dia');
+  checa(/Priorização e atribuição de responsáveis|Refinamento/.test(meuDia.txt),
+    'a tarefa atribuida no projeto aparece na lista');
+  checa(/Fercon/.test(meuDia.txt), 'a linha diz de qual cliente e a tarefa');
+  checa(/pjAbrir\(/.test(meuDia.html), 'a linha leva pro projeto (pjAbrir), nao pro kanban');
+  checa(!/openTaskDetail/.test(meuDia.html.split('Dos projetos')[1] || ''),
+    'a linha de projeto NAO chama openTaskDetail (que mexe em wfa-tarefas)');
+  checa(Number(meuDia.contador) >= 1, 'o contador do cartao passou a somar a de projeto');
+
+  // quem nao e dono nao ve
+  const deOutro = await page.evaluate(() => {
+    WFA_MEMBER = { full_name: 'Fulano Que Nao Existe', role: 'admin' };
+    renderMeuDia();
+    const box = document.getElementById('md-tasks');
+    return box ? box.textContent : '';
+  });
+  checa(!/Dos projetos/.test(deOutro), 'quem nao e responsavel nao ve a tarefa de projeto');
+
+  // o botao Abrir leva pra aba Projetos com a tarefa aberta
+  // vai pra aba Meu Dia de verdade: o botao so e clicavel com a pagina visivel
+  await page.evaluate((nome) => {
+    WFA_MEMBER = { full_name: nome, role: 'admin' };
+    document.querySelector('[data-nav="dashboard"]').click();
+    renderMeuDia();
+  }, pessoa);
+  await page.waitForTimeout(500);
+  await page.locator('#md-tasks .md-act .ab').first().click();
+  await page.waitForTimeout(700);
+  checa(await page.locator('#page-projetos.active').count() === 1, 'clicar em Abrir vai para a aba Projetos');
+  checa(await page.locator('#pj-modal #tk-t').count() === 1, 'e abre a tarefa certa ja no modal');
+  await page.locator('#pj-modal [data-tkcancel]').click();
+  await page.waitForTimeout(300);
+
+  console.log('\n11. Console limpo');
   const relevantes = erros.filter((e) => !/Failed to fetch|NetworkError|supabase|fetch/i.test(e));
   checa(relevantes.length === 0, 'nenhum erro de JS na pagina' + (relevantes.length ? ': ' + relevantes.join(' | ') : ''));
 
@@ -298,6 +346,15 @@ async function main() {
   await page.locator('#pj-detalhe [data-vista="prontuario"]').click();
   await page.waitForTimeout(500);
   await page.screenshot({ path: 'deploy/prova-projetos-prontuario.png', fullPage: true });
+
+  // Meu Dia com o bloco "Dos projetos"
+  await page.evaluate((nome) => {
+    WFA_MEMBER = { full_name: nome, role: 'admin' };
+    document.querySelector('[data-nav="dashboard"]').click();
+    renderMeuDia();
+  }, pessoa);
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: 'deploy/prova-projetos-meudia.png' });
 
   await browser.close();
 

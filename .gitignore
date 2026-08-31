@@ -52,3 +52,5 @@ deploy/_saida-safari/
 
 # provas visuais do teste de Projetos (geradas a cada run)
 deploy/prova-projetos-*.png
+
+deploy/prova-projetos-meudia.png
