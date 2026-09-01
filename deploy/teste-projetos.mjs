@@ -273,14 +273,35 @@ async function main() {
   // atribuir pessoa e horas numa tarefa
   await page.locator('#pj-detalhe [data-col="backlog"] .pj-t').first().click();
   await page.waitForTimeout(400);
-  const ehSelect = await page.evaluate(() => {
-    const el = document.getElementById('tk-resp');
-    return el ? el.tagName : 'AUSENTE';
+  // O detalhe virou o padrao do ClickUp: responsavel agora e chip, alimentado pelo
+  // seletor #tk-addresp, e aceita mais de uma pessoa. resp continua no dado e
+  // espelha resps[0], porque Meu Dia, filtro e capacity leem resp.
+  const campos = await page.evaluate(() => {
+    const m = document.getElementById('pj-modal');
+    const el = document.getElementById('tk-addresp');
+    return {
+      tag: el ? el.tagName : 'AUSENTE',
+      rotulos: [...m.querySelectorAll('.tkl')].map((x) => x.textContent.trim()),
+      temConcluir: !!m.querySelector('[data-tkconcluir]'),
+      temInicio: !!m.querySelector('#tk-ini'),
+      temTimer: !!m.querySelector('[data-tktimer]'),
+      temChecklist: !!m.querySelector('#tk-clnovo'),
+      temAnexo: !!m.querySelector('[data-anxadd]'),
+      temAtividade: !!m.querySelector('#tk-feed'),
+    };
   });
-  checa(ehSelect === 'SELECT', 'responsavel virou lista da equipe, nao texto livre (achou ' + ehSelect + ')');
+  checa(campos.tag === 'SELECT', 'responsavel sai da lista da equipe, nao de texto livre (achou ' + campos.tag + ')');
+  checa(campos.rotulos.length === 6, 'a tarefa tem as 6 linhas de campo do ClickUp: ' + campos.rotulos.join(' / '));
+  checa(campos.temConcluir, 'tem o botao de concluir ao lado do status');
+  checa(campos.temInicio, 'tem data de INICIO alem do prazo');
+  checa(campos.temTimer, 'tem rastrear tempo');
+  checa(campos.temChecklist, 'tem checklist');
+  checa(campos.temAnexo, 'tem anexo');
+  checa(campos.temAtividade, 'tem a coluna de atividade com comentario');
 
   const pessoa = await page.evaluate(() => (typeof allTeam === 'function' ? allTeam() : [])[1]);
-  await page.selectOption('#tk-resp', pessoa);
+  await page.selectOption('#tk-addresp', pessoa);
+  await page.waitForTimeout(250);
   await page.fill('#tk-horas', '3.5');
   await page.locator('#pj-modal [data-tksave]').click();
   await page.waitForTimeout(500);
@@ -292,6 +313,13 @@ async function main() {
     return t ? { resp: t.resp, horas: t.horas } : null;
   }, pessoa);
   checa(!!gravou2 && gravou2.resp === pessoa, 'responsavel gravou em wfa-projetos');
+  const espelho = await page.evaluate((nome) => {
+    const arr = JSON.parse(localStorage.getItem('wfa-projetos') || '[]');
+    const p = arr.filter((x) => x.cliente === 'Fercon')[0];
+    const t = (p.tarefas || []).filter((x) => x.resp === nome)[0];
+    return t && Array.isArray(t.resps) && t.resps[0] === nome;
+  }, pessoa);
+  checa(espelho, 'resp espelha resps[0] (Meu Dia, filtro e capacity dependem disso)');
   checa(!!gravou2 && gravou2.horas === 3.5, 'estimativa de 3,5h gravou como numero (achou ' + (gravou2 && gravou2.horas) + ')');
 
   // a carga da sprint soma as horas por pessoa
@@ -417,29 +445,30 @@ async function main() {
   const estilo = await page.evaluate(() => {
     const box = document.querySelector('#pj-modal .pj-f');
     if (!box) return null;
-    const lab = box.querySelector('.pr-f label');
-    const inp = box.querySelector('#tk-t');
-    const dupla = box.querySelector('.pr-2');
     const cs = (el) => getComputedStyle(el);
     const fundo = cs(box).backgroundColor;
-    // so rgba() carrega alfa. rgb() e opaco, e um regex frouxo aqui le o azul como alfa.
+    // so rgba() carrega alfa. rgb() e opaco, e um regex frouxo le o azul como alfa.
     const alfa = (fundo.match(/^rgba\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*([\d.]+)\s*\)$/) || [])[1];
+    const rot = box.querySelector('.tkl');
+    const campo = box.querySelector('#tk-st');
+    const tit = box.querySelector('#tk-t');
     return {
-      label: cs(lab).display,
-      colide: lab.getBoundingClientRect().bottom > inp.getBoundingClientRect().top + 1,
-      largura: Math.round(inp.getBoundingClientRect().width),
-      caixa: Math.round(box.getBoundingClientRect().width),
-      colunas: cs(dupla).gridTemplateColumns.split(' ').length,
+      larguraCaixa: Math.round(box.getBoundingClientRect().width),
       opaco: alfa === undefined || Number(alfa) === 1,
+      // rotulo a ESQUERDA do campo, como no ClickUp, e nao por cima nem colado
+      rotuloAEsquerda: rot.getBoundingClientRect().right <= campo.getBoundingClientRect().left + 1,
+      // o campo de status nao pode esticar a linha inteira (regra do modal estreito vazando)
+      statusCurto: campo.getBoundingClientRect().width < box.getBoundingClientRect().width * 0.5,
+      tituloLargo: tit.getBoundingClientRect().width > box.getBoundingClientRect().width * 0.6,
     };
   });
   checa(!!estilo, 'o modal de tarefa abre');
-  checa(estilo && estilo.label === 'block', 'o rotulo fica em cima do campo, nao ao lado (display block)');
-  checa(estilo && !estilo.colide, 'rotulo e campo nao se sobrepoem');
-  checa(estilo && estilo.largura > estilo.caixa * 0.8,
-    'o campo ocupa a largura da caixa (' + (estilo && estilo.largura) + 'px de ' + (estilo && estilo.caixa) + 'px)');
-  checa(estilo && estilo.colunas === 2, 'Etapa/Sprint e Prazo/Estimativa ficam em duas colunas');
+  checa(estilo && estilo.larguraCaixa > 900, 'o modal e largo como o do ClickUp (' + (estilo && estilo.larguraCaixa) + 'px)');
   checa(estilo && estilo.opaco, 'a caixa do modal e opaca: a pagina nao aparece atras dela');
+  checa(estilo && estilo.rotuloAEsquerda, 'rotulo fica a esquerda do campo, sem sobrepor');
+  checa(estilo && estilo.statusCurto, 'o campo de status nao estica a linha inteira');
+  checa(estilo && estilo.tituloLargo, 'o titulo ocupa a largura da caixa');
+
   await page.locator('#pj-modal [data-tkcancel]').click();
   await page.waitForTimeout(300);
 

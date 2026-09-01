@@ -1,4 +1,4 @@
-<!-- build 20260831-backlog-caio-66 -->
+<!-- build 20260831-tarefa-clickup -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -3306,6 +3306,82 @@ function wfaSetTheme(t){
           .org-saidas .os-h{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute);font-weight:800;margin-bottom:6px}
           .org-saidas .os-l{font-size:12.5px;line-height:1.6;color:var(--txt)}
           .org-saidas b{color:var(--ink);font-weight:750}
+          /* ===== Detalhe da tarefa no padrao ClickUp (print do Gabriel, 31/08) ===== */
+          #pj-modal .pj-f.largo{display:flex}
+          .tkwrap{display:grid;grid-template-columns:1fr 320px;width:100%;max-height:92vh;min-height:0}
+          .tkmain{padding:22px 24px;overflow:auto;min-width:0}
+          .tkbc{font-size:11.5px;color:var(--mute);font-weight:600}
+          .tkbc i{color:var(--line-2);font-style:normal;margin:0 5px}
+          .tktitulo{width:100%;background:none;border:none;color:var(--ink);font-size:23px;font-weight:750;letter-spacing:-.02em;padding:8px 0 12px;font-family:inherit}
+          .tktitulo:focus{outline:none}
+          .tktitulo::placeholder{color:var(--mute-2)}
+          .tkcampos{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px 0;margin-bottom:14px}
+          .tkr{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:10px;padding:7px 0}
+          .tkl{font-size:12px;color:var(--mute);font-weight:600}
+          .tkv{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+          .tkv select,.tkv input{background:var(--blue-soft);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:6px 9px;font:inherit;font-size:12.5px}
+          .tkv select:focus,.tkv input:focus{outline:none;border-color:var(--yel)}
+          .tkst{font-weight:700}
+          .tkok{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--blue-soft);color:var(--green);cursor:pointer;font-size:14px;line-height:1}
+          .tkok:hover{background:var(--green);color:#fff;border-color:var(--green)}
+          .tkmini{font-size:12px;padding:5px 8px}
+          .tkmini.num{width:92px}
+          .tkdata{width:140px}
+          .tkseta{color:var(--mute);font-size:13px}
+          .tkchips{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+          .tkchip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-soft);border:1px solid var(--line);border-radius:99px;padding:3px 9px 3px 3px;font-size:11.5px;font-weight:600;color:var(--txt);cursor:pointer}
+          .tkchip .av{width:20px;height:20px;border-radius:50%;background:var(--yel);color:#000;display:grid;place-items:center;font-size:9px;font-weight:800;font-style:normal;flex:none}
+          .tkchip b{color:var(--mute);font-weight:700;font-size:10px}
+          .tkchip:hover b{color:var(--red)}
+          .tkvazio{font-size:12px;color:var(--mute-2)}
+          .tkadd{font-size:11.5px;color:var(--yel-d,#a07e00);font-weight:700;cursor:pointer;white-space:nowrap}
+          .tktimer{background:var(--blue-soft);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer}
+          .tktimer.on{background:var(--red);color:#fff;border-color:var(--red)}
+          .tkgasto{font-family:var(--mono);font-size:12px;color:var(--mute)}
+          .tkdesc{width:100%;background:none;border:1px solid transparent;border-radius:10px;color:var(--txt);font:inherit;font-size:13.5px;line-height:1.6;padding:8px 10px;min-height:76px;resize:vertical}
+          .tkdesc:hover{border-color:var(--line)}
+          .tkdesc:focus{outline:none;border-color:var(--yel);background:var(--blue-soft)}
+          .tksec{margin-top:16px}
+          .tksech{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;gap:8px;align-items:center}
+          .tksech span{font-family:var(--mono);font-size:11px;color:var(--mute);font-weight:600}
+          .tkcl{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:8px;font-size:13px;color:var(--txt);cursor:pointer}
+          .tkcl:hover{background:var(--blue-soft)}
+          .tkcl.ok span{text-decoration:line-through;color:var(--mute)}
+          .tkcl span{flex:1}
+          .tkcl b{color:var(--mute-2);font-size:10px;font-weight:700}
+          .tkcl:hover b{color:var(--red)}
+          .tkanx{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:8px;font-size:12.5px}
+          .tkanx:hover{background:var(--blue-soft)}
+          .tkanx a{flex:1;color:var(--txt);text-decoration:none}
+          .tkanx a:hover{color:var(--yel-d,#a07e00)}
+          .tkanx b{color:var(--mute-2);font-size:10px;cursor:pointer}
+          .tkinline{display:flex;gap:6px;margin-top:6px}
+          .tkinline input{flex:1;background:var(--blue-soft);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:6px 10px;font:inherit;font-size:12.5px}
+          .tkinline input:focus{outline:none;border-color:var(--yel)}
+          .tkbtn{background:var(--ink);color:var(--bg);border:none;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+          .tkfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid var(--line)}
+          .tkside{border-left:1px solid var(--line);background:var(--blue-soft);display:flex;flex-direction:column;min-height:0}
+          .tksideh{font-size:12px;font-weight:700;color:var(--ink);padding:16px 16px 10px;border-bottom:1px solid var(--line)}
+          .tkfeed{flex:1;overflow:auto;padding:12px 16px}
+          .tkev{display:flex;gap:8px;margin-bottom:11px}
+          .tkev .dot{width:6px;height:6px;border-radius:50%;background:var(--line-2);margin-top:6px;flex:none}
+          .tkev p{font-size:11.5px;color:var(--mute);line-height:1.45;margin:0}
+          .tkev p span{display:block;font-size:10px;color:var(--mute-2);margin-top:2px}
+          .tkcm{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:10px}
+          .tkcmh{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:5px}
+          .tkcmh .av{width:19px;height:19px;border-radius:50%;background:var(--yel);color:#000;display:grid;place-items:center;font-size:8.5px;font-weight:800;font-style:normal}
+          .tkcmh span{margin-left:auto;font-size:10px;color:var(--mute-2);font-weight:500}
+          .tkcm p{font-size:12.5px;color:var(--txt);line-height:1.5;margin:0;white-space:pre-wrap}
+          .tkcbox{border-top:1px solid var(--line);padding:10px 14px;display:flex;flex-direction:column;gap:7px;align-items:stretch}
+          .tkcbox .tkbtn{align-self:flex-end}
+          .tkcbox textarea{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:7px 10px;font:inherit;font-size:12.5px;min-height:38px;max-height:110px;resize:vertical}
+          .tkcbox textarea:focus{outline:none;border-color:var(--yel)}
+          @media(max-width:900px){
+            .tkwrap{grid-template-columns:1fr;max-height:92vh;overflow:auto}
+            .tkside{border-left:none;border-top:1px solid var(--line)}
+            .tkfeed{max-height:220px}
+            .tkr{grid-template-columns:1fr;gap:4px;align-items:flex-start}
+          }
           @media(max-width:1200px){#page-organograma .org-areas{grid-template-columns:repeat(3,1fr)}}
           @media(max-width:900px){
             #page-organograma .org-areas{grid-template-columns:repeat(2,1fr)}
@@ -5458,7 +5534,7 @@ function iniciarAutoSync(){
           #pj-modal .pr-f{margin-bottom:11px}
           #pj-modal .pr-f label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);margin-bottom:5px;font-weight:700}
           #pj-modal .pr-f input,#pj-modal .pr-f textarea,#pj-modal .pr-f select,
-          #pj-modal .pj-f input,#pj-modal .pj-f textarea,#pj-modal .pj-f select{width:100%;background:var(--blue-soft);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:9px 11px;font:inherit;font-size:13px}
+          #pj-modal .pj-f:not(.largo) input,#pj-modal .pj-f:not(.largo) textarea,#pj-modal .pj-f:not(.largo) select{width:100%;background:var(--blue-soft);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:9px 11px;font:inherit;font-size:13px}
           #pj-modal .pr-f textarea{min-height:76px;resize:vertical;line-height:1.55}
           #pj-modal .pr-f input:focus,#pj-modal .pr-f textarea:focus,#pj-modal .pr-f select:focus{outline:none;border-color:var(--yel)}
           #pj-modal .pr-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
@@ -5483,6 +5559,7 @@ function iniciarAutoSync(){
             </div>
             <div style="display:flex;gap:7px;flex-wrap:wrap">
               <button class="tb-btn alt" id="pj-seed">Criar os projetos do briefing</button>
+              <button class="tb-btn alt" id="pj-completar">Completar backlog dos projetos</button>
               <button class="tb-btn dk" id="pj-novo">+ Novo projeto</button>
             </div>
           </div>
@@ -8150,8 +8227,41 @@ function relatorioImprimir(){
       tarefas: semTemplate?[]:TEMPLATE.map(function(t){
         return {id:uid('pt'),t:t[0],st:'backlog',papeis:t[1].slice(),sprint:(t[2]===0?0:(t[2]||1)),venc:'',resp:'',obs:''};
       }),
+      tplV:2,
       pront:{briefing:{},arquivos:[],senhas:[],atas:[],licoes:[]}
     };
+  }
+
+  /* ---------- Completar backlog de projeto que ja existe ----------
+     Projeto criado antes de 31/08/2026 nasceu com 19 tarefas, todas em sprint 1.
+     O quadro do Caio tem 69, com a sprint de cada uma. Esta rotina traz o que
+     FALTA, comparando por titulo normalizado, e nunca duplica o que ja esta la.
+     Roda uma vez por projeto (marca tplV) e nunca mexe em tarefa que a equipe ja
+     moveu de coluna, escreveu observacao ou atribuiu a alguem. */
+  var TPL_V=2;
+  function normTit(x){return String(x||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+  function completaBacklog(p){
+    if(!p||p.tplV>=TPL_V)return 0;
+    p.tarefas=p.tarefas||[];
+    var tem={};
+    p.tarefas.forEach(function(t){tem[normTit(t.t)+'#'+(t.sprint===0?0:(t.sprint||1))]=1;});
+    var add=0;
+    TEMPLATE.forEach(function(x){
+      var sp=(x[2]===0?0:(x[2]||1));
+      var ch=normTit(x[0])+'#'+sp;
+      if(tem[ch])return;
+      p.tarefas.push({id:uid('pt'),t:x[0],st:'backlog',papeis:x[1].slice(),sprint:sp,ini:'',venc:'',resp:'',resps:[],horas:'',obs:'',checklist:[],anexos:[],coments:[],hist:[]});
+      tem[ch]=1;add++;
+    });
+    p.tplV=TPL_V;
+    return add;
+  }
+  function completaTodos(){
+    var arr=load(),total=0,n=0;
+    arr.forEach(function(p){var a=completaBacklog(p);if(a){total+=a;n++;}});
+    if(total){save(arr);try{toast(total+' tarefa(s) do quadro do Caio adicionadas em '+n+' projeto(s)');}catch(e){}}
+    else{try{toast('Todos os projetos já estão com o backlog completo');}catch(e){}}
+    return total;
   }
 
   /* ---------- KPIs e cartoes da carteira ---------- */
@@ -8525,7 +8635,7 @@ function relatorioImprimir(){
   }
 
   /* ---------- Modal de tarefa ---------- */
-  function modal(html){
+  function modal(html,largo){
     var m=document.getElementById('pj-modal');
     if(!m){
       m=document.createElement('div');m.id='pj-modal';
@@ -8535,52 +8645,94 @@ function relatorioImprimir(){
     }
     /* no tema escuro --surface e rgba(...,.04): sozinho ele deixa a pagina aparecer
        atraves do modal. Por isso o fundo opaco por baixo, e a superficie por cima. */
-    m.innerHTML='<div class="pj-f" style="background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface));border:1px solid var(--line);border-radius:18px;padding:22px;width:min(560px,100%);max-height:88vh;overflow:auto">'+html+'</div>';
+    m.innerHTML='<div class="pj-f'+(largo?' largo':'')+'" style="background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface));border:1px solid var(--line);border-radius:18px;padding:'+(largo?'0':'22px')+';width:min('+(largo?'1080px':'560px')+',100%);max-height:'+(largo?'92vh':'88vh')+';overflow:'+(largo?'hidden':'auto')+'">'+html+'</div>';
     m.style.display='flex';
   }
   function fecharModal(){var m=document.getElementById('pj-modal');if(m)m.style.display='none';}
+
+  /* ---------- Detalhe da tarefa, no padrao do ClickUp ----------
+     O print que o Gabriel mandou tem: status com botao de concluir, responsaveis,
+     datas de inicio e fim, rastrear tempo, etiquetas, descricao, checklist, anexo
+     e a coluna de atividade com comentario. E isso que esta aqui.
+
+     resp (texto) continua existindo e sempre espelha resps[0]: o Meu Dia, o filtro
+     por pessoa e a conta de capacity leem resp. Trocar so por resps quebraria os
+     tres em silencio. */
+  function tkAgora(){return new Date().toISOString();}
+  function tkQuem(){try{return (WFA_MEMBER&&WFA_MEMBER.full_name)||'Alguém';}catch(e){return 'Alguém';}}
+  function tkDur(s){s=Math.max(0,Math.floor(s||0));var h=Math.floor(s/3600),m=Math.floor(s%3600/60);
+    return h?(h+'h '+(m<10?'0':'')+m+'m'):(m+'m '+((s%60)<10?'0':'')+(s%60)+'s');}
+  function tkGasto(t){var s=t.timeSpent||0;if(t.timerSince)s+=(Date.now()-new Date(t.timerSince).getTime())/1000;return s;}
+  function tkIni(n){return String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(function(s){return s[0]||'';}).join('').toUpperCase();}
 
   function abrirTarefa(tid,stInicial){
     var p=get(aberto); if(!p)return;
     var t=tid?(p.tarefas||[]).filter(function(x){return x.id===tid;})[0]:null;
     var ehNova=!t;
-    if(ehNova)t={id:'',t:'',st:stInicial||'backlog',papeis:[],sprint:p.sprint||1,venc:'',resp:'',horas:'',obs:''};
+    if(ehNova)t={id:'',t:'',st:stInicial||'backlog',papeis:[],sprint:p.sprint||1,venc:'',ini:'',resp:'',resps:[],horas:'',obs:'',checklist:[],anexos:[],coments:[],hist:[]};
+    if(!t.resps||!t.resps.length)t.resps=t.resp?[t.resp]:[];
+    var cl=(t.checklist||[]).map(function(x){return {id:x.id||uid('cl'),txt:x.txt,done:!!x.done};});
+    var clOk=cl.filter(function(x){return x.done;}).length;
+    var linha=function(ic,rot,val){return '<div class="tkr"><div class="tkl">'+ic+' '+rot+'</div><div class="tkv">'+val+'</div></div>';};
+    var eq=equipe().slice();
+    (t.resps||[]).forEach(function(n){if(eq.indexOf(n)<0)eq.push(n);});
+    var gasto=tkGasto(t);
+
     modal(
-      '<h3 style="font-size:17px;font-weight:720;margin:0 0 16px">'+(ehNova?'Nova tarefa':'Editar tarefa')+'</h3>'+
-      '<div class="pr-f"><label>Tarefa</label><input id="tk-t" value="'+esc(t.t)+'" placeholder="O que precisa ser feito"></div>'+
-      '<div class="pr-2">'+
-        '<div class="pr-f"><label>Etapa</label><select id="tk-st">'+COLS.map(function(c){return '<option value="'+c.k+'"'+(t.st===c.k?' selected':'')+'>'+esc(c.n)+'</option>';}).join('')+'</select></div>'+
-        '<div class="pr-f"><label>Sprint</label><input id="tk-sp" type="number" min="1" value="'+esc(t.sprint||1)+'"></div>'+
+      '<div class="tkwrap">'+
+      '<div class="tkmain">'+
+        '<div class="tkbc">'+esc(p.cliente||'Projeto')+' <i>/</i> Sprint '+(String(t.sprint||1).length<2?'0':'')+esc(t.sprint||1)+'</div>'+
+        '<input id="tk-t" class="tktitulo" value="'+esc(t.t)+'" placeholder="O que precisa ser feito">'+
+        '<div class="tkcampos">'+
+          linha('◎','Status','<select id="tk-st" class="tkst">'+COLS.map(function(c){return '<option value="'+c.k+'"'+(t.st===c.k?' selected':'')+'>'+esc(c.n)+'</option>';}).join('')+'</select>'+
+            (t.st==='concluido'?'':'<button type="button" class="tkok" data-tkconcluir="1" title="Marcar como concluída">✓</button>'))+
+          linha('👤','Responsáveis','<div id="tk-resps" class="tkchips"></div>'+
+            '<select id="tk-addresp" class="tkmini"><option value="">+ pessoa</option>'+
+            eq.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join('')+'</select>')+
+          linha('📅','Datas','<input id="tk-ini" type="date" class="tkdata" value="'+esc(t.ini||'')+'"><span class="tkseta">→</span><input id="tk-venc" type="date" class="tkdata" value="'+esc(t.venc||'')+'">')+
+          linha('⏱','Rastrear tempo','<button type="button" class="tktimer'+(t.timerSince?' on':'')+'" data-tktimer="1">'+(t.timerSince?'⏸ Parar':'▶ Start')+'</button>'+
+            '<span class="tkgasto" id="tk-gasto">'+(gasto>=1?tkDur(gasto):'0m 00s')+'</span>'+
+            '<input id="tk-horas" type="number" min="0" step="0.5" class="tkmini num" value="'+esc(t.horas||'')+'" placeholder="est. h">')+
+          linha('🏷','Etiquetas','<div id="tk-papeis" class="tkchips"></div><a data-ppnovo="1" class="tkadd">+ nova</a>')+
+          linha('🧩','Sprint','<input id="tk-sp" type="number" min="0" class="tkmini num" value="'+esc(t.sprint===0?0:(t.sprint||1))+'"><span class="tkvazio">0 = tarefa fixa, sem sprint</span>')+
+        '</div>'+
+        '<textarea id="tk-obs" class="tkdesc" placeholder="Adicione uma descrição">'+esc(t.obs||'')+'</textarea>'+
+        '<div class="tksec"><div class="tksech">☑ Checklist <span id="tk-clct">'+(cl.length?clOk+'/'+cl.length:'')+'</span></div>'+
+          '<div id="tk-cl"></div>'+
+          '<div class="tkinline"><input id="tk-clnovo" placeholder="Adicionar item e teclar Enter"></div></div>'+
+        '<div class="tksec"><div class="tksech">📎 Anexos</div>'+
+          '<div id="tk-anx"></div>'+
+          '<div class="tkinline"><input id="tk-anxnm" placeholder="Nome"><input id="tk-anxurl" placeholder="https://"><button type="button" class="tkbtn" data-anxadd="1">Anexar</button></div></div>'+
+        '<div class="tkfoot">'+
+          (ehNova?'':'<button class="icobtn" data-tkdel="'+esc(t.id)+'" style="color:var(--red);margin-right:auto">Excluir</button>')+
+          '<button class="tb-btn alt" data-tkcancel="1">Cancelar</button>'+
+          '<button class="tb-btn dk" data-tksave="'+esc(t.id||'')+'">Salvar</button>'+
+        '</div>'+
       '</div>'+
-      '<div class="pr-2">'+
-        '<div class="pr-f"><label>Prazo</label><input id="tk-venc" type="date" value="'+esc(t.venc||'')+'"></div>'+
-        '<div class="pr-f"><label>Estimativa (horas)</label><input id="tk-horas" type="number" min="0" step="0.5" value="'+esc(t.horas||'')+'" placeholder="ex: 2"></div>'+
+      '<div class="tkside">'+
+        '<div class="tksideh">Atividade</div>'+
+        '<div id="tk-feed" class="tkfeed"></div>'+
+        '<div class="tkcbox"><textarea id="tk-cmt" placeholder="Escreva um comentário"></textarea>'+
+          '<button type="button" class="tkbtn" data-cmtadd="1">Enviar</button></div>'+
       '</div>'+
-      '<div class="pr-f"><label>Responsável</label><select id="tk-resp"><option value="">A definir</option>'+
-        (function(){
-          var eq=equipe().slice();
-          /* quem ja estava na tarefa mas saiu da equipe continua aparecendo: sem isso,
-             salvar a tarefa apagaria o responsavel sem ninguem perceber */
-          if(t.resp&&eq.indexOf(t.resp)<0)eq.push(t.resp);
-          return eq.map(function(n){return '<option value="'+esc(n)+'"'+(t.resp===n?' selected':'')+'>'+esc(n)+'</option>';}).join('');
-        })()+
-      '</select></div>'+
-      '<div class="pr-f"><label>Etiquetas de papel <a data-ppnovo="1" style="color:var(--yel);cursor:pointer;font-weight:700;text-transform:none;letter-spacing:0">+ nova etiqueta</a></label><div id="tk-papeis" style="display:flex;gap:6px;flex-wrap:wrap">'+
-        PAPEIS.map(function(x){
-          var on=(t.papeis||[]).indexOf(x.k)>=0;
-          return '<button type="button" class="pj-tag" data-pp="'+x.k+'" style="cursor:pointer;padding:5px 11px;font-size:11px;background:'+(on?x.c:'transparent')+';color:'+(on?'#fff':x.c)+';border:1px solid '+x.c+'">'+esc(x.n)+'</button>';
-        }).join('')+'</div></div>'+
-      '<div class="pr-f"><label>Observação</label><textarea id="tk-obs" style="min-height:64px">'+esc(t.obs||'')+'</textarea></div>'+
-      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'+
-        (ehNova?'':'<button class="icobtn" data-tkdel="'+esc(t.id)+'" style="color:var(--red);margin-right:auto">Excluir</button>')+
-        '<button class="tb-btn alt" data-tkcancel="1">Cancelar</button>'+
-        '<button class="tb-btn dk" data-tksave="'+esc(t.id||'')+'">Salvar</button>'+
       '</div>'
-    );
+    , true);
+
     var m=document.getElementById('pj-modal');
     m.dataset.papeis=(t.papeis||[]).join(',');
-    /* Criar etiqueta nova no meio da edicao: repinta so a faixa de etiquetas e
-       mantem tudo que ja foi digitado no formulario. Reabrir o modal perderia. */
+    m.dataset.resps=(t.resps||[]).join('|');
+    /* checklist, anexo, comentario e cronometro ficam no elemento ate salvar: fechar
+       sem salvar nao pode gravar meio item dentro do projeto. */
+    m._cl=cl;
+    m._anx=(t.anexos||[]).slice();
+    m._cmt=(t.coments||[]).slice();
+    m._hist=(t.hist||[]).slice();
+    m._timer=t.timerSince||'';
+    m._spent=t.timeSpent||0;
+    m._antes={st:t.st,resps:(t.resps||[]).join('|'),venc:t.venc||'',horas:t.horas||''};
+
+    pjPintaPapeis(m);pjPintaResps(m);pjPintaCl(m);pjPintaAnx(m);pjPintaFeed(m);
+
     var elNovo=m.querySelector('[data-ppnovo]');
     if(elNovo)elNovo.addEventListener('click',function(){
       var k=papelNovo();if(!k)return;
@@ -8589,14 +8741,110 @@ function relatorioImprimir(){
       m.dataset.papeis=cur.join(',');
       pjPintaPapeis(m);
     });
-    pjPintaPapeis(m);
+    var selResp=m.querySelector('#tk-addresp');
+    if(selResp)selResp.addEventListener('change',function(){
+      var n=selResp.value;selResp.value='';if(!n)return;
+      var cur=(m.dataset.resps||'').split('|').filter(Boolean);
+      if(cur.indexOf(n)<0)cur.push(n);
+      m.dataset.resps=cur.join('|');pjPintaResps(m);
+    });
+    var inCl=m.querySelector('#tk-clnovo');
+    if(inCl)inCl.addEventListener('keydown',function(ev){
+      if(ev.key!=='Enter')return;ev.preventDefault();
+      var v=(inCl.value||'').trim();if(!v)return;
+      m._cl.push({id:uid('cl'),txt:v,done:false});inCl.value='';pjPintaCl(m);
+    });
+    var btnT=m.querySelector('[data-tktimer]');
+    if(btnT)btnT.addEventListener('click',function(){
+      if(m._timer){m._spent=(m._spent||0)+(Date.now()-new Date(m._timer).getTime())/1000;m._timer='';btnT.textContent='▶ Start';btnT.classList.remove('on');}
+      else{m._timer=tkAgora();btnT.textContent='⏸ Parar';btnT.classList.add('on');}
+      var g=m.querySelector('#tk-gasto');if(g)g.textContent=tkDur(m._spent);
+    });
+    var btnAnx=m.querySelector('[data-anxadd]');
+    if(btnAnx)btnAnx.addEventListener('click',function(){
+      var nm=(m.querySelector('#tk-anxnm').value||'').trim();
+      var url=(m.querySelector('#tk-anxurl').value||'').trim();
+      if(!url)return;
+      if(!/^https?:\/\//i.test(url))url='https://'+url;
+      m._anx.push({id:uid('an'),nome:nm||url,url:url});
+      m.querySelector('#tk-anxnm').value='';m.querySelector('#tk-anxurl').value='';
+      pjPintaAnx(m);
+    });
+    var btnC=m.querySelector('[data-cmtadd]');
+    if(btnC)btnC.addEventListener('click',function(){
+      var ta=m.querySelector('#tk-cmt');var v=(ta.value||'').trim();if(!v)return;
+      m._cmt.push({id:uid('cm'),autor:tkQuem(),txt:v,em:tkAgora()});
+      ta.value='';pjPintaFeed(m);
+    });
+    var btnOk=m.querySelector('[data-tkconcluir]');
+    if(btnOk)btnOk.addEventListener('click',function(){
+      var sel=m.querySelector('#tk-st');if(sel)sel.value='concluido';
+      btnOk.style.display='none';
+    });
+  }
+
+  function pjPintaResps(m){
+    var box=m.querySelector('#tk-resps');if(!box)return;
+    var cur=(m.dataset.resps||'').split('|').filter(Boolean);
+    box.innerHTML=cur.length?cur.map(function(n){
+      return '<span class="tkchip" data-rmresp="'+esc(n)+'"><i class="av">'+tkIni(n)+'</i>'+esc(n)+'<b>✕</b></span>';}).join('')
+      :'<span class="tkvazio">A definir</span>';
+    box.querySelectorAll('[data-rmresp]').forEach(function(el){
+      el.addEventListener('click',function(){
+        var atual=(m.dataset.resps||'').split('|').filter(Boolean).filter(function(x){return x!==el.dataset.rmresp;});
+        m.dataset.resps=atual.join('|');pjPintaResps(m);
+      });
+    });
+  }
+  function pjPintaCl(m){
+    var box=m.querySelector('#tk-cl');if(!box)return;
+    box.innerHTML=(m._cl||[]).map(function(x){
+      return '<label class="tkcl'+(x.done?' ok':'')+'"><input type="checkbox" data-cl="'+x.id+'"'+(x.done?' checked':'')+'><span>'+esc(x.txt)+'</span><b data-clrm="'+x.id+'">✕</b></label>';
+    }).join('');
+    var ct=m.querySelector('#tk-clct');
+    if(ct)ct.textContent=(m._cl||[]).length?((m._cl.filter(function(x){return x.done;}).length)+'/'+m._cl.length):'';
+    box.querySelectorAll('[data-cl]').forEach(function(el){
+      el.addEventListener('change',function(){
+        m._cl.forEach(function(x){if(x.id===el.dataset.cl)x.done=el.checked;});pjPintaCl(m);
+      });
+    });
+    box.querySelectorAll('[data-clrm]').forEach(function(el){
+      el.addEventListener('click',function(ev){
+        ev.preventDefault();
+        m._cl=m._cl.filter(function(x){return x.id!==el.dataset.clrm;});pjPintaCl(m);
+      });
+    });
+  }
+  function pjPintaAnx(m){
+    var box=m.querySelector('#tk-anx');if(!box)return;
+    box.innerHTML=(m._anx||[]).map(function(a){
+      return '<div class="tkanx"><a href="'+esc(a.url)+'" target="_blank" rel="noopener">🔗 '+esc(a.nome)+'</a><b data-anxrm="'+a.id+'">✕</b></div>';
+    }).join('');
+    box.querySelectorAll('[data-anxrm]').forEach(function(el){
+      el.addEventListener('click',function(){
+        m._anx=m._anx.filter(function(a){return a.id!==el.dataset.anxrm;});pjPintaAnx(m);
+      });
+    });
+  }
+  function pjPintaFeed(m){
+    var box=m.querySelector('#tk-feed');if(!box)return;
+    var itens=[];
+    (m._hist||[]).forEach(function(h){itens.push({em:h.em,tipo:'h',txt:h.txt});});
+    (m._cmt||[]).forEach(function(c){itens.push({em:c.em,tipo:'c',autor:c.autor,txt:c.txt});});
+    itens.sort(function(a,b){return String(a.em).localeCompare(String(b.em));});
+    box.innerHTML=itens.length?itens.map(function(i){
+      var q=new Date(i.em);var dd=isNaN(q.getTime())?'':q.toLocaleDateString('pt-BR')+' '+q.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      if(i.tipo==='c')return '<div class="tkcm"><div class="tkcmh"><i class="av">'+tkIni(i.autor)+'</i>'+esc(i.autor)+'<span>'+dd+'</span></div><p>'+esc(i.txt)+'</p></div>';
+      return '<div class="tkev"><span class="dot"></span><p>'+esc(i.txt)+'<span>'+dd+'</span></p></div>';
+    }).join(''):'<div class="tkvazio" style="padding:10px 0">Nada aconteceu aqui ainda.</div>';
+    box.scrollTop=box.scrollHeight;
   }
   function pjPintaPapeis(m){
     var box=m.querySelector('#tk-papeis');if(!box)return;
     var cur=(m.dataset.papeis||'').split(',').filter(Boolean);
     box.innerHTML=PAPEIS.map(function(x){
       var on=cur.indexOf(x.k)>=0;
-      return '<button type="button" class="pj-tag" data-pp="'+x.k+'" style="cursor:pointer;padding:5px 11px;font-size:11px;background:'+(on?x.c:'transparent')+';color:'+(on?'#fff':x.c)+';border:1px solid '+x.c+'">'+esc(x.n)+'</button>';
+      return '<button type="button" class="pj-tag" data-pp="'+x.k+'" style="cursor:pointer;padding:4px 10px;font-size:10.5px;background:'+(on?x.c:'transparent')+';color:'+(on?'#fff':x.c)+';border:1px solid '+x.c+'">'+esc(x.n)+'</button>';
     }).join('');
     box.querySelectorAll('[data-pp]').forEach(function(b){
       b.addEventListener('click',function(){
@@ -8620,7 +8868,7 @@ function relatorioImprimir(){
 
     var b=ev.target.closest('[data-open],[data-voltar],[data-vista],[data-prpag],[data-newtask],[data-tid],'+
       '[data-add],[data-rm],[data-toggle-pend],[data-tksave],[data-tkcancel],[data-tkdel],[data-limpar],'+
-      '[data-planning],[data-delproj],#pj-novo,#pj-seed');
+      '[data-planning],[data-delproj],#pj-novo,#pj-seed,#pj-completar');
     if(!b)return;
 
     if(b.id==='pj-novo'){
@@ -8636,6 +8884,7 @@ function relatorioImprimir(){
       return;
     }
     if(b.id==='pj-seed'){semear();return;}
+    if(b.id==='pj-completar'){completaTodos();return;}
     if(b.dataset.open!=null){aberto=b.dataset.open;vista='quadro';prPag='briefing';filtro={papel:'',sprint:'',resp:'',busca:''};render();return;}
     if(b.dataset.voltar!=null){aberto=null;render();return;}
     if(b.dataset.vista){vista=b.dataset.vista;renderDetalhe();return;}
@@ -8672,16 +8921,41 @@ function relatorioImprimir(){
       var tt=(document.getElementById('tk-t').value||'').trim();
       if(!tt){try{toast('Escreva o nome da tarefa');}catch(e){}return;}
       var mm=document.getElementById('pj-modal');
+      var vv=function(id){var e=document.getElementById(id);return e?e.value:'';};
+      var resps=(mm.dataset.resps||'').split('|').filter(Boolean);
+      /* estimativa vazia grava '' e nao 0: zero hora contaria como tarefa medida e
+         faria o capacity da equipe mentir para baixo. */
+      var hRaw=String(vv('tk-horas')||'').trim().replace(',','.');
+      var spRaw=String(vv('tk-sp')||'').trim();
       var dados={
         t:tt,
-        st:document.getElementById('tk-st').value,
-        sprint:parseInt(document.getElementById('tk-sp').value,10)||1,
-        venc:document.getElementById('tk-venc').value||'',
-        resp:(document.getElementById('tk-resp').value||'').trim(),
-        horas:parseFloat(document.getElementById('tk-horas').value)||0,
-        obs:(document.getElementById('tk-obs').value||'').trim(),
-        papeis:(mm.dataset.papeis||'').split(',').filter(Boolean)
+        st:vv('tk-st'),
+        sprint:(spRaw===''?1:(parseInt(spRaw,10)||0)),
+        ini:vv('tk-ini')||'',
+        venc:vv('tk-venc')||'',
+        resps:resps,
+        resp:resps[0]||'',          // espelho: Meu Dia, filtro e capacity leem resp
+        horas:hRaw===''?'':(isNaN(parseFloat(hRaw))?'':parseFloat(hRaw)),
+        obs:(vv('tk-obs')||'').trim(),
+        papeis:(mm.dataset.papeis||'').split(',').filter(Boolean),
+        checklist:(mm._cl||[]),
+        anexos:(mm._anx||[]),
+        coments:(mm._cmt||[]),
+        timeSpent:(mm._spent||0),
+        timerSince:(mm._timer||'')
       };
+      // Atividade: registra o que de fato mudou, para a coluna da direita ter historia
+      var hist=(mm._hist||[]).slice(), antes=mm._antes||{}, quem=tkQuem();
+      var reg=function(txt){hist.push({em:tkAgora(),txt:quem+' '+txt});};
+      if(!b.dataset.tksave)reg('criou esta tarefa');
+      else{
+        if(antes.st!==dados.st)reg('mudou o status para '+((COLS.filter(function(c){return c.k===dados.st;})[0]||{}).n||dados.st));
+        if(antes.resps!==resps.join('|'))reg(resps.length?('atribuiu para '+resps.join(', ')):'tirou o responsável');
+        if((antes.venc||'')!==(dados.venc||''))reg(dados.venc?('marcou o prazo para '+dados.venc.split('-').reverse().join('/')):'tirou o prazo');
+        if(String(antes.horas||'')!==String(dados.horas||''))reg(dados.horas===''?'tirou a estimativa':('estimou em '+dados.horas+'h'));
+      }
+      if(hist.length>60)hist=hist.slice(-60);
+      dados.hist=hist;
       var id=b.dataset.tksave;
       if(id){
         (p2.tarefas||[]).forEach(function(t){if(t.id===id)Object.keys(dados).forEach(function(k){t[k]=dados[k];});});
