@@ -1,4 +1,4 @@
-<!-- build 20260831-tarefa-clickup -->
+<!-- build 20260901-okrs-lideranca -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -16078,13 +16078,30 @@ function ahBuildSlides(edit){
   // 20 · DIVISOR bloco 5
   S.push('<div>'+sec('05','Bloco 5','Para onde a gente ','VAI','O que cada frente leva daqui, e o que precisa estar de pé no fim do mês.')+'</div>');
 
-  // 21 · OKRs
-  S.push('<div><div class="ah-kick">OKRs de setembro · por função</div><h2>O que cada um vai puxar</h2>'+
+  // 21 · OKRs de setembro a dezembro (Gabriel, CEO)
+  S.push('<div><div class="ah-kick">OKRs de setembro a dezembro</div><h2>'+ahTxt('set_okr_tema','Fortalecer a saúde financeira e o posicionamento da ARK e da Alpha',edit)+'</h2>'+
+    '<p style="color:#9a9aa2;font-size:14px;margin:6px 0 12px">'+ahTxt('set_okr_intro','Três objetivos do CEO para o quadrimestre. Cada liderança carrega a sua parte no slide seguinte.',edit)+'</p>'+
+    '<div class="ah-grid g3">'+
+    cardG('OKR 1 · Renovar a base',ahTxt('set_okr_g1','Já em setembro: FERCON, Sasse, Mundo Livre, 4B Burger e Sabor Além. No quadrimestre: Deguste e os demais contratos da base.',edit))+
+    card('OKR 2 · Dominar os processos',ahTxt('set_okr_g2','Fazer a transição e deixar desenhado como se faz o onboarding, como o cardápio fica ativo e como se faz a ativação. Treinamento de verdade para quem responde pelo atendimento.',edit))+
+    card('OKR 3 · Marketing da ARK',ahTxt('set_okr_g3','Uma campanha por semana. Dois criativos já prontos cobrem as duas primeiras semanas. Ligado à entrada do Caio e do Guilherme na geração de demanda.',edit))+
+    '</div></div>');
+
+  // 21b · OKRs das lideranças (Danilo e Lucas Rosi)
+  S.push('<div><div class="ah-kick">OKRs das lideranças · setembro a dezembro</div><h2>O que Danilo e Lucas carregam</h2>'+
     '<div class="ah-grid g2" style="margin-top:12px">'+
-    card('Comercial · Saulo + Gabriel + Danilo',ahTxt('set_okr_com','Profox e Localiza respondidas, renovações de Sasse e Naeo endereçadas, funil no CRM sem lead parado e leitura semanal de dado feita pelo Danilo.',edit))+
-    card('Sucesso do cliente · Lucas + Caio',ahTxt('set_okr_cs','Régua rodando na carteira inteira, zero churn por silêncio e o backlog de cada cliente no quadro, com dono e prazo.',edit))+
-    card('Tráfego · Danilo + Guilherme',ahTxt('set_okr_traf','Rotina de campanha assumida pelo Guilherme, auditoria dos projetos concluída e acesso aos dados do operacional da Alpha resolvido.',edit))+
-    card('Criação e Captação',ahTxt('set_okr_criacao','Roteiro entregue 3 dias antes de cada captação, planejamento estratégico do mês entregue e tarefa com estimativa preenchida.',edit))+
+    '<div>'+ahPessoa('Danilo de Lima','COO · Operação e tráfego','COO')+
+      '<div style="display:grid;gap:10px;margin-top:10px">'+
+      cardG('OKR 1 · Renovar 100% da base',ahTxt('set_okr_d1','Nenhum contrato da base termina por silêncio. Renovação encaminhada com antecedência, um a um.',edit))+
+      card('OKR 2 · Dominar a operação',ahTxt('set_okr_d2','Mapear, treinar e implementar todos os processos que já estão desenhados.',edit))+
+      card('Resultados-chave',ahTxt('set_okr_d3','Mais 10% de faturamento dos clientes pela gestão de tráfego. Campanha de cliente novo no ar em menos de uma semana, com tudo o que ela precisa executado.',edit))+
+      '</div></div>'+
+    '<div>'+ahPessoa('Lucas Rosi','Sucesso do cliente · Account','HEAD')+
+      '<div style="display:grid;gap:10px;margin-top:10px">'+
+      cardG('OKR 1 · Renovar 100% da base',ahTxt('set_okr_l1','Ligação rápida com 100% da base. Cada cliente ouvido antes de qualquer vencimento.',edit))+
+      card('OKR 2 · Demandas criativas',ahTxt('set_okr_l2','90% das demandas criativas entregues no prazo e com qualidade aprovada.',edit))+
+      card('Resultado-chave',ahTxt('set_okr_l3','Pelo menos 5 novas opções ofertadas dentro da base, entre ARK e Alpha, no período.',edit))+
+      '</div></div>'+
     '</div></div>');
 
   // 22 · Compromisso
