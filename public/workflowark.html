@@ -1,4 +1,4 @@
-<!-- build 20260831-caio-kanban-capacity -->
+<!-- build 20260831-agenda-setembro -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -14959,6 +14959,42 @@ const AGENDA_AGO26=[
   {id:'ago26-c-att',date:'2026-08-26',title:'Captação Attraverssiamo 10:00',type:'y'},
   {id:'ago26-c-lec2',date:'2026-08-28',title:'Captação Lá em Casa 12:00',type:'y'},
 ];
+/* AGENDA DE SETEMBRO/26 (programada em 31/08, ditada pelo Gabriel). Mesma regra de
+   agosto: captação marcada e roteiro entregue pelo menos 3 dias antes. Ids fixos para
+   a mescla do sync espalhar sem duplicar, e a semente roda UMA vez por aparelho, então
+   o que ele excluir não volta.
+   Royal Face não entra: já captou no ciclo e tem uma por mês. Lá em Casa não entra:
+   deu churn. Roteiro só entra quando o D-3 ainda está no futuro, senão nasceria
+   vencido e sujaria a tela logo no primeiro dia. */
+const AGENDA_SET26=[
+  {id:'set26-c-viv1',date:'2026-09-02',title:'Captação Vivenda · Café com nutricionista',type:'y'},
+  {id:'set26-c-att',date:'2026-09-02',title:'Captação Attraversiamo Café',type:'y'},
+  {id:'set26-c-emf',date:'2026-09-03',title:'Captação EmFace',type:'y'},
+  {id:'set26-r-fon',date:'2026-09-07',title:'Roteiro Fonseca e Cavalcanti · entrega (captação 10/09)',type:''},
+  {id:'set26-r-fer',date:'2026-09-07',title:'Roteiro Fercon · entrega (captação 10/09)',type:''},
+  {id:'set26-r-maz',date:'2026-09-07',title:'Roteiro Mazuchi Regenera · entrega (captação 10 ou 11/09)',type:''},
+  {id:'set26-c-fon',date:'2026-09-10',title:'Captação Fonseca e Cavalcanti 09:00 no escritório',type:'y'},
+  {id:'set26-c-fer',date:'2026-09-10',title:'Captação Fercon 14:00',type:'y'},
+  {id:'set26-c-maz',date:'2026-09-10',title:'Captação Mazuchi Regenera (a confirmar entre 10 e 11)',type:'y'},
+  {id:'set26-r-viv2',date:'2026-09-12',title:'Roteiro Vivenda · entrega (captação 15/09)',type:''},
+  {id:'set26-c-viv2',date:'2026-09-15',title:'Captação Vivenda 08:30 (a confirmar)',type:'y'},
+  {id:'set26-r-viv3',date:'2026-09-19',title:'Roteiro Vivenda · entrega (captação 22/09)',type:''},
+  {id:'set26-c-viv3',date:'2026-09-22',title:'Captação Vivenda 08:30 (a confirmar)',type:'y'},
+];
+(function seedAgendaSet26(){
+  try{
+    if(localStorage.getItem('wfa-agenda-seed-set26'))return;
+    const evs=loadAgendaEvents();
+    const ids=new Set(evs.map(e=>e&&e.id));
+    let novo=false;
+    AGENDA_SET26.forEach(ev=>{if(!ids.has(ev.id)){evs.push(JSON.parse(JSON.stringify(ev)));novo=true;}});
+    if(novo){
+      localStorage.setItem('wfa-agenda-events',JSON.stringify(evs));
+      try{if(typeof cloudSave==='function')cloudSave('wfa-agenda-events',localStorage.getItem('wfa-agenda-events'));}catch(e){}
+    }
+    localStorage.setItem('wfa-agenda-seed-set26','1');
+  }catch(e){}
+})();
 (function seedAgendaAgo26(){
   try{
     if(localStorage.getItem('wfa-agenda-seed-ago26'))return;
@@ -15447,19 +15483,19 @@ function ahBuildSlides(edit){
     '</div>'+
     '<p style="margin-top:12px;color:#9a9aa2;font-size:13px">'+ahTxt('set_carteira_nota','Moenda e Mazuchi entram por um formato de entrega diferente do contrato mensal padrão. Vale olhar isso como produto novo, não como exceção.',edit)+'</p></div>');
 
-  // 6 · Agenda de setembro (dita pelo Gabriel + o que estiver na Gestão do mês)
+  // 6 · Agenda de setembro (AO VIVO da Gestão do mês, semeada em 31/08)
+  /* Nada de lista fixa aqui. As captações foram semeadas na agenda (AGENDA_SET26),
+     entao a fonte e a propria agenda: o que o Gabriel mexer la aparece aqui, e o que
+     ele excluir some. Lista fixa no deck voltaria a mentir no dia que ele remarcasse. */
   let setEvs=[];try{setEvs=(loadAgendaEvents()||[]).filter(e=>String((e&&e.date)||'').slice(0,7)==='2026-09').sort((a,b)=>String(a.date).localeCompare(String(b.date)));}catch(e){}
-  const setLinha=e=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+String(e.date).slice(8,10)+'/09</td><td>'+(e.title||'')+'</td></tr>';
-  const daAgenda=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).map(setLinha).join('');
-  const CAPT=[['02','Vivenda · Café com nutricionista'],['02','Attraversiamo Café'],['03','EmFace'],
-              ['10','Fonseca &amp; Cavalcanti'],['10','Fercon'],['10 ou 11','Mazuchi Regenera · a confirmar'],
-              ['a marcar','Vivenda · mais duas no mês']];
-  const captHtml=CAPT.map(x=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+x[0]+'</td><td>'+x[1]+'</td></tr>').join('');
+  const setLinha=e=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+String(e.date).slice(8,10)+'/09</td><td>'+(e.title||'').replace(/^\s*(Capta[çc][ãa]o|Roteiro)\s*/i,'')+'</td></tr>';
+  const setCapt=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).map(setLinha).join('');
+  const setRot=setEvs.filter(e=>/^\s*roteiro/i.test(e.title||'')).map(setLinha).join('');
   S.push('<div><div class="ah-kick">Agenda de setembro · Gestão do mês</div><h2>Captação marcada, roteiro 3 dias antes, planejamento entregue</h2>'+
     '<div class="ah-grid g2" style="margin-top:12px">'+
-    '<div><h3>Captações</h3><table><tbody>'+captHtml+(daAgenda||'')+'</tbody></table>'+
+    '<div><h3>Captações</h3><table><tbody>'+(setCapt||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table>'+
     '<p style="font-size:12px;color:#5a5a62;margin-top:8px">Royal Face já recebeu a captação do ciclo e tem uma por mês. Lá em Casa não capta por ter dado churn.</p></div>'+
-    '<div><h3>Roteiro</h3><p style="font-size:13px;color:#bdbdc4">'+ahTxt('set_agenda_roteiro','Todo roteiro entra pelo menos 3 dias antes da captação. Sem roteiro na mão, a data não se confirma.',edit)+'</p>'+
+    '<div><h3>Entrega de roteiro</h3><table><tbody>'+(setRot||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table>'+
     '<h3 style="margin-top:14px">Planejamento estratégico do mês</h3><p style="font-size:13px;color:#bdbdc4">'+ahTxt('set_agenda_plano','O planejamento estratégico passa a ser entrega fixa do mês, não favor. É o que conduz o cliente, gera valor, sustenta renovação e facilita a entrega das semanas seguintes. Grande parte fica com Rosiron e Darmã. Na Alpha o planejamento não precisa ser mensal.',edit)+'</p></div>'+
     '</div></div>');
 
