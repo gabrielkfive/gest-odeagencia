@@ -1,4 +1,4 @@
-<!-- build 20260831-allhands-dinamica -->
+<!-- build 20260831-backlog-caio-66 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -8018,28 +8018,99 @@ function relatorioImprimir(){
     return k;
   }
 
-  /* TEMPLATE da sprint 1. Ele pediu "deixar essas tasks montadas" pra nao comecar
-     do zero em cliente nenhum. Sai do backlog visivel no video, na mesma ordem. */
+  /* BACKLOG COMPLETO do Caio, transcrito das 11 fotos que ele mandou em 31/08/2026
+     (o quadro dele marca "BACKLOG 66"). Formato: [titulo, papeis, sprint].
+     Sprint 0 = tarefa fixa, sem etiqueta de sprint, igual ao cartao dele.
+
+     Duas tarefas vieram do VIDEO dele de 28/08 e nao aparecem nas fotos, porque a
+     rolagem cortou: "Realizar reuniao de onboarding" e "Recolher os acessos".
+     Ficaram porque tirar seria perder passo que ele ja tinha pedido.
+
+     Onde a etiqueta de sprint apareceu cortada na foto, o numero saiu da ORDEM do
+     quadro, que e crescente por sprint, entre duas ancoras legiveis. */
   var TEMPLATE=[
-    ['Refinamento e implementação das tasks padrão na planning',['po']],
-    ['Priorização e atribuição de responsáveis',['po']],
-    ['Marcar a reunião com o cliente para formatação da Oferta',['cs']],
-    ['Formalizar oferta irresistível',['po']],
-    ['Marcar reunião de Onboarding',['cs']],
-    ['Realizar reunião de onboarding',['cs']],
-    ['Marcar reunião de kick-off com o cliente (apresentar o PDF do estratégico)',['cs','po']],
-    ['Coletar e preencher os dados do cliente no prontuário',['cs']],
-    ['Recolher os acessos e registrar na página Senhas do prontuário',['track']],
-    ['Roteirizar 8 vídeos',['rot']],
-    ['Roteirizar 3 cases em vídeo falado pelo cliente',['rot']],
-    ['Agendar a captação com data, local e responsável',['po']],
-    ['Editar os vídeos da captação',['editor']],
-    ['Montar a landing page',['designlp']],
-    ['Estruturar a campanha no Meta Ads',['trafego']],
-    ['Estruturar a campanha no Google Ads',['trafego']],
-    ['Configurar rastreamento e conversões',['track']],
-    ['Registrar a ata de otimização da semana',['trafego']],
-    ['Rodar a review e escrever a lição aprendida',['po']]
+    // ---- Sprint 1: fechar oferta, onboarding e producao inicial
+    ['Marcar reunião de Onboarding',['cs'],1],
+    ['Realizar reunião de onboarding',['cs'],1],
+    ['Refinamento e implementação das tasks padrão na planning',['po'],1],
+    ['Priorização e atribuição de responsáveis',['po'],1],
+    ['Marcar a reunião com o cliente para formatação da Oferta',['cs'],1],
+    ['Formalizar oferta irresistível',['po'],1],
+    ['Marcar reunião de kick-off com o cliente (apresentar o PDF do estratégico)',['cs','po'],1],
+    ['Coletar e preencher os dados do cliente no prontuário',['cs'],1],
+    ['Recolher os acessos e registrar na página Senhas do prontuário',['track'],1],
+    ['Roteirizar 8 vídeos',['rot'],1],
+    ['Roteirizar 3 cases em vídeo falado pelo paciente',['rot'],1],
+    ['Fazer 15 estáticas para Google Ads (em 3 resoluções cada)',['design'],1],
+    ['Enviar roteiro para a CS encaminhar ao cliente',['rot'],1],
+    ['Analisar referências de conteúdo do cliente',['editor'],1],
+    ['Roteirizar edições e escolha de trilha sonora',['editor'],1],
+    ['Montar drawflow de aquisição e analisar viabilidade do nicho',['trafego'],1],
+    ['Definir texto do site, incluindo FAQ, depoimentos e headline',['designlp'],1],
+    ['Definir composição de cores da LP com base na marca',['designlp'],1],
+    ['Importar preset da Landing page da clínica',['designlp'],1],
+    ['Iniciar ajustes dos ativos coletados no preset',['designlp'],1],
+
+    // ---- Sprint 2: entregar video, subir LP, trackear e montar campanha
+    ['Edição dos vídeos',['editor'],2],
+    ['Enviar ao CS para homologação com o cliente',['editor'],2],
+    ['Editar alterações baseadas nos feedbacks e informar o PO',['editor'],2],
+    ['Finalizar ajustes dos ativos da LP',['designlp'],2],
+    ['Enviar para a CS aprovar com o cliente',['designlp'],2],
+    ['Alterar conforme as requisições do cliente',['designlp'],2],
+    ['Publicar site e apontar DNS',['designlp'],2],
+    ['Montar estrutura de trackeamento',['track'],2],
+    ['Testar estrutura de GTM',['track'],2],
+    ['Publicar estrutura final de trackeamento',['track'],2],
+    ['Estruturar GA4',['track'],2],
+    ['Integrar GTM com o Analytics',['track'],2],
+    ['Publicar estrutura Analytics',['track'],2],
+    ['Testar estrutura Analytics',['track'],2],
+    ['Estruturar UTMs em todos os canais',['track'],2],
+    ['Fazer distribuição de orçamento',['po'],2],
+    ['Mandar para o CS o pagamento dos anúncios',['po'],2],
+    ['Enviar para o cliente o pagamento dos anúncios',['cs'],2],
+    ['Criar estrutura de campanhas no Meta e Google',['trafego'],2],
+    ['Escolher títulos, imagens e vídeos para o Google',['trafego'],2],
+    ['Criar públicos de remarketing',['trafego'],2],
+    ['Criar públicos de interesse',['trafego'],2],
+    ['Segregar criativos (topo, meio, fundo) e criar copys',['trafego'],2],
+    ['Enviar criativos e copys para CS homologar com o cliente',['trafego'],2],
+
+    // ---- Sprint 3: verba distribuida e campanha no ar
+    ['Fazer distribuição da verba entre canais',['po'],3],
+    ['Confirmar homologação dos criativos com o cliente',['cs'],3],
+    ['Rodar otimizações semanalmente e anotar no prontuário',['trafego'],3],
+    ['Iniciar as campanhas',['trafego'],3],
+
+    // ---- Sprint 4
+    ['Certificar se todas as campanhas iniciaram',['po'],4],
+
+    // ---- Rotina de pagamento e relatorio, sprint a sprint
+    ['Mandar para o CS o pagamento dos anúncios',['po'],5],
+    ['Enviar para o cliente o pagamento dos anúncios',['cs'],5],
+    ['Enviar Relatórios para o cliente',['cs'],5],
+    ['Mandar para o CS o pagamento dos anúncios',['po'],6],
+    ['Enviar para o cliente o pagamento dos anúncios',['cs'],6],
+    ['Enviar Relatórios para o cliente',['cs'],6],
+    ['Mandar para o CS o pagamento dos anúncios',['po'],7],
+    ['Enviar para o cliente o pagamento dos anúncios',['cs'],7],
+    ['Enviar Relatórios para o cliente',['cs'],7],
+
+    // ---- Fixa: nao tem sprint no quadro dele, so as etiquetas fixa e trafego
+    ['Documentar rotina de otimizações da semana',['fixa','trafego'],0],
+
+    // ---- Ciclo mensal de relatorio e reuniao
+    ['Elaborar mega relatório',['cs'],8],
+    ['Marcar reunião mensal cliente',['cs'],8],
+    ['Enviar Relatórios para o cliente',['cs'],9],
+    ['Enviar Relatórios para o cliente',['cs'],10],
+    ['Enviar Relatórios para o cliente',['cs'],11],
+    ['Elaborar mega relatório',['cs'],11],
+    ['Elaborar mega relatório',['cs'],12],
+    ['Marcar reunião mensal cliente',['cs'],12],
+    ['Marcar reunião mensal cliente',['cs'],16],
+    ['Elaborar mega relatório',['cs'],16]
   ];
 
   function uid(p){return p+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);}
@@ -8074,8 +8145,10 @@ function relatorioImprimir(){
     return {
       id:uid('pj'), clienteId:clienteId||'', cliente:nome||'', temp:'gr',
       sprint:1, sprintIni:d, sprintDias:7, criadoEm:d, atualizadoEm:d,
+      /* Cada tarefa carrega a sprint que o Caio deu no quadro dele. Antes tudo
+         nascia em sprint 1, e o backlog inteiro parecia trabalho da semana. */
       tarefas: semTemplate?[]:TEMPLATE.map(function(t){
-        return {id:uid('pt'),t:t[0],st:'backlog',papeis:t[1].slice(),sprint:1,venc:'',resp:'',obs:''};
+        return {id:uid('pt'),t:t[0],st:'backlog',papeis:t[1].slice(),sprint:(t[2]===0?0:(t[2]||1)),venc:'',resp:'',obs:''};
       }),
       pront:{briefing:{},arquivos:[],senhas:[],atas:[],licoes:[]}
     };

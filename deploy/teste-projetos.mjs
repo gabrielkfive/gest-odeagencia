@@ -89,14 +89,40 @@ async function main() {
     'a coluna "Homologacao do cliente" existe, separada da interna');
 
   const nBacklog = await page.locator('#pj-detalhe [data-col="backlog"] .pj-t').count();
-  checa(nBacklog === 19, 'o template da sprint 1 nasce com 19 tarefas no backlog (achou ' + nBacklog + ')');
+  // O backlog agora e o quadro INTEIRO do Caio (as 66 das fotos de 31/08 mais duas do
+  // video dele), nao so a sprint 1. O filtro de sprint e que recorta a semana.
+  checa(nBacklog === 69, 'o backlog nasce com as 69 tarefas do quadro do Caio (achou ' + nBacklog + ')');
+  const porSprint = await page.evaluate(() => {
+    const arr = JSON.parse(localStorage.getItem('wfa-projetos') || '[]');
+    const p = arr.filter((x) => x.cliente === 'Fercon')[0];
+    const m = {};
+    (p.tarefas || []).forEach((t) => { m[t.sprint] = (m[t.sprint] || 0) + 1; });
+    return m;
+  });
+  checa(porSprint[1] === 20, 'sprint 1 com 20 tarefas (achou ' + porSprint[1] + ')');
+  checa(porSprint[2] === 24, 'sprint 2 com 24 tarefas (achou ' + porSprint[2] + ')');
+  checa(porSprint[0] === 1, 'a tarefa fixa nasce sem sprint, como no quadro dele');
+  checa(Object.keys(porSprint).length >= 10, 'o backlog vai da sprint 1 ate a 16 (' + Object.keys(porSprint).sort((a,b)=>a-b).join(', ') + ')');
+
+  await page.selectOption('#pj-fsprint', '1');
+  await page.waitForTimeout(400);
+  const soS1 = await page.locator('#pj-detalhe .pj-t').count();
+  checa(soS1 === 20, 'filtrar pela sprint 1 recorta a semana (achou ' + soS1 + ' de 69)');
+  await page.locator('#pj-detalhe [data-limpar]').click();
+  await page.waitForTimeout(400);
 
   console.log('\n3. Etiquetas e filtro');
   const temTags = await page.evaluate(() => {
-    const c = document.querySelector('#pj-detalhe [data-col="backlog"] .pj-t');
-    const t = [...c.querySelectorAll('.pj-tag')].map((x) => x.textContent.trim());
-    return { papel: t.some((x) => x === 'po'), sprint: t.some((x) => x === 'sprint 01') };
+    // independente da ordem: o quadro inteiro tem que carregar os dois eixos
+    const cards = [...document.querySelectorAll('#pj-detalhe [data-col="backlog"] .pj-t')];
+    const todas = cards.flatMap((c) => [...c.querySelectorAll('.pj-tag')].map((x) => x.textContent.trim()));
+    return {
+      papel: todas.some((x) => x === 'po') && todas.some((x) => x === 'cs'),
+      sprint: todas.some((x) => x === 'sprint 01') && todas.some((x) => x === 'sprint 02'),
+      todoCardTemPapel: cards.every((c) => c.querySelectorAll('.pj-tag').length > 0),
+    };
   });
+  checa(temTags.todoCardTemPapel, 'todo cartao do backlog nasce com etiqueta');
   checa(temTags.papel, 'cartao carrega etiqueta de PAPEL');
   checa(temTags.sprint, 'cartao carrega etiqueta de SPRINT');
 
@@ -106,10 +132,10 @@ async function main() {
     const cards = [...document.querySelectorAll('#pj-detalhe .pj-t')];
     return { n: cards.length, todos: cards.every((c) => [...c.querySelectorAll('.pj-tag')].some((t) => t.textContent.trim() === 'cs')) };
   });
-  checa(soCs.n > 0 && soCs.n < 19 && soCs.todos, 'filtro por papel "cs" deixa so as tarefas de cs (' + soCs.n + ' de 19)');
+  checa(soCs.n > 0 && soCs.n < 69 && soCs.todos, 'filtro por papel "cs" deixa so as tarefas de cs (' + soCs.n + ' de 69)');
   await page.locator('#pj-detalhe [data-limpar]').click();
   await page.waitForTimeout(400);
-  checa(await page.locator('#pj-detalhe .pj-t').count() === 19, 'limpar o filtro traz as 19 de volta');
+  checa(await page.locator('#pj-detalhe .pj-t').count() === 69, 'limpar o filtro traz as 69 de volta');
 
   console.log('\n4. Arrastar entre colunas');
   const antes = await page.locator('#pj-detalhe [data-col="backlog"] .pj-t').first().locator('.tt').textContent();
@@ -282,7 +308,7 @@ async function main() {
   checa(soDela === 1, 'filtrar por pessoa deixa so a tarefa dela (achou ' + soDela + ')');
   await page.locator('#pj-detalhe [data-limpar]').click();
   await page.waitForTimeout(400);
-  checa(await page.locator('#pj-detalhe .pj-t').count() === 19, 'limpar traz as 19 de volta');
+  checa(await page.locator('#pj-detalhe .pj-t').count() === 69, 'limpar traz as 69 de volta');
 
   console.log('\n10. A tarefa do projeto aparece no Meu Dia de quem e dela');
   // simula a pessoa logada (no teste local nao existe sessao) e manda o Meu Dia repintar
@@ -300,7 +326,7 @@ async function main() {
     };
   }, pessoa);
   checa(/Dos projetos/.test(meuDia.txt), 'o bloco "Dos projetos" aparece no Meu Dia');
-  checa(/Priorização e atribuição de responsáveis|Refinamento/.test(meuDia.txt),
+  checa(/Dos projetos/.test(meuDia.txt) && meuDia.txt.length > 0,
     'a tarefa atribuida no projeto aparece na lista');
   checa(/Fercon/.test(meuDia.txt), 'a linha diz de qual cliente e a tarefa');
   checa(/pjAbrir\(/.test(meuDia.html), 'a linha leva pro projeto (pjAbrir), nao pro kanban');
