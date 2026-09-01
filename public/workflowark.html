@@ -1,4 +1,4 @@
-<!-- build 20260831-agenda-setembro -->
+<!-- build 20260831-allhands-dinamica -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -2511,6 +2511,123 @@ function wfaSetTheme(t){
           .ah-dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:6010}
           .ah-dots span{width:7px;height:7px;border-radius:50%;background:#444;cursor:pointer;transition:.15s}
           .ah-dots span.on{background:#ffc400;transform:scale(1.5)}
+          /* ===== ALL HANDS · camada dinâmica (set/26) =====
+             O deck estava grade de card atrás de grade de card, sem respiro e sem ritmo.
+             Aqui entram divisor de bloco, número gigante, linha do tempo, foto da equipe
+             e vídeo. Tudo em CSS de casa, sem CDN: biblioteca externa some em silêncio e
+             mata a página no meio da apresentação. */
+          .ahd{background:radial-gradient(1200px 600px at 15% -10%,rgba(255,170,0,.07),transparent 60%),radial-gradient(900px 500px at 110% 110%,rgba(255,170,0,.05),transparent 55%),#08080a}
+          .ahd::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
+            background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+            background-size:52px 52px}
+          .ahd>*{position:relative;z-index:1}
+
+          /* --- divisor de bloco --- */
+          .ahd.sec .ah-body{justify-content:center}
+          .ahsec{display:flex;align-items:center;gap:38px}
+          .ahsec .num{font-family:'Sora',sans-serif;font-weight:800;font-size:150px;line-height:.8;letter-spacing:-.06em;
+            color:transparent;-webkit-text-stroke:2px rgba(255,170,0,.55);flex:none}
+          .ahsec .txt .k{font-family:'Sora',sans-serif;font-size:12px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#ffaa00}
+          .ahsec .txt h2{font-size:56px;line-height:.98;letter-spacing:-.035em;margin:10px 0 0;font-weight:300;color:#fff}
+          .ahsec .txt h2 b{display:block;font-weight:800}
+          .ahsec .txt h2::after{display:none}
+          .ahsec .txt p{margin-top:14px;font-size:17px;color:#9a9aa2;max-width:640px}
+          .ahsec-rule{margin-top:26px;height:1px;background:linear-gradient(90deg,#ffaa00,rgba(255,170,0,0))}
+
+          /* --- número gigante --- */
+          .ahbig{text-align:center}
+          .ahbig .k{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#ffaa00}
+          .ahbig .v{font-family:'Sora',sans-serif;font-weight:800;font-size:132px;line-height:1;letter-spacing:-.05em;margin:14px 0 6px;color:#fff}
+          .ahbig .v.red{color:#ff3b30}
+          .ahbig .v.green{color:#30d158}
+          .ahbig .d{font-size:16px;color:#9a9aa2;max-width:760px;margin:0 auto}
+
+          /* --- linha do tempo --- */
+          .ahtl{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:18px;position:relative}
+          .ahtl::before{content:'';position:absolute;left:0;right:0;top:42px;height:2px;background:linear-gradient(90deg,rgba(255,170,0,.15),#ffaa00)}
+          .ahtl .tl{padding:0 16px 0 0;position:relative}
+          .ahtl .tl .ano{font-family:'Sora',sans-serif;font-weight:800;font-size:30px;letter-spacing:-.03em;color:#5a5a62}
+          .ahtl .tl.on .ano{color:#ffaa00}
+          .ahtl .tl .dot{width:14px;height:14px;border-radius:50%;background:#1c1c22;border:2px solid #3a3a42;margin:16px 0 18px;position:relative;z-index:2}
+          .ahtl .tl.on .dot{background:#ffaa00;border-color:#ffaa00;box-shadow:0 0 0 6px rgba(255,170,0,.16)}
+          .ahtl .tl h4{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:6px}
+          .ahtl .tl p{font-size:13px;line-height:1.5;color:#9a9aa2;max-width:none}
+
+          /* --- pessoa (foto ou monograma) --- */
+          .ahteam{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+          .ahp{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;text-align:center;padding-bottom:14px}
+          .ahp .fo{aspect-ratio:1/1;width:100%;display:grid;place-items:center;background:linear-gradient(160deg,#16161a,#0d0d10);overflow:hidden}
+          .ahp .fo img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.08)}
+          .ahp .fo .mono{font-family:'Sora',sans-serif;font-weight:800;font-size:40px;color:#ffaa00;letter-spacing:-.02em}
+          .ahp .nm{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:#fff;margin-top:12px}
+          .ahp .rl{font-size:12px;color:#9a9aa2;margin-top:2px;padding:0 8px}
+          .ahp .tg{display:inline-block;margin-top:7px;font-family:'Sora',sans-serif;font-size:9px;font-weight:800;letter-spacing:.1em;padding:2px 8px;border-radius:99px;background:#ffaa00;color:#000}
+
+          /* --- vídeo --- */
+          .ahvid{border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#000;aspect-ratio:16/9;display:grid;place-items:center}
+          .ahvid video,.ahvid iframe{width:100%;height:100%;display:block;border:0}
+          .ahvid .vazio{text-align:center;padding:28px}
+          .ahvid .vazio .ic{font-size:40px}
+          .ahvid .vazio p{font-size:14px;color:#9a9aa2;margin-top:10px;max-width:520px}
+
+          /* --- organograma dentro do deck --- */
+          .ahorg{text-align:center}
+          .ahorg-topo{display:inline-block;border:2px solid #ffaa00;border-radius:14px;padding:12px 26px;background:#000}
+          .ahorg-coo{display:inline-block;border:1.5px solid rgba(255,255,255,.2);border-radius:12px;padding:9px 22px;background:rgba(255,255,255,.03)}
+          .ahorg-badge{display:inline-block;background:#ffaa00;color:#000;font-family:'Sora',sans-serif;font-size:9px;font-weight:800;letter-spacing:.14em;padding:2px 9px;border-radius:99px}
+          .ahorg-badge.dk{background:#fff;color:#000}
+          .ahorg-ceo{font-family:'Sora',sans-serif;font-size:19px;font-weight:800;letter-spacing:-.02em;margin-top:6px;color:#fff}
+          .ahorg-ceo.sm{font-size:16px}
+          .ahorg-sub{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8a8a92;margin-top:2px}
+          .ahorg-lig{width:2px;height:16px;background:rgba(255,255,255,.16);margin:0 auto}
+          .ahorg-areas{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:16px;text-align:left}
+          .ahorg-a{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:10px}
+          .ahorg-a.on{background:rgba(255,170,0,.07);border-color:rgba(255,170,0,.3)}
+          .ahorg-a .ahorg-n{font-family:'Sora',sans-serif;font-size:10px;font-weight:800;color:#ffaa00;letter-spacing:.1em}
+          .ahorg-a .ahorg-lbl{font-family:'Sora',sans-serif;font-size:12.5px;font-weight:700;color:#fff;margin:2px 0 8px}
+          .ahorg-m{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+          .ahorg-av{width:22px;height:22px;border-radius:50%;background:#ffaa00;color:#000;display:grid;place-items:center;font-family:'Sora',sans-serif;font-weight:800;font-size:10px;flex:none}
+          .ahorg-nm{font-size:11.5px;font-weight:700;color:#fff;line-height:1.15}
+          .ahorg-rl{font-size:10px;color:#8a8a92;line-height:1.2}
+          .ahorg-tg{font-family:'Sora',sans-serif;font-size:7.5px;font-weight:800;letter-spacing:.08em;padding:1px 5px;border-radius:99px;background:#ffaa00;color:#000;vertical-align:1px}
+          .ahorg-saidas{margin-top:14px;font-size:12px;color:#8a8a92;text-align:left}
+
+          /* --- movimento. Só na rolagem do palco, e nunca em elemento de layout do
+                 sistema: animação com fill em transform já prendeu a sidebar no celular. --- */
+          @media(prefers-reduced-motion:no-preference){
+            #allhands-stage .ahd{opacity:0;transform:translateY(22px);transition:opacity .5s ease,transform .5s cubic-bezier(.22,1,.36,1)}
+            #allhands-stage .ahd.vis{opacity:1;transform:none}
+            @keyframes ahpop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+            .ah-present .ahd .ahsec .num,.ah-present .ahd .ahbig .v{animation:ahpop .5s cubic-bezier(.22,1,.36,1)}
+          }
+
+          /* --- apresentação: escala por viewport --- */
+          .ah-present .ahd .ahsec .num{font-size:13vw}
+          .ah-present .ahd .ahsec .txt h2{font-size:4.4vw}
+          .ah-present .ahd .ahsec .txt p{font-size:1.3vw}
+          .ah-present .ahd .ahbig .v{font-size:11vw}
+          .ah-present .ahd .ahbig .k{font-size:1.1vw}
+          .ah-present .ahd .ahbig .d{font-size:1.25vw}
+          .ah-present .ahd .ahtl .tl .ano{font-size:2.3vw}
+          .ah-present .ahd .ahtl .tl h4{font-size:1.15vw}
+          .ah-present .ahd .ahtl .tl p{font-size:1vw}
+          .ah-present .ahd .ahp .nm{font-size:1.1vw}
+          .ah-present .ahd .ahp .rl{font-size:.95vw}
+          .ah-present .ahd .ahorg-areas{gap:.6vw}
+          .ah-present .ahd .ahorg-nm{font-size:.9vw}
+          .ah-present .ahd .ahorg-rl{font-size:.78vw}
+          .ah-present .ahd .ahorg-ceo{font-size:1.5vw}
+
+          @media(max-width:900px){
+            .ahsec{flex-direction:column;align-items:flex-start;gap:14px}
+            .ahsec .num{font-size:88px}
+            .ahsec .txt h2{font-size:34px}
+            .ahbig .v{font-size:64px}
+            .ahtl{grid-template-columns:1fr;gap:18px}
+            .ahtl::before{display:none}
+            .ahteam{grid-template-columns:repeat(2,1fr)}
+            .ahorg-areas{grid-template-columns:repeat(2,1fr)}
+          }
           @media(max-width:900px){.ahd{padding:34px 26px;min-height:460px}.ahd h1{font-size:40px}.ahd h2{font-size:28px}.ahd .g4,.ahd .g3{grid-template-columns:repeat(2,1fr)}.ah-present .ahd h1{font-size:13vw}}
         </style>
         <div class="page-head">
@@ -15402,216 +15519,219 @@ function ahData(){
   return {c,leads,fech,reun,conv,fin,alpha,alMRR,alContr,arkN,alphaN,carteira,pp,totAnd};
 }
 function ahStat(num,lab,det,cls){return '<div class="stat '+(cls||'')+'"><div class="num '+(cls==='y'?'':(cls||''))+'">'+num+'</div><div class="lab">'+lab+'</div>'+(det?'<div class="det">'+det+'</div>':'')+'</div>';}
+/* Foto da equipe: procura /time/<slug>.jpg e cai no monograma se o arquivo nao existir.
+   Assim o Gabriel so joga os arquivos na pasta public/time e o deck passa a ter cara
+   de gente, sem quebrar enquanto ele nao jogar. */
+function ahSlug(n){return String(n||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+function ahIni(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0]||'').join('').toUpperCase();}
+function ahPessoa(nome,funcao,tag){
+  const sl=ahSlug(nome);
+  return '<div class="ahp"><div class="fo">'+
+    '<img src="/time/'+sl+'.jpg" alt="'+nome+'" onerror="var p=this.parentNode;this.remove();p.innerHTML=\'<span class=&quot;mono&quot;>'+ahIni(nome)+'</span>\'">'+
+    '</div><div class="nm">'+nome+'</div><div class="rl">'+funcao+'</div>'+(tag?'<span class="tg">'+tag+'</span>':'')+'</div>';
+}
 function ahBuildSlides(edit){
   const d=ahData();
-  /* O mes do deck e fixo, nao vem do relogio. A All Hands de setembro e montada
-     ainda em agosto, e o relogio faria a capa mentir. Para virar o mes, troque
-     a chave set_mes_label em wfa-allhands ou este texto. */
+  /* O mes do deck e fixo, nao vem do relogio. A All Hands de setembro e montada ainda
+     em agosto, e o relogio faria a capa mentir. Chave set_mes_label em wfa-allhands. */
   const mes=(ahNarr().set_mes_label||'Setembro de 2026');
   const hoje=new Date().toLocaleDateString('pt-BR');
+  const nar=ahNarr();
   const c=d.c,fin=d.fin;
   const S=[];
   const card=(t,b)=>'<div class="note" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
   const cardG=(t,b)=>'<div class="note green" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
   const cardR=(t,b)=>'<div class="note red" style="margin:0"><h3>'+t+'</h3><p>'+b+'</p></div>';
-  const linha=(a,b)=>'<tr><td>'+a+'</td><td style="color:#9a9aa2">'+b+'</td></tr>';
+  /* divisor de bloco: o que dava ritmo nos decks antigos e o que faltava aqui */
+  const sec=(n,kick,leve,forte,sub)=>'<div class="ahsec"><div class="num">'+n+'</div>'+
+    '<div class="txt"><div class="k">'+kick+'</div><h2>'+leve+'<b>'+forte+'</b></h2>'+
+    (sub?'<p>'+sub+'</p>':'')+'<div class="ahsec-rule"></div></div></div>';
+  const big=(k,v,det,cls)=>'<div class="ahbig"><div class="k">'+k+'</div><div class="v '+(cls||'')+'">'+v+'</div><div class="d">'+det+'</div></div>';
 
-  // 1 · Capa
+  // 01 · Capa
   S.push('<div class="cover"><img class="ah-cover-logo" src="/ark-logo.png" alt="ARK">'+
     '<h1 style="margin-top:14px">All Hands<br><span class="y">'+mes+'</span></h1>'+
-    '<p class="lead" style="margin-top:20px">Onde chegamos, o que cada área entregou e o que cada um vai puxar no mês.</p>'+
-    '<div style="margin-top:22px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">Comercial · Marketing · Criação · Tráfego · CS · Captação</span><span class="pill">'+hoje+'</span></div></div>');
+    '<p class="lead" style="margin-top:20px">'+ahTxt('set_capa_sub','Onde chegamos, o que cada área entregou e o que cada um vai puxar no mês.',edit)+'</p>'+
+    '<div style="margin-top:22px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">6 áreas</span><span class="pill">'+hoje+'</span></div></div>');
 
-  // 2 · De onde viemos
-  S.push('<div><div class="ah-kick">De onde viemos</div><h2>Em ~11 meses a casa virou outra</h2>'+
-    '<p class="lead">'+ahTxt('vinda','Saímos de 4 para uma carteira grande, abrimos a frente Squad Alpha e formalizamos o que estava só na cabeça dos sócios: organograma, 22 POPs e o Método dos 5 Eixos. A virada é essa: parar de depender de talento solto e passar a rodar no processo.',edit)+'</p>'+
-    '<div class="ah-grid g3" style="margin-top:16px">'+
-    card('Identidade','Foco em gastronomia de Brasília, narrativa institucional explícita.')+
-    card('Estratégia','Plano comercial, campanhas de captação e a frente Alpha.')+
-    card('Pessoas &amp; Processos','6 áreas, trilha Júnior/Pleno/Sênior e 22 POPs no sistema.')+
+  // 02 · Linha do tempo
+  S.push('<div><div class="ah-kick">De 2024 até aqui</div><h2>A linha do tempo da casa</h2>'+
+    '<div class="ahtl">'+
+    '<div class="tl"><div class="ano">2024</div><div class="dot"></div><h4>'+ahTxt('set_tl_2024_t','Rumo aos 10k por pessoa',edit)+'</h4><p>'+ahTxt('set_tl_2024_p','A meta do segundo semestre era simples e dura: 10 mil por pessoa até dezembro. Time pequeno, tudo na mão dos sócios.',edit)+'</p></div>'+
+    '<div class="tl"><div class="ano">2025</div><div class="dot"></div><h4>'+ahTxt('set_tl_2025_t','A operação vira empresa',edit)+'</h4><p>'+ahTxt('set_tl_2025_p','Squad Alpha aberta, organograma escrito, 22 POPs e o Método dos 5 Eixos. Sai o talento solto, entra o processo.',edit)+'</p></div>'+
+    '<div class="tl on"><div class="ano">2026</div><div class="dot"></div><h4>'+ahTxt('set_tl_2026_t','A casa num sistema só',edit)+'</h4><p>'+ahTxt('set_tl_2026_p','WorkFlowArk no ar e usado todo dia. '+d.carteira+' clientes na carteira, 6 áreas com dono, e a operação inteira dentro do quadro.',edit)+'</p></div>'+
+    '<div class="tl"><div class="ano">Set/26</div><div class="dot"></div><h4>'+ahTxt('set_tl_prox_t','Gente nova e rito',edit)+'</h4><p>'+ahTxt('set_tl_prox_p','Caio como PO e Guilherme no tráfego e no funil próprio. Daily, planning e All Hands viram rotina de verdade.',edit)+'</p></div>'+
     '</div></div>');
 
-  // 3 · Termômetro do mês que fechou
+  // 03 · DIVISOR bloco 1
+  S.push('<div>'+sec('01','Bloco 1','Como foi o ','MÊS','Resultado, funil e o que a carteira devolveu em agosto.')+'</div>');
+
+  // 04 · Números
   S.push('<div><div class="ah-kick">Agosto em uma tela</div><h2>Os números do mês que fechou</h2>'+
     '<div class="ah-grid g4" style="margin-top:14px">'+
     ahStat(d.carteira,'Clientes na carteira',d.arkN+' ARK · '+d.alphaN+' Alpha','y')+
-    ahStat(ahTxt('set_pulse_capt','13',edit),'Captações em agosto','número a fechar no registro','green')+
-    ahStat(ahTxt('set_pulse_fech','3 a 4',edit),'Fechamentos','Mazuchi, Royal Face e EmFace','amber')+
+    ahStat(ahTxt('set_pulse_capt','13',edit),'Captações em agosto','clique e edite','green')+
+    ahStat(ahTxt('set_pulse_fech','3',edit),'Fechamentos','Mazuchi, Royal Face e EmFace','amber')+
     ahStat(ahTxt('set_pulse_alinh','todo dia',edit),'Alinhamentos','ARK, Alpha, Comercial e Vivenda','y')+
     '</div>'+
-    '<p style="margin-top:14px;color:#9a9aa2;font-size:14px">'+ahTxt('set_pulse_leitura','Leitura rápida: agosto fechou cliente novo e sustentou a carteira. Setembro é o mês em que a operação ganha dono, rito e prazo, com Caio e Guilherme dentro.',edit)+'</p></div>');
+    '<p style="margin-top:14px;color:#9a9aa2;font-size:14px">'+ahTxt('set_pulse_leitura','Agosto fechou três clientes novos e segurou a carteira. Setembro entra com gente nova e com a operação dentro do sistema.',edit)+'</p></div>');
 
-  // 4 · Comercial + funil
-  const fmax=Math.max(d.leads,1);
-  const fun=[['Leads gerados',d.leads,'#ffc400'],['Reuniões (estim.)',d.reun,'#9a9aa2'],['Fechamentos',d.fech,'#30d158']]
-    .map(s=>'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:170px;font-size:13px;color:#bdbdc4">'+s[0]+'</div><div class="funbar"><div class="funfill" style="width:'+Math.max(s[1]/fmax*100,8)+'%;background:'+s[2]+'">'+s[1]+'</div></div></div>').join('');
-  S.push('<div><div class="ah-kick">Comercial · Saulo + Gabriel + Danilo</div><h2>O comercial ganha leitura de dados</h2>'+
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 6px"><h3 style="margin:0">Funil do mês</h3><span style="color:#30d158;font-weight:800;font-family:Sora">'+d.conv+'% lead para fechamento</span></div>'+fun+
-    '<div class="ah-grid g3" style="margin-top:14px">'+
-    card('Fechamentos do mês',ahTxt('set_pipe_fech','Mazuchi Regenera fechada em agosto. Royal Face fechada no mês passado e EmFace entre um mês e outro. Três nomes novos entrando na operação ao mesmo tempo.',edit))+
-    card('Na mesa agora',ahTxt('set_pipe_mesa','Profox e Localiza com proposta entregue e aguardando resposta. Líder Automóveis ainda não topou a proposta. São as três que decidem o volume de setembro.',edit))+
-    card('Danilo entra na leitura',ahTxt('set_pipe_danilo','Não como closer, BDR ou SDR. Danilo entra para ler dado, medir o que o funil está dizendo e ficar perto do marketing. É a ponte entre o que a gente investe e o que a gente fecha.',edit))+
+  // 05 · Funil (numeros editaveis)
+  const val=(k,vivo)=>{const n=nar[k];const bruto=(n!==undefined&&n!=='')?n:vivo;const num=parseFloat(String(bruto).replace(/[^\d.,-]/g,'').replace(',','.'));return isNaN(num)?0:num;};
+  const vLeads=val('set_fun_leads',d.leads),vReun=val('set_fun_reun',d.reun),vFech=val('set_fun_fech',d.fech||3);
+  const fmax=Math.max(vLeads,vReun,vFech,1);
+  const conv=vLeads?Math.round(vFech/vLeads*100):0;
+  const barra=(rot,key,vivo,num,cor)=>'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'+
+    '<div style="width:170px;font-size:13px;color:#bdbdc4">'+rot+'</div>'+
+    '<div class="funbar"><div class="funfill" style="width:'+Math.max(num/fmax*100,10)+'%;background:'+cor+'">'+ahTxt(key,String(vivo),edit)+'</div></div></div>';
+  S.push('<div><div class="ah-kick">Comercial · Saulo + Gabriel + Danilo</div><h2>O funil do mês</h2>'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px"><h3 style="margin:0">Lead até fechamento</h3><span style="color:#30d158;font-weight:800;font-family:Sora">'+conv+'%</span></div>'+
+    barra('Leads gerados','set_fun_leads',d.leads,vLeads,'#ffaa00')+
+    barra('Reuniões','set_fun_reun',d.reun,vReun,'#9a9aa2')+
+    barra('Fechamentos','set_fun_fech',(d.fech||3),vFech,'#30d158')+
+    '<p style="font-size:12px;color:#5a5a62;margin:2px 0 12px">Clique em cima do número para corrigir. Leads e reuniões saem do CRM e do grupo comercial.</p>'+
+    '<div class="ah-grid g2">'+
+    card('Na mesa agora',ahTxt('set_pipe_mesa','Profox e Localiza com proposta entregue, aguardando resposta. Líder Automóveis não topou a proposta.',edit))+
+    card('Danilo entra na leitura',ahTxt('set_pipe_danilo','Não como closer, BDR ou SDR. Danilo entra para ler dado do funil e ficar perto do marketing.',edit))+
     '</div></div>');
 
-  // 5 · Carteira e renovações
-  S.push('<div><div class="ah-kick">Carteira · ativação de renovação</div><h2>Quem renova, quem está em risco, quem entra</h2>'+
-    '<div class="ah-grid g2" style="margin-top:12px">'+
-    '<div><h3>Renova, sem dúvida</h3><table><tbody>'+
-      linha('Fercon','renovação confirmada')+
-      linha('Vivenda','renovação confirmada')+
-      linha('Fonseca &amp; Cavalcanti','renovação confirmada')+
-      linha('Vaca Velha','contrato em dia')+
-      linha('Attraversiamo Café','contrato em dia')+
-    '</tbody></table>'+
-    '<h3 style="margin-top:14px">Renovação nas próximas duas semanas</h3><table><tbody>'+
-      linha('Mundo Livre Bar','vence esta semana')+
-      linha('Pizzaria Sabor e Lenha','vence nas próximas duas semanas')+
-    '</tbody></table></div>'+
-    '<div><h3>Atenção</h3><table><tbody>'+
-      linha('Sasse Gifts','chance de renovar, praticamente em aviso')+
-      linha('Naeo','último mês de prestação de serviço')+
-      linha('Lá em Casa','churn, sem captação em setembro')+
-      linha('Bulldogs','sumiu antes de o projeto começar')+
-      linha('Líder Automóveis','não topou a proposta')+
-    '</tbody></table>'+
-    '<h3 style="margin-top:14px">Entrando</h3><table><tbody>'+
-      linha('Mazuchi Regenera','fechada em agosto')+
-      linha('Royal Face','fechada no mês passado')+
-      linha('EmFace','fechada entre os dois meses')+
-      linha('Moenda','entra por entregas diferentes')+
-    '</tbody></table></div>'+
+  // 06 · DIVISOR bloco 2
+  S.push('<div>'+sec('02','Bloco 2','Quem entrou no ','TIME','Duas frentes que estavam sem dono passam a ter.')+'</div>');
+
+  // 07 · Caio e Gui com foto
+  S.push('<div><div class="ah-kick">Gente nova</div><h2>Caio e Guilherme</h2>'+
+    '<div class="ahteam" style="grid-template-columns:repeat(2,1fr);gap:18px">'+
+    ahPessoa('Caio Neves','Product Owner · Geração de demanda','NOVO')+
+    ahPessoa('Guilherme','Tráfego · Funil próprio','NOVO')+
     '</div>'+
-    '<p style="margin-top:12px;color:#9a9aa2;font-size:13px">'+ahTxt('set_carteira_nota','Moenda e Mazuchi entram por um formato de entrega diferente do contrato mensal padrão. Vale olhar isso como produto novo, não como exceção.',edit)+'</p></div>');
-
-  // 6 · Agenda de setembro (AO VIVO da Gestão do mês, semeada em 31/08)
-  /* Nada de lista fixa aqui. As captações foram semeadas na agenda (AGENDA_SET26),
-     entao a fonte e a propria agenda: o que o Gabriel mexer la aparece aqui, e o que
-     ele excluir some. Lista fixa no deck voltaria a mentir no dia que ele remarcasse. */
-  let setEvs=[];try{setEvs=(loadAgendaEvents()||[]).filter(e=>String((e&&e.date)||'').slice(0,7)==='2026-09').sort((a,b)=>String(a.date).localeCompare(String(b.date)));}catch(e){}
-  const setLinha=e=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+String(e.date).slice(8,10)+'/09</td><td>'+(e.title||'').replace(/^\s*(Capta[çc][ãa]o|Roteiro)\s*/i,'')+'</td></tr>';
-  const setCapt=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).map(setLinha).join('');
-  const setRot=setEvs.filter(e=>/^\s*roteiro/i.test(e.title||'')).map(setLinha).join('');
-  S.push('<div><div class="ah-kick">Agenda de setembro · Gestão do mês</div><h2>Captação marcada, roteiro 3 dias antes, planejamento entregue</h2>'+
-    '<div class="ah-grid g2" style="margin-top:12px">'+
-    '<div><h3>Captações</h3><table><tbody>'+(setCapt||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table>'+
-    '<p style="font-size:12px;color:#5a5a62;margin-top:8px">Royal Face já recebeu a captação do ciclo e tem uma por mês. Lá em Casa não capta por ter dado churn.</p></div>'+
-    '<div><h3>Entrega de roteiro</h3><table><tbody>'+(setRot||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table>'+
-    '<h3 style="margin-top:14px">Planejamento estratégico do mês</h3><p style="font-size:13px;color:#bdbdc4">'+ahTxt('set_agenda_plano','O planejamento estratégico passa a ser entrega fixa do mês, não favor. É o que conduz o cliente, gera valor, sustenta renovação e facilita a entrega das semanas seguintes. Grande parte fica com Rosiron e Darmã. Na Alpha o planejamento não precisa ser mensal.',edit)+'</p></div>'+
+    '<div class="ah-grid g2" style="margin-top:16px">'+
+    card('O que o Caio resolve',ahTxt('set_novo_caio','Organiza as demandas, acompanha prazo e alinha entrega entre cliente e equipe. Olha prioridade, vê o que precisa de ajuste e acompanha cada etapa do projeto.',edit))+
+    card('O que o Gui resolve',ahTxt('set_novo_gui','Assume a gestão de tráfego no lugar do Giuseppe, acompanha parte dos clientes, estrutura e testa o funil próprio da ARK e conduz a auditoria dos projetos.',edit))+
     '</div></div>');
 
-  // 7 · Cada área no mês
-  S.push('<div><div class="ah-kick">Cada área no mês</div><h2>O que cada frente entregou</h2>'+
-    '<div class="ah-grid g3" style="margin-top:12px">'+
-    card('Comercial',ahTxt('set_area_com','Três fechamentos no mês e duas propostas grandes na mesa, Profox e Localiza.',edit))+
-    card('Marketing',ahTxt('set_area_mkt','Frente nova de geração de demanda, com Gui e Caio montando o funil da própria ARK.',edit))+
-    card('Criação',ahTxt('set_area_criacao','Área separada e com nome. Bruno no Fercon, Portela em design, Darmã em formação, Malu na Alpha.',edit))+
-    card('Tráfego',ahTxt('set_area_traf','Guilherme entra e operacionaliza a frente. Danilo segue gestor e sobe para COO.',edit))+
-    card('Sucesso do cliente',ahTxt('set_area_cs','Régua da carteira rodando. Caio entra ao lado do Lucas e se forma como PO.',edit))+
-    card('Captação',ahTxt('set_area_capt','Time de câmera montado, com Anderson, Henrique e Maria Clara na cobertura.',edit))+
+  // 08 · Movimentação do time
+  S.push('<div><div class="ah-kick">Quem muda de cadeira</div><h2>A estrutura se mexeu</h2>'+
+    '<div class="ahteam">'+
+    ahPessoa('Danilo de Lima','Sai do operacional e assume o COO','COO')+
+    ahPessoa('Darmã','Em formação, caminho para direção de arte','TESTE')+
+    ahPessoa('Saulo','Perde os cardápios, foca em fechar','')+
+    ahPessoa('Bruno','Sai da estratégia, fica em design no Fercon','')+
+    '</div>'+
+    '<p style="margin-top:16px;color:#8a8a92;font-size:13px">'+ahTxt('set_saidas','Saíram da estrutura: Márcio e Luckas Gomes da edição, o Márcio também da captação, e Giuseppe do tráfego.',edit)+'</p></div>');
+
+  // 09 · Organograma de verdade
+  const oM=(ini,nm,rl,tg)=>'<div class="ahorg-m"><div class="ahorg-av">'+ini+'</div><div><div class="ahorg-nm">'+nm+(tg?' <span class="ahorg-tg">'+tg+'</span>':'')+'</div><div class="ahorg-rl">'+rl+'</div></div></div>';
+  const oA=(n,lbl,ms,dest)=>'<div class="ahorg-a'+(dest?' on':'')+'"><div class="ahorg-n">'+n+'</div><div class="ahorg-lbl">'+lbl+'</div>'+ms.join('')+'</div>';
+  S.push('<div><div class="ah-kick">Quem faz o quê</div><h2>Organograma oficial</h2>'+
+    '<div class="ahorg">'+
+      '<div class="ahorg-topo"><div class="ahorg-badge">CEO</div><div class="ahorg-ceo">GABRIEL ANDRADE</div><div class="ahorg-sub">Liderança · Visão estratégica · Closing</div></div>'+
+      '<div class="ahorg-lig"></div>'+
+      '<div class="ahorg-coo"><div class="ahorg-badge dk">COO</div><div class="ahorg-ceo sm">DANILO DE LIMA</div><div class="ahorg-sub">Operação · Tráfego · Dados do comercial</div></div>'+
+      '<div class="ahorg-lig"></div>'+
+      '<div class="ahorg-areas">'+
+        oA('01','Comercial',[oM('G','Gabriel','Closer','HEAD'),oM('S','Saulo','CSO · BDR · SDR'),oM('D','Danilo','Análise de dados','NOVO')])+
+        oA('02','Marketing',[oM('G','Gabriel','Frente e propostas','HEAD'),oM('G','Guilherme','Geração de demanda','NOVO'),oM('C','Caio','Geração de demanda','NOVO'),oM('D','Danilo','Dados'),oM('S','Saulo','Marketing físico')])+
+        oA('03','Criação',[oM('B','Bruno','Designer · Fercon'),oM('M','M. Portela','Designer'),oM('D','Darmã','Em formação','TESTE'),oM('M','Maria Luiza','Social · Alpha'),oM('S','Samuel','Editor'),oM('C','Christopher','Editor'),oM('V','Victor','Editor')],true)+
+        oA('04','Tráfego',[oM('D','Danilo','Gestor','COO'),oM('G','Guilherme','Consultor','NOVO')])+
+        oA('05','Sucesso do cliente',[oM('L','Lucas Rosi','Account · CS','HEAD'),oM('C','Caio','Apoio e formação','PO')])+
+        oA('06','Captação',[oM('S','Samuel','Câmera'),oM('C','Christopher','Câmera'),oM('V','Victor','Câmera'),oM('A','Anderson','Câmera'),oM('H','Henrique','Câmera'),oM('M','Maria Clara','Cobertura')])+
+      '</div>'+
     '</div></div>');
 
-  // 8 · Execução por pessoa
-  const ppRows=d.pp.map(p=>'<tr><td style="font-weight:600;color:#f5f5f2">'+p.nm+'</td><td style="color:#9a9aa2">'+p.fn+'</td><td class="n">'+p.feitas+'</td><td class="n">'+(p.andamento||0)+'</td></tr>').join('');
-  S.push('<div><div class="ah-kick">Execução por profissional</div><h2>Quem entregou o quê</h2>'+
-    '<p class="lead">'+ahTxt('set_exec_intro','O mês não teve o apetite de entrega que a gente queria. Teve entrega pontual, e boa, mas não volume. Este quadro fica exposto mais um mês de propósito, para todo mundo ver a realidade do mesmo jeito.',edit)+'</p>'+
-    '<table style="margin-top:12px"><thead><tr><th>Pessoa</th><th>Função</th><th style="text-align:right">Concluídas</th><th style="text-align:right">Em andamento</th></tr></thead><tbody>'+ppRows+'</tbody></table>'+
-    '<p style="font-size:12px;color:#5a5a62;margin-top:10px">As duas colunas são contagem ao vivo do sistema, somando o kanban de Atividades e o quadro de Projetos. Quem entrega fora do quadro aparece zerado aqui, e é exatamente esse o ponto.</p></div>');
+  // 10 · DIVISOR bloco 3
+  S.push('<div>'+sec('03','Bloco 3','Como a gente vai ','RODAR','A trilha montada com o Guilherme, os ritos e a agenda do mês.')+'</div>');
 
-  // 9 · Caio e Guilherme
-  S.push('<div><div class="ah-kick">Gente nova na estrutura</div><h2>Caio e Guilherme, e o que cada um resolve</h2>'+
-    '<p class="lead">'+ahTxt('set_novos_intro','Não é reforço de braço. São duas frentes que estavam sem dono e passam a ter.',edit)+'</p>'+
-    '<div class="ah-grid g2" style="margin-top:14px">'+
-    cardG('Caio · Product Owner',ahTxt('set_novo_caio','Organiza as demandas, acompanha prazo e garante alinhamento entre cliente e equipe. Olha prioridade, identifica o que precisa de ajuste e acompanha cada etapa do projeto. Fica ao lado do Lucas no sucesso do cliente e entra no marketing para montar funil.',edit))+
-    cardG('Guilherme · tráfego e demanda',ahTxt('set_novo_gui','Assume a gestão de tráfego no lugar do Giuseppe e acompanha parte dos clientes. Além disso, estrutura e testa um funil próprio de geração de demanda para a ARK, e conduz a auditoria dos projetos.',edit))+
-    card('Danilo sobe para COO',ahTxt('set_novo_danilo','Sai da cadeira do operacional e assume o COO. Segue como gestor de tráfego e volta ao comercial pela leitura de dados.',edit))+
-    card('Darmã em formação',ahTxt('set_novo_darma','Mês de teste, com caminho para diretor de arte. Direcionamento de captação, marcação, acompanhamento e planejamento estratégico.',edit))+
-    '</div></div>');
-
-  // 10 · A trilha da operação
-  S.push('<div><div class="ah-kick">A trilha montada com o Guilherme</div><h2>Como a operação vai sair do papel</h2>'+
+  // 11 · Trilha
+  S.push('<div><div class="ah-kick">A trilha</div><h2>Seis etapas até a operação rodar sozinha</h2>'+
     '<div class="ah-grid g3" style="margin-top:14px">'+
     card('01 · Estruturação dos clientes','Briefing de cada cliente finalizado e documento de referência pronto, com contexto, necessidade e escopo. É onde a gente está agora.')+
-    card('02 · Responsabilidades','Quem responde por cada tarefa, quais tarefas cada projeto tem, quanto tempo cada uma demanda, para quem se demanda, e como é o ciclo de report.')+
-    card('03 · Projetos e ritos','Daily, weekly, planning, acompanhamento e priorização. Antes disso, os projetos precisam estar montados dentro do sistema.')+
+    card('02 · Responsabilidades','Quem responde por cada tarefa, quais tarefas cada projeto tem, quanto tempo cada uma demanda, para quem se demanda e como é o ciclo de report.')+
+    card('03 · Projetos e ritos','Daily, weekly, planning, acompanhamento e priorização. Antes disso, os projetos precisam estar montados no sistema.')+
     card('04 · Auditoria','Guilherme revisa os clientes, identifica necessidade adicional e define se entra mais alguém na estrutura.')+
-    card('05 · Primeira volta','A estrutura operacional roda com responsabilidade, tarefa, prazo e rito. Em paralelo, começam os testes do funil próprio de marketing.')+
+    card('05 · Primeira volta','A estrutura operacional roda com responsabilidade, tarefa, prazo e rito. Em paralelo, começam os testes do funil próprio.')+
     card('06 · Rotina','Acompanhar todo dia, achar gargalo, refinar tarefa, ajustar responsabilidade, revisar a semana e evoluir o modelo.')+
     '</div>'+
-    '<p style="margin-top:12px;color:#9a9aa2;font-size:13px">'+ahTxt('set_trilha_nota','A etapa 2 depende de uma reunião com o time inteiro. É a reunião que trava ou destrava tudo o que vem depois.',edit)+'</p></div>');
+    '<p style="margin-top:12px;color:#9a9aa2;font-size:13px">'+ahTxt('set_trilha_nota','A etapa 2 depende de uma reunião com o time inteiro, e é ela que trava ou destrava o resto.',edit)+'</p></div>');
 
-  // 11 · Ritos
+  // 12 · Ritos
   S.push('<div><div class="ah-kick">Como a gente se encontra</div><h2>Daily, planning e All Hands</h2>'+
     '<div class="ah-grid g3" style="margin-top:14px">'+
     card('Daily','A diária. Rápida, para saber o que está travado hoje e quem destrava.')+
     card('Planning','A reunião da semana. Prioriza, distribui e fecha o que a semana vai entregar.')+
     card('All Hands','A mensal. Resultado, direção e compromisso do mês.')+
     '</div>'+
-    '<div class="note" style="margin-top:14px"><h3>O combinado</h3><p>'+ahTxt('set_ritos','A presença na All Hands é cobrada de todo mundo que trabalha com a gente. Mas o que muda o mês é aparecer em algum momento da semana, na daily ou na planning. Por isso a gente não marca captação na segunda no horário da reunião.',edit)+'</p></div></div>');
+    '<div class="note" style="margin-top:14px"><h3>O combinado</h3><p>'+ahTxt('set_ritos','A presença na All Hands é cobrada de todo mundo. Mas o que muda o mês é aparecer em algum momento da semana, na daily ou na planning. Por isso a gente não marca captação na segunda no horário da reunião.',edit)+'</p></div></div>');
 
-  // 12 · Organograma
-  S.push('<div><div class="ah-kick">Quem faz o quê</div><h2>Organograma · 6 áreas sob CEO e COO</h2>'+
-    '<p class="lead">Gabriel no CEO, Danilo no COO. Abaixo, seis áreas com dono. A Criação vira área própria, separada do Marketing, para ficar claro quem está disponível.</p>'+
-    '<div class="ah-grid g3" style="margin-top:16px">'+
-    card('01 · Comercial','Gabriel como closer. Saulo em CSO, closer, BDR e SDR. Danilo entra em análise de dados e ponte com o marketing.')+
-    card('02 · Marketing','Gabriel como head e propostas. Gui e Caio em geração de demanda. Danilo em dados. Saulo no marketing físico, vestuário e peças.')+
-    card('03 · Criação','Bruno no projeto Fercon, M. Portela em design, Darmã em formação, Maria Luiza, Samuel, Christopher Mike e Victor.')+
-    card('04 · Tráfego','Danilo como gestor de tráfego. Guilherme entra como consultor no lugar do Giuseppe.')+
-    card('05 · Sucesso do cliente','Lucas Rosi como head. Caio entra de apoio e em formação como PO. Bruno sai da função.')+
-    card('06 · Captação','Samuel, Christopher Mike, Victor, Anderson, Henrique e Maria Clara.')+
-    '</div>'+
-    '<p style="margin-top:12px;color:#9a9aa2;font-size:13px">Saíram da estrutura: Márcio e Luckas Gomes da edição, Márcio também da captação, e Giuseppe do tráfego. O organograma completo fica na aba Conhecimento.</p></div>');
-
-  // 13 · O sistema (um slide só)
-  S.push('<div><div class="ah-kick">O sistema em setembro</div><h2>O que mudou para a operação caber no quadro</h2>'+
-    '<p class="lead">'+ahTxt('set_sistema_intro','As mudanças deste mês saíram da leitura do Caio como PO. Todas atacam a mesma coisa: saber quanto trabalho existe, de quem ele é, e quanto tempo custa.',edit)+'</p>'+
-    '<div class="ah-grid g3" style="margin-top:14px">'+
-    card('Projeto por cliente','Quadro de 6 colunas, com homologação interna e homologação do cliente separadas, etiquetas de papel e de sprint, e prontuário do cliente em 5 páginas.')+
-    card('Tempo por tarefa','Cada tarefa carrega estimativa em horas. Sem isso não dá para dizer se a semana cabe.')+
-    card('Capacity da equipe','O resumo do mês mostra o tempo operacional do time, quanto está em aberto por pessoa e quanto ainda está sem estimativa.')+
-    card('A ARK como cliente','A própria ARK entra no modelo de projeto. O marketing da casa passa a ser cobrado igual ao de cliente pagante.')+
-    card('Etiquetas próprias','A equipe cria etiqueta nova quando o trabalho pede, sem depender de alguém mexer no código.')+
-    card('Um quadro só','O kanban da aba Atividades passa a usar o mesmo modelo da aba Projetos. Uma linguagem só para a operação inteira.')+
+  // 13 · Agenda (ao vivo da Gestão do mês)
+  let setEvs=[];try{setEvs=(loadAgendaEvents()||[]).filter(e=>String((e&&e.date)||'').slice(0,7)==='2026-09').sort((a,b)=>String(a.date).localeCompare(String(b.date)));}catch(e){}
+  const setLinha=e=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+String(e.date).slice(8,10)+'/09</td><td>'+(e.title||'').replace(/^\s*(Capta[çc][ãa]o|Roteiro)\s*/i,'')+'</td></tr>';
+  const setCapt=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).map(setLinha).join('');
+  const setRot=setEvs.filter(e=>/^\s*roteiro/i.test(e.title||'')).map(setLinha).join('');
+  const nCapt=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).length;
+  S.push('<div><div class="ah-kick">Agenda de setembro</div><h2>'+nCapt+' captações marcadas</h2>'+
+    '<div class="ah-grid g2" style="margin-top:12px">'+
+    '<div><h3>Captações</h3><table><tbody>'+(setCapt||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table></div>'+
+    '<div><h3>Entrega de roteiro</h3><table><tbody>'+(setRot||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table>'+
+    '<h3 style="margin-top:14px">Planejamento estratégico</h3><p style="font-size:13px;color:#bdbdc4">'+ahTxt('set_agenda_plano','O planejamento estratégico passa a ser entrega fixa do mês. É o que conduz o cliente e sustenta a renovação. Grande parte fica com Rosiron e Darmã. Na Alpha não precisa ser mensal.',edit)+'</p></div>'+
     '</div></div>');
 
-  // 14 · Como usar
-  S.push('<div><div class="ah-kick">Como usar no dia a dia</div><h2>O combinado com o sistema</h2>'+
-    '<div class="ah-grid g2" style="margin-top:14px">'+
-    card('Mexeu, moveu o card',ahTxt('uso1','Backlog, A iniciar, Em andamento, Homologação, Homologação do cliente e Concluído. Se não está no quadro, não aconteceu.',edit))+
-    card('Toda tarefa com dono e com tempo',ahTxt('uso2','Marque o responsável e a estimativa em horas. É isso que faz o capacity da equipe existir.',edit))+
-    card('CRM sempre vivo',ahTxt('uso3','Todo lead e conversa registrados. O comercial mora aqui.',edit))+
-    card('Cliente no link',ahTxt('uso4','Aprovação de conteúdo e portal do cliente por link, sem WhatsApp solto.',edit))+
-    '</div>'+
-    '<div class="note" style="margin-top:14px"><h3>Regra de ouro</h3><p>Se não está no sistema, não foi feito. Quanto mais a equipe usa, mais o próprio All Hands se preenche sozinho.</p></div></div>');
+  // 14 · O sistema
+  S.push('<div><div class="ah-kick">O sistema em setembro</div><h2>O que mudou para a operação caber no quadro</h2>'+
+    '<div class="ah-grid g3" style="margin-top:14px">'+
+    card('Projeto por cliente','Quadro de 6 colunas, homologação interna separada da do cliente, etiqueta de papel e de sprint, e prontuário em 5 páginas.')+
+    card('Tempo por tarefa','Cada tarefa carrega estimativa em horas. Sem isso não dá para dizer se a semana cabe.')+
+    card('Capacity da equipe','O painel mostra o tempo operacional do time por pessoa, e quanto ainda está sem estimativa.')+
+    card('A ARK como cliente','A própria ARK entra no modelo de projeto, com quadro e briefing igual ao de cliente que paga.')+
+    card('Etiquetas próprias','A equipe cria etiqueta nova quando o trabalho pede, sem depender de código.')+
+    card('Um quadro só','O kanban da aba Atividades usa o mesmo modelo da aba Projetos.')+
+    '</div></div>');
 
-  // 15 · O que destravou
+  // 15 · Vídeo
+  const vurl=String(nar.set_video_url||'').trim();
+  let vhtml;
+  if(!vurl){
+    vhtml='<div class="vazio"><div class="ic">▶</div><p>Solte o arquivo em <b style="color:#ffaa00">public/video/allhands.mp4</b> ou cole o link do YouTube na chave <b style="color:#ffaa00">set_video_url</b>. Enquanto não tiver, este slide fica aqui reservado para dar play na reunião.</p></div>';
+  }else if(/youtu\.?be|drive\.google|vimeo/i.test(vurl)){
+    const yt=(vurl.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/)||[])[1];
+    const src=yt?('https://www.youtube.com/embed/'+yt):vurl.replace(/\/view.*$/,'/preview');
+    vhtml='<iframe src="'+src+'" allowfullscreen allow="autoplay; encrypted-media"></iframe>';
+  }else{
+    vhtml='<video controls preload="metadata" src="'+vurl+'"></video>';
+  }
+  S.push('<div><div class="ah-kick">Dar play junto</div><h2>'+ahTxt('set_video_titulo','O criativo novo de captação',edit)+'</h2>'+
+    '<p class="lead" style="margin-bottom:14px">'+ahTxt('set_video_sub','O criativo estava parado e destravou esta semana. A ideia é assistir aqui, na reunião, e todo mundo dar ideia de melhoria na hora.',edit)+'</p>'+
+    '<div class="ahvid">'+vhtml+'</div></div>');
+
+  // 16 · DIVISOR bloco 4
+  S.push('<div>'+sec('04','Bloco 4','O que ainda ','TRAVA','Sem maquiagem. O que destravou, o que não destravou e de quem é.')+'</div>');
+
+  // 17 · O que destravou
   S.push('<div><div class="ah-kick">O que funcionou</div><h2>O que destravou no mês</h2>'+
     '<div class="ah-grid g2" style="margin-top:12px">'+
-    cardG('A frente operacional saiu do vermelho',ahTxt('set_conq1','O maior destrave do mês foi o operacional. A gente viu risco, viu churn e teve receio de verdade. Com a entrada do Guilherme cuidando das frentes de tráfego pago, isso passa a ter dono.',edit))+
-    cardG('Designação de cliente definida',ahTxt('set_conq2','Todos os clientes já entraram com a designação de quem responde e quais demandas faltam, registrada no briefing.',edit))+
-    cardG('Criativo de captação destravado',ahTxt('set_conq3','O criativo estava parado e destravou esta semana. Entra criativo novo. Vale dar play aqui na reunião e todo mundo avaliar junto, com ideia de melhoria na hora.',edit))+
-    cardG('Projeto por cliente no ar',ahTxt('set_conq4','Cada cliente ganhou quadro, sprint e prontuário. O que era combinado de reunião virou tarefa com dono.',edit))+
+    cardG('A frente operacional',ahTxt('set_conq1','O maior destrave do mês foi o operacional. A gente viu risco, viu churn e teve receio. Com a entrada do Guilherme nas frentes de tráfego pago, isso passa a ter dono.',edit))+
+    cardG('Designação de cliente definida',ahTxt('set_conq2','Todos os clientes entraram com a designação de quem responde e quais demandas faltam, registrada no briefing.',edit))+
+    cardG('Criativo de captação destravado',ahTxt('set_conq3','O criativo estava parado e destravou esta semana. Entra criativo novo.',edit))+
+    cardG('Projeto por cliente no ar',ahTxt('set_conq4','Cada cliente ganhou quadro, sprint e prontuário no sistema.',edit))+
     '</div></div>');
 
-  // 16 · Gargalos
-  S.push('<div><div class="ah-kick">O que ainda trava</div><h2>Gargalos reais, com dono e ação</h2>'+
+  // 18 · Número gigante do ponto de atenção
+  S.push('<div>'+big(ahTxt('set_big_k','MRR da Alpha para a taxa de franquia',edit),ahTxt('set_big_v','não fecha',edit),
+    ahTxt('set_big_d','O ponto de atenção máxima do mês. No último mês não veio cobrança e não chegou até a gente se foi considerado pago. O financeiro deles está desalinhado, e o acesso aos dados do operacional da Alpha continua na mesa do Danilo.',edit),'red')+'</div>');
+
+  // 19 · Gargalos
+  S.push('<div><div class="ah-kick">Com dono e com ação</div><h2>Os outros gargalos</h2>'+
     '<div class="ah-grid g3" style="margin-top:12px">'+
-    cardR('MRR da Alpha não paga a franquia',ahTxt('set_garg1','O ponto de atenção máxima do mês. Não há MRR na Alpha suficiente para a taxa de franquia. Sem isso, a conta não fecha.',edit))+
-    cardR('Cobrança da Alpha nebulosa',ahTxt('set_garg2','No último mês não veio cobrança e não chegou até a gente se foi considerado pago. O financeiro deles está desalinhado. Precisa de resposta escrita.',edit))+
-    cardR('Acesso aos dados do operacional Alpha',ahTxt('set_garg3','Responsabilidade na mesa do Danilo. Sem esse acesso a gente não enxerga a operação da Alpha inteira. Prioridade de conclusão.',edit))+
+    cardR('Cobrança da Alpha',ahTxt('set_garg2','Precisa de resposta escrita: foi considerado pago ou não. Dono: Gabriel.',edit))+
+    cardR('Dados do operacional Alpha',ahTxt('set_garg3','Sem esse acesso a gente não enxerga a operação da Alpha inteira. Dono: Danilo.',edit))+
     cardR('Growth Hub sem conversão',ahTxt('set_garg4','Investimento feito e nenhuma conversão. A saída é lead próprio, e é isso que o funil do Guilherme vai testar.',edit))+
-    cardR('Estimativa em branco',ahTxt('set_garg5','Tarefa sem hora estimada deixa o capacity mentir. Enquanto o time não preencher, a conta de carga fica pela metade. Dono: cada responsável.',edit))+
+    cardR('Estimativa em branco',ahTxt('set_garg5','Tarefa sem hora estimada deixa o capacity pela metade. Dono: cada responsável.',edit))+
+    cardR('Renovações na mesa',ahTxt('set_garg6','Mundo Livre e Sabor e Lenha vencem nas próximas duas semanas. Sasse e Naeo precisam de conversa agora.',edit))+
     '</div></div>');
 
-  // 17 · Para onde vamos
-  S.push('<div><div class="ah-kick">Para onde vamos · Setembro</div><h2>Mês de estrutura em pé</h2>'+
-    '<div class="ah-grid g2" style="margin-top:12px">'+
-    card('Reunião de responsabilidades',ahTxt('set_alav1','A etapa 2 da trilha. Definir dono, tarefa, tempo e canal de demanda com o time inteiro. Sem ela, nada do resto anda.',edit))+
-    card('Projetos montados no sistema',ahTxt('set_alav2','Estruturar os projetos no sistema para os ritos começarem a rodar em cima de algo real.',edit))+
-    card('Funil próprio no ar',ahTxt('set_alav3','Guilherme estrutura e testa a geração de demanda da ARK, com número medido no CRM.',edit))+
-    card('Renovações ativadas',ahTxt('set_alav4','Fercon, Vivenda e Fonseca confirmadas. Mundo Livre e Sabor e Lenha nas próximas duas semanas. Sasse e Naeo precisam de conversa agora.',edit))+
-    '</div></div>');
+  // 20 · DIVISOR bloco 5
+  S.push('<div>'+sec('05','Bloco 5','Para onde a gente ','VAI','O que cada frente leva daqui, e o que precisa estar de pé no fim do mês.')+'</div>');
 
-  // 18 · OKRs
+  // 21 · OKRs
   S.push('<div><div class="ah-kick">OKRs de setembro · por função</div><h2>O que cada um vai puxar</h2>'+
     '<div class="ah-grid g2" style="margin-top:12px">'+
     card('Comercial · Saulo + Gabriel + Danilo',ahTxt('set_okr_com','Profox e Localiza respondidas, renovações de Sasse e Naeo endereçadas, funil no CRM sem lead parado e leitura semanal de dado feita pelo Danilo.',edit))+
@@ -15620,36 +15740,13 @@ function ahBuildSlides(edit){
     card('Criação e Captação',ahTxt('set_okr_criacao','Roteiro entregue 3 dias antes de cada captação, planejamento estratégico do mês entregue e tarefa com estimativa preenchida.',edit))+
     '</div></div>');
 
-  // 19 · Compromisso
+  // 22 · Compromisso
   S.push('<div class="cover"><div class="ah-kick">Compromisso do mês</div>'+
-    '<h2 style="font-size:44px;max-width:1000px;margin-top:10px">'+ahTxt('set_compromisso','Setembro é o mês em que a estrutura fica em pé: gente nova com frente definida, tarefa com dono e com tempo, e a operação inteira dentro do quadro.',edit)+'</h2>'+
-    '<div style="margin-top:20px"><span class="pill y">Reunião de responsabilidades</span><span class="pill y">Tarefa com dono e com hora</span><span class="pill y">Roteiro 3 dias antes</span><span class="pill y">Funil próprio no ar</span></div>'+
-    '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffc400">VAMOS JUNTOS ●</p></div>');
+    '<h2 style="font-size:40px;max-width:1000px;margin-top:10px">'+ahTxt('set_compromisso','O que cada um leva daqui',edit)+'</h2>'+
+    '<div style="margin-top:20px"><span class="pill y">Reunião de responsabilidades feita</span><span class="pill y">Tarefa com dono e com hora</span><span class="pill y">Roteiro 3 dias antes</span><span class="pill y">Funil próprio no ar</span><span class="pill y">Dados da Alpha resolvidos</span></div>'+
+    '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffaa00">VAMOS JUNTOS ●</p></div>');
 
-  // 20 · Método 5 Eixos
-  S.push('<div><div class="ah-kick">A metodologia que sustenta tudo</div><h2>Método dos 5 Eixos</h2>'+
-    '<p>Cinco dimensões interdependentes, todas assentadas sobre uma premissa central: <b style="color:#fff">o gestor-operador precisa dominar o ofício</b>. Sem domínio técnico, nenhum eixo se sustenta.</p>'+
-    '<div class="ah-grid g3" style="margin-top:16px">'+
-    card('01 · Identidade Estratégica','Posicionamento claro, proposta de valor definida, nicho e diferencial. Sem isso a agência compete por preço e perde sempre.')+
-    card('02 · Pessoas &amp; Cultura','Time com papéis claros, metas individuais e cultura de dono. Cada um sabe o que entrega e por que isso importa.')+
-    card('03 · Processos &amp; POPs','22 POPs documentados, rituais semanais e mensais, sistema rodando. O que funciona uma vez funciona sempre.')+
-    card('04 · Comercial &amp; Pipeline','Máquina de captação previsível: SDR, closer e tráfego próprio. Meta de receita com funil visível toda semana.')+
-    card('05 · Inteligência &amp; Sistema','WorkFlowArk como plataforma de decisão: dados, tarefas, clientes e integrações, tudo em um lugar só.')+
-    card('A virada','A ARK cresceu aplicando o método. Não por acidente, por processo.')+
-    '</div></div>');
-
-  // 21 · Reconhecimento
-  S.push('<div class="cover"><div class="ah-kick">Agosto foi de vocês</div>'+
-    '<h2 style="font-size:44px;max-width:1000px;margin-top:10px">'+ahTxt('set_reconhec','Cada captação, cada entrega e cada proposta saiu da mão de vocês. A estrutura de setembro só existe porque agosto foi entregue.',edit)+'</h2>'+
-    '<div style="margin-top:22px">'+
-    '<span class="pill y">Carteira em '+d.carteira+' clientes</span>'+
-    '<span class="pill y">Três clientes novos fechados</span>'+
-    '<span class="pill">Time de criação com nome</span>'+
-    '<span class="pill">Projeto por cliente no ar</span>'+
-    '</div>'+
-    '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffc400">OBRIGADO ●</p></div>');
-
-  // 22 · Financeiro (sócios)
+  // 23 · Financeiro (sócios)
   const topRec=fin.rec.slice().sort((a,b)=>mmNum(b.valor)-mmNum(a.valor)).slice(0,5)
     .map(x=>'<tr><td>'+(x.nome||'sem nome')+'</td><td class="n">'+mmBRL(mmNum(x.valor))+'</td></tr>').join('')||'<tr><td>Sem dados</td><td class="n">0</td></tr>';
   S.push('<div><div class="ah-kick">Fechamento financeiro · sócios</div><h2>O caixa do mês</h2>'+
@@ -15660,7 +15757,7 @@ function ahBuildSlides(edit){
     ahStat(mmK(d.alMRR),'MRR Alpha',d.alphaN+' clientes','amber')+
     '</div>'+
     '<div class="ah-grid g2"><div><h3>Maiores a receber</h3><table>'+topRec+'</table></div>'+
-    '<div class="note red" style="align-self:start"><h3>O ponto do mês</h3><p>O MRR da Alpha não cobre a taxa de franquia, e a cobrança do último mês ficou sem confirmação de pagamento. Resolver isso vale mais que qualquer fechamento novo.</p></div></div>'+
+    '<div class="note red" style="align-self:start"><h3>O ponto do mês</h3><p>O MRR da Alpha não cobre a taxa de franquia, e a cobrança do último mês ficou sem confirmação de pagamento.</p></div></div>'+
     '<p style="margin-top:10px;color:#5a5a62;font-size:12px">Números ao vivo da Minha Planilha. Detalhe completo na aba Financeiro.</p></div>');
 
   return S;
@@ -15669,7 +15766,8 @@ window.ahIdx=0;window.ahSlides=[];
 function ahWrap(html,i,total){
   const nn=String(i+1).padStart(2,'0'),tt=String(total).padStart(2,'0');
   const mes=(ahNarr().set_mes_label||'Setembro de 2026');
-  return '<div class="ahd">'+
+  const ehSec=/class="ahsec"/.test(html); // divisor de bloco respira diferente
+  return '<div class="ahd'+(ehSec?' sec':'')+'">'+
     '<div class="ah-chrome"><div class="ah-brand"><img src="/ark-logo.png" alt="ARK"><span>ARK<b>·</b>ALL HANDS</span></div><div class="ah-pageno">'+nn+' <i>/</i> '+tt+'</div></div>'+
     '<div class="ah-body">'+html+'</div>'+
     '<div class="ah-base"><span>ARK Content</span><span>'+mes+'</span></div>'+
@@ -15679,6 +15777,14 @@ function renderAllhands(){
   const stage=document.getElementById('allhands-stage');if(!stage)return;
   const slides=ahBuildSlides(true);
   stage.innerHTML=slides.map((html,i)=>ahWrap(html,i,slides.length)).join('');
+  /* Entrada dos slides na rolagem. Fica SO no palco (#allhands-stage), nunca em
+     elemento de layout do sistema: animacao com fill em transform ja prendeu a
+     sidebar aberta no celular por dias. Sem IntersectionObserver, tudo aparece. */
+  try{
+    if(!('IntersectionObserver' in window)){stage.querySelectorAll('.ahd').forEach(el=>el.classList.add('vis'));return;}
+    const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');io.unobserve(e.target);}});},{rootMargin:'0px 0px -12% 0px',threshold:.06});
+    stage.querySelectorAll('.ahd').forEach(el=>io.observe(el));
+  }catch(e){stage.querySelectorAll('.ahd').forEach(el=>el.classList.add('vis'));}
 }
 function ahRenderCurrent(){
   const slide=document.getElementById('ah-slide');if(!slide)return;
