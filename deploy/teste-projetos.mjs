@@ -69,12 +69,14 @@ async function main() {
   await page.locator('#pj-seed').click();
   await page.waitForTimeout(600);
   const nCards = await page.locator('#pj-cards .pj-c').count();
-  checa(nCards === 8, 'semear cria os 8 clientes do briefing (achou ' + nCards + ')');
+  // 9 e nao 8: a propria ARK entrou como projeto a pedido do Caio (31/08/2026),
+  // para o marketing da casa ser cobrado no mesmo quadro do cliente que paga.
+  checa(nCards === 9, 'semear cria os 8 clientes do briefing mais a ARK (achou ' + nCards + ')');
 
   // nao duplica se clicar de novo
   await page.locator('#pj-seed').click();
   await page.waitForTimeout(500);
-  checa(await page.locator('#pj-cards .pj-c').count() === 8, 'clicar em semear de novo nao duplica');
+  checa(await page.locator('#pj-cards .pj-c').count() === 9, 'clicar em semear de novo nao duplica');
 
   console.log('\n2. Quadro de 6 colunas');
   await page.locator('#pj-cards .pj-c', { hasText: 'Fercon' }).first().click();
@@ -166,7 +168,7 @@ async function main() {
   await page.waitForTimeout(3000);
   await page.evaluate(() => document.querySelector('[data-nav="projetos"]').click());
   await page.waitForTimeout(600);
-  checa(await page.locator('#pj-cards .pj-c').count() === 8, 'os 8 projetos continuam la depois de recarregar');
+  checa(await page.locator('#pj-cards .pj-c').count() === 9, 'os 9 projetos continuam la depois de recarregar');
 
   console.log('\n7. A aba Atividades nao foi tocada');
   checa(await page.evaluate(() => {

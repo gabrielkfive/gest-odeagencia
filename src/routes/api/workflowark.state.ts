@@ -63,6 +63,7 @@ const STATE_KEYS = new Set([
   // papel e sprint, e o prontuario (briefing, arquivos, senhas, ata de otimizacao,
   // licoes aprendidas). Estrutura pedida pelo Caio em 28/08/2026.
   "wfa-projetos",
+  "wfa-papeis",
   // Briefing de ENTRADA de cliente novo (identidade visual e site), preenchido na
   // página /briefing. Nome parecido com o de cima, papel diferente: aquele é pauta de
   // conteúdo, este é a reunião que abre o projeto. Só a página /briefing escreve aqui,

@@ -1,4 +1,4 @@
-<!-- build 20260831-allhands-setembro-v2 -->
+<!-- build 20260831-caio-kanban-capacity -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -477,7 +477,9 @@ table.t tr.high{background:var(--yel-bg)}
 .task-col::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;border-radius:var(--r-lg) var(--r-lg) 0 0;background:var(--mute-2)}
 .task-col[data-status=backlog]::before{background:#a3a3a3}
 .task-col[data-status=andamento]::before{background:var(--yel)}
-.task-col[data-status=aprovacao]::before{background:#3b6fff}
+.task-col[data-status=iniciar]::before{background:#2b62c4}
+.task-col[data-status=aprovacao]::before{background:#d4a300}
+.task-col[data-status=homologcli]::before{background:#ea580c}
 .task-col[data-status=concluido]::before{background:var(--green)}
 .task-col.drop-on{background:linear-gradient(180deg,#fffdf2,#fff7d9);box-shadow:0 0 0 2px var(--yel) inset,var(--sh-2)}
 .task-col-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:12px 4px 10px;margin:0 0 2px;background:linear-gradient(180deg,rgba(251,251,249,.96),rgba(251,251,249,.72));backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);border-bottom:1px solid var(--line)}
@@ -487,7 +489,9 @@ table.t tr.high{background:var(--yel-bg)}
 .task-col-head h4{padding:3px 9px;border-radius:var(--r-full)}
 .task-col[data-status=backlog] .task-col-head h4{background:rgba(130,130,140,.14)}
 .task-col[data-status=andamento] .task-col-head h4{background:rgba(255,199,0,.20);color:#7a5c00}
-.task-col[data-status=aprovacao] .task-col-head h4{background:rgba(59,111,255,.14);color:#2c55c4}
+.task-col[data-status=iniciar] .task-col-head h4{background:rgba(43,98,196,.14);color:#2b62c4}
+.task-col[data-status=aprovacao] .task-col-head h4{background:rgba(212,163,0,.16);color:#8a6a00}
+.task-col[data-status=homologcli] .task-col-head h4{background:rgba(234,88,12,.14);color:#c2410c}
 .task-col[data-status=concluido] .task-col-head h4{background:rgba(48,209,88,.16);color:#177a3d}
 /* CORREÇÃO: a área de soltar era só do tamanho dos cards (sobrava espaço "morto" embaixo
    onde o drop não registrava). Agora a lista preenche a coluna inteira — a coluna toda vira alvo. */
@@ -1472,15 +1476,21 @@ body.aura-dark .prio-baixa{background:rgba(34,197,94,.14)!important;color:#4ade8
 body.aura-dark .task-col-head{background:rgba(4,5,7,.9);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 body.aura-dark .task-col[data-status=backlog] .task-col-head{box-shadow:inset 0 3px 0 #7b8494}
 body.aura-dark .task-col[data-status=andamento] .task-col-head{box-shadow:inset 0 3px 0 var(--yel)}
-body.aura-dark .task-col[data-status=aprovacao] .task-col-head{box-shadow:inset 0 3px 0 #5b8cff}
+body.aura-dark .task-col[data-status=iniciar] .task-col-head{box-shadow:inset 0 3px 0 #5b8cff}
+body.aura-dark .task-col[data-status=aprovacao] .task-col-head{box-shadow:inset 0 3px 0 #e8b71d}
+body.aura-dark .task-col[data-status=homologcli] .task-col-head{box-shadow:inset 0 3px 0 #fb7a3c}
 body.aura-dark .task-col[data-status=concluido] .task-col-head{box-shadow:inset 0 3px 0 #4ade80}
 body.aura-dark .task-col[data-status=andamento] .task-col-head h4{color:var(--yel)}
-body.aura-dark .task-col[data-status=aprovacao] .task-col-head h4{color:#8db0ff}
+body.aura-dark .task-col[data-status=iniciar] .task-col-head h4{color:#8db0ff}
+body.aura-dark .task-col[data-status=aprovacao] .task-col-head h4{color:#e8c65a}
+body.aura-dark .task-col[data-status=homologcli] .task-col-head h4{color:#fb9a6c}
 body.aura-dark .task-col[data-status=concluido] .task-col-head h4{color:#4ade80}
 /* Cor da etapa atrás do nome também no escuro (tinta suave, sem gritar no preto) */
 body.aura-dark .task-col[data-status=backlog] .task-col-head h4{background:rgba(123,132,148,.16);color:#c7cdd8}
 body.aura-dark .task-col[data-status=andamento] .task-col-head h4{background:rgba(255,199,0,.12)}
-body.aura-dark .task-col[data-status=aprovacao] .task-col-head h4{background:rgba(91,140,255,.14)}
+body.aura-dark .task-col[data-status=iniciar] .task-col-head h4{background:rgba(91,140,255,.14)}
+body.aura-dark .task-col[data-status=aprovacao] .task-col-head h4{background:rgba(232,183,29,.14)}
+body.aura-dark .task-col[data-status=homologcli] .task-col-head h4{background:rgba(251,122,60,.14)}
 body.aura-dark .task-col[data-status=concluido] .task-col-head h4{background:rgba(74,222,128,.12)}
 /* Chips de status (tabelas, réguas): mantêm cor viva no preto */
 body.aura-dark .chip.ok{background:rgba(34,197,94,.2);color:#4ade80}
@@ -2752,7 +2762,9 @@ function wfaSetTheme(t){
           #page-tarefas .tl-pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
           #page-tarefas .tl-st-backlog{background:#f0f0ee;color:#777}
           #page-tarefas .tl-st-andamento{background:#fff3cd;color:#8a6d00}
-          #page-tarefas .tl-st-aprovacao{background:#e7f0ff;color:#2b62c4}
+          #page-tarefas .tl-st-iniciar{background:#e7f0ff;color:#2b62c4}
+          #page-tarefas .tl-st-aprovacao{background:#fdf3d6;color:#8a6a00}
+          #page-tarefas .tl-st-homologcli{background:#ffe8d9;color:#c2410c}
           #page-tarefas .tl-st-concluido{background:#e6f8ec;color:#127a3e}
           /* MODO ESCURO DA VISTA LISTA: as regras claras acima usam ID (#page-tarefas .tl-table
              = 1 id + 1 classe) e venciam a regra de tema (body.aura-dark .tl-table = 0 id + 2
@@ -2854,15 +2866,25 @@ function wfaSetTheme(t){
             <div class="task-list" data-list="backlog"></div>
             <div class="qadd" data-qadd="backlog"><button class="add-task-btn" onclick="qaddOpen('backlog')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'backlog')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('backlog',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('backlog')">✕</button></div></div></div>
           </div>
+          <div class="task-col" data-status="iniciar">
+            <div class="task-col-head"><h4>A iniciar</h4><span class="ct" id="ct-iniciar">0</span></div>
+            <div class="task-list" data-list="iniciar"></div>
+            <div class="qadd" data-qadd="iniciar"><button class="add-task-btn" onclick="qaddOpen('iniciar')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'iniciar')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('iniciar',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('iniciar')">✕</button></div></div></div>
+          </div>
           <div class="task-col" data-status="andamento">
             <div class="task-col-head"><h4>Em Andamento</h4><span class="ct" id="ct-andamento">0</span></div>
             <div class="task-list" data-list="andamento"></div>
             <div class="qadd" data-qadd="andamento"><button class="add-task-btn" onclick="qaddOpen('andamento')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'andamento')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('andamento',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('andamento')">✕</button></div></div></div>
           </div>
           <div class="task-col" data-status="aprovacao">
-            <div class="task-col-head"><h4>Aprovação</h4><span class="ct" id="ct-aprovacao">0</span></div>
+            <div class="task-col-head"><h4>Homologação</h4><span class="ct" id="ct-aprovacao">0</span></div>
             <div class="task-list" data-list="aprovacao"></div>
             <div class="qadd" data-qadd="aprovacao"><button class="add-task-btn" onclick="qaddOpen('aprovacao')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'aprovacao')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('aprovacao',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('aprovacao')">✕</button></div></div></div>
+          </div>
+          <div class="task-col" data-status="homologcli">
+            <div class="task-col-head"><h4>Homologação do cliente</h4><span class="ct" id="ct-homologcli">0</span></div>
+            <div class="task-list" data-list="homologcli"></div>
+            <div class="qadd" data-qadd="homologcli"><button class="add-task-btn" onclick="qaddOpen('homologcli')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'homologcli')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('homologcli',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('homologcli')">✕</button></div></div></div>
           </div>
           <div class="task-col" data-status="concluido">
             <div class="task-col-head"><h4>Concluído</h4><span class="ct" id="ct-concluido">0</span></div>
@@ -3556,7 +3578,7 @@ function wfaSetTheme(t){
         </script>
 <script>
 /* ============ CLOUD SYNC ============ */
-const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings','wfa-acertosrec','wfa-propostas','wfa-notif-read','wfa-planejamentos','wfa-projetos'];
+const WFA_CLOUD_KEYS = ['wfa-tarefas','wfa-regua','wfa-jornada','wfa-demandas','wfa-rotinas','wfa-okrs','wfa-okrs-edits','wfa-inline-edits','wfa-processos','wfa-gcal','wfa-fin','wfa-crm','wfa-agenda-events','wfa-comercial','wfa-cobranca','wfa-acerto','wfa-planilha','wfa-whatsapp','wfa-notificacoes','wfa-planejamento','wfa-criativos','wfa-clientes-custom','wfa-colab-custom','wfa-cliente-detalhes','wfa-conselho-briefings','wfa-drive','wfa-brand','wfa-widgets','wfa-alpha','wfa-alpha-am','wfa-alpha-gt','wfa-alpha-cr','wfa-alpha-bs','wfa-warroom','wfa-cli-geo','wfa-deleted-ids','wfa-producao','wfa-briefings','wfa-acertosrec','wfa-propostas','wfa-notif-read','wfa-planejamentos','wfa-projetos','wfa-papeis'];
 const WFA_SUPABASE_URL='https://fxfnonozzekxnxddxsnh.supabase.co';
 const WFA_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4Zm5vbm96emVreG54ZGR4c25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQwODAsImV4cCI6MjA5NjIwMDA4MH0.ZQmGbuwIq_HM81QH-ch_kJPMrV8AgeX_WCF9iTaglK0';
 const _wfaSb=supabase.createClient(WFA_SUPABASE_URL,WFA_SUPABASE_KEY);
@@ -5741,7 +5763,7 @@ function iniciarAutoSync(){
       </div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="nt-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
-        <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="nt-status"><option value="backlog">Backlog</option><option value="andamento">Em Andamento</option><option value="aprovacao">Aprovação</option><option value="concluido">Concluído</option></select></div>
+        <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="nt-status"><option value="backlog">Backlog</option><option value="iniciar">A iniciar</option><option value="andamento">Em Andamento</option><option value="aprovacao">Homologação</option><option value="homologcli">Homologação do cliente</option><option value="concluido">Concluído</option></select></div>
       </div>
       <div class="form-group"><label class="form-label">Tags <span style="color:var(--mute);font-weight:400">(separe por vírgula)</span></label><input class="form-input" id="nt-tags" placeholder="Ex: criativo, urgente, copa"></div>
     </div>
@@ -5833,10 +5855,11 @@ function iniciarAutoSync(){
               <button class="td2-tbtn td2-treset" onclick="tdResetTimer()" title="Zerar tempo">↺</button>
             </div>
           </div>
-          <div class="td2-fld"><label>Status</label><select class="form-select" id="td-status"><option value="backlog">Backlog</option><option value="andamento">Em Andamento</option><option value="aprovacao">Aprovação</option><option value="concluido">Concluído</option></select></div>
+          <div class="td2-fld"><label>Status</label><select class="form-select" id="td-status"><option value="backlog">Backlog</option><option value="iniciar">A iniciar</option><option value="andamento">Em Andamento</option><option value="aprovacao">Homologação</option><option value="homologcli">Homologação do cliente</option><option value="concluido">Concluído</option></select></div>
           <div class="td2-fld"><label>Prioridade</label><select class="form-select" id="td-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
           <div class="td2-fld"><label>Responsável <a onclick="colabOpen()" style="color:#a07e00;cursor:pointer;font-weight:700">+ pessoa</a></label><select class="form-select" id="td-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Márcio</option><option>Henrique</option><option>Nicolas</option><option>Anderson</option><option>João Gabriel</option><option>Maria Clara</option><option>Luckas Gomes</option><option>Kaique</option><option>Lush</option></select></div>
           <div class="td2-fld"><label>Vencimento</label><input class="form-input" id="td-data" type="date"></div>
+          <div class="td2-fld"><label>Tempo estimado <span style="color:var(--mute);font-weight:400">(horas)</span></label><input class="form-input" id="td-horas" type="number" min="0" step="0.5" placeholder="ex: 2"></div>
           <div class="td2-fld"><label>Cliente</label><select class="form-select" id="td-cliente"></select></div>
           <div class="td2-fld"><label>Função</label><select class="form-select" id="td-funcao"><option>Account Manager</option><option>Gestor de Tráfego</option><option>Criador</option><option>Editor</option><option>Designer</option><option>Captação</option></select></div>
           <div class="td2-fld"><label>Tags <span style="color:var(--mute);font-weight:400">(vírgula)</span></label><input class="form-input" id="td-tags" placeholder="criativo, urgente"></div>
@@ -7842,7 +7865,7 @@ function relatorioImprimir(){
   ];
 
   /* Etiquetas de PAPEL. Sao as mesmas que aparecem no filtro dele. */
-  var PAPEIS=[
+  var PAPEIS_BASE=[
     {k:'po',      n:'po',                     c:'#ea580c'},
     {k:'cs',      n:'cs',                     c:'#7c3aed'},
     {k:'rot',     n:'roteirista',             c:'#d4a300'},
@@ -7853,6 +7876,30 @@ function relatorioImprimir(){
     {k:'designlp',n:'design de LP',           c:'#9333ea'},
     {k:'fixa',    n:'fixa',                   c:'#64748b'}
   ];
+  /* Etiqueta nova criada pela equipe, pedido do Caio. Fica em wfa-papeis, que ja
+     esta liberada no STATE_KEYS do servidor: chave so no cliente tem o save
+     recusado em silencio, e a etiqueta sumiria no outro aparelho. */
+  var PAPEIS_KEY='wfa-papeis';
+  function papeisCustom(){try{var a=JSON.parse(localStorage.getItem(PAPEIS_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+  function papeisSalvar(a){
+    try{localStorage.setItem(PAPEIS_KEY,JSON.stringify(a));}catch(e){}
+    try{if(typeof cloudSave==='function')cloudSave(PAPEIS_KEY,localStorage.getItem(PAPEIS_KEY));}catch(e){}
+    PAPEIS=PAPEIS_BASE.concat(papeisCustom());
+  }
+  var PAPEIS=PAPEIS_BASE.concat(papeisCustom());
+  var CORES_PAPEL=['#ea580c','#7c3aed','#d4a300','#16a34a','#2b62c4','#0891b2','#db2777','#9333ea','#64748b','#be123c','#0f766e','#7c2d12'];
+  function papelNovo(){
+    var nm=(prompt('Nome da etiqueta nova (ex: copywriter)')||'').trim();
+    if(!nm)return null;
+    var k='cst-'+nm.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'').slice(0,20);
+    if(!k||k==='cst-'){try{toast('Nome invalido para etiqueta');}catch(e){}return null;}
+    if(papel(k)){try{toast('Ja existe uma etiqueta com esse nome');}catch(e){}return k;}
+    var cur=papeisCustom();
+    cur.push({k:k,n:nm,c:CORES_PAPEL[(PAPEIS_BASE.length+cur.length)%CORES_PAPEL.length]});
+    papeisSalvar(cur);
+    try{toast('Etiqueta "'+nm+'" criada');}catch(e){}
+    return k;
+  }
 
   /* TEMPLATE da sprint 1. Ele pediu "deixar essas tasks montadas" pra nao comecar
      do zero em cliente nenhum. Sai do backlog visivel no video, na mesma ordem. */
@@ -8328,7 +8375,7 @@ function relatorioImprimir(){
           return eq.map(function(n){return '<option value="'+esc(n)+'"'+(t.resp===n?' selected':'')+'>'+esc(n)+'</option>';}).join('');
         })()+
       '</select></div>'+
-      '<div class="pr-f"><label>Etiquetas de papel</label><div style="display:flex;gap:6px;flex-wrap:wrap">'+
+      '<div class="pr-f"><label>Etiquetas de papel <a data-ppnovo="1" style="color:var(--yel);cursor:pointer;font-weight:700;text-transform:none;letter-spacing:0">+ nova etiqueta</a></label><div id="tk-papeis" style="display:flex;gap:6px;flex-wrap:wrap">'+
         PAPEIS.map(function(x){
           var on=(t.papeis||[]).indexOf(x.k)>=0;
           return '<button type="button" class="pj-tag" data-pp="'+x.k+'" style="cursor:pointer;padding:5px 11px;font-size:11px;background:'+(on?x.c:'transparent')+';color:'+(on?'#fff':x.c)+';border:1px solid '+x.c+'">'+esc(x.n)+'</button>';
@@ -8342,13 +8389,32 @@ function relatorioImprimir(){
     );
     var m=document.getElementById('pj-modal');
     m.dataset.papeis=(t.papeis||[]).join(',');
-    m.querySelectorAll('[data-pp]').forEach(function(b){
+    /* Criar etiqueta nova no meio da edicao: repinta so a faixa de etiquetas e
+       mantem tudo que ja foi digitado no formulario. Reabrir o modal perderia. */
+    var elNovo=m.querySelector('[data-ppnovo]');
+    if(elNovo)elNovo.addEventListener('click',function(){
+      var k=papelNovo();if(!k)return;
+      var cur=(m.dataset.papeis||'').split(',').filter(Boolean);
+      if(cur.indexOf(k)<0)cur.push(k);
+      m.dataset.papeis=cur.join(',');
+      pjPintaPapeis(m);
+    });
+    pjPintaPapeis(m);
+  }
+  function pjPintaPapeis(m){
+    var box=m.querySelector('#tk-papeis');if(!box)return;
+    var cur=(m.dataset.papeis||'').split(',').filter(Boolean);
+    box.innerHTML=PAPEIS.map(function(x){
+      var on=cur.indexOf(x.k)>=0;
+      return '<button type="button" class="pj-tag" data-pp="'+x.k+'" style="cursor:pointer;padding:5px 11px;font-size:11px;background:'+(on?x.c:'transparent')+';color:'+(on?'#fff':x.c)+';border:1px solid '+x.c+'">'+esc(x.n)+'</button>';
+    }).join('');
+    box.querySelectorAll('[data-pp]').forEach(function(b){
       b.addEventListener('click',function(){
-        var cur=(m.dataset.papeis||'').split(',').filter(Boolean);
-        var k=b.dataset.pp, ix=cur.indexOf(k), pp=papel(k);
-        if(ix>=0)cur.splice(ix,1);else cur.push(k);
-        m.dataset.papeis=cur.join(',');
-        var on=cur.indexOf(k)>=0;
+        var atual=(m.dataset.papeis||'').split(',').filter(Boolean);
+        var k=b.dataset.pp, ix=atual.indexOf(k), pp=papel(k);
+        if(ix>=0)atual.splice(ix,1);else atual.push(k);
+        m.dataset.papeis=atual.join(',');
+        var on=atual.indexOf(k)>=0;
         b.style.background=on?pp.c:'transparent';
         b.style.color=on?'#fff':pp.c;
       });
@@ -8539,6 +8605,19 @@ function relatorioImprimir(){
   }
 
   var SEED=[
+    /* A propria ARK entra como projeto, pedido do Caio. O marketing da casa passa
+       a ser cobrado no mesmo quadro do cliente que paga, senao ele so acontece
+       quando sobra tempo, que e o mesmo que nunca. */
+    {nm:'ARK Content',cid:'ark',temp:'gr',br:{
+      segmento:'Marketing e publicidade. Cliente interno.',status:'Ativo',
+      responsaveis:'Gabriel Andrade, head da frente de marketing e das propostas.\nGuilherme e Caio, especialistas em geracao de demanda, montam o funil.\nDanilo, leitura de dados e performance.\nSaulo, marketing fisico, vestuario e pecas.',
+      entregas:'Funil proprio de geracao de demanda\nConteudo institucional da ARK\nMaterial comercial e propostas\nMarketing fisico, vestuario e pecas',
+      conteudos:'A definir na reuniao de responsabilidades (etapa 2 da trilha).',
+      trafego:'Funil proprio em teste, conduzido pelo Guilherme.',
+      site:'Institucional da ARK.',
+      social:'Sim.',
+      obs:'Projeto interno. Serve para a casa cobrar de si o mesmo que cobra do cliente.'
+    }},
     {nm:'Fercon',cid:'fercon',temp:'gr',br:{
       segmento:'Materiais de construção',status:'Ativo',
       responsaveis:'Vinicius, sócio da empresa e primo do Lucas. Sem experiência com marketing, bastante acelerado.\nRodrigo, filho de um dos sócios. Trabalha com Photoshop, tem alguma noção de marketing e reprova bastante material.\nBruno, designer responsável pelo projeto, fala direto com o pessoal da Fercon.',
@@ -10221,7 +10300,9 @@ function adiarAtrasadas(){
 }
 let WFA_SHOW_ALL_DONE=false; // Concluído mostra só as 30 mais recentes até pedirem todas
 function renderTarefas(){
-  const STATS=['backlog','andamento','aprovacao','concluido'];
+  /* Mesmo modelo da aba Projetos, pedido do Caio. A chave 'aprovacao' ficou como
+     estava e so mudou de rotulo para Homologacao: renomear migraria tarefa gravada. */
+  const STATS=['backlog','iniciar','andamento','aprovacao','homologcli','concluido'];
   // FLIP: fotografa a posição dos cards ANTES do rebuild; no fim, anima do lugar velho pro
   // novo (card desliza entre colunas em vez de teleportar). Respeita reduced-motion.
   const _flip=new Map();
@@ -10296,7 +10377,7 @@ function tarefaApplyView(){
   else if(WFA_TASK_VIEW==='relatorio')renderTaskRelatorio();
 }
 function taskFiltradas(){return state.tarefas.filter(tarefaPassaFiltro);}
-function taskStatusLabel(s){return s==='backlog'?'Backlog':s==='andamento'?'Em Andamento':s==='aprovacao'?'Aprovação':s==='concluido'?'Concluído':s;}
+function taskStatusLabel(s){return s==='backlog'?'Backlog':s==='iniciar'?'A iniciar':s==='andamento'?'Em Andamento':s==='aprovacao'?'Homologação':s==='homologcli'?'Homologação do cliente':s==='concluido'?'Concluído':s;}
 function taskInitials(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'?';}
 function renderTaskLista(){
   const today=hojeSP();
@@ -10349,7 +10430,7 @@ function renderTaskPessoas(){
     const arr=byResp[nm];
     const ativos=arr.filter(t=>t.status!=='concluido');
     const atras=arr.filter(t=>t.data&&t.data<today&&t.status!=='concluido').length;
-    const cnt={backlog:0,andamento:0,aprovacao:0,concluido:0};arr.forEach(t=>{cnt[t.status]=(cnt[t.status]||0)+1;});
+    const cnt={backlog:0,iniciar:0,andamento:0,aprovacao:0,homologcli:0,concluido:0};arr.forEach(t=>{cnt[t.status]=(cnt[t.status]||0)+1;});
     const tot=arr.length||1;
     const seg=(c,col)=>cnt[c]?`<div class="tp-seg" style="width:${cnt[c]/tot*100}%;background:${col}"></div>`:'';
     const lista=arr.slice().sort((a,b)=>((a.data||'9999')<(b.data||'9999')?-1:1)).slice(0,6).map(t=>{const late=t.data&&t.data<today&&t.status!=='concluido';const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';return `<div class="tp-task ${late?'late':''}" onclick="openTaskDetail('${t.id}')"><span>${t.status==='concluido'?'✅ ':''}${escapeHtml(t.title.slice(0,38))}</span><span class="d">${late?'⚠ ':''}${dataFmt}</span></div>`;}).join('');
@@ -10386,7 +10467,42 @@ function renderTaskDashboard(){
   const WIPLIM=5;
   const wipRows=Object.entries(wip).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{const over=v>WIPLIM;return `<div class="db-row"><div class="db-lb" title="${escapeHtml(k)}">${escapeHtml(k)}</div><div class="db-track"><div class="db-fill" style="width:${Math.min(100,v/WIPLIM*100)}%;background:${over?'#e0364f':'#19b36b'}"></div></div><div class="db-val">${v}/${WIPLIM}${over?' ⚠':''}</div></div>`;}).join('');
   const wipCard=`<div class="db-card"><h3>Capacidade · WIP por pessoa <span style="font-size:11px;color:var(--mute);font-weight:500">(meta ${WIPLIM} em execução)</span></h3>${wipRows||'<div class="tp-sub">Ninguém em execução</div>'}</div>`;
-  wfaSetHTML(document.getElementById('task-painel'),kpis+`<div class="db-grid">${barBlock('Atividades por Função',porFuncao,'#ffd400')}${barBlock('Atividades por Membro',porMembro,'#111')}${barBlock('Atrasadas por Membro',atrasMembro,'#e0364f')}${wipCard}</div>`);
+
+  /* CAPACITY, pedido do Caio: o tempo operacional da equipe.
+     Soma a estimativa em horas das tarefas ABERTAS, do kanban de Atividades e do
+     quadro de Projetos por cliente, e mostra separado quanto ainda esta SEM
+     estimativa. Sem essa segunda coluna o total pareceria folgado so porque
+     ninguem preencheu, que e o jeito mais facil de a conta mentir. */
+  const HORA=t=>{const h=parseFloat(String(t&&t.horas!==undefined?t.horas:'').toString().replace(',','.'));return isNaN(h)?null:h;};
+  let pjAbertas=[];
+  try{(JSON.parse(localStorage.getItem('wfa-projetos')||'[]')||[]).forEach(pj=>{
+    (pj.tarefas||[]).forEach(t=>{if(t.st!=='concluido')pjAbertas.push({resp:t.resp,horas:t.horas});});
+  });}catch(e){}
+  const capBase=ativas.map(t=>({resp:t.resp,horas:t.horas})).concat(pjAbertas);
+  const capPessoa={},semEst={};
+  capBase.forEach(t=>{
+    const quem=((t.resp||'').toString().trim())||'Sem responsável';
+    const h=HORA(t);
+    if(h===null)semEst[quem]=(semEst[quem]||0)+1;
+    else capPessoa[quem]=(capPessoa[quem]||0)+h;
+  });
+  const capTotal=Object.values(capPessoa).reduce((a,b)=>a+b,0);
+  const capSemTotal=Object.values(semEst).reduce((a,b)=>a+b,0);
+  const fmtH=h=>(Math.round(h*10)/10).toString().replace('.',',')+'h';
+  const SEMANA=40; // jornada de referencia por pessoa, so para dar escala a barra
+  const capNomes=Array.from(new Set(Object.keys(capPessoa).concat(Object.keys(semEst))));
+  const capRows=capNomes.map(k=>({k,h:capPessoa[k]||0,s:semEst[k]||0}))
+    .sort((a,b)=>b.h-a.h||b.s-a.s)
+    .map(r=>{const pct=Math.min(100,r.h/SEMANA*100);const cheio=r.h>SEMANA;
+      return `<div class="db-row"><div class="db-lb" title="${escapeHtml(r.k)}">${escapeHtml(r.k)}</div>`+
+        `<div class="db-track"><div class="db-fill" style="width:${pct}%;background:${cheio?'#e0364f':'#19b36b'}"></div></div>`+
+        `<div class="db-val">${fmtH(r.h)}${cheio?' ⚠':''}${r.s?` <span style="color:var(--mute);font-weight:500">+${r.s} s/ est.</span>`:''}</div></div>`;}).join('');
+  const capCard=`<div class="db-card"><h3>Capacity · tempo operacional da equipe <span style="font-size:11px;color:var(--mute);font-weight:500">(${fmtH(capTotal)} em aberto · referência ${SEMANA}h por pessoa)</span></h3>`+
+    (capRows||'<div class="tp-sub">Nenhuma tarefa aberta</div>')+
+    (capSemTotal?`<div class="tp-sub" style="margin-top:8px">${capSemTotal} tarefa(s) ainda sem estimativa. Enquanto elas existirem, o total acima está por baixo.</div>`:'')+
+    `</div>`;
+
+  wfaSetHTML(document.getElementById('task-painel'),kpis+`<div class="db-grid">${capCard}${barBlock('Atividades por Função',porFuncao,'#ffd400')}${barBlock('Atividades por Membro',porMembro,'#111')}${barBlock('Atrasadas por Membro',atrasMembro,'#e0364f')}${wipCard}</div>`);
 }
 function taskCard(t){
   const c=CLIENTES.find(x=>x.id===t.clienteId);
@@ -10394,7 +10510,9 @@ function taskCard(t){
   const late=t.data&&t.data<today&&t.status!=='concluido';
   const venceHoje=t.data===today&&t.status!=='concluido';
   const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';
-  const nextStatus=t.status==='backlog'?'andamento':t.status==='andamento'?'aprovacao':t.status==='aprovacao'?'concluido':'backlog';
+  const ORDEM=['backlog','iniciar','andamento','aprovacao','homologcli','concluido'];
+  const _ix=ORDEM.indexOf(t.status);
+  const nextStatus=_ix<0?'iniciar':ORDEM[(_ix+1)%ORDEM.length];
   const prioBadge=t.prio==='alta'?'<span class="prio-badge prio-alta">Alta</span>':t.prio==='baixa'?'<span class="prio-badge prio-baixa">Baixa</span>':'';
   const descHtml=t.desc?`<div class="tc-desc">${escapeHtml(t.desc)}</div>`:'';
   const tags=(t.tags||[]);
@@ -10406,6 +10524,7 @@ function taskCard(t){
   const badges=[];
   if(cl.length)badges.push(`<span class="tc-badge${clDone===cl.length?' done':''}">☑ ${clDone}/${cl.length}</span>`);
   if(tSpent>=1)badges.push(`<span class="tc-badge${t.timerSince?' run':''}">⏱ ${fmtDur(tSpent)}</span>`);
+  if(t.horas===0||t.horas)badges.push(`<span class="tc-badge">⏳ ${t.horas}h</span>`);
   if(nCmt)badges.push(`<span class="tc-badge">💬 ${nCmt}</span>`);
   if(nAtt)badges.push(`<span class="tc-badge">🔗 ${nAtt}</span>`);
   const clHtml=badges.length?`<div class="tc-badges">${badges.join('')}</div>`:'';
@@ -10486,7 +10605,7 @@ function delTask(id){
       taskRenumera/taskReordena, que enxergam a coluna inteira, filtro ou nao. */
 let WFA_DROP_FEITO=false;   // o drop chegou a acontecer? (ver dragend)
 const _PRIO_PESO={alta:0,media:1,baixa:2};
-const TASK_STATS=['backlog','andamento','aprovacao','concluido'];
+const TASK_STATS=['backlog','iniciar','andamento','aprovacao','homologcli','concluido'];
 function taskCmp(a,b){
   const oa=(a.ord==null?Infinity:a.ord), ob=(b.ord==null?Infinity:b.ord);
   if(oa!==ob)return oa-ob;
@@ -10839,6 +10958,7 @@ function openTaskDetail(id){
   document.getElementById('td-cliente').value=t.clienteId||CLIENTES[0].id;
   document.getElementById('td-funcao').value=t.funcao||'Account Manager';
   document.getElementById('td-tags').value=(t.tags||[]).join(', ');
+  document.getElementById('td-horas').value=(t.horas===0||t.horas)?t.horas:'';
   renderChecklist(t.checklist||[]);
   renderTdTimer(t);renderTdComments(t);renderTdAttachments(t);
   const ci=document.getElementById('td-cmt-input');if(ci)ci.value='';
@@ -11057,6 +11177,11 @@ function saveTaskDetail(){
   t.data=document.getElementById('td-data').value;
   t.clienteId=document.getElementById('td-cliente').value;
   t.funcao=document.getElementById('td-funcao').value;
+  /* Tempo estimado por tarefa, pedido do Caio. Guardado como NUMERO: campo vazio
+     vira '' e nao 0, senao tarefa sem estimativa contaria como zero hora e o
+     capacity da equipe passaria a mentir para baixo. */
+  const _h=String((document.getElementById('td-horas')||{}).value||'').trim().replace(',','.');
+  t.horas=_h===''?'':(isNaN(parseFloat(_h))?'':parseFloat(_h));
   const tagsRaw=document.getElementById('td-tags').value;
   t.tags=tagsRaw?tagsRaw.split(',').map(s=>s.trim()).filter(Boolean):[];
   saveTarefas();closeModal('modal-detail');toast('Tarefa atualizada');
