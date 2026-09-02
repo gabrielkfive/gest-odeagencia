@@ -1,4 +1,4 @@
-<!-- build 20260901-okrs-lideranca -->
+<!-- build 20260902-ponte-projetos -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -456,6 +456,16 @@ table.t tr.high{background:var(--yel-bg)}
 
 /* sprint kanban */
 .sprint-board{display:flex;gap:11px;overflow-x:auto;padding:2px 0 8px}
+.pp-wrap{position:relative;min-width:0;flex:1}
+.pp-dd{position:fixed;z-index:20000;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;max-height:240px;overflow:auto;box-shadow:0 14px 30px -14px rgba(0,0,0,.35);padding:4px}
+.pp-it{padding:7px 10px;font-size:12.5px;border-radius:7px;cursor:pointer;color:var(--ink)}
+.pp-it:hover,.pp-it.on{background:var(--yel-bg,#fff7d6)}
+.pp-none{padding:8px 10px;font-size:12px;color:var(--mute)}
+body.aura-dark .pp-dd{background:var(--surface,#1c1c1e);border-color:var(--line)}
+body.aura-dark .pp-it{color:var(--txt)}
+body.aura-dark .pp-it:hover,body.aura-dark .pp-it.on{background:rgba(255,212,0,.16)}
+input[type=date]{cursor:pointer}
+input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.75}
 .sprint-col{flex:0 0 240px;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 240px);overflow-y:auto;box-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 28px -18px rgba(0,0,0,.20)}
 .sprint-col .col-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:7px;border-bottom:1px solid var(--line);margin-bottom:3px}
 .sprint-col .col-head h4{font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px}
@@ -2826,10 +2836,11 @@ function wfaSetTheme(t){
       <!-- =================== TAREFAS =================== -->
       <div class="page" id="page-tarefas">
         <div class="page-head">
-          <div class="page-title"><h1>Tarefas</h1><p>Kanban operacional · arraste entre colunas · atualiza automaticamente quando uma sprint cria atividades</p></div>
+          <div class="page-title"><h1>Tarefas</h1><p>Daily do time · o que está a iniciar, em andamento e em homologação, incluindo as tarefas puxadas dos projetos</p></div>
           <div style="display:flex;gap:6px;align-items:center">
             <span id="sync-status" style="font-size:10px;color:var(--mute);font-family:var(--mono)"></span>
-            <button class="icobtn" title="Move todas as tarefas atrasadas (não concluídas) para amanhã — pra reorganizar o board" onclick="adiarAtrasadas()">Adiar atrasadas → amanhã</button>
+            <button class="icobtn" title="Junta cartão repetido: mesmo título para o mesmo cliente, aqui ou vindo de um projeto. Pede confirmação antes." onclick="removerDuplicadas()">⧉ Remover duplicadas</button>
+            <button class="icobtn" title="Move todas as tarefas atrasadas (não concluídas) para amanhã, pra reorganizar o board" onclick="adiarAtrasadas()">Adiar atrasadas</button>
             <button class="tb-btn" onclick="openNovaTarefa()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova</button>
           </div>
         </div>
@@ -2868,6 +2879,12 @@ function wfaSetTheme(t){
 
         <style>
           #page-tarefas .task-views{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+          #page-tarefas select.tv-more{font:inherit;font-size:12.5px;font-weight:600;padding:6px 10px;cursor:pointer}
+          #page-tarefas .tc-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+          /* cartao ligado a um projeto (aba Projetos): mesma tarefa, sem copia */
+          #page-tarefas .task-card.tc-pj{border-left-color:#7c3aed}
+          #page-tarefas .tc-pjtag{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:#7c3aed;background:rgba(124,58,237,.10);border:1px solid rgba(124,58,237,.25);border-radius:6px;padding:2px 6px;margin-bottom:5px}
+          body.aura-dark #page-tarefas .tc-pjtag{color:#c4b5fd;background:rgba(124,58,237,.22);border-color:rgba(196,181,253,.35)}
           #page-tarefas .tv-btn{font-size:12.5px;font-weight:600;padding:7px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;transition:.15s}
           #page-tarefas .tv-btn:hover{border-color:var(--yel,#ffd400)}
           #page-tarefas .tv-btn.on{background:#111;color:#fff;border-color:#111}
@@ -2971,10 +2988,13 @@ function wfaSetTheme(t){
         <div class="task-views" id="task-views">
           <button class="tv-btn on" data-tv="kanban" onclick="tarefaSetView('kanban')">▦ Kanban</button>
           <button class="tv-btn" data-tv="lista" onclick="tarefaSetView('lista')">☰ Lista</button>
-          <button class="tv-btn" data-tv="calendario" onclick="tarefaSetView('calendario')">🗓️ Calendário</button>
           <button class="tv-btn" data-tv="pessoas" onclick="tarefaSetView('pessoas')">👥 Por Pessoa</button>
-          <button class="tv-btn" data-tv="painel" onclick="tarefaSetView('painel')">📊 Painel</button>
-          <button class="tv-btn" data-tv="relatorio" onclick="tarefaSetView('relatorio')">📄 Relatório</button>
+          <select class="tv-btn tv-more" id="tv-more" title="Outras vistas" onchange="if(this.value)tarefaSetView(this.value)">
+            <option value="">Mais…</option>
+            <option value="calendario">🗓️ Calendário</option>
+            <option value="painel">📊 Painel</option>
+            <option value="relatorio">📄 Relatório</option>
+          </select>
         </div>
 
         <div class="task-board" id="task-board">
@@ -3006,7 +3026,6 @@ function wfaSetTheme(t){
           <div class="task-col" data-status="concluido">
             <div class="task-col-head"><h4>Concluído</h4><span class="ct" id="ct-concluido">0</span></div>
             <div class="task-list" data-list="concluido"></div>
-            <div class="qadd" data-qadd="concluido"><button class="add-task-btn" onclick="qaddOpen('concluido')">+ Adicionar cartão</button><div class="qadd-box" style="display:none"><textarea class="qadd-input" placeholder="Digite um título e tecle Enter…" onkeydown="qaddKey(event,'concluido')"></textarea><div class="qadd-actions"><button class="qadd-save" onclick="qaddSave('concluido',true)">Adicionar</button><button class="qadd-cancel" onclick="qaddClose('concluido')">✕</button></div></div></div>
           </div>
         </div>
         <div id="task-lista" class="task-altview" style="display:none"></div>
@@ -4199,7 +4218,7 @@ function applyCloudState(remote){
   const jornada=JSON.parse(localStorage.getItem('wfa-jornada')||'null');
   if(jornada&&typeof jornada==='object')SPRINTS.forEach(sp=>{sp.clis=jornada[sp.n]||[];});
   if(typeof rebuildPeople==='function')rebuildPeople();if(typeof fillRespSelects==='function')fillRespSelects();
-  renderClientes();renderSprints();if(_rr('wfa-tarefas','wfa-clientes-custom','wfa-deleted-ids'))renderTarefas();renderRegua();updateBadges();renderGcal();renderFin();if(_rr('wfa-demandas','wfa-deleted-ids'))renderDemandas();if(_rr('wfa-rotinas','wfa-deleted-ids'))renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function'&&!(typeof planIsEditing==='function'&&planIsEditing()))renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function'&&_rr('wfa-whatsapp'))renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
+  renderClientes();renderSprints();if(_rr('wfa-tarefas','wfa-clientes-custom','wfa-deleted-ids','wfa-projetos'))renderTarefas();if(_rr('wfa-projetos')&&typeof renderProjetos==='function'&&document.getElementById('page-projetos')&&document.getElementById('page-projetos').classList.contains('active')){try{renderProjetos();}catch(e){}}renderRegua();updateBadges();renderGcal();renderFin();if(_rr('wfa-demandas','wfa-deleted-ids'))renderDemandas();if(_rr('wfa-rotinas','wfa-deleted-ids'))renderRotinas();renderOkrs();renderProcessos();renderMeuDia();renderIdentity();applyAccess();if(typeof renderCobranca==='function')renderCobranca();if(typeof renderAcerto==='function')renderAcerto();if(typeof renderPlanilha==='function'&&!(typeof planIsEditing==='function'&&planIsEditing()))renderPlanilha();if(typeof planAutoSeed==='function')planAutoSeed();if(typeof renderWhatsapp==='function'&&_rr('wfa-whatsapp'))renderWhatsapp();if(typeof renderNotificacoes==='function')renderNotificacoes();
   if(typeof renderCrm==='function'&&_rr('wfa-crm','wfa-deleted-ids'))renderCrm();
   if(typeof renderWidgets==='function')renderWidgets(); // Meu Painel é a home: widgets refletem os dados sincronizados
   if(typeof renderAlpha==='function'&&document.getElementById('page-alpha')&&document.getElementById('page-alpha').classList.contains('active'))renderAlpha();
@@ -5959,6 +5978,10 @@ function iniciarAutoSync(){
         <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="nt-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
         <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="nt-status"><option value="backlog">Backlog</option><option value="iniciar">A iniciar</option><option value="andamento">Em Andamento</option><option value="aprovacao">Homologação</option><option value="homologcli">Homologação do cliente</option><option value="concluido">Concluído</option></select></div>
       </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Início</label><input class="form-input" id="nt-ini" type="date"></div>
+        <div class="form-group"><label class="form-label">Tempo estimado</label><div style="display:flex;gap:6px;align-items:center"><input class="form-input" id="nt-horas-h" type="number" min="0" step="1" placeholder="0" style="width:72px"><span style="font-size:11px;color:var(--mute)">h</span><input class="form-input" id="nt-horas-m" type="number" min="0" max="59" step="5" placeholder="0" style="width:72px"><span style="font-size:11px;color:var(--mute)">min</span></div></div>
+      </div>
       <div class="form-group"><label class="form-label">Tags <span style="color:var(--mute);font-weight:400">(separe por vírgula)</span></label><input class="form-input" id="nt-tags" placeholder="Ex: criativo, urgente, copa"></div>
     </div>
     <div class="modal-foot"><button class="icobtn" onclick="closeModal('modal-nova')">Cancelar</button><button class="tb-btn" onclick="criarTarefaManual()">Criar tarefa</button></div>
@@ -6052,8 +6075,9 @@ function iniciarAutoSync(){
           <div class="td2-fld"><label>Status</label><select class="form-select" id="td-status"><option value="backlog">Backlog</option><option value="iniciar">A iniciar</option><option value="andamento">Em Andamento</option><option value="aprovacao">Homologação</option><option value="homologcli">Homologação do cliente</option><option value="concluido">Concluído</option></select></div>
           <div class="td2-fld"><label>Prioridade</label><select class="form-select" id="td-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
           <div class="td2-fld"><label>Responsável <a onclick="colabOpen()" style="color:#a07e00;cursor:pointer;font-weight:700">+ pessoa</a></label><select class="form-select" id="td-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Márcio</option><option>Henrique</option><option>Nicolas</option><option>Anderson</option><option>João Gabriel</option><option>Maria Clara</option><option>Luckas Gomes</option><option>Kaique</option><option>Lush</option></select></div>
+          <div class="td2-fld"><label>Início</label><input class="form-input" id="td-ini" type="date"></div>
           <div class="td2-fld"><label>Vencimento</label><input class="form-input" id="td-data" type="date"></div>
-          <div class="td2-fld"><label>Tempo estimado <span style="color:var(--mute);font-weight:400">(horas)</span></label><input class="form-input" id="td-horas" type="number" min="0" step="0.5" placeholder="ex: 2"></div>
+          <div class="td2-fld"><label>Tempo estimado</label><div style="display:flex;gap:6px;align-items:center"><input class="form-input" id="td-horas-h" type="number" min="0" step="1" placeholder="0" style="width:64px"><span style="font-size:11px;color:var(--mute)">h</span><input class="form-input" id="td-horas-m" type="number" min="0" max="59" step="5" placeholder="0" style="width:64px"><span style="font-size:11px;color:var(--mute)">min</span></div><div id="td-est-cmp" style="font-size:11px;color:var(--mute)"></div></div>
           <div class="td2-fld"><label>Cliente</label><select class="form-select" id="td-cliente"></select></div>
           <div class="td2-fld"><label>Função</label><select class="form-select" id="td-funcao"><option>Account Manager</option><option>Gestor de Tráfego</option><option>Criador</option><option>Editor</option><option>Designer</option><option>Captação</option></select></div>
           <div class="td2-fld"><label>Tags <span style="color:var(--mute);font-weight:400">(vírgula)</span></label><input class="form-input" id="td-tags" placeholder="criativo, urgente"></div>
@@ -6559,7 +6583,66 @@ function fillRespSelects(){
   // no HTML e faltava gente, ex: Samuel). Preserva a seleção atual.
   const f=document.getElementById('filt-resp');
   if(f){ const cur=f.value; f.innerHTML='<option value="">Todo responsável</option>'+opts; if(cur)f.value=cur; }
+  // campo de busca por nome em cima de cada seletor (o time cresceu, a lista ficou longa)
+  document.querySelectorAll('#nt-resp, #td-resp, #filt-resp').forEach(s=>{try{wfaBuscaPessoa(s);if(s.__ppSync)s.__ppSync();}catch(e){}});
 }
+/* ============ BUSCA DE PESSOA NOS SELETORES DE RESPONSAVEL ============
+   Pedido de 02/09/2026: o time cresceu e escolher numa lista longa ficou ruim, a
+   equipe quer digitar o nome. Transforma um <select> comum em campo de busca. O
+   select continua existindo (escondido) e continua sendo a fonte do valor, entao
+   todo codigo que le .value ou escuta change segue funcionando igual. */
+function wfaBuscaPessoa(sel){
+  if(!sel||sel.__pp||sel.tagName!=='SELECT')return;
+  sel.__pp=1;
+  const wrap=document.createElement('div');wrap.className='pp-wrap';
+  sel.parentNode.insertBefore(wrap,sel);wrap.appendChild(sel);
+  const inp=document.createElement('input');
+  inp.type='text';inp.autocomplete='off';inp.spellcheck=false;
+  inp.className=(sel.className||'').replace(/\bform-select\b/,'form-input')||'form-input';
+  const st=sel.getAttribute('style');if(st)inp.setAttribute('style',st);
+  const op0=sel.options[0];
+  inp.placeholder=(op0&&op0.value==='')?(op0.textContent||'Buscar pessoa…'):'Buscar pessoa…';
+  wrap.appendChild(inp);
+  sel.style.display='none';
+  const dd=document.createElement('div');dd.className='pp-dd';dd.hidden=true;document.body.appendChild(dd);
+  const nm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const sync=()=>{inp.value=sel.value||'';};
+  sel.__ppSync=sync;
+  // valor setado por codigo (sel.value='Fulano') tem que aparecer no campo de texto
+  try{
+    const d=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
+    Object.defineProperty(sel,'value',{configurable:true,get(){return d.get.call(sel);},set(v){d.set.call(sel,v);sync();}});
+  }catch(e){}
+  sync();
+  const fechar=()=>{dd.hidden=true;};
+  const pintar=q=>{
+    const n=nm(q);
+    const ops=[...sel.options].filter(o=>!n||nm(o.textContent).includes(n));
+    const r=inp.getBoundingClientRect();
+    dd.style.top=(r.bottom+4)+'px';dd.style.left=r.left+'px';dd.style.width=Math.max(r.width,190)+'px';
+    dd.innerHTML=ops.length?ops.slice(0,80).map((o,i)=>`<div class="pp-it${(n?i===0:o.value===sel.value)?' on':''}" data-v="${mdEsc(o.value)}">${mdEsc(o.textContent||'—')}</div>`).join(''):'<div class="pp-none">Ninguém com esse nome. Use "+ pessoa" para cadastrar.</div>';
+    dd.hidden=false;
+  };
+  const escolher=v=>{sel.value=v;fechar();sel.dispatchEvent(new Event('change',{bubbles:true}));sync();};
+  inp.addEventListener('focus',()=>{pintar('');setTimeout(()=>{try{inp.select();}catch(e){}},0);});
+  inp.addEventListener('input',()=>pintar(inp.value));
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();const f=dd.querySelector('.pp-it.on')||dd.querySelector('.pp-it');if(f)escolher(f.dataset.v);}
+    else if(e.key==='Escape'){fechar();sync();}
+    else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const its=[...dd.querySelectorAll('.pp-it')];if(!its.length)return;let i=its.findIndex(x=>x.classList.contains('on'));i=e.key==='ArrowDown'?Math.min(its.length-1,i+1):Math.max(0,i-1);its.forEach(x=>x.classList.remove('on'));its[i].classList.add('on');its[i].scrollIntoView({block:'nearest'});}
+  });
+  inp.addEventListener('blur',()=>{setTimeout(()=>{fechar();sync();},160);});
+  dd.addEventListener('mousedown',e=>{const it=e.target.closest('.pp-it');if(!it)return;e.preventDefault();escolher(it.dataset.v);});
+  sel.addEventListener('change',sync);
+  window.addEventListener('scroll',fechar,true);
+}
+/* Data: clicar em qualquer lugar do campo abre o calendario (pedido de 02/09/2026).
+   Chrome, Edge e Safari 16+ tem showPicker; onde nao tem, o campo segue como antes. */
+document.addEventListener('click',e=>{
+  const i=e.target;
+  if(!i||i.tagName!=='INPUT'||i.type!=='date'||typeof i.showPicker!=='function')return;
+  try{i.showPicker();}catch(_){}
+});
 // ---- Gerenciar pessoas (adicionar/remover) ----
 function colabOpen(){
   const list=loadColabCustom();
@@ -8024,6 +8107,31 @@ function relatorioImprimir(){
     '</div></div></body></html>';
   }
 })();
+/* ============ ESTIMATIVA EM HORAS E MINUTOS ============
+   Pedido do Gabriel (02/09/2026): ninguem estima "0,5 hora". O dado continua gravado
+   em horas decimais (capacity, Meu Dia e relatorios ja leem assim), mas a tela mostra
+   e recebe horas + minutos: 0.5 vira 30min, 0.2 vira 12min, 1.75 vira 1h 45min. */
+function wfaEstSplit(h){
+  var v=parseFloat(String(h===undefined||h===null?'':h).replace(',','.'));
+  if(isNaN(v)||v<0)return {h:'',m:''};
+  var hh=Math.floor(v),mm=Math.round((v-hh)*60);
+  if(mm>=60){hh+=1;mm=0;}
+  return {h:hh,m:mm};
+}
+function wfaEstFmt(h){
+  var s=wfaEstSplit(h);
+  if(s.h===''&&s.m==='')return '';
+  if(!s.h&&!s.m)return '0min';
+  return (s.h?s.h+'h':'')+(s.h&&s.m?' ':'')+(s.m?s.m+'min':'');
+}
+function wfaEstDecimal(hStr,mStr){
+  var hs=String(hStr===undefined||hStr===null?'':hStr).trim().replace(',','.');
+  var ms=String(mStr===undefined||mStr===null?'':mStr).trim().replace(',','.');
+  if(hs===''&&ms==='')return '';
+  var hh=parseFloat(hs)||0,mm=parseFloat(ms)||0;
+  if(hh<0)hh=0;if(mm<0)mm=0;
+  return Math.round((hh+mm/60)*1000)/1000;
+}
 /* ============ PROJETOS (Atividades > Projetos) ============
    Modelo de gestao de projeto por cliente que o Caio passou no video de 28/08/2026.
    Reproduz o que ele mostrou no ClickUp, dentro do sistema:
@@ -8047,6 +8155,7 @@ function relatorioImprimir(){
   var vista='quadro';   // quadro | lista | prontuario
   var prPag='briefing'; // pagina do prontuario
   var filtro={papel:'',sprint:'',resp:'',busca:''};
+  var modalPid=null;    // projeto dono do modal de tarefa quando aberto de fora (ponte)
 
   /* As 6 colunas do quadro, na ordem que ele desenhou. */
   var COLS=[
@@ -8200,6 +8309,10 @@ function relatorioImprimir(){
     try{localStorage.setItem(KEY,JSON.stringify(arr));}catch(e){}
     try{if(typeof scheduleSync==='function')scheduleSync();}catch(e){}
     render();
+    /* PONTE: o kanban de Atividades e a Jornada mostram tarefa de projeto; repinta os dois. */
+    try{if(typeof renderTarefas==='function')renderTarefas();}catch(e){}
+    try{if(typeof renderSprints==='function')renderSprints();}catch(e){}
+    try{if(typeof updateBadges==='function')updateBadges();}catch(e){}
   }
   function get(id){return load().filter(function(p){return p.id===id;})[0]||null;}
   function grava(p){
@@ -8329,7 +8442,7 @@ function relatorioImprimir(){
       '<div class="pj-tags">'+tagsHTML(t)+'</div>'+
       (t.venc?'<div class="pj-venc'+(late?' late':'')+'">'+(late?'⚠ ':'📅 ')+esc(br(t.venc))+(t.resp?' · '+esc(t.resp):'')+'</div>'
              :(t.resp?'<div class="pj-venc">'+esc(t.resp)+'</div>':''))+
-      (t.horas?'<div class="pj-venc">⏱ '+esc(t.horas)+'h estimadas</div>':'')+
+      (t.horas?'<div class="pj-venc">⏱ '+esc(wfaEstFmt(t.horas))+' estimadas</div>':'')+
       '</div>';
   }
 
@@ -8351,12 +8464,12 @@ function relatorioImprimir(){
     if(!total&&!semEstim)return '';
     var um=function(x){return Math.round(x*10)/10;};
     var chips=nomes.map(function(n){
-      return '<span class="pj-carga"><b>'+esc(n)+'</b> '+um(por[n])+'h</span>';
+      return '<span class="pj-carga"><b>'+esc(n)+'</b> '+wfaEstFmt(por[n])+'</span>';
     }).join('');
-    if(semDono)chips+='<span class="pj-carga sem"><b>sem responsável</b> '+um(semDono)+'h</span>';
+    if(semDono)chips+='<span class="pj-carga sem"><b>sem responsável</b> '+wfaEstFmt(semDono)+'</span>';
     if(semEstim)chips+='<span class="pj-carga sem"><b>sem estimativa</b> '+semEstim+' tarefa'+(semEstim>1?'s':'')+'</span>';
     return '<div class="pj-cargabar"><span class="lbl">Carga em aberto</span>'+chips+
-      '<span class="pj-carga tot"><b>total</b> '+um(total)+'h</span></div>';
+      '<span class="pj-carga tot"><b>total</b> '+wfaEstFmt(total)+'</span></div>';
   }
 
   function quadroHTML(p){
@@ -8604,6 +8717,105 @@ function relatorioImprimir(){
     return out;
   };
 
+  /* ---------- PONTE com Atividades e Jornada (pedido do Gabriel, 02/09/2026) ----------
+     Regra: tarefa de projeto em BACKLOG mora na Jornada do Cliente, na sprint dela.
+     Tarefa de projeto fora do backlog (a iniciar, em andamento, homologacoes, concluido)
+     aparece no kanban de Atividades como cartao ligado, SEM copia: quem arrasta la move
+     aqui, quem abre la ve este mesmo detalhe. Fonte unica continua sendo wfa-projetos. */
+  var ST_PJ_ATV={backlog:'backlog',iniciar:'iniciar',andamento:'andamento',homolog:'aprovacao',homologcli:'homologcli',concluido:'concluido'};
+  var ST_ATV_PJ={backlog:'backlog',iniciar:'iniciar',andamento:'andamento',aprovacao:'homolog',homologcli:'homologcli',concluido:'concluido'};
+  function pjCliId(p){
+    if(p.clienteId)return p.clienteId;
+    try{
+      var nm=String(p.cliente||'').toLowerCase().trim();
+      var hit=(typeof CLIENTES!=='undefined'?CLIENTES:[]).filter(function(c){return String(c.nm||'').toLowerCase().trim()===nm;})[0];
+      return hit?hit.id:'';
+    }catch(e){return '';}
+  }
+  function papelNome(k){var pp=papel(k);return pp?pp.n:k;}
+  function paraCard(p,t){
+    return {id:'pj:'+p.id+':'+t.id,pj:true,projId:p.id,ptId:t.id,
+      title:t.t||'',desc:t.obs||'',clienteId:pjCliId(p),clienteNome:p.cliente||'',
+      resp:t.resp||'',resps:t.resps||[],data:t.venc||'',ini:t.ini||'',prio:'media',
+      status:ST_PJ_ATV[t.st]||'backlog',sprint:(t.sprint===0?0:(t.sprint||'')),
+      tags:(t.papeis||[]).map(papelNome),
+      checklist:(t.checklist||[]).map(function(x){return {text:x.txt,done:!!x.done};}),
+      comments:t.coments||[],attachments:t.anexos||[],
+      horas:t.horas,timeSpent:t.timeSpent||0,timerSince:t.timerSince||'',
+      concluidaEm:t.fim||'',criadaEm:p.criadoEm||''};
+  }
+  var _atvStr=null,_atvCli=-1,_atvArr=[];
+  // Tarefas de projeto FORA do backlog, no formato que o kanban de Atividades entende.
+  window.pjAtivas=function(){
+    var s='';try{s=localStorage.getItem(KEY)||'[]';}catch(e){}
+    var ncli=0;try{ncli=(CLIENTES||[]).length;}catch(e){}
+    if(s===_atvStr&&ncli===_atvCli)return _atvArr;
+    _atvStr=s;_atvCli=ncli;_atvArr=[];
+    var arr=[];try{arr=JSON.parse(s)||[];}catch(e){arr=[];}
+    if(!Array.isArray(arr))arr=[];
+    arr.forEach(function(p){(p.tarefas||[]).forEach(function(t){if(!t||!t.st||t.st==='backlog')return;_atvArr.push(paraCard(p,t));});});
+    return _atvArr;
+  };
+  // Backlog do projeto de um cliente, por sprint (Jornada). n nulo: todas as sprints.
+  window.pjBacklogDe=function(cliId,n){
+    var out=[];
+    load().forEach(function(p){
+      if(pjCliId(p)!==cliId)return;
+      (p.tarefas||[]).forEach(function(t){
+        if(!t||t.st!=='backlog')return;
+        var sp=(t.sprint===0?0:(t.sprint||1));
+        if(n!==null&&n!==undefined&&sp!==n)return;
+        out.push({projId:p.id,projNome:p.cliente||'',id:t.id,t:t.t,sprint:sp,resp:t.resp||'',venc:t.venc||'',horas:t.horas,papeis:(t.papeis||[]).map(papelNome)});
+      });
+    });
+    return out;
+  };
+  function moverCore(p,ptId,stAtv,extra){
+    var st=ST_ATV_PJ[stAtv]; if(!st)return false;
+    var ok=false;
+    (p.tarefas||[]).forEach(function(t){
+      if(t.id!==ptId)return;
+      ok=true;
+      var mudou=t.st!==st;
+      t.st=st; t.fim=(st==='concluido')?hoje():'';
+      if(extra){
+        if(extra.resp){t.resp=extra.resp;t.resps=[extra.resp].concat((t.resps||[]).filter(function(x){return x!==extra.resp;}));}
+        if(extra.venc)t.venc=extra.venc;
+        if(extra.ini)t.ini=extra.ini;
+        if(extra.horas!==undefined&&extra.horas!==''&&extra.horas!==null)t.horas=extra.horas;
+        if(extra.obs&&!t.obs)t.obs=extra.obs;
+      }
+      if(mudou){
+        t.hist=(t.hist||[]).concat([{em:tkAgora(),txt:tkQuem()+' mudou o status para '+col(st).n+(extra&&extra.origem?' ('+extra.origem+')':'')}]);
+        if(t.hist.length>60)t.hist=t.hist.slice(-60);
+      }
+    });
+    return ok;
+  }
+  // Move UMA tarefa de projeto (arrastar no kanban de Atividades).
+  window.pjMoverStatus=function(projId,ptId,stAtv,extra){
+    var p=get(projId); if(!p)return false;
+    var ok=moverCore(p,ptId,stAtv,extra);
+    if(ok)grava(p);
+    return ok;
+  };
+  // Move VARIAS de uma vez (puxar da Jornada, juntar repetidas): grava uma vez por projeto.
+  window.pjMoverLote=function(itens){
+    var porProj={},n=0;
+    (itens||[]).forEach(function(i){(porProj[i.projId]=porProj[i.projId]||[]).push(i);});
+    Object.keys(porProj).forEach(function(pid){
+      var p=get(pid); if(!p)return;
+      porProj[pid].forEach(function(i){if(moverCore(p,i.ptId,i.stAtv,i.extra))n++;});
+      grava(p);
+    });
+    return n;
+  };
+  // Abre o detalhe da tarefa de projeto de qualquer aba, sem trocar de pagina.
+  window.pjAbrirTarefaModal=function(projId,ptId){
+    if(!get(projId))return false;
+    modalPid=projId; abrirTarefa(ptId); return true;
+  };
+
   /* ---------- Arrastar entre colunas ---------- */
   var arrastando=null;
   function ligarDrag(){
@@ -8648,7 +8860,7 @@ function relatorioImprimir(){
     m.innerHTML='<div class="pj-f'+(largo?' largo':'')+'" style="background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface));border:1px solid var(--line);border-radius:18px;padding:'+(largo?'0':'22px')+';width:min('+(largo?'1080px':'560px')+',100%);max-height:'+(largo?'92vh':'88vh')+';overflow:'+(largo?'hidden':'auto')+'">'+html+'</div>';
     m.style.display='flex';
   }
-  function fecharModal(){var m=document.getElementById('pj-modal');if(m)m.style.display='none';}
+  function fecharModal(){var m=document.getElementById('pj-modal');if(m)m.style.display='none';modalPid=null;}
 
   /* ---------- Detalhe da tarefa, no padrao do ClickUp ----------
      O print que o Gabriel mandou tem: status com botao de concluir, responsaveis,
@@ -8666,7 +8878,7 @@ function relatorioImprimir(){
   function tkIni(n){return String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(function(s){return s[0]||'';}).join('').toUpperCase();}
 
   function abrirTarefa(tid,stInicial){
-    var p=get(aberto); if(!p)return;
+    var p=get(modalPid||aberto); if(!p)return;
     var t=tid?(p.tarefas||[]).filter(function(x){return x.id===tid;})[0]:null;
     var ehNova=!t;
     if(ehNova)t={id:'',t:'',st:stInicial||'backlog',papeis:[],sprint:p.sprint||1,venc:'',ini:'',resp:'',resps:[],horas:'',obs:'',checklist:[],anexos:[],coments:[],hist:[]};
@@ -8692,7 +8904,7 @@ function relatorioImprimir(){
           linha('📅','Datas','<input id="tk-ini" type="date" class="tkdata" value="'+esc(t.ini||'')+'"><span class="tkseta">→</span><input id="tk-venc" type="date" class="tkdata" value="'+esc(t.venc||'')+'">')+
           linha('⏱','Rastrear tempo','<button type="button" class="tktimer'+(t.timerSince?' on':'')+'" data-tktimer="1">'+(t.timerSince?'⏸ Parar':'▶ Start')+'</button>'+
             '<span class="tkgasto" id="tk-gasto">'+(gasto>=1?tkDur(gasto):'0m 00s')+'</span>'+
-            '<input id="tk-horas" type="number" min="0" step="0.5" class="tkmini num" value="'+esc(t.horas||'')+'" placeholder="est. h">')+
+            '<span class="tkvazio">estimativa</span><input id="tk-horas-h" type="number" min="0" step="1" class="tkmini num" style="width:62px" value="'+esc(wfaEstSplit(t.horas).h)+'" placeholder="0"><span class="tkvazio">h</span><input id="tk-horas-m" type="number" min="0" max="59" step="5" class="tkmini num" style="width:62px" value="'+esc(wfaEstSplit(t.horas).m)+'" placeholder="0"><span class="tkvazio">min</span>')+
           linha('🏷','Etiquetas','<div id="tk-papeis" class="tkchips"></div><a data-ppnovo="1" class="tkadd">+ nova</a>')+
           linha('🧩','Sprint','<input id="tk-sp" type="number" min="0" class="tkmini num" value="'+esc(t.sprint===0?0:(t.sprint||1))+'"><span class="tkvazio">0 = tarefa fixa, sem sprint</span>')+
         '</div>'+
@@ -8742,6 +8954,7 @@ function relatorioImprimir(){
       pjPintaPapeis(m);
     });
     var selResp=m.querySelector('#tk-addresp');
+    try{if(typeof wfaBuscaPessoa==='function')wfaBuscaPessoa(selResp);}catch(e){}
     if(selResp)selResp.addEventListener('change',function(){
       var n=selResp.value;selResp.value='';if(!n)return;
       var cur=(m.dataset.resps||'').split('|').filter(Boolean);
@@ -8917,7 +9130,7 @@ function relatorioImprimir(){
     }
 
     if(b.dataset.tksave!=null){
-      var p2=get(aberto); if(!p2)return;
+      var p2=get(modalPid||aberto); if(!p2)return;
       var tt=(document.getElementById('tk-t').value||'').trim();
       if(!tt){try{toast('Escreva o nome da tarefa');}catch(e){}return;}
       var mm=document.getElementById('pj-modal');
@@ -8925,7 +9138,7 @@ function relatorioImprimir(){
       var resps=(mm.dataset.resps||'').split('|').filter(Boolean);
       /* estimativa vazia grava '' e nao 0: zero hora contaria como tarefa medida e
          faria o capacity da equipe mentir para baixo. */
-      var hRaw=String(vv('tk-horas')||'').trim().replace(',','.');
+      var hRaw=String(wfaEstDecimal(vv('tk-horas-h'),vv('tk-horas-m')));
       var spRaw=String(vv('tk-sp')||'').trim();
       var dados={
         t:tt,
@@ -8952,7 +9165,7 @@ function relatorioImprimir(){
         if(antes.st!==dados.st)reg('mudou o status para '+((COLS.filter(function(c){return c.k===dados.st;})[0]||{}).n||dados.st));
         if(antes.resps!==resps.join('|'))reg(resps.length?('atribuiu para '+resps.join(', ')):'tirou o responsável');
         if((antes.venc||'')!==(dados.venc||''))reg(dados.venc?('marcou o prazo para '+dados.venc.split('-').reverse().join('/')):'tirou o prazo');
-        if(String(antes.horas||'')!==String(dados.horas||''))reg(dados.horas===''?'tirou a estimativa':('estimou em '+dados.horas+'h'));
+        if(String(antes.horas||'')!==String(dados.horas||''))reg(dados.horas===''?'tirou a estimativa':('estimou em '+wfaEstFmt(dados.horas)));
       }
       if(hist.length>60)hist=hist.slice(-60);
       dados.hist=hist;
@@ -8967,7 +9180,7 @@ function relatorioImprimir(){
     }
 
     if(b.dataset.tkdel!=null){
-      var p3=get(aberto); if(!p3)return;
+      var p3=get(modalPid||aberto); if(!p3)return;
       if(!confirm('Excluir esta tarefa?'))return;
       p3.tarefas=(p3.tarefas||[]).filter(function(t){return t.id!==b.dataset.tkdel;});
       grava(p3);fecharModal();
@@ -9659,13 +9872,14 @@ function renderSprints(){
     const clis=sp.clis.map(cid=>{
       const c=CLIENTES.find(x=>x.id===cid);if(!c)return'';
       const tarefasAtivas=state.tarefas.filter(t=>t.clienteId===cid&&t.sprintN===sp.n&&t.status!=='concluido').length;
+      let pjBl=0;try{pjBl=(typeof pjBacklogDe==='function')?pjBacklogDe(cid,sp.n).length:0;}catch(e){}
       const interval=capIntervalFor(c);
       const isCap=interval&&sp.n>0&&sp.n%interval===0;
       const capBadge=isCap?`<span title="Sprint de captação" style="color:var(--yel-d);font-weight:700">📹</span>`:'';
       const capInfo=c.cap?`<span style="font-size:9px;color:var(--mute)"> · ${c.cap}×/mês</span>`:'';
       return `<div class="sprint-card" draggable="true" data-cli="${cid}" data-sp="${sp.n}" onclick="openSprint(${sp.n},'${cid}')">
         <div class="sc-cli">${c.nm} ${capBadge}</div>
-        <div class="sc-meta"><span class="dot ${c.status==='churn'?'gray':c.status}"></span>${c.plano}${capInfo}${tarefasAtivas?` · <span style="color:var(--yel-d);font-weight:700">${tarefasAtivas} tarefas</span>`:''}</div>
+        <div class="sc-meta"><span class="dot ${c.status==='churn'?'gray':c.status}"></span>${c.plano}${capInfo}${tarefasAtivas?` · <span style="color:var(--yel-d);font-weight:700">${tarefasAtivas} tarefas</span>`:''}${pjBl?` · <span style="color:#7c3aed;font-weight:700" title="Tarefas do projeto nesta sprint, ainda no backlog">${pjBl} no backlog</span>`:''}</div>
       </div>`;
     }).join('');
     return `<div class="sprint-col" data-spcol="${sp.n}"><div class="col-head"><h4><span class="dot gray"></span>${sp.nm}</h4><span class="ct">${sp.clis.length}</span></div><div class="sp-drop" data-spdrop="${sp.n}" style="min-height:40px;display:flex;flex-direction:column;gap:8px">${clis||'<div class="muted" style="font-size:11px;padding:6px">Arraste clientes aqui</div>'}</div></div>`;
@@ -9718,9 +9932,29 @@ function openSprint(n,cliId){
   document.getElementById('modal-sprint-name').textContent=spLabel+(isCap?' 📹':'');
   document.getElementById('modal-sprint-cli').textContent=c.nm;
   const today=new Date();const venc=dataSP(new Date(today.getTime()+7*86400000));
-  document.getElementById('modal-sprint-list').innerHTML=ativs.map((a,i)=>`
+  /* PONTE: o backlog do projeto deste cliente, nesta sprint, vem primeiro. Marcado, ele e
+     PUXADO para "A iniciar" e passa a aparecer no kanban de Atividades. As sugestoes
+     padrao ficam abaixo, desmarcadas quando ja existe backlog de projeto, senao a sprint
+     nasceria em dobro. */
+  const pjBl=(typeof pjBacklogDe==='function')?pjBacklogDe(cliId,n):[];
+  state.currentPjBl=pjBl;
+  const temPj=pjBl.length>0;
+  const teamOpts=cur=>'<option value="">Sem responsável</option>'+allTeam().map(nm=>`<option${nm===cur?' selected':''}>${mdEsc(nm)}</option>`).join('');
+  const pjHtml=temPj?`<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#7c3aed;margin:2px 0 8px">Backlog do projeto · ${pjBl.length} tarefa${pjBl.length>1?'s':''} nesta sprint</div>`+
+    pjBl.map((t,i)=>`
     <div class="activity-suggestion">
-      <input type="checkbox" id="atv-${i}" checked>
+      <input type="checkbox" id="pjb-${i}" checked>
+      <div class="as-info">
+        <div class="as-title">${mdEsc(t.t)} ${(t.papeis||[]).map(p=>`<span class="tag yel">${mdEsc(p)}</span>`).join('')}${t.horas?` <span style="font-size:10px;color:var(--mute);font-weight:600">⏳ ${wfaEstFmt(t.horas)}</span>`:''}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+          <div><label class="form-label" style="font-size:9px;margin-bottom:2px">Vencimento</label><input class="form-input" type="date" id="pjb-data-${i}" value="${t.venc||venc}" style="padding:5px 8px;font-size:11.5px"></div>
+          <div><label class="form-label" style="font-size:9px;margin-bottom:2px">Responsável</label><select class="form-select" id="pjb-resp-${i}" style="padding:5px 8px;font-size:11.5px">${teamOpts(t.resp)}</select></div>
+        </div>
+      </div>
+    </div>`).join('')+`<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin:14px 0 8px">Sugestões padrão da sprint</div>`:'';
+  document.getElementById('modal-sprint-list').innerHTML=pjHtml+ativs.map((a,i)=>`
+    <div class="activity-suggestion">
+      <input type="checkbox" id="atv-${i}"${temPj?'':' checked'}>
       <div class="as-info">
         <div class="as-title">${a.t} <span class="tag yel">média</span> <span style="font-size:10px;color:var(--mute);font-weight:600">${a.f}</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
@@ -9731,10 +9965,22 @@ function openSprint(n,cliId){
     </div>
   `).join('');
   document.getElementById('modal-sprint').classList.add('open');
+  document.querySelectorAll('#modal-sprint-list select').forEach(s=>{try{wfaBuscaPessoa(s);}catch(e){}});
 }
 function criarAtividadesSelecionadas(){
   const n=state.currentSprint;const cliId=state.currentCliente;
   const ativs=getAtividadesParaSprint(n,cliId);
+  // PONTE: puxa as tarefas de projeto marcadas para "A iniciar" (fonte segue na aba Projetos)
+  let puxadas=0;
+  const lote=[];
+  (state.currentPjBl||[]).forEach((t,i)=>{
+    const cb=document.getElementById('pjb-'+i);
+    if(!cb||!cb.checked)return;
+    const venc=(document.getElementById('pjb-data-'+i)||{}).value||'';
+    const resp=(document.getElementById('pjb-resp-'+i)||{}).value||'';
+    lote.push({projId:t.projId,ptId:t.id,stAtv:'iniciar',extra:{resp,venc,origem:'pela Jornada'}});
+  });
+  if(lote.length&&typeof pjMoverLote==='function')puxadas=pjMoverLote(lote);
   let count=0;
   ativs.forEach((a,i)=>{
     const cb=document.getElementById('atv-'+i);
@@ -9753,7 +9999,8 @@ function criarAtividadesSelecionadas(){
   });
   saveTarefas();
   closeModal('modal-sprint');
-  toast(`${count} tarefa(s) criada(s) · ver em Atividades > Tarefas`);
+  if(!count&&!puxadas){toast('Nada selecionado');return;}
+  toast(`${count?count+' tarefa(s) criada(s)':''}${count&&puxadas?' · ':''}${puxadas?puxadas+' puxada(s) do projeto para A iniciar':''} · ver em Atividades`);
 }
 
 /* ============ TAREFAS ============ */
@@ -9776,7 +10023,7 @@ function mdProjRow(kind,t){
   const ir=`event.stopPropagation();pjAbrir('${t.projId}','${t.id}')`;
   return `<div class="md-task ${kind==='late'?'late':kind==='today'?'today':''}">
     <span class="pr media"></span>
-    <div class="tk-main" onclick="${ir}" style="cursor:pointer"><div class="tk-t">${mdEsc(t.titulo||'Sem t\u00edtulo')}</div><div class="tk-m">${meta}${t.horas?' \u00b7 '+mdEsc(t.horas)+'h':''}</div></div>
+    <div class="tk-main" onclick="${ir}" style="cursor:pointer"><div class="tk-t">${mdEsc(t.titulo||'Sem t\u00edtulo')}</div><div class="tk-m">${meta}${t.horas?' \u00b7 '+mdEsc(wfaEstFmt(t.horas)):''}</div></div>
     ${chip}
     <div class="md-act"><button class="ab" title="Abrir no projeto" onclick="${ir}">Abrir</button></div>
   </div>`;
@@ -10762,11 +11009,72 @@ function adiarAtrasadas(){
   if(typeof renderMeuDia==='function')renderMeuDia();
   toast('📅 '+atrasadas.length+' tarefa(s) movida(s) para amanhã');
 }
+/* ============ REMOVER DUPLICADAS (pedido do Gabriel, 02/09/2026) ============
+   Com a ponte, uma tarefa pode existir no kanban proprio E no projeto do cliente
+   (mesmo titulo, mesmo cliente). Regra, sempre com confirmacao antes:
+   1. Duas tarefas proprias iguais (titulo + cliente, nenhuma concluida): fica a mais
+      antiga, as outras saem.
+   2. Tarefa propria igual a uma tarefa de projeto nao concluida: a do projeto vira a
+      unica. Antes de apagar a propria, o que ela tinha a mais (responsavel, prazo,
+      estimativa, descricao, status mais avancado) e copiado pra do projeto; se a do
+      projeto estava no backlog ela e puxada pro mesmo status, pra nao sumir da daily. */
+function removerDuplicadas(){
+  const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+  const ORD=['backlog','iniciar','andamento','aprovacao','homologcli','concluido'];
+  const proprias=state.tarefas.filter(t=>t&&t.status!=='concluido'&&norm(t.title));
+  const vistos={},saemEntreSi=[];
+  proprias.slice().sort((a,b)=>String(a.criadaEm||'').localeCompare(String(b.criadaEm||''))).forEach(t=>{
+    const k=norm(t.title)+'|'+(t.clienteId||'');
+    if(vistos[k])saemEntreSi.push(t);else vistos[k]=t;
+  });
+  const pjPor={};
+  try{(JSON.parse(localStorage.getItem('wfa-projetos')||'[]')||[]).forEach(p=>{
+    let cid=p.clienteId||'';
+    if(!cid){const nm=String(p.cliente||'').toLowerCase().trim();const hit=(CLIENTES||[]).find(c=>String(c.nm||'').toLowerCase().trim()===nm);cid=hit?hit.id:'';}
+    (p.tarefas||[]).forEach(t=>{if(!t||t.st==='concluido')return;const k=norm(t.t)+'|'+cid;if(!pjPor[k])pjPor[k]={projId:p.id,t};});
+  });}catch(e){}
+  const jaSai=new Set(saemEntreSi.map(t=>t.id));
+  const casadas=[];
+  proprias.forEach(t=>{
+    if(jaSai.has(t.id))return;
+    const k=norm(t.title)+'|'+(t.clienteId||'');
+    if(pjPor[k])casadas.push({propria:t,pj:pjPor[k]});
+  });
+  const total=saemEntreSi.length+casadas.length;
+  if(!total){toast('Nenhuma tarefa repetida encontrada 👌');return;}
+  const msg='Encontrei '+total+' tarefa(s) repetida(s):\n\n'+
+    (saemEntreSi.length?'• '+saemEntreSi.length+' repetida(s) dentro da própria aba (fica a mais antiga)\n':'')+
+    (casadas.length?'• '+casadas.length+' que também existe(m) no projeto do cliente (fica a do projeto, com responsável, prazo e status copiados)\n':'')+
+    '\nRemover agora?';
+  if(!confirm(msg))return;
+  const MAP_PJ_ATV={backlog:'backlog',iniciar:'iniciar',andamento:'andamento',homolog:'aprovacao',homologcli:'homologcli',concluido:'concluido'};
+  const lote=[];
+  casadas.forEach(({propria,pj})=>{
+    const stPj=MAP_PJ_ATV[pj.t.st]||'backlog';
+    const alvo=ORD.indexOf(propria.status)>ORD.indexOf(stPj)?propria.status:stPj;
+    lote.push({projId:pj.projId,ptId:pj.t.id,stAtv:alvo,extra:{
+      resp:pj.t.resp?'':(propria.resp||''),
+      venc:pj.t.venc?'':(propria.data||''),
+      horas:(pj.t.horas===''||pj.t.horas===undefined||pj.t.horas===null)?propria.horas:'',
+      obs:propria.desc||'',
+      origem:'ao juntar tarefa repetida da aba Atividades'}});
+  });
+  if(lote.length&&typeof pjMoverLote==='function')pjMoverLote(lote);
+  const ids=new Set(saemEntreSi.map(t=>t.id).concat(casadas.map(c=>c.propria.id)));
+  state.tarefas=state.tarefas.filter(t=>!ids.has(t.id));
+  ids.forEach(id=>{try{addDeleted(id);}catch(e){}});
+  saveTarefas();
+  toast('✓ '+ids.size+' tarefa(s) repetida(s) removida(s)');
+}
 let WFA_SHOW_ALL_DONE=false; // Concluído mostra só as 30 mais recentes até pedirem todas
 function renderTarefas(){
   /* Mesmo modelo da aba Projetos, pedido do Caio. A chave 'aprovacao' ficou como
      estava e so mudou de rotulo para Homologacao: renomear migraria tarefa gravada. */
   const STATS=['backlog','iniciar','andamento','aprovacao','homologcli','concluido'];
+  /* PONTE: tarefas dos projetos (aba Projetos) fora do backlog entram como cartao ligado.
+     O backlog delas fica na Jornada, de proposito: a daily nao precisa ver centenas de
+     cartoes que ainda nem foram puxados. */
+  const _ligadas=(typeof pjAtivas==='function')?pjAtivas():[];
   // FLIP: fotografa a posição dos cards ANTES do rebuild; no fim, anima do lugar velho pro
   // novo (card desliza entre colunas em vez de teleportar). Respeita reduced-motion.
   const _flip=new Map();
@@ -10778,6 +11086,11 @@ function renderTarefas(){
     // status desconhecido (dado antigo/importado) cai no Backlog — nada some
     let filt=state.tarefas.filter(t=>(t.status===st||(st==='backlog'&&!STATS.includes(t.status)))&&tarefaPassaFiltro(t))
       .sort(taskCmp);   // ordem unica do board, ver taskCmp
+    if(st!=='backlog'){
+      const lig=_ligadas.filter(t=>t.status===st&&tarefaPassaFiltro(t))
+        .sort((a,b)=>String(a.data||'9999').localeCompare(String(b.data||'9999'))||String(a.title||'').localeCompare(String(b.title||'')));
+      filt=filt.concat(lig);
+    }
     const totalCol=filt.length;
     let maisBtn='';
     // Concluído acumula centenas de cards e pesava o board inteiro: mostra as 30 mais
@@ -10797,7 +11110,8 @@ function renderTarefas(){
   // KPIs — "Ativas" = não concluídas. Com FILTRO ativo, os KPIs contam o MESMO conjunto
   // das colunas (filtrado): filtrar por Samuel e ver "Ativas 94" global não batia (print
   // do Gabriel de 27/07). Sem filtro, comportamento de sempre.
-  const _kpiBase=Object.values(WFA_FILTROS).some(v=>v!=='')?state.tarefas.filter(tarefaPassaFiltro):state.tarefas;
+  const _todas=state.tarefas.concat(_ligadas);
+  const _kpiBase=Object.values(WFA_FILTROS).some(v=>v!=='')?_todas.filter(tarefaPassaFiltro):_todas;
   document.getElementById('kpi-total').textContent=_kpiBase.filter(t=>t.status!=='concluido').length;
   document.getElementById('kpi-andamento').textContent=_kpiBase.filter(t=>t.status==='andamento').length;
   const today=hojeSP();
@@ -10823,6 +11137,8 @@ let WFA_TASK_VIEW='kanban';
 function tarefaSetView(v){
   WFA_TASK_VIEW=v;
   document.querySelectorAll('#task-views .tv-btn').forEach(b=>b.classList.toggle('on',b.dataset.tv===v));
+  const more=document.getElementById('tv-more');
+  if(more){const has=[...more.options].some(o=>o.value===v);more.value=has?v:'';more.classList.toggle('on',has);}
   renderTarefas();
 }
 function tarefaApplyView(){
@@ -10840,7 +11156,10 @@ function tarefaApplyView(){
   else if(WFA_TASK_VIEW==='painel')renderTaskDashboard();
   else if(WFA_TASK_VIEW==='relatorio')renderTaskRelatorio();
 }
-function taskFiltradas(){return state.tarefas.filter(tarefaPassaFiltro);}
+function taskFiltradas(){const lig=(typeof pjAtivas==='function')?pjAtivas():[];return state.tarefas.concat(lig).filter(tarefaPassaFiltro);}
+/* Painel e Relatorio seguem lendo so o kanban proprio: o capacity ja soma os projetos
+   por fora, e o relatorio do cliente e emitido a partir das tarefas proprias. */
+function taskFiltradasProprias(){return state.tarefas.filter(tarefaPassaFiltro);}
 function taskStatusLabel(s){return s==='backlog'?'Backlog':s==='iniciar'?'A iniciar':s==='andamento'?'Em Andamento':s==='aprovacao'?'Homologação':s==='homologcli'?'Homologação do cliente':s==='concluido'?'Concluído':s;}
 function taskInitials(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'?';}
 function renderTaskLista(){
@@ -10905,7 +11224,7 @@ function renderTaskPessoas(){
 function renderTaskDashboard(){
   const today=hojeSP();
   const em7=dataSP(new Date(Date.now()+7*86400000));
-  const ts=taskFiltradas();
+  const ts=taskFiltradasProprias();
   const by=(arr,keyfn)=>{const m={};arr.forEach(t=>{const k=((keyfn(t)||'').toString().trim())||'—';m[k]=(m[k]||0)+1;});return m;};
   const kpi=(l,v,cls)=>`<div class="kpi ${cls||''}"><div class="l">${l}</div><div class="v">${v}</div></div>`;
   const total=ts.length;
@@ -10988,12 +11307,14 @@ function taskCard(t){
   const badges=[];
   if(cl.length)badges.push(`<span class="tc-badge${clDone===cl.length?' done':''}">☑ ${clDone}/${cl.length}</span>`);
   if(tSpent>=1)badges.push(`<span class="tc-badge${t.timerSince?' run':''}">⏱ ${fmtDur(tSpent)}</span>`);
-  if(t.horas===0||t.horas)badges.push(`<span class="tc-badge">⏳ ${t.horas}h</span>`);
+  if(t.horas===0||t.horas)badges.push(`<span class="tc-badge">⏳ ${wfaEstFmt(t.horas)}</span>`);
   if(nCmt)badges.push(`<span class="tc-badge">💬 ${nCmt}</span>`);
   if(nAtt)badges.push(`<span class="tc-badge">🔗 ${nAtt}</span>`);
   const clHtml=badges.length?`<div class="tc-badges">${badges.join('')}</div>`:'';
   const dateStyle=late?'color:var(--red);font-weight:700':venceHoje?'color:#b36200;font-weight:700':'';
-  return `<div class="task-card priority-${t.prio||'media'}" draggable="true" data-tid="${t.id}" onclick="openTaskDetail('${t.id}')" style="cursor:pointer">
+  const pjTag=t.pj?`<div class="tc-pjtag" title="Tarefa do projeto ${escapeHtml(t.clienteNome||'')}: mesma tarefa da aba Projetos, sem cópia">Projeto${(t.sprint!==''&&t.sprint!==undefined&&t.sprint!==null)?' · sprint '+String(t.sprint).padStart(2,'0'):''}</div>`:'';
+  return `<div class="task-card priority-${t.prio||'media'}${t.pj?' tc-pj':''}" draggable="true" data-tid="${t.id}" onclick="openTaskDetail('${t.id}')" style="cursor:pointer">
+    ${pjTag}
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;margin-bottom:2px">
       <div class="tc-title" style="flex:1">${escapeHtml(t.title)}</div>
       ${prioBadge}
@@ -11002,13 +11323,13 @@ function taskCard(t){
     ${tagsHtml}
     ${clHtml}
     <div class="tc-meta" style="margin-top:5px">
-      <span class="tc-cli">${c?escapeHtml(c.nm):'—'}</span>
+      <span class="tc-cli">${c?escapeHtml(c.nm):(t.clienteNome?escapeHtml(t.clienteNome):'—')}</span>
       <span class="tc-date ${late?'late':''}" style="${dateStyle}">${late?'Atrasada · ':venceHoje?'Hoje · ':''}${dataFmt}</span>
     </div>
     <div class="tc-meta" style="margin-top:4px">
       <span class="tc-assign" style="display:inline-flex;align-items:center;gap:5px">${t.resp?`<span class="tc-av">${taskInitials(t.resp)}</span>`:''}${escapeHtml(t.resp||'sem responsável')}</span>
       <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
-        <button class="icobtn" style="padding:2px 6px;font-size:9.5px;color:var(--red)" title="Excluir" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>
+        ${t.pj?'':`<button class="icobtn" style="padding:2px 6px;font-size:9.5px;color:var(--red)" title="Excluir" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>`}
       </div>
     </div>
   </div>`;
@@ -11162,7 +11483,19 @@ function bindDrag(){
     list.addEventListener('dragleave',e=>{if(!list.contains(e.relatedTarget)&&!col.contains(e.relatedTarget))col.classList.remove('drop-on');});
     list.addEventListener('drop',e=>{
       e.preventDefault();col.classList.remove('drop-on');
-      const id=e.dataTransfer.getData('id');const t=state.tarefas.find(x=>x.id===id);if(!t)return;
+      const id=e.dataTransfer.getData('id');
+      if(String(id).indexOf('pj:')===0){
+        /* Cartao ligado a um projeto: o status muda LA (fonte unica). Soltar em Backlog
+           devolve a tarefa pro backlog do projeto, que mora na Jornada. */
+        const pp=String(id).split(':');const dest=list.dataset.list;
+        WFA_DROP_FEITO=true;
+        document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});
+        const ok=(typeof pjMoverStatus==='function')&&pjMoverStatus(pp[1],pp[2],dest,{origem:'pela aba Atividades'});
+        if(!ok){renderTarefas();return;}
+        toast(dest==='backlog'?'Voltou pro backlog do projeto (fica na Jornada)':'✓ Movida para '+taskStatusLabel(dest)+' no projeto');
+        return;
+      }
+      const t=state.tarefas.find(x=>x.id===id);if(!t)return;
       const destino=list.dataset.list;
       const origem=t.status;                 // de onde o cartão saiu, pra poder devolver no lugar certo
       const changedCol=origem!==destino;
@@ -11214,7 +11547,8 @@ function qaddSave(st,keepOpen){
 /* ============ NOVA TAREFA MANUAL ============ */
 function openNovaTarefa(status){
   // limpa os campos pra não herdar lixo da última tarefa
-  ['nt-title','nt-desc','nt-tags'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['nt-title','nt-desc','nt-tags','nt-horas-h','nt-horas-m'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  {const ini=document.getElementById('nt-ini');if(ini)ini.value=hojeSP();}
   if(typeof fillRespSelects==='function')fillRespSelects(); // garante a equipe completa no select
   if(typeof fillClienteSelects==='function')fillClienteSelects();
   const pr=document.getElementById('nt-prio');if(pr)pr.value='media';
@@ -11237,6 +11571,8 @@ function criarTarefaManual(){
     prio:document.getElementById('nt-prio').value,
     status:document.getElementById('nt-status').value,
     tags,checklist:[],
+    ini:(document.getElementById('nt-ini')||{}).value||'',
+    horas:wfaEstDecimal((document.getElementById('nt-horas-h')||{}).value,(document.getElementById('nt-horas-m')||{}).value),
     sprintN:null,criadaEm:new Date().toISOString(),timerSince:new Date().toISOString()
   });
   saveTarefas();closeModal('modal-nova');
@@ -11337,7 +11673,8 @@ function updateBadges(){
   // O badge mostra o MESMO número do KPI "Ativas" da página (todas as não concluídas).
   // Antes contava só as urgentes e o Gabriel estranhou 2x o "não bate" — número igual
   // em todo lugar, detalhe das urgentes fica no tooltip.
-  const ativas=state.tarefas.filter(t=>t.status!=='concluido').length;
+  let _lig=[];try{_lig=(typeof pjAtivas==='function')?pjAtivas():[];}catch(e){}
+  const ativas=state.tarefas.filter(t=>t.status!=='concluido').length+_lig.filter(t=>t.status!=='concluido').length;
   const badge=document.getElementById('tarefas-badge');
   badge.textContent=ativas;
   badge.title=ativas+' ativa(s): '+atrasadas+' atrasada(s) · '+venceHoje+' vence(m) hoje · '+(ativas-atrasadas-venceHoje)+' no prazo';
@@ -11397,6 +11734,7 @@ function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;',
 
 /* ============ TASK DETAIL MODAL ============ */
 function openTaskDetail(id){
+  if(String(id).indexOf('pj:')===0){const p=String(id).split(':');if(typeof pjAbrirTarefaModal==='function')pjAbrirTarefaModal(p[1],p[2]);return;}
   const t=state.tarefas.find(x=>x.id===id);if(!t)return;
   // POP vivo: tarefa de Captação/Edição sem checklist recebe o POP da função na hora,
   // e ganha a tag 'pop' (que trava a conclusão até o checklist fechar).
@@ -11422,7 +11760,9 @@ function openTaskDetail(id){
   document.getElementById('td-cliente').value=t.clienteId||CLIENTES[0].id;
   document.getElementById('td-funcao').value=t.funcao||'Account Manager';
   document.getElementById('td-tags').value=(t.tags||[]).join(', ');
-  document.getElementById('td-horas').value=(t.horas===0||t.horas)?t.horas:'';
+  {const s=wfaEstSplit(t.horas);document.getElementById('td-horas-h').value=s.h;document.getElementById('td-horas-m').value=s.m;
+   const ini=document.getElementById('td-ini');if(ini)ini.value=t.ini||'';
+   const cmp=document.getElementById('td-est-cmp');if(cmp){const est=wfaEstFmt(t.horas);cmp.textContent=est?('Estimado '+est+' · gasto até agora '+fmtDur(tdElapsed(t))):'';}}
   renderChecklist(t.checklist||[]);
   renderTdTimer(t);renderTdComments(t);renderTdAttachments(t);
   const ci=document.getElementById('td-cmt-input');if(ci)ci.value='';
@@ -11491,7 +11831,7 @@ function relPeriodo(){
   return{ini:y+'-'+p2(m)+'-01',fim:y+'-'+p2(m)+'-'+p2(ultimo),label:REL_MESES[m-1]+' de '+y};
 }
 function relDados(){
-  const per=relPeriodo(),hoje=hojeSP(),ts=taskFiltradas();
+  const per=relPeriodo(),hoje=hojeSP(),ts=taskFiltradasProprias();
   const feitasPer=ts.filter(t=>t.status==='concluido'&&t.concluidaEm&&relDia(t.concluidaEm)>=per.ini&&relDia(t.concluidaEm)<=per.fim);
   const abertas=ts.filter(t=>t.status!=='concluido');
   const mapa={};
@@ -11644,8 +11984,8 @@ function saveTaskDetail(){
   /* Tempo estimado por tarefa, pedido do Caio. Guardado como NUMERO: campo vazio
      vira '' e nao 0, senao tarefa sem estimativa contaria como zero hora e o
      capacity da equipe passaria a mentir para baixo. */
-  const _h=String((document.getElementById('td-horas')||{}).value||'').trim().replace(',','.');
-  t.horas=_h===''?'':(isNaN(parseFloat(_h))?'':parseFloat(_h));
+  t.horas=wfaEstDecimal((document.getElementById('td-horas-h')||{}).value,(document.getElementById('td-horas-m')||{}).value);
+  {const ini=document.getElementById('td-ini');if(ini)t.ini=ini.value||'';}
   const tagsRaw=document.getElementById('td-tags').value;
   t.tags=tagsRaw?tagsRaw.split(',').map(s=>s.trim()).filter(Boolean):[];
   saveTarefas();closeModal('modal-detail');toast('Tarefa atualizada');
