@@ -175,31 +175,53 @@ const ARRASTA = (args) => {
   checa((est.hist || []).some((h) => /estimou em 1h 15min/.test(h.txt)), 'histórico registra "estimou em 1h 15min"');
   checa((est.hist || []).some((h) => /pela aba Atividades/.test(h.txt)), 'histórico registra a mudança de status feita pela aba Atividades');
 
-  // 5. Detalhe da tarefa PROPRIA: campos h/min + inicio
+  // 5. Detalhe da tarefa PROPRIA abre o MESMO modal dos projetos (pedido de 02/09)
   await page.evaluate(() => openTaskDetail('n1'));
-  await page.waitForTimeout(250);
-  const detN = await page.evaluate(() => ({
-    h: document.getElementById('td-horas-h').value, min: document.getElementById('td-horas-m').value,
-    ini: !!document.getElementById('td-ini'), cmp: document.getElementById('td-est-cmp').textContent,
-    respBusca: !!document.querySelector('#modal-detail .pp-wrap input'),
-    respHidden: document.getElementById('td-resp').style.display === 'none',
-    respVal: document.getElementById('td-resp').value,
-    respInput: document.querySelector('#modal-detail .pp-wrap input').value,
-  }));
-  checa(detN.h === '2' && detN.min === '0', 'detalhe próprio mostra 2h como 2h 0min');
-  checa(detN.ini, 'detalhe próprio ganhou campo Início');
-  checa(/Estimado 2h/.test(detN.cmp), 'detalhe próprio compara estimado x gasto (' + detN.cmp + ')');
-  checa(detN.respBusca && detN.respHidden, 'responsável do detalhe próprio virou busca por nome');
-  checa(detN.respVal === 'Gabriel Andrade' && detN.respInput === 'Gabriel Andrade', 'campo de busca mostra o responsável atual');
-  await page.evaluate(() => { document.getElementById('td-horas-h').value = '0'; document.getElementById('td-horas-m').value = '45'; document.getElementById('td-ini').value = '2026-09-02'; saveTaskDetail(); });
   await page.waitForTimeout(300);
+  const detN = await page.evaluate(() => {
+    const m = document.getElementById('pj-modal');
+    return {
+      aberto: !!m && m.style.display !== 'none',
+      titulo: (document.getElementById('tk-t') || {}).value,
+      h: (document.getElementById('tk-horas-h') || {}).value, min: (document.getElementById('tk-horas-m') || {}).value,
+      prio: !!document.getElementById('tk-prio'), cli: !!document.getElementById('tk-cli'), func: !!document.getElementById('tk-func'), tags: !!document.getElementById('tk-tags'),
+      semSprint: !document.getElementById('tk-sp'),
+      chips: (document.getElementById('tk-resps') || {}).textContent || '',
+      upload: !!m.querySelector('[data-anxup]') && !!m.querySelector('#tk-anxfile'),
+      crumb: (m.querySelector('.tkbc') || {}).textContent || '',
+    };
+  });
+  checa(detN.aberto && detN.titulo === 'Roteirizar 8 vídeos', 'tarefa própria abre no modal padrão ClickUp com o título certo');
+  checa(detN.h === '2' && detN.min === '0', 'detalhe próprio mostra 2h como 2h 0min');
+  checa(detN.prio && detN.cli && detN.func && detN.tags, 'detalhe próprio tem Prioridade, Cliente, Função e Tags');
+  checa(detN.semSprint, 'detalhe próprio não mostra linha de Sprint');
+  checa(/Gabriel Andrade/.test(detN.chips), 'responsável aparece como chip (Gabriel Andrade)');
+  checa(detN.upload, 'anexos têm botão de enviar imagem');
+  checa(/Vivenda/.test(detN.crumb), 'trilha mostra o cliente');
+  await page.screenshot({ path: 'deploy/prova-modal-atividades.png', fullPage: false });
+  // anexo com link de imagem vira miniatura
+  await page.evaluate(() => { document.getElementById('tk-anxnm').value = 'print'; document.getElementById('tk-anxurl').value = 'https://example.com/print.jpg'; document.querySelector('[data-anxadd]').click(); });
+  await page.waitForTimeout(150);
+  const thumb = await page.evaluate(() => !!document.querySelector('#tk-anx .tkanx.img img'));
+  checa(thumb, 'anexo de imagem aparece como miniatura');
+  await page.evaluate(() => { document.getElementById('tk-horas-h').value = '0'; document.getElementById('tk-horas-m').value = '45'; document.getElementById('tk-ini').value = '2026-09-02'; document.getElementById('tk-prio').value = 'alta'; document.getElementById('tk-tags').value = 'urgente, copa'; document.querySelector('[data-tksave]').click(); });
+  await page.waitForTimeout(350);
   est = await page.evaluate(() => state.tarefas.find((t) => t.id === 'n1'));
   checa(est.horas === 0.75 && est.ini === '2026-09-02', 'tarefa própria salvou 45min (0,75h) e início (foi ' + est.horas + ', ' + est.ini + ')');
+  checa(est.prio === 'alta' && (est.tags || []).join(',') === 'urgente,copa', 'tarefa própria salvou prioridade e tags');
+  checa((est.attachments || []).some((a) => a.url === 'https://example.com/print.jpg' && a.name === 'print'), 'anexo voltou pro formato do kanban (name/url)');
+  checa(est.resp === 'Gabriel Andrade' && (est.resps || [])[0] === 'Gabriel Andrade', 'resp continua espelhando resps[0]');
+  const fechou = await page.evaluate(() => document.getElementById('pj-modal').style.display === 'none');
+  checa(fechou, 'modal fechou depois de salvar');
 
-  // 6. Busca de pessoa na Nova tarefa: digitar filtra e Enter escolhe
+  // 6. Nova tarefa: mesmo modal, busca de pessoa no "+ pessoa" (digitar filtra, Enter escolhe)
+  const antesN = await page.evaluate(() => state.tarefas.length);
   await page.evaluate(() => openNovaTarefa('iniciar'));
-  await page.waitForTimeout(250);
-  const inp = page.locator('#modal-nova .pp-wrap input').first();
+  await page.waitForTimeout(300);
+  const nova = await page.evaluate(() => ({ aberto: document.getElementById('pj-modal').style.display !== 'none', crumb: (document.querySelector('#pj-modal .tkbc') || {}).textContent || '', st: (document.getElementById('tk-st') || {}).value, ini: (document.getElementById('tk-ini') || {}).value }));
+  checa(nova.aberto && /Nova tarefa/.test(nova.crumb), 'Nova tarefa abre o modal padrão');
+  checa(nova.st === 'iniciar' && !!nova.ini, 'nova tarefa nasce na coluna clicada e com início preenchido');
+  const inp = page.locator('#pj-modal .pp-wrap input').first();
   await inp.click();
   await inp.fill('dani');
   await page.waitForTimeout(150);
@@ -207,11 +229,14 @@ const ARRASTA = (args) => {
   checa(dd.length >= 1 && dd.every((x) => /dani/i.test(x)), 'digitar "dani" filtra a lista para quem tem "dani" (' + dd.join(', ') + ')');
   await inp.press('Enter');
   await page.waitForTimeout(150);
-  const escolhido = await page.evaluate(() => document.getElementById('nt-resp').value);
-  checa(escolhido === 'Danilo de Lima', 'Enter escolhe Danilo de Lima (foi ' + escolhido + ')');
-  const ntCampos = await page.evaluate(() => ({ ini: !!document.getElementById('nt-ini'), h: !!document.getElementById('nt-horas-h'), m: !!document.getElementById('nt-horas-m') }));
-  checa(ntCampos.ini && ntCampos.h && ntCampos.m, 'Nova tarefa tem Início e estimativa em h/min');
-  await page.evaluate(() => closeModal('modal-nova'));
+  const chip = await page.evaluate(() => (document.getElementById('tk-resps') || {}).textContent || '');
+  checa(/Danilo de Lima/.test(chip), 'Enter adiciona Danilo de Lima como responsável (foi "' + chip.trim() + '")');
+  await page.evaluate(() => { document.getElementById('tk-t').value = 'Tarefa nova do teste'; document.querySelector('[data-tksave]').click(); });
+  await page.waitForTimeout(350);
+  const criada = await page.evaluate(() => state.tarefas.find((t) => t.title === 'Tarefa nova do teste'));
+  checa(!!criada && criada.status === 'iniciar' && criada.resp === 'Danilo de Lima' && !!criada.timerSince, 'nova tarefa gravada em A iniciar com responsável e relógio correndo');
+  const depoisN = await page.evaluate(() => state.tarefas.length);
+  checa(depoisN === antesN + 1, 'só uma tarefa nova entrou');
 
   // 7. Remover duplicadas: n1 repete pt1 (mesmo titulo, mesmo cliente)
   await page.evaluate(() => { window.confirm = () => true; removerDuplicadas(); });
@@ -281,7 +306,7 @@ const ARRASTA = (args) => {
   });
   checa(pux.pt2.st === 'iniciar' && pux.pt2.resp === 'Danilo de Lima' && pux.pt2.venc === '2026-09-06', 'pt2 foi puxada para A iniciar com responsável e prazo');
   checa(pux.pt3.st === 'backlog', 'pt3 (desmarcada) continua no backlog');
-  checa(pux.proprias === 1, 'nenhuma tarefa própria nova foi criada (sugestões desmarcadas)');
+  checa(pux.proprias === 2, 'nenhuma tarefa própria nova foi criada pela Jornada (sugestões desmarcadas)');
   await page.evaluate(() => { const n = document.querySelector('[data-nav="tarefas"]'); n && n.click(); });
   await page.waitForTimeout(500);
   const dep = await page.evaluate(() => [...document.querySelectorAll('.task-list[data-list="iniciar"] .task-card')].map((c) => c.dataset.tid));

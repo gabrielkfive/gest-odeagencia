@@ -1,4 +1,4 @@
-<!-- build 20260902-ponte-projetos -->
+<!-- build 20260902-modal-unico -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -457,11 +457,12 @@ table.t tr.high{background:var(--yel-bg)}
 /* sprint kanban */
 .sprint-board{display:flex;gap:11px;overflow-x:auto;padding:2px 0 8px}
 .pp-wrap{position:relative;min-width:0;flex:1}
-.pp-dd{position:fixed;z-index:20000;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;max-height:240px;overflow:auto;box-shadow:0 14px 30px -14px rgba(0,0,0,.35);padding:4px}
+.pp-dd{position:fixed;z-index:20000;background:#fff;border:1px solid var(--line);border-radius:10px;max-height:240px;overflow:auto;box-shadow:0 14px 30px -14px rgba(0,0,0,.35);padding:4px}
 .pp-it{padding:7px 10px;font-size:12.5px;border-radius:7px;cursor:pointer;color:var(--ink)}
 .pp-it:hover,.pp-it.on{background:var(--yel-bg,#fff7d6)}
 .pp-none{padding:8px 10px;font-size:12px;color:var(--mute)}
-body.aura-dark .pp-dd{background:var(--surface,#1c1c1e);border-color:var(--line)}
+/* no escuro --surface e translucido: sozinho deixava o KPI de tras aparecer dentro da lista */
+body.aura-dark .pp-dd{background-color:#141416;background-image:linear-gradient(var(--surface,transparent),var(--surface,transparent));border-color:var(--line)}
 body.aura-dark .pp-it{color:var(--txt)}
 body.aura-dark .pp-it:hover,body.aura-dark .pp-it.on{background:rgba(255,212,0,.16)}
 input[type=date]{cursor:pointer}
@@ -3374,7 +3375,12 @@ function wfaSetTheme(t){
           .tkanx a{flex:1;color:var(--txt);text-decoration:none}
           .tkanx a:hover{color:var(--yel-d,#a07e00)}
           .tkanx b{color:var(--mute-2);font-size:10px;cursor:pointer}
-          .tkinline{display:flex;gap:6px;margin-top:6px}
+          .tkinline{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+          .tkanx.img{display:flex;align-items:center;gap:10px;padding:6px 0}
+          .tkanx.img img{width:64px;height:64px;object-fit:cover;border-radius:9px;border:1px solid var(--line);display:block;background:#000}
+          .tkanx.img span{flex:1;font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+          .tkanx.img b{cursor:pointer;color:var(--mute)}
+          .tkanx.img b:hover{color:var(--red)}
           .tkinline input{flex:1;background:var(--blue-soft);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:6px 10px;font:inherit;font-size:12.5px}
           .tkinline input:focus{outline:none;border-color:var(--yel)}
           .tkbtn{background:var(--ink);color:var(--bg);border:none;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
@@ -8878,10 +8884,39 @@ function wfaEstDecimal(hStr,mStr){
   function tkIni(n){return String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(function(s){return s[0]||'';}).join('').toUpperCase();}
 
   function abrirTarefa(tid,stInicial){
-    var p=get(modalPid||aberto); if(!p)return;
+    var pid=modalPid||aberto; var p=get(pid); if(!p)return;
     var t=tid?(p.tarefas||[]).filter(function(x){return x.id===tid;})[0]:null;
     var ehNova=!t;
     if(ehNova)t={id:'',t:'',st:stInicial||'backlog',papeis:[],sprint:p.sprint||1,venc:'',ini:'',resp:'',resps:[],horas:'',obs:'',checklist:[],anexos:[],coments:[],hist:[]};
+    var tidFinal=t.id;
+    tkAbrir({
+      t:t, ehNova:ehNova, cols:COLS,
+      crumb:esc(p.cliente||'Projeto')+' <i>/</i> Sprint '+(String(t.sprint||1).length<2?'0':'')+esc(t.sprint||1),
+      onSave:function(dados){
+        var p2=get(pid); if(!p2)return false;
+        if(tidFinal){(p2.tarefas||[]).forEach(function(x){if(x.id===tidFinal)Object.keys(dados).forEach(function(k){x[k]=dados[k];});});}
+        else{dados.id=uid('pt');p2.tarefas=p2.tarefas||[];p2.tarefas.push(dados);}
+        grava(p2); return true;
+      },
+      onDelete:function(){
+        var p3=get(pid); if(!p3||!tidFinal)return;
+        p3.tarefas=(p3.tarefas||[]).filter(function(x){return x.id!==tidFinal;});
+        grava(p3);
+      }
+    });
+  }
+
+  /* GENERICO desde 02/09/2026, pedido do Gabriel: "esses dois tem que ser iguais ao da
+     aba de projetos". A aba Atividades abre esta mesma tela (window.wfaTaskModal). Quem
+     chama passa a tarefa ja normalizada (t, st, resps, ini, venc, horas, obs, papeis,
+     sprint, checklist, anexos, coments, hist, timeSpent, timerSince) e os callbacks
+     onSave(dados, modal) / onDelete() / onTimer(since, gasto). O modal nao sabe onde a
+     tarefa mora. extrasHTML(t) acrescenta linhas no bloco de campos (prioridade,
+     cliente, funcao e tags, no caso de Atividades). */
+  function tkAbrir(ctx){
+    var t=ctx.t||{};
+    var ehNova=!!ctx.ehNova;
+    var cols=ctx.cols||COLS;
     if(!t.resps||!t.resps.length)t.resps=t.resp?[t.resp]:[];
     var cl=(t.checklist||[]).map(function(x){return {id:x.id||uid('cl'),txt:x.txt,done:!!x.done};});
     var clOk=cl.filter(function(x){return x.done;}).length;
@@ -8889,14 +8924,15 @@ function wfaEstDecimal(hStr,mStr){
     var eq=equipe().slice();
     (t.resps||[]).forEach(function(n){if(eq.indexOf(n)<0)eq.push(n);});
     var gasto=tkGasto(t);
+    var hEst=wfaEstSplit(t.horas);
 
     modal(
       '<div class="tkwrap">'+
       '<div class="tkmain">'+
-        '<div class="tkbc">'+esc(p.cliente||'Projeto')+' <i>/</i> Sprint '+(String(t.sprint||1).length<2?'0':'')+esc(t.sprint||1)+'</div>'+
+        '<div class="tkbc">'+(ctx.crumb||'')+'</div>'+
         '<input id="tk-t" class="tktitulo" value="'+esc(t.t)+'" placeholder="O que precisa ser feito">'+
         '<div class="tkcampos">'+
-          linha('◎','Status','<select id="tk-st" class="tkst">'+COLS.map(function(c){return '<option value="'+c.k+'"'+(t.st===c.k?' selected':'')+'>'+esc(c.n)+'</option>';}).join('')+'</select>'+
+          linha('◎','Status','<select id="tk-st" class="tkst">'+cols.map(function(c){return '<option value="'+c.k+'"'+(t.st===c.k?' selected':'')+'>'+esc(c.n)+'</option>';}).join('')+'</select>'+
             (t.st==='concluido'?'':'<button type="button" class="tkok" data-tkconcluir="1" title="Marcar como concluída">✓</button>'))+
           linha('👤','Responsáveis','<div id="tk-resps" class="tkchips"></div>'+
             '<select id="tk-addresp" class="tkmini"><option value="">+ pessoa</option>'+
@@ -8904,9 +8940,10 @@ function wfaEstDecimal(hStr,mStr){
           linha('📅','Datas','<input id="tk-ini" type="date" class="tkdata" value="'+esc(t.ini||'')+'"><span class="tkseta">→</span><input id="tk-venc" type="date" class="tkdata" value="'+esc(t.venc||'')+'">')+
           linha('⏱','Rastrear tempo','<button type="button" class="tktimer'+(t.timerSince?' on':'')+'" data-tktimer="1">'+(t.timerSince?'⏸ Parar':'▶ Start')+'</button>'+
             '<span class="tkgasto" id="tk-gasto">'+(gasto>=1?tkDur(gasto):'0m 00s')+'</span>'+
-            '<span class="tkvazio">estimativa</span><input id="tk-horas-h" type="number" min="0" step="1" class="tkmini num" style="width:62px" value="'+esc(wfaEstSplit(t.horas).h)+'" placeholder="0"><span class="tkvazio">h</span><input id="tk-horas-m" type="number" min="0" max="59" step="5" class="tkmini num" style="width:62px" value="'+esc(wfaEstSplit(t.horas).m)+'" placeholder="0"><span class="tkvazio">min</span>')+
-          linha('🏷','Etiquetas','<div id="tk-papeis" class="tkchips"></div><a data-ppnovo="1" class="tkadd">+ nova</a>')+
-          linha('🧩','Sprint','<input id="tk-sp" type="number" min="0" class="tkmini num" value="'+esc(t.sprint===0?0:(t.sprint||1))+'"><span class="tkvazio">0 = tarefa fixa, sem sprint</span>')+
+            '<span class="tkvazio">estimativa</span><input id="tk-horas-h" type="number" min="0" step="1" class="tkmini num" style="width:62px" value="'+esc(hEst.h)+'" placeholder="0"><span class="tkvazio">h</span><input id="tk-horas-m" type="number" min="0" max="59" step="5" class="tkmini num" style="width:62px" value="'+esc(hEst.m)+'" placeholder="0"><span class="tkvazio">min</span>')+
+          (ctx.semPapeis?'':linha('🏷','Etiquetas','<div id="tk-papeis" class="tkchips"></div><a data-ppnovo="1" class="tkadd">+ nova</a>'))+
+          (ctx.semSprint?'':linha('🧩','Sprint','<input id="tk-sp" type="number" min="0" class="tkmini num" value="'+esc(t.sprint===0?0:(t.sprint||1))+'"><span class="tkvazio">0 = tarefa fixa, sem sprint</span>'))+
+          (typeof ctx.extrasHTML==='function'?ctx.extrasHTML(t):'')+
         '</div>'+
         '<textarea id="tk-obs" class="tkdesc" placeholder="Adicione uma descrição">'+esc(t.obs||'')+'</textarea>'+
         '<div class="tksec"><div class="tksech">☑ Checklist <span id="tk-clct">'+(cl.length?clOk+'/'+cl.length:'')+'</span></div>'+
@@ -8914,11 +8951,14 @@ function wfaEstDecimal(hStr,mStr){
           '<div class="tkinline"><input id="tk-clnovo" placeholder="Adicionar item e teclar Enter"></div></div>'+
         '<div class="tksec"><div class="tksech">📎 Anexos</div>'+
           '<div id="tk-anx"></div>'+
-          '<div class="tkinline"><input id="tk-anxnm" placeholder="Nome"><input id="tk-anxurl" placeholder="https://"><button type="button" class="tkbtn" data-anxadd="1">Anexar</button></div></div>'+
+          '<div class="tkinline"><input id="tk-anxnm" placeholder="Nome"><input id="tk-anxurl" placeholder="https://"><button type="button" class="tkbtn" data-anxadd="1">Anexar</button>'+
+          '<button type="button" class="tkbtn" data-anxup="1" title="Enviar imagem ou PDF do computador ou do celular. Também dá pra colar a imagem com Ctrl+V.">📷 Imagem</button>'+
+          '<input type="file" id="tk-anxfile" accept="image/*,application/pdf" style="display:none"></div>'+
+          '<div id="tk-anxstatus" class="tkvazio" style="margin-top:4px"></div></div>'+
         '<div class="tkfoot">'+
-          (ehNova?'':'<button class="icobtn" data-tkdel="'+esc(t.id)+'" style="color:var(--red);margin-right:auto">Excluir</button>')+
+          (ehNova?'':'<button class="icobtn" data-tkdel="1" style="color:var(--red);margin-right:auto">Excluir</button>')+
           '<button class="tb-btn alt" data-tkcancel="1">Cancelar</button>'+
-          '<button class="tb-btn dk" data-tksave="'+esc(t.id||'')+'">Salvar</button>'+
+          '<button class="tb-btn dk" data-tksave="1">Salvar</button>'+
         '</div>'+
       '</div>'+
       '<div class="tkside">'+
@@ -8931,10 +8971,11 @@ function wfaEstDecimal(hStr,mStr){
     , true);
 
     var m=document.getElementById('pj-modal');
+    m._ctx=ctx;
     m.dataset.papeis=(t.papeis||[]).join(',');
     m.dataset.resps=(t.resps||[]).join('|');
     /* checklist, anexo, comentario e cronometro ficam no elemento ate salvar: fechar
-       sem salvar nao pode gravar meio item dentro do projeto. */
+       sem salvar nao pode gravar meio item. */
     m._cl=cl;
     m._anx=(t.anexos||[]).slice();
     m._cmt=(t.coments||[]).slice();
@@ -8972,6 +9013,8 @@ function wfaEstDecimal(hStr,mStr){
       if(m._timer){m._spent=(m._spent||0)+(Date.now()-new Date(m._timer).getTime())/1000;m._timer='';btnT.textContent='▶ Start';btnT.classList.remove('on');}
       else{m._timer=tkAgora();btnT.textContent='⏸ Parar';btnT.classList.add('on');}
       var g=m.querySelector('#tk-gasto');if(g)g.textContent=tkDur(m._spent);
+      /* Atividades persiste o cronometro na hora: la o time da play e fecha a tela. */
+      try{if(typeof ctx.onTimer==='function')ctx.onTimer(m._timer,m._spent);}catch(e){}
     });
     var btnAnx=m.querySelector('[data-anxadd]');
     if(btnAnx)btnAnx.addEventListener('click',function(){
@@ -8983,6 +9026,20 @@ function wfaEstDecimal(hStr,mStr){
       m.querySelector('#tk-anxnm').value='';m.querySelector('#tk-anxurl').value='';
       pjPintaAnx(m);
     });
+    /* Upload de imagem (pedido de 02/09/2026): botao, ou colar com Ctrl+V dentro do modal. */
+    var btnUp=m.querySelector('[data-anxup]'), fileIn=m.querySelector('#tk-anxfile');
+    if(btnUp&&fileIn){
+      btnUp.addEventListener('click',function(){fileIn.click();});
+      fileIn.addEventListener('change',function(){var f=fileIn.files&&fileIn.files[0];fileIn.value='';if(f)tkEnviarArquivo(m,f);});
+    }
+    m.onpaste=function(ev){
+      try{
+        var its=(ev.clipboardData&&ev.clipboardData.items)||[];
+        for(var i=0;i<its.length;i++){
+          if(its[i].kind==='file'&&/^image\//.test(its[i].type)){var f=its[i].getAsFile();if(f){ev.preventDefault();tkEnviarArquivo(m,f);return;}}
+        }
+      }catch(e){}
+    };
     var btnC=m.querySelector('[data-cmtadd]');
     if(btnC)btnC.addEventListener('click',function(){
       var ta=m.querySelector('#tk-cmt');var v=(ta.value||'').trim();if(!v)return;
@@ -8994,6 +9051,22 @@ function wfaEstDecimal(hStr,mStr){
       var sel=m.querySelector('#tk-st');if(sel)sel.value='concluido';
       btnOk.style.display='none';
     });
+  }
+  window.wfaTaskModal=tkAbrir;
+  window.pjPapelNome=function(k){var pp=papel(k);return pp?pp.n:k;};
+
+  function tkEnviarArquivo(m,f){
+    if(!f)return;
+    if(!/^image\//.test(f.type)&&f.type!=='application/pdf'){try{toast('Só imagem ou PDF por aqui. Vídeo e arquivo grande vão por link do Drive.');}catch(e){}return;}
+    var stEl=m.querySelector('#tk-anxstatus');if(stEl)stEl.textContent='Enviando '+(f.name||'imagem')+'…';
+    var ehImg=/^image\//.test(f.type), nome=f.name||(ehImg?'imagem':'arquivo');
+    var prep=(typeof wfaComprimirImagem==='function')?wfaComprimirImagem(f):Promise.resolve(f);
+    prep.then(function(file){return wfaUploadFile(file);}).then(function(r){
+      if(!r||!r.url)throw new Error((r&&r.error)||'servidor não devolveu o link');
+      m._anx.push({id:uid('an'),nome:nome,url:r.url,tipo:ehImg?'imagem':'arquivo'});
+      pjPintaAnx(m);if(stEl)stEl.textContent='';
+      try{toast(ehImg?'Imagem anexada. Salve a tarefa para ficar gravada.':'Arquivo anexado. Salve a tarefa para ficar gravada.');}catch(e){}
+    }).catch(function(e){if(stEl)stEl.textContent='';try{toast('Não consegui enviar: '+((e&&e.message)||e));}catch(_){}});
   }
 
   function pjPintaResps(m){
@@ -9030,7 +9103,9 @@ function wfaEstDecimal(hStr,mStr){
   }
   function pjPintaAnx(m){
     var box=m.querySelector('#tk-anx');if(!box)return;
+    var ehImg=function(a){return a.tipo==='imagem'||/\.(png|jpe?g|gif|webp|avif)(\?|$)/i.test(a.url||'');};
     box.innerHTML=(m._anx||[]).map(function(a){
+      if(ehImg(a))return '<div class="tkanx img"><a href="'+esc(a.url)+'" target="_blank" rel="noopener"><img src="'+esc(a.url)+'" alt="'+esc(a.nome)+'" loading="lazy"></a><span>'+esc(a.nome)+'</span><b data-anxrm="'+a.id+'">✕</b></div>';
       return '<div class="tkanx"><a href="'+esc(a.url)+'" target="_blank" rel="noopener">🔗 '+esc(a.nome)+'</a><b data-anxrm="'+a.id+'">✕</b></div>';
     }).join('');
     box.querySelectorAll('[data-anxrm]').forEach(function(el){
@@ -9130,20 +9205,21 @@ function wfaEstDecimal(hStr,mStr){
     }
 
     if(b.dataset.tksave!=null){
-      var p2=get(modalPid||aberto); if(!p2)return;
+      var mm=document.getElementById('pj-modal'); var cx=mm&&mm._ctx; if(!cx)return;
       var tt=(document.getElementById('tk-t').value||'').trim();
       if(!tt){try{toast('Escreva o nome da tarefa');}catch(e){}return;}
-      var mm=document.getElementById('pj-modal');
       var vv=function(id){var e=document.getElementById(id);return e?e.value:'';};
       var resps=(mm.dataset.resps||'').split('|').filter(Boolean);
       /* estimativa vazia grava '' e nao 0: zero hora contaria como tarefa medida e
          faria o capacity da equipe mentir para baixo. */
       var hRaw=String(wfaEstDecimal(vv('tk-horas-h'),vv('tk-horas-m')));
       var spRaw=String(vv('tk-sp')||'').trim();
+      var spBase=(cx.t&&cx.t.sprint!==undefined&&cx.t.sprint!==null&&cx.t.sprint!=='')?cx.t.sprint:1;
+      var colsAt=cx.cols||COLS;
       var dados={
         t:tt,
         st:vv('tk-st'),
-        sprint:(spRaw===''?1:(parseInt(spRaw,10)||0)),
+        sprint:(spRaw===''?spBase:(parseInt(spRaw,10)||0)),
         ini:vv('tk-ini')||'',
         venc:vv('tk-venc')||'',
         resps:resps,
@@ -9160,30 +9236,26 @@ function wfaEstDecimal(hStr,mStr){
       // Atividade: registra o que de fato mudou, para a coluna da direita ter historia
       var hist=(mm._hist||[]).slice(), antes=mm._antes||{}, quem=tkQuem();
       var reg=function(txt){hist.push({em:tkAgora(),txt:quem+' '+txt});};
-      if(!b.dataset.tksave)reg('criou esta tarefa');
+      if(cx.ehNova)reg('criou esta tarefa');
       else{
-        if(antes.st!==dados.st)reg('mudou o status para '+((COLS.filter(function(c){return c.k===dados.st;})[0]||{}).n||dados.st));
+        if(antes.st!==dados.st)reg('mudou o status para '+((colsAt.filter(function(c){return c.k===dados.st;})[0]||{}).n||dados.st));
         if(antes.resps!==resps.join('|'))reg(resps.length?('atribuiu para '+resps.join(', ')):'tirou o responsável');
         if((antes.venc||'')!==(dados.venc||''))reg(dados.venc?('marcou o prazo para '+dados.venc.split('-').reverse().join('/')):'tirou o prazo');
         if(String(antes.horas||'')!==String(dados.horas||''))reg(dados.horas===''?'tirou a estimativa':('estimou em '+wfaEstFmt(dados.horas)));
       }
       if(hist.length>60)hist=hist.slice(-60);
       dados.hist=hist;
-      var id=b.dataset.tksave;
-      if(id){
-        (p2.tarefas||[]).forEach(function(t){if(t.id===id)Object.keys(dados).forEach(function(k){t[k]=dados[k];});});
-      }else{
-        dados.id=uid('pt');p2.tarefas=p2.tarefas||[];p2.tarefas.push(dados);
-      }
-      grava(p2);fecharModal();
+      var okSave=true;
+      try{okSave=(cx.onSave(dados,mm)!==false);}catch(e){console.warn('tksave',e);okSave=false;try{toast('Não consegui salvar: '+((e&&e.message)||e));}catch(_){}}
+      if(okSave)fecharModal();
       return;
     }
 
     if(b.dataset.tkdel!=null){
-      var p3=get(modalPid||aberto); if(!p3)return;
+      var mm2=document.getElementById('pj-modal'); var cx2=mm2&&mm2._ctx; if(!cx2)return;
       if(!confirm('Excluir esta tarefa?'))return;
-      p3.tarefas=(p3.tarefas||[]).filter(function(t){return t.id!==b.dataset.tkdel;});
-      grava(p3);fecharModal();
+      try{if(typeof cx2.onDelete==='function')cx2.onDelete();}catch(e){console.warn('tkdel',e);}
+      fecharModal();
       return;
     }
 
@@ -11298,7 +11370,7 @@ function taskCard(t){
   const nextStatus=_ix<0?'iniciar':ORDEM[(_ix+1)%ORDEM.length];
   const prioBadge=t.prio==='alta'?'<span class="prio-badge prio-alta">Alta</span>':t.prio==='baixa'?'<span class="prio-badge prio-baixa">Baixa</span>':'';
   const descHtml=t.desc?`<div class="tc-desc">${escapeHtml(t.desc)}</div>`:'';
-  const tags=(t.tags||[]);
+  const tags=(t.tags||[]).concat((t.papeis||[]).map(k=>(typeof pjPapelNome==='function'?pjPapelNome(k):k)));
   const tagsHtml=tags.length?`<div class="tc-tags">${tags.map(tg=>`<span class="tc-tag">${escapeHtml(tg)}</span>`).join('')}</div>`:'';
   const cl=t.checklist||[];
   const clDone=cl.filter(x=>x.done).length;
@@ -11546,6 +11618,11 @@ function qaddSave(st,keepOpen){
 
 /* ============ NOVA TAREFA MANUAL ============ */
 function openNovaTarefa(status){
+  if(typeof wfaTaskModal==='function'){
+    wfaTarefaModal({id:'',title:'',status:status||'backlog',prio:'media',clienteId:(WFA_FILTROS&&WFA_FILTROS.cli)||'',funcao:'Account Manager',resp:'',
+      data:dataSP(new Date(Date.now()+3*86400000)),ini:hojeSP(),tags:[],checklist:[],attachments:[],comments:[]},true);
+    return;
+  }
   // limpa os campos pra não herdar lixo da última tarefa
   ['nt-title','nt-desc','nt-tags','nt-horas-h','nt-horas-m'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   {const ini=document.getElementById('nt-ini');if(ini)ini.value=hojeSP();}
@@ -11733,6 +11810,74 @@ function restoreLastPage(){
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 /* ============ TASK DETAIL MODAL ============ */
+/* ============ DETALHE DA TAREFA PROPRIA NO MESMO MODAL DOS PROJETOS ============
+   Pedido do Gabriel (02/09/2026): "esses dois tem que ser iguais ao da aba de projetos".
+   O modal generico (wfaTaskModal) mora no modulo Projetos; aqui so se traduz a tarefa do
+   kanban (title/status/data/attachments...) pro formato dele e de volta. O modal antigo
+   (#modal-detail e #modal-nova) fica no HTML como reserva, sem uso. */
+const WFA_TK_COLS=[{k:'backlog',n:'Backlog'},{k:'iniciar',n:'A iniciar'},{k:'andamento',n:'Em Andamento'},{k:'aprovacao',n:'Homologação'},{k:'homologcli',n:'Homologação do cliente'},{k:'concluido',n:'Concluído'}];
+const WFA_FUNCOES=['Account Manager','Gestor de Tráfego','Criador','Editor','Designer','Captação'];
+function wfaTarefaModal(t,ehNova){
+  const c=CLIENTES.find(x=>x.id===t.clienteId);
+  const norm={
+    id:t.id,t:t.title||'',st:t.status||'backlog',
+    resps:(t.resps&&t.resps.length)?t.resps.slice():(t.resp?[t.resp]:[]),resp:t.resp||'',
+    ini:t.ini||'',venc:t.data||'',horas:(t.horas===0||t.horas)?t.horas:'',obs:t.desc||'',
+    papeis:(t.papeis||[]).slice(),sprint:t.sprintN||0,
+    checklist:(t.checklist||[]).map(x=>({id:x.id,txt:x.text,done:!!x.done})),
+    anexos:(t.attachments||[]).map(a=>({id:a.id||('at'+Math.random().toString(36).slice(2,8)),nome:a.name||a.nome||a.url,url:a.url,tipo:a.tipo||''})),
+    coments:(t.comments||[]).map(x=>({id:x.id,autor:x.author||x.autor||'',txt:x.text||x.txt||'',em:x.at||x.em||''})),
+    hist:(t.hist||[]).slice(),timeSpent:t.timeSpent||0,timerSince:t.timerSince||''
+  };
+  const sel=(id,ops,cur)=>`<select id="${id}" class="tkmini">${ops.map(o=>`<option value="${escapeHtml(o.v)}"${o.v===cur?' selected':''}>${escapeHtml(o.n)}</option>`).join('')}</select>`;
+  const linha=(ic,rot,val)=>`<div class="tkr"><div class="tkl">${ic} ${rot}</div><div class="tkv">${val}</div></div>`;
+  const extras=()=>linha('🚩','Prioridade',sel('tk-prio',[{v:'alta',n:'🔴 Alta'},{v:'media',n:'🟡 Média'},{v:'baixa',n:'🟢 Baixa'}],t.prio||'media'))+
+    linha('🏢','Cliente',sel('tk-cli',[{v:'',n:'Sem cliente'}].concat(CLIENTES.map(x=>({v:x.id,n:x.nm}))),t.clienteId||''))+
+    linha('🧭','Função',sel('tk-func',WFA_FUNCOES.concat((t.funcao&&!WFA_FUNCOES.includes(t.funcao))?[t.funcao]:[]).map(f=>({v:f,n:f})),t.funcao||'Account Manager'))+
+    linha('#','Tags',`<input id="tk-tags" class="tkmini" style="width:100%;max-width:340px" placeholder="criativo, urgente" value="${escapeHtml((t.tags||[]).join(', '))}">`);
+  wfaTaskModal({
+    t:norm,ehNova:!!ehNova,cols:WFA_TK_COLS,semSprint:true,
+    crumb:(c?escapeHtml(c.nm):'Atividades')+' <i>/</i> '+(ehNova?'Nova tarefa':'Tarefa'),
+    extrasHTML:extras,
+    onTimer:(timerSince,timeSpent)=>{
+      if(ehNova)return;
+      const x=state.tarefas.find(y=>y.id===t.id);if(!x)return;
+      x.timerSince=timerSince||null;x.timeSpent=timeSpent||0;saveTarefas();
+    },
+    onSave:(d,m)=>{
+      const g=id=>{const e=m.querySelector('#'+id);return e?e.value:'';};
+      let x=ehNova?null:state.tarefas.find(y=>y.id===t.id);
+      if(ehNova)x={id:'t'+Date.now(),criadaEm:new Date().toISOString(),sprintN:null};
+      if(!x)return false;
+      const stAntes=x.status;
+      x.title=d.t;x.desc=d.obs;x.prio=g('tk-prio')||'media';x.clienteId=g('tk-cli');x.funcao=g('tk-func')||x.funcao||'';
+      x.resps=d.resps;x.resp=d.resps[0]||'';x.ini=d.ini;x.data=d.venc;x.horas=d.horas;x.papeis=d.papeis;
+      const tagsRaw=g('tk-tags');x.tags=tagsRaw?tagsRaw.split(',').map(s=>s.trim()).filter(Boolean):[];
+      x.checklist=(d.checklist||[]).map(i=>({id:i.id,text:i.txt,done:!!i.done}));
+      x.attachments=(d.anexos||[]).map(a=>({id:a.id,name:a.nome,url:a.url,tipo:a.tipo||'',at:a.at||new Date().toISOString()}));
+      x.comments=(d.coments||[]).map(cm=>({id:cm.id,author:cm.autor,text:cm.txt,at:cm.em}));
+      x.hist=d.hist||[];x.timeSpent=d.timeSpent||0;x.timerSince=d.timerSince||null;
+      x.status=d.st;taskStampSt(x,x.status);
+      if(x.status==='concluido'){
+        /* Gate de POP: tarefa de Captacao/Edicao so conclui com o checklist fechado. */
+        if(!taskConcluir(x)){
+          x.status=stAntes||'andamento';
+          const s=m.querySelector('#tk-st');if(s)s.value=x.status;
+          toast('⚠ POP incompleto: feche o checklist antes de concluir');
+          if(!ehNova)saveTarefas();
+          return false;
+        }
+      } else x.concluidaEm=null;
+      if(ehNova){
+        // toda tarefa nasce com o relogio correndo (pedido antigo do Gabriel)
+        if(!x.timerSince&&!x.timeSpent)x.timerSince=new Date().toISOString();
+        state.tarefas.push(x);
+      }
+      saveTarefas();toast(ehNova?'Tarefa criada':'Tarefa atualizada');return true;
+    },
+    onDelete:()=>{if(!ehNova)delTask(t.id);}
+  });
+}
 function openTaskDetail(id){
   if(String(id).indexOf('pj:')===0){const p=String(id).split(':');if(typeof pjAbrirTarefaModal==='function')pjAbrirTarefaModal(p[1],p[2]);return;}
   const t=state.tarefas.find(x=>x.id===id);if(!t)return;
@@ -11748,6 +11893,7 @@ function openTaskDetail(id){
       }
     }
   }catch(e){}
+  if(typeof wfaTaskModal==='function'){wfaTarefaModal(t,false);return;}
   const sel=document.getElementById('td-cliente');
   sel.innerHTML=CLIENTES.map(c=>`<option value="${c.id}">${c.nm}</option>`).join('');
   document.getElementById('td-id').value=t.id;
@@ -13905,6 +14051,24 @@ function legDeTema(tema,cliente){
   if(t)t.value=tema||'';if(c&&cliente)c.value=cliente;
   const nav=document.querySelector('[data-nav="legenda"]');if(nav)nav.click();
   if(t)t.focus();toast&&toast('Tema enviado pras Legendas ✍️');
+}
+/* Foto de celular tem 4 a 8 MB; em 1600px JPEG fica em ~300 KB e sobe em 1 segundo.
+   Usado pelos anexos da tarefa e pelo chat. PDF e imagem pequena passam direto. */
+function wfaComprimirImagem(f){
+  return new Promise(function(res){
+    if(!f||!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size<600*1024)return res(f);
+    var img=new Image(),url=URL.createObjectURL(f);
+    img.onload=function(){
+      try{
+        var MAX=1600,w=img.width,h=img.height,s=Math.min(1,MAX/Math.max(w,h));
+        var c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(h*s);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        c.toBlob(function(b){URL.revokeObjectURL(url);if(!b)return res(f);res(new File([b],String(f.name||'imagem').replace(/\.\w+$/,'')+'.jpg',{type:'image/jpeg'}));},'image/jpeg',0.85);
+      }catch(e){URL.revokeObjectURL(url);res(f);}
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);res(f);};
+    img.src=url;
+  });
 }
 async function wfaUploadFile(file){
   // Arquivo grande em base64 + JSON congela a thread inteira (UI "sumia" durante o envio).
