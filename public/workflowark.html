@@ -3461,7 +3461,7 @@ function wfaSetTheme(t){
             <div class="desc-sm">Design, arte e edição. Quem está disponível.</div>
             <div class="org-m"><div class="av-sm">B</div><div><div class="nm-sm">Bruno</div><div class="rl-sm">Designer · projeto Fercon</div></div></div>
             <div class="org-m"><div class="av-sm">M</div><div><div class="nm-sm">M. Portela</div><div class="rl-sm">Designer</div></div></div>
-            <div class="org-m"><div class="av-sm">D</div><div><div class="nm-sm">Darmã <span class="tag-sm">TESTE</span></div><div class="rl-sm">Em formação · caminho p/ diretor de arte</div></div></div>
+            <div class="org-m"><div class="av-sm">D</div><div><div class="nm-sm">Darman <span class="tag-sm">TESTE</span></div><div class="rl-sm">Em formação · caminho p/ diretor de arte</div></div></div>
             <div class="org-m"><div class="av-sm">M</div><div><div class="nm-sm">Maria Luiza</div><div class="rl-sm">Social media · edição Alpha</div></div></div>
             <div class="org-m"><div class="av-sm">S</div><div><div class="nm-sm">Samuel</div><div class="rl-sm">Editor</div></div></div>
             <div class="org-m"><div class="av-sm">C</div><div><div class="nm-sm">Christopher Mike</div><div class="rl-sm">Editor</div></div></div>
@@ -6573,9 +6573,9 @@ function seedValhalla(){
 
 // ---- Equipe: base + colaboradores personalizados (nuvem · wfa-colab-custom) ----
 /* Roster do organograma de setembro/2026. Sairam Marcio, Luckas Gomes e Giuseppe;
-   entraram Caio (PO), Guilherme (trafego), Christopher Mike, Victor e Darma.
+   entraram Caio (PO), Guilherme (trafego), Christopher Mike, Victor e Darman.
    Tirar da lista so muda o seletor: tarefa ja salva guarda o nome em texto. */
-const TEAM_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Saulo','Caio Neves','Guilherme','Bruno','Maria Luiza','Samuel Magalhães','M. Portela','Christopher Mike','Victor','Darmã','Omar','Henrique','Nicolas','Kaique','Lush','Anderson','João Gabriel','Maria Clara'];
+const TEAM_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Saulo','Caio Neves','Guilherme','Bruno','Maria Luiza','Samuel Magalhães','M. Portela','Christopher Mike','Victor','Darman','Omar','Henrique','Nicolas','Kaique','Lush','Anderson','João Gabriel','Maria Clara'];
 function loadColabCustom(){ try{ return JSON.parse(localStorage.getItem('wfa-colab-custom')||'[]'); }catch(e){ return []; } }
 function saveColabCustom(arr){ localStorage.setItem('wfa-colab-custom', JSON.stringify(arr)); if(typeof rebuildPeople==='function')rebuildPeople(); fillRespSelects(); if(typeof renderMeuDia==='function')renderMeuDia(); }
 // Lista completa da equipe (base + adicionados), sem duplicar.
@@ -16332,7 +16332,7 @@ function ahPerPessoa(){
     {nm:'Victor',fn:'Edicao · Captacao'},
     {nm:'M. Portela',fn:'Design'},
     {nm:'Bruno',fn:'Design · Fercon'},
-    {nm:'Darmã',fn:'Criacao · em formacao'},
+    {nm:'Darman',fn:'Criacao · em formacao'},
     {nm:'Saulo',fn:'CSO · Closer · BDR · SDR'},
     {nm:'Gabriel Andrade',fn:'CEO · Comercial · Marketing'},
   ];
@@ -16464,7 +16464,7 @@ function ahBuildSlides(edit){
   S.push('<div><div class="ah-kick">Quem muda de cadeira</div><h2>A estrutura se mexeu</h2>'+
     '<div class="ahteam">'+
     ahPessoa('Danilo de Lima','Sai do operacional e assume o COO','COO')+
-    ahPessoa('Darmã','Em formação, caminho para direção de arte','TESTE')+
+    ahPessoa('Darman','Em formação, caminho para direção de arte','TESTE')+
     ahPessoa('Saulo','Perde os cardápios, foca em fechar','')+
     ahPessoa('Bruno','Sai da estratégia, fica em design no Fercon','')+
     '</div>'+
@@ -16482,7 +16482,7 @@ function ahBuildSlides(edit){
       '<div class="ahorg-areas">'+
         oA('01','Comercial',[oM('G','Gabriel','Closer','HEAD'),oM('S','Saulo','CSO · BDR · SDR'),oM('D','Danilo','Análise de dados','NOVO')])+
         oA('02','Marketing',[oM('G','Gabriel','Frente e propostas','HEAD'),oM('G','Guilherme','Geração de demanda','NOVO'),oM('C','Caio','Geração de demanda','NOVO'),oM('D','Danilo','Dados'),oM('S','Saulo','Marketing físico')])+
-        oA('03','Criação',[oM('B','Bruno','Designer · Fercon'),oM('M','M. Portela','Designer'),oM('D','Darmã','Em formação','TESTE'),oM('M','Maria Luiza','Social · Alpha'),oM('S','Samuel','Editor'),oM('C','Christopher','Editor'),oM('V','Victor','Editor')],true)+
+        oA('03','Criação',[oM('B','Bruno','Designer · Fercon'),oM('M','M. Portela','Designer'),oM('D','Darman','Em formação','TESTE'),oM('M','Maria Luiza','Social · Alpha'),oM('S','Samuel','Editor'),oM('C','Christopher','Editor'),oM('V','Victor','Editor')],true)+
         oA('04','Tráfego',[oM('D','Danilo','Gestor','COO'),oM('G','Guilherme','Consultor','NOVO')])+
         oA('05','Sucesso do cliente',[oM('L','Lucas Rosi','Account · CS','HEAD'),oM('C','Caio','Apoio e formação','PO')])+
         oA('06','Captação',[oM('S','Samuel','Câmera'),oM('C','Christopher','Câmera'),oM('V','Victor','Câmera'),oM('A','Anderson','Câmera'),oM('H','Henrique','Câmera'),oM('M','Maria Clara','Cobertura')])+
@@ -16523,7 +16523,7 @@ function ahBuildSlides(edit){
     '<div class="ah-grid g2" style="margin-top:12px">'+
     '<div><h3>Captações</h3><table><tbody>'+(setCapt||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table></div>'+
     '<div><h3>Entrega de roteiro</h3><table><tbody>'+(setRot||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table>'+
-    '<h3 style="margin-top:14px">Planejamento estratégico</h3><p style="font-size:13px;color:#bdbdc4">'+ahTxt('set_agenda_plano','O planejamento estratégico passa a ser entrega fixa do mês. É o que conduz o cliente e sustenta a renovação. Grande parte fica com Rosiron e Darmã. Na Alpha não precisa ser mensal.',edit)+'</p></div>'+
+    '<h3 style="margin-top:14px">Planejamento estratégico</h3><p style="font-size:13px;color:#bdbdc4">'+ahTxt('set_agenda_plano','O planejamento estratégico passa a ser entrega fixa do mês. É o que conduz o cliente e sustenta a renovação. Grande parte fica com Rosiron e Darman. Na Alpha não precisa ser mensal.',edit)+'</p></div>'+
     '</div></div>');
 
   // 14 · O sistema
