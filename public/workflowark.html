@@ -1,4 +1,4 @@
-<!-- build 20260902-modal-unico -->
+<!-- build 20260902-chat -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -1741,6 +1741,12 @@ function wfaSetTheme(t){
         </div>
       </div>
 
+      <div class="navitem" data-nav="chat" title="Chat da equipe: Geral e grupos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span>Chat</span>
+        <span class="badge" id="chat-badge" style="display:none">0</span>
+      </div>
+
       <div class="navitem" data-toggle="oper-menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v4H3z"/><path d="M5 7v13h14V7"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
         <span>Operacional</span>
@@ -2915,6 +2921,8 @@ function wfaSetTheme(t){
           body.aura-dark #page-tarefas .tl-st-andamento{background:rgba(255,199,0,.16);color:#ffcf3d}
           body.aura-dark #page-tarefas .tl-st-aprovacao{background:rgba(59,111,255,.20);color:#8db0ff}
           body.aura-dark #page-tarefas .tl-st-concluido{background:rgba(25,179,107,.18);color:#4fd396}
+          body.aura-dark #page-tarefas .tl-st-iniciar{background:rgba(59,111,255,.20);color:#8db0ff}
+          body.aura-dark #page-tarefas .tl-st-homologcli{background:rgba(234,88,12,.22);color:#fdba74}
           #page-tarefas .tl-late{color:var(--red,#e0364f);font-weight:700}
           #page-tarefas .tcal{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
           #page-tarefas .tcal-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:800;text-transform:capitalize}
@@ -3034,6 +3042,95 @@ function wfaSetTheme(t){
         <div id="task-pessoas" class="task-altview" style="display:none"></div>
         <div id="task-painel" class="task-altview" style="display:none"></div>
         <div id="task-relatorio" class="task-altview" style="display:none"></div>
+      </div>
+
+      <!-- =================== CHAT INTERNO DA EQUIPE =================== -->
+      <div class="page" id="page-chat">
+        <style>
+          #page-chat .ch-wrap{display:grid;grid-template-columns:260px 1fr;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;height:calc(100vh - 200px);min-height:460px}
+          body.aura-dark #page-chat .ch-wrap{background-color:var(--bg);background-image:linear-gradient(var(--surface,transparent),var(--surface,transparent))}
+          #page-chat .ch-side{border-right:1px solid var(--line);overflow:auto;padding:8px;background:var(--blue-soft)}
+          #page-chat .ch-sec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);padding:10px 8px 4px;display:flex;justify-content:space-between;align-items:center}
+          #page-chat .ch-sec a{cursor:pointer;color:var(--yel-d,#a07e00);text-transform:none;letter-spacing:0;font-size:11px;font-weight:700}
+          #page-chat .ch-can{display:flex;align-items:center;gap:9px;padding:8px;border-radius:10px;cursor:pointer}
+          #page-chat .ch-can:hover{background:rgba(128,128,128,.10)}
+          #page-chat .ch-can.on{background:var(--yel,#ffd400);color:#111}
+          #page-chat .ch-can.on .ch-can-tx span,#page-chat .ch-can.on .ch-can-tx b{color:#111}
+          #page-chat .ch-can-av{width:32px;height:32px;border-radius:50%;background:#111;color:var(--yel,#ffd400);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none}
+          #page-chat .ch-can-tx{flex:1;min-width:0}
+          #page-chat .ch-can-tx b{display:block;font-size:13px;color:var(--ink)}
+          #page-chat .ch-can-tx span{display:block;font-size:11px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+          #page-chat .ch-n{background:var(--red,#e0364f);color:#fff;font-style:normal;font-size:10px;font-weight:800;border-radius:999px;padding:2px 7px;flex:none}
+          #page-chat .ch-main{display:flex;flex-direction:column;min-width:0;min-height:0}
+          #page-chat .ch-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);min-height:54px}
+          #page-chat .ch-back{display:none;border:none;background:none;font-size:24px;line-height:1;cursor:pointer;color:var(--ink);padding:0 6px}
+          #page-chat .ch-head-tx{flex:1;min-width:0}
+          #page-chat .ch-head-tx b{display:block;font-size:14px;color:var(--ink)}
+          #page-chat .ch-head-tx span{display:block;font-size:11px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+          #page-chat .ch-head-act{display:flex;gap:6px;flex-wrap:wrap}
+          #page-chat .ch-msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:2px}
+          #page-chat .ch-dia{text-align:center;margin:10px 0 6px}
+          #page-chat .ch-dia span{font-size:10.5px;font-weight:700;color:var(--mute);background:var(--blue-soft);border:1px solid var(--line);border-radius:999px;padding:3px 10px;text-transform:capitalize}
+          #page-chat .ch-m{display:flex;gap:9px;align-items:flex-start;padding:3px 0}
+          #page-chat .ch-m.seg{padding-top:0}
+          #page-chat .ch-av{width:30px;height:30px;border-radius:50%;background:#111;color:var(--yel,#ffd400);display:grid;place-items:center;font-weight:800;font-size:11px;flex:none;margin-top:2px}
+          #page-chat .ch-av.vazio{background:transparent}
+          #page-chat .ch-b{max-width:78%;min-width:0}
+          #page-chat .ch-meta{display:flex;gap:8px;align-items:baseline;font-size:11px;color:var(--mute)}
+          #page-chat .ch-meta b{color:var(--ink);font-size:12.5px}
+          #page-chat .ch-tx{background:var(--blue-soft);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:8px 12px;font-size:13.5px;line-height:1.5;word-break:break-word;margin-top:2px;color:var(--txt)}
+          #page-chat .ch-tx a{color:var(--yel-d,#a07e00);text-decoration:underline}
+          #page-chat .ch-m.eu .ch-tx{background:rgba(255,212,0,.16);border-color:rgba(255,212,0,.45)}
+          #page-chat .ch-m.env{opacity:.6}
+          #page-chat .ch-err{font-size:10.5px;color:var(--red);margin-top:2px}
+          #page-chat .ch-anxs{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+          #page-chat .ch-anxs img{max-width:260px;max-height:220px;border-radius:12px;border:1px solid var(--line);display:block;background:#000}
+          #page-chat .ch-file{font-size:12.5px;background:var(--blue-soft);border:1px solid var(--line);border-radius:10px;padding:6px 10px;color:var(--ink)}
+          #page-chat .ch-compose{border-top:1px solid var(--line);padding:10px 12px}
+          #page-chat .ch-row{display:flex;gap:8px;align-items:flex-end}
+          #page-chat #ch-texto{flex:1;resize:none;background:var(--blue-soft);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:13.5px;color:var(--txt);max-height:160px;min-height:40px}
+          #page-chat #ch-texto:focus{outline:none;border-color:var(--yel)}
+          #page-chat .ch-anx{display:none;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+          #page-chat .ch-anxchip{display:inline-flex;align-items:center;gap:6px;font-size:12px;background:var(--blue-soft);border:1px solid var(--line);border-radius:10px;padding:4px 8px;color:var(--txt)}
+          #page-chat .ch-anxchip img{width:28px;height:28px;object-fit:cover;border-radius:6px}
+          #page-chat .ch-anxchip b{cursor:pointer;color:var(--mute)}
+          #page-chat .ch-vazio{font-size:12.5px;color:var(--mute);padding:10px 8px;text-align:center}
+          #page-chat .ch-status{font-size:11px;color:var(--mute);margin-top:4px;min-height:14px}
+          @media(max-width:900px){
+            #page-chat .ch-wrap{grid-template-columns:1fr;height:calc(100vh - 165px);min-height:380px}
+            #page-chat .page-title p{display:none}
+            #page-chat .ch-side{border-right:none}
+            #page-chat .ch-wrap.conv .ch-side{display:none}
+            #page-chat .ch-wrap:not(.conv) .ch-main{display:none}
+            #page-chat .ch-back{display:block}
+            #page-chat .ch-b{max-width:88%}
+            #page-chat .ch-head-act .icobtn{padding:4px 8px;font-size:11px}
+          }
+        </style>
+        <div class="page-head">
+          <div class="page-title"><h1>Chat da equipe</h1><p>Geral e grupos · toca um som quando chega mensagem · imagens por botão ou Ctrl+V</p></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="icobtn" id="chat-som" onclick="chatToggleSom()">🔔 Som ligado</button>
+            <button class="tb-btn dk" onclick="chatNovoGrupo()">+ Novo grupo</button>
+          </div>
+        </div>
+        <div class="ch-wrap" id="ch-wrap">
+          <aside class="ch-side" id="ch-side"></aside>
+          <section class="ch-main">
+            <div class="ch-head" id="ch-head"></div>
+            <div class="ch-msgs" id="ch-msgs"></div>
+            <div class="ch-compose">
+              <div id="ch-anexos" class="ch-anx"></div>
+              <div class="ch-row">
+                <button class="icobtn" title="Enviar imagem ou PDF" onclick="document.getElementById('ch-file').click()">📷</button>
+                <input type="file" id="ch-file" accept="image/*,application/pdf" style="display:none" onchange="chatArquivo(this)">
+                <textarea id="ch-texto" rows="1" placeholder="Escreva uma mensagem… Enter envia, Shift+Enter quebra linha"></textarea>
+                <button class="tb-btn dk" onclick="chatEnviar()">Enviar</button>
+              </div>
+              <div class="ch-status" id="ch-status"></div>
+            </div>
+          </section>
+        </div>
       </div>
 
       <!-- =================== RÉGUA DOS 15 =================== -->
@@ -5965,6 +6062,25 @@ function iniciarAutoSync(){
   </div>
 </div>
 
+<!-- MODAL: grupo do chat -->
+<div class="modal-bg" id="modal-chat-grupo">
+  <div class="modal" style="max-width:480px;width:95vw">
+    <style>
+      #modal-chat-grupo .chg-it{display:flex;align-items:center;gap:9px;padding:7px 4px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;color:var(--ink)}
+      #modal-chat-grupo .chg-it i{margin-left:auto;font-style:normal;font-size:11px;color:var(--mute)}
+      #modal-chat-grupo .chg-av{width:26px;height:26px;border-radius:50%;background:#111;color:var(--yel,#ffd400);display:grid;place-items:center;font-weight:800;font-size:10px;flex:none}
+      #modal-chat-grupo #chg-lista{max-height:320px;overflow:auto;margin-top:8px}
+    </style>
+    <div class="modal-head"><h3><span class="ic">💬</span><span id="chg-titulo">Novo grupo</span></h3><span class="x" onclick="closeModal('modal-chat-grupo')">✕</span></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nome do grupo</label><input class="form-input" id="chg-nome" placeholder="Ex: Edição, Tráfego, Vivenda"></div>
+      <label class="form-label">Quem participa</label>
+      <div id="chg-lista"></div>
+    </div>
+    <div class="modal-foot"><button class="icobtn" onclick="closeModal('modal-chat-grupo')">Cancelar</button><div style="flex:1"></div><button class="tb-btn" onclick="chatGrupoSalvar()">Salvar</button></div>
+  </div>
+</div>
+
 <!-- MODAL: Nova Tarefa Manual -->
 <div class="modal-bg" id="modal-nova">
   <div class="modal">
@@ -7002,6 +7118,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='briefings'){try{const f=document.getElementById('briefing-iframe');if(f&&!f.getAttribute('src')){f.setAttribute('src',f.dataset.pendingSrc||'/briefing');}}catch(e){console.warn('briefing',e);}}
     if(p==='planejamentos'&&typeof renderPlanos==='function'){try{renderPlanos();}catch(e){console.warn('planos',e);}}
     if(p==='projetos'&&typeof renderProjetos==='function'){try{renderProjetos();}catch(e){console.warn('projetos',e);}}
+    if(p==='chat'&&typeof chatAbrir==='function'){try{chatAbrir();}catch(e){console.warn('chat',e);}}
     if(p==='marcas'){try{const f=document.getElementById('marcas-iframe');if(f&&!f.getAttribute('src')){f.setAttribute('src',f.dataset.pendingSrc||'/moenda');}}catch(e){console.warn('marcas',e);}}
     if(p==='drive'&&typeof renderDrive==='function'){try{renderDrive();}catch(e){console.warn('drive',e);}}
     if(p==='alpha'&&typeof renderAlpha==='function'){try{renderAlpha();}catch(e){console.warn('alpha',e);}}
@@ -8113,6 +8230,239 @@ function relatorioImprimir(){
     '</div></div></body></html>';
   }
 })();
+/* ============ CHAT INTERNO DA EQUIPE (02/09/2026) ============
+   Pedido do Gabriel: chat com Geral e grupos, que avisa com som. As mensagens ficam em
+   linhas proprias no servidor (wfa-chat-m-*), fora do sync geral; este modulo faz uma
+   puxada leve a cada poucos segundos (so o que mudou desde a ultima), guarda um cache
+   local pra tela abrir na hora e toca um "ding" quando chega mensagem de outra pessoa. */
+(function(){
+  var CH={msgs:[],canais:[],lido:{},equipe:[],eu:null,t:null,canal:'geral',anx:[],som:true,ultimoPoll:0};
+  var CACHE='wfa-chat-cache';
+  try{var c0=JSON.parse(localStorage.getItem(CACHE)||'null');if(c0&&typeof c0==='object'){CH.msgs=c0.msgs||[];CH.canais=c0.canais||[];CH.lido=c0.lido||{};CH.t=c0.t||null;CH.equipe=c0.equipe||[];CH.eu=c0.eu||null;}}catch(e){}
+  try{CH.som=localStorage.getItem('wfa-chat-som')!=='0';}catch(e){}
+  function salvaCache(){try{localStorage.setItem(CACHE,JSON.stringify({msgs:CH.msgs.slice(-400),canais:CH.canais,lido:CH.lido,t:CH.t,equipe:CH.equipe,eu:CH.eu}));}catch(e){}}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function ini(n){return String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(function(s){return s[0]||'';}).join('').toUpperCase()||'?';}
+  function souEu(m){if(!CH.eu||!m||!m.autor)return false;if(m.autor.id&&CH.eu.id&&m.autor.id===CH.eu.id)return true;return !!(m.autor.email&&CH.eu.email&&String(m.autor.email).toLowerCase()===String(CH.eu.email).toLowerCase());}
+  function nomeCanal(id){if(id==='geral')return 'Geral';var c=CH.canais.filter(function(x){return x.id===id;})[0];return c?c.nome:'Grupo';}
+  function canalVisivel(id){return id==='geral'||CH.canais.some(function(c){return c.id===id;});}
+  function naoLidas(canal){var l=CH.lido[canal]||'';return CH.msgs.filter(function(m){return m.canal===canal&&!souEu(m)&&(!l||m.em>l);}).length;}
+  function totalNaoLidas(){var n=naoLidas('geral');CH.canais.forEach(function(c){n+=naoLidas(c.id);});return n;}
+  function badge(){var b=document.getElementById('chat-badge');if(!b)return;var n=totalNaoLidas();b.textContent=n>99?'99+':String(n);b.style.display=n?'':'none';}
+  function paginaAberta(){var p=document.getElementById('page-chat');return !!(p&&p.classList.contains('active'));}
+  function linkify(t){return esc(t).replace(/(https?:\/\/[^\s<]+)/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>';}).replace(/\n/g,'<br>');}
+  function nomeDe(email){var e=String(email||'').toLowerCase();var m=CH.equipe.filter(function(x){return String(x.email||'').toLowerCase()===e;})[0];return (m&&m.full_name)||e.split('@')[0];}
+  function meuEmail(){return String((CH.eu&&CH.eu.email)||'').toLowerCase();}
+  function podeApagar(c){var adm=false;try{adm=!!(WFA_MEMBER&&WFA_MEMBER.role==='admin');}catch(e){}return adm||String(c.criadoPor||'').toLowerCase()===meuEmail();}
+
+  /* ---- som: "ding" de duas notas gerado no navegador, sem arquivo de audio.
+     O AudioContext so destrava depois de um clique do usuario, por isso o pointerdown. */
+  var actx=null;
+  function preparaSom(){try{if(!actx&&(window.AudioContext||window.webkitAudioContext))actx=new (window.AudioContext||window.webkitAudioContext)();if(actx&&actx.state==='suspended')actx.resume();}catch(e){}}
+  document.addEventListener('pointerdown',preparaSom,{passive:true});
+  function toca(){
+    if(!CH.som||!actx)return;
+    try{
+      var t0=actx.currentTime;
+      [[880,0],[1174.7,0.13]].forEach(function(p){
+        var o=actx.createOscillator(),g=actx.createGain();
+        o.type='sine';o.frequency.value=p[0];
+        g.gain.setValueAtTime(0.0001,t0+p[1]);
+        g.gain.exponentialRampToValueAtTime(0.28,t0+p[1]+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001,t0+p[1]+0.38);
+        o.connect(g);g.connect(actx.destination);o.start(t0+p[1]);o.stop(t0+p[1]+0.42);
+      });
+    }catch(e){}
+  }
+  window.chatToca=toca;
+  function pintaSomBtn(){var b=document.getElementById('chat-som');if(b)b.textContent=CH.som?'🔔 Som ligado':'🔕 Som desligado';}
+  window.chatToggleSom=function(){CH.som=!CH.som;try{localStorage.setItem('wfa-chat-som',CH.som?'1':'0');}catch(e){}pintaSomBtn();if(CH.som){preparaSom();toca();}};
+
+  /* ---- rede ---- */
+  function api(payload){return cloudCall('save',payload);}
+  var polling=false;
+  function poll(){
+    if(polling)return;polling=true;
+    var since=CH.t;
+    api({action:'chat-poll',since:since||''}).then(function(r){
+      if(!r||!r.ok)return;
+      CH.eu=r.eu||CH.eu;CH.equipe=r.equipe||CH.equipe;CH.canais=r.canais||[];CH.lido=Object.assign({},CH.lido,r.lido||{});
+      var novas=0,deOutro=[];
+      var ids={};CH.msgs.forEach(function(m){ids[m.id]=1;});
+      if(!since){
+        var vistos={};CH.msgs=(r.mensagens||[]).filter(function(m){if(vistos[m.id])return false;vistos[m.id]=1;return true;});
+        novas=CH.msgs.length;
+      }else{
+        (r.mensagens||[]).forEach(function(m){if(ids[m.id])return;CH.msgs.push(m);novas++;if(!souEu(m))deOutro.push(m);});
+      }
+      CH.msgs.sort(function(a,b){return String(a.em).localeCompare(String(b.em));});
+      if(CH.msgs.length>600)CH.msgs=CH.msgs.slice(-600);
+      if(r.t)CH.t=r.t;
+      salvaCache();
+      if(deOutro.length){
+        var naTela=paginaAberta()&&document.visibilityState==='visible';
+        var mesmoCanal=deOutro.some(function(m){return m.canal===CH.canal;});
+        toca();
+        if(naTela&&mesmoCanal)marcaLido(CH.canal);
+        else{var u=deOutro[deOutro.length-1];try{toast('💬 '+((u.autor&&u.autor.nome)||'Alguém')+(u.canal!=='geral'?' em '+nomeCanal(u.canal):'')+': '+String(u.texto||'(imagem)').slice(0,70));}catch(e){}}
+      }
+      if(novas||!since)render();
+      badge();
+    }).catch(function(){/* sem sessao ou sem rede: tenta no proximo tick */}).then(function(){polling=false;});
+  }
+  function tick(){
+    var vis=document.visibilityState==='visible';
+    var intervalo=(paginaAberta()&&vis)?4000:(vis?8000:25000);
+    if(Date.now()-CH.ultimoPoll>=intervalo){CH.ultimoPoll=Date.now();poll();}
+  }
+  setInterval(tick,1000);
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')CH.ultimoPoll=0;});
+  window.chatPollAgora=function(){CH.ultimoPoll=0;tick();};
+
+  function marcaLido(canal){
+    var ult=CH.msgs.filter(function(m){return m.canal===canal;}).slice(-1)[0];
+    var em=ult?ult.em:new Date().toISOString();
+    if(CH.lido[canal]&&CH.lido[canal]>=em){badge();return;}
+    CH.lido[canal]=em;salvaCache();badge();
+    api({action:'chat-lido',canal:canal,em:em}).catch(function(){});
+  }
+
+  /* ---- envio ---- */
+  window.chatEnviar=function(){
+    var ta=document.getElementById('ch-texto');if(!ta)return;
+    var texto=(ta.value||'').trim();var anexos=CH.anx.slice();
+    if(!texto&&!anexos.length)return;
+    var tmp={id:'tmp-'+Date.now(),canal:CH.canal,texto:texto,anexos:anexos,autor:{id:CH.eu&&CH.eu.id,nome:(CH.eu&&CH.eu.nome)||'Eu',email:CH.eu&&CH.eu.email},em:new Date().toISOString(),enviando:true};
+    CH.msgs.push(tmp);CH.anx=[];ta.value='';ta.style.height='';pintaAnexos();render(true);
+    api({action:'chat-send',canal:tmp.canal,texto:texto,anexos:anexos}).then(function(r){
+      if(!r||!r.ok)throw new Error((r&&r.error)||'falha ao enviar');
+      CH.msgs=CH.msgs.filter(function(m){return m.id!==tmp.id;});
+      if(!CH.msgs.some(function(m){return m.id===r.mensagem.id;}))CH.msgs.push(r.mensagem);
+      CH.msgs.sort(function(a,b){return String(a.em).localeCompare(String(b.em));});
+      CH.lido[tmp.canal]=r.mensagem.em;salvaCache();render(true);
+    }).catch(function(e){
+      tmp.enviando=false;tmp.falhou=true;render(true);
+      try{toast('Não foi possível enviar: '+((e&&e.message)||e));}catch(_){}
+    });
+  };
+  window.chatArquivo=function(input){var f=input.files&&input.files[0];input.value='';if(f)enviaArquivo(f);};
+  function enviaArquivo(f){
+    if(!/^image\//.test(f.type)&&f.type!=='application/pdf'){try{toast('Só imagem ou PDF por aqui. Vídeo vai por link do Drive.');}catch(e){}return;}
+    var st=document.getElementById('ch-status');if(st)st.textContent='Enviando '+(f.name||'imagem')+'…';
+    var prep=(typeof wfaComprimirImagem==='function')?wfaComprimirImagem(f):Promise.resolve(f);
+    prep.then(function(file){return wfaUploadFile(file);}).then(function(r){
+      if(!r||!r.url)throw new Error((r&&r.error)||'servidor não devolveu o link');
+      CH.anx.push({nome:f.name||'imagem',url:r.url,tipo:/^image\//.test(f.type)?'imagem':'arquivo'});
+      if(st)st.textContent='';pintaAnexos();
+      var ta=document.getElementById('ch-texto');if(ta)ta.focus();
+    }).catch(function(e){if(st)st.textContent='';try{toast('Não consegui enviar: '+((e&&e.message)||e));}catch(_){}});
+  }
+  function pintaAnexos(){
+    var box=document.getElementById('ch-anexos');if(!box)return;
+    box.innerHTML=CH.anx.map(function(a,i){return '<span class="ch-anxchip">'+(a.tipo==='imagem'?'<img src="'+esc(a.url)+'" alt="">':'📎')+' '+esc(a.nome)+' <b data-chrm="'+i+'" title="Tirar">✕</b></span>';}).join('');
+    box.style.display=CH.anx.length?'flex':'none';
+  }
+
+  /* ---- tela ---- */
+  function render(scrollFim){
+    var side=document.getElementById('ch-side');if(!side)return;
+    if(!canalVisivel(CH.canal))CH.canal='geral';
+    var ultMsg=function(id){var m=CH.msgs.filter(function(x){return x.canal===id;}).slice(-1)[0];if(!m)return '';var quem=souEu(m)?'Você':String((m.autor&&m.autor.nome)||'').split(' ')[0];return (quem+': '+(m.texto||((m.anexos||[]).length?'📷 imagem':''))).slice(0,44);};
+    var item=function(id,nome,sub){var n=naoLidas(id);return '<div class="ch-can'+(CH.canal===id?' on':'')+'" data-canal="'+esc(id)+'"><div class="ch-can-av">'+(id==='geral'?'#':esc(ini(nome)))+'</div><div class="ch-can-tx"><b>'+esc(nome)+'</b><span>'+esc(sub||'')+'</span></div>'+(n?'<i class="ch-n">'+n+'</i>':'')+'</div>';};
+    side.innerHTML='<div class="ch-sec">Canais</div>'+item('geral','Geral',ultMsg('geral')||'Toda a equipe')+
+      '<div class="ch-sec">Grupos <a onclick="chatNovoGrupo()">+ novo</a></div>'+
+      (CH.canais.length?CH.canais.map(function(c){return item(c.id,c.nome,ultMsg(c.id)||((c.membros||[]).length+' pessoas'));}).join(''):'<div class="ch-vazio">Nenhum grupo ainda. Crie um em "+ novo".</div>');
+    side.querySelectorAll('[data-canal]').forEach(function(el){el.addEventListener('click',function(){CH.canal=el.dataset.canal;var w=document.getElementById('ch-wrap');if(w)w.classList.add('conv');render(true);marcaLido(CH.canal);});});
+
+    var head=document.getElementById('ch-head');
+    var c=CH.canais.filter(function(x){return x.id===CH.canal;})[0];
+    var membros=CH.canal==='geral'?'Toda a equipe':(c?(c.membros||[]).map(nomeDe).join(', '):'');
+    head.innerHTML='<button class="ch-back" onclick="chatVoltar()" title="Voltar">‹</button><div class="ch-head-tx"><b>'+esc(nomeCanal(CH.canal))+'</b><span title="'+esc(membros)+'">'+esc(membros)+'</span></div>'+
+      (c?'<div class="ch-head-act"><button class="icobtn" onclick="chatEditarGrupo(\''+esc(c.id)+'\')">Membros</button><button class="icobtn" onclick="chatSairGrupo(\''+esc(c.id)+'\')">Sair</button>'+(podeApagar(c)?'<button class="icobtn" style="color:var(--red)" onclick="chatApagarGrupo(\''+esc(c.id)+'\')">Apagar</button>':'')+'</div>':'');
+
+    var box=document.getElementById('ch-msgs');
+    var pertoFim=(box.scrollHeight-box.scrollTop-box.clientHeight)<90;
+    var ms=CH.msgs.filter(function(m){return m.canal===CH.canal;});
+    var html='',dia='',ultAutor='',ultEm=0;
+    ms.forEach(function(m){
+      var d=new Date(m.em);var ok=!isNaN(d.getTime());
+      var dd=ok?d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}):'';
+      if(dd!==dia){dia=dd;html+='<div class="ch-dia"><span>'+esc(dd)+'</span></div>';ultAutor='';}
+      var hora=ok?d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+      var eu=souEu(m);var nome=(m.autor&&m.autor.nome)||'?';
+      var seguido=(nome===ultAutor)&&ok&&(d-ultEm<5*60000);
+      html+='<div class="ch-m'+(eu?' eu':'')+(seguido?' seg':'')+(m.enviando?' env':'')+'" data-mid="'+esc(m.id)+'">'+
+        (seguido?'<div class="ch-av vazio"></div>':'<div class="ch-av">'+esc(ini(nome))+'</div>')+
+        '<div class="ch-b">'+(seguido?'':'<div class="ch-meta"><b>'+esc(nome)+'</b><span>'+hora+'</span></div>')+
+        (m.texto?'<div class="ch-tx">'+linkify(m.texto)+'</div>':'')+
+        ((m.anexos||[]).length?'<div class="ch-anxs">'+m.anexos.map(function(a){var img=a.tipo==='imagem'||/\.(png|jpe?g|gif|webp|avif)(\?|$)/i.test(a.url||'');return img?'<a href="'+esc(a.url)+'" target="_blank" rel="noopener"><img src="'+esc(a.url)+'" alt="'+esc(a.nome)+'" loading="lazy"></a>':'<a class="ch-file" href="'+esc(a.url)+'" target="_blank" rel="noopener">📎 '+esc(a.nome)+'</a>';}).join('')+'</div>':'')+
+        (m.falhou?'<div class="ch-err">não enviou, tente de novo</div>':(m.enviando?'<div class="ch-err" style="color:var(--mute)">enviando…</div>':''))+
+        '</div></div>';
+      ultAutor=nome;ultEm=ok?d:0;
+    });
+    box.innerHTML=html||'<div class="ch-vazio" style="margin:auto">Nenhuma mensagem ainda. Diga oi.</div>';
+    if(scrollFim||pertoFim)box.scrollTop=box.scrollHeight;
+    pintaSomBtn();badge();
+  }
+  window.chatVoltar=function(){var w=document.getElementById('ch-wrap');if(w)w.classList.remove('conv');};
+  window.chatAbrir=function(){render(true);marcaLido(CH.canal);CH.ultimoPoll=0;tick();setTimeout(function(){var ta=document.getElementById('ch-texto');if(ta&&window.innerWidth>900)ta.focus();},80);};
+
+  /* ---- grupos ---- */
+  var grupoEdit=null;
+  function abreGrupo(c){
+    grupoEdit=c||null;
+    document.getElementById('chg-titulo').textContent=c?'Membros do grupo':'Novo grupo';
+    document.getElementById('chg-nome').value=c?c.nome:'';
+    var eu=meuEmail();
+    var lista=CH.equipe.slice().sort(function(a,b){return String(a.full_name||a.email).localeCompare(String(b.full_name||b.email));});
+    document.getElementById('chg-lista').innerHTML=lista.length?lista.map(function(m){
+      var e=String(m.email||'').toLowerCase();
+      var on=c?(c.membros||[]).map(function(x){return String(x).toLowerCase();}).indexOf(e)>=0:(e===eu);
+      return '<label class="chg-it"><input type="checkbox" value="'+esc(e)+'"'+(on?' checked':'')+(e===eu?' disabled':'')+'><span class="chg-av">'+esc(ini(m.full_name||e))+'</span>'+esc(m.full_name||e)+'<i>'+esc(e)+'</i></label>';
+    }).join(''):'<div class="ch-vazio">A lista da equipe ainda não carregou. Tente de novo em instantes.</div>';
+    document.getElementById('modal-chat-grupo').classList.add('open');
+    setTimeout(function(){document.getElementById('chg-nome').focus();},60);
+  }
+  window.chatNovoGrupo=function(){abreGrupo(null);};
+  window.chatEditarGrupo=function(id){var c=CH.canais.filter(function(x){return x.id===id;})[0];if(c)abreGrupo(c);};
+  window.chatGrupoSalvar=function(){
+    var nome=(document.getElementById('chg-nome').value||'').trim();if(!nome){toast('Dê um nome ao grupo');return;}
+    var membros=[].slice.call(document.querySelectorAll('#chg-lista input:checked')).map(function(i){return i.value;});
+    var eu=meuEmail();if(eu&&membros.indexOf(eu)<0)membros.push(eu);
+    var payload=grupoEdit?{action:'chat-canal',op:'editar',id:grupoEdit.id,nome:nome,membros:membros}:{action:'chat-canal',op:'criar',nome:nome,membros:membros};
+    api(payload).then(function(r){
+      if(!r||!r.ok)throw new Error((r&&r.error)||'falha');
+      CH.canais=(r.canais||[]).filter(function(c){return (c.membros||[]).map(function(x){return String(x).toLowerCase();}).indexOf(eu)>=0;});
+      closeModal('modal-chat-grupo');
+      if(!grupoEdit){var novo=(r.canais||[]).filter(function(c){return c.nome===nome;}).slice(-1)[0];if(novo){CH.canal=novo.id;var w=document.getElementById('ch-wrap');if(w)w.classList.add('conv');}}
+      salvaCache();render(true);toast(grupoEdit?'Grupo atualizado':'Grupo criado');
+    }).catch(function(e){toast('Não deu: '+((e&&e.message)||e));});
+  };
+  window.chatSairGrupo=function(id){
+    if(!confirm('Sair deste grupo?'))return;
+    api({action:'chat-canal',op:'sair',id:id}).then(function(r){if(!r||!r.ok)throw new Error((r&&r.error)||'falha');CH.canais=CH.canais.filter(function(c){return c.id!==id;});CH.canal='geral';salvaCache();render(true);}).catch(function(e){toast('Não deu: '+((e&&e.message)||e));});
+  };
+  window.chatApagarGrupo=function(id){
+    if(!confirm('Apagar o grupo para todo mundo? As mensagens dele saem da lista.'))return;
+    api({action:'chat-canal',op:'apagar',id:id}).then(function(r){if(!r||!r.ok)throw new Error((r&&r.error)||'falha');CH.canais=CH.canais.filter(function(c){return c.id!==id;});CH.canal='geral';salvaCache();render(true);}).catch(function(e){toast('Não deu: '+((e&&e.message)||e));});
+  };
+
+  /* ---- teclado, colar imagem, tirar anexo ---- */
+  document.addEventListener('keydown',function(ev){
+    if(ev.target&&ev.target.id==='ch-texto'&&ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();chatEnviar();}
+  });
+  document.addEventListener('input',function(ev){if(ev.target&&ev.target.id==='ch-texto'){ev.target.style.height='auto';ev.target.style.height=Math.min(160,ev.target.scrollHeight)+'px';}});
+  document.addEventListener('paste',function(ev){
+    if(!ev.target||ev.target.id!=='ch-texto')return;
+    var its=(ev.clipboardData&&ev.clipboardData.items)||[];
+    for(var i=0;i<its.length;i++){if(its[i].kind==='file'&&/^image\//.test(its[i].type)){var f=its[i].getAsFile();if(f){ev.preventDefault();enviaArquivo(f);return;}}}
+  });
+  document.addEventListener('click',function(ev){var b=ev.target&&ev.target.closest&&ev.target.closest('[data-chrm]');if(b){CH.anx.splice(parseInt(b.dataset.chrm,10),1);pintaAnexos();}});
+  // ferramenta de teste: injeta estado sem servidor
+  window.__chatDebug=function(patch){Object.keys(patch||{}).forEach(function(k){CH[k]=patch[k];});render(true);badge();return CH;};
+  badge();
+})();
+
 /* ============ ESTIMATIVA EM HORAS E MINUTOS ============
    Pedido do Gabriel (02/09/2026): ninguem estima "0,5 hora". O dado continua gravado
    em horas decimais (capacity, Meu Dia e relatorios ja leem assim), mas a tela mostra

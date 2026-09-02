@@ -127,7 +127,7 @@ async function backupDiarioSeDevido(db: any) {
     await db.from("workflowark_state").upsert({ key: "wfa-backup-last", data: { date: hoje } });
     const { data: rows } = await db
       .from("workflowark_state").select("key,data")
-      .neq("key", "wfa-whatsapp").not("key", "like", "wfa-backup-%");
+      .neq("key", "wfa-whatsapp").not("key", "like", "wfa-backup-%").not("key", "like", "wfa-chat-%");
     const snap = Object.fromEntries((rows ?? []).map((r: any) => [r.key, r.data]));
     await db.from("workflowark_state").upsert({ key: `wfa-backup-${hoje}`, data: snap });
     const lim = new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10);
@@ -365,7 +365,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           .from("workflowark_state")
           .select("key,data,updated_at")
           .neq("key", "wfa-whatsapp")
-          .not("key", "like", "wfa-backup-%"); // snapshots diários nunca descem pro cliente
+          .not("key", "like", "wfa-backup-%").not("key", "like", "wfa-chat-%"); // snapshots diários nunca descem pro cliente
         if (since) q = q.gt("updated_at", since);
         const { data: rows, error } = await q;
         if (error) return json({ error: "Não foi possível carregar os dados." }, { status: 500 });
@@ -587,6 +587,104 @@ export const Route = createFileRoute("/api/workflowark/state")({
             try { await ctx.db.auth.admin.deleteUser(m.user_id); } catch { /* ignore */ }
           }
           return json({ ok: true });
+        }
+
+        /* ===== CHAT INTERNO DA EQUIPE (02/09/2026) =====
+           Cada mensagem e uma LINHA propria em workflowark_state (key wfa-chat-m-<ts>-<id>),
+           nunca um blob unico: o WhatsApp ja mostrou que blob que so cresce estoura o Worker.
+           As linhas ficam fora do load geral (filtro wfa-chat-% no GET) e descem so pelo
+           chat-poll, que traz apenas o que mudou desde o ultimo tick. */
+        if (action === "chat-poll") {
+          const since = String(body.since ?? "");
+          const eu = ctx.member;
+          const meuEmail = String(eu.email || "").toLowerCase();
+          const { data: canRow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-chat-canais").maybeSingle();
+          const canais: any[] = Array.isArray((canRow?.data as any)?.canais) ? (canRow!.data as any).canais : [];
+          const meus = new Set<string>(["geral"]);
+          for (const c of canais) if (Array.isArray(c.membros) && c.membros.some((m: string) => String(m).toLowerCase() === meuEmail)) meus.add(String(c.id));
+          let q = ctx.db.from("workflowark_state").select("key,data,updated_at").like("key", "wfa-chat-m-%").order("key", { ascending: false });
+          if (since) q = q.gt("updated_at", since); else q = q.limit(400);
+          const { data: rows, error } = await q;
+          if (error) return json({ error: "Não foi possível carregar o chat." }, { status: 500 });
+          let maxT = since;
+          const mensagens: any[] = [];
+          for (const r of rows ?? []) {
+            if (r.updated_at && (!maxT || String(r.updated_at) > maxT)) maxT = String(r.updated_at);
+            const d: any = r.data || {};
+            if (!meus.has(String(d.canal))) continue;
+            mensagens.push(d);
+          }
+          mensagens.reverse();
+          const { data: lidoRow } = await ctx.db.from("workflowark_state").select("data").eq("key", `wfa-chat-lido-${eu.id}`).maybeSingle();
+          const { data: mem } = await ctx.db.from("workflowark_members").select("id,email,full_name").eq("active", true);
+          return json({
+            ok: true, mensagens, canais: canais.filter((c: any) => meus.has(String(c.id))), lido: lidoRow?.data ?? {},
+            equipe: mem ?? [], t: maxT || null, eu: { id: eu.id, email: eu.email, nome: eu.full_name || eu.email },
+          });
+        }
+
+        if (action === "chat-send") {
+          const canal = String(body.canal ?? "geral").slice(0, 60);
+          const texto = String(body.texto ?? "").slice(0, 4000);
+          const anexos = Array.isArray(body.anexos)
+            ? body.anexos.slice(0, 6).map((a: any) => ({ nome: String(a?.nome ?? "").slice(0, 120), url: String(a?.url ?? "").slice(0, 600), tipo: String(a?.tipo ?? "").slice(0, 20) })).filter((a: any) => /^https?:\/\//.test(a.url))
+            : [];
+          if (!texto.trim() && !anexos.length) return json({ error: "Mensagem vazia." }, { status: 400 });
+          if (canal !== "geral") {
+            const { data: canRow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-chat-canais").maybeSingle();
+            const canais: any[] = Array.isArray((canRow?.data as any)?.canais) ? (canRow!.data as any).canais : [];
+            const c = canais.find((x: any) => String(x.id) === canal);
+            if (!c || !(c.membros || []).some((m: string) => String(m).toLowerCase() === String(ctx.member.email).toLowerCase())) return json({ error: "Você não está nesse grupo." }, { status: 403 });
+          }
+          const em = new Date().toISOString();
+          const id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+          const mensagem = { id, canal, texto, anexos, autor: { id: ctx.member.id, nome: ctx.member.full_name || ctx.member.email, email: ctx.member.email }, em };
+          const { error } = await ctx.db.from("workflowark_state").upsert({ key: `wfa-chat-m-${Date.now()}-${id}`, data: mensagem, updated_by: ctx.user.id });
+          if (error) return json({ error: "Não foi possível enviar." }, { status: 500 });
+          return json({ ok: true, mensagem });
+        }
+
+        if (action === "chat-canal") {
+          const op = String(body.op ?? "criar");
+          const { data: canRow } = await ctx.db.from("workflowark_state").select("data").eq("key", "wfa-chat-canais").maybeSingle();
+          const canais: any[] = Array.isArray((canRow?.data as any)?.canais) ? (canRow!.data as any).canais : [];
+          const meuEmail = String(ctx.member.email || "").toLowerCase();
+          const limpaMembros = (arr: any) => Array.from(new Set((Array.isArray(arr) ? arr : []).map((m: any) => String(m).toLowerCase().trim()).filter((m: string) => /@/.test(m)).concat([meuEmail])));
+          if (op === "criar") {
+            const nome = String(body.nome ?? "").trim().slice(0, 60);
+            if (!nome) return json({ error: "Dê um nome ao grupo." }, { status: 400 });
+            const id = "g-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+            canais.push({ id, nome, membros: limpaMembros(body.membros), criadoPor: meuEmail, em: new Date().toISOString() });
+          } else {
+            const id = String(body.id ?? "");
+            const c = canais.find((x) => String(x.id) === id);
+            if (!c) return json({ error: "Grupo não encontrado." }, { status: 404 });
+            const souMembro = (c.membros || []).some((m: string) => String(m).toLowerCase() === meuEmail);
+            if (!souMembro && !ctx.isAdmin) return json({ error: "Você não está nesse grupo." }, { status: 403 });
+            if (op === "editar") {
+              if (body.nome) c.nome = String(body.nome).trim().slice(0, 60);
+              if (body.membros) c.membros = limpaMembros(body.membros);
+            } else if (op === "sair") {
+              c.membros = (c.membros || []).filter((m: string) => String(m).toLowerCase() !== meuEmail);
+            } else if (op === "apagar") {
+              if (!(ctx.isAdmin || String(c.criadoPor || "").toLowerCase() === meuEmail)) return json({ error: "Só quem criou ou um admin apaga o grupo." }, { status: 403 });
+              canais.splice(canais.indexOf(c), 1);
+            } else return json({ error: "Operação inválida." }, { status: 400 });
+          }
+          const { error } = await ctx.db.from("workflowark_state").upsert({ key: "wfa-chat-canais", data: { canais }, updated_by: ctx.user.id });
+          if (error) return json({ error: "Não foi possível salvar o grupo." }, { status: 500 });
+          return json({ ok: true, canais });
+        }
+
+        if (action === "chat-lido") {
+          const canal = String(body.canal ?? "");
+          const em = String(body.em ?? new Date().toISOString());
+          if (!canal) return json({ error: "canal obrigatório" }, { status: 400 });
+          const key = `wfa-chat-lido-${ctx.member.id}`;
+          const { data: row } = await ctx.db.from("workflowark_state").select("data").eq("key", key).maybeSingle();
+          const lido = Object.assign({}, (row?.data as any) || {}, { [canal]: em });
+          await ctx.db.from("workflowark_state").upsert({ key, data: lido, updated_by: ctx.user.id });
+          return json({ ok: true, lido });
         }
 
         if (action === "upload-file") {
