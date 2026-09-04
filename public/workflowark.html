@@ -1,4 +1,4 @@
-<!-- build 20260904-atividades-nomes-filtros -->
+<!-- build 20260904-atividades-nomes-filtros-2 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -2877,6 +2877,7 @@ function wfaSetTheme(t){
             <option value="7dias">📆 Próximos 7 dias</option>
           </select>
           <button class="icobtn" id="filt-minhas" onclick="filtSoMinhas()" title="Ver só as tarefas atribuídas a você">👤 Só minhas</button>
+          <button class="icobtn" id="filt-sempj" onclick="filtSemProjetos()" title="Esconder os cards puxados dos Projetos (ações operacionais) e ver só as tarefas diretas da equipe">📁 Esconder projetos</button>
           <button class="icobtn" id="filt-limpar" onclick="limparFiltros()" style="display:none;color:var(--red)">✕ Limpar filtros</button>
         </div>
 
@@ -3967,6 +3968,16 @@ const DEFAULT_CALENDARS = {
   'lucas rosi':'luccascalta@gmail.com',
 };
 const WFA_FILTROS = {busca:'',prio:'',resp:'',cli:'',tag:'',data:''};
+/* "Esconder projetos": tira do board da daily os cards puxados dos Projetos (t.pj), que
+   são as ações operacionais por cliente. Não apaga nada, é só um filtro de visão. */
+let WFA_HIDE_PJ=false;
+function filtSemProjetos(){
+  WFA_HIDE_PJ=!WFA_HIDE_PJ;
+  const b=document.getElementById('filt-sempj');
+  if(b){b.style.color=WFA_HIDE_PJ?'var(--yel,#b38600)':'';b.textContent=WFA_HIDE_PJ?'📁 Mostrar projetos':'📁 Esconder projetos';}
+  const lim=document.getElementById('filt-limpar');if(lim)lim.style.display=(WFA_HIDE_PJ||Object.values(WFA_FILTROS).some(v=>v!==''))?'':'none';
+  renderTarefas();
+}
 function aplicarFiltros(){
   WFA_FILTROS.busca=(document.getElementById('filt-busca').value||'').toLowerCase();
   WFA_FILTROS.prio=document.getElementById('filt-prio').value||'';
@@ -3974,7 +3985,7 @@ function aplicarFiltros(){
   WFA_FILTROS.cli=document.getElementById('filt-cli').value||'';
   WFA_FILTROS.tag=(document.getElementById('filt-tag')||{}).value||'';
   WFA_FILTROS.data=document.getElementById('filt-data').value||'';
-  const ativo=Object.values(WFA_FILTROS).some(v=>v!=='');
+  const ativo=Object.values(WFA_FILTROS).some(v=>v!=='')||WFA_HIDE_PJ;
   document.getElementById('filt-limpar').style.display=ativo?'':'none';
   const bm=document.getElementById('filt-minhas');
   if(bm){const eu=(typeof WFA_MEMBER!=='undefined'&&WFA_MEMBER&&WFA_MEMBER.full_name)||'';bm.style.color=(WFA_FILTROS.resp&&eu&&WFA_FILTROS.resp.toLowerCase()===eu.toLowerCase())?'var(--yel,#b38600)':'';}
@@ -3996,6 +4007,9 @@ function filtSoMinhas(){
 function limparFiltros(){
   ['filt-busca','filt-prio','filt-resp','filt-cli','filt-tag','filt-data'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   Object.keys(WFA_FILTROS).forEach(k=>WFA_FILTROS[k]='');
+  WFA_HIDE_PJ=false;
+  const bp=document.getElementById('filt-sempj');if(bp){bp.style.color='';bp.textContent='📁 Esconder projetos';}
+  const bm=document.getElementById('filt-minhas');if(bm)bm.style.color='';
   document.getElementById('filt-limpar').style.display='none';
   renderTarefas();
 }
@@ -4005,6 +4019,7 @@ function limparFiltros(){
 function dataSP(d){return (d||new Date()).toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});}
 function hojeSP(){return dataSP(new Date());}
 function tarefaPassaFiltro(t){
+  if(WFA_HIDE_PJ&&t.pj)return false;   // "Esconder projetos": só tarefas diretas da equipe
   const today=hojeSP();
   const em7=dataSP(new Date(Date.now()+7*86400000));
   if(WFA_FILTROS.busca&&!(t.title||'').toLowerCase().includes(WFA_FILTROS.busca)&&!(t.desc||'').toLowerCase().includes(WFA_FILTROS.busca))return false;
