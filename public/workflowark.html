@@ -1,4 +1,4 @@
-<!-- build 20260902-chat -->
+<!-- build 20260904-atividades-nomes-filtros -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -2867,6 +2867,9 @@ function wfaSetTheme(t){
           <select class="form-select" id="filt-cli" style="width:145px" onchange="aplicarFiltros()">
             <option value="">Todo cliente</option>
           </select>
+          <select class="form-select" id="filt-tag" style="width:145px" onchange="aplicarFiltros()">
+            <option value="">Toda etiqueta</option>
+          </select>
           <select class="form-select" id="filt-data" style="width:155px" onchange="aplicarFiltros()">
             <option value="">Toda data</option>
             <option value="atrasadas">⚠️ Atrasadas</option>
@@ -3228,7 +3231,7 @@ function wfaSetTheme(t){
       <!-- =================== CAMPANHAS =================== -->
       <div class="page" id="page-campanhas">
         <div class="page-head">
-          <div class="page-title"><h1>Performance das Campanhas</h1><p>Leitura factual semana 11–17/05 · pontos a melhorar e oportunidade Copa</p></div>
+          <div class="page-title"><h1>Performance das Campanhas</h1><p>Análise histórica · semana 11–17/05/2026 — dados não atualizados automaticamente</p></div>
         </div>
 
         <div class="alert yel" style="margin-bottom:14px">
@@ -3775,7 +3778,8 @@ function wfaSetTheme(t){
 
       <!-- =================== OKRs =================== -->
       <div class="page" id="page-okrs">
-        <div class="page-head"><div class="page-title"><h1>OKRs · ALPHA Abril 2026</h1><p>Objetivos e Key Results por função · meta de R$ 100K no primeiro mês</p></div></div>
+        <div class="page-head"><div class="page-title"><h2 id="okr-page-title">OKRs</h2><p>Objetivos e Key Results por função · meta de R$ 100K no primeiro mês</p></div></div>
+        <script>document.getElementById('okr-page-title').textContent='OKRs · '+new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());</script>
 
         <style>
           .okr-sect{margin-bottom:18px}
@@ -3962,12 +3966,13 @@ const DEFAULT_CALENDARS = {
   'danilo de lima':'danilodelima.distribuidoracopa@gmail.com',
   'lucas rosi':'luccascalta@gmail.com',
 };
-const WFA_FILTROS = {busca:'',prio:'',resp:'',cli:'',data:''};
+const WFA_FILTROS = {busca:'',prio:'',resp:'',cli:'',tag:'',data:''};
 function aplicarFiltros(){
   WFA_FILTROS.busca=(document.getElementById('filt-busca').value||'').toLowerCase();
   WFA_FILTROS.prio=document.getElementById('filt-prio').value||'';
   WFA_FILTROS.resp=document.getElementById('filt-resp').value||'';
   WFA_FILTROS.cli=document.getElementById('filt-cli').value||'';
+  WFA_FILTROS.tag=(document.getElementById('filt-tag')||{}).value||'';
   WFA_FILTROS.data=document.getElementById('filt-data').value||'';
   const ativo=Object.values(WFA_FILTROS).some(v=>v!=='');
   document.getElementById('filt-limpar').style.display=ativo?'':'none';
@@ -3989,7 +3994,7 @@ function filtSoMinhas(){
   aplicarFiltros();
 }
 function limparFiltros(){
-  ['filt-busca','filt-prio','filt-resp','filt-cli','filt-data'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['filt-busca','filt-prio','filt-resp','filt-cli','filt-tag','filt-data'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   Object.keys(WFA_FILTROS).forEach(k=>WFA_FILTROS[k]='');
   document.getElementById('filt-limpar').style.display='none';
   renderTarefas();
@@ -4004,8 +4009,20 @@ function tarefaPassaFiltro(t){
   const em7=dataSP(new Date(Date.now()+7*86400000));
   if(WFA_FILTROS.busca&&!(t.title||'').toLowerCase().includes(WFA_FILTROS.busca)&&!(t.desc||'').toLowerCase().includes(WFA_FILTROS.busca))return false;
   if(WFA_FILTROS.prio&&t.prio!==WFA_FILTROS.prio)return false;
-  if(WFA_FILTROS.resp&&t.resp!==WFA_FILTROS.resp)return false;
+  /* Responsável: casa contra TODOS os responsáveis (t.resps), não só o 1º (t.resp).
+     Antes o filtro/"Só minhas" perdia toda tarefa em que a pessoa era co-responsável
+     e não o primeiro da lista (print do Gabriel: filtrar Darman/Caio dava 0). normName
+     ignora acento e caixa. */
+  if(WFA_FILTROS.resp){
+    const _alvo=normName(WFA_FILTROS.resp);
+    const _quem=(Array.isArray(t.resps)&&t.resps.length)?t.resps:[t.resp];
+    if(!_quem.some(r=>normName(r)===_alvo))return false;
+  }
   if(WFA_FILTROS.cli&&t.clienteId!==WFA_FILTROS.cli)return false;
+  if(WFA_FILTROS.tag){
+    const _tags=(t.tags||[]).concat((t.papeis||[]).map(k=>(typeof pjPapelNome==='function'?pjPapelNome(k):k)));
+    if(!_tags.some(tg=>normName(tg)===normName(WFA_FILTROS.tag)))return false;
+  }
   if(WFA_FILTROS.data==='atrasadas'&&!(t.data&&t.data<today&&t.status!=='concluido'))return false;
   if(WFA_FILTROS.data==='hoje'&&t.data!==today)return false;
   if(WFA_FILTROS.data==='7dias'&&!(t.data&&t.data>=today&&t.data<=em7))return false;
@@ -4451,7 +4468,7 @@ async function bootCloudSync(){
     wfaSeedRotinasV1();      // rotinas semanais da equipe (1x, idempotente)
     // Seeds que ANTES rodavam no parse (e apagavam dados em navegador novo): agora aqui,
     // com a lista real do servidor já aplicada, então só ACRESCENTAM.
-    seedValhalla();seedSamuel();seedProcessos();saneamentoCarteira();saneamentoBriefingV2();
+    seedValhalla();seedSamuel();seedProcessos();saneamentoCarteira();saneamentoBriefingV2();migraNomesEquipe();
     wfaSeedHistoricoCob(['2026-06','2026-07']);   // preenche jun/jul como cobrado
     if(WFA_WPP_OFF){try{document.querySelectorAll('[data-nav="whatsapp"]').forEach(el=>el.style.display='none');}catch(e){}}
     try{onboardMaybeAuto();}catch(e){} // tour de boas-vindas no 1º acesso
@@ -6368,6 +6385,19 @@ function iniciarAutoSync(){
         <div class="set-sect-t" style="margin-bottom:4px">Membros da equipe</div>
         <p class="muted" style="font-size:10.5px;margin-bottom:13px">Defina o <strong>nome</strong>, o <strong>papel</strong> e <strong>quais abas</strong> cada pessoa enxerga (botão "Abas"). Desmarcar "ativo" bloqueia o acesso.</p>
         <div id="set-team-list"></div>
+        <div class="card" style="margin-top:14px;padding:12px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
+          <input id="inv-email" class="form-input" type="email" placeholder="E-mail do novo membro">
+          <select id="inv-role" class="form-select">
+            <option value="viewer">Viewer</option>
+            <option value="operacao">Operação</option>
+            <option value="marketing">Marketing</option>
+            <option value="comercial">Comercial</option>
+            <option value="financeiro">Financeiro</option>
+            <option value="gestor">Gestor</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button class="tb-btn" onclick="inviteMember()">Convidar</button>
+        </div>
       </div>
 
       <!-- CONTA -->
@@ -6960,6 +6990,42 @@ function seedSamuel(){
     if(!arr.some(n=>String(n).toLowerCase().includes('samuel'))){ arr.push('Samuel Magalhães'); localStorage.setItem('wfa-colab-custom',JSON.stringify(arr)); }
     localStorage.setItem('wfa-seed-samuel','1');
   }catch(e){}
+}
+
+/* ===== MIGRAÇÃO DE NOMES DA EQUIPE (04/09/2026) =====
+   O organograma renomeou "Darmã" -> "Darman", mas tarefa já salva guarda o nome em
+   texto (ver comentário em TEAM_BASE): o filtro por "Darman" dava 0 porque o dado
+   dizia "Darmã". Mesmo caso do "Caio" solto, que o seletor grava como "Caio Neves".
+   Reescreve resp/resps das tarefas (wfa-tarefas) e das tarefas de projeto
+   (wfa-projetos > p.tarefas) para o nome canônico. Casa por forma normalizada
+   (sem acento, sem espaço, minúscula), então só toca o que reconhece: idempotente,
+   nunca inventa nome. Roda 1x por aparelho, depois do sync, e só grava se mudou algo. */
+const MIG_NOMES_KEY='wfa-migra-nomes-v1';
+const MIG_NOMES_CANON={'darma':'Darman','darman':'Darman','caio':'Caio Neves','caioneves':'Caio Neves'};
+function migCanonNome(x){ if(!x)return x; var k=sanNorm(x); return MIG_NOMES_CANON[k]||x; }
+function migraNomesEquipe(){
+  try{
+    if(localStorage.getItem(MIG_NOMES_KEY))return;
+    var mexeu=0;
+    var fix=function(o){
+      if(!o)return;
+      if(o.resp){var nr=migCanonNome(o.resp);if(nr!==o.resp){o.resp=nr;mexeu++;}}
+      if(Array.isArray(o.resps)){o.resps=o.resps.map(function(r){var nr=migCanonNome(r);if(nr!==r)mexeu++;return nr;});}
+    };
+    // tarefas (estado em memória é a fonte; salva pelo caminho normal)
+    if(Array.isArray(state.tarefas)){state.tarefas.forEach(fix);}
+    // tarefas de projeto
+    var pjs=[];try{pjs=JSON.parse(localStorage.getItem('wfa-projetos')||'[]');}catch(e){pjs=[];}
+    var pjMex=0;
+    if(Array.isArray(pjs)){pjs.forEach(function(p){(p&&p.tarefas||[]).forEach(function(t){var antes=mexeu;fix(t);if(mexeu!==antes)pjMex++;});});}
+    localStorage.setItem(MIG_NOMES_KEY,'1');
+    if(mexeu){
+      if(typeof saveTarefas==='function')saveTarefas();
+      if(pjMex)localStorage.setItem('wfa-projetos',JSON.stringify(pjs));
+      if(typeof toast==='function')toast('Nomes da equipe atualizados: '+mexeu+' ajuste(s)');
+      if(typeof renderTarefas==='function'){try{renderTarefas();}catch(e){}}
+    }
+  }catch(e){console.warn('migraNomesEquipe',e);}
 }
 
 const SPRINT_ATIVIDADES = {
@@ -8870,6 +8936,7 @@ function wfaEstDecimal(hStr,mStr){
   var BR_CAMPOS=[
     ['Contexto do projeto',[
       ['segmento','Segmento','i'],['status','Situação','sel:Ativo|Onboarding|Aviso prévio|Crítico'],
+      ['negocio','O que a empresa faz (descrição do negócio e informações relevantes)','t'],
       ['tempo','Há quanto tempo a empresa existe','i'],['ticket','Ticket médio','i'],
       ['responsaveis','Responsáveis e particularidades de cada um','t'],
       ['objetivo','Objetivo principal do cliente ao nos contratar','t']
@@ -8895,6 +8962,9 @@ function wfaEstDecimal(hStr,mStr){
       ['contato','Com qual frequência o cliente quer contato','i'],
       ['particularidades','Particularidades','t'],
       ['antes','O que preciso saber antes de falar com o cliente','t']
+    ]],
+    ['Outras informações',[
+      ['livre','Texto livre · qualquer informação complementar que não se encaixe nos campos acima','t']
     ]]
   ];
 
@@ -8947,7 +9017,10 @@ function wfaEstDecimal(hStr,mStr){
         '<div class="pr-f"><label>Usuário ou e-mail</label><input id="sn-user"></div>'+
         '<div class="pr-f"><label>Observação</label><input id="sn-obs" placeholder="quem tem, onde está guardado"></div></div>'+
         '<button class="tb-btn dk" data-add="senha">Adicionar</button>'+
-        '<div style="font-size:11.5px;color:var(--mute);margin-top:9px">Registre onde a senha está guardada, não a senha em si.</div></div>';
+        '<div style="font-size:11.5px;color:var(--mute);margin-top:9px">Registre onde a senha está guardada, não a senha em si.</div></div>'+
+        '<div class="pr-sec"><h4>Outras informações de acesso</h4>'+
+        '<div class="pr-f"><label>Texto livre · links úteis, onde as senhas ficam guardadas, contato de TI, qualquer coisa que ajude a equipe</label>'+
+        '<textarea data-br="acessosLivre">'+esc((p.pront.briefing||{}).acessosLivre||'')+'</textarea></div></div>';
     }
     if(prPag==='atas'){
       var at=p.pront.atas||[];
@@ -11355,6 +11428,18 @@ async function removerMembro(id){
     toast('✓ Membro removido');
   }catch(e){toast('⚠ '+(e.message||'Erro ao remover'));}
 }
+async function inviteMember(){
+  const emIn=document.getElementById('inv-email');const rlIn=document.getElementById('inv-role');
+  const email=(emIn?.value||'').trim().toLowerCase();const role=(rlIn?.value||'viewer');
+  if(!/^\S+@\S+\.\S+$/.test(email)){toast('Informe um e-mail válido');return;}
+  try{
+    await cloudCall('save',{action:'add-member',email,role});
+    const res=await cloudCall('load');if(res&&res.members)WFA_MEMBERS=res.members;
+    renderSettingsTeam();
+    if(emIn)emIn.value='';
+    toast('✓ Convite salvo · '+email+' já pode entrar com este e-mail');
+  }catch(e){toast('⚠ '+(e.message||'Erro ao convidar'));}
+}
 
 /* ============ TAREFAS DE EXEMPLO ============ */
 function popularExemplos(){
@@ -11489,9 +11574,30 @@ function removerDuplicadas(){
   toast('✓ '+ids.size+' tarefa(s) repetida(s) removida(s)');
 }
 let WFA_SHOW_ALL_DONE=false; // Concluído mostra só as 30 mais recentes até pedirem todas
+/* Popula o filtro por etiqueta com as tags reais (t.tags + papéis dos projetos), sem
+   duplicar e em ordem. So rebuilda quando o conjunto muda, pra nao atrapalhar quem esta
+   escolhendo. Pedido do Gabriel: filtrar Atividades por etiqueta. */
+let WFA_TAG_OPTS_CACHE='';
+function fillTagFilter(){
+  const sel=document.getElementById('filt-tag');if(!sel)return;
+  const set=new Set();
+  const add=t=>{ if(!t)return;
+    (t.tags||[]).forEach(x=>{if(x)set.add(String(x));});
+    (t.papeis||[]).forEach(k=>{const n=(typeof pjPapelNome==='function'?pjPapelNome(k):k);if(n)set.add(String(n));}); };
+  (state.tarefas||[]).forEach(add);
+  try{(typeof pjAtivas==='function'?pjAtivas():[]).forEach(add);}catch(e){}
+  const arr=[...set].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const key=arr.join('|');
+  if(key===WFA_TAG_OPTS_CACHE)return;
+  WFA_TAG_OPTS_CACHE=key;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Toda etiqueta</option>'+arr.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  if(cur&&arr.includes(cur))sel.value=cur;
+}
 function renderTarefas(){
   /* Mesmo modelo da aba Projetos, pedido do Caio. A chave 'aprovacao' ficou como
      estava e so mudou de rotulo para Homologacao: renomear migraria tarefa gravada. */
+  fillTagFilter();
   const STATS=['backlog','iniciar','andamento','aprovacao','homologcli','concluido'];
   /* PONTE: tarefas dos projetos (aba Projetos) fora do backlog entram como cartao ligado.
      O backlog delas fica na Jornada, de proposito: a daily nao precisa ver centenas de
@@ -11749,7 +11855,10 @@ function taskCard(t){
       <span class="tc-date ${late?'late':''}" style="${dateStyle}">${late?'Atrasada · ':venceHoje?'Hoje · ':''}${dataFmt}</span>
     </div>
     <div class="tc-meta" style="margin-top:4px">
-      <span class="tc-assign" style="display:inline-flex;align-items:center;gap:5px">${t.resp?`<span class="tc-av">${taskInitials(t.resp)}</span>`:''}${escapeHtml(t.resp||'sem responsável')}</span>
+      <span class="tc-assign" style="display:inline-flex;align-items:center;gap:5px">${(()=>{
+        /* mostra TODOS os responsáveis, não só o primeiro: antes uma tarefa com Gabriel+Caio
+           só exibia "Gabriel" e parecia que o nome do Caio sumia (relato do Gabriel). */
+        const _rs=(Array.isArray(t.resps)&&t.resps.length)?t.resps:(t.resp?[t.resp]:[]);if(!_rs.length)return 'sem responsável';return _rs.map(r=>`<span class="tc-av">${taskInitials(r)}</span>`).join('')+'<span>'+_rs.map(r=>escapeHtml(r)).join(', ')+'</span>';})()}</span>
       <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
         ${t.pj?'':`<button class="icobtn" style="padding:2px 6px;font-size:9.5px;color:var(--red)" title="Excluir" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>`}
       </div>
@@ -12239,7 +12348,7 @@ function openTaskDetail(id){
       if(popSrc){
         t.checklist=popSrc.map((tx,k)=>({id:'pi'+k,text:tx,done:false}));
         if(!(t.tags||[]).includes('pop')){t.tags=(t.tags||[]).concat('pop');}
-        saveTarefas();toast('POP da função carregado no checklist desta tarefa');
+        saveTarefas();toast('📋 Checklist de produção adicionado · tarefa só conclui com todos os itens marcados');
       }
     }
   }catch(e){}
@@ -15445,9 +15554,13 @@ function rotinaVenceHoje(r){
   const hoje=new Date();const dow=ROT_DOW[hoje.getDay()];const dia=hoje.getDate();
   const f=(r.freq||'').toLowerCase();const campoDia=(r.dia||'').toLowerCase();
   if(f.startsWith('di')) return true;                               // diária
-  if(f.startsWith('sem')||f.startsWith('quin')){                   // semanal/quinzenal
+  if(f.startsWith('sem')){                                          // semanal
     if(!campoDia) return false;
     return campoDia.includes(dow.toLowerCase());
+  }
+  if(f.startsWith('quin')){                                         // quinzenal: semanas 1 e 3
+    if(!campoDia||!campoDia.includes(dow.toLowerCase())) return false;
+    const weekN=Math.ceil(hoje.getDate()/7); return weekN%2===1;
   }
   if(f.startsWith('men')){                                          // mensal
     const num=parseInt((campoDia.match(/\d+/)||[])[0]||'1',10);
@@ -16615,7 +16728,7 @@ function renderMeumes(){
     </div>
 
     <div class="mm-sec">
-      <div class="sec-h"><h2>Financeiro</h2><span class="live">live</span><span class="sub">Minha Planilha${fin.nome?' · '+fin.nome:''} · cobranças e acertos sincronizados</span></div>
+      <div class="sec-h"><h2>Financeiro</h2><span class="live">live</span><span class="sub">Minha Planilha${fin.nome?' · '+fin.nome:''} · cobranças e acertos sincronizados</span>${(typeof planActive==='function'&&typeof cobMesKey==='function'&&(planActive()?.mk||null)!==cobMesKey())?'<span style="color:#ffc400;font-size:11px;margin-left:8px">dados do mês '+fin.nome+'</span>':''}</div>
       <div class="grid g4" style="margin-bottom:18px">
         <div class="stat"><div class="num green">${mmBRL(fin.tRec)}</div><div class="lab">A receber</div><div class="det">${fin.cobOk}/${fin.cobN} cobrados</div></div>
         <div class="stat"><div class="num red">${mmBRL(fin.tPag)}</div><div class="lab">A pagar (acertos)</div><div class="det">${fin.aceOk}/${fin.aceN} pagos</div></div>
