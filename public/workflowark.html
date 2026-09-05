@@ -1,4 +1,4 @@
-<!-- build 20260905-po-cronometro -->
+<!-- build 20260905-po-autoatribui -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -9243,6 +9243,14 @@ function wfaEstDecimal(hStr,mStr){
         if(extra.horas!==undefined&&extra.horas!==''&&extra.horas!==null)t.horas=extra.horas;
         if(extra.obs&&!t.obs)t.obs=extra.obs;
       }
+      /* Auto-atribui a tarefa de papel PO ao DONO do projeto (p.po) quando ela sai do
+         backlog. Cada projeto tem seu próprio PO e a pessoa varia; por isso usa p.po, e só
+         age se o projeto TEM PO definido e a tarefa está sem responsável (nunca chuta nome
+         nem sobrescreve quem já foi posto à mão). */
+      if(st!=='backlog' && (t.papeis||[]).includes('po') && p.po && !(t.resp||'') && !((t.resps||[]).length)){
+        t.resp=p.po; t.resps=[p.po];
+        t.hist=(t.hist||[]).concat([{em:tkAgora(),txt:'atribuído a '+p.po+' (PO do projeto) ao sair do backlog'}]);
+      }
       if(mudou){
         t.hist=(t.hist||[]).concat([{em:tkAgora(),txt:tkQuem()+' mudou o status para '+col(st).n+(extra&&extra.origem?' ('+extra.origem+')':'')}]);
         if(t.hist.length>60)t.hist=t.hist.slice(-60);
@@ -9784,9 +9792,19 @@ function wfaEstDecimal(hStr,mStr){
     if(t.id==='pj-po'){
       var pp=get(aberto); if(!pp)return;
       pp.po=t.value; pp.atualizadoEm=hoje();
+      /* Back-fill: ao definir o PO, as tarefas de papel PO já ATIVAS (fora do backlog) e sem
+         dono passam a ser dele. Não toca backlog nem tarefa que já tem responsável. */
+      var back=0;
+      if(pp.po)(pp.tarefas||[]).forEach(function(tk){
+        if((tk.papeis||[]).includes('po') && tk.st && tk.st!=='backlog' && !(tk.resp||'') && !((tk.resps||[]).length)){
+          tk.resp=pp.po; tk.resps=[pp.po]; back++;
+        }
+      });
       var arr=load(),i=-1;arr.forEach(function(x,ix){if(x.id===pp.id)i=ix;});
       if(i>=0){arr[i]=pp;try{localStorage.setItem(KEY,JSON.stringify(arr));}catch(e){}try{if(typeof scheduleSync==='function')scheduleSync();}catch(e){}}
-      try{toast('PO do projeto: '+(t.value||'—'));}catch(e){}
+      try{if(typeof renderDetalhe==='function')renderDetalhe();}catch(e){}
+      try{if(typeof window.renderTarefas==='function')window.renderTarefas();}catch(e){}
+      try{toast('PO do projeto: '+(t.value||'—')+(back?(' · '+back+' tarefa(s) de PO ativa(s) atribuída(s)'):''));}catch(e){}
       return;
     }
     if(t.dataset&&t.dataset.br!=null){
