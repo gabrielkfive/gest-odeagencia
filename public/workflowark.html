@@ -1,4 +1,4 @@
-<!-- build 20260904-atividades-nomes-filtros-2 -->
+<!-- build 20260905-drag-guard-blindagem -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -3967,10 +3967,14 @@ const DEFAULT_CALENDARS = {
   'danilo de lima':'danilodelima.distribuidoracopa@gmail.com',
   'lucas rosi':'luccascalta@gmail.com',
 };
-const WFA_FILTROS = {busca:'',prio:'',resp:'',cli:'',tag:'',data:''};
+/* var (não const): WFA_FILTROS é lido por tarefaPassaFiltro, que pode ser chamado por um
+   render disparado cedo na carga. Com const/let, o TDZ estoura e o board fica BRANCO (parte
+   do bug de "tela branca" em carga lenta). Com var hoista como undefined e nunca quebra;
+   o objeto só é mutado, nunca reatribuído, então var é equivalente. */
+var WFA_FILTROS = {busca:'',prio:'',resp:'',cli:'',tag:'',data:''};
 /* "Esconder projetos": tira do board da daily os cards puxados dos Projetos (t.pj), que
    são as ações operacionais por cliente. Não apaga nada, é só um filtro de visão. */
-let WFA_HIDE_PJ=false;
+var WFA_HIDE_PJ=false;   // var (não let): hoisted sem TDZ, senão um render cedo estoura e deixa a tela branca
 function filtSemProjetos(){
   WFA_HIDE_PJ=!WFA_HIDE_PJ;
   const b=document.getElementById('filt-sempj');
@@ -4019,6 +4023,9 @@ function limparFiltros(){
 function dataSP(d){return (d||new Date()).toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});}
 function hojeSP(){return dataSP(new Date());}
 function tarefaPassaFiltro(t){
+  /* Blindagem: se um render disparar antes de WFA_FILTROS ser preenchido (carga lenta), NÃO
+     estoura nem deixa o board branco — deixa a tarefa passar e a próxima repintada filtra. */
+  if(!WFA_FILTROS)return true;
   if(WFA_HIDE_PJ&&t.pj)return false;   // "Esconder projetos": só tarefas diretas da equipe
   const today=hojeSP();
   const em7=dataSP(new Date(Date.now()+7*86400000));
@@ -7097,7 +7104,7 @@ function saveJornada(){
 }
 
 /* ============ STATE ============ */
-let state = {
+var state = {   /* var (não let): estado global lido por muitas funções; hoisted evita TDZ/tela branca se algo renderiza cedo */
   tarefas: JSON.parse(localStorage.getItem('wfa-tarefas')||'[]'),
   regua: JSON.parse(localStorage.getItem('wfa-regua')||'{}'),
   cobranca: JSON.parse(localStorage.getItem('wfa-cobranca')||'{}'),
@@ -11592,7 +11599,7 @@ let WFA_SHOW_ALL_DONE=false; // Concluído mostra só as 30 mais recentes até p
 /* Popula o filtro por etiqueta com as tags reais (t.tags + papéis dos projetos), sem
    duplicar e em ordem. So rebuilda quando o conjunto muda, pra nao atrapalhar quem esta
    escolhendo. Pedido do Gabriel: filtrar Atividades por etiqueta. */
-let WFA_TAG_OPTS_CACHE='';
+var WFA_TAG_OPTS_CACHE='';   // var: sem TDZ (fillTagFilter roda dentro do renderTarefas)
 function fillTagFilter(){
   const sel=document.getElementById('filt-tag');if(!sel)return;
   const set=new Set();
@@ -11610,6 +11617,15 @@ function fillTagFilter(){
   if(cur&&arr.includes(cur))sel.value=cur;
 }
 function renderTarefas(){
+  /* Blindagem contra tela branca: se o script ainda não terminou de inicializar (carga
+     lenta) e algo dispara um render cedo, WFA_FILTROS/estado ainda não existem. Sair limpo
+     aqui evita o throw que deixava o board branco — o boot repinta quando tudo estiver pronto. */
+  if(!WFA_FILTROS||typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return;
+  /* ADIA a repintada enquanto um cartão está sendo arrastado: reconstruir o board no meio
+     do arrasto destruía o cartão e fazia o drop falhar (o "sumiu e voltou"). A flag é
+     ligada de forma SÍNCRONA no dragstart; ao soltar, wfaDragFim() repinta com o estado
+     final. Rede de segurança contra flag zumbi: o timeout de 20s do wfaDragInicio. */
+  if(WFA_DRAGGING){WFA_RENDER_PENDENTE=true;return;}
   /* Mesmo modelo da aba Projetos, pedido do Caio. A chave 'aprovacao' ficou como
      estava e so mudou de rotulo para Homologacao: renomear migraria tarefa gravada. */
   fillTagFilter();
@@ -11935,6 +11951,27 @@ function delTask(id){
       e quando o filtro saia a coluna aparecia embaralhada. Agora quem renumera e
       taskRenumera/taskReordena, que enxergam a coluna inteira, filtro ou nao. */
 let WFA_DROP_FEITO=false;   // o drop chegou a acontecer? (ver dragend)
+/* ARRASTO EM ANDAMENTO: a puxada da nuvem (a cada 6s) chamava renderTarefas() no meio do
+   arrasto, reconstruía o board e DESTRUÍA o cartão que a pessoa segurava — o drop falhava e
+   o cartão "sumia e voltava pro mesmo lugar" (relato do Gabriel: "tem que jogar 5-6x"). Com
+   esta trava, qualquer repintada durante o arrasto fica ADIADA e é aplicada ao soltar. */
+/* var (não let): WFA_DRAGGING é referenciado no topo do renderTarefas, que é definido ANTES
+   desta linha. Com let, um render disparado durante a carga (antes daqui) estouraria TDZ e
+   deixaria o board BRANCO. Com var, hoista como undefined (falsy) e nunca quebra. */
+var WFA_DRAGGING=false, WFA_RENDER_PENDENTE=false, WFA_DRAG_TIMER=null;
+function wfaDragInicio(){
+  WFA_DRAGGING=true; WFA_DROP_FEITO=false;
+  // rede de seguranca: se por algum motivo o dragend nao disparar, destrava em 20s
+  if(WFA_DRAG_TIMER)clearTimeout(WFA_DRAG_TIMER);
+  WFA_DRAG_TIMER=setTimeout(()=>{WFA_DRAGGING=false;WFA_DRAG_TIMER=null;try{renderTarefas();}catch(e){}},20000);
+}
+function wfaDragFim(){
+  WFA_DRAGGING=false;
+  if(WFA_DRAG_TIMER){clearTimeout(WFA_DRAG_TIMER);WFA_DRAG_TIMER=null;}
+  WFA_RENDER_PENDENTE=false;
+  document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});
+  try{renderTarefas();}catch(e){}
+}
 const _PRIO_PESO={alta:0,media:1,baixa:2};
 const TASK_STATS=['backlog','iniciar','andamento','aprovacao','homologcli','concluido'];
 function taskCmp(a,b){
@@ -12005,15 +12042,11 @@ function bindDrag(){
   // Cada elemento é atado UMA vez na vida (__dragBound).
   document.querySelectorAll('.task-card').forEach(c=>{
     if(c.__dragBound)return;c.__dragBound=1;
-    c.addEventListener('dragstart',e=>{e.dataTransfer.setData('id',c.dataset.tid);e.dataTransfer.effectAllowed='move';requestAnimationFrame(()=>c.classList.add('dragging'));});
-    c.addEventListener('dragstart',()=>{WFA_DROP_FEITO=false;});
+    c.addEventListener('dragstart',e=>{e.dataTransfer.setData('id',c.dataset.tid);e.dataTransfer.effectAllowed='move';wfaDragInicio();requestAnimationFrame(()=>c.classList.add('dragging'));});
     c.addEventListener('dragend',e=>{c.classList.remove('dragging');document.querySelectorAll('.task-col.drop-on').forEach(x=>x.classList.remove('drop-on'));
-      /* Soltou fora de qualquer coluna: o preview do dragover ja tinha movido o cartao
-         no DOM. Sem repintar, ele fica na coluna errada ate a proxima repintada e da a
-         impressao de que sumiu e voltou sozinho. */
-      if(!WFA_DROP_FEITO){document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});renderTarefas();return;}
-      // o drag mexe no DOM por fora do render: invalida o cache pro próximo render repintar de verdade
-      document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});
+      /* Sempre repinta ao terminar o arrasto: desfaz o preview se soltou fora e aplica
+         qualquer render que a puxada da nuvem tenha adiado enquanto o arrasto rolava. */
+      wfaDragFim();
     });
   });
   document.querySelectorAll('.task-list').forEach(list=>{
