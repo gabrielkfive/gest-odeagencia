@@ -1,4 +1,4 @@
-<!-- build 20260905-drag-guard-blindagem -->
+<!-- build 20260905-po-cronometro -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -8785,6 +8785,7 @@ function wfaEstDecimal(hStr,mStr){
         return {id:uid('pt'),t:t[0],st:'backlog',papeis:t[1].slice(),sprint:(t[2]===0?0:(t[2]||1)),venc:'',resp:'',obs:''};
       }),
       tplV:2,
+      po:'',   // PO (Project Owner): quem responde pelo projeto. Escolhido no cabeçalho.
       pront:{briefing:{},arquivos:[],senhas:[],atas:[],licoes:[]}
     };
   }
@@ -9095,7 +9096,13 @@ function wfaEstDecimal(hStr,mStr){
         '<button class="icobtn" data-voltar="1" style="margin-bottom:9px">← Todos os projetos</button>'+
         '<div class="page-title"><h1><span class="pj-temp '+esc(p.temp||'gr')+'"></span>'+esc(p.cliente||'Sem nome')+'</h1>'+
         '<p>Sprint '+(p.sprint||1)+', de '+esc(br(p.sprintIni))+' a '+esc(br(fim))+
-        ' · '+pct(p)+'% concluído · '+abertas(p)+' tarefas abertas</p></div></div>'+
+        ' · '+pct(p)+'% concluído · '+abertas(p)+' tarefas abertas</p>'+
+        '<div style="margin-top:9px;display:flex;align-items:center;gap:8px">'+
+          '<span style="font-size:11px;color:var(--mute);font-weight:800;text-transform:uppercase;letter-spacing:.05em">PO · Project Owner</span>'+
+          '<select class="form-select" id="pj-po" style="width:190px"><option value="">— escolher —</option>'+
+            (typeof allTeam==='function'?allTeam():[]).map(function(n){return '<option value="'+esc(n)+'"'+((p.po||'')===n?' selected':'')+'>'+esc(n)+'</option>';}).join('')+
+          '</select>'+
+        '</div></div></div>'+
         '<div style="display:flex;gap:7px;flex-wrap:wrap;align-items:flex-start">'+
           '<button class="tb-btn alt" data-planning="1" title="Fecha a sprint atual, abre a próxima e leva o que está em A iniciar para Em andamento">Abrir próxima sprint</button>'+
           '<button class="tb-btn dk" data-newtask="backlog">+ Tarefa</button>'+
@@ -9385,6 +9392,7 @@ function wfaEstDecimal(hStr,mStr){
           linha('📅','Datas','<input id="tk-ini" type="date" class="tkdata" value="'+esc(t.ini||'')+'"><span class="tkseta">→</span><input id="tk-venc" type="date" class="tkdata" value="'+esc(t.venc||'')+'">')+
           linha('⏱','Rastrear tempo','<button type="button" class="tktimer'+(t.timerSince?' on':'')+'" data-tktimer="1">'+(t.timerSince?'⏸ Parar':'▶ Start')+'</button>'+
             '<span class="tkgasto" id="tk-gasto">'+(gasto>=1?tkDur(gasto):'0m 00s')+'</span>'+
+            '<button type="button" class="tktimer" data-tkzero="1" title="Zerar o tempo cronometrado" style="opacity:.8">↺ Zerar</button>'+
             '<span class="tkvazio">estimativa</span><input id="tk-horas-h" type="number" min="0" step="1" class="tkmini num" style="width:62px" value="'+esc(hEst.h)+'" placeholder="0"><span class="tkvazio">h</span><input id="tk-horas-m" type="number" min="0" max="59" step="5" class="tkmini num" style="width:62px" value="'+esc(hEst.m)+'" placeholder="0"><span class="tkvazio">min</span>')+
           (ctx.semPapeis?'':linha('🏷','Etiquetas','<div id="tk-papeis" class="tkchips"></div><a data-ppnovo="1" class="tkadd">+ nova</a>'))+
           (ctx.semSprint?'':linha('🧩','Sprint','<input id="tk-sp" type="number" min="0" class="tkmini num" value="'+esc(t.sprint===0?0:(t.sprint||1))+'"><span class="tkvazio">0 = tarefa fixa, sem sprint</span>'))+
@@ -9460,6 +9468,16 @@ function wfaEstDecimal(hStr,mStr){
       var g=m.querySelector('#tk-gasto');if(g)g.textContent=tkDur(m._spent);
       /* Atividades persiste o cronometro na hora: la o time da play e fecha a tela. */
       try{if(typeof ctx.onTimer==='function')ctx.onTimer(m._timer,m._spent);}catch(e){}
+    });
+    /* Zerar o cronometro: pedido do Gabriel. Para a contagem (se estiver rodando), zera o
+       acumulado e persiste na hora igual ao play/pause. */
+    var btnZ=m.querySelector('[data-tkzero]');
+    if(btnZ)btnZ.addEventListener('click',function(){
+      m._timer='';m._spent=0;
+      if(btnT){btnT.textContent='▶ Start';btnT.classList.remove('on');}
+      var g=m.querySelector('#tk-gasto');if(g)g.textContent='0m 00s';
+      try{if(typeof ctx.onTimer==='function')ctx.onTimer(m._timer,m._spent);}catch(e){}
+      try{toast('Cronômetro zerado');}catch(e){}
     });
     var btnAnx=m.querySelector('[data-anxadd]');
     if(btnAnx)btnAnx.addEventListener('click',function(){
@@ -9763,6 +9781,14 @@ function wfaEstDecimal(hStr,mStr){
     if(t.id==='pj-fpapel'){filtro.papel=t.value;renderDetalhe();return;}
     if(t.id==='pj-fsprint'){filtro.sprint=t.value;renderDetalhe();return;}
     if(t.id==='pj-fresp'){filtro.resp=t.value;renderDetalhe();return;}
+    if(t.id==='pj-po'){
+      var pp=get(aberto); if(!pp)return;
+      pp.po=t.value; pp.atualizadoEm=hoje();
+      var arr=load(),i=-1;arr.forEach(function(x,ix){if(x.id===pp.id)i=ix;});
+      if(i>=0){arr[i]=pp;try{localStorage.setItem(KEY,JSON.stringify(arr));}catch(e){}try{if(typeof scheduleSync==='function')scheduleSync();}catch(e){}}
+      try{toast('PO do projeto: '+(t.value||'—'));}catch(e){}
+      return;
+    }
     if(t.dataset&&t.dataset.br!=null){
       var p=get(aberto); if(!p)return;
       p.pront.briefing=p.pront.briefing||{};
