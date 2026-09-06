@@ -1,4 +1,4 @@
-<!-- build 20260905-po-autoatribui -->
+<!-- build 20260906-drag-nuvem-blindagem -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -4275,6 +4275,12 @@ function wfaMergeById(remoteArr,localArr,localPrevalece){
 function loadDeleted(){try{return new Set(JSON.parse(localStorage.getItem('wfa-deleted-ids')||'[]'));}catch(e){return new Set();}}
 function addDeleted(ids){const s=loadDeleted();(Array.isArray(ids)?ids:[ids]).forEach(i=>{if(i)s.add(i);});localStorage.setItem('wfa-deleted-ids',JSON.stringify([...s].slice(-3000)));}
 function applyCloudState(remote){
+  /* ARRASTO EM ANDAMENTO ou JANELA PÓS-DROP: não aplica a puxada da nuvem agora. O merge por
+     item regravava por cima do cartão recém-solto (dado remoto/velho vencia por timestamp),
+     o que causava o "solta e volta pro mesmo lugar". O tick de 6s reaplica assim que o
+     arrasto acabar e a gravação do drop confirmar. typeof guard: applyCloudState mora em
+     outro bloco de script, a flag pode ainda não existir na 1ª carga. */
+  if(typeof WFA_DRAGGING!=='undefined' && (WFA_DRAGGING || (typeof WFA_DROP_ATE!=='undefined' && Date.now() < WFA_DROP_ATE))) return;
   WFA_CLOUD_MUTED=true;
   // mudou=false ao fim => o remoto era idêntico ao local => NÃO re-renderiza nada.
   // (Era o re-render incondicional a cada 6s que fazia o app inteiro piscar em branco.)
@@ -11639,7 +11645,7 @@ function removerDuplicadas(){
   saveTarefas();
   toast('✓ '+ids.size+' tarefa(s) repetida(s) removida(s)');
 }
-let WFA_SHOW_ALL_DONE=false; // Concluído mostra só as 30 mais recentes até pedirem todas
+var WFA_SHOW_ALL_DONE=false; // var: sem TDZ (usado em render que pode rodar cedo). Concluído mostra só as 30 mais recentes até pedirem todas
 /* Popula o filtro por etiqueta com as tags reais (t.tags + papéis dos projetos), sem
    duplicar e em ordem. So rebuilda quando o conjunto muda, pra nao atrapalhar quem esta
    escolhendo. Pedido do Gabriel: filtrar Atividades por etiqueta. */
@@ -11736,7 +11742,7 @@ function renderTarefas(){
   bindDrag();
   tarefaApplyView();
 }
-let WFA_TASK_VIEW='kanban';
+var WFA_TASK_VIEW='kanban';   // var: renderTarefas->tarefaApplyView lê isto e pode rodar antes desta linha num boot rápido (evita TDZ/tela branca)
 function tarefaSetView(v){
   WFA_TASK_VIEW=v;
   document.querySelectorAll('#task-views .tv-btn').forEach(b=>b.classList.toggle('on',b.dataset.tv===v));
@@ -11759,13 +11765,14 @@ function tarefaApplyView(){
   else if(WFA_TASK_VIEW==='painel')renderTaskDashboard();
   else if(WFA_TASK_VIEW==='relatorio')renderTaskRelatorio();
 }
-function taskFiltradas(){const lig=(typeof pjAtivas==='function')?pjAtivas():[];return state.tarefas.concat(lig).filter(tarefaPassaFiltro);}
+function taskFiltradas(){if(typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return [];const lig=(typeof pjAtivas==='function')?pjAtivas():[];return state.tarefas.concat(lig).filter(tarefaPassaFiltro);}
 /* Painel e Relatorio seguem lendo so o kanban proprio: o capacity ja soma os projetos
    por fora, e o relatorio do cliente e emitido a partir das tarefas proprias. */
-function taskFiltradasProprias(){return state.tarefas.filter(tarefaPassaFiltro);}
+function taskFiltradasProprias(){if(typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return [];return state.tarefas.filter(tarefaPassaFiltro);}
 function taskStatusLabel(s){return s==='backlog'?'Backlog':s==='iniciar'?'A iniciar':s==='andamento'?'Em Andamento':s==='aprovacao'?'Homologação':s==='homologcli'?'Homologação do cliente':s==='concluido'?'Concluído':s;}
 function taskInitials(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0]||'').join('').toUpperCase()||'?';}
 function renderTaskLista(){
+  if(typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return;   // blindagem tela branca
   const today=hojeSP();
   const ts=taskFiltradas().slice().sort((a,b)=>{const da=a.data||'9999',db=b.data||'9999';return da<db?-1:da>db?1:0;});
   const rows=ts.map(t=>{
@@ -11782,6 +11789,7 @@ function renderTaskLista(){
 let WFA_TCAL_OFF=0;
 function tcalNav(d){WFA_TCAL_OFF=(d===0)?0:WFA_TCAL_OFF+d;renderTaskCalendario();}
 function renderTaskCalendario(){
+  if(typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return;   // blindagem tela branca
   const ts=taskFiltradas();
   const today=new Date();today.setHours(0,0,0,0);
   const dated=ts.map(t=>({t,d:t.data?new Date(t.data+'T00:00:00'):null})).filter(x=>x.d&&!isNaN(x.d.getTime()));
@@ -11806,6 +11814,7 @@ function renderTaskCalendario(){
   wfaSetHTML(document.getElementById('task-calendario'),`<div class="tcal"><div class="tcal-head"><span style="text-transform:capitalize">${monthName}</span><span style="display:inline-flex;gap:10px;align-items:center"><span style="font-size:12px;color:var(--mute)">${noMes} com prazo no mês</span>${navHtml}</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`);
 }
 function renderTaskPessoas(){
+  if(typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return;   // blindagem tela branca
   const today=hojeSP();
   const ts=taskFiltradas();
   const byResp={};
@@ -11825,6 +11834,7 @@ function renderTaskPessoas(){
   wfaSetHTML(document.getElementById('task-pessoas'),`<div class="tp-grid">${cards||'<div class="tp-sub" style="grid-column:1/-1;padding:28px;text-align:center">Nenhuma tarefa atribuída — crie no Kanban e defina um responsável para aparecer aqui.</div>'}</div>`);
 }
 function renderTaskDashboard(){
+  if(typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return;   // blindagem tela branca
   const today=hojeSP();
   const em7=dataSP(new Date(Date.now()+7*86400000));
   const ts=taskFiltradasProprias();
@@ -12003,11 +12013,13 @@ let WFA_DROP_FEITO=false;   // o drop chegou a acontecer? (ver dragend)
    desta linha. Com let, um render disparado durante a carga (antes daqui) estouraria TDZ e
    deixaria o board BRANCO. Com var, hoista como undefined (falsy) e nunca quebra. */
 var WFA_DRAGGING=false, WFA_RENDER_PENDENTE=false, WFA_DRAG_TIMER=null;
+var WFA_DROP_ATE=0;   // janela pós-drop: até este instante, a puxada da nuvem não reaplica wfa-tarefas
 function wfaDragInicio(){
   WFA_DRAGGING=true; WFA_DROP_FEITO=false;
-  // rede de seguranca: se por algum motivo o dragend nao disparar, destrava em 20s
+  // rede de seguranca: se o dragend nao disparar (drop cancelado pelo SO no celular),
+  // destrava em 4s (era 20s, longo demais: o board ficava "travado" a vista do usuario).
   if(WFA_DRAG_TIMER)clearTimeout(WFA_DRAG_TIMER);
-  WFA_DRAG_TIMER=setTimeout(()=>{WFA_DRAGGING=false;WFA_DRAG_TIMER=null;try{renderTarefas();}catch(e){}},20000);
+  WFA_DRAG_TIMER=setTimeout(()=>{WFA_DRAGGING=false;WFA_DRAG_TIMER=null;try{renderTarefas();}catch(e){}},4000);
 }
 function wfaDragFim(){
   WFA_DRAGGING=false;
@@ -12111,14 +12123,17 @@ function bindDrag(){
         /* Cartao ligado a um projeto: o status muda LA (fonte unica). Soltar em Backlog
            devolve a tarefa pro backlog do projeto, que mora na Jornada. */
         const pp=String(id).split(':');const dest=list.dataset.list;
-        WFA_DROP_FEITO=true;
+        WFA_DROP_FEITO=true; WFA_DROP_ATE=Date.now()+8000;   // segura a puxada da nuvem por 8s pós-drop
         document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});
         const ok=(typeof pjMoverStatus==='function')&&pjMoverStatus(pp[1],pp[2],dest,{origem:'pela aba Atividades'});
         if(!ok){renderTarefas();return;}
         toast(dest==='backlog'?'Voltou pro backlog do projeto (fica na Jornada)':'✓ Movida para '+taskStatusLabel(dest)+' no projeto');
         return;
       }
-      const t=state.tarefas.find(x=>x.id===id);if(!t)return;
+      // id nao bate (dado antigo/cartao mal formado): repinta pra desfazer o preview do
+      // dragover, senao o cartao real fica preso na coluna errada ate o proximo sync.
+      const t=state.tarefas.find(x=>x.id===id);if(!t){document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});renderTarefas();return;}
+      document.querySelectorAll('.task-list').forEach(l=>{l.__wfaHtml=null;});   // o drag mexeu no DOM por fora do render: invalida cache p/ repintar de verdade
       const destino=list.dataset.list;
       const origem=t.status;                 // de onde o cartão saiu, pra poder devolver no lugar certo
       const changedCol=origem!==destino;
@@ -12142,7 +12157,7 @@ function bindDrag(){
         taskReordena(id,t.status,k>=0?naTela[k+1]:null);
         if(changedCol)taskRenumera(origem);   // a coluna de origem fecha os buracos
       }
-      WFA_DROP_FEITO=true;
+      WFA_DROP_FEITO=true; WFA_DROP_ATE=Date.now()+8000;   // segura a puxada da nuvem por 8s pós-drop
       saveTarefas();
       if(bloqueado){renderTarefas();setTimeout(()=>{try{openTaskDetail(id);}catch(_){}},900);return;}
       if(changedCol)toast('✓ Movida para '+taskStatusLabel(t.status));
@@ -12569,6 +12584,7 @@ function relMedia(arr){return arr.length?(arr.reduce((s,n)=>s+n,0)/arr.length):n
 function relPct(n,d){return d?Math.round(n/d*100):null;}
 function relCel(v,suf){return (v===null||v===undefined)?'<span class="rl-na">—</span>':v+(suf||'');}
 function renderTaskRelatorio(){
+  if(typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return;   // blindagem tela branca
   const el=document.getElementById('task-relatorio');if(!el)return;
   const d=relDados();
   const btn=(k,l)=>'<button class="rl-per'+(WFA_REL_PER===k?' on':'')+'" onclick="relSetPer(&quot;'+k+'&quot;)">'+l+'</button>';
