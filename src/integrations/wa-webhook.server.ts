@@ -113,11 +113,23 @@ export async function processWaWebhook(body: any): Promise<void> {
         const { handleRemoteCommand } = await import("@/integrations/remote-queue.server");
         if (await handleRemoteCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
       } catch { /* fila indisponível: segue fluxo normal */ }
+      // Comando "robo on/off/status" do Gabriel + eco do próprio robô (não regrava).
+      try {
+        const { handleSdrCommand, sdrHandleFromMe } = await import("@/integrations/sdr.server");
+        if (await handleSdrCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
+        if (fromMe && !isGroup) {
+          if ((await sdrHandleFromMe(supabaseAdmin as any, { phone, text })) === "echo") return;
+        }
+      } catch { /* SDR nunca derruba o webhook */ }
       const { appendWhatsapp } = await import("@/integrations/zapi.server");
       await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name, media, mkey });
       if (!fromMe && !isGroup) {
-        const { runAgentOnIncoming } = await import("@/integrations/agent.server");
-        await runAgentOnIncoming(supabaseAdmin as any, { phone, name, text });
+        const { runSdrOnIncoming } = await import("@/integrations/sdr.server");
+        const sdrDono = await runSdrOnIncoming(supabaseAdmin as any, { phone, name, text });
+        if (!sdrDono) {
+          const { runAgentOnIncoming } = await import("@/integrations/agent.server");
+          await runAgentOnIncoming(supabaseAdmin as any, { phone, name, text });
+        }
       }
     }
     return;
@@ -230,12 +242,25 @@ export async function processWaWebhook(body: any): Promise<void> {
       const { handleRemoteCommand } = await import("@/integrations/remote-queue.server");
       if (await handleRemoteCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
     } catch { /* fila indisponível: segue fluxo normal */ }
+    // Comando "robo on/off/status" do Gabriel + eco do próprio robô (não regrava).
+    try {
+      const { handleSdrCommand, sdrHandleFromMe } = await import("@/integrations/sdr.server");
+      if (await handleSdrCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
+      if (fromMe && !isGroup) {
+        if ((await sdrHandleFromMe(supabaseAdmin as any, { phone, text })) === "echo") return;
+      }
+    } catch { /* SDR nunca derruba o webhook */ }
     const { appendWhatsapp } = await import("@/integrations/zapi.server");
     await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name, media, mkey });
-    // Assistente: só em mensagens recebidas e fora de grupo (evita enxurrada de tarefas).
+    // SDR primeiro (lead de campanha responde sozinho); se a conversa não é de lead,
+    // segue o assistente antigo (sugere resposta/tarefa, não envia nada).
     if (!fromMe && !isGroup) {
-      const { runAgentOnIncoming } = await import("@/integrations/agent.server");
-      await runAgentOnIncoming(supabaseAdmin as any, { phone, name, text });
+      const { runSdrOnIncoming } = await import("@/integrations/sdr.server");
+      const sdrDono = await runSdrOnIncoming(supabaseAdmin as any, { phone, name, text });
+      if (!sdrDono) {
+        const { runAgentOnIncoming } = await import("@/integrations/agent.server");
+        await runAgentOnIncoming(supabaseAdmin as any, { phone, name, text });
+      }
     }
   }
 }
