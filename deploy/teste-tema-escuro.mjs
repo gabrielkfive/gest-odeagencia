@@ -15,6 +15,15 @@ import { dirname, join } from 'node:path';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(join(raiz, 'public/workflowark.html'), 'utf8');
+// O monolito foi fatiado: parte do CSS (inclusive as :root{} vars) vive em arquivos .css
+// linkados. Junta o HTML + todo CSS local linkado para as checagens de estilo continuarem
+// valendo onde quer que o CSS esteja. Pula CDN (fontes).
+let cssExterno = '';
+for (const m of html.matchAll(/<link[^>]+href="([^"]+\.css)"/g)) {
+  if (/^https?:/.test(m[1])) continue;
+  try { cssExterno += '\n' + readFileSync(join(raiz, 'public', m[1]), 'utf8'); } catch (e) {}
+}
+const fonte = html + cssExterno;
 
 let falhas = 0;
 const ok = (m) => console.log('  ✓ ' + m);
@@ -22,22 +31,22 @@ const nok = (m) => { falhas++; console.log('  ✗ FALHOU: ' + m); };
 
 /* ---------- 1. variaveis CSS usadas sem fallback e nunca definidas ---------- */
 console.log('\n[1] Variaveis CSS');
-const usadas = new Set([...html.matchAll(/var\(\s*(--[\w-]+)\s*[),]/g)].map(m => m[1]));
-const definidas = new Set([...html.matchAll(/(--[\w-]+)\s*:/g)].map(m => m[1]));
+const usadas = new Set([...fonte.matchAll(/var\(\s*(--[\w-]+)\s*[),]/g)].map(m => m[1]));
+const definidas = new Set([...fonte.matchAll(/(--[\w-]+)\s*:/g)].map(m => m[1]));
 const semFallback = [...usadas].filter(v =>
-  !definidas.has(v) && html.includes('var(' + v + ')'));
+  !definidas.has(v) && fonte.includes('var(' + v + ')'));
 if (semFallback.length) nok('usadas sem fallback e nunca definidas: ' + semFallback.join(', '));
 else ok('toda var() sem fallback esta definida');
 
 /* ---------- 2. modo escuro da vista LISTA de tarefas ---------- */
 console.log('\n[2] Modo escuro da vista Lista (#page-tarefas .tl-*)');
-const claras = [...html.matchAll(/#page-tarefas (\.tl-[\w-]+(?::hover)?)\s*\{([^}]*)\}/g)];
+const claras = [...fonte.matchAll(/#page-tarefas (\.tl-[\w-]+(?::hover)?)\s*\{([^}]*)\}/g)];
 const temFundoClaro = claras.filter(m => /background:\s*#(fff|fafafa|f0f0ee|fff3cd|e7f0ff|e6f8ec)/i.test(m[2]));
 if (!temFundoClaro.length) nok('nao achei as regras claras da vista lista (o teste ficou cego)');
 for (const m of temFundoClaro) {
   const sel = m[1].replace(':hover', '');
   const alvo = 'body.aura-dark #page-tarefas ' + sel;
-  if (html.includes(alvo)) ok('#page-tarefas ' + m[1] + ' tem contraparte escura de especificidade maior');
+  if (fonte.includes(alvo)) ok('#page-tarefas ' + m[1] + ' tem contraparte escura de especificidade maior');
   else nok('#page-tarefas ' + m[1] + ' pinta claro e NAO tem body.aura-dark #page-tarefas ' + sel);
 }
 
