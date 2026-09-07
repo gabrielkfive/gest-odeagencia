@@ -23,7 +23,13 @@ for (const m of html.matchAll(/<link[^>]+href="([^"]+\.css)"/g)) {
   if (/^https?:/.test(m[1])) continue;
   try { cssExterno += '\n' + readFileSync(join(raiz, 'public', m[1]), 'utf8'); } catch (e) {}
 }
-const fonte = html + cssExterno;
+// e o JS linkado (o monolito foi fatiado: o app e o sync viraram <script src> externos)
+let jsExterno = '';
+for (const m of html.matchAll(/<script[^>]+src="([^"]+\.js)"/g)) {
+  if (/^https?:/.test(m[1])) continue;
+  try { jsExterno += '\n' + readFileSync(join(raiz, 'public', m[1]), 'utf8'); } catch (e) {}
+}
+const fonte = html + cssExterno + jsExterno;
 
 let falhas = 0;
 const ok = (m) => console.log('  ✓ ' + m);
@@ -54,11 +60,11 @@ for (const m of temFundoClaro) {
 console.log('\n[3] Gate de POP');
 // janela = do inicio do listener ate o fecho dele (indentacao de 4 espacos), nao ate o
 // primeiro '});', que cai dentro do forEach de ordenacao e cegava o teste.
-const iDrop = html.indexOf("list.addEventListener('drop'");
-const fim = iDrop >= 0 ? html.indexOf('\n    });', iDrop) : -1;
+const iDrop = fonte.indexOf("list.addEventListener('drop'");
+const fim = iDrop >= 0 ? fonte.indexOf('\n    });', iDrop) : -1;
 if (iDrop < 0 || fim < 0) nok('handler de drop nao encontrado');
 else {
-  const d = html.slice(iDrop, fim);
+  const d = fonte.slice(iDrop, fim);
   if (/bloqueado\s*=\s*true/.test(d) && /t\.status\s*=\s*origem/.test(d))
     ok('drop devolve o cartao pra coluna de ORIGEM quando o gate recusa');
   else nok('drop nao devolve o cartao pra coluna de origem quando o gate recusa');
@@ -75,7 +81,7 @@ else {
     ok('drop abre o checklist que esta travando');
   else nok('drop nao abre o checklist que esta travando');
 }
-const mv = html.match(/function moveTask\([\s\S]{0,700}?\n\}/);
+const mv = fonte.match(/function moveTask\([\s\S]{0,700}?\n\}/);
 if (mv && /taskConcluir\(t\)\)\{renderTarefas\(\);setTimeout\(\(\)=>\{try\{openTaskDetail/.test(mv[0]))
   ok('moveTask abre o checklist quando o gate recusa');
 else nok('moveTask so repinta e o cartao "pula de volta" sem explicacao');
