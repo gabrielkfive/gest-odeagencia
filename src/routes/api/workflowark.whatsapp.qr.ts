@@ -52,7 +52,9 @@ export const Route = createFileRoute("/api/workflowark/whatsapp/qr")({
         const fresh = d.ts && Date.now() - d.ts < 80000;
 
         let body: string;
-        if (connected || d.connected) {
+        // d.connected é cache (webhook antigo); com problema conhecido na Evolution ele
+        // fica velho e a página mentia "conectado". Problema na mão = mostra o problema.
+        if (connected || (d.connected && !problema)) {
           body = `<div class="ok">✅ WhatsApp conectado!</div><p class="sub">Pode fechar esta página. As conversas já aparecem no sistema.</p>`;
         } else if (fresh && d.base64) {
           body = `<div class="qr"><img src="${d.base64}" alt="QR" width="300" height="300"></div>

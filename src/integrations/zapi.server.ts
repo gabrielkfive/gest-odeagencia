@@ -196,7 +196,7 @@ export async function evoConnectionState(): Promise<string> {
     const resp = await fetch(`${url}/instance/connectionState/${instance}`, { headers: { apikey: key } });
     if (resp.status === 404) return "notfound";
     const data: any = await resp.json().catch(() => ({}));
-    if (!resp.ok) return "error";
+    if (!resp.ok) return "error:" + resp.status; // ex.: error:401 chave errada, error:500 VM doente
     return String(data?.instance?.state || data?.state || "unknown");
   } catch {
     return "offline"; // não alcançou o servidor Evolution (VM caída / porta fechada)

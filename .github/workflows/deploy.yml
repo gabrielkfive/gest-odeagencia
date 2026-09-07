@@ -42,6 +42,23 @@ jobs:
           # deploya producao nao pode mudar sozinho embaixo da gente.
           wranglerVersion: '4.125.0'
 
+      # WEBHOOK_SECRET: fechado por padrão desde 20/08, mas o segredo nunca foi criado,
+      # então TODO webhook do WhatsApp levava 401 (nenhuma mensagem entrava). O CI gera
+      # um valor aleatório UMA vez e grava direto no Worker: ninguém vê o valor, nada
+      # fica no repo. A Evolution passa a usá-lo via /api/workflowark/sdr?fixwebhook=1
+      # (o Worker configura a própria Evolution com o segredo que só ele conhece).
+      - name: Garantir WEBHOOK_SECRET (gera uma vez, nunca expõe)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: e85057a4ce95cb115958cbf045f7457c
+        run: |
+          if npx wrangler secret list | grep -q 'WEBHOOK_SECRET'; then
+            echo "WEBHOOK_SECRET já existe, nada a fazer."
+          else
+            openssl rand -hex 24 | npx wrangler secret put WEBHOOK_SECRET
+            echo "WEBHOOK_SECRET criado."
+          fi
+
       # "Deployado" só depois de PROVAR que a URL de produção serve o build novo.
       # Compara o marcador do fonte com o que o site devolve. Falhou = action vermelha.
       - name: Smoke check pós-deploy (marcador em produção)

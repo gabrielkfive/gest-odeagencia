@@ -36,6 +36,31 @@ export const Route = createFileRoute("/api/workflowark/sdr")({
           });
         }
 
+        // Auto-configuração: o Worker manda a PRÓPRIA Evolution passar a postar o webhook
+        // com o token (header + ?token=). Sem auth de propósito: é idempotente, não recebe
+        // input e só re-sincroniza a config correta entre dois sistemas nossos.
+        if (u.searchParams.get("fixwebhook") === "1") {
+          const { evoConfig, zapiEnv } = await import("@/integrations/zapi.server");
+          const { url, key, instance } = evoConfig();
+          const secret = zapiEnv("WEBHOOK_SECRET");
+          if (!url || !key || !instance) return Response.json({ ok: false, erro: "Evolution não configurada." });
+          if (!secret) return Response.json({ ok: false, erro: "WEBHOOK_SECRET ainda não existe no Worker (o CI cria no próximo deploy)." });
+          const hookUrl = "https://workflowark.arkcontent.workers.dev/api/workflowark/whatsapp/webhook?token=" + encodeURIComponent(secret);
+          const events = ["MESSAGES_UPSERT", "QRCODE_UPDATED", "CONNECTION_UPDATE"];
+          const tenta = async (body: any) => {
+            const r = await fetch(`${url}/webhook/set/${instance}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", apikey: key },
+              body: JSON.stringify(body),
+            });
+            return { status: r.status, data: await r.json().catch(() => ({})) };
+          };
+          // Evolution v2 usa corpo aninhado { webhook: {...} }; versões antigas, corpo plano.
+          let r = await tenta({ webhook: { enabled: true, url: hookUrl, byEvents: false, base64: true, headers: { "x-webhook-token": secret }, events } });
+          if (r.status >= 400) r = await tenta({ enabled: true, url: hookUrl, webhook_by_events: false, events });
+          return Response.json({ ok: r.status < 400, evolutionStatus: r.status, resposta: r.data });
+        }
+
         const { isRunAuthorized } = await import("@/integrations/run-auth.server");
         if (!(await isRunAuthorized(request, u))) return Response.json({ error: "unauthorized" }, { status: 401 });
         const cfg = await sdrConfig(db);
