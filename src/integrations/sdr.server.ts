@@ -30,6 +30,8 @@ export type SdrConfig = {
   pausados: Record<string, { ts: number; motivo: string }>;
   lastInboundTs: number;
   stats: { respostas: number; leads: number };
+  dia?: string; // dia (SP) do contador global
+  respostasHoje?: number; // teto global de respostas automáticas no dia
 };
 
 async function readKey(db: any, key: string, fallback: any) {
@@ -46,6 +48,8 @@ export async function sdrConfig(db: any): Promise<SdrConfig> {
     pausados: c.pausados && typeof c.pausados === "object" ? c.pausados : {},
     lastInboundTs: Number(c.lastInboundTs) || 0,
     stats: c.stats && typeof c.stats === "object" ? c.stats : { respostas: 0, leads: 0 },
+    dia: String(c.dia || ""),
+    respostasHoje: Number(c.respostasHoje) || 0,
   };
 }
 
@@ -247,12 +251,18 @@ export async function runSdrOnIncoming(db: any, msg: { phone: string; name?: str
     if (!cfg.enabled) return false;
     if (cfg.pausados[msg.phone]) return false;
 
+    const hoje = hojeSP();
+    // Trava global de custo (revisão 06/09): teto de 200 respostas automáticas/dia no total.
+    if (cfg.dia === hoje && Number(cfg.respostasHoje || 0) >= 200) return false;
+
     const state = await readKey(db, "wfa-whatsapp", null);
     const conv = state?.conversas?.[msg.phone];
     if (!conversaElegivel(conv)) return false;
 
+    // Mídia sem conteúdo aproveitável (áudio não transcrito, figurinha): não gasta IA.
+    if (/^(🎤|🖼️|🎬|📎|📍|👤|🩷)?\s*\[[^\]]*\]$/u.test(String(msg.text || "").trim())) return conv?.sdr === true;
+
     // Anti-loop: teto diário por conversa.
-    const hoje = hojeSP();
     if (conv?.sdrDia === hoje && Number(conv?.sdrCount || 0) >= MAX_RESPOSTAS_DIA) return true;
 
     const leadsRaw = await readKey(db, LEADS_KEY, {});
@@ -264,9 +274,13 @@ export async function runSdrOnIncoming(db: any, msg: { phone: string; name?: str
 
     if (!ai.ehLead) {
       // Não é lead: nunca mais tocar nesta conversa; JARVIS continua cuidando dela.
-      if (conv) {
-        conv.sdrOff = true;
-        await db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: state });
+      // RELÊ o blob na hora de gravar (revisão 06/09): a IA demora segundos e regravar
+      // o snapshot antigo apagaria mensagens de QUALQUER conversa chegadas no meio.
+      const stFresh = await readKey(db, "wfa-whatsapp", null);
+      const cFresh = stFresh?.conversas?.[msg.phone];
+      if (cFresh) {
+        cFresh.sdrOff = true;
+        await db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: stFresh });
       }
       return false;
     }
@@ -289,30 +303,57 @@ export async function runSdrOnIncoming(db: any, msg: { phone: string; name?: str
     leads[msg.phone] = ficha;
     await db.from("workflowark_state").upsert({ key: LEADS_KEY, data: leads });
 
+    // Reconfere kill switch e pausa DEPOIS da IA (revisão 06/09): "robo off" ou o
+    // Gabriel assumindo a conversa podem ter acontecido enquanto a IA pensava.
+    const cfgPosIA = await sdrConfig(db);
+    if (!cfgPosIA.enabled || cfgPosIA.pausados[msg.phone]) return true;
+
     // ---- responde ----
+    let respondeu = false;
     if (ai.responder && ai.resposta) {
       const { waSendText, appendWhatsapp } = await import("./zapi.server");
+      // 1) Persiste o marcador de eco ANTES de enviar (revisão 06/09): o eco fromMe da
+      //    Evolution pode chegar em milissegundos; sem marcador ele viraria "resposta
+      //    humana" e o robô se auto-pausava achando que o Gabriel assumiu.
+      const stA = await readKey(db, "wfa-whatsapp", null);
+      const cA = stA?.conversas?.[msg.phone];
+      if (cA) {
+        cA.sdr = true;
+        noteSent(cA, ai.resposta);
+        await db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: stA });
+      }
+      // 2) Envia.
       await waSendText(msg.phone, ai.resposta);
-      // grava a saída já marcada como do robô; o eco do webhook é deduplicado via sdrSent
-      const state2 = await readKey(db, "wfa-whatsapp", null);
-      const conv2 = state2?.conversas?.[msg.phone];
-      if (conv2) {
-        conv2.sdr = true;
-        conv2.sdrCount = (conv2.sdrDia === hoje ? Number(conv2.sdrCount || 0) : 0) + 1;
-        conv2.sdrDia = hoje;
-        noteSent(conv2, ai.resposta);
-        conv2.msgs.push({ dir: "out", text: ai.resposta, ts: Date.now(), ai: true });
-        conv2.msgs = conv2.msgs.slice(-300);
-        conv2.unread = 0;
-        conv2.updatedAt = Date.now();
-        await db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: state2 });
+      // 3) Grava a mensagem no histórico relendo o blob (o eco duplicado é filtrado
+      //    pelo marcador em sdrHandleFromMe, então ela entra uma vez só).
+      const stB = await readKey(db, "wfa-whatsapp", null);
+      const cB = stB?.conversas?.[msg.phone];
+      if (cB) {
+        cB.sdr = true;
+        cB.sdrCount = (cB.sdrDia === hoje ? Number(cB.sdrCount || 0) : 0) + 1;
+        cB.sdrDia = hoje;
+        cB.msgs.push({ dir: "out", text: ai.resposta, ts: Date.now(), ai: true });
+        cB.msgs = cB.msgs.slice(-300);
+        cB.unread = 0;
+        cB.updatedAt = Date.now();
+        await db.from("workflowark_state").upsert({ key: "wfa-whatsapp", data: stB });
       } else {
         await appendWhatsapp(db, { phone: msg.phone, dir: "out", text: ai.resposta });
       }
-      cfg.stats.respostas = Number(cfg.stats.respostas || 0) + 1;
+      respondeu = true;
     }
-    if (novoLead) cfg.stats.leads = Number(cfg.stats.leads || 0) + 1;
-    await sdrSaveConfig(db, cfg);
+    // Stats: relê a config na hora de somar (revisão 06/09): regravar o cfg lido antes
+    // da IA desfazia "robo off" e pausas feitos enquanto ela pensava.
+    try {
+      const cfgFresh = await sdrConfig(db);
+      if (respondeu) {
+        cfgFresh.stats.respostas = Number(cfgFresh.stats.respostas || 0) + 1;
+        cfgFresh.respostasHoje = (cfgFresh.dia === hoje ? Number(cfgFresh.respostasHoje || 0) : 0) + 1;
+        cfgFresh.dia = hoje;
+      }
+      if (novoLead) cfgFresh.stats.leads = Number(cfgFresh.stats.leads || 0) + 1;
+      await sdrSaveConfig(db, cfgFresh);
+    } catch { /* stats são best-effort */ }
 
     // ---- avisa o Gabriel nos momentos que importam (sem flood) ----
     const { addNotificacao } = await import("./agent.server");
@@ -320,7 +361,7 @@ export async function runSdrOnIncoming(db: any, msg: { phone: string; name?: str
     if (novoLead) {
       await addNotificacao(db, { tipo: "comercial", texto: `🤝 Novo lead no WhatsApp: ${quem}${ficha.negocio ? " · " + ficha.negocio : ""}. O robô SDR assumiu a conversa.`, phone: msg.phone, nome: quem });
     }
-    if (ai.estagio === "reuniao" || ai.notificarGabriel) {
+    if ((ai.estagio === "reuniao" && lead?.estagio !== "reuniao") || ai.notificarGabriel) {
       const motivo = ai.estagio === "reuniao" ? "quer marcar a call com você" : ai.motivoNotificacao || "precisa de você na conversa";
       await addNotificacao(db, { tipo: "comercial", texto: `🔥 Lead ${quem} (${msg.phone}) ${motivo}. Resumo: ${ai.resumo || ficha.interesse || "ver conversa"}`, phone: msg.phone, nome: quem });
       // Aviso também no WhatsApp do Gabriel (nota pra si mesmo), pra não depender do sino.
