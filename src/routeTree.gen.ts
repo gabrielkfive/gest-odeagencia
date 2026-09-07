@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SistemaRouteImport } from './routes/sistema'
+import { Route as RoboRouteImport } from './routes/robo'
 import { Route as PropostasRouteImport } from './routes/propostas'
 import { Route as PostagensRouteImport } from './routes/postagens'
 import { Route as PortalRouteImport } from './routes/portal'
@@ -27,6 +28,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
 import { Route as ApiWorkflowarkSocialRunRouteImport } from './routes/api/workflowark.social-run'
 import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowark.sheet'
+import { Route as ApiWorkflowarkSdrRouteImport } from './routes/api/workflowark.sdr'
 import { Route as ApiWorkflowarkRemoteRouteImport } from './routes/api/workflowark.remote'
 import { Route as ApiWorkflowarkPortalRouteImport } from './routes/api/workflowark.portal'
 import { Route as ApiWorkflowarkFinanceiroRunRouteImport } from './routes/api/workflowark.financeiro-run'
@@ -49,6 +51,11 @@ import { Route as ApiWorkflowarkWhatsappWebhookSplatRouteImport } from './routes
 const SistemaRoute = SistemaRouteImport.update({
   id: '/sistema',
   path: '/sistema',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RoboRoute = RoboRouteImport.update({
+  id: '/robo',
+  path: '/robo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PropostasRoute = PropostasRouteImport.update({
@@ -133,6 +140,11 @@ const ApiWorkflowarkSocialRunRoute = ApiWorkflowarkSocialRunRouteImport.update({
 const ApiWorkflowarkSheetRoute = ApiWorkflowarkSheetRouteImport.update({
   id: '/api/workflowark/sheet',
   path: '/api/workflowark/sheet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWorkflowarkSdrRoute = ApiWorkflowarkSdrRouteImport.update({
+  id: '/api/workflowark/sdr',
+  path: '/api/workflowark/sdr',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWorkflowarkRemoteRoute = ApiWorkflowarkRemoteRouteImport.update({
@@ -243,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
   '/propostas': typeof PropostasRoute
+  '/robo': typeof RoboRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/mcp': typeof ApiMcpRoute
@@ -261,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/api/workflowark/financeiro-run': typeof ApiWorkflowarkFinanceiroRunRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
+  '/api/workflowark/sdr': typeof ApiWorkflowarkSdrRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
@@ -280,6 +294,7 @@ export interface FileRoutesByTo {
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
   '/propostas': typeof PropostasRoute
+  '/robo': typeof RoboRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/api/mcp': typeof ApiMcpRoute
@@ -298,6 +313,7 @@ export interface FileRoutesByTo {
   '/api/workflowark/financeiro-run': typeof ApiWorkflowarkFinanceiroRunRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
+  '/api/workflowark/sdr': typeof ApiWorkflowarkSdrRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
@@ -319,6 +335,7 @@ export interface FileRoutesById {
   '/portal': typeof PortalRoute
   '/postagens': typeof PostagensRoute
   '/propostas': typeof PropostasRoute
+  '/robo': typeof RoboRoute
   '/sistema': typeof SistemaRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/api/mcp': typeof ApiMcpRoute
@@ -337,6 +354,7 @@ export interface FileRoutesById {
   '/api/workflowark/financeiro-run': typeof ApiWorkflowarkFinanceiroRunRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
+  '/api/workflowark/sdr': typeof ApiWorkflowarkSdrRoute
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
@@ -358,6 +376,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/postagens'
     | '/propostas'
+    | '/robo'
     | '/sistema'
     | '/app'
     | '/api/mcp'
@@ -376,6 +395,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/financeiro-run'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
+    | '/api/workflowark/sdr'
     | '/api/workflowark/sheet'
     | '/api/workflowark/social-run'
     | '/api/workflowark/state'
@@ -395,6 +415,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/postagens'
     | '/propostas'
+    | '/robo'
     | '/sistema'
     | '/app'
     | '/api/mcp'
@@ -413,6 +434,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/financeiro-run'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
+    | '/api/workflowark/sdr'
     | '/api/workflowark/sheet'
     | '/api/workflowark/social-run'
     | '/api/workflowark/state'
@@ -433,6 +455,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/postagens'
     | '/propostas'
+    | '/robo'
     | '/sistema'
     | '/_authenticated/app'
     | '/api/mcp'
@@ -451,6 +474,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/financeiro-run'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
+    | '/api/workflowark/sdr'
     | '/api/workflowark/sheet'
     | '/api/workflowark/social-run'
     | '/api/workflowark/state'
@@ -472,6 +496,7 @@ export interface RootRouteChildren {
   PortalRoute: typeof PortalRoute
   PostagensRoute: typeof PostagensRoute
   PropostasRoute: typeof PropostasRoute
+  RoboRoute: typeof RoboRoute
   SistemaRoute: typeof SistemaRoute
   ApiMcpRoute: typeof ApiMcpRoute
   TccApresentacaoRoute: typeof TccApresentacaoRoute
@@ -489,6 +514,7 @@ export interface RootRouteChildren {
   ApiWorkflowarkFinanceiroRunRoute: typeof ApiWorkflowarkFinanceiroRunRoute
   ApiWorkflowarkPortalRoute: typeof ApiWorkflowarkPortalRoute
   ApiWorkflowarkRemoteRoute: typeof ApiWorkflowarkRemoteRoute
+  ApiWorkflowarkSdrRoute: typeof ApiWorkflowarkSdrRoute
   ApiWorkflowarkSheetRoute: typeof ApiWorkflowarkSheetRoute
   ApiWorkflowarkSocialRunRoute: typeof ApiWorkflowarkSocialRunRoute
   ApiWorkflowarkStateRoute: typeof ApiWorkflowarkStateRoute
@@ -504,6 +530,13 @@ declare module '@tanstack/react-router' {
       path: '/sistema'
       fullPath: '/sistema'
       preLoaderRoute: typeof SistemaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robo': {
+      id: '/robo'
+      path: '/robo'
+      fullPath: '/robo'
+      preLoaderRoute: typeof RoboRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/propostas': {
@@ -623,6 +656,13 @@ declare module '@tanstack/react-router' {
       path: '/api/workflowark/sheet'
       fullPath: '/api/workflowark/sheet'
       preLoaderRoute: typeof ApiWorkflowarkSheetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/sdr': {
+      id: '/api/workflowark/sdr'
+      path: '/api/workflowark/sdr'
+      fullPath: '/api/workflowark/sdr'
+      preLoaderRoute: typeof ApiWorkflowarkSdrRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/workflowark/remote': {
@@ -792,6 +832,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortalRoute: PortalRoute,
   PostagensRoute: PostagensRoute,
   PropostasRoute: PropostasRoute,
+  RoboRoute: RoboRoute,
   SistemaRoute: SistemaRoute,
   ApiMcpRoute: ApiMcpRoute,
   TccApresentacaoRoute: TccApresentacaoRoute,
@@ -809,6 +850,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWorkflowarkFinanceiroRunRoute: ApiWorkflowarkFinanceiroRunRoute,
   ApiWorkflowarkPortalRoute: ApiWorkflowarkPortalRoute,
   ApiWorkflowarkRemoteRoute: ApiWorkflowarkRemoteRoute,
+  ApiWorkflowarkSdrRoute: ApiWorkflowarkSdrRoute,
   ApiWorkflowarkSheetRoute: ApiWorkflowarkSheetRoute,
   ApiWorkflowarkSocialRunRoute: ApiWorkflowarkSocialRunRoute,
   ApiWorkflowarkStateRoute: ApiWorkflowarkStateRoute,
