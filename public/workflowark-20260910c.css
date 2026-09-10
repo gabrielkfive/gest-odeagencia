@@ -1563,3 +1563,22 @@ body.aura-dark #page-tarefas .task-col.drop-on{background:rgba(255,199,0,.06)}
 body.aura-light #page-tarefas .task-col::before,body.aura-dark #page-tarefas .task-col::before{display:none}
 body.aura-light #page-tarefas .task-card,body.aura-dark #page-tarefas .task-card,body.aura-light #page-tarefas .task-card:has(.prio-alta),body.aura-dark #page-tarefas .task-card:has(.prio-alta){border-left:1px solid var(--line)}
 body.aura-dark #page-tarefas .task-card,body.aura-dark #page-tarefas .task-card:has(.prio-alta){border-left-color:rgba(255,255,255,.08)}
+
+/* ===== Tema escuro do kanban (11/09/2026): cartao com profundidade, sem faixa no cabecalho ===== */
+body.aura-dark #page-tarefas .task-col-head,body.aura-dark #page-tarefas .task-col[data-status] .task-col-head{background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border:0}
+body.aura-dark #page-tarefas .task-card,body.aura-dark #page-tarefas .task-card:has(.prio-alta){background:#16171b;border:1px solid rgba(255,255,255,.10)}
+body.aura-dark #page-tarefas .task-card:hover{border-color:rgba(255,255,255,.18);box-shadow:0 14px 34px -14px rgba(0,0,0,.75)}
+body.aura-dark #page-tarefas .tc-title{color:#f5f6f8}
+body.aura-dark #page-tarefas .tc-desc{color:#a7adb8}
+body.aura-dark #page-tarefas .tc-chips .tc-tag,body.aura-dark #page-tarefas .tc-chips .tc-cli{background:#25272c;color:#e4e7ec}
+body.aura-dark #page-tarefas .tc-meta-l,body.aura-dark #page-tarefas .tc-meta-l .tc-badge,body.aura-dark #page-tarefas .tc-meta-l .tc-date{color:#9aa1ad}
+body.aura-dark #page-tarefas .tc-meta-l .tc-date.late{color:#ff6b6b}
+body.aura-dark #page-tarefas .tc-avs .tc-av{border-color:#16171b}
+body.aura-dark #page-tarefas .tc-foot{border-top-color:rgba(255,255,255,.09)}
+body.aura-dark #page-tarefas .task-col-head .ct{background:#25272c;color:#9aa1ad}
+/* Capa de imagem no cartao (primeiro anexo de imagem da tarefa), como na referencia 21st */
+#page-tarefas .task-card .tc-capa{margin:-18px -18px 14px;height:132px;overflow:hidden;border-radius:16px 16px 0 0;border-bottom:1px solid var(--line);background:#000}
+#page-tarefas .task-card .tc-capa img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.23,1,.32,1)}
+#page-tarefas .task-card:hover .tc-capa img{transform:scale(1.04)}
+@media (max-width:900px){#page-tarefas .task-card .tc-capa{margin:-16px -16px 12px;height:120px}}
+body.aura-dark #page-tarefas .task-card .tc-capa{border-bottom-color:rgba(255,255,255,.08)}

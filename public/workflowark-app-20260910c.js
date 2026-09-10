@@ -2935,7 +2935,7 @@ function wfaEstDecimal(hStr,mStr){
     modal(
       '<div class="tkwrap">'+
       '<div class="tkmain">'+
-        '<div class="tkbc">'+(ctx.crumb||'')+'</div>'+
+        '<div id="tk-capa" class="tkcapa"></div>'+'<div class="tktopo"><div class="tkbc">'+(ctx.crumb||'')+'</div><button type="button" class="tkx" data-tkx="1" aria-label="Fechar" title="Fechar">✕</button></div>'+
         '<input id="tk-t" class="tktitulo" value="'+esc(t.t)+'" placeholder="O que precisa ser feito">'+
         '<div class="tkcampos">'+
           linha('◎','Status','<select id="tk-st" class="tkst">'+cols.map(function(c){return '<option value="'+c.k+'"'+(t.st===c.k?' selected':'')+'>'+esc(c.n)+'</option>';}).join('')+'</select>'+
@@ -2980,6 +2980,9 @@ function wfaEstDecimal(hStr,mStr){
 
     var m=document.getElementById('pj-modal');
     m._ctx=ctx;
+    /* Status como pilula colorida (mesma cor da coluna) e botao X no topo (11/09/2026) */
+    (function(){var st=m.querySelector('#tk-st');if(st){st.dataset.st=st.value;st.addEventListener('change',function(){st.dataset.st=st.value;});}
+      var bx=m.querySelector('[data-tkx]');if(bx)bx.addEventListener('click',function(){var cb=m.querySelector('[data-tkcancel]');if(cb)cb.click();else fecharModal();});})();
     m.dataset.papeis=(t.papeis||[]).join(',');
     m.dataset.resps=(t.resps||[]).join('|');
     /* checklist, anexo, comentario e cronometro ficam no elemento ate salvar: fechar
@@ -3157,6 +3160,13 @@ function wfaEstDecimal(hStr,mStr){
       if(ehImg(a))return '<div class="tkanx img"><a href="'+esc(a.url)+'" target="_blank" rel="noopener"><img src="'+esc(a.url)+'" alt="'+esc(a.nome)+'" loading="lazy"></a><span>'+esc(a.nome)+'</span><b data-anxrm="'+a.id+'">✕</b></div>';
       return '<div class="tkanx"><a href="'+esc(a.url)+'" target="_blank" rel="noopener">🔗 '+esc(a.nome)+'</a><b data-anxrm="'+a.id+'">✕</b></div>';
     }).join('');
+    /* Capa: primeira imagem anexada vira a capa da tarefa; as outras viram miniaturas clicaveis. */
+    var capa=m.querySelector('#tk-capa');
+    if(capa){var imgs=(m._anx||[]).filter(ehImg);
+      if(imgs.length){capa.classList.add('on');capa.innerHTML='<img class="capa" src="'+esc(imgs[0].url)+'" alt="'+esc(imgs[0].nome||'')+'">'+(imgs.length>1?'<div class="tkthumbs">'+imgs.map(function(a,i){return '<img src="'+esc(a.url)+'" alt="" class="'+(i===0?'on':'')+'" data-capai="'+i+'">';}).join('')+'</div>':'');
+        var big=capa.querySelector('img.capa');big.addEventListener('click',function(){var u=big.getAttribute('src');if(u)window.open(u,'_blank','noopener');});
+        capa.querySelectorAll('[data-capai]').forEach(function(th){th.addEventListener('click',function(ev){ev.stopPropagation();big.setAttribute('src',th.getAttribute('src'));capa.querySelectorAll('[data-capai]').forEach(function(x){x.classList.toggle('on',x===th);});});});
+      }else{capa.classList.remove('on');capa.innerHTML='';}}
     box.querySelectorAll('[data-anxrm]').forEach(function(el){
       el.addEventListener('click',function(){
         m._anx=m._anx.filter(function(a){return a.id!==el.dataset.anxrm;});pjPintaAnx(m);
@@ -5527,9 +5537,11 @@ function taskCard(t){
   /* mostra TODOS os responsáveis (avatar por pessoa e nomes no title), não só o primeiro */
   const _rs=(Array.isArray(t.resps)&&t.resps.length)?t.resps:(t.resp?[t.resp]:[]);
   const avs=_rs.length?_rs.map(r=>`<span class="tc-av" title="${escapeHtml(r)}">${taskInitials(r)}</span>`).join(''):'<span class="tc-av none" title="Sem responsável">?</span>';
+  const _img=(t.attachments||[]).find(a=>a&&(a.tipo==='imagem'||/\.(png|jpe?g|gif|webp|avif)(\?|$)/i.test(a.url||'')));
+  const capa=_img?`<div class="tc-capa"><img src="${escapeHtml(_img.url)}" alt="" loading="lazy" decoding="async"></div>`:'';
   const del=t.pj?'':`<button type="button" class="tc-kebab icobtn" title="Excluir" aria-label="Excluir tarefa" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>`;
   return `<div class="task-card priority-${t.prio||'media'}${t.pj?' tc-pj':''}" draggable="true" data-tid="${t.id}" onclick="openTaskDetail('${t.id}')" style="cursor:pointer">
-    ${pjTag}
+    ${capa}${pjTag}
     <div class="tc-top"><div class="tc-chips">${cliChip}${tagsHtml}${prioBadge}</div>${del}</div>
     <div class="tc-title">${escapeHtml(t.title)}</div>
     ${descHtml}

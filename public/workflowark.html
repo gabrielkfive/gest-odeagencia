@@ -1,4 +1,4 @@
-<!-- build 20260910b-kanban-21st -->
+<!-- build 20260910c-modal-apple -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
-<link rel="stylesheet" href="workflowark-20260910b.css">
+<link rel="stylesheet" href="workflowark-20260910c.css">
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -1933,86 +1933,131 @@ function wfaSetTheme(t){
           .org-saidas .os-h{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute);font-weight:800;margin-bottom:6px}
           .org-saidas .os-l{font-size:12.5px;line-height:1.6;color:var(--txt)}
           .org-saidas b{color:var(--ink);font-weight:750}
-          /* ===== Detalhe da tarefa no padrao ClickUp (print do Gabriel, 31/08) ===== */
+          /* ===== Detalhe da tarefa, shape Apple / 21st (11/09/2026). Mesmas informacoes, nova forma. ===== */
+          #pj-modal{backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%)}
+          #pj-modal .pj-f{border-radius:24px!important;box-shadow:0 30px 90px -20px rgba(0,0,0,.45);animation:tkIn .22s cubic-bezier(.23,1,.32,1);transform-origin:center}
+          @keyframes tkIn{from{opacity:0;transform:scale(.97) translateY(6px)}to{opacity:1;transform:none}}
+          @media (prefers-reduced-motion:reduce){#pj-modal .pj-f{animation:none}}
+          @media (prefers-reduced-transparency:reduce){#pj-modal{backdrop-filter:none;-webkit-backdrop-filter:none}}
           #pj-modal .pj-f.largo{display:flex}
-          .tkwrap{display:grid;grid-template-columns:1fr 320px;width:100%;max-height:92vh;min-height:0}
-          .tkmain{padding:22px 24px;overflow:auto;min-width:0}
-          .tkbc{font-size:11.5px;color:var(--mute);font-weight:600}
-          .tkbc i{color:var(--line-2);font-style:normal;margin:0 5px}
-          .tktitulo{width:100%;background:none;border:none;color:var(--ink);font-size:23px;font-weight:750;letter-spacing:-.02em;padding:8px 0 12px;font-family:inherit}
+          .tkwrap{display:grid;grid-template-columns:1fr 340px;width:100%;max-height:92vh;min-height:0}
+          .tkmain{padding:0 28px 22px;overflow:auto;min-width:0;scrollbar-width:thin}
+          .tkcapa{margin:0 -28px;height:0;overflow:hidden;background:#000;position:relative;transition:height .22s cubic-bezier(.23,1,.32,1)}
+          .tkcapa.on{height:230px;margin-bottom:6px}
+          .tkcapa img.capa{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+          .tkcapa .tkthumbs{position:absolute;left:16px;bottom:12px;display:flex;gap:6px}
+          .tkcapa .tkthumbs img{width:46px;height:46px;object-fit:cover;border-radius:12px;border:2px solid rgba(255,255,255,.85);box-shadow:0 6px 14px rgba(0,0,0,.3);cursor:pointer;background:#000;transition:transform .12s}
+          .tkcapa .tkthumbs img.on{border-color:var(--yel)}
+          .tkcapa .tkthumbs img:active{transform:scale(.94)}
+          .tktopo{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 0 6px;position:sticky;top:0;z-index:2;background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface))}
+          .tkbc{font-size:12px;color:var(--mute);font-weight:600;display:inline-flex;align-items:center;gap:6px;background:rgba(118,118,128,.10);border-radius:999px;padding:5px 12px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+          .tkbc i{color:var(--mute-2);font-style:normal;margin:0}
+          .tkx{flex:none;width:30px;height:30px;border-radius:999px;border:0;background:rgba(118,118,128,.12);color:var(--ink);font-size:13px;cursor:pointer;display:grid;place-items:center;transition:background .15s,transform .12s}
+          .tkx:hover{background:rgba(118,118,128,.22)}
+          .tkx:active{transform:scale(.94)}
+          .tktitulo{width:100%;background:none;border:none;color:var(--ink);font-size:27px;font-weight:750;letter-spacing:-.025em;line-height:1.15;padding:6px 0 14px;font-family:inherit}
           .tktitulo:focus{outline:none}
           .tktitulo::placeholder{color:var(--mute-2)}
-          .tkcampos{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px 0;margin-bottom:14px}
-          .tkr{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:10px;padding:7px 0}
-          .tkl{font-size:12px;color:var(--mute);font-weight:600}
+          .tkcampos{border:1px solid var(--line);border-radius:16px;padding:2px 14px;margin-bottom:16px;background:var(--surface)}
+          .tkr{display:grid;grid-template-columns:140px 1fr;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+          .tkr:last-child{border-bottom:0}
+          .tkl{font-size:12.5px;color:var(--mute);font-weight:600}
           .tkv{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
-          .tkv select,.tkv input{background:var(--blue-soft);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:6px 9px;font:inherit;font-size:12.5px}
-          .tkv select:focus,.tkv input:focus{outline:none;border-color:var(--yel)}
-          .tkst{font-weight:700}
-          .tkok{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--blue-soft);color:var(--green);cursor:pointer;font-size:14px;line-height:1}
-          .tkok:hover{background:var(--green);color:#fff;border-color:var(--green)}
-          .tkmini{font-size:12px;padding:5px 8px}
+          .tkv select,.tkv input{background:rgba(118,118,128,.10);border:1px solid transparent;border-radius:10px;color:var(--txt);padding:7px 10px;font:inherit;font-size:13px;transition:background .15s,border-color .15s,box-shadow .15s}
+          .tkv select:hover,.tkv input:hover{background:rgba(118,118,128,.16)}
+          .tkv select:focus,.tkv input:focus{outline:none;border-color:var(--yel);box-shadow:0 0 0 3px rgba(255,199,0,.25);background:var(--surface)}
+          .tkst{font-weight:700;border-radius:999px!important;padding:6px 12px!important}
+          .tkst[data-st=backlog]{background:rgba(130,130,140,.16)!important}
+          .tkst[data-st=iniciar]{background:rgba(43,98,196,.16)!important;color:#2b62c4}
+          .tkst[data-st=andamento]{background:rgba(255,199,0,.24)!important;color:#7a5c00}
+          .tkst[data-st=aprovacao]{background:rgba(212,163,0,.18)!important;color:#8a6a00}
+          .tkst[data-st=homologcli]{background:rgba(234,88,12,.16)!important;color:#c2410c}
+          .tkst[data-st=concluido]{background:rgba(48,209,88,.18)!important;color:#177a3d}
+          body.aura-dark .tkst[data-st=iniciar]{color:#8db0ff}
+          body.aura-dark .tkst[data-st=andamento]{color:var(--yel)}
+          body.aura-dark .tkst[data-st=aprovacao]{color:#e8c65a}
+          body.aura-dark .tkst[data-st=homologcli]{color:#fb9a6c}
+          body.aura-dark .tkst[data-st=concluido]{color:#4ade80}
+          .tkok{width:30px;height:30px;border-radius:999px;border:0;background:rgba(48,209,88,.14);color:var(--green);cursor:pointer;font-size:14px;line-height:1;transition:background .15s,transform .12s}
+          .tkok:hover{background:var(--green);color:#fff}
+          .tkok:active{transform:scale(.94)}
+          .tkmini{font-size:12.5px;padding:6px 9px}
           .tkmini.num{width:92px}
           .tkdata{width:140px}
           .tkseta{color:var(--mute);font-size:13px}
-          .tkchips{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-          .tkchip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-soft);border:1px solid var(--line);border-radius:99px;padding:3px 9px 3px 3px;font-size:11.5px;font-weight:600;color:var(--txt);cursor:pointer}
-          .tkchip .av{width:20px;height:20px;border-radius:50%;background:var(--yel);color:#000;display:grid;place-items:center;font-size:9px;font-weight:800;font-style:normal;flex:none}
+          .tkchips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+          .tkchip{display:inline-flex;align-items:center;gap:7px;background:rgba(118,118,128,.10);border:0;border-radius:999px;padding:4px 10px 4px 4px;font-size:12px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s}
+          .tkchip:hover{background:rgba(118,118,128,.18)}
+          .tkchip .av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--yel),var(--yel-d));color:#000;display:grid;place-items:center;font-size:9px;font-weight:800;font-style:normal;flex:none}
           .tkchip b{color:var(--mute);font-weight:700;font-size:10px}
           .tkchip:hover b{color:var(--red)}
           .tkvazio{font-size:12px;color:var(--mute-2)}
-          .tkadd{font-size:11.5px;color:var(--yel-d,#a07e00);font-weight:700;cursor:pointer;white-space:nowrap}
-          .tktimer{background:var(--blue-soft);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer}
-          .tktimer.on{background:var(--red);color:#fff;border-color:var(--red)}
-          .tkgasto{font-family:var(--mono);font-size:12px;color:var(--mute)}
-          .tkdesc{width:100%;background:none;border:1px solid transparent;border-radius:10px;color:var(--txt);font:inherit;font-size:13.5px;line-height:1.6;padding:8px 10px;min-height:76px;resize:vertical}
-          .tkdesc:hover{border-color:var(--line)}
-          .tkdesc:focus{outline:none;border-color:var(--yel);background:var(--blue-soft)}
-          .tksec{margin-top:16px}
-          .tksech{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;gap:8px;align-items:center}
+          .tkadd{font-size:12px;color:var(--yel-d,#a07e00);font-weight:700;cursor:pointer;white-space:nowrap}
+          .tktimer{background:rgba(118,118,128,.10);border:0;border-radius:999px;color:var(--txt);padding:7px 13px;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .15s,transform .12s}
+          .tktimer:hover{background:rgba(118,118,128,.18)}
+          .tktimer:active{transform:scale(.96)}
+          .tktimer.on{background:var(--red);color:#fff}
+          .tkgasto{font-family:var(--mono);font-size:12.5px;color:var(--mute);font-variant-numeric:tabular-nums}
+          .tkdesc{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;color:var(--txt);font:inherit;font-size:14px;line-height:1.6;padding:12px 14px;min-height:92px;resize:vertical;transition:border-color .15s,box-shadow .15s}
+          .tkdesc:focus{outline:none;border-color:var(--yel);box-shadow:0 0 0 3px rgba(255,199,0,.22)}
+          .tksec{margin-top:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:12px 14px}
+          .tksech{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;gap:8px;align-items:center}
           .tksech span{font-family:var(--mono);font-size:11px;color:var(--mute);font-weight:600}
-          .tkcl{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:8px;font-size:13px;color:var(--txt);cursor:pointer}
-          .tkcl:hover{background:var(--blue-soft)}
+          .tkcl{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:10px;font-size:13.5px;color:var(--txt);cursor:pointer;transition:background .12s}
+          .tkcl:hover{background:rgba(118,118,128,.10)}
           .tkcl.ok span{text-decoration:line-through;color:var(--mute)}
           .tkcl span{flex:1}
           .tkcl b{color:var(--mute-2);font-size:10px;font-weight:700}
           .tkcl:hover b{color:var(--red)}
-          .tkanx{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:8px;font-size:12.5px}
-          .tkanx:hover{background:var(--blue-soft)}
+          .tkanx{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:10px;font-size:13px}
+          .tkanx:hover{background:rgba(118,118,128,.10)}
           .tkanx a{flex:1;color:var(--txt);text-decoration:none}
           .tkanx a:hover{color:var(--yel-d,#a07e00)}
           .tkanx b{color:var(--mute-2);font-size:10px;cursor:pointer}
-          .tkinline{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+          .tkinline{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
           .tkanx.img{display:flex;align-items:center;gap:10px;padding:6px 0}
-          .tkanx.img img{width:64px;height:64px;object-fit:cover;border-radius:9px;border:1px solid var(--line);display:block;background:#000}
-          .tkanx.img span{flex:1;font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+          .tkanx.img img{width:64px;height:64px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block;background:#000}
+          .tkanx.img span{flex:1;font-size:12.5px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
           .tkanx.img b{cursor:pointer;color:var(--mute)}
           .tkanx.img b:hover{color:var(--red)}
-          .tkinline input{flex:1;background:var(--blue-soft);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:6px 10px;font:inherit;font-size:12.5px}
-          .tkinline input:focus{outline:none;border-color:var(--yel)}
-          .tkbtn{background:var(--ink);color:var(--bg);border:none;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
-          .tkfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid var(--line)}
-          .tkside{border-left:1px solid var(--line);background:var(--blue-soft);display:flex;flex-direction:column;min-height:0}
-          .tksideh{font-size:12px;font-weight:700;color:var(--ink);padding:16px 16px 10px;border-bottom:1px solid var(--line)}
-          .tkfeed{flex:1;overflow:auto;padding:12px 16px}
+          .tkinline input{flex:1;background:rgba(118,118,128,.10);border:1px solid transparent;border-radius:10px;color:var(--txt);padding:7px 11px;font:inherit;font-size:13px}
+          .tkinline input:focus{outline:none;border-color:var(--yel);background:var(--surface)}
+          .tkbtn{background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:transform .12s,filter .15s}
+          .tkbtn:hover{filter:brightness(1.1)}
+          .tkbtn:active{transform:scale(.96)}
+          .tkfoot{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);position:sticky;bottom:0;background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface))}
+          .tkside{border-left:1px solid var(--line);background:transparent;display:flex;flex-direction:column;min-height:0}
+          .tksideh{font-size:13px;font-weight:700;color:var(--ink);padding:22px 20px 10px}
+          .tkfeed{flex:1;overflow:auto;padding:4px 20px 12px;scrollbar-width:thin}
           .tkev{display:flex;gap:8px;margin-bottom:11px}
           .tkev .dot{width:6px;height:6px;border-radius:50%;background:var(--line-2);margin-top:6px;flex:none}
-          .tkev p{font-size:11.5px;color:var(--mute);line-height:1.45;margin:0}
-          .tkev p span{display:block;font-size:10px;color:var(--mute-2);margin-top:2px}
-          .tkcm{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:10px}
-          .tkcmh{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:5px}
-          .tkcmh .av{width:19px;height:19px;border-radius:50%;background:var(--yel);color:#000;display:grid;place-items:center;font-size:8.5px;font-weight:800;font-style:normal}
-          .tkcmh span{margin-left:auto;font-size:10px;color:var(--mute-2);font-weight:500}
-          .tkcm p{font-size:12.5px;color:var(--txt);line-height:1.5;margin:0;white-space:pre-wrap}
-          .tkcbox{border-top:1px solid var(--line);padding:10px 14px;display:flex;flex-direction:column;gap:7px;align-items:stretch}
+          .tkev p{font-size:12px;color:var(--mute);line-height:1.45;margin:0}
+          .tkev p span{display:block;font-size:10.5px;color:var(--mute-2);margin-top:2px}
+          .tkcm{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px}
+          .tkcmh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px}
+          .tkcmh .av{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--yel),var(--yel-d));color:#000;display:grid;place-items:center;font-size:8.5px;font-weight:800;font-style:normal}
+          .tkcmh span{margin-left:auto;font-size:10.5px;color:var(--mute-2);font-weight:500}
+          .tkcm p{font-size:13px;color:var(--txt);line-height:1.5;margin:0;white-space:pre-wrap}
+          .tkcbox{border-top:1px solid var(--line);padding:12px 16px 16px;display:flex;flex-direction:column;gap:8px;align-items:stretch}
           .tkcbox .tkbtn{align-self:flex-end}
-          .tkcbox textarea{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:7px 10px;font:inherit;font-size:12.5px;min-height:38px;max-height:110px;resize:vertical}
-          .tkcbox textarea:focus{outline:none;border-color:var(--yel)}
+          .tkcbox textarea{flex:1;background:rgba(118,118,128,.10);border:1px solid transparent;border-radius:14px;color:var(--txt);padding:9px 12px;font:inherit;font-size:13px;min-height:42px;max-height:120px;resize:vertical}
+          .tkcbox textarea:focus{outline:none;border-color:var(--yel);background:var(--surface)}
+          body.aura-dark .tkcampos,body.aura-dark .tkdesc,body.aura-dark .tksec,body.aura-dark .tkcm{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.09)}
+          body.aura-dark .tkv select:focus,body.aura-dark .tkv input:focus,body.aura-dark .tkinline input:focus,body.aura-dark .tkcbox textarea:focus{background:rgba(255,255,255,.06)}
+          body.aura-dark #pj-modal .pj-f{box-shadow:0 30px 90px -20px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.06) inset}
           @media(max-width:900px){
             .tkwrap{grid-template-columns:1fr;max-height:92vh;overflow:auto}
+            .tkmain{padding:0 18px 18px}
+            .tkcapa{margin:0 -18px}
+            .tkcapa.on{height:170px}
             .tkside{border-left:none;border-top:1px solid var(--line)}
             .tkfeed{max-height:220px}
             .tkr{grid-template-columns:1fr;gap:4px;align-items:flex-start}
+            .tktitulo{font-size:22px}
+            .tkfoot{position:static}
+            .tkv{overflow:hidden}
+            .tkv select,.tkv input{max-width:100%}
+            #tk-addresp{flex:1 1 120px;min-width:0}
           }
           @media(max-width:1200px){#page-organograma .org-areas{grid-template-columns:repeat(3,1fr)}}
           @media(max-width:900px){
@@ -4285,6 +4330,6 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260910b.js"></script>
+<script src="workflowark-app-20260910c.js"></script>
 </body>
 </html>
