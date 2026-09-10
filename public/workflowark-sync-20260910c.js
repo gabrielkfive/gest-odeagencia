@@ -348,7 +348,7 @@ async function wfaFlush(){
         break;                                 // para; tenta de novo no próximo tick
       }
     }
-  }finally{_wfaFlushing=false;}
+  }finally{_wfaFlushing=false;if(!WFA_PENDING.size&&!WFA_DIRTY.size)atualizarBadgeSync(true);}
 }
 localStorage.setItem=function(key,value){
   // listas mescláveis ganham carimbo `up` por item mudado (conflito entre aparelhos vira por item)
@@ -715,17 +715,26 @@ async function sincronizarAgora(silent){
 // Badge tolerante: 1-2 falhas seguidas (blip) NÃO assustam; só depois de 3 mostra "reconectando"
 // (calmo, não vermelho de pânico). Qualquer sucesso zera e volta ao ✓ na hora.
 let WFA_SYNC_FAILS=0;
+/* Rede de seguranca do badge (11/09/2026): o Gabriel viu "Salvando..." preso com a fila vazia (aba em
+   segundo plano nao roda o tick de 6s, e o texto so mudava no proximo sucesso). Toda vez que o badge
+   diz "Salvando...", um timer reconfere 2,5s depois: fila e pendencias vazias e nada em voo = "Salvo". */
+let _wfaBadgeTimer=null;
+function wfaBadgeRecheck(){
+  if(_wfaBadgeTimer)clearTimeout(_wfaBadgeTimer);
+  _wfaBadgeTimer=setTimeout(()=>{_wfaBadgeTimer=null;
+    if(!WFA_PENDING.size&&!WFA_DIRTY.size&&!_wfaFlushing)atualizarBadgeSync(true);else wfaBadgeRecheck();},2500);
+}
 function atualizarBadgeSync(ok){
   const el=document.getElementById('sync-status');
   if(!el)return;
   /* Estados de gravação (10/09/2026): a pessoa precisa saber se o que fez já está na nuvem.
      'salvando' = há escrita na fila; 'retry' = a gravação falhou e vai tentar de novo (o dado
      está guardado no aparelho, nada se perde); true = tudo confirmado. */
-  if(ok==='salvando'){el.textContent='Salvando…';el.style.color='var(--mute)';el.title='Gravando na nuvem';return;}
+  if(ok==='salvando'){el.textContent='Salvando…';el.style.color='var(--mute)';el.title='Gravando na nuvem';wfaBadgeRecheck();return;}
   if(ok==='retry'){WFA_SYNC_FAILS++;el.textContent='⚠ Não salvou ainda · tentando de novo';el.style.color='var(--yel,#b38600)';el.title='Sem conexão com o servidor. O dado está guardado neste aparelho e sobe sozinho quando a rede voltar.';return;}
   if(ok){
     WFA_SYNC_FAILS=0;
-    if((typeof WFA_PENDING!=='undefined'&&WFA_PENDING.size)||(typeof WFA_DIRTY!=='undefined'&&WFA_DIRTY.size)){el.textContent='Salvando…';el.style.color='var(--mute)';return;}
+    if((typeof WFA_PENDING!=='undefined'&&WFA_PENDING.size)||(typeof WFA_DIRTY!=='undefined'&&WFA_DIRTY.size)){el.textContent='Salvando…';el.style.color='var(--mute)';wfaBadgeRecheck();return;}
     const agora=new Date();
     const h=String(agora.getHours()).padStart(2,'0');
     const m=String(agora.getMinutes()).padStart(2,'0');
