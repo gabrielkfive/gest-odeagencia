@@ -46,6 +46,7 @@ import { Route as ApiAuthSeedEvaluatorsRouteImport } from './routes/api/auth.see
 import { Route as ApiWorkflowarkWhatsappWebhookRouteImport } from './routes/api/workflowark.whatsapp.webhook'
 import { Route as ApiWorkflowarkWhatsappSendRouteImport } from './routes/api/workflowark.whatsapp.send'
 import { Route as ApiWorkflowarkWhatsappQrRouteImport } from './routes/api/workflowark.whatsapp.qr'
+import { Route as ApiWorkflowarkWhatsappMetaRouteImport } from './routes/api/workflowark.whatsapp.meta'
 import { Route as ApiWorkflowarkWhatsappWebhookSplatRouteImport } from './routes/api/workflowark.whatsapp.webhook.$'
 
 const SistemaRoute = SistemaRouteImport.update({
@@ -237,6 +238,12 @@ const ApiWorkflowarkWhatsappQrRoute =
     path: '/api/workflowark/whatsapp/qr',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiWorkflowarkWhatsappMetaRoute =
+  ApiWorkflowarkWhatsappMetaRouteImport.update({
+    id: '/api/workflowark/whatsapp/meta',
+    path: '/api/workflowark/whatsapp/meta',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiWorkflowarkWhatsappWebhookSplatRoute =
   ApiWorkflowarkWhatsappWebhookSplatRouteImport.update({
     id: '/$',
@@ -278,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
+  '/api/workflowark/whatsapp/meta': typeof ApiWorkflowarkWhatsappMetaRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
   '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
   '/api/workflowark/whatsapp/webhook': typeof ApiWorkflowarkWhatsappWebhookRouteWithChildren
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
+  '/api/workflowark/whatsapp/meta': typeof ApiWorkflowarkWhatsappMetaRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
   '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
   '/api/workflowark/whatsapp/webhook': typeof ApiWorkflowarkWhatsappWebhookRouteWithChildren
@@ -358,6 +367,7 @@ export interface FileRoutesById {
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
+  '/api/workflowark/whatsapp/meta': typeof ApiWorkflowarkWhatsappMetaRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
   '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
   '/api/workflowark/whatsapp/webhook': typeof ApiWorkflowarkWhatsappWebhookRouteWithChildren
@@ -399,6 +409,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/sheet'
     | '/api/workflowark/social-run'
     | '/api/workflowark/state'
+    | '/api/workflowark/whatsapp/meta'
     | '/api/workflowark/whatsapp/qr'
     | '/api/workflowark/whatsapp/send'
     | '/api/workflowark/whatsapp/webhook'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/sheet'
     | '/api/workflowark/social-run'
     | '/api/workflowark/state'
+    | '/api/workflowark/whatsapp/meta'
     | '/api/workflowark/whatsapp/qr'
     | '/api/workflowark/whatsapp/send'
     | '/api/workflowark/whatsapp/webhook'
@@ -478,6 +490,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/sheet'
     | '/api/workflowark/social-run'
     | '/api/workflowark/state'
+    | '/api/workflowark/whatsapp/meta'
     | '/api/workflowark/whatsapp/qr'
     | '/api/workflowark/whatsapp/send'
     | '/api/workflowark/whatsapp/webhook'
@@ -518,6 +531,7 @@ export interface RootRouteChildren {
   ApiWorkflowarkSheetRoute: typeof ApiWorkflowarkSheetRoute
   ApiWorkflowarkSocialRunRoute: typeof ApiWorkflowarkSocialRunRoute
   ApiWorkflowarkStateRoute: typeof ApiWorkflowarkStateRoute
+  ApiWorkflowarkWhatsappMetaRoute: typeof ApiWorkflowarkWhatsappMetaRoute
   ApiWorkflowarkWhatsappQrRoute: typeof ApiWorkflowarkWhatsappQrRoute
   ApiWorkflowarkWhatsappSendRoute: typeof ApiWorkflowarkWhatsappSendRoute
   ApiWorkflowarkWhatsappWebhookRoute: typeof ApiWorkflowarkWhatsappWebhookRouteWithChildren
@@ -784,6 +798,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWorkflowarkWhatsappQrRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/workflowark/whatsapp/meta': {
+      id: '/api/workflowark/whatsapp/meta'
+      path: '/api/workflowark/whatsapp/meta'
+      fullPath: '/api/workflowark/whatsapp/meta'
+      preLoaderRoute: typeof ApiWorkflowarkWhatsappMetaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/workflowark/whatsapp/webhook/$': {
       id: '/api/workflowark/whatsapp/webhook/$'
       path: '/$'
@@ -854,6 +875,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWorkflowarkSheetRoute: ApiWorkflowarkSheetRoute,
   ApiWorkflowarkSocialRunRoute: ApiWorkflowarkSocialRunRoute,
   ApiWorkflowarkStateRoute: ApiWorkflowarkStateRoute,
+  ApiWorkflowarkWhatsappMetaRoute: ApiWorkflowarkWhatsappMetaRoute,
   ApiWorkflowarkWhatsappQrRoute: ApiWorkflowarkWhatsappQrRoute,
   ApiWorkflowarkWhatsappSendRoute: ApiWorkflowarkWhatsappSendRoute,
   ApiWorkflowarkWhatsappWebhookRoute:

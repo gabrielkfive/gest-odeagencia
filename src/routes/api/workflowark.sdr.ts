@@ -20,13 +20,15 @@ export const Route = createFileRoute("/api/workflowark/sdr")({
         const { sdrConfig } = await import("@/integrations/sdr.server");
 
         if (u.searchParams.get("health") === "1") {
-          const { evoConnectionState, zapiEnv } = await import("@/integrations/zapi.server");
+          const { evoConnectionState, metaConfigured, zapiEnv } = await import("@/integrations/zapi.server");
           const cfg = await sdrConfig(db);
           const age = cfg.lastInboundTs ? Math.round((Date.now() - cfg.lastInboundTs) / 60000) : null;
           return Response.json({
             ok: true,
-            build: "20260906-sdr-1",
-            canal: await evoConnectionState(),
+            build: "20260910-sdr-2-meta",
+            // Canal oficial (Cloud API da Meta): quando configurado, é ele que envia.
+            canalOficial: metaConfigured() ? "configurado" : "nao-configurado",
+            canal: await evoConnectionState(), // legado Evolution (VM Oracle)
             webhookFechado: true, // sempre exige token desde 20/08
             webhookSecretConfigurado: !!zapiEnv("WEBHOOK_SECRET"),
             sdrLigado: cfg.enabled,

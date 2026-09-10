@@ -106,31 +106,7 @@ export async function processWaWebhook(body: any): Promise<void> {
     }
 
     if (phone && text) {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      // Controle remoto ("jarvis <demanda>"): enfileira pro PC executar e NÃO
-      // entra no fluxo de conversa/agente (comando não é papo de cliente).
-      try {
-        const { handleRemoteCommand } = await import("@/integrations/remote-queue.server");
-        if (await handleRemoteCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
-      } catch { /* fila indisponível: segue fluxo normal */ }
-      // Comando "robo on/off/status" do Gabriel + eco do próprio robô (não regrava).
-      try {
-        const { handleSdrCommand, sdrHandleFromMe } = await import("@/integrations/sdr.server");
-        if (await handleSdrCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
-        if (fromMe && !isGroup) {
-          if ((await sdrHandleFromMe(supabaseAdmin as any, { phone, text })) === "echo") return;
-        }
-      } catch { /* SDR nunca derruba o webhook */ }
-      const { appendWhatsapp } = await import("@/integrations/zapi.server");
-      await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name, media, mkey });
-      if (!fromMe && !isGroup) {
-        const { runSdrOnIncoming } = await import("@/integrations/sdr.server");
-        const sdrDono = await runSdrOnIncoming(supabaseAdmin as any, { phone, name, text });
-        if (!sdrDono) {
-          const { runAgentOnIncoming } = await import("@/integrations/agent.server");
-          await runAgentOnIncoming(supabaseAdmin as any, { phone, name, text });
-        }
-      }
+      await entregarMensagem({ phone, name, text, ts, fromMe, isGroup, jid, media, mkey });
     }
     return;
   }
@@ -236,31 +212,83 @@ export async function processWaWebhook(body: any): Promise<void> {
 
   // só guarda mensagens de texto reais (ignora status, recibos, etc.)
   if (phone && text && typeof text === "string") {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // Controle remoto ("jarvis <demanda>") — mesmo tratamento do caminho Bridge acima.
-    try {
-      const { handleRemoteCommand } = await import("@/integrations/remote-queue.server");
-      if (await handleRemoteCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
-    } catch { /* fila indisponível: segue fluxo normal */ }
-    // Comando "robo on/off/status" do Gabriel + eco do próprio robô (não regrava).
-    try {
-      const { handleSdrCommand, sdrHandleFromMe } = await import("@/integrations/sdr.server");
-      if (await handleSdrCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
-      if (fromMe && !isGroup) {
-        if ((await sdrHandleFromMe(supabaseAdmin as any, { phone, text })) === "echo") return;
-      }
-    } catch { /* SDR nunca derruba o webhook */ }
-    const { appendWhatsapp } = await import("@/integrations/zapi.server");
-    await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name, media, mkey });
-    // SDR primeiro (lead de campanha responde sozinho); se a conversa não é de lead,
-    // segue o assistente antigo (sugere resposta/tarefa, não envia nada).
-    if (!fromMe && !isGroup) {
-      const { runSdrOnIncoming } = await import("@/integrations/sdr.server");
-      const sdrDono = await runSdrOnIncoming(supabaseAdmin as any, { phone, name, text });
-      if (!sdrDono) {
-        const { runAgentOnIncoming } = await import("@/integrations/agent.server");
-        await runAgentOnIncoming(supabaseAdmin as any, { phone, name, text });
-      }
+    await entregarMensagem({ phone, name, text, ts, fromMe, isGroup, jid, media, mkey });
+  }
+}
+
+// Entrega comum a todos os canais (Bridge, Evolution, Z-API, Meta): controle remoto
+// ("jarvis ..."), comandos "robo on/off/status", gravação no histórico e, em DM recebida,
+// SDR primeiro (lead de campanha responde sozinho) e depois o assistente antigo
+// (só sugere, não envia). Uma mensagem = uma passagem por aqui.
+export async function entregarMensagem(m: {
+  phone: string; name: string; text: string; ts: number; fromMe: boolean; isGroup: boolean;
+  jid: string; media: any; mkey: any;
+}): Promise<void> {
+  const { phone, name, text, ts, fromMe, isGroup, jid, media, mkey } = m;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  try {
+    const { handleRemoteCommand } = await import("@/integrations/remote-queue.server");
+    if (await handleRemoteCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
+  } catch { /* fila indisponível: segue fluxo normal */ }
+  try {
+    const { handleSdrCommand, sdrHandleFromMe } = await import("@/integrations/sdr.server");
+    if (await handleSdrCommand(supabaseAdmin as any, { phone, fromMe, isGroup, text })) return;
+    if (fromMe && !isGroup) {
+      if ((await sdrHandleFromMe(supabaseAdmin as any, { phone, text })) === "echo") return;
+    }
+  } catch { /* SDR nunca derruba o webhook */ }
+  const { appendWhatsapp } = await import("@/integrations/zapi.server");
+  await appendWhatsapp(supabaseAdmin as any, { phone, name, dir: fromMe ? "out" : "in", text, ts, isGroup, jid, senderName: name, media, mkey });
+  if (!fromMe && !isGroup) {
+    const { runSdrOnIncoming } = await import("@/integrations/sdr.server");
+    const sdrDono = await runSdrOnIncoming(supabaseAdmin as any, { phone, name, text });
+    if (!sdrDono) {
+      const { runAgentOnIncoming } = await import("@/integrations/agent.server");
+      await runAgentOnIncoming(supabaseAdmin as any, { phone, name, text });
     }
   }
+}
+
+// ===== WhatsApp Business Cloud API (oficial, Meta) =====
+// O número do robô é separado do número do Gabriel. Por isso "fromMe" nunca vem da Meta:
+// o comando "robo on/off/status" chega como mensagem RECEBIDA do número dele
+// (SDR_AVISO_PHONE) e é tratado como se fosse do dono. Mídia chega só como id; áudio é
+// transcrito e imagem descrita baixando pelo token, como já se faz na Evolution.
+export async function processMetaWebhook(body: any): Promise<{ recebidas: number; statuses: number }> {
+  const { parseMetaWebhook } = await import("@/lib/meta-wa.js");
+  const parsed = parseMetaWebhook(body);
+  const dono = String(zapiEnv("SDR_AVISO_PHONE") || "").replace(/\D/g, "");
+  for (const msg of parsed.messages) {
+    let text = msg.text;
+    const media = msg.media;
+    const mkey = msg.mediaId ? { id: msg.messageId, remoteJid: msg.phone + "@s.whatsapp.net", fromMe: false, mediaId: msg.mediaId } : null;
+    if (media && msg.mediaId) {
+      try {
+        const { metaMediaBase64, transcribeAudioBase64, describeImageBase64 } = await import("@/integrations/zapi.server");
+        if (media.type === "audio") {
+          const md = await metaMediaBase64(msg.mediaId);
+          const tr = await transcribeAudioBase64(md.base64);
+          if (tr) text = "🎤 " + tr;
+        } else if (media.type === "image" || media.type === "sticker") {
+          const md = await metaMediaBase64(msg.mediaId);
+          const desc = await describeImageBase64(md.base64, md.mimetype);
+          if (desc) text = (media.caption ? media.caption + ", " : "") + "🖼️ [Imagem: " + desc + "]";
+        }
+      } catch { /* segue com o placeholder */ }
+    }
+    const doDono = !!dono && msg.phone === dono;
+    if (doDono) {
+      // Dono falando com o robô: só comandos. Não é lead, não grava como conversa de cliente.
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { handleSdrCommand } = await import("@/integrations/sdr.server");
+        if (await handleSdrCommand(supabaseAdmin as any, { phone: msg.phone, fromMe: true, isGroup: false, text })) continue;
+      } catch { /* nunca derruba o webhook */ }
+    }
+    await entregarMensagem({
+      phone: msg.phone, name: msg.name, text, ts: msg.ts, fromMe: false, isGroup: false,
+      jid: msg.phone + "@s.whatsapp.net", media, mkey,
+    });
+  }
+  return { recebidas: parsed.messages.length, statuses: parsed.statuses };
 }

@@ -180,8 +180,54 @@ export async function bridgeMediaBase64(relPath: string): Promise<{ base64: stri
   return { base64: btoa(b64), mimetype, fileName };
 }
 
-// Envio unificado: usa Bridge se configurada, senão Evolution, senão Z-API.
+// ===== WhatsApp Business Cloud API (OFICIAL, Meta) =====
+// Depois do banimento do número comercial (10/09/2026), robô de WhatsApp só por aqui.
+// Segredos: META_WA_TOKEN (token permanente do usuário de sistema), META_WA_PHONE_ID
+// (id do número no WhatsApp Manager). Configure com `npx wrangler secret put <NOME>`.
+export function metaConfig() {
+  return {
+    token: zapiEnv("META_WA_TOKEN"),
+    phoneId: zapiEnv("META_WA_PHONE_ID"),
+    version: zapiEnv("META_WA_API_VERSION") || "v21.0",
+  };
+}
+export function metaConfigured() {
+  const c = metaConfig();
+  return !!(c.token && c.phoneId);
+}
+// Texto simples. Fora da janela de 24 h desde a última mensagem do cliente a Meta recusa
+// (só template aprovado passa); o SDR responde dentro da janela, então serve.
+export async function metaSendText(phone: string, message: string) {
+  const { token, phoneId, version } = metaConfig();
+  if (!token || !phoneId) throw new Error("Cloud API da Meta não configurada (META_WA_TOKEN / META_WA_PHONE_ID).");
+  const to = String(phone || "").replace(/\D/g, "");
+  const resp = await fetch(`https://graph.facebook.com/${version}/${phoneId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", to, type: "text", text: { preview_url: false, body: message } }),
+  });
+  const data: any = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data?.error?.message || `Cloud API respondeu ${resp.status}`);
+  return data;
+}
+// Mídia recebida: a Meta manda só o id; primeiro GET /{id} devolve a url, depois baixa com o token.
+export async function metaMediaBase64(mediaId: string): Promise<{ base64: string; mimetype: string }> {
+  const { token, version } = metaConfig();
+  if (!token || !mediaId) throw new Error("Cloud API da Meta não configurada.");
+  const meta = await fetch(`https://graph.facebook.com/${version}/${mediaId}`, { headers: { Authorization: `Bearer ${token}` } });
+  const info: any = await meta.json().catch(() => ({}));
+  if (!meta.ok || !info?.url) throw new Error(info?.error?.message || "Mídia não encontrada na Meta.");
+  const bin = await fetch(info.url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!bin.ok) throw new Error(`Download da mídia falhou (${bin.status}).`);
+  const bytes = new Uint8Array(await bin.arrayBuffer());
+  let b64 = "";
+  for (let i = 0; i < bytes.length; i += 8192) b64 += String.fromCharCode(...bytes.subarray(i, i + 8192));
+  return { base64: btoa(b64), mimetype: String(info.mime_type || bin.headers.get("content-type") || "application/octet-stream") };
+}
+
+// Envio unificado: Cloud API oficial se configurada; senão Bridge, Evolution, Z-API (legado).
 export async function waSendText(phone: string, message: string) {
+  if (metaConfigured()) return metaSendText(phone, message);
   if (bridgeConfigured()) return bridgeSendText(phone, message);
   if (evoConfigured()) return evoSendText(phone, message);
   return zapiSendText(phone, message);

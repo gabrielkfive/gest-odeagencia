@@ -16,6 +16,7 @@
     "teste:arrastar": "node deploy/teste-arrastar-tarefas.mjs",
     "teste:projetos": "node deploy/teste-projetos.mjs",
     "teste:merge": "node deploy/teste-merge-estado.mjs",
+    "teste:meta": "node deploy/teste-meta-wa.mjs",
     "teste:confiabilidade": "node deploy/teste-confiabilidade.mjs",
     "teste:apple": "node deploy/teste-apple-kanban.mjs",
     "capturas:apple": "node deploy/apple-review-capturas.mjs",
