@@ -5471,8 +5471,9 @@ function renderTaskLista(){
     const c=CLIENTES.find(x=>x.id===t.clienteId);
     const late=t.data&&t.data<today&&t.status!=='concluido';
     const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';
-    const prio=t.prio==='alta'?'🔴 Alta':t.prio==='baixa'?'🟢 Baixa':'🟡 Média';
-    return `<tr class="tl-row" onclick="openTaskDetail('${t.id}')"><td class="tl-tt">${escapeHtml(t.title)}</td><td>${c?escapeHtml(c.nm):'—'}</td><td>${escapeHtml(t.resp||'—')}</td><td class="${late?'tl-late':''}">${late?'⚠ ':''}${dataFmt}</td><td>${prio}</td><td><span class="tl-pill tl-st-${t.status}">${taskStatusLabel(t.status)}</span></td></tr>`;
+    /* Ponto de cor no lugar do emoji (revisao Apple, vistas, 10/09/2026) */
+    const prio=t.prio==='alta'?'<span class="tl-prio alta">Alta</span>':t.prio==='baixa'?'<span class="tl-prio baixa">Baixa</span>':'<span class="tl-prio media">Média</span>';
+    return `<tr class="tl-row" onclick="openTaskDetail('${t.id}')"><td class="tl-tt">${escapeHtml(t.title)}</td><td>${c?escapeHtml(c.nm):'—'}</td><td>${escapeHtml(t.resp||'—')}</td><td class="${late?'tl-late':''}">${late?'Atrasada · ':''}${dataFmt}</td><td>${prio}</td><td><span class="tl-pill tl-st-${t.status}">${taskStatusLabel(t.status)}</span></td></tr>`;
   }).join('');
   wfaSetHTML(document.getElementById('task-lista'),`<table class="tl-table"><thead><tr><th>Tarefa</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:24px">Nenhuma tarefa encontrada — ajuste os filtros ou crie uma nova na aba <b>Kanban</b>.</td></tr>'}</tbody></table>`);
 }
@@ -5503,7 +5504,7 @@ function renderTaskCalendario(){
   }
   const navBtn=(d,lb,tt)=>`<button class="icobtn" style="padding:2px 10px;font-size:13px" title="${tt}" onclick="tcalNav(${d})">${lb}</button>`;
   const navHtml=`<span style="display:inline-flex;gap:4px;align-items:center">${navBtn(-1,'‹','Mês anterior')}${WFA_TCAL_OFF!==0?navBtn(0,'Hoje','Voltar para o mês atual'):''}${navBtn(1,'›','Próximo mês')}</span>`;
-  wfaSetHTML(document.getElementById('task-calendario'),`<div class="tcal"><div class="tcal-head"><span style="text-transform:capitalize">${monthName}</span><span style="display:inline-flex;gap:10px;align-items:center"><span style="font-size:12px;color:var(--mute)">${noMes} com prazo no mês</span>${navHtml}</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`);
+  wfaSetHTML(document.getElementById('task-calendario'),`<div class="tcal"><div class="tcal-head"><span>${monthName.charAt(0).toUpperCase()+monthName.slice(1)}</span><span style="display:inline-flex;gap:10px;align-items:center"><span style="font-size:12px;color:var(--mute)">${noMes} com prazo no mês</span>${navHtml}</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`);
 }
 function renderTaskPessoas(){
   if(typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return;   // blindagem tela branca
@@ -5520,7 +5521,7 @@ function renderTaskPessoas(){
     const cnt={backlog:0,iniciar:0,andamento:0,aprovacao:0,homologcli:0,concluido:0};arr.forEach(t=>{cnt[t.status]=(cnt[t.status]||0)+1;});
     const tot=arr.length||1;
     const seg=(c,col)=>cnt[c]?`<div class="tp-seg" style="width:${cnt[c]/tot*100}%;background:${col}"></div>`:'';
-    const lista=arr.slice().sort((a,b)=>((a.data||'9999')<(b.data||'9999')?-1:1)).slice(0,6).map(t=>{const late=t.data&&t.data<today&&t.status!=='concluido';const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';return `<div class="tp-task ${late?'late':''}" onclick="openTaskDetail('${t.id}')"><span>${t.status==='concluido'?'✅ ':''}${escapeHtml(t.title.slice(0,38))}</span><span class="d">${late?'⚠ ':''}${dataFmt}</span></div>`;}).join('');
+    const lista=arr.slice().sort((a,b)=>((a.data||'9999')<(b.data||'9999')?-1:1)).slice(0,6).map(t=>{const late=t.data&&t.data<today&&t.status!=='concluido';const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';return `<div class="tp-task ${late?'late':''}" onclick="openTaskDetail('${t.id}')"><span class="${t.status==='concluido'?'ok':''}">${escapeHtml(t.title.slice(0,38))}</span><span class="d">${late?'Atrasada · ':''}${dataFmt}</span></div>`;}).join('');
     return `<div class="tp-card"><div class="tp-head"><div class="tp-av">${initials(nm)}</div><div><div class="tp-nm">${escapeHtml(nm)}</div><div class="tp-sub">${ativos.length} ativas${atras?` · <span style="color:var(--red,#e0364f);font-weight:700">${atras} atrasada${atras>1?'s':''}</span>`:''}</div></div></div><div class="tp-bar">${seg('backlog','#bbb')}${seg('andamento','#ffd400')}${seg('aprovacao','#4a90ff')}${seg('concluido','#19b36b')}</div>${lista||'<div class="tp-sub">Sem tarefas</div>'}${arr.length>6?`<div class="tp-sub" style="margin-top:6px">+${arr.length-6} outras</div>`:''}</div>`;
   }).join('');
   wfaSetHTML(document.getElementById('task-pessoas'),`<div class="tp-grid">${cards||'<div class="tp-sub" style="grid-column:1/-1;padding:28px;text-align:center">Nenhuma tarefa atribuída — crie no Kanban e defina um responsável para aparecer aqui.</div>'}</div>`);
