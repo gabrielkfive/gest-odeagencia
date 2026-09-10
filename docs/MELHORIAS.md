@@ -120,6 +120,25 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
     exige a chave de serviço. Travado por `deploy/teste-segredos.mjs`, que agora também recusa
     qualquer segredo com valor fixo no código, em qualquer rota.
 > Verificado com Playwright (0 erros de console, widgets com dado, toggle da rotina ok). Build OK.
+23. 🔧 **(2026-09-10, branch `feat/apple-workflow-review`, sem merge)** Atividades no shape de app,
+    linguagem Apple. O Kanban inspirado no 21st tinha sido rejeitado pelo Gabriel: cartões
+    com fileira de chips em caixa alta, quatro cartões de indicador que empurravam o quadro
+    pra baixo da dobra, filtros numa caixa de duas linhas. Agora: barra de ferramentas
+    compacta (título 22 px, "Mais" nativo com Remover duplicadas e Adiar atrasadas, Nova),
+    filtros em controles baixos sem caixa (no celular escondidos atrás de um botão que conta
+    os ativos), vistas em controle segmentado com os indicadores em linha ao lado, colunas
+    com fundo neutro e ponto de status, cartão com título primeiro, contexto em texto
+    discreto e prioridade só quando é Alta ou Baixa. O quadro cabe abaixo da barra sem rolar
+    a página (o snap que escondia a barra saiu). Detalhe da tarefa: capa menor, ações do
+    cartão em pílulas compactas, etiquetas neutras com ponto colorido, Esc fecha gravando o
+    autosave, papel de diálogo, e no celular uma área de rolagem só. Nada de transform em
+    hover: alvo não se move durante o arrasto. Motor, salvamento por item, lápides, sync
+    adiado no arrasto, autosave e cronômetro intactos (nenhuma linha de sync mudou de lógica).
+    Ambiente de teste novo em `deploy/apple-review-ambiente.mjs`: servidor HTTP local para
+    `public/` e bloqueio de toda rede externa (fontes, CDN, API), o que resolve o `page.goto`
+    que ficava esperando recurso externo. Travado por `npm run teste:apple`
+    (`deploy/teste-apple-kanban.mjs`, 108 verificações em 390, 430 e 1440 px nos dois temas,
+    reprova a versão anterior) e capturas por `npm run capturas:apple`.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 
 ## Próximas (abertas)

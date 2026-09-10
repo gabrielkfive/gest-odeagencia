@@ -79,7 +79,7 @@ var WFA_HIDE_PJ=false;   // var (não let): hoisted sem TDZ, senão um render ce
 function filtSemProjetos(){
   WFA_HIDE_PJ=!WFA_HIDE_PJ;
   const b=document.getElementById('filt-sempj');
-  if(b){b.style.color=WFA_HIDE_PJ?'var(--yel,#b38600)':'';b.textContent=WFA_HIDE_PJ?'📁 Mostrar projetos':'📁 Esconder projetos';}
+  if(b){b.style.color=WFA_HIDE_PJ?'var(--yel,#b38600)':'';b.textContent=WFA_HIDE_PJ?'Mostrar projetos':'Esconder projetos';}
   const lim=document.getElementById('filt-limpar');if(lim)lim.style.display=(WFA_HIDE_PJ||Object.values(WFA_FILTROS).some(v=>v!==''))?'':'none';
   renderTarefas();
 }
@@ -113,7 +113,7 @@ function limparFiltros(){
   ['filt-busca','filt-prio','filt-resp','filt-cli','filt-tag','filt-data'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   Object.keys(WFA_FILTROS).forEach(k=>WFA_FILTROS[k]='');
   WFA_HIDE_PJ=false;
-  const bp=document.getElementById('filt-sempj');if(bp){bp.style.color='';bp.textContent='📁 Esconder projetos';}
+  const bp=document.getElementById('filt-sempj');if(bp){bp.style.color='';bp.textContent='Esconder projetos';}
   const bm=document.getElementById('filt-minhas');if(bm)bm.style.color='';
   document.getElementById('filt-limpar').style.display='none';
   renderTarefas();

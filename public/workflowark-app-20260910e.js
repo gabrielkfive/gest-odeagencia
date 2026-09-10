@@ -3006,6 +3006,14 @@ function wfaEstDecimal(hStr,mStr){
 
     var m=document.getElementById('pj-modal');
     m._ctx=ctx;
+    /* Acessibilidade do detalhe (revisao Apple, 10/09/2026): papel de dialogo e Esc fecha pelo
+       mesmo caminho do botao Fechar, entao o autosave pendente grava. Um listener so por pagina. */
+    try{var pf=m.querySelector('.pj-f');if(pf){pf.setAttribute('role','dialog');pf.setAttribute('aria-modal','true');pf.setAttribute('aria-label',ehNova?'Nova tarefa':'Detalhe da tarefa');}}catch(e){}
+    if(!m._escBound){m._escBound=true;document.addEventListener('keydown',function(ev){
+      if(ev.key!=='Escape'||m.style.display==='none')return;
+      var ae=document.activeElement;if(ae&&ae.tagName==='SELECT')return;
+      ev.preventDefault();var cb=m.querySelector('[data-tkcancel]');if(cb)cb.click();else fecharModal();
+    });}
     /* Botoes laterais estilo Trello: levam ao campo, com um brilho no destino. */
     (function(){
       var vai=function(id){var el=m.querySelector('#'+id);if(!el)return;el.scrollIntoView({behavior:'smooth',block:'center'});var alvo=el.closest('.tkr')||el.closest('.tksec')||el;alvo.classList.remove('tkflash');void alvo.offsetWidth;alvo.classList.add('tkflash');setTimeout(function(){try{el.focus({preventScroll:true});}catch(e){}},260);};
@@ -3229,7 +3237,9 @@ function wfaEstDecimal(hStr,mStr){
     var cur=(m.dataset.papeis||'').split(',').filter(Boolean);
     box.innerHTML=PAPEIS.map(function(x){
       var on=cur.indexOf(x.k)>=0;
-      return '<button type="button" class="pj-tag" data-pp="'+x.k+'" style="cursor:pointer;padding:4px 10px;font-size:10.5px;background:'+(on?x.c:'transparent')+';color:'+(on?'#fff':x.c)+';border:1px solid '+x.c+'">'+esc(x.n)+'</button>';
+      /* Etiqueta neutra com ponto na cor; so a ligada pinta o fundo (revisao Apple, 10/09/2026).
+         Antes todas apareciam contornadas em cores diferentes, um arco-iris dentro do campo. */
+      return '<button type="button" class="pj-tag" data-pp="'+x.k+'" aria-pressed="'+(on?'true':'false')+'" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;font-size:11.5px;font-weight:600;background:'+(on?x.c:'rgba(118,118,128,.10)')+';color:'+(on?'#fff':'var(--txt)')+';border:1px solid '+(on?x.c:'transparent')+'"><i style="width:7px;height:7px;border-radius:50%;background:'+(on?'rgba(255,255,255,.85)':x.c)+';display:inline-block"></i>'+esc(x.n)+'</button>';
     }).join('');
     box.querySelectorAll('[data-pp]').forEach(function(b){
       b.addEventListener('click',function(){
@@ -5381,17 +5391,41 @@ function renderTarefas(){
   bindDrag();
   tarefaApplyView();
   wfaAjustaAlturaBoard();
+  try{tfFiltrosBadge();}catch(e){}
 }
 /* Colunas com a altura da area de rolagem (#view): o quadro inteiro cabe na tela e cada lista rola por dentro.
    Antes a coluna media 100vh-220px e o quadro nascia abaixo da dobra: a roda do mouse caia na lista e a pagina parava.
    (11/09/2026, relato do Gabriel: 'rolagem pra cima e pra baixo tem que funcionar'). */
 function wfaAjustaAlturaBoard(){
   try{const board=document.getElementById('task-board'),view=document.getElementById('view');if(!board||!view)return;
-    const kan=(WFA_TASK_VIEW==='kanban'); /* so o quadro tem snap-align; em outras paginas a regra nao encontra alvo */
-    view.classList.toggle('wfa-snap',!!kan);
-    const alt=Math.max(360,view.clientHeight-28);board.style.setProperty('--wfa-colmax',alt+'px');}catch(e){}
+    /* Revisao Apple (10/09/2026): a barra de ferramentas ficou compacta, entao o quadro cabe
+       ABAIXO dela sem rolar a pagina. A altura das colunas e o que sobra da area de rolagem
+       depois do topo do quadro; sem snap, que escondia a barra ao encaixar o quadro no topo. */
+    view.classList.remove('wfa-snap');
+    const topo=board.getBoundingClientRect().top-view.getBoundingClientRect().top+view.scrollTop;
+    const alt=Math.max(360,view.clientHeight-topo-22);board.style.setProperty('--wfa-colmax',alt+'px');}catch(e){}
 }
 window.addEventListener('resize',function(){clearTimeout(window._wfaAltT);window._wfaAltT=setTimeout(wfaAjustaAlturaBoard,120);});
+/* Barra de ferramentas compacta de Atividades (revisao Apple, 10/09/2026). "Mais" e um select
+   nativo: acessivel, funciona no celular e nao precisa de menu proprio. */
+function tfMaisAcao(sel){
+  var v=sel&&sel.value;if(sel)sel.value='';
+  if(v==='dup'){if(typeof removerDuplicadas==='function')removerDuplicadas();}
+  else if(v==='adiar'){if(typeof adiarAtrasadas==='function')adiarAtrasadas();}
+}
+/* No celular os filtros ficam escondidos ate a pessoa pedir; o botao mostra quantos estao ativos. */
+function tfFiltrosToggle(force){
+  var pg=document.getElementById('page-tarefas'),b=document.getElementById('tf-filtros-btn');if(!pg)return;
+  var abre=(typeof force==='boolean')?force:!pg.classList.contains('filtros-abertos');
+  pg.classList.toggle('filtros-abertos',abre);
+  if(b)b.setAttribute('aria-expanded',abre?'true':'false');
+  if(abre){try{var i=document.getElementById('filt-busca');if(i&&matchMedia('(hover:hover)').matches)i.focus({preventScroll:true});}catch(e){}}
+}
+function tfFiltrosBadge(){
+  var b=document.getElementById('tf-filtros-btn'),n=document.getElementById('tf-filtros-n');if(!b||!n)return;
+  var qtd=0;try{qtd=Object.values(WFA_FILTROS||{}).filter(function(v){return v!=='';}).length+(WFA_HIDE_PJ?1:0);}catch(e){}
+  n.textContent=qtd;b.classList.toggle('tem',qtd>0);
+}
 var WFA_TASK_VIEW='kanban';   // var: renderTarefas->tarefaApplyView lê isto e pode rodar antes desta linha num boot rápido (evita TDZ/tela branca)
 function tarefaSetView(v){
   WFA_TASK_VIEW=v;
@@ -5558,8 +5592,9 @@ function taskCard(t){
   const late=t.data&&t.data<today&&t.status!=='concluido';
   const venceHoje=t.data===today&&t.status!=='concluido';
   const dataFmt=t.data?t.data.split('-').reverse().join('/'):'';
-  const prioLbl=t.prio==='alta'?'Alta':t.prio==='baixa'?'Baixa':'Média';
-  const prioBadge=`<span class="prio-badge prio-${t.prio==='alta'?'alta':t.prio==='baixa'?'baixa':'media'}">${prioLbl}</span>`;
+  /* Prioridade como acento discreto no rodape (revisao Apple, 10/09/2026): so Alta e Baixa
+     aparecem; Media e o padrao e nao precisa de etiqueta. O dado continua em t.prio e no filtro. */
+  const prioBadge=t.prio==='alta'?`<span class="tc-prio alta" title="Prioridade alta">Alta</span>`:t.prio==='baixa'?`<span class="tc-prio baixa" title="Prioridade baixa">Baixa</span>`:'';
   const descHtml=t.desc?`<div class="tc-desc">${escapeHtml(t.desc)}</div>`:'';
   const cliNm=c?c.nm:(t.clienteNome||'');
   const cliChip=cliNm?`<span class="tc-cli"><span class="tc-dot" style="background:${tcDot(cliNm)}"></span>${escapeHtml(cliNm)}</span>`:'';
@@ -5588,13 +5623,17 @@ function taskCard(t){
   const avs=_rs.length?_rs.map(r=>`<span class="tc-av" title="${escapeHtml(r)}">${taskInitials(r)}</span>`).join(''):'<span class="tc-av none" title="Sem responsável">?</span>';
   const _img=(t.attachments||[]).find(a=>a&&(a.tipo==='imagem'||/\.(png|jpe?g|gif|webp|avif)(\?|$)/i.test(a.url||'')));
   const capa=_img?`<div class="tc-capa"><img src="${escapeHtml(_img.url)}" alt="" loading="lazy" decoding="async"></div>`:'';
-  const del=t.pj?'':`<button type="button" class="tc-kebab icobtn" title="Excluir" aria-label="Excluir tarefa" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>`;
-  return `<div class="task-card priority-${t.prio||'media'}${t.pj?' tc-pj':''}" draggable="true" data-tid="${t.id}" onclick="openTaskDetail('${t.id}')" style="cursor:pointer">
-    ${capa}${pjTag}
-    <div class="tc-top"><div class="tc-chips">${cliChip}${tagsHtml}${prioBadge}</div>${del}</div>
+  const del=t.pj?'':`<button type="button" class="tc-kebab" title="Excluir" aria-label="Excluir tarefa" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>`;
+  /* Ordem de leitura do cartao (revisao Apple): titulo primeiro, descricao curta, contexto
+     (cliente e etiquetas) em texto discreto, rodape com prazo, contadores e avatares.
+     tabindex e Enter: o cartao abre pelo teclado, nao so pelo clique. */
+  const ctx=(cliChip||tagsHtml)?`<div class="tc-ctx">${cliChip}${tagsHtml}</div>`:'';
+  return `<div class="task-card priority-${t.prio||'media'}${t.pj?' tc-pj':''}" draggable="true" data-tid="${t.id}" data-prio="${t.prio||'media'}" tabindex="0" role="button" aria-label="${escapeHtml(t.title)}" onclick="openTaskDetail('${t.id}')" onkeydown="if(event.key==='Enter'&&event.target===this){openTaskDetail('${t.id}')}" style="cursor:pointer">
+    ${capa}${del}${pjTag}
     <div class="tc-title">${escapeHtml(t.title)}</div>
     ${descHtml}
-    <div class="tc-foot"><div class="tc-meta-l">${meta.join('')}</div><span class="tc-assign tc-avs" title="${escapeHtml(_rs.join(', ')||'Sem responsável')}">${avs}</span></div>
+    ${ctx}
+    <div class="tc-foot"><div class="tc-meta-l">${prioBadge}${meta.join('')}</div><span class="tc-assign tc-avs" title="${escapeHtml(_rs.join(', ')||'Sem responsável')}">${avs}</span></div>
   </div>`;
 }
 function moveTask(id,newSt){

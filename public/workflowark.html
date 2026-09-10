@@ -1,4 +1,4 @@
-<!-- build 20260910d-trello-vivo -->
+<!-- build 20260910e-apple-kanban -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
-<link rel="stylesheet" href="workflowark-20260910d.css">
+<link rel="stylesheet" href="workflowark-20260910e.css">
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -1349,62 +1349,56 @@ function wfaSetTheme(t){
       <!-- =================== TAREFAS =================== -->
       <div class="page" id="page-tarefas">
         <div class="page-head">
-          <div class="page-title"><h1>Tarefas</h1><p>Daily do time · o que está a iniciar, em andamento e em homologação, incluindo as tarefas puxadas dos projetos</p></div>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span id="sync-status" style="font-size:10px;color:var(--mute);font-family:var(--mono)"></span>
-            <button class="icobtn" title="Junta cartão repetido: mesmo título para o mesmo cliente, aqui ou vindo de um projeto. Pede confirmação antes." onclick="removerDuplicadas()">⧉ Remover duplicadas</button>
-            <button class="icobtn" title="Move todas as tarefas atrasadas (não concluídas) para amanhã, pra reorganizar o board" onclick="adiarAtrasadas()">Adiar atrasadas</button>
-            <button class="tb-btn" onclick="openNovaTarefa()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova</button>
+          <div class="page-title"><h1>Tarefas</h1><p>Daily do time: a iniciar, em andamento e em homologação, com as tarefas puxadas dos projetos</p></div>
+          <!-- Barra de ferramentas compacta (revisao Apple, 10/09/2026). As acoes raras
+               (juntar duplicadas, adiar atrasadas) moram num "Mais" nativo, acessivel e que
+               funciona no celular; o filtro no celular abre por um botao. -->
+          <div class="tf-acoes">
+            <span id="sync-status"></span>
+            <button type="button" class="tf-btn tf-filtros-btn" id="tf-filtros-btn" onclick="tfFiltrosToggle()" aria-controls="tf-filtros" aria-expanded="false" title="Mostrar ou esconder os filtros">Filtros <span class="n" id="tf-filtros-n">0</span></button>
+            <select class="tf-mais" id="tf-mais" aria-label="Mais ações" title="Mais ações" onchange="tfMaisAcao(this)">
+              <option value="">Mais</option>
+              <option value="dup">Remover duplicadas</option>
+              <option value="adiar">Adiar atrasadas</option>
+            </select>
+            <button type="button" class="tf-btn pri" onclick="openNovaTarefa()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova</button>
           </div>
         </div>
 
-        <div class="filter-bar">
-          <input class="form-input" id="filt-busca" style="flex:1;min-width:140px;max-width:220px" placeholder="🔍 Buscar tarefa..." oninput="aplicarFiltros()">
-          <select class="form-select" id="filt-prio" style="width:130px" onchange="aplicarFiltros()">
+        <div class="filter-bar" id="tf-filtros">
+          <input class="form-input" id="filt-busca" placeholder="Buscar tarefa" oninput="aplicarFiltros()">
+          <select class="form-select" id="filt-prio" onchange="aplicarFiltros()">
             <option value="">Toda prioridade</option>
-            <option value="alta">🔴 Alta</option>
-            <option value="media">🟡 Média</option>
-            <option value="baixa">🟢 Baixa</option>
+            <option value="alta">Alta</option>
+            <option value="media">Média</option>
+            <option value="baixa">Baixa</option>
           </select>
-          <select class="form-select" id="filt-resp" style="width:145px" onchange="aplicarFiltros()">
+          <select class="form-select" id="filt-resp" onchange="aplicarFiltros()">
             <option value="">Todo responsável</option>
             <option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Henrique</option><option>Nicolas</option><option>Luckas Gomes</option>
           </select>
-          <select class="form-select" id="filt-cli" style="width:145px" onchange="aplicarFiltros()">
+          <select class="form-select" id="filt-cli" onchange="aplicarFiltros()">
             <option value="">Todo cliente</option>
           </select>
-          <select class="form-select" id="filt-tag" style="width:145px" onchange="aplicarFiltros()">
+          <select class="form-select" id="filt-tag" onchange="aplicarFiltros()">
             <option value="">Toda etiqueta</option>
           </select>
-          <select class="form-select" id="filt-data" style="width:155px" onchange="aplicarFiltros()">
+          <select class="form-select" id="filt-data" onchange="aplicarFiltros()">
             <option value="">Toda data</option>
-            <option value="atrasadas">⚠️ Atrasadas</option>
-            <option value="hoje">📅 Vencem hoje</option>
-            <option value="7dias">📆 Próximos 7 dias</option>
+            <option value="atrasadas">Atrasadas</option>
+            <option value="hoje">Vencem hoje</option>
+            <option value="7dias">Próximos 7 dias</option>
           </select>
-          <button class="icobtn" id="filt-minhas" onclick="filtSoMinhas()" title="Ver só as tarefas atribuídas a você">👤 Só minhas</button>
-          <button class="icobtn" id="filt-sempj" onclick="filtSemProjetos()" title="Esconder os cards puxados dos Projetos (ações operacionais) e ver só as tarefas diretas da equipe">📁 Esconder projetos</button>
-          <button class="icobtn" id="filt-limpar" onclick="limparFiltros()" style="display:none;color:var(--red)">✕ Limpar filtros</button>
-        </div>
-
-        <div class="g4" style="margin-bottom:14px">
-          <div class="kpi"><div class="l">Ativas</div><div class="v" id="kpi-total">0</div></div>
-          <div class="kpi yel"><div class="l">Em andamento</div><div class="v" id="kpi-andamento">0</div></div>
-          <div class="kpi red"><div class="l">Atrasadas</div><div class="v" id="kpi-atrasadas">0</div></div>
-          <div class="kpi green"><div class="l">Concluídas hoje</div><div class="v" id="kpi-concluidas">0</div></div>
+          <button type="button" class="icobtn" id="filt-minhas" onclick="filtSoMinhas()" title="Ver só as tarefas atribuídas a você">Só minhas</button>
+          <button class="icobtn" id="filt-sempj" onclick="filtSemProjetos()" title="Esconder os cards puxados dos Projetos (ações operacionais) e ver só as tarefas diretas da equipe">Esconder projetos</button>
+          <button type="button" class="icobtn" id="filt-limpar" onclick="limparFiltros()" style="display:none;color:var(--red)">Limpar filtros</button>
         </div>
 
         <style>
-          #page-tarefas .task-views{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-          #page-tarefas select.tv-more{font:inherit;font-size:12.5px;font-weight:600;padding:6px 10px;cursor:pointer}
+          /* vistas, cartao ligado a projeto e botoes de vista: estilos no fim de workflowark-*.css (revisao Apple, 10/09/2026) */
           #page-tarefas .tc-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+          #page-tarefas select.tv-more{font:inherit;cursor:pointer}
           /* cartao ligado a um projeto (aba Projetos): mesma tarefa, sem copia */
-          #page-tarefas .task-card.tc-pj{border-left-color:#7c3aed}
-          #page-tarefas .tc-pjtag{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:#7c3aed;background:rgba(124,58,237,.10);border:1px solid rgba(124,58,237,.25);border-radius:6px;padding:2px 6px;margin-bottom:5px}
-          body.aura-dark #page-tarefas .tc-pjtag{color:#c4b5fd;background:rgba(124,58,237,.22);border-color:rgba(196,181,253,.35)}
-          #page-tarefas .tv-btn{font-size:12.5px;font-weight:600;padding:7px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;transition:.15s}
-          #page-tarefas .tv-btn:hover{border-color:var(--yel,#ffd400)}
-          #page-tarefas .tv-btn.on{background:#111;color:#fff;border-color:#111}
           #page-tarefas .tl-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
           #page-tarefas .tl-table th{background:#fafafa;text-align:left;padding:10px 12px;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);border-bottom:1px solid var(--line)}
           #page-tarefas .tl-table td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -1504,16 +1498,24 @@ function wfaSetTheme(t){
           @media(max-width:760px){#task-relatorio .rl-kpis{grid-template-columns:repeat(2,1fr)}#task-relatorio .rl-cobg{grid-template-columns:repeat(2,1fr)}#task-relatorio .rl-tab{display:block;overflow-x:auto}}
 
         </style>
-        <div class="task-views" id="task-views">
-          <button class="tv-btn on" data-tv="kanban" onclick="tarefaSetView('kanban')">▦ Kanban</button>
-          <button class="tv-btn" data-tv="lista" onclick="tarefaSetView('lista')">☰ Lista</button>
-          <button class="tv-btn" data-tv="pessoas" onclick="tarefaSetView('pessoas')">👥 Por Pessoa</button>
-          <select class="tv-btn tv-more" id="tv-more" title="Outras vistas" onchange="if(this.value)tarefaSetView(this.value)">
-            <option value="">Mais…</option>
-            <option value="calendario">🗓️ Calendário</option>
-            <option value="painel">📊 Painel</option>
-            <option value="relatorio">📄 Relatório</option>
-          </select>
+        <div class="tf-linha">
+          <div class="task-views" id="task-views" role="tablist">
+            <button type="button" class="tv-btn on" data-tv="kanban" onclick="tarefaSetView('kanban')">Kanban</button>
+            <button type="button" class="tv-btn" data-tv="lista" onclick="tarefaSetView('lista')">Lista</button>
+            <button type="button" class="tv-btn" data-tv="pessoas" onclick="tarefaSetView('pessoas')">Por pessoa</button>
+            <select class="tv-btn tv-more" id="tv-more" title="Outras vistas" aria-label="Outras vistas" onchange="if(this.value)tarefaSetView(this.value)">
+              <option value="">Mais</option>
+              <option value="calendario">Calendário</option>
+              <option value="painel">Painel</option>
+              <option value="relatorio">Relatório</option>
+            </select>
+          </div>
+          <div class="tf-kpis" id="tf-kpis">
+            <div class="kpi"><div class="l">ativas</div><div class="v" id="kpi-total">0</div></div>
+            <div class="kpi yel"><div class="l">em andamento</div><div class="v" id="kpi-andamento">0</div></div>
+            <div class="kpi red"><div class="l">atrasadas</div><div class="v" id="kpi-atrasadas">0</div></div>
+            <div class="kpi green"><div class="l">concluídas hoje</div><div class="v" id="kpi-concluidas">0</div></div>
+          </div>
         </div>
 
         <div class="task-board" id="task-board">
@@ -1943,7 +1945,7 @@ function wfaSetTheme(t){
           .tkwrap{display:grid;grid-template-columns:1fr 340px;width:100%;max-height:92vh;min-height:0}
           .tkmain{padding:0 28px 22px;overflow:auto;min-width:0;scrollbar-width:thin}
           .tkcapa{margin:0 -28px;height:0;overflow:hidden;background:#000;position:relative;transition:height .22s cubic-bezier(.23,1,.32,1)}
-          .tkcapa.on{height:230px;margin-bottom:6px}
+          .tkcapa.on{height:168px;margin-bottom:6px}
           .tkcapa img.capa{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
           .tkcapa .tkthumbs{position:absolute;left:16px;bottom:12px;display:flex;gap:6px}
           .tkcapa .tkthumbs img{width:46px;height:46px;object-fit:cover;border-radius:12px;border:2px solid rgba(255,255,255,.85);box-shadow:0 6px 14px rgba(0,0,0,.3);cursor:pointer;background:#000;transition:transform .12s}
@@ -1955,11 +1957,11 @@ function wfaSetTheme(t){
           .tkx{flex:none;width:30px;height:30px;border-radius:999px;border:0;background:rgba(118,118,128,.12);color:var(--ink);font-size:13px;cursor:pointer;display:grid;place-items:center;transition:background .15s,transform .12s}
           .tkx:hover{background:rgba(118,118,128,.22)}
           .tkx:active{transform:scale(.94)}
-          .tktitulo{width:100%;background:none;border:none;color:var(--ink);font-size:27px;font-weight:750;letter-spacing:-.025em;line-height:1.15;padding:6px 0 14px;font-family:inherit}
+          .tktitulo{width:100%;background:none;border:none;color:var(--ink);font-size:24px;font-weight:700;letter-spacing:-.022em;line-height:1.2;padding:6px 0 12px;font-family:inherit}
           .tktitulo:focus{outline:none}
           .tktitulo::placeholder{color:var(--mute-2)}
           .tkcampos{border:1px solid var(--line);border-radius:16px;padding:2px 14px;margin-bottom:16px;background:var(--surface)}
-          .tkr{display:grid;grid-template-columns:140px 1fr;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+          .tkr{display:grid;grid-template-columns:124px 1fr;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
           .tkr:last-child{border-bottom:0}
           .tkl{font-size:12.5px;color:var(--mute);font-weight:600}
           .tkv{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
@@ -2061,17 +2063,19 @@ function wfaSetTheme(t){
           .tkprog.full span{color:var(--green)}
           .tkcl input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex:none}
           .tkcl span{transition:color .2s}
-          .tkacoes{padding:22px 16px 6px;display:flex;flex-direction:column;gap:5px}
-          .tkacth{font-size:11px;font-weight:700;color:var(--mute);letter-spacing:.06em;text-transform:uppercase;margin:6px 4px 3px}
-          .tkacoes button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:rgba(118,118,128,.10);border:0;border-radius:10px;padding:8px 11px;font:inherit;font-size:13px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s,transform .12s}
+          /* Acoes do cartao como pilulas compactas em linha (revisao Apple, 10/09/2026): mesma
+             funcao dos botoes altos de antes, menos peso visual, e o feed ganha espaco. */
+          .tkacoes{padding:18px 16px 4px;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+          .tkacth{flex:0 0 100%;font-size:10.5px;font-weight:600;color:var(--mute);letter-spacing:.02em;text-transform:none;margin:4px 2px 1px}
+          .tkacoes button{display:inline-flex;align-items:center;gap:6px;width:auto;text-align:left;background:rgba(118,118,128,.10);border:0;border-radius:8px;padding:6px 10px;font:inherit;font-size:12px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s,transform .12s;min-height:32px}
           .tkacoes button:hover{background:rgba(118,118,128,.18)}
           .tkacoes button:active{transform:scale(.97)}
-          .tkacoes button svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+          .tkacoes button svg{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
           .tkacoes button.ok{color:var(--green)}
           .tkacoes button.ok:hover{background:rgba(22,163,74,.14)}
           .tkacoes button.bad{color:var(--red)}
           .tkacoes button.bad:hover{background:rgba(220,38,38,.12)}
-          .tksideh{padding-top:14px}
+          .tksideh{padding-top:12px}
           .tkcrow{display:flex;gap:8px;align-items:flex-start}
           .tkcrow .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--yel),var(--yel-d));color:#000;display:grid;place-items:center;font-size:10px;font-weight:800;font-style:normal;flex:none;margin-top:4px}
           .tkcrow textarea{flex:1}
@@ -2080,20 +2084,22 @@ function wfaSetTheme(t){
           body.aura-dark .tkacoes button{background:rgba(255,255,255,.06);color:#e6e8ec}
           body.aura-dark .tkacoes button:hover{background:rgba(255,255,255,.12)}
           body.aura-dark .tkr:hover{background:rgba(255,255,255,.04)}
-          @media(max-width:900px){.tkacoes{flex-direction:row;flex-wrap:wrap;padding:12px 14px 4px}.tkacoes button{width:auto;flex:1 1 30%}.tkacth{width:100%}.tkr:hover{margin:0;padding-left:0;padding-right:0}}
+          @media(max-width:900px){.tkacoes{padding:12px 14px 4px}.tkr:hover{margin:0;padding-left:0;padding-right:0}}
           @media(max-width:900px){
-            .tkwrap{grid-template-columns:1fr;max-height:92vh;overflow:auto}
-            .tkmain{padding:0 18px 18px}
+            /* Uma rolagem so no celular: o conteudo principal e a atividade correm juntos,
+               em vez de duas areas de rolagem presas dentro de 92vh (revisao Apple). */
+            .tkwrap{display:flex;flex-direction:column;max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch}
+            .tkmain{padding:0 18px 18px;overflow:visible;max-height:none;flex:none}
             .tkcapa{margin:0 -18px}
-            .tkcapa.on{height:170px}
-            .tkside{border-left:none;border-top:1px solid var(--line)}
-            .tkfeed{max-height:220px}
+            .tkcapa.on{height:132px}
+            .tkside{border-left:none;border-top:1px solid var(--line);flex:none}
+            .tkfeed{max-height:none;overflow:visible}
             .tkr{grid-template-columns:1fr;gap:4px;align-items:flex-start}
             .tktitulo{font-size:22px}
             .tkfoot{position:static}
             .tkv{overflow:hidden}
             .tkv select,.tkv input{max-width:100%}
-            #tk-addresp{flex:1 1 120px;min-width:0}
+            #tk-addresp{flex:1 1 100%;min-width:0;max-width:220px}
           }
           @media(max-width:1200px){#page-organograma .org-areas{grid-template-columns:repeat(3,1fr)}}
           @media(max-width:900px){
@@ -2483,7 +2489,7 @@ function wfaSetTheme(t){
           });
         }
         </script>
-<script src="workflowark-sync-20260910c.js"></script>
+<script src="workflowark-sync-20260910e.js"></script>
       </div>
 
       <!-- =================== CENTRAL DE AGENTES (funcionários de IA) =================== -->
@@ -4366,6 +4372,6 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260910d.js"></script>
+<script src="workflowark-app-20260910e.js"></script>
 </body>
 </html>
