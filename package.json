@@ -19,6 +19,7 @@
     "teste:confiabilidade": "node deploy/teste-confiabilidade.mjs",
     "teste:apple": "node deploy/teste-apple-kanban.mjs",
     "capturas:apple": "node deploy/apple-review-capturas.mjs",
+    "preview:apple": "node deploy/apple-review-preview.mjs",
     "prova:visual": "node deploy/prova-visual.mjs",
     "checa:paginas": "node deploy/checa-paginas.mjs"
   },
