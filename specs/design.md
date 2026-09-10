@@ -59,3 +59,11 @@ estado de gravação da pessoa.
 
 - 21st.dev como catálogo de componentes para a fase de redesign (ArkOS / migração V1).
 - Linguagem Apple (fluidez, materiais) descrita em `docs/ARKOS-V2-TOKENS.md`.
+
+## Kanban e detalhe da tarefa no shape 21st / Apple (11/09/2026)
+
+Referência: Kanban Board de Arun Dass no 21st.dev (React, lucide-react, framer-motion), recriado em CSS e JS puros, sem mudar a stack. Cartão branco de canto 16 px (escuro: #16171b com borda rgba(255,255,255,.10)), chips de cliente e etiqueta com ponto colorido por hash (`tcDot`), prioridade em chip, título 15 px, descrição em 2 linhas, rodapé com divisor (prazo, checklist, relógio, estimativa, comentários, anexos) e avatares. Capa: a primeira imagem anexada aparece no topo do cartão (`.tc-capa`) e no topo do modal (`#tk-capa`, com miniaturas das outras imagens).
+
+Modal da tarefa (`tkAbrir`): mesmo conteúdo de antes, nova forma. Container `.pj-f` com raio 24 px, fundo da página com blur (`#pj-modal`), entrada com escala .97 e opacidade em 220 ms (desligada em `prefers-reduced-motion`, blur desligado em `prefers-reduced-transparency`). Topo fixo com migalha em pílula e botão X (`[data-tkx]`, que aciona o mesmo caminho do Fechar, logo o autosave pendente grava). Status `#tk-st` recebe `data-st` com o valor atual e vira pílula na cor da coluna. Campos em bloco arredondado, descrição, checklist e anexos como cartões, rodapé fixo com o indicador de autosave. No celular o rodapé deixa de ser fixo e os campos não estouram a largura.
+
+Regra: qualquer mudança nesses estilos roda `npm run teste:mobile`, `teste:arrastar` e `teste:confiabilidade`, e passa por captura em claro e escuro com dado sintético (ver deploy/teste-arrastar-tarefas.mjs para a semente).
