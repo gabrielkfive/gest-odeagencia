@@ -722,7 +722,7 @@ let _wfaBadgeTimer=null;
 function wfaBadgeRecheck(){
   if(_wfaBadgeTimer)clearTimeout(_wfaBadgeTimer);
   _wfaBadgeTimer=setTimeout(()=>{_wfaBadgeTimer=null;
-    if(!WFA_PENDING.size&&!WFA_DIRTY.size&&!_wfaFlushing)atualizarBadgeSync(true);else wfaBadgeRecheck();},2500);
+    if(!WFA_PENDING.size&&!WFA_DIRTY.size&&!_wfaFlushing)atualizarBadgeSync(true);else{if(WFA_PENDING.size&&WFA_CLOUD_READY&&!_wfaFlushing)wfaFlush();wfaBadgeRecheck();}},2500);
 }
 function atualizarBadgeSync(ok){
   const el=document.getElementById('sync-status');
@@ -752,7 +752,8 @@ function iniciarAutoSync(){
   // par de intervalos 6s/3,5s, disparando dezenas de GETs concorrentes e piorando as corridas.
   if(_autoSyncStarted)return;
   _autoSyncStarted=true;
-  setInterval(()=>{if(WFA_CLOUD_READY&&document.visibilityState!=='hidden'){wfaFlush();sincronizarAgora(true);}},6000);
+  /* Gravacao pendente sobe mesmo com a aba em segundo plano (seguranca do dado); so a puxada espera a aba voltar. */
+  setInterval(()=>{if(!WFA_CLOUD_READY)return;wfaFlush();if(document.visibilityState!=='hidden')sincronizarAgora(true);},6000);
   // WhatsApp aberto = mensagens chegam mais rápido: puxa a cada 3,5s enquanto a aba está ativa.
   setInterval(()=>{const wp=document.getElementById('page-whatsapp');if(WFA_CLOUD_READY&&document.visibilityState!=='hidden'&&wp&&wp.classList.contains('active')){sincronizarAgora(true);}},3500);
   document.addEventListener('visibilitychange',()=>{
