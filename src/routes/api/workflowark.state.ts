@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { hojeSP } from "@/lib/datas";
+// JavaScript puro de propósito (o teste deploy/teste-merge-estado.mjs importa direto no Node).
+// @ts-ignore
+import { CHAVES_MESCLA, mesclarChave } from "@/lib/merge-estado.js";
 
 const STATE_KEYS = new Set([
   "wfa-tarefas",
@@ -110,6 +113,41 @@ type WorkflowMember = {
   active: boolean;
   permissions: Record<string, unknown>;
 };
+
+/* Grava uma lista mesclável sem apagar o que outro aparelho acabou de salvar.
+   Até 4 tentativas: (1) lê a linha atual e a lápide; (2) mescla por item; (3) UPDATE
+   condicionado ao updated_at lido (se outro save entrou no meio, zero linhas voltam e
+   repete). Linha inexistente: INSERT (conflito de chave = alguém criou antes, repete). */
+async function salvarMesclando(ctx: { db: any; user: { id: string } }, key: string, novo: unknown[]): Promise<boolean> {
+  for (let tentativa = 0; tentativa < 4; tentativa++) {
+    const { data: row, error: e1 } = await ctx.db
+      .from("workflowark_state").select("data,updated_at").eq("key", key).maybeSingle();
+    if (e1) return false;
+    let deletados: unknown[] = [];
+    try {
+      const { data: lap } = await ctx.db
+        .from("workflowark_state").select("data").eq("key", "wfa-deleted-ids").maybeSingle();
+      if (Array.isArray(lap?.data)) deletados = lap.data;
+    } catch { /* sem lápide no servidor: mescla sem ela */ }
+    const atual = Array.isArray(row?.data) ? row.data : [];
+    const mesclado = mesclarChave(key, atual, novo, deletados);
+    if (!row) {
+      const { error } = await ctx.db.from("workflowark_state").insert({ key, data: mesclado, updated_by: ctx.user.id });
+      if (!error) return true;
+      continue; // alguém inseriu no meio: relê e mescla de novo
+    }
+    const { data: gravadas, error } = await ctx.db
+      .from("workflowark_state")
+      .update({ data: mesclado, updated_by: ctx.user.id })
+      .eq("key", key)
+      .eq("updated_at", row.updated_at)
+      .select("key");
+    if (error) return false;
+    if (Array.isArray(gravadas) && gravadas.length) return true;
+    // updated_at mudou entre a leitura e a gravação: outro save entrou. Tenta de novo.
+  }
+  return false;
+}
 
 function json(data: unknown, init?: ResponseInit) {
   return Response.json(data, init);
@@ -426,6 +464,16 @@ export const Route = createFileRoute("/api/workflowark/state")({
               .from("workflowark_state").select("data").eq("key", key).maybeSingle();
             const atual: unknown[] = Array.isArray(row?.data) ? row.data : [];
             data = [...new Set([...atual, ...data])].slice(-2000);
+          }
+          // LISTAS MULTIUSUÁRIO MESCLAM POR ITEM (10/09/2026). Antes o upsert gravava a lista
+          // inteira: duas pessoas na mesma janela de 6s, a última apagava a mudança da outra
+          // (cartão "voltava" de coluna, tarefa de projeto saía da homologação do cliente).
+          // Regra em src/lib/merge-estado.js (a mesma do cliente). Concorrência otimista: lê a
+          // linha, mescla, grava só se o updated_at não mudou no meio; senão tenta de novo.
+          if (CHAVES_MESCLA.includes(key) && Array.isArray(data)) {
+            const ok = await salvarMesclando(ctx, key, data);
+            if (!ok) return json({ error: "Não foi possível salvar." }, { status: 500 });
+            return json({ ok: true, mesclado: true });
           }
           const { error } = await ctx.db.from("workflowark_state").upsert({
             key,

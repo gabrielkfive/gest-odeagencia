@@ -48,6 +48,22 @@ o sistema está em produção sendo usado pela equipe da ARK todos os dias.
   escondido do mobile pra sempre, porque animação CSS ganha de regra normal.
 - Correções de segurança e de perda de dado têm prioridade sobre feature nova.
 
+### 7. Sincronização: o que não pode quebrar (10/09/2026)
+- Servidor e cliente mesclam listas POR ITEM (carimbo `up`), nunca "última lista ganha".
+  Regra única em `src/lib/merge-estado.js` (servidor) espelhada em `wfaMergeById` /
+  `wfaMergeProjetos` (cliente). `npm run teste:merge` prova que as duas concordam; se
+  mudar uma, mude a outra e rode o teste.
+- Nova chave de lista sincronizada entra em TRÊS lugares: `WFA_CLOUD_KEYS` (cliente),
+  `STATE_KEYS` (servidor) e, se for lista com id, `WFA_MERGE_KEYS` + `CHAVES_MESCLA` (e
+  nas listas de lápide se apagar precisa "pegar" entre aparelhos).
+- `WFA_STATE_T` (carimbo do sync condicional) só avança quando a resposta foi APLICADA.
+  Durante arrasto e por 8s após o drop a aplicação é adiada; avançar antes perde dado.
+- Exclusão sempre passa pela lápide (`addDeleted`), inclusive tarefa de projeto.
+- Mexeu em arrasto, filtro, modal de tarefa ou sync? Rode `npm run teste:confiabilidade`
+  e `npm run teste:arrastar` além do `teste:mobile`. Leia `specs/system.md` antes.
+- Arquivos do app levam a data no nome (`workflowark-app-<data>.js`); ao mudar o conteúdo,
+  renomeie (git mv + referência no HTML) e troque o marcador `<!-- build ... -->`.
+
 ## Dono do projeto
 Gabriel Andrade — dono da ARK Content (agência de marketing de gastronomia). Não é desenvolvedor. Quer o software funcionando em produção, sem precisar entender o código. Falar sempre em português, linguagem simples e direta.
 

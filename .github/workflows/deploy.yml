@@ -98,6 +98,16 @@ jobs:
       - name: Chaves de sync (cliente x servidor)
         run: node deploy/teste-chaves-sync.mjs
 
+      # Mescla por item do estado (10/09/2026): servidor e cliente tem que concordar, senao
+      # o cliente reempurra pra sempre ou perde dado em silencio. Puro, roda em 1s.
+      - name: Mescla do estado (servidor x cliente)
+        run: node deploy/teste-merge-estado.mjs
+
+      # Criterios de pronto do Kanban: mover persiste apos recarregar, homologacao do cliente
+      # persiste, busca sem acento e por responsavel, autosave da tela da tarefa, cronometro.
+      - name: Confiabilidade do Kanban (arrasto, busca, autosave, cronometro)
+        run: node deploy/teste-confiabilidade.mjs
+
       - name: Segredos (token de link publico so de crypto)
         run: node deploy/teste-segredos.mjs
 

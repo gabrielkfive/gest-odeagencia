@@ -123,6 +123,18 @@ function limparFiltros(){
 // prazos e a virada de mês. dataSP/hojeSP resolvem em qualquer fuso. en-CA = YYYY-MM-DD.
 function dataSP(d){return (d||new Date()).toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});}
 function hojeSP(){return dataSP(new Date());}
+/* Busca sem acento e sem caixa (10/09/2026): "Darma" acha "Darmã", "Acai" acha "Açaí".
+   Antes era só toLowerCase: acento no dado e sem acento na digitação (ou o contrário) dava
+   zero resultado. A busca também olha responsável, cliente e tags, que é o que a equipe
+   digita quando procura "as tarefas do Caio". wfaNorm é local de propósito: este script
+   carrega antes do app, então não depende de normName existir. */
+function wfaNorm(s){return String(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function wfaBuscaCasa(t,q){
+  const alvo=wfaNorm(q);if(!alvo)return true;
+  const partes=[t.title,t.desc,t.resp,t.clienteNome].concat(Array.isArray(t.resps)?t.resps:[]).concat(Array.isArray(t.tags)?t.tags:[]);
+  try{if(t.clienteId&&typeof CLIENTES!=='undefined'){const c=CLIENTES.find(x=>x.id===t.clienteId);if(c)partes.push(c.nm);}}catch(e){}
+  return partes.some(p=>p&&wfaNorm(p).includes(alvo));
+}
 function tarefaPassaFiltro(t){
   /* Blindagem: se um render disparar antes de WFA_FILTROS ser preenchido (carga lenta), NÃO
      estoura nem deixa o board branco — deixa a tarefa passar e a próxima repintada filtra. */
@@ -130,16 +142,19 @@ function tarefaPassaFiltro(t){
   if(WFA_HIDE_PJ&&t.pj)return false;   // "Esconder projetos": só tarefas diretas da equipe
   const today=hojeSP();
   const em7=dataSP(new Date(Date.now()+7*86400000));
-  if(WFA_FILTROS.busca&&!(t.title||'').toLowerCase().includes(WFA_FILTROS.busca)&&!(t.desc||'').toLowerCase().includes(WFA_FILTROS.busca))return false;
+  if(WFA_FILTROS.busca&&!wfaBuscaCasa(t,WFA_FILTROS.busca))return false;
   if(WFA_FILTROS.prio&&t.prio!==WFA_FILTROS.prio)return false;
   /* Responsável: casa contra TODOS os responsáveis (t.resps), não só o 1º (t.resp).
      Antes o filtro/"Só minhas" perdia toda tarefa em que a pessoa era co-responsável
      e não o primeiro da lista (print do Gabriel: filtrar Darman/Caio dava 0). normName
      ignora acento e caixa. */
   if(WFA_FILTROS.resp){
-    const _alvo=normName(WFA_FILTROS.resp);
+    // Dado antigo ainda pode dizer "Caio" ou "Darmã" enquanto o seletor diz "Caio Neves" e
+    // "Darman": casa pelo nome canônico também (mesma tabela da migração migraNomesEquipe).
+    const _canon=(typeof migCanonNome==='function')?migCanonNome:(x=>x);
+    const _alvo=wfaNorm(_canon(WFA_FILTROS.resp));
     const _quem=(Array.isArray(t.resps)&&t.resps.length)?t.resps:[t.resp];
-    if(!_quem.some(r=>normName(r)===_alvo))return false;
+    if(!_quem.some(r=>wfaNorm(r)===_alvo||wfaNorm(_canon(r))===_alvo))return false;
   }
   if(WFA_FILTROS.cli&&t.clienteId!==WFA_FILTROS.cli)return false;
   if(WFA_FILTROS.tag){
@@ -263,7 +278,13 @@ const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-crm','wfa-produ
    resolver conflito POR ITEM (quem editou por último vence) em vez de reverter edição.
    As tarefas já têm o próprio mecanismo (wfaTarefaSnapshot) e ficam de fora. */
 const WFA_UP_SNAP={};
-function wfaSnapKey(key,arr){const m=new Map();(Array.isArray(arr)?arr:[]).forEach(o=>{if(o&&o.id){const c=Object.assign({},o);delete c.up;m.set(o.id,JSON.stringify(c));}});WFA_UP_SNAP[key]=m;}
+/* wfa-projetos: foto TAMBÉM por tarefa (projId -> Map(taskId -> json)). O projeto inteiro era o
+   item da mescla, então duas pessoas mexendo em tarefas diferentes do MESMO projeto brigavam
+   pelo projeto todo e a mudança de uma delas sumia ("mandei a LP pra homologação do cliente
+   e voltou"). Com t.up a mescla resolve tarefa por tarefa (wfaMergeProjetos). */
+const WFA_UP_SNAP_T={};
+function wfaSnapTarefasProjeto(arr){(Array.isArray(arr)?arr:[]).forEach(p=>{if(!p||!p.id)return;const m=new Map();(Array.isArray(p.tarefas)?p.tarefas:[]).forEach(t=>{if(t&&t.id){const c=Object.assign({},t);delete c.up;m.set(t.id,JSON.stringify(c));}});WFA_UP_SNAP_T[p.id]=m;});}
+function wfaSnapKey(key,arr){const m=new Map();(Array.isArray(arr)?arr:[]).forEach(o=>{if(o&&o.id){const c=Object.assign({},o);delete c.up;m.set(o.id,JSON.stringify(c));}});WFA_UP_SNAP[key]=m;if(key==='wfa-projetos')wfaSnapTarefasProjeto(arr);}
 function wfaStampUp(key,value){
   try{
     if(key==='wfa-tarefas')return value;
@@ -272,6 +293,12 @@ function wfaStampUp(key,value){
     if(!WFA_UP_SNAP[key]){let prev=[];try{prev=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}wfaSnapKey(key,prev);}
     const snap=WFA_UP_SNAP[key];
     let stamped=false;
+    if(key==='wfa-projetos'){
+      const agora=new Date().toISOString();
+      arr.forEach(p=>{if(!p||!p.id||!Array.isArray(p.tarefas))return;const tsnap=WFA_UP_SNAP_T[p.id]||new Map();const novo=new Map();
+        p.tarefas.forEach(t=>{if(!t||!t.id)return;const c=Object.assign({},t);delete c.up;const j=JSON.stringify(c);if(tsnap.get(t.id)!==j){t.up=agora;stamped=true;}novo.set(t.id,j);});
+        WFA_UP_SNAP_T[p.id]=novo;});
+    }
     arr.forEach(o=>{if(o&&o.id){const c=Object.assign({},o);delete c.up;const j=JSON.stringify(c);if(snap.get(o.id)!==j){o.up=new Date().toISOString();stamped=true;}}});
     wfaSnapKey(key,arr);
     return stamped?JSON.stringify(arr):value;
@@ -282,6 +309,7 @@ function cloudSave(key,value){
   WFA_DIRTY.add(key);
   WFA_RECENT.set(key,Date.now()+WFA_RECENT_MS); // mantém o local autoritário por ~15s
   WFA_PENDING.set(key,parseCloudValue(value));
+  atualizarBadgeSync('salvando');
   wfaFlush();
 }
 async function wfaFlush(){
@@ -316,7 +344,7 @@ async function wfaFlush(){
         // erro transitório: recoloca na fila SÓ se não chegou um valor mais novo enquanto
         // esta gravação estava em voo — senão o retry sobrescreve a edição nova com a antiga.
         if(!WFA_PENDING.has(key))WFA_PENDING.set(key,data);
-        atualizarBadgeSync(false);
+        atualizarBadgeSync('retry');
         break;                                 // para; tenta de novo no próximo tick
       }
     }
@@ -371,6 +399,42 @@ function wfaMergeById(remoteArr,localArr,localPrevalece){
     }}});
   return order.map(id=>byId[id]);
 }
+/* Mescla das TAREFAS de um projeto: união por id; em conflito vence o t.up mais novo; sem
+   carimbo dos dois lados fica a versão de quem venceu o projeto (base). Lápide vale pra
+   tarefa também (onDelete do modal carimba o id). Mesma regra vive no servidor em
+   src/lib/merge-estado.js; deploy/teste-merge-estado.mjs prova que as duas concordam. */
+function wfaMergeTarefasProjeto(base,outro,deletedSet){
+  const byId=new Map();const order=[];
+  (Array.isArray(base)?base:[]).forEach(t=>{if(t&&t.id&&!byId.has(t.id)){order.push(t.id);byId.set(t.id,t);}});
+  (Array.isArray(outro)?outro:[]).forEach(t=>{if(!t||!t.id)return;
+    if(!byId.has(t.id)){order.push(t.id);byId.set(t.id,t);return;}
+    const b=byId.get(t.id);
+    if(t.up&&b.up){if(t.up>b.up)byId.set(t.id,t);}
+    else if(t.up&&!b.up)byId.set(t.id,t);});
+  return order.map(id=>byId.get(id)).filter(t=>!(deletedSet&&deletedSet.has(t.id)));
+}
+function wfaMergeProjetos(remoteArr,localArr,localPrevalece,deletedSet){
+  const byId={};const order=[];
+  (Array.isArray(remoteArr)?remoteArr:[]).forEach(o=>{if(o&&o.id){if(!(o.id in byId))order.push(o.id);byId[o.id]=o;}});
+  (Array.isArray(localArr)?localArr:[]).forEach(o=>{if(!o||!o.id)return;
+    if(!(o.id in byId)){order.push(o.id);byId[o.id]=o;return;}
+    const r=byId[o.id];let venc=r,perd=o;
+    if(o.up&&r.up){if(o.up>r.up){venc=o;perd=r;}}
+    else if(o.up){venc=o;perd=r;}
+    else if(r.up){venc=r;perd=o;}
+    else if(localPrevalece){venc=o;perd=r;}
+    const m=Object.assign({},venc);
+    m.tarefas=wfaMergeTarefasProjeto(venc.tarefas,perd.tarefas,deletedSet);
+    byId[o.id]=m;});
+  return order.map(id=>byId[id]);
+}
+/* JSON com chaves em ordem fixa, pra comparar conteúdo sem depender da ordem que o Postgres
+   (jsonb) ou o navegador devolvem as chaves. */
+function wfaJsonCanon(v){
+  if(Array.isArray(v))return '['+v.map(wfaJsonCanon).join(',')+']';
+  if(v&&typeof v==='object')return '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+wfaJsonCanon(v[k])).join(',')+'}';
+  return JSON.stringify(v===undefined?null:v);
+}
 /* LÁPIDE DE EXCLUSÃO: ids apagados ficam em wfa-deleted-ids (sincronizado). A mescla
    nunca ressuscita um id que está na lápide. Resolve "excluo e a tarefa volta". */
 function loadDeleted(){try{return new Set(JSON.parse(localStorage.getItem('wfa-deleted-ids')||'[]'));}catch(e){return new Set();}}
@@ -381,7 +445,7 @@ function applyCloudState(remote){
      o que causava o "solta e volta pro mesmo lugar". O tick de 6s reaplica assim que o
      arrasto acabar e a gravação do drop confirmar. typeof guard: applyCloudState mora em
      outro bloco de script, a flag pode ainda não existir na 1ª carga. */
-  if(typeof WFA_DRAGGING!=='undefined' && (WFA_DRAGGING || (typeof WFA_DROP_ATE!=='undefined' && Date.now() < WFA_DROP_ATE))) return;
+  if(typeof WFA_DRAGGING!=='undefined' && (WFA_DRAGGING || (typeof WFA_DROP_ATE!=='undefined' && Date.now() < WFA_DROP_ATE))) return false;
   WFA_CLOUD_MUTED=true;
   // mudou=false ao fim => o remoto era idêntico ao local => NÃO re-renderiza nada.
   // (Era o re-render incondicional a cada 6s que fazia o app inteiro piscar em branco.)
@@ -420,17 +484,19 @@ function applyCloudState(remote){
       let rArr=value; if(typeof rArr==='string'){try{rArr=JSON.parse(rArr);}catch(e){rArr=[];}}
       if(Array.isArray(rArr)){
         let lArr=[];try{lArr=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
-        let merged=wfaMergeById(rArr,lArr,wfaLocalAuth(key)); // local vence conflitos enquanto autoritário (dirty ou janela recente)
+        // local vence conflitos enquanto autoritário (dirty ou janela recente); projetos mesclam tarefa por tarefa
+        let merged=(key==='wfa-projetos')?wfaMergeProjetos(rArr,lArr,wfaLocalAuth(key),deletedSet):wfaMergeById(rArr,lArr,wfaLocalAuth(key));
         if(WFA_TOMBSTONE_KEYS.includes(key))merged=merged.filter(o=>!deletedSet.has(o.id)); // remove apagados
         setIfDiff(key,JSON.stringify(merged));
         wfaSnapKey(key,merged); // baseline do carimbo `up` acompanha o estado recém-aplicado
-        // A UNIÃO VOLTA PRO SERVIDOR: se a mescla tem item que o remoto não tem (ou o remoto
-        // ainda carrega item apagado aqui), reempurra a lista mesclada. Sem isto, um item
-        // salvo com o servidor fora do ar ficava visível SÓ neste aparelho pra sempre
-        // ("adicionei no CRM e pros outros sumiu").
+        // A UNIÃO VOLTA PRO SERVIDOR: se a mescla tem item que o remoto não tem, OU um item
+        // mais novo que o do remoto (carimbo `up` local venceu), reempurra a lista mesclada.
+        // Antes só reempurrava por id faltando: a versão velha ficava no servidor e os outros
+        // aparelhos viam o cartão na coluna antiga. O servidor agora mescla por item também
+        // (src/lib/merge-estado.js), então reempurrar é idempotente e converge.
         try{
-          const rIds=new Set(rArr.filter(o=>o&&o.id).map(o=>o.id));
-          if(merged.length!==rIds.size||merged.some(o=>!rIds.has(o.id)))pushKeys.push(key);
+          const rMap=new Map(rArr.filter(o=>o&&o.id).map(o=>[o.id,wfaJsonCanon(o)]));
+          if(merged.length!==rMap.size||merged.some(o=>rMap.get(o.id)!==wfaJsonCanon(o)))pushKeys.push(key);
         }catch(e){}
         return;
       }
@@ -443,7 +509,7 @@ function applyCloudState(remote){
   try{const mj=JSON.stringify([WFA_MEMBER,WFA_MEMBERS]);if(mj!==window._wfaMemberJson){window._wfaMemberJson=mj;mudou=true;}}catch(e){}
   const _primeira=!window._wfaAppliedOnce;
   if(_primeira){window._wfaAppliedOnce=true;mudou=true;} // 1ª aplicação sempre pinta a tela
-  if(!mudou)return; // nada mudou: mantém o DOM em paz (sem piscada, sem perder foco/scroll)
+  if(!mudou)return true; // nada mudou: mantém o DOM em paz (sem piscada, sem perder foco/scroll)
   // RENDER SELETIVO: os boards pesados (tarefas/CRM/demandas/rotinas) só reconstroem o DOM
   // quando a chave DELES mudou (lápide conta: pode remover item). O resto é leve e roda sempre.
   const _rr=(...ks)=>_primeira||ks.some(k=>mudouK.has(k));
@@ -475,6 +541,7 @@ function applyCloudState(remote){
   if(typeof renderComercialMes==='function')renderComercialMes();
   if(typeof restoreLastPage==='function')restoreLastPage(); // volta p/ a aba que estava (1x, após RBAC)
   if(typeof applyBrand==='function')applyBrand(); // aplica marca White Label sincronizada
+  return true;
 }
 /* ===== LIMPEZA ÚNICA DO CONSELHO (pedido do Gabriel, 16/06) =====
    O conselho vinha empilhando tarefa sem fim (130-140 cartões). Esta rotina, UMA vez por
@@ -624,12 +691,17 @@ async function sincronizarAgora(silent){
     _wfaSyncN++;
     const since=(WFA_STATE_T&&_wfaSyncN%10!==0)?WFA_STATE_T:null;
     const res=await cloudCall('load',since?{since}:undefined);
-    if(res&&res.t)WFA_STATE_T=res.t;
+    let aplicou=true;
     if(!(res&&res.unchanged)){
       const remote=res.state||{};
       WFA_MEMBER=res.member||WFA_MEMBER;WFA_MEMBERS=res.members||WFA_MEMBERS;
-      applyCloudState(remote);
+      aplicou=applyCloudState(remote)!==false;
     }
+    /* O carimbo só avança quando a resposta foi APLICADA (10/09/2026). Antes avançava antes
+       do applyCloudState, que durante o arrasto (e por 8s depois do drop) descarta a resposta:
+       as mudanças dos colegas naquele intervalo sumiam deste aparelho até o load completo de
+       60s, e qualquer gravação local nesse meio tempo subia a lista SEM elas (perda real). */
+    if(aplicou&&res&&res.t)WFA_STATE_T=res.t;
     WFA_CLOUD_READY=true;
     localStorage.setItem('wfa-cloud-last-sync',new Date().toISOString());
     atualizarBadgeSync(true);
@@ -646,12 +718,18 @@ let WFA_SYNC_FAILS=0;
 function atualizarBadgeSync(ok){
   const el=document.getElementById('sync-status');
   if(!el)return;
+  /* Estados de gravação (10/09/2026): a pessoa precisa saber se o que fez já está na nuvem.
+     'salvando' = há escrita na fila; 'retry' = a gravação falhou e vai tentar de novo (o dado
+     está guardado no aparelho, nada se perde); true = tudo confirmado. */
+  if(ok==='salvando'){el.textContent='Salvando…';el.style.color='var(--mute)';el.title='Gravando na nuvem';return;}
+  if(ok==='retry'){WFA_SYNC_FAILS++;el.textContent='⚠ Não salvou ainda · tentando de novo';el.style.color='var(--yel,#b38600)';el.title='Sem conexão com o servidor. O dado está guardado neste aparelho e sobe sozinho quando a rede voltar.';return;}
   if(ok){
     WFA_SYNC_FAILS=0;
+    if((typeof WFA_PENDING!=='undefined'&&WFA_PENDING.size)||(typeof WFA_DIRTY!=='undefined'&&WFA_DIRTY.size)){el.textContent='Salvando…';el.style.color='var(--mute)';return;}
     const agora=new Date();
     const h=String(agora.getHours()).padStart(2,'0');
     const m=String(agora.getMinutes()).padStart(2,'0');
-    el.textContent=`✓ ${h}:${m}`;el.style.color='var(--mute)';
+    el.textContent=`✓ Salvo ${h}:${m}`;el.style.color='var(--mute)';el.title='Tudo gravado na nuvem';
   }else{
     WFA_SYNC_FAILS++;
     if(WFA_SYNC_FAILS>=3){el.textContent='↻ reconectando…';el.style.color='var(--mute)';}

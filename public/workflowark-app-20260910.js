@@ -951,20 +951,22 @@ function gsGo(kind,arg){
 }
 function globalSearch(q){
   const res=document.getElementById('gsearch-res');if(!res)return;
-  q=(q||'').toLowerCase().trim();
+  /* Sem acento e sem caixa (10/09/2026): "Darma" acha "Darmã". E procura tarefa pelo
+     responsável também, que é como a equipe busca ("as tarefas do Caio"). */
+  q=normName(q||'');
   if(!q){res.classList.remove('open');res.innerHTML='';return;}
   const out=[];
   // páginas
-  try{const pgs=(typeof NAV_CATALOG!=='undefined'?NAV_CATALOG:[]).filter(s=>s.l.toLowerCase().includes(q)).slice(0,4);
+  try{const pgs=(typeof NAV_CATALOG!=='undefined'?NAV_CATALOG:[]).filter(s=>normName(s.l).includes(q)).slice(0,4);
     if(pgs.length)out.push(['Páginas',pgs.map(s=>({mono:s.l.slice(0,2).toUpperCase(),t:s.l,s:'ir para a página',k:'nav',a:s.k}))]);}catch(e){}
   // clientes
-  try{const cs=(typeof CLIENTES!=='undefined'?CLIENTES:[]).filter(c=>String(c.nm||'').toLowerCase().includes(q)).slice(0,6);
+  try{const cs=(typeof CLIENTES!=='undefined'?CLIENTES:[]).filter(c=>normName(c.nm).includes(q)).slice(0,6);
     if(cs.length)out.push(['Clientes',cs.map(c=>({mono:cliInitials(c.nm).toUpperCase(),t:c.nm,s:(c.plano||'')+' · '+(c.tipo==='ARK'?'ARK':'Alpha'),k:'cli',a:c.id}))]);}catch(e){}
   // tarefas
-  try{const ts=(state.tarefas||[]).filter(t=>String(t.title||'').toLowerCase().includes(q)).slice(0,6);
+  try{const ts=(state.tarefas||[]).filter(t=>normName(t.title).includes(q)||normName(t.resp).includes(q)||(Array.isArray(t.resps)&&t.resps.some(r=>normName(r).includes(q)))).slice(0,6);
     if(ts.length)out.push(['Tarefas',ts.map(t=>({mono:'TK',t:t.title,s:[t.resp,t.data].filter(Boolean).join(' · ')||'tarefa',k:'tarefa',a:t.id}))]);}catch(e){}
   // processos
-  try{const ps=(typeof loadProc==='function'?loadProc():[]).filter(p=>String(p.titulo||'').toLowerCase().includes(q)||String(p.area||'').toLowerCase().includes(q)).slice(0,6);
+  try{const ps=(typeof loadProc==='function'?loadProc():[]).filter(p=>normName(p.titulo).includes(q)||normName(p.area).includes(q)).slice(0,6);
     if(ps.length)out.push(['Processos',ps.map(p=>({mono:(typeof procMono==='function'?procMono(p.area):'PR'),t:p.titulo,s:p.area,k:'proc',a:p.id}))]);}catch(e){}
   if(!out.length){res.innerHTML='<div class="gs-empty">Nada encontrado para "'+escapeHtml(q)+'"</div>';res.classList.add('open');return;}
   res.innerHTML=out.map(([grp,items])=>`<div class="gs-grp">${grp}</div>`+items.map(it=>`<div class="gs-it" onclick="gsGo('${it.k}','${String(it.a).replace(/'/g,"")}')"><div class="gs-mono">${escapeHtml(it.mono)}</div><div style="min-width:0"><div class="gs-t">${escapeHtml(it.t)}</div><div class="gs-s">${escapeHtml(it.s||'')}</div></div></div>`).join('')).join('');
@@ -2850,7 +2852,18 @@ function wfaEstDecimal(hStr,mStr){
     m.innerHTML='<div class="pj-f'+(largo?' largo':'')+'" style="background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface));border:1px solid var(--line);border-radius:18px;padding:'+(largo?'0':'22px')+';width:min('+(largo?'1080px':'560px')+',100%);max-height:'+(largo?'92vh':'88vh')+';overflow:'+(largo?'hidden':'auto')+'">'+html+'</div>';
     m.style.display='flex';
   }
-  function fecharModal(){var m=document.getElementById('pj-modal');if(m)m.style.display='none';modalPid=null;}
+  function fecharModal(){
+    var m=document.getElementById('pj-modal');
+    if(m){
+      /* Fechar (Cancelar, clique fora) grava o que ficou pendente do autosave. */
+      try{if(typeof m._tkAutosave==='function'&&m._sujo)m._tkAutosave();}catch(e){}
+      if(m._tkTick){clearInterval(m._tkTick);m._tkTick=null;}
+      if(m._autoTimer){clearTimeout(m._autoTimer);m._autoTimer=null;}
+      m._tkAutosave=null;m._sujo=false;
+      m.style.display='none';
+    }
+    modalPid=null;
+  }
 
   /* ---------- Detalhe da tarefa, no padrao do ClickUp ----------
      O print que o Gabriel mandou tem: status com botao de concluir, responsaveis,
@@ -2882,9 +2895,18 @@ function wfaEstDecimal(hStr,mStr){
         else{dados.id=uid('pt');p2.tarefas=p2.tarefas||[];p2.tarefas.push(dados);}
         grava(p2); return true;
       },
+      /* Cronometro persiste na hora, igual em Atividades (10/09/2026). Antes so gravava no
+         Salvar: quem dava play e fechava a tela perdia a contagem. */
+      onTimer:function(since,gasto){
+        var p2=get(pid); if(!p2||!tidFinal)return;
+        (p2.tarefas||[]).forEach(function(x){if(x.id===tidFinal){x.timerSince=since||'';x.timeSpent=gasto||0;}});
+        grava(p2);
+      },
       onDelete:function(){
         var p3=get(pid); if(!p3||!tidFinal)return;
         p3.tarefas=(p3.tarefas||[]).filter(function(x){return x.id!==tidFinal;});
+        /* Lapide: sem ela a mescla por tarefa (wfaMergeProjetos) ressuscitava a excluida. */
+        try{if(typeof addDeleted==='function')addDeleted(tidFinal);}catch(e){}
         grava(p3);
       }
     });
@@ -2941,8 +2963,9 @@ function wfaEstDecimal(hStr,mStr){
           '<input type="file" id="tk-anxfile" accept="image/*,application/pdf" style="display:none"></div>'+
           '<div id="tk-anxstatus" class="tkvazio" style="margin-top:4px"></div></div>'+
         '<div class="tkfoot">'+
-          (ehNova?'':'<button class="icobtn" data-tkdel="1" style="color:var(--red);margin-right:auto">Excluir</button>')+
-          '<button class="tb-btn alt" data-tkcancel="1">Cancelar</button>'+
+          (ehNova?'':'<button class="icobtn" data-tkdel="1" style="color:var(--red)">Excluir</button>')+
+          '<span id="tk-autosave" class="tkvazio" style="margin-right:auto;padding-left:8px"></span>'+
+          '<button class="tb-btn alt" data-tkcancel="1">'+(ehNova?'Cancelar':'Fechar')+'</button>'+
           '<button class="tb-btn dk" data-tksave="1">Salvar</button>'+
         '</div>'+
       '</div>'+
@@ -2970,6 +2993,37 @@ function wfaEstDecimal(hStr,mStr){
     m._antes={st:t.st,resps:(t.resps||[]).join('|'),venc:t.venc||'',horas:t.horas||''};
 
     pjPintaPapeis(m);pjPintaResps(m);pjPintaCl(m);pjPintaAnx(m);pjPintaFeed(m);
+
+    /* AUTOSAVE (10/09/2026): "alteracoes desaparecem quando alguem esquece de clicar em
+       salvar". Tarefa existente: cada mudanca grava sozinha 1,2s depois que a pessoa para
+       (mesmo caminho do botao Salvar, a tela continua aberta) e o rodape mostra
+       "Salvando... / Salvo". Fechar pelo botao ou clicando fora grava o que ficou pendente.
+       Tarefa NOVA continua nascendo so no Salvar, senao qualquer clique fora criaria cartao
+       solto. */
+    m._autoTimer=null;m._sujo=false;
+    var indicador=m.querySelector('#tk-autosave');
+    var marca=function(txt,cor){if(indicador){indicador.textContent=txt;indicador.style.color=cor||'';}};
+    m._tkAutosave=function(){
+      if(m._autoTimer){clearTimeout(m._autoTimer);m._autoTimer=null;}
+      if(!m._sujo||ehNova||m.style.display==='none')return;
+      m._sujo=false;
+      marca('Salvando…');
+      var ok=false;
+      try{ok=tkSalvar(m,ctx,{auto:true});}catch(e){ok=false;}
+      if(ok)marca('Salvo ✓ '+new Date().toTimeString().slice(0,5));
+      else marca('⚠ Não salvou, confira o aviso','var(--red)');
+    };
+    var agenda=function(){if(ehNova)return;m._sujo=true;marca('Alteração pendente…');if(m._autoTimer)clearTimeout(m._autoTimer);m._autoTimer=setTimeout(m._tkAutosave,1200);};
+    m.addEventListener('input',agenda);
+    m.addEventListener('change',agenda);
+    m.addEventListener('click',function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('#tk-cl,#tk-resps,#tk-papeis,#tk-anx,[data-anxadd],[data-cmtadd],[data-tkconcluir],[data-ppnovo]'))agenda();});
+    /* Cronometro ao vivo: o numero andava so quando clicava. Parecia travado. */
+    if(m._tkTick)clearInterval(m._tkTick);
+    m._tkTick=setInterval(function(){
+      if(m.style.display==='none'){clearInterval(m._tkTick);m._tkTick=null;return;}
+      if(!m._timer)return;
+      var g=m.querySelector('#tk-gasto');if(g)g.textContent=tkDur((m._spent||0)+(Date.now()-new Date(m._timer).getTime())/1000);
+    },1000);
 
     var elNovo=m.querySelector('[data-ppnovo]');
     if(elNovo)elNovo.addEventListener('click',function(){
@@ -3142,6 +3196,63 @@ function wfaEstDecimal(hStr,mStr){
     });
   }
 
+  /* Le a tela da tarefa e grava pelo callback de quem abriu (onSave). Serve o botao Salvar e
+     o autosave (opts.auto): no autosave a tela fica aberta e a historia so registra o que
+     mudou desde a ultima gravacao (m._antes e m._hist sao atualizados). Devolve true se gravou. */
+  function tkSalvar(mm,cx,opts){
+    opts=opts||{};
+    var tt=(document.getElementById('tk-t').value||'').trim();
+    if(!tt){if(!opts.auto){try{toast('Escreva o nome da tarefa');}catch(e){}}return false;}
+    var vv=function(id){var e=document.getElementById(id);return e?e.value:'';};
+    var resps=(mm.dataset.resps||'').split('|').filter(Boolean);
+    /* estimativa vazia grava '' e nao 0: zero hora contaria como tarefa medida e
+       faria o capacity da equipe mentir para baixo. */
+    var hRaw=String(wfaEstDecimal(vv('tk-horas-h'),vv('tk-horas-m')));
+    var spRaw=String(vv('tk-sp')||'').trim();
+    var spBase=(cx.t&&cx.t.sprint!==undefined&&cx.t.sprint!==null&&cx.t.sprint!=='')?cx.t.sprint:1;
+    var colsAt=cx.cols||COLS;
+    var dados={
+      t:tt,
+      st:vv('tk-st'),
+      sprint:(spRaw===''?spBase:(parseInt(spRaw,10)||0)),
+      ini:vv('tk-ini')||'',
+      venc:vv('tk-venc')||'',
+      resps:resps,
+      resp:resps[0]||'',          // espelho: Meu Dia, filtro e capacity leem resp
+      horas:hRaw===''?'':(isNaN(parseFloat(hRaw))?'':parseFloat(hRaw)),
+      obs:(vv('tk-obs')||'').trim(),
+      papeis:(mm.dataset.papeis||'').split(',').filter(Boolean),
+      checklist:(mm._cl||[]),
+      anexos:(mm._anx||[]),
+      coments:(mm._cmt||[]),
+      timeSpent:(mm._spent||0),
+      timerSince:(mm._timer||'')
+    };
+    // Atividade: registra o que de fato mudou, para a coluna da direita ter historia
+    var hist=(mm._hist||[]).slice(), antes=mm._antes||{}, quem=tkQuem();
+    var reg=function(txt){hist.push({em:tkAgora(),txt:quem+' '+txt});};
+    if(cx.ehNova)reg('criou esta tarefa');
+    else{
+      if(antes.st!==dados.st)reg('mudou o status para '+((colsAt.filter(function(c){return c.k===dados.st;})[0]||{}).n||dados.st));
+      if(antes.resps!==resps.join('|'))reg(resps.length?('atribuiu para '+resps.join(', ')):'tirou o responsável');
+      if((antes.venc||'')!==(dados.venc||''))reg(dados.venc?('marcou o prazo para '+dados.venc.split('-').reverse().join('/')):'tirou o prazo');
+      if(String(antes.horas||'')!==String(dados.horas||''))reg(dados.horas===''?'tirou a estimativa':('estimou em '+wfaEstFmt(dados.horas)));
+    }
+    if(hist.length>60)hist=hist.slice(-60);
+    dados.hist=hist;
+    var okSave=true;
+    try{okSave=(cx.onSave(dados,mm)!==false);}catch(e){console.warn('tksave',e);okSave=false;try{toast('Não consegui salvar: '+((e&&e.message)||e));}catch(_){}}
+    if(okSave){
+      /* Proxima gravacao (autosave) compara com o que acabou de ser salvo, senao a historia
+         repetiria "mudou o status" a cada 1,2s e o onSave de Atividades releria st antigo. */
+      mm._hist=hist.slice();
+      var stSalvo=vv('tk-st');
+      mm._antes={st:stSalvo,resps:resps.join('|'),venc:dados.venc||'',horas:dados.horas||''};
+      try{if(cx.t){cx.t.st=stSalvo;cx.t.t=tt;}}catch(e){}
+    }
+    return okSave;
+  }
+
   /* ---------- Eventos ---------- */
   document.addEventListener('click',function(ev){
     var pg=document.getElementById('page-projetos');
@@ -3201,48 +3312,9 @@ function wfaEstDecimal(hStr,mStr){
 
     if(b.dataset.tksave!=null){
       var mm=document.getElementById('pj-modal'); var cx=mm&&mm._ctx; if(!cx)return;
-      var tt=(document.getElementById('tk-t').value||'').trim();
-      if(!tt){try{toast('Escreva o nome da tarefa');}catch(e){}return;}
-      var vv=function(id){var e=document.getElementById(id);return e?e.value:'';};
-      var resps=(mm.dataset.resps||'').split('|').filter(Boolean);
-      /* estimativa vazia grava '' e nao 0: zero hora contaria como tarefa medida e
-         faria o capacity da equipe mentir para baixo. */
-      var hRaw=String(wfaEstDecimal(vv('tk-horas-h'),vv('tk-horas-m')));
-      var spRaw=String(vv('tk-sp')||'').trim();
-      var spBase=(cx.t&&cx.t.sprint!==undefined&&cx.t.sprint!==null&&cx.t.sprint!=='')?cx.t.sprint:1;
-      var colsAt=cx.cols||COLS;
-      var dados={
-        t:tt,
-        st:vv('tk-st'),
-        sprint:(spRaw===''?spBase:(parseInt(spRaw,10)||0)),
-        ini:vv('tk-ini')||'',
-        venc:vv('tk-venc')||'',
-        resps:resps,
-        resp:resps[0]||'',          // espelho: Meu Dia, filtro e capacity leem resp
-        horas:hRaw===''?'':(isNaN(parseFloat(hRaw))?'':parseFloat(hRaw)),
-        obs:(vv('tk-obs')||'').trim(),
-        papeis:(mm.dataset.papeis||'').split(',').filter(Boolean),
-        checklist:(mm._cl||[]),
-        anexos:(mm._anx||[]),
-        coments:(mm._cmt||[]),
-        timeSpent:(mm._spent||0),
-        timerSince:(mm._timer||'')
-      };
-      // Atividade: registra o que de fato mudou, para a coluna da direita ter historia
-      var hist=(mm._hist||[]).slice(), antes=mm._antes||{}, quem=tkQuem();
-      var reg=function(txt){hist.push({em:tkAgora(),txt:quem+' '+txt});};
-      if(cx.ehNova)reg('criou esta tarefa');
-      else{
-        if(antes.st!==dados.st)reg('mudou o status para '+((colsAt.filter(function(c){return c.k===dados.st;})[0]||{}).n||dados.st));
-        if(antes.resps!==resps.join('|'))reg(resps.length?('atribuiu para '+resps.join(', ')):'tirou o responsável');
-        if((antes.venc||'')!==(dados.venc||''))reg(dados.venc?('marcou o prazo para '+dados.venc.split('-').reverse().join('/')):'tirou o prazo');
-        if(String(antes.horas||'')!==String(dados.horas||''))reg(dados.horas===''?'tirou a estimativa':('estimou em '+wfaEstFmt(dados.horas)));
-      }
-      if(hist.length>60)hist=hist.slice(-60);
-      dados.hist=hist;
-      var okSave=true;
-      try{okSave=(cx.onSave(dados,mm)!==false);}catch(e){console.warn('tksave',e);okSave=false;try{toast('Não consegui salvar: '+((e&&e.message)||e));}catch(_){}}
-      if(okSave)fecharModal();
+      if(mm._autoTimer){clearTimeout(mm._autoTimer);mm._autoTimer=null;}
+      mm._sujo=false;
+      if(tkSalvar(mm,cx,{}))fecharModal();
       return;
     }
 
@@ -11423,7 +11495,7 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
   const BORDA=54;      // px da borda onde a coluna comeca a rolar sozinha
   const PASSO=16;      // px por quadro dessa rolagem
 
-  let origem=null,clone=null,zona=null,timer=null,ativo=false;
+  let origem=null,clone=null,zona=null,timer=null,ativo=false,moveu=false;
   let x0=0,y0=0,offX=0,offY=0,dt=null,rolavel=null,ultimo=null,laco=0;
 
   // dataTransfer de mentira: os handlers so usam setData/getData/effectAllowed/dropEffect.
@@ -11455,6 +11527,11 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
     if(!ativo){laco=0;return;}
     laco=requestAnimationFrame(rolaBorda);
     const t=ultimo; if(!t)return;
+    /* So rola depois que o dedo ANDOU (10/09/2026). Segurar um cartao a menos de 54px da
+       borda do quadro ja disparava a rolagem no mesmo instante: o quadro corria, as colunas
+       deslizavam por baixo do dedo e o cartao caia na coluna vizinha ("some ao arrastar").
+       Reproduzido no Chrome desktop com toque pelo deploy/teste-arrastar-tarefas.mjs. */
+    if(!moveu)return;
     const cx=rolavel||(zona&&rolante(zona))||(origem&&rolante(origem)); if(!cx)return;
     rolavel=cx;
     const r=cx.getBoundingClientRect();
@@ -11485,6 +11562,7 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
   }
   function move(t){
     ultimo=t;
+    if(!moveu&&(Math.abs(t.clientX-x0)>24||Math.abs(t.clientY-y0)>24))moveu=true;
     if(clone)clone.style.transform='translate('+(t.clientX-offX)+'px,'+(t.clientY-offY)+'px) rotate(1.5deg)';
     const sob=document.elementFromPoint(t.clientX,t.clientY);   // o clone nao entra: pointer-events none
     const nova=sob&&sob.closest?sob.closest(ZONAS):null;
@@ -11501,7 +11579,7 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
     if(laco){cancelAnimationFrame(laco);laco=0;}
     if(clone&&clone.parentNode)clone.parentNode.removeChild(clone);
     if(origem)origem.style.opacity='';
-    clone=null;origem=null;zona=null;ativo=false;dt=null;rolavel=null;ultimo=null;
+    clone=null;origem=null;zona=null;ativo=false;dt=null;rolavel=null;ultimo=null;moveu=false;
   }
 
   document.addEventListener('touchstart',function(e){
@@ -11556,6 +11634,10 @@ if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,9
   let avisando=false;
   function ocupado(){
     if(document.querySelector('.modal-bg.open,.crm-modal.open'))return true;
+    /* Tela de tarefa (pj-modal) aberta ou cartao sendo arrastado: recarregar agora jogaria
+       fora o que a pessoa esta fazendo (10/09/2026). */
+    try{var pm=document.getElementById('pj-modal');if(pm&&pm.style.display!=='none')return true;}catch(e){}
+    try{if(typeof WFA_DRAGGING!=='undefined'&&WFA_DRAGGING)return true;}catch(e){}
     const a=document.activeElement;
     if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return true;
     if(a&&a.isContentEditable)return true;

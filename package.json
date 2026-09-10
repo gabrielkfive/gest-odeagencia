@@ -15,6 +15,8 @@
     "teste:safari": "node deploy/teste-safari-ios.mjs",
     "teste:arrastar": "node deploy/teste-arrastar-tarefas.mjs",
     "teste:projetos": "node deploy/teste-projetos.mjs",
+    "teste:merge": "node deploy/teste-merge-estado.mjs",
+    "teste:confiabilidade": "node deploy/teste-confiabilidade.mjs",
     "prova:visual": "node deploy/prova-visual.mjs",
     "checa:paginas": "node deploy/checa-paginas.mjs"
   },

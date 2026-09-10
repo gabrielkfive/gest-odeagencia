@@ -4,6 +4,13 @@
   Cache-Control: no-cache, must-revalidate
 /workflowark.html
   Cache-Control: no-cache, must-revalidate
+# Desde o split do monolito (06/09/2026) o app vive em workflowark-*.js e .css. Sem esta
+# regra o navegador podia guardar o script velho por heuristica e a equipe testava a
+# versao antiga com o HTML novo (o fix do arrastar "continuava" quebrado).
+/workflowark-*.js
+  Cache-Control: no-cache, must-revalidate
+/workflowark-*.css
+  Cache-Control: no-cache, must-revalidate
 /propostas
   Cache-Control: no-cache, must-revalidate
 /propostas.html

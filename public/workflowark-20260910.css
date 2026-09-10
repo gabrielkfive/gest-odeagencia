@@ -482,6 +482,11 @@ input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.75}
 /* filter bar */
 .filter-bar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center;padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:7px}
 .filter-bar .form-input,.filter-bar .form-select{height:30px;font-size:11px;padding:0 8px;min-width:0}
+/* Campo de busca de pessoa (pp-wrap) dentro da barra de filtros: o input herdava o width fixo
+   do select (145px) e, em janela estreita, saia pra fora da barra (print do Gabriel, 10/09/2026).
+   O wrap se comporta como qualquer outro filtro e o input ocupa o wrap, nunca mais que ele. */
+.filter-bar .pp-wrap{flex:1 1 140px;min-width:0;max-width:100%}
+.filter-bar .pp-wrap .form-input{width:100% !important;max-width:100% !important;box-sizing:border-box}
 /* priority badge */
 .prio-badge{display:inline-block;font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em;margin-right:4px}
 .prio-alta{background:#fff1f0;color:var(--red)}.prio-media{background:var(--yel-bg);color:var(--yel-d)}.prio-baixa{background:#f0fff4;color:#1a7a3a}

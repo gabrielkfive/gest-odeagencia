@@ -18,7 +18,17 @@
 */
 import { readFile } from 'fs/promises';
 
-const html = await readFile('public/workflowark.html', 'utf8');
+// Desde a fatia 2 do split (763ebe0, 06/09/2026) o script CLOUD SYNC mora em
+// public/workflowark-sync-*.js. O teste lia so o HTML, nao achava WFA_CLOUD_KEYS e
+// derrubava o job de testes pos-deploy inteiro (4 pushes seguidos vermelhos, e os
+// testes de navegador nem chegavam a rodar). Agora le o HTML mais todo script
+// workflowark-*.js que ele referencia, e procura as listas em qualquer um deles.
+const htmlBase = await readFile('public/workflowark.html', 'utf8');
+const scripts = [...htmlBase.matchAll(/<script src="(workflowark-[^"]+\.js)"/g)].map((m) => m[1]);
+let html = htmlBase;
+for (const s of scripts) {
+  try { html += '\n' + (await readFile('public/' + s, 'utf8')); } catch (e) { /* script opcional */ }
+}
 const srv = await readFile('src/routes/api/workflowark.state.ts', 'utf8');
 
 // Regex literal de proposito: construir com new RegExp exige escapar as barras duas
@@ -28,7 +38,7 @@ const RE_NO_PUSH = /const WFA_NO_PUSH\s*=\s*new Set\(\[([\s\S]*?)\]\)/;
 
 function chavesDe(regex, nome) {
   const m = html.match(regex);
-  if (!m) throw new Error('nao achei ' + nome + ' no workflowark.html');
+  if (!m) throw new Error('nao achei ' + nome + ' no workflowark.html nem nos scripts workflowark-*.js');
   return new Set([...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]));
 }
 
