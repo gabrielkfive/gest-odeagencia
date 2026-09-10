@@ -192,6 +192,26 @@ for (const tema of ['light', 'dark']) {
       checa(/Salvando|Salvo|Não salvou/.test(badge), `${rot} indicador de gravacao visivel na barra (badge: "${badge}")`);
     }
 
+    // 9. vistas restantes (10/09/2026): sem emoji, sem rolagem lateral da pagina, indicadores neutros
+    for (const v of ['lista', 'pessoas', 'calendario', 'painel', 'relatorio']) {
+      const r = await page.evaluate((v) => {
+        tarefaSetView(v);
+        const pg = document.getElementById('page-tarefas'), view = document.getElementById('view');
+        const cont = document.getElementById('task-' + v);
+        const txt = cont ? cont.innerText : '';
+        const emoji = (txt.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu) || []).slice(0, 5);
+        const kpi = v === 'painel' ? cont.querySelector('.kpi.red') : null;
+        const kpiBg = kpi ? getComputedStyle(kpi).backgroundColor : '';
+        return { visivel: !!cont && cont.style.display !== 'none' && cont.offsetHeight > 0, pgOver: pg.scrollWidth - pg.clientWidth, viewOver: view ? view.scrollWidth - view.clientWidth : 0, emoji, kpiBg, mes: v === 'calendario' ? ((cont.querySelector('.tcal-head span') || {}).textContent || '') : '' };
+      }, v);
+      checa(r.visivel, `${rot} vista ${v} aparece`);
+      checa(r.pgOver <= 1 && r.viewOver <= 1, `${rot} vista ${v} sem rolagem lateral da pagina (+${r.pgOver}/+${r.viewOver})`);
+      checa(r.emoji.length === 0, `${rot} vista ${v} sem emoji no texto (${r.emoji.join(' ') || 'nenhum'})`);
+      if (v === 'painel') checa(/^rgb\((255, 255, 255|13, 14, 17)\)$/.test(r.kpiBg), `${rot} painel: indicador Atrasadas com cartao neutro, numero na cor (fundo ${r.kpiBg})`);
+      if (v === 'calendario') checa(/^[A-ZÀ-Ú][a-zç]+ de \d{4}$/.test(r.mes.trim()), `${rot} calendario: mes com inicial maiuscula e "de" minusculo ("${r.mes.trim()}")`);
+    }
+    await page.evaluate(() => tarefaSetView('kanban'));
+
     for (const e of [...new Set(erros)]) if (!RUIDO.test(e)) falhas.push(`${rot} erro de JS: ${e}`);
     await ctx.close();
   }
