@@ -22,19 +22,43 @@
 */
 
 export const CHAVES_MESCLA = [
-  'wfa-tarefas', 'wfa-agenda-events', 'wfa-conselho-briefings', 'wfa-notificacoes', 'wfa-crm',
-  'wfa-producao', 'wfa-briefings', 'wfa-planejamentos', 'wfa-demandas', 'wfa-rotinas',
-  'wfa-clientes-custom', 'wfa-alpha', 'wfa-alpha-am', 'wfa-alpha-gt', 'wfa-alpha-cr', 'wfa-projetos',
+  "wfa-tarefas",
+  "wfa-agenda-events",
+  "wfa-conselho-briefings",
+  "wfa-notificacoes",
+  "wfa-crm",
+  "wfa-producao",
+  "wfa-briefings",
+  "wfa-planejamentos",
+  "wfa-demandas",
+  "wfa-rotinas",
+  "wfa-clientes-custom",
+  "wfa-alpha",
+  "wfa-alpha-am",
+  "wfa-alpha-gt",
+  "wfa-alpha-cr",
+  "wfa-projetos",
 ];
 
 export const CHAVES_LAPIDE = [
-  'wfa-tarefas', 'wfa-agenda-events', 'wfa-crm', 'wfa-producao', 'wfa-briefings', 'wfa-planejamentos',
-  'wfa-demandas', 'wfa-rotinas', 'wfa-clientes-custom', 'wfa-alpha', 'wfa-alpha-am', 'wfa-alpha-gt',
-  'wfa-alpha-cr', 'wfa-projetos',
+  "wfa-tarefas",
+  "wfa-agenda-events",
+  "wfa-crm",
+  "wfa-producao",
+  "wfa-briefings",
+  "wfa-planejamentos",
+  "wfa-demandas",
+  "wfa-rotinas",
+  "wfa-clientes-custom",
+  "wfa-alpha",
+  "wfa-alpha-am",
+  "wfa-alpha-gt",
+  "wfa-alpha-cr",
+  "wfa-projetos",
 ];
 
 const lista = (v) => (Array.isArray(v) ? v : []);
-const temId = (o) => o && typeof o === 'object' && o.id != null && o.id !== '';
+const temId = (o) => o && typeof o === "object" && o.id != null && o.id !== "";
 
 // Devolve o item que vence entre `a` (quem esta salvando) e `b` (o que o servidor tinha).
 function vencedor(a, b) {
@@ -50,10 +74,19 @@ export function mesclarPorId(atual, novo, deletados) {
   const del = deletados instanceof Set ? deletados : new Set(lista(deletados));
   const porId = new Map();
   const ordem = [];
-  lista(novo).forEach((o) => { if (temId(o) && !porId.has(o.id)) { ordem.push(o.id); porId.set(o.id, o); } });
+  lista(novo).forEach((o) => {
+    if (temId(o) && !porId.has(o.id)) {
+      ordem.push(o.id);
+      porId.set(o.id, o);
+    }
+  });
   lista(atual).forEach((o) => {
     if (!temId(o)) return;
-    if (!porId.has(o.id)) { ordem.push(o.id); porId.set(o.id, o); return; }
+    if (!porId.has(o.id)) {
+      ordem.push(o.id);
+      porId.set(o.id, o);
+      return;
+    }
     porId.set(o.id, vencedor(porId.get(o.id), o));
   });
   return ordem.map((id) => porId.get(id)).filter((o) => !del.has(o.id));
@@ -65,13 +98,23 @@ export function mesclarTarefasProjeto(base, outro, deletados) {
   const del = deletados instanceof Set ? deletados : new Set(lista(deletados));
   const porId = new Map();
   const ordem = [];
-  lista(base).forEach((t) => { if (temId(t) && !porId.has(t.id)) { ordem.push(t.id); porId.set(t.id, t); } });
+  lista(base).forEach((t) => {
+    if (temId(t) && !porId.has(t.id)) {
+      ordem.push(t.id);
+      porId.set(t.id, t);
+    }
+  });
   lista(outro).forEach((t) => {
     if (!temId(t)) return;
-    if (!porId.has(t.id)) { ordem.push(t.id); porId.set(t.id, t); return; }
+    if (!porId.has(t.id)) {
+      ordem.push(t.id);
+      porId.set(t.id, t);
+      return;
+    }
     const b = porId.get(t.id);
-    if (t.up && b.up) { if (t.up > b.up) porId.set(t.id, t); }
-    else if (t.up && !b.up) porId.set(t.id, t);
+    if (t.up && b.up) {
+      if (t.up > b.up) porId.set(t.id, t);
+    } else if (t.up && !b.up) porId.set(t.id, t);
   });
   return ordem.map((id) => porId.get(id)).filter((t) => !del.has(t.id));
 }
@@ -80,10 +123,19 @@ export function mesclarProjetos(atual, novo, deletados) {
   const del = deletados instanceof Set ? deletados : new Set(lista(deletados));
   const porId = new Map();
   const ordem = [];
-  lista(novo).forEach((p) => { if (temId(p) && !porId.has(p.id)) { ordem.push(p.id); porId.set(p.id, p); } });
+  lista(novo).forEach((p) => {
+    if (temId(p) && !porId.has(p.id)) {
+      ordem.push(p.id);
+      porId.set(p.id, p);
+    }
+  });
   lista(atual).forEach((p) => {
     if (!temId(p)) return;
-    if (!porId.has(p.id)) { ordem.push(p.id); porId.set(p.id, p); return; }
+    if (!porId.has(p.id)) {
+      ordem.push(p.id);
+      porId.set(p.id, p);
+      return;
+    }
     const n = porId.get(p.id);
     const venc = vencedor(n, p);
     const perd = venc === n ? p : n;
@@ -99,6 +151,6 @@ export function mesclarProjetos(atual, novo, deletados) {
 export function mesclarChave(key, atual, novo, deletados) {
   if (!CHAVES_MESCLA.includes(key) || !Array.isArray(novo)) return novo;
   const del = CHAVES_LAPIDE.includes(key) ? deletados : [];
-  if (key === 'wfa-projetos') return mesclarProjetos(atual, novo, del);
+  if (key === "wfa-projetos") return mesclarProjetos(atual, novo, del);
   return mesclarPorId(atual, novo, del);
 }
