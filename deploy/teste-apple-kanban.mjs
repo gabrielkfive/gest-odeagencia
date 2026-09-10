@@ -145,6 +145,18 @@ for (const tema of ['light', 'dark']) {
     });
     checa(mod.dentro && mod.wrapOver <= 1, `${rot} detalhe cabe na tela (${mod.largura}px, sem rolagem lateral)`);
     if (L.mobile) checa(mod.mainOverflow === 'visible' && /auto|scroll/.test(mod.wrapOverflow), `${rot} celular: o detalhe rola numa area so (main ${mod.mainOverflow}, wrap ${mod.wrapOverflow})`);
+    // etiquetas fechadas por padrao: so as ligadas e o "+ etiqueta"; abre ao clicar (10/09/2026, pedido do Gabriel)
+    const et = await page.evaluate(() => {
+      const box = document.getElementById('tk-papeis'); if (!box) return { sem: true };
+      const antes = !!box.querySelector('.tkpp-lista'), tg = box.querySelector('[data-pptoggle]');
+      tg && tg.click();
+      const depois = !!box.querySelector('.tkpp-lista');
+      const nomes = [...box.querySelectorAll('.tkpp-lista [data-pp]')].map((b) => b.textContent.trim());
+      const minusc = nomes.filter((n) => n && n[0] !== n[0].toUpperCase());
+      box.querySelector('[data-pptoggle]').click();
+      return { antes, depois, fechou: !box.querySelector('.tkpp-lista'), total: nomes.length, minusc };
+    });
+    checa(!et.sem && !et.antes && et.depois && et.fechou && et.total > 0 && et.minusc.length === 0, `${rot} etiquetas fechadas por padrao, abrem no clique e vem com inicial maiuscula (${et.total} no catalogo, minusculas: ${(et.minusc || []).join(',') || 'nenhuma'})`);
     await page.evaluate(() => { const i = document.getElementById('tk-t'); i.value = 'Relatório semanal v2'; i.dispatchEvent(new Event('input', { bubbles: true })); });
     await page.waitForTimeout(100);
     await page.keyboard.press('Escape');
