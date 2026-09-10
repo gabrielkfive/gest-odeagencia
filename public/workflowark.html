@@ -1,4 +1,4 @@
-<!-- build 20260910e-apple-kanban -->
+<!-- build 20260910f-apple-v2 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
-<link rel="stylesheet" href="workflowark-20260910e.css">
+<link rel="stylesheet" href="workflowark-20260910f.css">
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -1943,7 +1943,8 @@ function wfaSetTheme(t){
           @media (prefers-reduced-transparency:reduce){#pj-modal{backdrop-filter:none;-webkit-backdrop-filter:none}}
           #pj-modal .pj-f.largo{display:flex}
           .tkwrap{display:grid;grid-template-columns:1fr 340px;width:100%;max-height:92vh;min-height:0}
-          .tkmain{padding:0 28px 22px;overflow:auto;min-width:0;scrollbar-width:thin}
+          .tkmain{padding:0 28px 22px;overflow:auto;min-width:0;scrollbar-width:thin;scrollbar-color:rgba(120,120,128,.35) transparent}
+          body.aura-dark .tkmain,body.aura-dark .tkfeed{scrollbar-color:rgba(255,255,255,.22) transparent}
           .tkcapa{margin:0 -28px;height:0;overflow:hidden;background:#000;position:relative;transition:height .22s cubic-bezier(.23,1,.32,1)}
           .tkcapa.on{height:168px;margin-bottom:6px}
           .tkcapa img.capa{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
@@ -2027,7 +2028,7 @@ function wfaSetTheme(t){
           .tkbtn{background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:transform .12s,filter .15s}
           .tkbtn:hover{filter:brightness(1.1)}
           .tkbtn:active{transform:scale(.96)}
-          .tkfoot{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:18px;padding:14px 0 6px;border-top:1px solid var(--line);position:sticky;bottom:0;box-shadow:0 -14px 18px -14px rgba(0,0,0,.35);background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface))}
+          .tkfoot{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:18px;padding:14px 0 2px;border-top:1px solid var(--line)}
           .tkside{border-left:1px solid var(--line);background:transparent;display:flex;flex-direction:column;min-height:0}
           .tksideh{font-size:13px;font-weight:700;color:var(--ink);padding:22px 20px 10px}
           .tkfeed{flex:1;overflow:auto;padding:4px 20px 12px;scrollbar-width:thin}
@@ -2065,9 +2066,9 @@ function wfaSetTheme(t){
           .tkcl span{transition:color .2s}
           /* Acoes do cartao como pilulas compactas em linha (revisao Apple, 10/09/2026): mesma
              funcao dos botoes altos de antes, menos peso visual, e o feed ganha espaco. */
-          .tkacoes{padding:18px 16px 4px;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
-          .tkacth{flex:0 0 100%;font-size:10.5px;font-weight:600;color:var(--mute);letter-spacing:.02em;text-transform:none;margin:4px 2px 1px}
-          .tkacoes button{display:inline-flex;align-items:center;gap:6px;width:auto;text-align:left;background:rgba(118,118,128,.10);border:0;border-radius:8px;padding:6px 10px;font:inherit;font-size:12px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s,transform .12s;min-height:32px}
+          .tkacoes{padding:18px 16px 4px;display:flex;flex-direction:column;gap:4px}
+          .tkacth{font-size:10.5px;font-weight:600;color:var(--mute);letter-spacing:.02em;text-transform:none;margin:6px 2px 2px}
+          .tkacoes button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:rgba(118,118,128,.10);border:0;border-radius:9px;padding:0 11px;font:inherit;font-size:12.5px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s,transform .12s;min-height:34px}
           .tkacoes button:hover{background:rgba(118,118,128,.18)}
           .tkacoes button:active{transform:scale(.97)}
           .tkacoes button svg{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
@@ -2084,7 +2085,7 @@ function wfaSetTheme(t){
           body.aura-dark .tkacoes button{background:rgba(255,255,255,.06);color:#e6e8ec}
           body.aura-dark .tkacoes button:hover{background:rgba(255,255,255,.12)}
           body.aura-dark .tkr:hover{background:rgba(255,255,255,.04)}
-          @media(max-width:900px){.tkacoes{padding:12px 14px 4px}.tkr:hover{margin:0;padding-left:0;padding-right:0}}
+          @media(max-width:900px){.tkacoes{padding:12px 14px 4px;flex-direction:row;flex-wrap:wrap}.tkacoes button{width:auto;flex:1 1 30%}.tkacth{flex:0 0 100%}.tkr:hover{margin:0;padding-left:0;padding-right:0}}
           @media(max-width:900px){
             /* Uma rolagem so no celular: o conteudo principal e a atividade correm juntos,
                em vez de duas areas de rolagem presas dentro de 92vh (revisao Apple). */
@@ -4372,6 +4373,6 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260910e.js"></script>
+<script src="workflowark-app-20260910f.js"></script>
 </body>
 </html>

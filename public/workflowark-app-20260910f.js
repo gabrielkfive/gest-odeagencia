@@ -3235,21 +3235,29 @@ function wfaEstDecimal(hStr,mStr){
   function pjPintaPapeis(m){
     var box=m.querySelector('#tk-papeis');if(!box)return;
     var cur=(m.dataset.papeis||'').split(',').filter(Boolean);
-    box.innerHTML=PAPEIS.map(function(x){
-      var on=cur.indexOf(x.k)>=0;
-      /* Etiqueta neutra com ponto na cor; so a ligada pinta o fundo (revisao Apple, 10/09/2026).
-         Antes todas apareciam contornadas em cores diferentes, um arco-iris dentro do campo. */
-      return '<button type="button" class="pj-tag" data-pp="'+x.k+'" aria-pressed="'+(on?'true':'false')+'" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;font-size:11.5px;font-weight:600;background:'+(on?x.c:'rgba(118,118,128,.10)')+';color:'+(on?'#fff':'var(--txt)')+';border:1px solid '+(on?x.c:'transparent')+'"><i style="width:7px;height:7px;border-radius:50%;background:'+(on?'rgba(255,255,255,.85)':x.c)+';display:inline-block"></i>'+esc(x.n)+'</button>';
-    }).join('');
+    /* Etiquetas fechadas por padrao (pedido do Gabriel, 10/09/2026): a linha mostra so as
+       ligadas e um "+ etiqueta"; o catalogo inteiro aparece ao clicar. Nome com inicial
+       maiuscula so na exibicao (a chave gravada nao muda). */
+    var aberto=!!m._papeisAbertos;
+    var Nome=function(n){n=String(n||'');return n.charAt(0).toUpperCase()+n.slice(1);};
+    var pill=function(x,on,rm){
+      return '<button type="button" class="pj-tag tkpp'+(on?' on':'')+'" data-pp="'+x.k+'" aria-pressed="'+(on?'true':'false')+'" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;font-size:11.5px;font-weight:600;background:'+(on?x.c:'rgba(118,118,128,.10)')+';color:'+(on?'#fff':'var(--txt)')+';border:1px solid '+(on?x.c:'transparent')+'"><i style="width:7px;height:7px;border-radius:50%;background:'+(on?'rgba(255,255,255,.85)':x.c)+';display:inline-block"></i>'+esc(Nome(x.n))+(rm?'<b style="font-size:10px;font-weight:700;opacity:.8">✕</b>':'')+'</button>';
+    };
+    var ligadas=PAPEIS.filter(function(x){return cur.indexOf(x.k)>=0;});
+    var h=ligadas.map(function(x){return pill(x,true,!aberto);}).join('');
+    h+='<button type="button" class="tkadd tkpp-toggle" data-pptoggle="1" style="background:none;border:0;padding:4px 6px;font:inherit;font-size:12px;font-weight:700">'+(aberto?'Fechar':'+ etiqueta')+'</button>';
+    if(aberto)h+='<div class="tkpp-lista" style="flex:0 0 100%;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)">'+PAPEIS.map(function(x){return pill(x,cur.indexOf(x.k)>=0,false);}).join('')+'</div>';
+    box.innerHTML=h;
+    var novo=m.querySelector('[data-ppnovo]');if(novo)novo.style.display=aberto?'':'none';
+    var tg=box.querySelector('[data-pptoggle]');
+    if(tg)tg.addEventListener('click',function(ev){ev.stopPropagation();m._papeisAbertos=!aberto;pjPintaPapeis(m);});
     box.querySelectorAll('[data-pp]').forEach(function(b){
       b.addEventListener('click',function(){
         var atual=(m.dataset.papeis||'').split(',').filter(Boolean);
-        var k=b.dataset.pp, ix=atual.indexOf(k), pp=papel(k);
+        var k=b.dataset.pp, ix=atual.indexOf(k);
         if(ix>=0)atual.splice(ix,1);else atual.push(k);
         m.dataset.papeis=atual.join(',');
-        var on=atual.indexOf(k)>=0;
-        b.style.background=on?pp.c:'transparent';
-        b.style.color=on?'#fff':pp.c;
+        pjPintaPapeis(m);
       });
     });
   }
