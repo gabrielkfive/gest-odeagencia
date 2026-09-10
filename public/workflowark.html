@@ -1,4 +1,4 @@
-<!-- build 20260910c3-flush-oculto -->
+<!-- build 20260910d-trello-vivo -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
-<link rel="stylesheet" href="workflowark-20260910c.css">
+<link rel="stylesheet" href="workflowark-20260910d.css">
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -2025,7 +2025,7 @@ function wfaSetTheme(t){
           .tkbtn{background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:transform .12s,filter .15s}
           .tkbtn:hover{filter:brightness(1.1)}
           .tkbtn:active{transform:scale(.96)}
-          .tkfoot{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);position:sticky;bottom:0;background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface))}
+          .tkfoot{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:18px;padding:14px 0 6px;border-top:1px solid var(--line);position:sticky;bottom:0;box-shadow:0 -14px 18px -14px rgba(0,0,0,.35);background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface))}
           .tkside{border-left:1px solid var(--line);background:transparent;display:flex;flex-direction:column;min-height:0}
           .tksideh{font-size:13px;font-weight:700;color:var(--ink);padding:22px 20px 10px}
           .tkfeed{flex:1;overflow:auto;padding:4px 20px 12px;scrollbar-width:thin}
@@ -2045,6 +2045,42 @@ function wfaSetTheme(t){
           body.aura-dark .tkcampos,body.aura-dark .tkdesc,body.aura-dark .tksec,body.aura-dark .tkcm{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.09)}
           body.aura-dark .tkv select:focus,body.aura-dark .tkv input:focus,body.aura-dark .tkinline input:focus,body.aura-dark .tkcbox textarea:focus{background:rgba(255,255,255,.06)}
           body.aura-dark #pj-modal .pj-f{box-shadow:0 30px 90px -20px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.06) inset}
+          /* ===== Vida do Trello no detalhe (11/09/2026) ===== */
+          .tkna{font-size:12.5px;color:var(--mute);margin:-8px 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+          .tkna b{color:var(--ink);font-weight:700;background:rgba(118,118,128,.12);padding:3px 10px;border-radius:999px}
+          .tkna-avs{display:inline-flex;align-items:center;padding-left:6px}
+          .tkna-avs .av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--yel),var(--yel-d));color:#000;display:grid;place-items:center;font-size:10px;font-weight:800;font-style:normal;margin-left:-6px;border:2px solid var(--bg)}
+          .tkr{transition:background .12s}
+          .tkr:hover{background:rgba(118,118,128,.05);border-radius:10px;margin:0 -8px;padding-left:8px;padding-right:8px}
+          .tkflash{animation:tkFlash .7s cubic-bezier(.23,1,.32,1)}
+          @keyframes tkFlash{0%{box-shadow:0 0 0 0 rgba(255,199,0,.0)}25%{box-shadow:0 0 0 4px rgba(255,199,0,.55)}100%{box-shadow:0 0 0 0 rgba(255,199,0,0)}}
+          .tkprog{display:flex;align-items:center;gap:10px;margin:2px 0 8px;font-size:11px;color:var(--mute);font-weight:700;font-variant-numeric:tabular-nums}
+          .tkprog .tkbar{flex:1;height:8px;border-radius:999px;background:rgba(118,118,128,.16);overflow:hidden}
+          .tkprog .tkbar div{height:100%;background:var(--yel);border-radius:999px;transition:width .35s cubic-bezier(.23,1,.32,1),background .3s}
+          .tkprog.full .tkbar div{background:var(--green)}
+          .tkprog.full span{color:var(--green)}
+          .tkcl input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex:none}
+          .tkcl span{transition:color .2s}
+          .tkacoes{padding:22px 16px 6px;display:flex;flex-direction:column;gap:5px}
+          .tkacth{font-size:11px;font-weight:700;color:var(--mute);letter-spacing:.06em;text-transform:uppercase;margin:6px 4px 3px}
+          .tkacoes button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:rgba(118,118,128,.10);border:0;border-radius:10px;padding:8px 11px;font:inherit;font-size:13px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s,transform .12s}
+          .tkacoes button:hover{background:rgba(118,118,128,.18)}
+          .tkacoes button:active{transform:scale(.97)}
+          .tkacoes button svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+          .tkacoes button.ok{color:var(--green)}
+          .tkacoes button.ok:hover{background:rgba(22,163,74,.14)}
+          .tkacoes button.bad{color:var(--red)}
+          .tkacoes button.bad:hover{background:rgba(220,38,38,.12)}
+          .tksideh{padding-top:14px}
+          .tkcrow{display:flex;gap:8px;align-items:flex-start}
+          .tkcrow .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--yel),var(--yel-d));color:#000;display:grid;place-items:center;font-size:10px;font-weight:800;font-style:normal;flex:none;margin-top:4px}
+          .tkcrow textarea{flex:1}
+          body.aura-dark .tkna b{background:rgba(255,255,255,.08)}
+          body.aura-dark .tkna-avs .av{border-color:#0d0e10}
+          body.aura-dark .tkacoes button{background:rgba(255,255,255,.06);color:#e6e8ec}
+          body.aura-dark .tkacoes button:hover{background:rgba(255,255,255,.12)}
+          body.aura-dark .tkr:hover{background:rgba(255,255,255,.04)}
+          @media(max-width:900px){.tkacoes{flex-direction:row;flex-wrap:wrap;padding:12px 14px 4px}.tkacoes button{width:auto;flex:1 1 30%}.tkacth{width:100%}.tkr:hover{margin:0;padding-left:0;padding-right:0}}
           @media(max-width:900px){
             .tkwrap{grid-template-columns:1fr;max-height:92vh;overflow:auto}
             .tkmain{padding:0 18px 18px}
@@ -4330,6 +4366,6 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260910c.js"></script>
+<script src="workflowark-app-20260910d.js"></script>
 </body>
 </html>

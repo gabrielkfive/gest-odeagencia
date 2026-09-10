@@ -1582,3 +1582,25 @@ body.aura-dark #page-tarefas .task-col-head .ct{background:#25272c;color:#9aa1ad
 #page-tarefas .task-card:hover .tc-capa img{transform:scale(1.04)}
 @media (max-width:900px){#page-tarefas .task-card .tc-capa{margin:-16px -16px 12px;height:120px}}
 body.aura-dark #page-tarefas .task-card .tc-capa{border-bottom-color:rgba(255,255,255,.08)}
+/* ===== Colunas com contorno e faixa de cor (pedido do Gabriel, 11/09): orientam onde termina cada etapa ===== */
+#page-tarefas .task-board{align-items:stretch;gap:16px;padding:6px 4px 14px}
+#page-tarefas .task-col{background:rgba(0,0,0,.035);border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:0 10px 10px;gap:10px;height:var(--wfa-colmax,calc(100vh - 220px));max-height:var(--wfa-colmax,calc(100vh - 220px));overflow:hidden;box-shadow:none}
+#page-tarefas .task-col::before{display:block;content:'';position:absolute;left:14px;right:14px;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--mute-2)}
+#page-tarefas .task-col[data-status=backlog]::before{background:#a3a3a3}
+#page-tarefas .task-col[data-status=iniciar]::before{background:#2b62c4}
+#page-tarefas .task-col[data-status=andamento]::before{background:var(--yel)}
+#page-tarefas .task-col[data-status=aprovacao]::before{background:#d4a300}
+#page-tarefas .task-col[data-status=homologcli]::before{background:#ea580c}
+#page-tarefas .task-col[data-status=concluido]::before{background:var(--green)}
+#page-tarefas .task-col-head{padding:12px 4px 8px;position:sticky;top:0;z-index:2;background:transparent}
+#page-tarefas .task-list{gap:12px;padding:2px 2px 8px;overscroll-behavior-y:auto;scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.18) transparent}
+#page-tarefas .task-list::-webkit-scrollbar{width:8px}
+#page-tarefas .task-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.18);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+#page-tarefas .task-col.drop-on{background:rgba(255,199,0,.10);border-color:rgba(255,199,0,.6)}
+body.aura-dark #page-tarefas .task-col{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.08)}
+body.aura-dark #page-tarefas .task-col::before{display:block}
+body.aura-dark #page-tarefas .task-list{scrollbar-color:rgba(255,255,255,.22) transparent}
+body.aura-dark #page-tarefas .task-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22)}
+/* O quadro encaixa no topo da rolagem quando a pessoa chega nele: as colunas ocupam a tela inteira e rolam por dentro. */
+@media (min-width:901px) and (pointer:fine){#view.wfa-snap{scroll-snap-type:y proximity}#view.wfa-snap #task-board{scroll-snap-align:start;scroll-margin-top:10px}}
+@media (max-width:900px){#page-tarefas .task-col{height:auto;max-height:var(--wfa-colmax,70vh)}}

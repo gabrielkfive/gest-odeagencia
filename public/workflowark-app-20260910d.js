@@ -2919,6 +2919,17 @@ function wfaEstDecimal(hStr,mStr){
      onSave(dados, modal) / onDelete() / onTimer(since, gasto). O modal nao sabe onde a
      tarefa mora. extrasHTML(t) acrescenta linhas no bloco de campos (prioridade,
      cliente, funcao e tags, no caso de Atividades). */
+  var TKI={
+    user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+    tag:'<svg viewBox="0 0 24 24"><path d="M3 12V4h8l9 9-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg>',
+    check:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m8 12 3 3 5-6"/></svg>',
+    cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
+    clip:'<svg viewBox="0 0 24 24"><path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 6"/></svg>',
+    img:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 9"/></svg>',
+    move:'<svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>',
+    done:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.3 2.3L15.5 10"/></svg>',
+    trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>'
+  };
   function tkAbrir(ctx){
     var t=ctx.t||{};
     var ehNova=!!ctx.ehNova;
@@ -2937,6 +2948,7 @@ function wfaEstDecimal(hStr,mStr){
       '<div class="tkmain">'+
         '<div id="tk-capa" class="tkcapa"></div>'+'<div class="tktopo"><div class="tkbc">'+(ctx.crumb||'')+'</div><button type="button" class="tkx" data-tkx="1" aria-label="Fechar" title="Fechar">✕</button></div>'+
         '<input id="tk-t" class="tktitulo" value="'+esc(t.t)+'" placeholder="O que precisa ser feito">'+
+      '<div class="tkna">na lista <b id="tk-na">'+esc((cols.filter(function(c){return c.k===t.st;})[0]||cols[0]||{n:''}).n)+'</b>'+((t.resps||[]).length?'<span class="tkna-avs">'+(t.resps||[]).map(function(r){return '<i class="av" title="'+esc(r)+'">'+tkIni(r)+'</i>';}).join('')+'</span>':'')+'</div>'+
         '<div class="tkcampos">'+
           linha('◎','Status','<select id="tk-st" class="tkst">'+cols.map(function(c){return '<option value="'+c.k+'"'+(t.st===c.k?' selected':'')+'>'+esc(c.n)+'</option>';}).join('')+'</select>'+
             (t.st==='concluido'?'':'<button type="button" class="tkok" data-tkconcluir="1" title="Marcar como concluída">✓</button>'))+
@@ -2954,6 +2966,7 @@ function wfaEstDecimal(hStr,mStr){
         '</div>'+
         '<textarea id="tk-obs" class="tkdesc" placeholder="Adicione uma descrição">'+esc(t.obs||'')+'</textarea>'+
         '<div class="tksec"><div class="tksech">☑ Checklist <span id="tk-clct">'+(cl.length?clOk+'/'+cl.length:'')+'</span></div>'+
+          '<div class="tkprog" id="tk-clprog"'+(cl.length?'':' style="display:none"')+'><span id="tk-clpct">'+(cl.length?Math.round(clOk/cl.length*100):0)+'%</span><div class="tkbar"><div id="tk-clbar" style="width:'+(cl.length?Math.round(clOk/cl.length*100):0)+'%"></div></div></div>'+
           '<div id="tk-cl"></div>'+
           '<div class="tkinline"><input id="tk-clnovo" placeholder="Adicionar item e teclar Enter"></div></div>'+
         '<div class="tksec"><div class="tksech">📎 Anexos</div>'+
@@ -2970,9 +2983,22 @@ function wfaEstDecimal(hStr,mStr){
         '</div>'+
       '</div>'+
       '<div class="tkside">'+
+        '<div class="tkacoes">'+
+          '<div class="tkacth">Adicionar ao cartão</div>'+
+          '<button type="button" data-tkgo="tk-addresp">'+TKI.user+'Membros</button>'+
+          (ctx.semPapeis?'':'<button type="button" data-tkgo="tk-papeis">'+TKI.tag+'Etiquetas</button>')+
+          '<button type="button" data-tkgo="tk-clnovo">'+TKI.check+'Checklist</button>'+
+          '<button type="button" data-tkgo="tk-venc">'+TKI.cal+'Datas</button>'+
+          '<button type="button" data-tkgo="tk-anxnm">'+TKI.clip+'Anexo</button>'+
+          '<button type="button" data-tkcapa="1">'+TKI.img+'Capa / imagem</button>'+
+          '<div class="tkacth">Ações</div>'+
+          '<button type="button" data-tkgo="tk-st">'+TKI.move+'Mover</button>'+
+          (t.st==='concluido'?'':'<button type="button" data-tkdone="1" class="ok">'+TKI.done+'Concluir</button>')+
+          (ehNova?'':'<button type="button" data-tkdel2="1" class="bad">'+TKI.trash+'Excluir</button>')+
+        '</div>'+
         '<div class="tksideh">Atividade</div>'+
         '<div id="tk-feed" class="tkfeed"></div>'+
-        '<div class="tkcbox"><textarea id="tk-cmt" placeholder="Escreva um comentário"></textarea>'+
+        '<div class="tkcbox"><div class="tkcrow"><i class="av">'+tkIni(tkQuem())+'</i><textarea id="tk-cmt" placeholder="Escreva um comentário"></textarea></div>'+
           '<button type="button" class="tkbtn" data-cmtadd="1">Enviar</button></div>'+
       '</div>'+
       '</div>'
@@ -2980,6 +3006,15 @@ function wfaEstDecimal(hStr,mStr){
 
     var m=document.getElementById('pj-modal');
     m._ctx=ctx;
+    /* Botoes laterais estilo Trello: levam ao campo, com um brilho no destino. */
+    (function(){
+      var vai=function(id){var el=m.querySelector('#'+id);if(!el)return;el.scrollIntoView({behavior:'smooth',block:'center'});var alvo=el.closest('.tkr')||el.closest('.tksec')||el;alvo.classList.remove('tkflash');void alvo.offsetWidth;alvo.classList.add('tkflash');setTimeout(function(){try{el.focus({preventScroll:true});}catch(e){}},260);};
+      m.querySelectorAll('[data-tkgo]').forEach(function(b){b.addEventListener('click',function(){vai(b.dataset.tkgo);});});
+      var bc=m.querySelector('[data-tkcapa]');if(bc)bc.addEventListener('click',function(){var f=m.querySelector('#tk-anxfile');if(f)f.click();});
+      var bd=m.querySelector('[data-tkdone]');if(bd)bd.addEventListener('click',function(){var s=m.querySelector('#tk-st');if(s){s.value='concluido';s.dataset.st='concluido';s.dispatchEvent(new Event('change',{bubbles:true}));}bd.style.display='none';var ok=m.querySelector('[data-tkconcluir]');if(ok)ok.style.display='none';});
+      var bx2=m.querySelector('[data-tkdel2]');if(bx2)bx2.addEventListener('click',function(){var d=m.querySelector('[data-tkdel]');if(d)d.click();});
+      var st=m.querySelector('#tk-st'),na=m.querySelector('#tk-na');if(st&&na)st.addEventListener('change',function(){var c=cols.filter(function(x){return x.k===st.value;})[0];na.textContent=c?c.n:st.value;});
+    })();
     /* Status como pilula colorida (mesma cor da coluna) e botao X no topo (11/09/2026) */
     (function(){var st=m.querySelector('#tk-st');if(st){st.dataset.st=st.value;st.addEventListener('change',function(){st.dataset.st=st.value;});}
       var bx=m.querySelector('[data-tkx]');if(bx)bx.addEventListener('click',function(){var cb=m.querySelector('[data-tkcancel]');if(cb)cb.click();else fecharModal();});})();
@@ -3141,6 +3176,9 @@ function wfaEstDecimal(hStr,mStr){
     }).join('');
     var ct=m.querySelector('#tk-clct');
     if(ct)ct.textContent=(m._cl||[]).length?((m._cl.filter(function(x){return x.done;}).length)+'/'+m._cl.length):'';
+    /* Barra de progresso do checklist (Trello): fica verde quando fecha. */
+    var prog=m.querySelector('#tk-clprog'),bar=m.querySelector('#tk-clbar'),pct=m.querySelector('#tk-clpct');
+    if(prog&&bar&&pct){var tot=(m._cl||[]).length,ok=tot?m._cl.filter(function(x){return x.done;}).length:0,p=tot?Math.round(ok/tot*100):0;prog.style.display=tot?'':'none';bar.style.width=p+'%';pct.textContent=p+'%';prog.classList.toggle('full',!!(tot&&ok===tot));}
     box.querySelectorAll('[data-cl]').forEach(function(el){
       el.addEventListener('change',function(){
         m._cl.forEach(function(x){if(x.id===el.dataset.cl)x.done=el.checked;});pjPintaCl(m);
@@ -5342,7 +5380,18 @@ function renderTarefas(){
   // bind drag
   bindDrag();
   tarefaApplyView();
+  wfaAjustaAlturaBoard();
 }
+/* Colunas com a altura da area de rolagem (#view): o quadro inteiro cabe na tela e cada lista rola por dentro.
+   Antes a coluna media 100vh-220px e o quadro nascia abaixo da dobra: a roda do mouse caia na lista e a pagina parava.
+   (11/09/2026, relato do Gabriel: 'rolagem pra cima e pra baixo tem que funcionar'). */
+function wfaAjustaAlturaBoard(){
+  try{const board=document.getElementById('task-board'),view=document.getElementById('view');if(!board||!view)return;
+    const kan=(WFA_TASK_VIEW==='kanban'); /* so o quadro tem snap-align; em outras paginas a regra nao encontra alvo */
+    view.classList.toggle('wfa-snap',!!kan);
+    const alt=Math.max(360,view.clientHeight-28);board.style.setProperty('--wfa-colmax',alt+'px');}catch(e){}
+}
+window.addEventListener('resize',function(){clearTimeout(window._wfaAltT);window._wfaAltT=setTimeout(wfaAjustaAlturaBoard,120);});
 var WFA_TASK_VIEW='kanban';   // var: renderTarefas->tarefaApplyView lê isto e pode rodar antes desta linha num boot rápido (evita TDZ/tela branca)
 function tarefaSetView(v){
   WFA_TASK_VIEW=v;
