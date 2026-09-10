@@ -1558,3 +1558,8 @@ body.aura-dark #page-tarefas .tc-avs .tc-av{border-color:#1a1b1e}
 body.aura-dark #page-tarefas .task-list .tc-vazio{border-color:rgba(255,255,255,.12)}
 body.aura-dark #page-tarefas .task-col.drop-on{background:rgba(255,199,0,.06)}
 @media (max-width:900px){#page-tarefas .task-col{flex-basis:82vw}#page-tarefas .task-card{padding:16px 16px 12px}}
+
+/* Fidelidade ao estilo 21st: sem faixa colorida na coluna nem borda vermelha lateral no cartao (os temas aura definiam isso com especificidade maior) */
+body.aura-light #page-tarefas .task-col::before,body.aura-dark #page-tarefas .task-col::before{display:none}
+body.aura-light #page-tarefas .task-card,body.aura-dark #page-tarefas .task-card,body.aura-light #page-tarefas .task-card:has(.prio-alta),body.aura-dark #page-tarefas .task-card:has(.prio-alta){border-left:1px solid var(--line)}
+body.aura-dark #page-tarefas .task-card,body.aura-dark #page-tarefas .task-card:has(.prio-alta){border-left-color:rgba(255,255,255,.08)}
