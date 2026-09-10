@@ -5303,7 +5303,7 @@ function renderTarefas(){
       }
     }
     const html=filt.map(taskCard).join('');
-    wfaSetHTML(list,(html||`<div class="muted" style="font-size:11px;padding:8px;text-align:center">Vazio</div>`)+maisBtn);
+    wfaSetHTML(list,(html||`<div class="muted tc-vazio">Solte cartões aqui</div>`)+maisBtn);
     list.scrollTop=_keepScroll;
     document.getElementById('ct-'+st).textContent=totalCol;
   });
@@ -5491,54 +5491,49 @@ function renderTaskDashboard(){
 
   wfaSetHTML(document.getElementById('task-painel'),kpis+`<div class="db-grid">${capCard}${barBlock('Atividades por Função',porFuncao,'#ffd400')}${barBlock('Atividades por Membro',porMembro,'#111')}${barBlock('Atrasadas por Membro',atrasMembro,'#e0364f')}${wipCard}</div>`);
 }
+/* Cor do ponto do chip: mesma etiqueta, mesma cor, em qualquer aparelho (hash simples). */
+function tcDot(str){const P=['#8b5cf6','#3b82f6','#f97316','#22c55e','#ec4899','#14b8a6','#eab308'];let h=0;const x=String(str||'');for(let i=0;i<x.length;i++)h=(h*31+x.charCodeAt(i))|0;return P[Math.abs(h)%P.length];}
 function taskCard(t){
   const c=CLIENTES.find(x=>x.id===t.clienteId);
   const today=hojeSP();
   const late=t.data&&t.data<today&&t.status!=='concluido';
   const venceHoje=t.data===today&&t.status!=='concluido';
-  const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';
-  const ORDEM=['backlog','iniciar','andamento','aprovacao','homologcli','concluido'];
-  const _ix=ORDEM.indexOf(t.status);
-  const nextStatus=_ix<0?'iniciar':ORDEM[(_ix+1)%ORDEM.length];
-  const prioBadge=t.prio==='alta'?'<span class="prio-badge prio-alta">Alta</span>':t.prio==='baixa'?'<span class="prio-badge prio-baixa">Baixa</span>':'';
+  const dataFmt=t.data?t.data.split('-').reverse().join('/'):'';
+  const prioLbl=t.prio==='alta'?'Alta':t.prio==='baixa'?'Baixa':'Média';
+  const prioBadge=`<span class="prio-badge prio-${t.prio==='alta'?'alta':t.prio==='baixa'?'baixa':'media'}">${prioLbl}</span>`;
   const descHtml=t.desc?`<div class="tc-desc">${escapeHtml(t.desc)}</div>`:'';
+  const cliNm=c?c.nm:(t.clienteNome||'');
+  const cliChip=cliNm?`<span class="tc-cli"><span class="tc-dot" style="background:${tcDot(cliNm)}"></span>${escapeHtml(cliNm)}</span>`:'';
   const tags=(t.tags||[]).concat((t.papeis||[]).map(k=>(typeof pjPapelNome==='function'?pjPapelNome(k):k)));
-  const tagsHtml=tags.length?`<div class="tc-tags">${tags.map(tg=>`<span class="tc-tag">${escapeHtml(tg)}</span>`).join('')}</div>`:'';
+  const tagsHtml=tags.map(tg=>`<span class="tc-tag"><span class="tc-dot" style="background:${tcDot(tg)}"></span>${escapeHtml(tg)}</span>`).join('');
   const cl=t.checklist||[];
   const clDone=cl.filter(x=>x.done).length;
   const nCmt=(t.comments||[]).length, nAtt=(t.attachments||[]).length;
   const tSpent=(t.timeSpent||0)+(t.timerSince?(Date.now()-new Date(t.timerSince).getTime())/1000:0);
-  const badges=[];
-  if(cl.length)badges.push(`<span class="tc-badge${clDone===cl.length?' done':''}">☑ ${clDone}/${cl.length}</span>`);
-  if(tSpent>=1)badges.push(`<span class="tc-badge${t.timerSince?' run':''}">⏱ ${fmtDur(tSpent)}</span>`);
-  if(t.horas===0||t.horas)badges.push(`<span class="tc-badge">⏳ ${wfaEstFmt(t.horas)}</span>`);
-  if(nCmt)badges.push(`<span class="tc-badge">💬 ${nCmt}</span>`);
-  if(nAtt)badges.push(`<span class="tc-badge">🔗 ${nAtt}</span>`);
-  const clHtml=badges.length?`<div class="tc-badges">${badges.join('')}</div>`:'';
-  const dateStyle=late?'color:var(--red);font-weight:700':venceHoje?'color:#b36200;font-weight:700':'';
+  const I={cal:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
+    chk:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.3 2.3L15.5 10"/></svg>',
+    clk:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    est:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12M6 21h12M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4"/></svg>',
+    msg:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14a3 3 0 0 1-3 3H9l-5 4V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z"/></svg>',
+    att:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 6"/></svg>'};
+  const meta=[];
+  if(dataFmt)meta.push(`<span class="tc-date${late?' late':venceHoje?' hoje':''}">${I.cal}${late?'Atrasada · ':venceHoje?'Hoje · ':''}${dataFmt}</span>`);
+  if(cl.length)meta.push(`<span class="tc-badge${clDone===cl.length?' done':''}">${I.chk}${clDone}/${cl.length}</span>`);
+  if(tSpent>=1)meta.push(`<span class="tc-badge${t.timerSince?' run':''}">${I.clk}${fmtDur(tSpent)}</span>`);
+  if(t.horas===0||t.horas)meta.push(`<span class="tc-badge">${I.est}${wfaEstFmt(t.horas)}</span>`);
+  if(nCmt)meta.push(`<span class="tc-badge">${I.msg}${nCmt}</span>`);
+  if(nAtt)meta.push(`<span class="tc-badge">${I.att}${nAtt}</span>`);
   const pjTag=t.pj?`<div class="tc-pjtag" title="Tarefa do projeto ${escapeHtml(t.clienteNome||'')}: mesma tarefa da aba Projetos, sem cópia">Projeto${(t.sprint!==''&&t.sprint!==undefined&&t.sprint!==null)?' · sprint '+String(t.sprint).padStart(2,'0'):''}</div>`:'';
+  /* mostra TODOS os responsáveis (avatar por pessoa e nomes no title), não só o primeiro */
+  const _rs=(Array.isArray(t.resps)&&t.resps.length)?t.resps:(t.resp?[t.resp]:[]);
+  const avs=_rs.length?_rs.map(r=>`<span class="tc-av" title="${escapeHtml(r)}">${taskInitials(r)}</span>`).join(''):'<span class="tc-av none" title="Sem responsável">?</span>';
+  const del=t.pj?'':`<button type="button" class="tc-kebab icobtn" title="Excluir" aria-label="Excluir tarefa" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>`;
   return `<div class="task-card priority-${t.prio||'media'}${t.pj?' tc-pj':''}" draggable="true" data-tid="${t.id}" onclick="openTaskDetail('${t.id}')" style="cursor:pointer">
     ${pjTag}
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;margin-bottom:2px">
-      <div class="tc-title" style="flex:1">${escapeHtml(t.title)}</div>
-      ${prioBadge}
-    </div>
+    <div class="tc-top"><div class="tc-chips">${cliChip}${tagsHtml}${prioBadge}</div>${del}</div>
+    <div class="tc-title">${escapeHtml(t.title)}</div>
     ${descHtml}
-    ${tagsHtml}
-    ${clHtml}
-    <div class="tc-meta" style="margin-top:5px">
-      <span class="tc-cli">${c?escapeHtml(c.nm):(t.clienteNome?escapeHtml(t.clienteNome):'—')}</span>
-      <span class="tc-date ${late?'late':''}" style="${dateStyle}">${late?'Atrasada · ':venceHoje?'Hoje · ':''}${dataFmt}</span>
-    </div>
-    <div class="tc-meta" style="margin-top:4px">
-      <span class="tc-assign" style="display:inline-flex;align-items:center;gap:5px">${(()=>{
-        /* mostra TODOS os responsáveis, não só o primeiro: antes uma tarefa com Gabriel+Caio
-           só exibia "Gabriel" e parecia que o nome do Caio sumia (relato do Gabriel). */
-        const _rs=(Array.isArray(t.resps)&&t.resps.length)?t.resps:(t.resp?[t.resp]:[]);if(!_rs.length)return 'sem responsável';return _rs.map(r=>`<span class="tc-av">${taskInitials(r)}</span>`).join('')+'<span>'+_rs.map(r=>escapeHtml(r)).join(', ')+'</span>';})()}</span>
-      <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
-        ${t.pj?'':`<button class="icobtn" style="padding:2px 6px;font-size:9.5px;color:var(--red)" title="Excluir" onclick="event.stopPropagation();delTask('${t.id}')">✕</button>`}
-      </div>
-    </div>
+    <div class="tc-foot"><div class="tc-meta-l">${meta.join('')}</div><span class="tc-assign tc-avs" title="${escapeHtml(_rs.join(', ')||'Sem responsável')}">${avs}</span></div>
   </div>`;
 }
 function moveTask(id,newSt){
