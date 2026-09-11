@@ -952,7 +952,7 @@ body.aura-dark #page-dashboard #md-sub,
 body.aura-light #page-dashboard #md-sub{display:none}
 body.aura-dark .aura-hero-row,
 body.aura-light .aura-hero-row{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;margin-bottom:16px}
-@media (max-width:1180px){body.aura-dark .aura-hero-row{grid-template-columns:1fr}}
+@media (max-width:1180px){body.aura-dark .aura-hero-row,body.aura-light .aura-hero-row{grid-template-columns:1fr}}
 body.aura-dark .aura-hero,
 body.aura-light .aura-hero{position:relative;overflow:hidden;border-radius:28px;padding:34px 36px 30px;
   border:1px solid rgba(255,255,255,.08);color:#fff;
@@ -1810,10 +1810,10 @@ cola no campo (bug de 31/08). Mexeu numa lista, mexe nas duas. */
    #page-tarefas e vem por ultimo no arquivo de proposito: vence as camadas antigas sem
    precisar de !important. Nada de transform em hover: alvo nao se move durante o arrasto.
    ===================================================================================== */
-#page-tarefas,#page-projetos{--tf-fill:rgba(120,120,128,.10);--tf-fill-2:rgba(120,120,128,.16);--tf-col:rgba(120,120,128,.08);--tf-card:#fff;--tf-line:rgba(0,0,0,.07);--tf-ink:#1d1d1f;--tf-mute:#6e6e73;--tf-mute-2:#aeaeb2;--tf-seg:#fff;--tf-r:12px;--tf-seta:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.6' stroke-linecap='round'/></svg>")}
+#page-tarefas,#page-projetos,#page-dashboard{--tf-fill:rgba(120,120,128,.10);--tf-fill-2:rgba(120,120,128,.16);--tf-col:rgba(120,120,128,.08);--tf-card:#fff;--tf-line:rgba(0,0,0,.07);--tf-ink:#1d1d1f;--tf-mute:#6e6e73;--tf-mute-2:#aeaeb2;--tf-seg:#fff;--tf-r:12px;--tf-seta:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.6' stroke-linecap='round'/></svg>")}
 /* Escuro "black piano" (pedido do Gabriel, 10/09/2026): mesmo preto do Meu Dia / Mission Control,
    coluna quase invisivel sobre o preto, cartao #0d0e11 opaco com brilho de 1 px no topo. */
-body.aura-dark #page-tarefas,body.aura-dark #page-projetos{--tf-fill:rgba(255,255,255,.07);--tf-fill-2:rgba(255,255,255,.13);--tf-col:rgba(255,255,255,.03);--tf-card:#0d0e11;--tf-line:rgba(255,255,255,.10);--tf-ink:#f5f5f7;--tf-mute:#9aa1ad;--tf-mute-2:#5f6570;--tf-seg:rgba(255,255,255,.16)}
+body.aura-dark #page-tarefas,body.aura-dark #page-projetos,body.aura-dark #page-dashboard{--tf-fill:rgba(255,255,255,.07);--tf-fill-2:rgba(255,255,255,.13);--tf-col:rgba(255,255,255,.03);--tf-card:#0d0e11;--tf-line:rgba(255,255,255,.10);--tf-ink:#f5f5f7;--tf-mute:#9aa1ad;--tf-mute-2:#5f6570;--tf-seg:rgba(255,255,255,.16)}
 #page-tarefas{padding-top:18px}
 @media (max-width:900px){#page-tarefas{padding:12px 14px 40px}}
 
@@ -2187,3 +2187,60 @@ body.aura-dark #page-projetos .pj-venc.late{color:#ff6b6b}
   #page-projetos .filter-bar::-webkit-scrollbar{display:none}
   #page-projetos .filter-bar>*{flex:0 0 auto;max-width:none}
 }
+
+/* =====================================================================================
+   MEU DIA FORA DO MISSION CONTROL (revisao Apple, 10/09/2026): a fila de decisoes, os
+   indicadores da coluna direita, os atalhos de area e os cartoes de tarefa e agenda entram
+   no mesmo cartao e tipografia de Atividades. O hero (Mission Control) nao muda.
+   ===================================================================================== */
+#page-dashboard .dec-hd b{font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--tf-ink)}
+#page-dashboard #md-decisoes .dec-hd b{font-size:15px}
+#page-dashboard .dec-hd span{font-size:12px;color:var(--tf-mute)}
+#page-dashboard #md-decisoes .dec-card,body.aura-dark #page-dashboard #md-decisoes .dec-card{background:var(--tf-card);border:1px solid var(--tf-line);border-left:1px solid var(--tf-line);border-radius:14px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin-bottom:8px}
+body.aura-dark #page-dashboard #md-decisoes .dec-card{box-shadow:0 1px 0 rgba(255,255,255,.04) inset}
+#page-dashboard #md-decisoes .dec-card.u2{border-left:1px solid var(--tf-line)}
+#page-dashboard #md-decisoes .dec-card::before{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--tf-mute-2);font-variant-numeric:tabular-nums}
+#page-dashboard .dec-ico{width:24px;height:24px;border-radius:7px;font-size:12px;background:var(--tf-fill)!important}
+#page-dashboard .dec-cli{font-size:11.5px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--tf-mute)}
+#page-dashboard .dec-t{font-size:13.5px;font-weight:600;letter-spacing:-.005em;color:var(--tf-ink)}
+#page-dashboard .dec-d{font-size:12px;color:var(--tf-mute);margin-bottom:10px}
+#page-dashboard .dec-urg{font-size:10.5px;font-weight:600;text-transform:capitalize;letter-spacing:0;padding:2px 8px;background:var(--tf-fill);color:var(--tf-mute)}
+#page-dashboard .dec-urg.u2{background:rgba(220,38,38,.10);color:#c62828}
+body.aura-dark #page-dashboard .dec-urg.u2{background:rgba(255,69,58,.16);color:#ff8a80}
+#page-dashboard .dec-urg.u1{background:rgba(255,199,0,.16);color:#8a6d00}
+body.aura-dark #page-dashboard .dec-urg.u1{color:var(--yel)}
+#page-dashboard .dec-btn{border-radius:9px;padding:0 12px;height:32px;font-size:12.5px;font-weight:600}
+#page-dashboard .dec-btn.p{background:var(--tf-ink);color:var(--bg)}
+body.aura-dark #page-dashboard .dec-btn.p{background:var(--yel);color:#111}
+#page-dashboard .dec-btn.s,body.aura-dark #page-dashboard .dec-btn.s{background:var(--tf-fill);color:var(--tf-ink);border:0}
+#page-dashboard .dec-btn.s:hover{background:var(--tf-fill-2)}
+#page-dashboard .dec-zero,body.aura-dark #page-dashboard .dec-zero{background:var(--tf-card);border:1px solid var(--tf-line);border-radius:14px;box-shadow:none}
+#page-dashboard .rail-label{font-size:11.5px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--tf-mute)}
+#page-dashboard .rail-label::after{background:var(--tf-line)}
+/* indicadores da coluna: cartao neutro, numero na cor */
+#page-dashboard #md-kpis .kpi,body.aura-dark #page-dashboard #md-kpis .kpi,body.aura-light #page-dashboard #md-kpis .kpi,
+#page-dashboard #md-kpis .kpi.yel,#page-dashboard #md-kpis .kpi.red,#page-dashboard #md-kpis .kpi.green,#page-dashboard #md-kpis .kpi.dk,
+body.aura-dark #page-dashboard #md-kpis .kpi.yel,body.aura-dark #page-dashboard #md-kpis .kpi.red,body.aura-dark #page-dashboard #md-kpis .kpi.green,body.aura-dark #page-dashboard #md-kpis .kpi.dk{
+  background:var(--tf-card);border:1px solid var(--tf-line);border-radius:14px;padding:14px 16px;min-height:0;gap:4px;box-shadow:0 1px 2px rgba(0,0,0,.04);transform:none;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--tf-ink)}
+body.aura-dark #page-dashboard #md-kpis .kpi{box-shadow:0 1px 0 rgba(255,255,255,.04) inset}
+#page-dashboard #md-kpis .kpi:hover{transform:none;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+#page-dashboard #md-kpis .kpi::after,#page-dashboard #md-kpis .kpi::before{display:none}
+#page-dashboard #md-kpis .kpi .l,#page-dashboard #md-kpis .kpi.dk .l{font-size:12px;font-weight:500;color:var(--tf-mute);text-transform:none;letter-spacing:0}
+#page-dashboard #md-kpis .kpi .v,#page-dashboard #md-kpis .kpi.dk .v{font-family:var(--sans);font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--tf-ink)}
+#page-dashboard #md-kpis .kpi .d,#page-dashboard #md-kpis .kpi.dk .d{font-size:11.5px;color:var(--tf-mute)}
+#page-dashboard #md-kpis .kpi.red .v{color:var(--red)}#page-dashboard #md-kpis .kpi.green .v{color:var(--green)}#page-dashboard #md-kpis .kpi.yel .v{color:#b38600}
+body.aura-dark #page-dashboard #md-kpis .kpi.red .v{color:#ff6b6b}body.aura-dark #page-dashboard #md-kpis .kpi.green .v{color:#4ade80}body.aura-dark #page-dashboard #md-kpis .kpi.yel .v{color:var(--yel)}
+/* atalhos de area */
+#page-dashboard .rail-links button,body.aura-dark #page-dashboard .rail-links button{background:var(--tf-fill);border:0;border-radius:9px;padding:0 12px;height:34px;font-size:12.5px;font-weight:600;color:var(--tf-ink);box-shadow:none}
+#page-dashboard .rail-links button:hover{background:var(--tf-fill-2)}
+/* cartoes de tarefa e agenda da coluna */
+#page-dashboard .md-card,body.aura-dark #page-dashboard .md-card{background:var(--tf-card);border:1px solid var(--tf-line);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);backdrop-filter:none;-webkit-backdrop-filter:none}
+body.aura-dark #page-dashboard .md-card{box-shadow:0 1px 0 rgba(255,255,255,.04) inset}
+#page-dashboard .md-card::after{display:none}
+#page-dashboard .md-card .md-hd,body.aura-dark #page-dashboard .md-card .md-hd{background:transparent;border-bottom:1px solid var(--tf-line);color:var(--tf-ink)}
+#page-dashboard .md-card .md-hd h3{color:var(--tf-ink);font-size:13px;font-weight:600}
+#page-dashboard .md-task,body.aura-dark #page-dashboard .md-task{background:transparent;border:0;border-bottom:1px solid var(--tf-line);border-radius:0;box-shadow:none;padding:10px 2px}
+#page-dashboard .md-task:hover,body.aura-dark #page-dashboard .md-task:hover{transform:none;box-shadow:none;background:var(--tf-fill)}
+#page-dashboard .md-task:last-child{border-bottom:0}
+/* Campo da missao no celular: sem min-width:0 o input de 16px (regra anti-zoom) empurrava o botao pra fora da tela (28 px de rolagem lateral no claro) */
+body.aura-dark .aura-missao-in,body.aura-light .aura-missao-in{min-width:0}

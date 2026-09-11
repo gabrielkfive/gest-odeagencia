@@ -247,6 +247,20 @@ for (const tema of ['light', 'dark']) {
     checa(pj.cols === 6 && /^rgb\((255, 255, 255|13, 14, 17)\)$/.test(pj.tBg), `${rot} Projetos: quadro com 6 colunas e cartao de tarefa na mesma superficie (${pj.tBg})`);
     checa(pj.emoji.length === 0 && !/🔍/.test(pj.ph), `${rot} Projetos: sem emoji no quadro e no filtro (${pj.emoji.join(' ') || 'nenhum'})`);
     checa(pj.pgOver <= 1 && pj.viewOver <= 1, `${rot} Projetos: pagina sem rolagem lateral (+${pj.pgOver}/+${pj.viewOver})`);
+    // 11. Meu Dia fora do Mission Control (10/09/2026): fila, indicadores e atalhos no mesmo cartao, sem emoji nos rotulos
+    await page.evaluate(() => { const n = document.querySelector('[data-nav="dashboard"]'); n && n.click(); });
+    await page.waitForTimeout(900);
+    const md = await page.evaluate(() => {
+      const pg = document.getElementById('page-dashboard'), view = document.getElementById('view');
+      const hd = pg.querySelector('#md-decisoes .dec-hd b'), kpi = pg.querySelector('#md-kpis .kpi.red'), links = [...pg.querySelectorAll('.rail-links button')].map((b) => b.textContent.trim());
+      const card = pg.querySelector('#md-decisoes .dec-card:not(.skeleton)');
+      const em = (t) => (t.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu) || []).length;
+      return { hd: hd ? hd.textContent.trim() : '', kpiBg: kpi ? getComputedStyle(kpi).backgroundColor : '', linksEmoji: links.reduce((a, t) => a + em(t), 0), cardBg: card ? getComputedStyle(card).backgroundColor : '', temHero: !!pg.querySelector('#md-exec .aura-hero, #md-exec'), pgOver: pg.scrollWidth - pg.clientWidth, viewOver: view ? view.scrollWidth - view.clientWidth : 0 };
+    });
+    checa(md.hd === 'Decisões de hoje' && md.linksEmoji === 0, `${rot} Meu Dia: cabecalho da fila e atalhos sem emoji ("${md.hd}")`);
+    checa(/^rgb\((255, 255, 255|13, 14, 17)\)$/.test(md.kpiBg), `${rot} Meu Dia: indicador Atrasadas com cartao neutro (${md.kpiBg})`);
+    checa(!md.cardBg || /^rgb\((255, 255, 255|13, 14, 17)\)$/.test(md.cardBg), `${rot} Meu Dia: cartao da fila na superficie do tema (${md.cardBg || 'sem fila'})`);
+    checa(md.temHero && md.pgOver <= 1 && md.viewOver <= 1, `${rot} Meu Dia: Mission Control preservado e pagina sem rolagem lateral (+${md.pgOver}/+${md.viewOver})`);
     await page.evaluate(() => { const n = document.querySelector('[data-nav="tarefas"]'); n && n.click(); });
 
     for (const e of [...new Set(erros)]) if (!RUIDO.test(e)) falhas.push(`${rot} erro de JS: ${e}`);
