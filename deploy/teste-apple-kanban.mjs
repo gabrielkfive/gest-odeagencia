@@ -157,6 +157,23 @@ for (const tema of ['light', 'dark']) {
       return { antes, depois, fechou: !box.querySelector('.tkpp-lista'), total: nomes.length, minusc };
     });
     checa(!et.sem && !et.antes && et.depois && et.fechou && et.total > 0 && et.minusc.length === 0, `${rot} etiquetas fechadas por padrao, abrem no clique e vem com inicial maiuscula (${et.total} no catalogo, minusculas: ${(et.minusc || []).join(',') || 'nenhuma'})`);
+    // segunda passada do detalhe (10/09/2026): sem emoji nas linhas, Funcao em pilula ligada ao select, Tags em pilula
+    const d2 = await page.evaluate(() => {
+      const f = document.querySelector('#pj-modal .pj-f');
+      const txt = f ? f.innerText : '';
+      const emoji = (txt.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{25CE}]/gu) || []).slice(0, 5); // Dingbats (✓ ✕) ficam de fora: sao glifos de botao, nao emoji
+      const svgs = f ? f.querySelectorAll('.tkl svg').length : 0;
+      const pill = f && f.querySelector('.tkfunc[data-func="Designer"]'); pill && pill.click();
+      const sel = document.getElementById('tk-func');
+      const inp = document.getElementById('tk-tags'); if (inp) { inp.value = 'Criativo, Urgente'; inp.dispatchEvent(new Event('input', { bubbles: true })); }
+      const pills = [...document.querySelectorAll('#tk-tags-pills .tkpp')].map((x) => x.textContent.replace('✕', '').trim());
+      const prio = document.getElementById('tk-prio');
+      return { emoji, svgs, func: sel ? sel.value : '', on: pill ? pill.classList.contains('on') : false, pills, prioTxt: prio ? [...prio.options].map((o) => o.text).join(',') : '' };
+    });
+    checa(d2.emoji.length === 0 && d2.svgs >= 6, `${rot} detalhe sem emoji nas linhas, icones SVG (${d2.svgs} icones, emoji: ${d2.emoji.join(' ') || 'nenhum'})`);
+    checa(d2.func === 'Designer' && d2.on, `${rot} pilula de Funcao grava no select (${d2.func})`);
+    checa(d2.pills.join(',') === 'Criativo,Urgente', `${rot} Tags viram pilulas a partir do campo (${d2.pills.join(',')})`);
+    checa(d2.prioTxt === 'Alta,Média,Baixa', `${rot} prioridade sem emoji (${d2.prioTxt})`);
     await page.evaluate(() => { const i = document.getElementById('tk-t'); i.value = 'Relatório semanal v2'; i.dispatchEvent(new Event('input', { bubbles: true })); });
     await page.waitForTimeout(100);
     await page.keyboard.press('Escape');
@@ -191,6 +208,60 @@ for (const tema of ['light', 'dark']) {
       const badge = await page.evaluate(() => (document.getElementById('sync-status') || {}).textContent || '');
       checa(/Salvando|Salvo|Não salvou/.test(badge), `${rot} indicador de gravacao visivel na barra (badge: "${badge}")`);
     }
+
+    // 9. vistas restantes (10/09/2026): sem emoji, sem rolagem lateral da pagina, indicadores neutros
+    for (const v of ['lista', 'pessoas', 'calendario', 'painel', 'relatorio']) {
+      const r = await page.evaluate((v) => {
+        tarefaSetView(v);
+        const pg = document.getElementById('page-tarefas'), view = document.getElementById('view');
+        const cont = document.getElementById('task-' + v);
+        const txt = cont ? cont.innerText : '';
+        const emoji = (txt.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu) || []).slice(0, 5);
+        const kpi = v === 'painel' ? cont.querySelector('.kpi.red') : null;
+        const kpiBg = kpi ? getComputedStyle(kpi).backgroundColor : '';
+        return { visivel: !!cont && cont.style.display !== 'none' && cont.offsetHeight > 0, pgOver: pg.scrollWidth - pg.clientWidth, viewOver: view ? view.scrollWidth - view.clientWidth : 0, emoji, kpiBg, mes: v === 'calendario' ? ((cont.querySelector('.tcal-head span') || {}).textContent || '') : '' };
+      }, v);
+      checa(r.visivel, `${rot} vista ${v} aparece`);
+      checa(r.pgOver <= 1 && r.viewOver <= 1, `${rot} vista ${v} sem rolagem lateral da pagina (+${r.pgOver}/+${r.viewOver})`);
+      checa(r.emoji.length === 0, `${rot} vista ${v} sem emoji no texto (${r.emoji.join(' ') || 'nenhum'})`);
+      if (v === 'painel') checa(/^rgb\((255, 255, 255|13, 14, 17)\)$/.test(r.kpiBg), `${rot} painel: indicador Atrasadas com cartao neutro, numero na cor (fundo ${r.kpiBg})`);
+      if (v === 'calendario') checa(/^[A-ZÀ-Ú][a-zç]+ de \d{4}$/.test(r.mes.trim()), `${rot} calendario: mes com inicial maiuscula e "de" minusculo ("${r.mes.trim()}")`);
+    }
+    await page.evaluate(() => tarefaSetView('kanban'));
+
+    // 10. Projetos (10/09/2026): lista e quadro na mesma linguagem, sem emoji, sem rolagem lateral da pagina
+    const pj = await page.evaluate(() => {
+      const n = document.querySelector('[data-nav="projetos"]'); n && n.click();
+      const pg = document.getElementById('page-projetos'), view = document.getElementById('view');
+      const card = pg.querySelector('.pj-c'); const cardBg = card ? getComputedStyle(card).backgroundColor : '';
+      card && card.click();
+      const cols = pg.querySelectorAll('.pj-col').length, t = pg.querySelector('.pj-t');
+      const tBg = t ? getComputedStyle(t).backgroundColor : '';
+      const txt = pg.innerText || '';
+      const emoji = (txt.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu) || []).slice(0, 5);
+      const ph = (pg.querySelector('#pj-busca') || {}).placeholder || '';
+      return { cardBg, cols, tBg, emoji, ph, pgOver: pg.scrollWidth - pg.clientWidth, viewOver: view ? view.scrollWidth - view.clientWidth : 0 };
+    });
+    await page.waitForTimeout(300);
+    checa(/^rgb\((255, 255, 255|13, 14, 17)\)$/.test(pj.cardBg), `${rot} Projetos: cartao de projeto na superficie do tema (${pj.cardBg})`);
+    checa(pj.cols === 6 && /^rgb\((255, 255, 255|13, 14, 17)\)$/.test(pj.tBg), `${rot} Projetos: quadro com 6 colunas e cartao de tarefa na mesma superficie (${pj.tBg})`);
+    checa(pj.emoji.length === 0 && !/🔍/.test(pj.ph), `${rot} Projetos: sem emoji no quadro e no filtro (${pj.emoji.join(' ') || 'nenhum'})`);
+    checa(pj.pgOver <= 1 && pj.viewOver <= 1, `${rot} Projetos: pagina sem rolagem lateral (+${pj.pgOver}/+${pj.viewOver})`);
+    // 11. Meu Dia fora do Mission Control (10/09/2026): fila, indicadores e atalhos no mesmo cartao, sem emoji nos rotulos
+    await page.evaluate(() => { const n = document.querySelector('[data-nav="dashboard"]'); n && n.click(); });
+    await page.waitForTimeout(900);
+    const md = await page.evaluate(() => {
+      const pg = document.getElementById('page-dashboard'), view = document.getElementById('view');
+      const hd = pg.querySelector('#md-decisoes .dec-hd b'), kpi = pg.querySelector('#md-kpis .kpi.red'), links = [...pg.querySelectorAll('.rail-links button')].map((b) => b.textContent.trim());
+      const card = pg.querySelector('#md-decisoes .dec-card:not(.skeleton)');
+      const em = (t) => (t.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu) || []).length;
+      return { hd: hd ? hd.textContent.trim() : '', kpiBg: kpi ? getComputedStyle(kpi).backgroundColor : '', linksEmoji: links.reduce((a, t) => a + em(t), 0), cardBg: card ? getComputedStyle(card).backgroundColor : '', temHero: !!pg.querySelector('#md-exec .aura-hero, #md-exec'), pgOver: pg.scrollWidth - pg.clientWidth, viewOver: view ? view.scrollWidth - view.clientWidth : 0 };
+    });
+    checa(md.hd === 'Decisões de hoje' && md.linksEmoji === 0, `${rot} Meu Dia: cabecalho da fila e atalhos sem emoji ("${md.hd}")`);
+    checa(/^rgb\((255, 255, 255|13, 14, 17)\)$/.test(md.kpiBg), `${rot} Meu Dia: indicador Atrasadas com cartao neutro (${md.kpiBg})`);
+    checa(!md.cardBg || /^rgb\((255, 255, 255|13, 14, 17)\)$/.test(md.cardBg), `${rot} Meu Dia: cartao da fila na superficie do tema (${md.cardBg || 'sem fila'})`);
+    checa(md.temHero && md.pgOver <= 1 && md.viewOver <= 1, `${rot} Meu Dia: Mission Control preservado e pagina sem rolagem lateral (+${md.pgOver}/+${md.viewOver})`);
+    await page.evaluate(() => { const n = document.querySelector('[data-nav="tarefas"]'); n && n.click(); });
 
     for (const e of [...new Set(erros)]) if (!RUIDO.test(e)) falhas.push(`${rot} erro de JS: ${e}`);
     await ctx.close();
