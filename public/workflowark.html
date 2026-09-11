@@ -1,4 +1,4 @@
-<!-- build 20260910g-apple-vistas -->
+<!-- build 20260910h-apple-detalhe -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
-<link rel="stylesheet" href="workflowark-20260910g.css">
+<link rel="stylesheet" href="workflowark-20260910h.css">
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -1861,7 +1861,35 @@ function wfaSetTheme(t){
           .tkcampos{border:1px solid var(--line);border-radius:16px;padding:2px 14px;margin-bottom:16px;background:var(--surface)}
           .tkr{display:grid;grid-template-columns:124px 1fr;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
           .tkr:last-child{border-bottom:0}
-          .tkl{font-size:12.5px;color:var(--mute);font-weight:600}
+          .tkl{font-size:12.5px;color:var(--mute);font-weight:600;display:flex;align-items:center;gap:7px}
+          /* Segunda passada Apple (10/09/2026): icones SVG nas linhas e nos botoes, prioridade em pilula,
+             Funcao e Tags no visual das etiquetas, botao de trocar a capa. */
+          .tkl svg,.tksech svg,.tktimer svg,.tkbtn svg,.tkanx a svg{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+          .tksech svg{margin-right:2px}
+          .tktimer{display:inline-flex;align-items:center;gap:6px}
+          .tktimer svg{width:12px;height:12px;opacity:1}
+          .tktimer.on svg,.tkbtn svg{opacity:1}
+          .tktimer [data-tktimer] svg path{fill:currentColor}
+          .tkbtn{display:inline-flex;align-items:center;gap:6px}
+          .tkanx a{display:inline-flex;align-items:center;gap:6px}
+          .tkprio{font-weight:700;border-radius:999px!important;padding:6px 12px!important;border:0!important;background:rgba(118,118,128,.12)!important;color:var(--txt)}
+          .tkprio[data-prio=alta]{background:rgba(220,38,38,.12)!important;color:#c62828}
+          .tkprio[data-prio=baixa]{color:var(--mute)}
+          body.aura-dark .tkprio[data-prio=alta]{color:#ff8a80}
+          .tkfunc{display:inline-flex;align-items:center;gap:6px;background:rgba(118,118,128,.10);border:1px solid transparent;border-radius:999px;padding:4px 11px;font:inherit;font-size:11.5px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s}
+          .tkfunc:hover{background:rgba(118,118,128,.18)}
+          /* !important: o normalizador do tema escuro grava fundo inline nos botoes e apagava a pilula ligada */
+          .tkfunc.on{background:var(--ink)!important;color:var(--bg)!important;border-color:var(--ink)!important}
+          body.aura-dark .tkfunc.on{background:#f5f5f7!important;color:#111!important;border-color:#f5f5f7!important}
+          .tkpp i{width:7px;height:7px;border-radius:50%;display:inline-block}
+          .tkpp b{font-size:10px;font-weight:700;opacity:.85;cursor:pointer;margin-left:2px}
+          #tk-tags-pills{margin-bottom:6px}
+          #tk-tags-pills .tkpp{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;font-size:11.5px;font-weight:600;border-radius:999px;border:1px solid transparent}
+          .tkcapa-trocar{position:absolute;right:12px;bottom:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .15s,background .15s}
+          .tkcapa-trocar svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+          .tkcapa:hover .tkcapa-trocar,.tkcapa-trocar:focus-visible{opacity:1}
+          .tkcapa-trocar:hover{background:rgba(0,0,0,.75)}
+          @media (hover:none){.tkcapa-trocar{opacity:1}}
           .tkv{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
           .tkv select,.tkv input{background:rgba(118,118,128,.10);border:1px solid transparent;border-radius:10px;color:var(--txt);padding:7px 10px;font:inherit;font-size:13px;transition:background .15s,border-color .15s,box-shadow .15s}
           .tkv select:hover,.tkv input:hover{background:rgba(118,118,128,.16)}
@@ -4270,6 +4298,6 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260910g.js"></script>
+<script src="workflowark-app-20260910h.js"></script>
 </body>
 </html>

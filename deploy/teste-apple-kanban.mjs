@@ -157,6 +157,23 @@ for (const tema of ['light', 'dark']) {
       return { antes, depois, fechou: !box.querySelector('.tkpp-lista'), total: nomes.length, minusc };
     });
     checa(!et.sem && !et.antes && et.depois && et.fechou && et.total > 0 && et.minusc.length === 0, `${rot} etiquetas fechadas por padrao, abrem no clique e vem com inicial maiuscula (${et.total} no catalogo, minusculas: ${(et.minusc || []).join(',') || 'nenhuma'})`);
+    // segunda passada do detalhe (10/09/2026): sem emoji nas linhas, Funcao em pilula ligada ao select, Tags em pilula
+    const d2 = await page.evaluate(() => {
+      const f = document.querySelector('#pj-modal .pj-f');
+      const txt = f ? f.innerText : '';
+      const emoji = (txt.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{25CE}]/gu) || []).slice(0, 5); // Dingbats (✓ ✕) ficam de fora: sao glifos de botao, nao emoji
+      const svgs = f ? f.querySelectorAll('.tkl svg').length : 0;
+      const pill = f && f.querySelector('.tkfunc[data-func="Designer"]'); pill && pill.click();
+      const sel = document.getElementById('tk-func');
+      const inp = document.getElementById('tk-tags'); if (inp) { inp.value = 'Criativo, Urgente'; inp.dispatchEvent(new Event('input', { bubbles: true })); }
+      const pills = [...document.querySelectorAll('#tk-tags-pills .tkpp')].map((x) => x.textContent.replace('✕', '').trim());
+      const prio = document.getElementById('tk-prio');
+      return { emoji, svgs, func: sel ? sel.value : '', on: pill ? pill.classList.contains('on') : false, pills, prioTxt: prio ? [...prio.options].map((o) => o.text).join(',') : '' };
+    });
+    checa(d2.emoji.length === 0 && d2.svgs >= 6, `${rot} detalhe sem emoji nas linhas, icones SVG (${d2.svgs} icones, emoji: ${d2.emoji.join(' ') || 'nenhum'})`);
+    checa(d2.func === 'Designer' && d2.on, `${rot} pilula de Funcao grava no select (${d2.func})`);
+    checa(d2.pills.join(',') === 'Criativo,Urgente', `${rot} Tags viram pilulas a partir do campo (${d2.pills.join(',')})`);
+    checa(d2.prioTxt === 'Alta,Média,Baixa', `${rot} prioridade sem emoji (${d2.prioTxt})`);
     await page.evaluate(() => { const i = document.getElementById('tk-t'); i.value = 'Relatório semanal v2'; i.dispatchEvent(new Event('input', { bubbles: true })); });
     await page.waitForTimeout(100);
     await page.keyboard.press('Escape');
@@ -199,7 +216,7 @@ for (const tema of ['light', 'dark']) {
         const pg = document.getElementById('page-tarefas'), view = document.getElementById('view');
         const cont = document.getElementById('task-' + v);
         const txt = cont ? cont.innerText : '';
-        const emoji = (txt.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu) || []).slice(0, 5);
+        const emoji = (txt.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu) || []).slice(0, 5);
         const kpi = v === 'painel' ? cont.querySelector('.kpi.red') : null;
         const kpiBg = kpi ? getComputedStyle(kpi).backgroundColor : '';
         return { visivel: !!cont && cont.style.display !== 'none' && cont.offsetHeight > 0, pgOver: pg.scrollWidth - pg.clientWidth, viewOver: view ? view.scrollWidth - view.clientWidth : 0, emoji, kpiBg, mes: v === 'calendario' ? ((cont.querySelector('.tcal-head span') || {}).textContent || '') : '' };
