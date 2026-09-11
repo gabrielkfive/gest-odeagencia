@@ -261,6 +261,30 @@ for (const tema of ['light', 'dark']) {
     checa(/^rgb\((255, 255, 255|13, 14, 17)\)$/.test(md.kpiBg), `${rot} Meu Dia: indicador Atrasadas com cartao neutro (${md.kpiBg})`);
     checa(!md.cardBg || /^rgb\((255, 255, 255|13, 14, 17)\)$/.test(md.cardBg), `${rot} Meu Dia: cartao da fila na superficie do tema (${md.cardBg || 'sem fila'})`);
     checa(md.temHero && md.pgOver <= 1 && md.viewOver <= 1, `${rot} Meu Dia: Mission Control preservado e pagina sem rolagem lateral (+${md.pgOver}/+${md.viewOver})`);
+    // 12. CRM e Lista de clientes (11/09/2026): colunas neutras, cartao de lead na superficie, sem emoji, sem rolagem lateral
+    await page.evaluate(() => { const n = document.querySelector('[data-nav="crm"]'); n && n.click(); });
+    await page.waitForTimeout(800);
+    const crm = await page.evaluate(() => {
+      const pg = document.getElementById('page-crm'), view = document.getElementById('view');
+      const card = pg.querySelector('.crm-card'), col = pg.querySelector('.crm-col'), hot = pg.querySelector('.crm-hot-btn svg'), fh = pg.querySelector('.crm-fh');
+      const txt = pg.innerText || '';
+      const emoji = (txt.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu) || []).slice(0, 5);
+      return { cardBg: card ? getComputedStyle(card).backgroundColor : '', cardLeft: card ? getComputedStyle(card).borderLeftWidth : '', cols: pg.querySelectorAll('.crm-col').length, colBorder: col ? getComputedStyle(col).borderRadius : '', hot: !!hot, fh: !!fh, emoji, pgOver: pg.scrollWidth - pg.clientWidth, viewOver: view ? view.scrollWidth - view.clientWidth : 0 };
+    });
+    checa(/^rgb\((255, 255, 255|13, 14, 17)\)$/.test(crm.cardBg) && crm.cardLeft === '1px', `${rot} CRM: cartao de lead na superficie do tema, sem borda colorida (${crm.cardBg}, esquerda ${crm.cardLeft})`);
+    checa(crm.cols === 6 && crm.hot && crm.fh && crm.emoji.length === 0, `${rot} CRM: 6 etapas, follow quente em icone, sem emoji (${crm.emoji.join(' ') || 'nenhum'})`);
+    checa(crm.pgOver <= 1 && crm.viewOver <= 1, `${rot} CRM: pagina sem rolagem lateral (+${crm.pgOver}/+${crm.viewOver})`);
+    await page.evaluate(() => { const n = document.querySelector('[data-nav="lista-clientes"]'); n && n.click(); });
+    await page.waitForTimeout(800);
+    const cli = await page.evaluate(() => {
+      const pg = document.getElementById('page-lista-clientes'), view = document.getElementById('view');
+      const tag = pg.querySelector('.csa-tag'), kpi = pg.querySelector('.cli-kpi');
+      const emoji = ((pg.querySelector('.csa-ttl') || {}).textContent || '').match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu) || [];
+      return { tagTT: tag ? getComputedStyle(tag).textTransform : 'sem', kpiBg: kpi ? getComputedStyle(kpi).backgroundColor : '', emoji: emoji.length, pgOver: pg.scrollWidth - pg.clientWidth, viewOver: view ? view.scrollWidth - view.clientWidth : 0 };
+    });
+    checa(cli.tagTT !== 'uppercase' && cli.emoji === 0, `${rot} Clientes: etiquetas de saude sem caixa alta e titulo sem emoji (${cli.tagTT})`);
+    checa(/^rgb\((255, 255, 255|13, 14, 17)\)$/.test(cli.kpiBg), `${rot} Clientes: indicador na superficie do tema (${cli.kpiBg})`);
+    checa(cli.pgOver <= 1 && cli.viewOver <= 1, `${rot} Clientes: pagina sem rolagem lateral (+${cli.pgOver}/+${cli.viewOver})`);
     await page.evaluate(() => { const n = document.querySelector('[data-nav="tarefas"]'); n && n.click(); });
 
     for (const e of [...new Set(erros)]) if (!RUIDO.test(e)) falhas.push(`${rot} erro de JS: ${e}`);

@@ -1289,7 +1289,7 @@ function renderClienteSaude(){
   const nUrg=items.filter(i=>i.sev>=3).length;
   box.innerHTML=`<div class="csa-card">
     <div class="csa-head">
-      <div class="csa-ttl"><span class="csa-bell">⚠️</span>Saúde dos clientes · ${items.length} ${items.length>1?'precisam':'precisa'} de atenção${nUrg?` · <b style="color:var(--red,#e0364f)">${nUrg} urgente${nUrg>1?'s':''}</b>`:''}</div>
+      <div class="csa-ttl"><span class="csa-bell"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17h.01"/></svg></span>Saúde dos clientes · ${items.length} ${items.length>1?'precisam':'precisa'} de atenção${nUrg?` · <b style="color:var(--red,#e0364f)">${nUrg} urgente${nUrg>1?'s':''}</b>`:''}</div>
       <button class="csa-x" title="Dispensar por hoje" onclick="localStorage.setItem('wfa-saude-dismiss',hojeSP());renderClienteSaude();">✕</button>
     </div>
     <div class="csa-list">${rows}</div>
@@ -3695,8 +3695,8 @@ function renderClientesKPIs(){
   const semCap=ativos.filter(c=>c.tipo!=='Interno'&&!c.cap).length;
   el.innerHTML=`
     <div class="cli-kpi dk"><div class="kl">Carteira ativa</div><div class="kv">${ativos.length}</div><div class="kd">${nArk} ARK · ${nAlpha} Alpha · ${churn} churn</div></div>
-    <div class="cli-kpi yel"><div class="kl">MRR ARK</div><div class="kv">R$ ${mrr.toLocaleString('pt-BR')}</div><div class="kd">${semValor?`⚠ ${semValor} cliente(s) sem mensalidade cadastrada`:'mensalidades recorrentes'}</div></div>
-    <div class="cli-kpi"><div class="kl">Captações / mês</div><div class="kv">${cap}</div><div class="kd">${semCap?`⚠ ${semCap} cliente(s) sem captação cadastrada`:'produção de vídeo contratada'}</div></div>
+    <div class="cli-kpi yel"><div class="kl">MRR ARK</div><div class="kv">R$ ${mrr.toLocaleString('pt-BR')}</div><div class="kd">${semValor?`${semValor} cliente(s) sem mensalidade cadastrada`:'mensalidades recorrentes'}</div></div>
+    <div class="cli-kpi"><div class="kl">Captações / mês</div><div class="kv">${cap}</div><div class="kd">${semCap?`${semCap} cliente(s) sem captação cadastrada`:'produção de vídeo contratada'}</div></div>
     <div class="cli-kpi"><div class="kl">Saúde da carteira</div><div class="kv" style="font-size:14px;margin-top:2px">${saud} ok · ${ajuste} ajuste · ${urg} urgente</div><div class="cli-hbar">${saud?`<span style="flex:${saud};background:var(--green)"></span>`:''}${ajuste?`<span style="flex:${ajuste};background:#eab308"></span>`:''}${urg?`<span style="flex:${urg};background:var(--red)"></span>`:''}</div></div>`;
 }
 function goRegua(id){
@@ -9814,7 +9814,7 @@ function crmSaveLead(){
 function crmToggleHot(id){
   const arr=loadCrm();const l=arr.find(x=>x.id===id);if(!l)return;
   l.hot=!l.hot;saveCrm(arr);
-  toast(l.hot?'🔥 Follow quente':'Removido do follow quente');
+  toast(l.hot?'Marcado como follow quente':'Removido do follow quente');
 }
 function crmDeleteLead(){
   const id=document.getElementById('crm-edit-id').value;if(!id)return;
@@ -9871,12 +9871,12 @@ function renderCrm(){
         const late=l.due&&l.due<today;
         const dtxt=l.due?crmFmtDate(l.due):'';
         return `<div class="crm-fh-card" onclick="crmOpenModal('${l.id}')">
-          <div class="nm">${l.hot?'🔥 ':''}${escapeHtml(l.nm)}</div>
+          <div class="nm">${l.hot?'<svg class="crm-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.5.5-2.5 1.2-3.4.3 1.2 1 2 1.8 2.4C11 8 11 5.5 12 3z"/></svg>':''}${escapeHtml(l.nm)}</div>
           <div class="mt"><span>${escapeHtml(CRM_STAGES[l.stage]?.label||'')}</span>${l.resp?`<span>${escapeHtml(l.resp)}</span>`:''}</div>
-          ${(l.next||dtxt)?`<div class="nx">${escapeHtml(l.next||'Próxima ação')}${dtxt?` · <span class="${late?'due-late':''}">${late?'⚠ ':''}${dtxt}</span>`:''}</div>`:''}
+          ${(l.next||dtxt)?`<div class="nx">${escapeHtml(l.next||'Próxima ação')}${dtxt?` · <span class="${late?'due-late':''}">${late?'Atrasada · ':''}${dtxt}</span>`:''}</div>`:''}
         </div>`;
       }).join('');
-      fhEl.innerHTML=`<div class="crm-fh"><div class="crm-fh-hd">🔥 Follow quente · ${hot.length} <small>marcados com 🔥 ou com próxima ação vencida/pra hoje</small></div><div class="crm-fh-cards">${cards}</div></div>`;
+      fhEl.innerHTML=`<div class="crm-fh"><div class="crm-fh-hd"><svg class="crm-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.5.5-2.5 1.2-3.4.3 1.2 1 2 1.8 2.4C11 8 11 5.5 12 3z"/></svg>Follow quente · ${hot.length} <small>marcados como quentes ou com próxima ação vencida ou para hoje</small></div><div class="crm-fh-cards">${cards}</div></div>`;
     }
   }
   // Pipeline columns
@@ -9892,7 +9892,7 @@ function renderCrm(){
       <div class="crm-cards">${cards.map(l=>{
         const overdue=l.due&&l.due<today&&l.stage<4;
         return `<div class="crm-card stage-${si}${overdue?' crm-overdue':''}" draggable="true" data-lead="${l.id}" onclick="crmOpenModal('${l.id}')">
-          <button class="crm-hot-btn${l.hot?' on':''}" title="Marcar como follow quente" onclick="event.stopPropagation();crmToggleHot('${l.id}')">🔥</button>
+          <button class="crm-hot-btn${l.hot?' on':''}" title="Marcar como follow quente" onclick="event.stopPropagation();crmToggleHot('${l.id}')" aria-label="Follow quente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.5.5-2.5 1.2-3.4.3 1.2 1 2 1.8 2.4C11 8 11 5.5 12 3z"/></svg></button>
           <div class="nm">${escapeHtml(l.nm)}</div>
           <div class="meta"><span class="crm-source-badge">${escapeHtml(l.source||'—')}</span>${l.resp?`<span>${escapeHtml(l.resp)}</span>`:''}</div>
           ${l.val?`<div class="val">R$ ${Number(l.val).toLocaleString('pt-BR')}</div>`:''}
