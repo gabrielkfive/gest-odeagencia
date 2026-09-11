@@ -69,6 +69,12 @@ export const SEMENTE = {
     { id: 't9', title: 'Planejamento de conteúdo de setembro', status: 'concluido', resp: 'Maria Luiza', resps: ['Maria Luiza'], clienteId: 'ark', prio: 'media', data: DIA(-6), ord: 0, tags: ['Planejamento'], concluidaEm: AGORA, timeSpent: 9000, up: AGORA },
     { id: 't10', title: 'Sem cliente e sem responsável, só título', status: 'backlog', prio: 'media', ord: 2, timeSpent: 0, up: AGORA },
   ],
+  crm: [
+    { id: 'l1', nm: 'Padaria Santa Clara', stage: 0, source: 'Instagram', resp: 'Gabriel Andrade', val: 2500, next: 'Ligar para agendar diagnóstico', due: DIA(2), hot: true, up: AGORA },
+    { id: 'l2', nm: 'Clínica Vitalle', stage: 1, source: 'Indicação', resp: 'Lucas Rosi', val: 4200, next: 'Enviar proposta até sexta', due: DIA(-1), up: AGORA },
+    { id: 'l3', nm: 'Restaurante Dona Flor', stage: 2, source: 'Tráfego', resp: 'Gabriel Andrade', val: 3000, next: 'Aguardando retorno do sócio', due: DIA(5), up: AGORA },
+    { id: 'l4', nm: 'Studio Pilates Corpo', stage: 4, source: 'Site', resp: 'Lucas Rosi', val: 1800, up: AGORA },
+  ],
   projetos: [
     { id: 'pj-viv', cliente: 'Vivenda', clienteId: 'vivenda', sprint: 3, up: AGORA, tarefas: [
       { id: 'pt1', t: 'Captação de setembro na loja', st: 'andamento', resps: ['Nicolas'], resp: 'Nicolas', venc: DIA(4), horas: 8, papeis: [], up: AGORA },
@@ -89,6 +95,7 @@ export const semear = (s) => {
     if (!localStorage.getItem('wfa-apple-semeado')) {
       localStorage.setItem('wfa-tarefas', JSON.stringify(s.tarefas));
       localStorage.setItem('wfa-projetos', JSON.stringify(s.projetos));
+      if (s.crm) localStorage.setItem('wfa-crm', JSON.stringify(s.crm));
       localStorage.setItem('wfa-apple-semeado', '1');
     }
   } catch (e) {}

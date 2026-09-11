@@ -1289,7 +1289,7 @@ function renderClienteSaude(){
   const nUrg=items.filter(i=>i.sev>=3).length;
   box.innerHTML=`<div class="csa-card">
     <div class="csa-head">
-      <div class="csa-ttl"><span class="csa-bell">⚠️</span>Saúde dos clientes · ${items.length} ${items.length>1?'precisam':'precisa'} de atenção${nUrg?` · <b style="color:var(--red,#e0364f)">${nUrg} urgente${nUrg>1?'s':''}</b>`:''}</div>
+      <div class="csa-ttl"><span class="csa-bell"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17h.01"/></svg></span>Saúde dos clientes · ${items.length} ${items.length>1?'precisam':'precisa'} de atenção${nUrg?` · <b style="color:var(--red,#e0364f)">${nUrg} urgente${nUrg>1?'s':''}</b>`:''}</div>
       <button class="csa-x" title="Dispensar por hoje" onclick="localStorage.setItem('wfa-saude-dismiss',hojeSP());renderClienteSaude();">✕</button>
     </div>
     <div class="csa-list">${rows}</div>
@@ -2411,9 +2411,9 @@ function wfaEstDecimal(hStr,mStr){
     return '<div class="pj-t" draggable="true" data-tid="'+esc(t.id)+'">'+
       '<div class="tt">'+esc(t.t)+'</div>'+
       '<div class="pj-tags">'+tagsHTML(t)+'</div>'+
-      (t.venc?'<div class="pj-venc'+(late?' late':'')+'">'+(late?'⚠ ':'📅 ')+esc(br(t.venc))+(t.resp?' · '+esc(t.resp):'')+'</div>'
+      (t.venc?'<div class="pj-venc'+(late?' late':'')+'">'+(late?'Atrasada · ':'')+esc(br(t.venc))+(t.resp?' · '+esc(t.resp):'')+'</div>'
              :(t.resp?'<div class="pj-venc">'+esc(t.resp)+'</div>':''))+
-      (t.horas?'<div class="pj-venc">⏱ '+esc(wfaEstFmt(t.horas))+' estimadas</div>':'')+
+      (t.horas?'<div class="pj-venc est">'+esc(wfaEstFmt(t.horas))+' estimadas</div>':'')+
       '</div>';
   }
 
@@ -2645,7 +2645,7 @@ function wfaEstDecimal(hStr,mStr){
 
       (vista==='prontuario'?'':
         '<div class="filter-bar">'+
-          '<input class="form-input" id="pj-busca" style="flex:1;min-width:150px;max-width:240px" placeholder="🔍 Buscar tarefa..." value="'+esc(filtro.busca)+'">'+
+          '<input class="form-input" id="pj-busca" style="flex:1;min-width:150px;max-width:240px" placeholder="Buscar tarefa" value="'+esc(filtro.busca)+'">'+
           '<select class="form-select" id="pj-fpapel" style="width:180px"><option value="">Toda etiqueta de papel</option>'+
             PAPEIS.map(function(x){return '<option value="'+x.k+'"'+(filtro.papel===x.k?' selected':'')+'>'+esc(x.n)+'</option>';}).join('')+
           '</select>'+
@@ -2928,8 +2928,21 @@ function wfaEstDecimal(hStr,mStr){
     img:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 9"/></svg>',
     move:'<svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>',
     done:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.3 2.3L15.5 10"/></svg>',
-    trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>'
+    trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+    /* Icones das linhas do detalhe, no lugar dos emojis (revisao Apple, 10/09/2026) */
+    status:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>',
+    clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    flag:'<svg viewBox="0 0 24 24"><path d="M5 21V4m0 0h11l-2 4 2 4H5"/></svg>',
+    building:'<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/></svg>',
+    compass:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>',
+    hash:'<svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14M10 3 8 21M16 3l-2 18"/></svg>',
+    puzzle:'<svg viewBox="0 0 24 24"><path d="M10 4a2 2 0 1 1 4 0v2h4v4h-2a2 2 0 1 0 0 4h2v4h-4v-2a2 2 0 1 0-4 0v2H6v-4h2a2 2 0 1 0 0-4H6V6h4z"/></svg>',
+    play:'<svg viewBox="0 0 24 24"><path d="M7 5v14l11-7z"/></svg>',
+    pause:'<svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>',
+    reset:'<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/></svg>',
+    link:'<svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>'
   };
+  window.WFA_TKI=TKI;
   function tkAbrir(ctx){
     var t=ctx.t||{};
     var ehNova=!!ctx.ehNova;
@@ -2950,29 +2963,29 @@ function wfaEstDecimal(hStr,mStr){
         '<input id="tk-t" class="tktitulo" value="'+esc(t.t)+'" placeholder="O que precisa ser feito">'+
       '<div class="tkna">na lista <b id="tk-na">'+esc((cols.filter(function(c){return c.k===t.st;})[0]||cols[0]||{n:''}).n)+'</b>'+((t.resps||[]).length?'<span class="tkna-avs">'+(t.resps||[]).map(function(r){return '<i class="av" title="'+esc(r)+'">'+tkIni(r)+'</i>';}).join('')+'</span>':'')+'</div>'+
         '<div class="tkcampos">'+
-          linha('◎','Status','<select id="tk-st" class="tkst">'+cols.map(function(c){return '<option value="'+c.k+'"'+(t.st===c.k?' selected':'')+'>'+esc(c.n)+'</option>';}).join('')+'</select>'+
+          linha(TKI.status,'Status','<select id="tk-st" class="tkst">'+cols.map(function(c){return '<option value="'+c.k+'"'+(t.st===c.k?' selected':'')+'>'+esc(c.n)+'</option>';}).join('')+'</select>'+
             (t.st==='concluido'?'':'<button type="button" class="tkok" data-tkconcluir="1" title="Marcar como concluída">✓</button>'))+
-          linha('👤','Responsáveis','<div id="tk-resps" class="tkchips"></div>'+
+          linha(TKI.user,'Responsáveis','<div id="tk-resps" class="tkchips"></div>'+
             '<select id="tk-addresp" class="tkmini"><option value="">+ pessoa</option>'+
             eq.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join('')+'</select>')+
-          linha('📅','Datas','<input id="tk-ini" type="date" class="tkdata" value="'+esc(t.ini||'')+'"><span class="tkseta">→</span><input id="tk-venc" type="date" class="tkdata" value="'+esc(t.venc||'')+'">')+
-          linha('⏱','Rastrear tempo','<button type="button" class="tktimer'+(t.timerSince?' on':'')+'" data-tktimer="1">'+(t.timerSince?'⏸ Parar':'▶ Start')+'</button>'+
+          linha(TKI.cal,'Datas','<input id="tk-ini" type="date" class="tkdata" value="'+esc(t.ini||'')+'"><span class="tkseta">→</span><input id="tk-venc" type="date" class="tkdata" value="'+esc(t.venc||'')+'">')+
+          linha(TKI.clock,'Rastrear tempo','<button type="button" class="tktimer'+(t.timerSince?' on':'')+'" data-tktimer="1">'+(t.timerSince?TKI.pause+'Parar':TKI.play+'Iniciar')+'</button>'+
             '<span class="tkgasto" id="tk-gasto">'+(gasto>=1?tkDur(gasto):'0m 00s')+'</span>'+
-            '<button type="button" class="tktimer" data-tkzero="1" title="Zerar o tempo cronometrado" style="opacity:.8">↺ Zerar</button>'+
+            '<button type="button" class="tktimer" data-tkzero="1" title="Zerar o tempo cronometrado" style="opacity:.8">'+TKI.reset+'Zerar</button>'+
             '<span class="tkvazio">estimativa</span><input id="tk-horas-h" type="number" min="0" step="1" class="tkmini num" style="width:62px" value="'+esc(hEst.h)+'" placeholder="0"><span class="tkvazio">h</span><input id="tk-horas-m" type="number" min="0" max="59" step="5" class="tkmini num" style="width:62px" value="'+esc(hEst.m)+'" placeholder="0"><span class="tkvazio">min</span>')+
-          (ctx.semPapeis?'':linha('🏷','Etiquetas','<div id="tk-papeis" class="tkchips"></div><a data-ppnovo="1" class="tkadd">+ nova</a>'))+
-          (ctx.semSprint?'':linha('🧩','Sprint','<input id="tk-sp" type="number" min="0" class="tkmini num" value="'+esc(t.sprint===0?0:(t.sprint||1))+'"><span class="tkvazio">0 = tarefa fixa, sem sprint</span>'))+
+          (ctx.semPapeis?'':linha(TKI.tag,'Etiquetas','<div id="tk-papeis" class="tkchips"></div><a data-ppnovo="1" class="tkadd">+ nova</a>'))+
+          (ctx.semSprint?'':linha(TKI.puzzle,'Sprint','<input id="tk-sp" type="number" min="0" class="tkmini num" value="'+esc(t.sprint===0?0:(t.sprint||1))+'"><span class="tkvazio">0 = tarefa fixa, sem sprint</span>'))+
           (typeof ctx.extrasHTML==='function'?ctx.extrasHTML(t):'')+
         '</div>'+
         '<textarea id="tk-obs" class="tkdesc" placeholder="Adicione uma descrição">'+esc(t.obs||'')+'</textarea>'+
-        '<div class="tksec"><div class="tksech">☑ Checklist <span id="tk-clct">'+(cl.length?clOk+'/'+cl.length:'')+'</span></div>'+
+        '<div class="tksec"><div class="tksech">'+TKI.check+'Checklist <span id="tk-clct">'+(cl.length?clOk+'/'+cl.length:'')+'</span></div>'+
           '<div class="tkprog" id="tk-clprog"'+(cl.length?'':' style="display:none"')+'><span id="tk-clpct">'+(cl.length?Math.round(clOk/cl.length*100):0)+'%</span><div class="tkbar"><div id="tk-clbar" style="width:'+(cl.length?Math.round(clOk/cl.length*100):0)+'%"></div></div></div>'+
           '<div id="tk-cl"></div>'+
           '<div class="tkinline"><input id="tk-clnovo" placeholder="Adicionar item e teclar Enter"></div></div>'+
-        '<div class="tksec"><div class="tksech">📎 Anexos</div>'+
+        '<div class="tksec"><div class="tksech">'+TKI.clip+'Anexos</div>'+
           '<div id="tk-anx"></div>'+
           '<div class="tkinline"><input id="tk-anxnm" placeholder="Nome"><input id="tk-anxurl" placeholder="https://"><button type="button" class="tkbtn" data-anxadd="1">Anexar</button>'+
-          '<button type="button" class="tkbtn" data-anxup="1" title="Enviar imagem ou PDF do computador ou do celular. Também dá pra colar a imagem com Ctrl+V.">📷 Imagem</button>'+
+          '<button type="button" class="tkbtn" data-anxup="1" title="Enviar imagem ou PDF do computador ou do celular. Também dá pra colar a imagem com Ctrl+V.">'+TKI.img+'Imagem</button>'+
           '<input type="file" id="tk-anxfile" accept="image/*,application/pdf" style="display:none"></div>'+
           '<div id="tk-anxstatus" class="tkvazio" style="margin-top:4px"></div></div>'+
         '<div class="tkfoot">'+
@@ -3095,8 +3108,8 @@ function wfaEstDecimal(hStr,mStr){
     });
     var btnT=m.querySelector('[data-tktimer]');
     if(btnT)btnT.addEventListener('click',function(){
-      if(m._timer){m._spent=(m._spent||0)+(Date.now()-new Date(m._timer).getTime())/1000;m._timer='';btnT.textContent='▶ Start';btnT.classList.remove('on');}
-      else{m._timer=tkAgora();btnT.textContent='⏸ Parar';btnT.classList.add('on');}
+      if(m._timer){m._spent=(m._spent||0)+(Date.now()-new Date(m._timer).getTime())/1000;m._timer='';btnT.innerHTML=TKI.play+'Iniciar';btnT.classList.remove('on');}
+      else{m._timer=tkAgora();btnT.innerHTML=TKI.pause+'Parar';btnT.classList.add('on');}
       var g=m.querySelector('#tk-gasto');if(g)g.textContent=tkDur(m._spent);
       /* Atividades persiste o cronometro na hora: la o time da play e fecha a tela. */
       try{if(typeof ctx.onTimer==='function')ctx.onTimer(m._timer,m._spent);}catch(e){}
@@ -3106,7 +3119,7 @@ function wfaEstDecimal(hStr,mStr){
     var btnZ=m.querySelector('[data-tkzero]');
     if(btnZ)btnZ.addEventListener('click',function(){
       m._timer='';m._spent=0;
-      if(btnT){btnT.textContent='▶ Start';btnT.classList.remove('on');}
+      if(btnT){btnT.innerHTML=TKI.play+'Iniciar';btnT.classList.remove('on');}
       var g=m.querySelector('#tk-gasto');if(g)g.textContent='0m 00s';
       try{if(typeof ctx.onTimer==='function')ctx.onTimer(m._timer,m._spent);}catch(e){}
       try{toast('Cronômetro zerado');}catch(e){}
@@ -3204,12 +3217,14 @@ function wfaEstDecimal(hStr,mStr){
     var ehImg=function(a){return a.tipo==='imagem'||/\.(png|jpe?g|gif|webp|avif)(\?|$)/i.test(a.url||'');};
     box.innerHTML=(m._anx||[]).map(function(a){
       if(ehImg(a))return '<div class="tkanx img"><a href="'+esc(a.url)+'" target="_blank" rel="noopener"><img src="'+esc(a.url)+'" alt="'+esc(a.nome)+'" loading="lazy"></a><span>'+esc(a.nome)+'</span><b data-anxrm="'+a.id+'">✕</b></div>';
-      return '<div class="tkanx"><a href="'+esc(a.url)+'" target="_blank" rel="noopener">🔗 '+esc(a.nome)+'</a><b data-anxrm="'+a.id+'">✕</b></div>';
+      return '<div class="tkanx"><a href="'+esc(a.url)+'" target="_blank" rel="noopener">'+TKI.link+esc(a.nome)+'</a><b data-anxrm="'+a.id+'">✕</b></div>';
     }).join('');
     /* Capa: primeira imagem anexada vira a capa da tarefa; as outras viram miniaturas clicaveis. */
     var capa=m.querySelector('#tk-capa');
     if(capa){var imgs=(m._anx||[]).filter(ehImg);
-      if(imgs.length){capa.classList.add('on');capa.innerHTML='<img class="capa" src="'+esc(imgs[0].url)+'" alt="'+esc(imgs[0].nome||'')+'">'+(imgs.length>1?'<div class="tkthumbs">'+imgs.map(function(a,i){return '<img src="'+esc(a.url)+'" alt="" class="'+(i===0?'on':'')+'" data-capai="'+i+'">';}).join('')+'</div>':'');
+      if(imgs.length){capa.classList.add('on');capa.innerHTML='<img class="capa" src="'+esc(imgs[0].url)+'" alt="'+esc(imgs[0].nome||'')+'">'+(imgs.length>1?'<div class="tkthumbs">'+imgs.map(function(a,i){return '<img src="'+esc(a.url)+'" alt="" class="'+(i===0?'on':'')+'" data-capai="'+i+'">';}).join('')+'</div>':'')+
+          '<button type="button" class="tkcapa-trocar" data-capatrocar="1" title="Enviar outra imagem para a capa">'+TKI.img+'Trocar capa</button>';
+        var tr=capa.querySelector('[data-capatrocar]');if(tr)tr.addEventListener('click',function(ev){ev.stopPropagation();var f=m.querySelector('#tk-anxfile');if(f)f.click();});
         var big=capa.querySelector('img.capa');big.addEventListener('click',function(){var u=big.getAttribute('src');if(u)window.open(u,'_blank','noopener');});
         capa.querySelectorAll('[data-capai]').forEach(function(th){th.addEventListener('click',function(ev){ev.stopPropagation();big.setAttribute('src',th.getAttribute('src'));capa.querySelectorAll('[data-capai]').forEach(function(x){x.classList.toggle('on',x===th);});});});
       }else{capa.classList.remove('on');capa.innerHTML='';}}
@@ -3680,8 +3695,8 @@ function renderClientesKPIs(){
   const semCap=ativos.filter(c=>c.tipo!=='Interno'&&!c.cap).length;
   el.innerHTML=`
     <div class="cli-kpi dk"><div class="kl">Carteira ativa</div><div class="kv">${ativos.length}</div><div class="kd">${nArk} ARK · ${nAlpha} Alpha · ${churn} churn</div></div>
-    <div class="cli-kpi yel"><div class="kl">MRR ARK</div><div class="kv">R$ ${mrr.toLocaleString('pt-BR')}</div><div class="kd">${semValor?`⚠ ${semValor} cliente(s) sem mensalidade cadastrada`:'mensalidades recorrentes'}</div></div>
-    <div class="cli-kpi"><div class="kl">Captações / mês</div><div class="kv">${cap}</div><div class="kd">${semCap?`⚠ ${semCap} cliente(s) sem captação cadastrada`:'produção de vídeo contratada'}</div></div>
+    <div class="cli-kpi yel"><div class="kl">MRR ARK</div><div class="kv">R$ ${mrr.toLocaleString('pt-BR')}</div><div class="kd">${semValor?`${semValor} cliente(s) sem mensalidade cadastrada`:'mensalidades recorrentes'}</div></div>
+    <div class="cli-kpi"><div class="kl">Captações / mês</div><div class="kv">${cap}</div><div class="kd">${semCap?`${semCap} cliente(s) sem captação cadastrada`:'produção de vídeo contratada'}</div></div>
     <div class="cli-kpi"><div class="kl">Saúde da carteira</div><div class="kv" style="font-size:14px;margin-top:2px">${saud} ok · ${ajuste} ajuste · ${urg} urgente</div><div class="cli-hbar">${saud?`<span style="flex:${saud};background:var(--green)"></span>`:''}${ajuste?`<span style="flex:${ajuste};background:#eab308"></span>`:''}${urg?`<span style="flex:${urg};background:var(--red)"></span>`:''}</div></div>`;
 }
 function goRegua(id){
@@ -4362,7 +4377,7 @@ function mdRenderDecisoes(){
   }
   if(!cards.length){
     box.style.display='';box.dataset.sig='zero';
-    box.innerHTML='<div class="dec-hd"><b>🎯 Decisões de hoje</b></div><div class="dec-zero"><div class="e">🏆</div><b>A agência está rodando</b><p><span class="pulse-dot"></span>Nada esperando você agora. Os agentes seguem trabalhando — a próxima decisão aparece aqui.</p></div>';
+    box.innerHTML='<div class="dec-hd"><b>Decisões de hoje</b></div><div class="dec-zero"><div class="e">🏆</div><b>A agência está rodando</b><p><span class="pulse-dot"></span>Nada esperando você agora. Os agentes seguem trabalhando — a próxima decisão aparece aqui.</p></div>';
     return;
   }
   cards.sort((a,b)=>(b.urg||0)-(a.urg||0));
@@ -4371,7 +4386,7 @@ function mdRenderDecisoes(){
   const nUrg=cards.filter(c=>c.urg===2).length;
   const URG_LBL=['pode esperar','importante','urgente'];
   box.style.display='';
-  box.innerHTML='<div class="dec-hd"><b>🎯 Decisões de hoje</b><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou — só falta o seu aval')+'</span></div>'+
+  box.innerHTML='<div class="dec-hd"><b>Decisões de hoje</b><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou — só falta o seu aval')+'</span></div>'+
     cards.slice(0,8).map(c=>`<div class="dec-card${c.urg===2?' u2':''}"><div class="dec-top"><span class="dec-ico" style="background:${c.bg}">${c.ico}</span><span class="dec-cli">${mdEsc(c.cli)}</span><span class="dec-urg u${c.urg}">${URG_LBL[c.urg]}</span></div><div class="dec-t">${mdEsc(c.t)}</div><div class="dec-d">${mdEsc(c.d)}</div><div class="dec-acts">${c.acts}</div></div>`).join('');
 }
 async function decRoteiro(id,status){
@@ -5471,8 +5486,9 @@ function renderTaskLista(){
     const c=CLIENTES.find(x=>x.id===t.clienteId);
     const late=t.data&&t.data<today&&t.status!=='concluido';
     const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';
-    const prio=t.prio==='alta'?'🔴 Alta':t.prio==='baixa'?'🟢 Baixa':'🟡 Média';
-    return `<tr class="tl-row" onclick="openTaskDetail('${t.id}')"><td class="tl-tt">${escapeHtml(t.title)}</td><td>${c?escapeHtml(c.nm):'—'}</td><td>${escapeHtml(t.resp||'—')}</td><td class="${late?'tl-late':''}">${late?'⚠ ':''}${dataFmt}</td><td>${prio}</td><td><span class="tl-pill tl-st-${t.status}">${taskStatusLabel(t.status)}</span></td></tr>`;
+    /* Ponto de cor no lugar do emoji (revisao Apple, vistas, 10/09/2026) */
+    const prio=t.prio==='alta'?'<span class="tl-prio alta">Alta</span>':t.prio==='baixa'?'<span class="tl-prio baixa">Baixa</span>':'<span class="tl-prio media">Média</span>';
+    return `<tr class="tl-row" onclick="openTaskDetail('${t.id}')"><td class="tl-tt">${escapeHtml(t.title)}</td><td>${c?escapeHtml(c.nm):'—'}</td><td>${escapeHtml(t.resp||'—')}</td><td class="${late?'tl-late':''}">${late?'Atrasada · ':''}${dataFmt}</td><td>${prio}</td><td><span class="tl-pill tl-st-${t.status}">${taskStatusLabel(t.status)}</span></td></tr>`;
   }).join('');
   wfaSetHTML(document.getElementById('task-lista'),`<table class="tl-table"><thead><tr><th>Tarefa</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:24px">Nenhuma tarefa encontrada — ajuste os filtros ou crie uma nova na aba <b>Kanban</b>.</td></tr>'}</tbody></table>`);
 }
@@ -5503,7 +5519,7 @@ function renderTaskCalendario(){
   }
   const navBtn=(d,lb,tt)=>`<button class="icobtn" style="padding:2px 10px;font-size:13px" title="${tt}" onclick="tcalNav(${d})">${lb}</button>`;
   const navHtml=`<span style="display:inline-flex;gap:4px;align-items:center">${navBtn(-1,'‹','Mês anterior')}${WFA_TCAL_OFF!==0?navBtn(0,'Hoje','Voltar para o mês atual'):''}${navBtn(1,'›','Próximo mês')}</span>`;
-  wfaSetHTML(document.getElementById('task-calendario'),`<div class="tcal"><div class="tcal-head"><span style="text-transform:capitalize">${monthName}</span><span style="display:inline-flex;gap:10px;align-items:center"><span style="font-size:12px;color:var(--mute)">${noMes} com prazo no mês</span>${navHtml}</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`);
+  wfaSetHTML(document.getElementById('task-calendario'),`<div class="tcal"><div class="tcal-head"><span>${monthName.charAt(0).toUpperCase()+monthName.slice(1)}</span><span style="display:inline-flex;gap:10px;align-items:center"><span style="font-size:12px;color:var(--mute)">${noMes} com prazo no mês</span>${navHtml}</span></div><div class="tcal-grid">${dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('')}${cells}</div></div>`);
 }
 function renderTaskPessoas(){
   if(typeof state==='undefined'||!state||!Array.isArray(state.tarefas))return;   // blindagem tela branca
@@ -5520,7 +5536,7 @@ function renderTaskPessoas(){
     const cnt={backlog:0,iniciar:0,andamento:0,aprovacao:0,homologcli:0,concluido:0};arr.forEach(t=>{cnt[t.status]=(cnt[t.status]||0)+1;});
     const tot=arr.length||1;
     const seg=(c,col)=>cnt[c]?`<div class="tp-seg" style="width:${cnt[c]/tot*100}%;background:${col}"></div>`:'';
-    const lista=arr.slice().sort((a,b)=>((a.data||'9999')<(b.data||'9999')?-1:1)).slice(0,6).map(t=>{const late=t.data&&t.data<today&&t.status!=='concluido';const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';return `<div class="tp-task ${late?'late':''}" onclick="openTaskDetail('${t.id}')"><span>${t.status==='concluido'?'✅ ':''}${escapeHtml(t.title.slice(0,38))}</span><span class="d">${late?'⚠ ':''}${dataFmt}</span></div>`;}).join('');
+    const lista=arr.slice().sort((a,b)=>((a.data||'9999')<(b.data||'9999')?-1:1)).slice(0,6).map(t=>{const late=t.data&&t.data<today&&t.status!=='concluido';const dataFmt=t.data?t.data.split('-').reverse().join('/'):'—';return `<div class="tp-task ${late?'late':''}" onclick="openTaskDetail('${t.id}')"><span class="${t.status==='concluido'?'ok':''}">${escapeHtml(t.title.slice(0,38))}</span><span class="d">${late?'Atrasada · ':''}${dataFmt}</span></div>`;}).join('');
     return `<div class="tp-card"><div class="tp-head"><div class="tp-av">${initials(nm)}</div><div><div class="tp-nm">${escapeHtml(nm)}</div><div class="tp-sub">${ativos.length} ativas${atras?` · <span style="color:var(--red,#e0364f);font-weight:700">${atras} atrasada${atras>1?'s':''}</span>`:''}</div></div></div><div class="tp-bar">${seg('backlog','#bbb')}${seg('andamento','#ffd400')}${seg('aprovacao','#4a90ff')}${seg('concluido','#19b36b')}</div>${lista||'<div class="tp-sub">Sem tarefas</div>'}${arr.length>6?`<div class="tp-sub" style="margin-top:6px">+${arr.length-6} outras</div>`:''}</div>`;
   }).join('');
   wfaSetHTML(document.getElementById('task-pessoas'),`<div class="tp-grid">${cards||'<div class="tp-sub" style="grid-column:1/-1;padding:28px;text-align:center">Nenhuma tarefa atribuída — crie no Kanban e defina um responsável para aparecer aqui.</div>'}</div>`);
@@ -6077,6 +6093,21 @@ function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;',
    (#modal-detail e #modal-nova) fica no HTML como reserva, sem uso. */
 const WFA_TK_COLS=[{k:'backlog',n:'Backlog'},{k:'iniciar',n:'A iniciar'},{k:'andamento',n:'Em Andamento'},{k:'aprovacao',n:'Homologação'},{k:'homologcli',n:'Homologação do cliente'},{k:'concluido',n:'Concluído'}];
 const WFA_FUNCOES=['Account Manager','Gestor de Tráfego','Criador','Editor','Designer','Captação'];
+/* Pilula de Funcao: escolha unica; grava no select escondido e avisa o autosave pelo change. */
+function wfaTkFunc(btn){
+  const box=btn.parentNode,sel=document.getElementById('tk-func');if(!sel)return;
+  sel.value=btn.dataset.func;
+  box.querySelectorAll('.tkfunc').forEach(b=>{const on=b===btn;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');});
+  sel.dispatchEvent(new Event('change',{bubbles:true}));
+}
+/* Tags como pilulas: espelho visual do input #tk-tags (que continua sendo o que o onSave le). */
+function wfaTkTagsPills(inp){
+  const box=document.getElementById('tk-tags-pills');if(!box||!inp)return;
+  const tags=String(inp.value||'').split(',').map(s=>s.trim()).filter(Boolean);
+  box.innerHTML=tags.map(tg=>`<span class="tkpp on" style="background:${tcDot(tg)};color:#fff;border-color:${tcDot(tg)}"><i style="background:rgba(255,255,255,.85)"></i>${escapeHtml(tg)}<b data-tagrm="${escapeHtml(tg)}" title="Tirar">✕</b></span>`).join('');
+  box.querySelectorAll('[data-tagrm]').forEach(b=>b.addEventListener('click',()=>{const resto=tags.filter(x=>x!==b.dataset.tagrm);inp.value=resto.join(', ');inp.dispatchEvent(new Event('input',{bubbles:true}));}));
+  box.style.display=tags.length?'':'none';
+}
 function wfaTarefaModal(t,ehNova){
   const c=CLIENTES.find(x=>x.id===t.clienteId);
   const norm={
@@ -6091,10 +6122,16 @@ function wfaTarefaModal(t,ehNova){
   };
   const sel=(id,ops,cur)=>`<select id="${id}" class="tkmini">${ops.map(o=>`<option value="${escapeHtml(o.v)}"${o.v===cur?' selected':''}>${escapeHtml(o.n)}</option>`).join('')}</select>`;
   const linha=(ic,rot,val)=>`<div class="tkr"><div class="tkl">${ic} ${rot}</div><div class="tkv">${val}</div></div>`;
-  const extras=()=>linha('🚩','Prioridade',sel('tk-prio',[{v:'alta',n:'🔴 Alta'},{v:'media',n:'🟡 Média'},{v:'baixa',n:'🟢 Baixa'}],t.prio||'media'))+
-    linha('🏢','Cliente',sel('tk-cli',[{v:'',n:'Sem cliente'}].concat(CLIENTES.map(x=>({v:x.id,n:x.nm}))),t.clienteId||''))+
-    linha('🧭','Função',sel('tk-func',WFA_FUNCOES.concat((t.funcao&&!WFA_FUNCOES.includes(t.funcao))?[t.funcao]:[]).map(f=>({v:f,n:f})),t.funcao||'Account Manager'))+
-    linha('#','Tags',`<input id="tk-tags" class="tkmini" style="width:100%;max-width:340px" placeholder="criativo, urgente" value="${escapeHtml((t.tags||[]).join(', '))}">`);
+  /* Segunda passada Apple (10/09/2026): icones SVG, prioridade em pilula sem emoji, Funcao como
+     pilulas de escolha unica (o select segue existindo, escondido, e e o que o onSave le) e Tags
+     como pilulas com o campo de texto por tras (mesma fonte de verdade: o input #tk-tags). */
+  const I=window.WFA_TKI||{};
+  const funcs=WFA_FUNCOES.concat((t.funcao&&!WFA_FUNCOES.includes(t.funcao))?[t.funcao]:[]);
+  const funcAtual=t.funcao||'Account Manager';
+  const extras=()=>linha(I.flag||'','Prioridade',`<select id="tk-prio" class="tkst tkprio" data-prio="${escapeHtml(t.prio||'media')}" onchange="this.dataset.prio=this.value">${[{v:'alta',n:'Alta'},{v:'media',n:'Média'},{v:'baixa',n:'Baixa'}].map(o=>`<option value="${o.v}"${o.v===(t.prio||'media')?' selected':''}>${o.n}</option>`).join('')}</select>`)+
+    linha(I.building||'','Cliente',sel('tk-cli',[{v:'',n:'Sem cliente'}].concat(CLIENTES.map(x=>({v:x.id,n:x.nm}))),t.clienteId||''))+
+    linha(I.compass||'','Função',`<select id="tk-func" class="tkmini" hidden>${funcs.map(f=>`<option value="${escapeHtml(f)}"${f===funcAtual?' selected':''}>${escapeHtml(f)}</option>`).join('')}</select><div class="tkchips" id="tk-func-pills">${funcs.map(f=>`<button type="button" class="tkfunc${f===funcAtual?' on':''}" data-func="${escapeHtml(f)}" aria-pressed="${f===funcAtual?'true':'false'}" onclick="wfaTkFunc(this)">${escapeHtml(f)}</button>`).join('')}</div>`)+
+    linha(I.hash||'','Tags',`<div class="tkchips" id="tk-tags-pills"></div><input id="tk-tags" class="tkmini" style="width:100%;max-width:340px" placeholder="criativo, urgente (separe por vírgula)" value="${escapeHtml((t.tags||[]).join(', '))}" oninput="wfaTkTagsPills(this)">`);
   wfaTaskModal({
     t:norm,ehNova:!!ehNova,cols:WFA_TK_COLS,semSprint:true,
     crumb:(c?escapeHtml(c.nm):'Atividades')+' <i>/</i> '+(ehNova?'Nova tarefa':'Tarefa'),
@@ -6137,6 +6174,7 @@ function wfaTarefaModal(t,ehNova){
     },
     onDelete:()=>{if(!ehNova)delTask(t.id);}
   });
+  try{wfaTkTagsPills(document.getElementById('tk-tags'));}catch(e){}
 }
 function openTaskDetail(id){
   if(String(id).indexOf('pj:')===0){const p=String(id).split(':');if(typeof pjAbrirTarefaModal==='function')pjAbrirTarefaModal(p[1],p[2]);return;}
@@ -9776,7 +9814,7 @@ function crmSaveLead(){
 function crmToggleHot(id){
   const arr=loadCrm();const l=arr.find(x=>x.id===id);if(!l)return;
   l.hot=!l.hot;saveCrm(arr);
-  toast(l.hot?'🔥 Follow quente':'Removido do follow quente');
+  toast(l.hot?'Marcado como follow quente':'Removido do follow quente');
 }
 function crmDeleteLead(){
   const id=document.getElementById('crm-edit-id').value;if(!id)return;
@@ -9833,12 +9871,12 @@ function renderCrm(){
         const late=l.due&&l.due<today;
         const dtxt=l.due?crmFmtDate(l.due):'';
         return `<div class="crm-fh-card" onclick="crmOpenModal('${l.id}')">
-          <div class="nm">${l.hot?'🔥 ':''}${escapeHtml(l.nm)}</div>
+          <div class="nm">${l.hot?'<svg class="crm-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.5.5-2.5 1.2-3.4.3 1.2 1 2 1.8 2.4C11 8 11 5.5 12 3z"/></svg>':''}${escapeHtml(l.nm)}</div>
           <div class="mt"><span>${escapeHtml(CRM_STAGES[l.stage]?.label||'')}</span>${l.resp?`<span>${escapeHtml(l.resp)}</span>`:''}</div>
-          ${(l.next||dtxt)?`<div class="nx">${escapeHtml(l.next||'Próxima ação')}${dtxt?` · <span class="${late?'due-late':''}">${late?'⚠ ':''}${dtxt}</span>`:''}</div>`:''}
+          ${(l.next||dtxt)?`<div class="nx">${escapeHtml(l.next||'Próxima ação')}${dtxt?` · <span class="${late?'due-late':''}">${late?'Atrasada · ':''}${dtxt}</span>`:''}</div>`:''}
         </div>`;
       }).join('');
-      fhEl.innerHTML=`<div class="crm-fh"><div class="crm-fh-hd">🔥 Follow quente · ${hot.length} <small>marcados com 🔥 ou com próxima ação vencida/pra hoje</small></div><div class="crm-fh-cards">${cards}</div></div>`;
+      fhEl.innerHTML=`<div class="crm-fh"><div class="crm-fh-hd"><svg class="crm-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.5.5-2.5 1.2-3.4.3 1.2 1 2 1.8 2.4C11 8 11 5.5 12 3z"/></svg>Follow quente · ${hot.length} <small>marcados como quentes ou com próxima ação vencida ou para hoje</small></div><div class="crm-fh-cards">${cards}</div></div>`;
     }
   }
   // Pipeline columns
@@ -9854,7 +9892,7 @@ function renderCrm(){
       <div class="crm-cards">${cards.map(l=>{
         const overdue=l.due&&l.due<today&&l.stage<4;
         return `<div class="crm-card stage-${si}${overdue?' crm-overdue':''}" draggable="true" data-lead="${l.id}" onclick="crmOpenModal('${l.id}')">
-          <button class="crm-hot-btn${l.hot?' on':''}" title="Marcar como follow quente" onclick="event.stopPropagation();crmToggleHot('${l.id}')">🔥</button>
+          <button class="crm-hot-btn${l.hot?' on':''}" title="Marcar como follow quente" onclick="event.stopPropagation();crmToggleHot('${l.id}')" aria-label="Follow quente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.5.5-2.5 1.2-3.4.3 1.2 1 2 1.8 2.4C11 8 11 5.5 12 3z"/></svg></button>
           <div class="nm">${escapeHtml(l.nm)}</div>
           <div class="meta"><span class="crm-source-badge">${escapeHtml(l.source||'—')}</span>${l.resp?`<span>${escapeHtml(l.resp)}</span>`:''}</div>
           ${l.val?`<div class="val">R$ ${Number(l.val).toLocaleString('pt-BR')}</div>`:''}
