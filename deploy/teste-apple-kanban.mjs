@@ -229,6 +229,26 @@ for (const tema of ['light', 'dark']) {
     }
     await page.evaluate(() => tarefaSetView('kanban'));
 
+    // 10. Projetos (10/09/2026): lista e quadro na mesma linguagem, sem emoji, sem rolagem lateral da pagina
+    const pj = await page.evaluate(() => {
+      const n = document.querySelector('[data-nav="projetos"]'); n && n.click();
+      const pg = document.getElementById('page-projetos'), view = document.getElementById('view');
+      const card = pg.querySelector('.pj-c'); const cardBg = card ? getComputedStyle(card).backgroundColor : '';
+      card && card.click();
+      const cols = pg.querySelectorAll('.pj-col').length, t = pg.querySelector('.pj-t');
+      const tBg = t ? getComputedStyle(t).backgroundColor : '';
+      const txt = pg.innerText || '';
+      const emoji = (txt.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu) || []).slice(0, 5);
+      const ph = (pg.querySelector('#pj-busca') || {}).placeholder || '';
+      return { cardBg, cols, tBg, emoji, ph, pgOver: pg.scrollWidth - pg.clientWidth, viewOver: view ? view.scrollWidth - view.clientWidth : 0 };
+    });
+    await page.waitForTimeout(300);
+    checa(/^rgb\((255, 255, 255|13, 14, 17)\)$/.test(pj.cardBg), `${rot} Projetos: cartao de projeto na superficie do tema (${pj.cardBg})`);
+    checa(pj.cols === 6 && /^rgb\((255, 255, 255|13, 14, 17)\)$/.test(pj.tBg), `${rot} Projetos: quadro com 6 colunas e cartao de tarefa na mesma superficie (${pj.tBg})`);
+    checa(pj.emoji.length === 0 && !/🔍/.test(pj.ph), `${rot} Projetos: sem emoji no quadro e no filtro (${pj.emoji.join(' ') || 'nenhum'})`);
+    checa(pj.pgOver <= 1 && pj.viewOver <= 1, `${rot} Projetos: pagina sem rolagem lateral (+${pj.pgOver}/+${pj.viewOver})`);
+    await page.evaluate(() => { const n = document.querySelector('[data-nav="tarefas"]'); n && n.click(); });
+
     for (const e of [...new Set(erros)]) if (!RUIDO.test(e)) falhas.push(`${rot} erro de JS: ${e}`);
     await ctx.close();
   }

@@ -2411,9 +2411,9 @@ function wfaEstDecimal(hStr,mStr){
     return '<div class="pj-t" draggable="true" data-tid="'+esc(t.id)+'">'+
       '<div class="tt">'+esc(t.t)+'</div>'+
       '<div class="pj-tags">'+tagsHTML(t)+'</div>'+
-      (t.venc?'<div class="pj-venc'+(late?' late':'')+'">'+(late?'⚠ ':'📅 ')+esc(br(t.venc))+(t.resp?' · '+esc(t.resp):'')+'</div>'
+      (t.venc?'<div class="pj-venc'+(late?' late':'')+'">'+(late?'Atrasada · ':'')+esc(br(t.venc))+(t.resp?' · '+esc(t.resp):'')+'</div>'
              :(t.resp?'<div class="pj-venc">'+esc(t.resp)+'</div>':''))+
-      (t.horas?'<div class="pj-venc">⏱ '+esc(wfaEstFmt(t.horas))+' estimadas</div>':'')+
+      (t.horas?'<div class="pj-venc est">'+esc(wfaEstFmt(t.horas))+' estimadas</div>':'')+
       '</div>';
   }
 
@@ -2645,7 +2645,7 @@ function wfaEstDecimal(hStr,mStr){
 
       (vista==='prontuario'?'':
         '<div class="filter-bar">'+
-          '<input class="form-input" id="pj-busca" style="flex:1;min-width:150px;max-width:240px" placeholder="🔍 Buscar tarefa..." value="'+esc(filtro.busca)+'">'+
+          '<input class="form-input" id="pj-busca" style="flex:1;min-width:150px;max-width:240px" placeholder="Buscar tarefa" value="'+esc(filtro.busca)+'">'+
           '<select class="form-select" id="pj-fpapel" style="width:180px"><option value="">Toda etiqueta de papel</option>'+
             PAPEIS.map(function(x){return '<option value="'+x.k+'"'+(filtro.papel===x.k?' selected':'')+'>'+esc(x.n)+'</option>';}).join('')+
           '</select>'+

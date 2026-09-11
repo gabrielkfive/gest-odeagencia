@@ -1,4 +1,4 @@
-<!-- build 20260910h-apple-detalhe -->
+<!-- build 20260910i-apple-projetos -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
-<link rel="stylesheet" href="workflowark-20260910h.css">
+<link rel="stylesheet" href="workflowark-20260910i.css">
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -3438,102 +3438,7 @@ function wfaSetTheme(t){
            NAO mexe na aba Atividades > Tarefas: este quadro tem dados proprios
            (wfa-projetos) e roda em paralelo ao kanban operacional que ja existe. -->
       <div class="page" id="page-projetos">
-        <style>
-          #page-projetos .pj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-          #page-projetos .pj-c{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;cursor:pointer;transition:transform .16s var(--ease-out),box-shadow .16s var(--ease-out)}
-          #page-projetos .pj-c:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
-          #page-projetos .pj-c h3{font-size:16px;font-weight:720;letter-spacing:-.02em;margin:0}
-          #page-projetos .pj-c .sub{font-size:11.5px;color:var(--mute);margin-top:3px}
-          #page-projetos .pj-temp{width:8px;height:8px;border-radius:99px;display:inline-block;margin-right:6px;vertical-align:middle}
-          #page-projetos .pj-temp.gr{background:var(--green)}#page-projetos .pj-temp.y{background:var(--yel)}#page-projetos .pj-temp.r{background:var(--red)}
-          #page-projetos .pj-bar{height:5px;background:var(--blue-soft);border-radius:99px;overflow:hidden;margin:14px 0 7px}
-          #page-projetos .pj-bar i{display:block;height:100%;background:var(--yel);border-radius:99px;transition:width .3s var(--ease)}
-          #page-projetos .pj-mini{display:flex;gap:12px;font-size:11px;color:var(--mute);flex-wrap:wrap}
-          #page-projetos .pj-mini b{color:var(--ink);font-weight:700}
-          #page-projetos .pj-empty{padding:40px;text-align:center;color:var(--mute);border:1px dashed var(--line);border-radius:16px}
-
-          #page-projetos .pj-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
-          #page-projetos .pj-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-          #page-projetos .pj-tab{font-size:12.5px;font-weight:640;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--txt);cursor:pointer;transition:.15s}
-          #page-projetos .pj-tab:hover{border-color:var(--line-2)}
-          #page-projetos .pj-tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-
-          #page-projetos .pj-cargabar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 0 13px;padding:9px 12px;background:var(--blue-soft);border:1px solid var(--line);border-radius:12px}
-          #page-projetos .pj-cargabar .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);font-weight:800;margin-right:3px}
-          #page-projetos .pj-carga{font-size:11.5px;color:var(--txt);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
-          #page-projetos .pj-carga b{font-weight:700}
-          #page-projetos .pj-carga.sem{color:var(--red);border-color:var(--red)}
-          #page-projetos .pj-carga.tot{background:var(--ink);color:var(--bg);border-color:var(--ink);margin-left:auto}
-          #page-projetos .pj-board{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:11px;overflow-x:auto;padding-bottom:10px;align-items:start}
-          #page-projetos .pj-col{background:var(--blue-soft);border:1px solid var(--line);border-radius:14px;padding:10px;min-height:120px}
-          #page-projetos .pj-col.over{border-color:var(--yel);background:var(--yel-bg)}
-          #page-projetos .pj-colh{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin-bottom:9px;padding:0 3px}
-          #page-projetos .pj-colh .n{margin-left:auto;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:1px 7px;font-size:10px;color:var(--txt)}
-          #page-projetos .pj-dot{width:7px;height:7px;border-radius:99px;flex:none}
-          #page-projetos .pj-t{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:11px 12px;margin-bottom:8px;cursor:grab;transition:box-shadow .15s,border-color .15s}
-          #page-projetos .pj-t:hover{box-shadow:var(--sh-2);border-color:var(--line-2)}
-          #page-projetos .pj-t.drag{opacity:.4}
-          #page-projetos .pj-t .tt{font-size:12.8px;font-weight:600;line-height:1.4;color:var(--ink)}
-          #page-projetos .pj-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
-          #page-projetos .pj-tag{font-size:9.5px;font-weight:750;padding:2.5px 7px;border-radius:99px;letter-spacing:.01em;white-space:nowrap}
-          #page-projetos .pj-tag.sp{background:var(--yel-soft);color:var(--yel-d);border:1px solid var(--yel)}
-          #page-projetos .pj-venc{font-size:10.5px;color:var(--mute);margin-top:7px;display:flex;align-items:center;gap:5px}
-          #page-projetos .pj-venc.late{color:var(--red);font-weight:700}
-          #page-projetos .pj-add{width:100%;font-size:11.5px;color:var(--mute);border:1px dashed var(--line);border-radius:10px;padding:7px;background:none;text-align:center}
-          #page-projetos .pj-add:hover{color:var(--ink);border-color:var(--line-2)}
-
-          #page-projetos .pj-tb{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-          #page-projetos .pj-tb th{background:var(--blue-soft);text-align:left;padding:10px 12px;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);border-bottom:1px solid var(--line)}
-          #page-projetos .pj-tb td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--txt)}
-          #page-projetos .pj-tb tr:last-child td{border-bottom:none}
-          #page-projetos .pj-tb tbody tr{cursor:pointer}
-          #page-projetos .pj-tb tbody tr:hover{background:var(--blue-soft)}
-
-          #page-projetos .pr-wrap{display:grid;grid-template-columns:190px 1fr;gap:16px;align-items:start}
-          #page-projetos .pr-nav{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;position:sticky;top:0}
-          #page-projetos .pr-nav button{display:block;width:100%;text-align:left;font-size:12.8px;font-weight:600;padding:9px 11px;border-radius:9px;color:var(--txt);transition:.14s}
-          #page-projetos .pr-nav button:hover{background:var(--blue-soft)}
-          #page-projetos .pr-nav button.on{background:var(--ink);color:var(--bg)}
-          #page-projetos .pr-body{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
-          #page-projetos .pr-body h2{font-size:19px;font-weight:740;letter-spacing:-.025em;margin:0 0 3px}
-          #page-projetos .pr-body .lede{font-size:12.5px;color:var(--mute);margin-bottom:18px}
-          #page-projetos .pr-sec{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
-          #page-projetos .pr-sec.first{border-top:none;margin-top:0;padding-top:0}
-          #page-projetos .pr-sec h4{font-size:13.5px;font-weight:720;margin:0 0 11px;color:var(--ink)}
-          #page-projetos .pr-f{margin-bottom:11px}
-          #page-projetos .pr-f label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);margin-bottom:5px;font-weight:700}
-          #page-projetos .pr-f input,#page-projetos .pr-f textarea,#page-projetos .pr-f select,
-          #page-projetos .pj-f input,#page-projetos .pj-f textarea,#page-projetos .pj-f select{width:100%;background:var(--blue-soft);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:9px 11px;font:inherit;font-size:13px}
-          #page-projetos .pr-f textarea{min-height:76px;resize:vertical;line-height:1.55}
-          #page-projetos .pr-f input:focus,#page-projetos .pr-f textarea:focus,#page-projetos .pr-f select:focus{outline:none;border-color:var(--yel)}
-          #page-projetos .pr-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-          #page-projetos .pr-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
-          #page-projetos .pr-lin{background:var(--blue-soft);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:9px}
-          #page-projetos .pr-lin .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
-          #page-projetos .pr-lin .top b{font-size:12.5px}
-          #page-projetos .pr-pend{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--red-soft);color:var(--red)}
-          #page-projetos .pr-ok{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--green-soft);color:var(--green)}
-          /* o modal de tarefa nasce em document.body, fora de #page-projetos.
-             Sem repetir as regras aqui ele perde o estilo do formulario e o rotulo
-             cola no campo (bug de 31/08). Mexeu numa lista, mexe nas duas. */
-          #pj-modal .pr-f{margin-bottom:11px}
-          #pj-modal .pr-f label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);margin-bottom:5px;font-weight:700}
-          #pj-modal .pr-f input,#pj-modal .pr-f textarea,#pj-modal .pr-f select,
-          #pj-modal .pj-f:not(.largo) input,#pj-modal .pj-f:not(.largo) textarea,#pj-modal .pj-f:not(.largo) select{width:100%;background:var(--blue-soft);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:9px 11px;font:inherit;font-size:13px}
-          #pj-modal .pr-f textarea{min-height:76px;resize:vertical;line-height:1.55}
-          #pj-modal .pr-f input:focus,#pj-modal .pr-f textarea:focus,#pj-modal .pr-f select:focus{outline:none;border-color:var(--yel)}
-          #pj-modal .pr-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-          #pj-modal .pr-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
-          #pj-modal .pj-tag{font-weight:750;border-radius:99px;letter-spacing:.01em;white-space:nowrap}
-          @media(max-width:900px){
-            #page-projetos .pr-wrap{grid-template-columns:1fr}
-            #page-projetos .pr-nav{position:static;display:flex;gap:6px;overflow-x:auto}
-            #page-projetos .pr-nav button{white-space:nowrap;width:auto}
-            #page-projetos .pr-2,#page-projetos .pr-3{grid-template-columns:1fr}
-            #pj-modal .pr-2,#pj-modal .pr-3{grid-template-columns:1fr}
-            #page-projetos .pj-board{grid-template-columns:repeat(6,minmax(180px,1fr))}
-          }
-        </style>
+        <!-- estilos de Projetos: movidos para workflowark-*.css (10/09/2026), para a camada Apple vencer por ordem -->
 
         <!-- VISTA 1: carteira de projetos -->
         <div id="pj-lista">
@@ -4298,6 +4203,6 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260910h.js"></script>
+<script src="workflowark-app-20260910i.js"></script>
 </body>
 </html>

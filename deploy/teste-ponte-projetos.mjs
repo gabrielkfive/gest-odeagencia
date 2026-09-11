@@ -120,7 +120,8 @@ const ARRASTA = (args) => {
   }));
   checa(badges.pt1.includes('30min') && !badges.pt1.includes('0.5h'), 'cartão mostra 0,5h como 30min');
   checa(badges.pt4.includes('1h 45min'), 'cartão mostra 1,75h como 1h 45min');
-  checa(/⏳ 2h(?!\s*\d)/.test(badges.n1), 'cartão próprio mostra 2h');
+  // Revisao Apple (10/09/2026): a ampulheta virou icone SVG, o texto do cartao traz so "2h"
+  checa(/2h(?![0-9]| [0-9])/.test(badges.n1), 'cartão próprio mostra 2h');
   checa(badges.pt1.includes('Projeto') && badges.pt1.includes('sprint 07'), 'cartão ligado tem etiqueta Projeto · sprint 07');
   checa(badges.pt1.includes('Vivenda'), 'cartão ligado mostra o cliente');
 
@@ -257,11 +258,12 @@ const ARRASTA = (args) => {
     more: !!document.getElementById('tv-more'),
     btnCal: !!document.querySelector('#task-views .tv-btn[data-tv="calendario"]'),
     semQaddConcluido: !document.querySelector('[data-qadd="concluido"]'),
-    btnDup: !!document.querySelector('#page-tarefas button[onclick="removerDuplicadas()"]'),
+    // Revisao Apple (10/09/2026): a acao mora no select "Mais" da barra compacta
+    btnDup: !!(document.querySelector('#page-tarefas button[onclick="removerDuplicadas()"]')||document.querySelector('#page-tarefas #tf-mais option[value="dup"]')),
   }));
   checa(vistas.more && !vistas.btnCal, 'Calendário saiu da barra e está no "Mais…"');
   checa(vistas.semQaddConcluido, 'coluna Concluído sem "+ Adicionar cartão"');
-  checa(vistas.btnDup, 'botão "Remover duplicadas" no topo da aba');
+  checa(vistas.btnDup, 'ação "Remover duplicadas" no topo da aba (botão ou item do Mais)');
   await page.evaluate(() => tarefaSetView('calendario'));
   await page.waitForTimeout(200);
   const cal = await page.evaluate(() => ({ vis: document.getElementById('task-calendario').style.display !== 'none', sel: document.getElementById('tv-more').value }));
