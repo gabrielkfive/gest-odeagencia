@@ -101,3 +101,29 @@ claro e escuro no mesmo lugar.
   primeira dobra, filtros, teclado, mover e recarregar, cronômetro) e `npm run capturas:apple`
   para as capturas com dado sintético. Rede externa bloqueada e servidor local em
   `deploy/apple-review-ambiente.mjs`.
+
+## Tokens do sistema e páginas alinhadas (11/09/2026)
+
+Os tokens da revisão Apple viraram tokens do sistema, definidos uma vez em `:root` (claro) e
+em `body.aura-dark` (escuro), no fim de `workflowark-<data>.css`:
+
+| Token | Claro | Escuro (black piano) | Uso |
+|---|---|---|---|
+| `--ark-card` | `#fff` | `#0d0e11` | superfície de cartão, tabela, indicador |
+| `--ark-line` | `rgba(0,0,0,.07)` | `rgba(255,255,255,.10)` | hairline de cartão e divisor |
+| `--ark-col` | `rgba(120,120,128,.08)` | `rgba(255,255,255,.03)` | fundo de coluna do quadro |
+| `--ark-fill` / `--ark-fill-2` | `rgba(120,120,128,.10 / .16)` | `rgba(255,255,255,.07 / .13)` | pílula, botão neutro, controle |
+| `--ark-ink` / `--ark-mute` / `--ark-mute-2` | `#1d1d1f / #6e6e73 / #aeaeb2` | `#f5f5f7 / #9aa1ad / #5f6570` | texto principal, secundário, terciário |
+| `--ark-seg` | `#fff` | `rgba(255,255,255,.16)` | item ligado do controle segmentado |
+| `--ark-r` | `12px` | idem | raio do cartão (coluna 14, modal 24) |
+
+`--tf-*` continua como apelido (redeclarado nos dois blocos, porque variável se resolve onde
+é declarada). Página nova usa `var(--ark-card)` etc. sem seletor próprio.
+
+Páginas já na linguagem: Atividades (quadro, Lista, Por pessoa, Calendário, Painel,
+Relatório), detalhe da tarefa, Projetos, Meu Dia (fora do Mission Control), CRM e Lista de
+clientes. Regras que valem para todas: cabeçalho com título 22 px e botões de 32 px; indicador
+neutro com o número na cor, nunca o cartão inteiro pintado; coluna com fundo `--ark-col` e ponto
+de 8 px na cor do status; cartão com título primeiro, contexto em pílula neutra, sem borda
+esquerda colorida, hover só de sombra e borda (sem transform); sem emoji em botão, rótulo,
+opção de select e cabeçalho (ícone SVG de 14 px com `stroke:currentColor` quando precisa).

@@ -1,4 +1,4 @@
-<!-- build 20260910k-apple-crm -->
+<!-- build 20260911a-apple-tokens -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
-<link rel="stylesheet" href="workflowark-20260910k.css">
+<link rel="stylesheet" href="workflowark-20260911a.css">
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -736,7 +736,7 @@ function wfaSetTheme(t){
             <div id="md-jarvis" onclick="jarvisOpen()" title="Conversar com o JARVIS" style="cursor:pointer">
               <div class="jv-hd"><div class="jv-orb"></div><div><div class="jv-ttl">Assistente ARK</div><div class="jv-nm">JARVIS · seu resumo de hoje</div></div><span style="margin-left:auto;font-size:11px;color:var(--yel);font-weight:700;white-space:nowrap">Conversar →</span></div>
               <div class="jv-txt" id="md-jarvis-txt"></div>
-              <button class="jv-spk" onclick="event.stopPropagation();mdJarvisFalar()">🔊 JARVIS narra meu dia</button>
+              <button class="jv-spk" onclick="event.stopPropagation();mdJarvisFalar()">JARVIS narra meu dia</button>
             </div>
           </aside>
         </div>
@@ -1214,7 +1214,7 @@ function wfaSetTheme(t){
             </h3>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
               <select id="climap-sel" class="form-select" style="width:auto;font-size:12px;padding:7px 10px"></select>
-              <button class="icobtn" id="climap-place" onclick="cliMapPlaceToggle()" style="font-size:12px">📍 Posicionar no mapa</button>
+              <button class="icobtn" id="climap-place" onclick="cliMapPlaceToggle()" style="font-size:12px">Posicionar no mapa</button>
             </div>
           </div>
           <div id="climap" style="height:400px;background:#0a0a0c"></div>
@@ -1288,7 +1288,7 @@ function wfaSetTheme(t){
         @media(max-width:1100px){#page-jarvis .jv-shell{grid-template-columns:1fr;height:auto}#page-jarvis .jv-chatcol{height:56vh}}
         @media(prefers-reduced-motion:reduce){#page-jarvis .jv-orb-big{animation:none}}
         </style>
-        <div class="page-head"><div class="page-title"><h1>JARVIS</h1><p>Seu assistente executor · converse, dê comandos, rode skills e acompanhe o núcleo local.</p></div><button class="tb-btn" onclick="jarvisMemoriaToggle()" style="flex-shrink:0;font-size:12px">🧠 Memória</button></div>
+        <div class="page-head"><div class="page-title"><h1>JARVIS</h1><p>Seu assistente executor · converse, dê comandos, rode skills e acompanhe o núcleo local.</p></div><button class="tb-btn" onclick="jarvisMemoriaToggle()" style="flex-shrink:0;font-size:12px">Memória</button></div>
         <div id="jarvis-memoria-panel" style="display:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;margin-bottom:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
             <span style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:#9a9aa2;text-transform:uppercase">O que o JARVIS aprendeu sobre você</span>
@@ -1307,7 +1307,7 @@ function wfaSetTheme(t){
               </div>
               <input type="file" id="jarvis-file" style="display:none" accept=".txt,.md,.markdown,.html,.htm,.csv,.json,.rtf,.srt,.vtt,text/*" onchange="jarvisFileChosen(this)">
               <div style="display:flex;gap:8px;align-items:flex-end">
-                <button id="jarvis-conv" class="jv-neu" title="Modo conversa (voz)" style="flex-shrink:0;font-weight:700;padding:0 10px;height:40px;font-size:11px" onclick="jarvisConversaToggle()">🎙 VOZ</button>
+                <button id="jarvis-conv" class="jv-neu" title="Modo conversa (voz)" style="flex-shrink:0;font-weight:700;padding:0 10px;height:40px;font-size:11px" onclick="jarvisConversaToggle()">VOZ</button>
                 <button id="jarvis-mic" class="jv-neu" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;flex-shrink:0;height:40px;padding:0 11px">🎙️</button>
                 <button class="jv-neu" onclick="jarvisAttach()" title="Anexar documento" style="font-size:17px;flex-shrink:0;height:40px;padding:0 11px">📎</button>
                 <textarea id="jarvis-input" class="form-input" placeholder="Fale, digite ou cole um documento…  (Enter envia · Shift+Enter pula linha)" rows="1" style="flex:1;border-radius:14px;resize:none;max-height:160px;min-height:40px;padding:9px 14px;line-height:1.4;font-family:inherit" oninput="jarvisAutoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();jarvisSend();}"></textarea>
@@ -1519,7 +1519,7 @@ function wfaSetTheme(t){
         <div class="page-head">
           <div class="page-title"><h1>Chat da equipe</h1><p>Geral e grupos · toca um som quando chega mensagem · imagens por botão ou Ctrl+V</p></div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button class="icobtn" id="chat-som" onclick="chatToggleSom()">🔔 Som ligado</button>
+            <button class="icobtn" id="chat-som" onclick="chatToggleSom()">Som ligado</button>
             <button class="tb-btn dk" onclick="chatNovoGrupo()">+ Novo grupo</button>
           </div>
         </div>
@@ -2611,7 +2611,7 @@ function wfaSetTheme(t){
         <div class="page-head">
           <div class="page-title"><h1>Drive</h1><p>Arquivos e documentos da ARK por cliente · tudo num lugar só.</p></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="tb-btn" onclick="driveSyncConselhoBtn()" title="Arquiva as últimas ideias do Conselho de IA em cada cliente">🧠 Recuperar ideias do conselho</button>
+            <button class="tb-btn" onclick="driveSyncConselhoBtn()" title="Arquiva as últimas ideias do Conselho de IA em cada cliente">Recuperar ideias do conselho</button>
             <label class="tb-btn" style="cursor:pointer">📎 Enviar arquivo<input type="file" style="display:none" onchange="arquivoUpload(this)"></label>
           </div>
         </div>
@@ -2637,10 +2637,10 @@ function wfaSetTheme(t){
             <textarea id="rot-ref" class="form-input" style="min-height:70px" placeholder="Cole aqui roteiros técnicos antigos, tom de voz, regras do cliente, HTML… o roteirista usa como referência pra manter o padrão."></textarea>
           </div>
           <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
-            <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="rotGerar()">🎬 Gerar roteiros</button>
-            <button class="tb-btn" onclick="rotPuxarCriativos()">📈 Criativos que deram certo</button>
+            <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="rotGerar()">Gerar roteiros</button>
+            <button class="tb-btn" onclick="rotPuxarCriativos()">Criativos que deram certo</button>
             <button class="tb-btn" onclick="rotCopiar()">⧉ Copiar</button>
-            <button class="tb-btn" onclick="rotSalvarNoDrive()">💾 Salvar no Drive</button>
+            <button class="tb-btn" onclick="rotSalvarNoDrive()">Salvar no Drive</button>
             <button class="tb-btn" onclick="legDeTema((document.getElementById('rot-out').textContent||document.getElementById('rot-tema').value||'').trim(),document.getElementById('rot-cliente').value||'')">✍️ Virar legenda</button>
             <span id="rot-status" style="font-size:12px;color:var(--mute)"></span>
           </div>
@@ -2732,13 +2732,13 @@ function wfaSetTheme(t){
         <div id="pl-views" style="display:none;margin-bottom:6px">
           <div class="pl-bar">
             <div class="pl-seg">
-              <button class="on" id="pl-view-cal" onclick="planSetView('cal')">🗓️ Calendário</button>
-              <button id="pl-view-list" onclick="planSetView('list')">☰ Lista</button>
+              <button class="on" id="pl-view-cal" onclick="planSetView('cal')">Calendário</button>
+              <button id="pl-view-list" onclick="planSetView('list')">Lista</button>
             </div>
-            <button class="pl-save" onclick="planSalvarNoDrive()">💾 Salvar no Drive</button>
-            <button class="pl-save" onclick="planGerarAprovacao(this)">🔗 Link de aprovação</button>
-            <button class="pl-save" onclick="planRoteirizarTudo(this)">🎬 Roteirizar tudo</button>
-            <button class="pl-save" onclick="planGerarPortal(this)">🌐 Portal do cliente</button>
+            <button class="pl-save" onclick="planSalvarNoDrive()">Salvar no Drive</button>
+            <button class="pl-save" onclick="planGerarAprovacao(this)">Link de aprovação</button>
+            <button class="pl-save" onclick="planRoteirizarTudo(this)">Roteirizar tudo</button>
+            <button class="pl-save" onclick="planGerarPortal(this)">Portal do cliente</button>
             <button class="pl-save" onclick="planGerarLegendas(this)">✍️ Legendas das edições prontas</button>
           </div>
           <div class="pl-legend">
@@ -2768,7 +2768,7 @@ function wfaSetTheme(t){
           <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
             <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="legGerar()">✍️ Gerar legendas</button>
             <button class="tb-btn" onclick="legCopiar()">⧉ Copiar</button>
-            <button class="tb-btn" onclick="legSalvarNoDrive()">💾 Salvar no Drive</button>
+            <button class="tb-btn" onclick="legSalvarNoDrive()">Salvar no Drive</button>
             <span id="leg-status" style="font-size:12px;color:var(--mute)"></span>
           </div>
         </div>
@@ -3202,7 +3202,7 @@ function wfaSetTheme(t){
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
             <div style="flex:1;min-width:220px"><label class="form-label">Convocar reunião · o que o conselho deve resolver?</label><input id="cons-tema" class="form-input" placeholder="Ex: como aumentar agendamentos da Vivenda na Copa? / o que postar essa semana?" onkeydown="if(event.key==='Enter')consRodar()"></div>
             <div style="min-width:160px"><label class="form-label">Cliente (opcional)</label><select id="cons-cliente" class="form-select"></select></div>
-            <button class="tb-btn" onclick="consRodar()">⚖️ Reunir o conselho</button>
+            <button class="tb-btn" onclick="consRodar()">Reunir o conselho</button>
           </div>
           <div id="cons-status2" style="font-size:12px;color:var(--mute);margin-top:8px"></div>
         </div>
@@ -3245,7 +3245,7 @@ function wfaSetTheme(t){
         </style>
         <div class="page-head">
           <div class="page-title"><h1>Tutorial & Conhecimento</h1><p>Como usar o WorkFlowArk · guia rápido pra qualquer pessoa da equipe</p></div>
-          <div style="display:flex;gap:8px"><button class="tb-btn" onclick="onboardOpen()">▶ Ver introdução</button><button class="tb-btn dk" onclick="tutorialNarrar()">🔊 JARVIS narra</button></div>
+          <div style="display:flex;gap:8px"><button class="tb-btn" onclick="onboardOpen()">▶ Ver introdução</button><button class="tb-btn dk" onclick="tutorialNarrar()">JARVIS narra</button></div>
         </div>
         <div class="tut-hero">
           <h2>Bem-vindo ao WorkFlowArk</h2>
@@ -3635,7 +3635,7 @@ function wfaSetTheme(t){
   <div class="modal" style="max-width:560px;max-height:86vh;display:flex;flex-direction:column">
     <div class="modal-head"><h3>🧠 Resumo do dia · WhatsApp</h3><span class="x" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">✕</span></div>
     <div class="modal-body" id="wres-body" style="overflow:auto;flex:1;min-height:0"></div>
-    <div class="modal-foot"><button class="icobtn" onclick="wppFalar()">🔊 Ouvir (JARVIS)</button><button class="icobtn" onclick="wppPararVoz()">⏹ Parar</button><button class="tb-btn" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">Fechar</button></div>
+    <div class="modal-foot"><button class="icobtn" onclick="wppFalar()">Ouvir (JARVIS)</button><button class="icobtn" onclick="wppPararVoz()">⏹ Parar</button><button class="tb-btn" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">Fechar</button></div>
   </div>
 </div>
 
@@ -3741,7 +3741,7 @@ function wfaSetTheme(t){
         <div class="form-group"><label class="form-label">Captações/mês</label><input class="form-input" id="cli-f-cap" type="number" min="0" placeholder="Ex: 1"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Situação</label><select class="form-select" id="cli-f-status"><option value="gr">🟢 Saudável</option><option value="y">🟡 Em ajuste</option><option value="r">🔴 Urgente</option><option value="churn">⚫ Churn / Cancelado</option></select></div>
+        <div class="form-group"><label class="form-label">Situação</label><select class="form-select" id="cli-f-status"><option value="gr">Saudável</option><option value="y">Em ajuste</option><option value="r">Urgente</option><option value="churn">Churn / Cancelado</option></select></div>
         <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="cli-f-meta" placeholder="Ex: Novo · onboarding"></div>
       </div>
     </div>
@@ -3802,7 +3802,7 @@ function wfaSetTheme(t){
         <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="nt-data" type="date"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="nt-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
+        <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="nt-prio"><option value="media">Média</option><option value="alta">Alta</option><option value="baixa">Baixa</option></select></div>
         <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="nt-status"><option value="backlog">Backlog</option><option value="iniciar">A iniciar</option><option value="andamento">Em Andamento</option><option value="aprovacao">Homologação</option><option value="homologcli">Homologação do cliente</option><option value="concluido">Concluído</option></select></div>
       </div>
       <div class="form-row">
@@ -3900,7 +3900,7 @@ function wfaSetTheme(t){
             </div>
           </div>
           <div class="td2-fld"><label>Status</label><select class="form-select" id="td-status"><option value="backlog">Backlog</option><option value="iniciar">A iniciar</option><option value="andamento">Em Andamento</option><option value="aprovacao">Homologação</option><option value="homologcli">Homologação do cliente</option><option value="concluido">Concluído</option></select></div>
-          <div class="td2-fld"><label>Prioridade</label><select class="form-select" id="td-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
+          <div class="td2-fld"><label>Prioridade</label><select class="form-select" id="td-prio"><option value="media">Média</option><option value="alta">Alta</option><option value="baixa">Baixa</option></select></div>
           <div class="td2-fld"><label>Responsável <a onclick="colabOpen()" style="color:#a07e00;cursor:pointer;font-weight:700">+ pessoa</a></label><select class="form-select" id="td-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Márcio</option><option>Henrique</option><option>Nicolas</option><option>Anderson</option><option>João Gabriel</option><option>Maria Clara</option><option>Luckas Gomes</option><option>Kaique</option><option>Lush</option></select></div>
           <div class="td2-fld"><label>Início</label><input class="form-input" id="td-ini" type="date"></div>
           <div class="td2-fld"><label>Vencimento</label><input class="form-input" id="td-data" type="date"></div>
@@ -3948,8 +3948,8 @@ function wfaSetTheme(t){
     <div class="modal-foot">
       <button class="icobtn" onclick="closeModal('modal-relatorio')">Fechar</button>
       <div style="flex:1"></div>
-      <button class="icobtn" onclick="relatorioCopiar()">📋 Copiar resumo</button>
-      <button class="tb-btn" onclick="relatorioImprimir()">🖨 Imprimir / PDF</button>
+      <button class="icobtn" onclick="relatorioCopiar()">Copiar resumo</button>
+      <button class="tb-btn" onclick="relatorioImprimir()">Imprimir / PDF</button>
     </div>
   </div>
 </div>
@@ -4140,6 +4140,6 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260910k.js"></script>
+<script src="workflowark-app-20260911a.js"></script>
 </body>
 </html>

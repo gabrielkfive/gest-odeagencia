@@ -1875,10 +1875,15 @@ cola no campo (bug de 31/08). Mexeu numa lista, mexe nas duas. */
    #page-tarefas e vem por ultimo no arquivo de proposito: vence as camadas antigas sem
    precisar de !important. Nada de transform em hover: alvo nao se move durante o arrasto.
    ===================================================================================== */
-#page-tarefas,#page-projetos,#page-dashboard,#page-crm,#page-lista-clientes{--tf-fill:rgba(120,120,128,.10);--tf-fill-2:rgba(120,120,128,.16);--tf-col:rgba(120,120,128,.08);--tf-card:#fff;--tf-line:rgba(0,0,0,.07);--tf-ink:#1d1d1f;--tf-mute:#6e6e73;--tf-mute-2:#aeaeb2;--tf-seg:#fff;--tf-r:12px;--tf-seta:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.6' stroke-linecap='round'/></svg>")}
+/* Tokens do sistema (revisao Apple, 11/09/2026): claro e escuro definidos UMA vez, aqui.
+   --ark-* e o nome oficial; --tf-* continua como apelido, porque as camadas das paginas ja usam.
+   Qualquer pagina nova usa var(--ark-card), var(--ark-line) etc. sem precisar de seletor proprio. */
+:root{--ark-fill:rgba(120,120,128,.10);--ark-fill-2:rgba(120,120,128,.16);--ark-col:rgba(120,120,128,.08);--ark-card:#fff;--ark-line:rgba(0,0,0,.07);--ark-ink:#1d1d1f;--ark-mute:#6e6e73;--ark-mute-2:#aeaeb2;--ark-seg:#fff;--ark-r:12px;--ark-seta:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.6' stroke-linecap='round'/></svg>");--tf-fill:var(--ark-fill);--tf-fill-2:var(--ark-fill-2);--tf-col:var(--ark-col);--tf-card:var(--ark-card);--tf-line:var(--ark-line);--tf-ink:var(--ark-ink);--tf-mute:var(--ark-mute);--tf-mute-2:var(--ark-mute-2);--tf-seg:var(--ark-seg);--tf-r:var(--ark-r);--tf-seta:var(--ark-seta)}
 /* Escuro "black piano" (pedido do Gabriel, 10/09/2026): mesmo preto do Meu Dia / Mission Control,
    coluna quase invisivel sobre o preto, cartao #0d0e11 opaco com brilho de 1 px no topo. */
-body.aura-dark #page-tarefas,body.aura-dark #page-projetos,body.aura-dark #page-dashboard,body.aura-dark #page-crm,body.aura-dark #page-lista-clientes{--tf-fill:rgba(255,255,255,.07);--tf-fill-2:rgba(255,255,255,.13);--tf-col:rgba(255,255,255,.03);--tf-card:#0d0e11;--tf-line:rgba(255,255,255,.10);--tf-ink:#f5f5f7;--tf-mute:#9aa1ad;--tf-mute-2:#5f6570;--tf-seg:rgba(255,255,255,.16)}
+/* Os apelidos --tf-* precisam ser redeclarados aqui: variavel se resolve onde e declarada, entao o
+   var(--ark-card) do :root ja tinha virado #fff antes de chegar no body escuro. */
+body.aura-dark{--ark-fill:rgba(255,255,255,.07);--ark-fill-2:rgba(255,255,255,.13);--ark-col:rgba(255,255,255,.03);--ark-card:#0d0e11;--ark-line:rgba(255,255,255,.10);--ark-ink:#f5f5f7;--ark-mute:#9aa1ad;--ark-mute-2:#5f6570;--ark-seg:rgba(255,255,255,.16);--tf-fill:var(--ark-fill);--tf-fill-2:var(--ark-fill-2);--tf-col:var(--ark-col);--tf-card:var(--ark-card);--tf-line:var(--ark-line);--tf-ink:var(--ark-ink);--tf-mute:var(--ark-mute);--tf-mute-2:var(--ark-mute-2);--tf-seg:var(--ark-seg);--tf-r:var(--ark-r);--tf-seta:var(--ark-seta)}
 #page-tarefas{padding-top:18px}
 @media (max-width:900px){#page-tarefas{padding:12px 14px 40px}}
 
