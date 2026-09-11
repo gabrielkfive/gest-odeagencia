@@ -139,6 +139,15 @@ Branch `persona-painel-allhands` · preview `https://d0031290-workflowark.arkcon
     que ficava esperando recurso externo. Travado por `npm run teste:apple`
     (`deploy/teste-apple-kanban.mjs`, 108 verificações em 390, 430 e 1440 px nos dois temas,
     reprova a versão anterior) e capturas por `npm run capturas:apple`.
+24. 🔧 **(10 e 11/09/2026, PRs #3 a #8)** Sprint página a página no mesmo padrão: Atividades
+    (vistas Lista, Por pessoa, Calendário, Painel, Relatório), detalhe da tarefa (ícones SVG,
+    prioridade sem emoji, Função e Tags em pílula, trocar capa), Projetos, Meu Dia fora do
+    Mission Control, CRM e Lista de clientes. Tokens `--ark-*` definidos uma vez para claro e
+    escuro (black piano). Varredura de emoji em botões, opções de select e cabeçalhos. Três
+    bugs de campo no caminho: Meu Dia claro rolava de lado 28 px no celular (hero não
+    empilhava), cartão de cliente estourava a coluna (62 px em 1440), e `teste-ponte-projetos`
+    estava preso à barra antiga. `teste:apple` chegou a 324 verificações em 390, 430 e 1440 px,
+    nos dois temas.
 > Próximo (feedback): comercial mais detalhado + aba comercial própria; Drive/POPs na mão do Saulo; portal por papel.
 
 ## Próximas (abertas)

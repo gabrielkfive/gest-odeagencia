@@ -1,4 +1,4 @@
-<!-- build 20260910f-apple-v2 -->
+<!-- build 20260911a-apple-tokens -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
-<link rel="stylesheet" href="workflowark-20260910f.css">
+<link rel="stylesheet" href="workflowark-20260911a.css">
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -696,10 +696,10 @@ function wfaSetTheme(t){
             <div>
               <div class="rail-label">Ir pra área</div>
               <div class="rail-links">
-                <button onclick="document.querySelector('[data-nav=planejamento]')?.click()">🗓️ Estúdio · Planejamento</button>
-                <button onclick="document.querySelector('[data-nav=producao]')?.click()">📹 Produção</button>
-                <button onclick="document.querySelector('[data-nav=tarefas]')?.click()">✅ Tarefas</button>
-                <button onclick="window.open('/postagens','_blank')">✍️ Postagens</button>
+                <button onclick="document.querySelector('[data-nav=planejamento]')?.click()">Estúdio · Planejamento</button>
+                <button onclick="document.querySelector('[data-nav=producao]')?.click()">Produção</button>
+                <button onclick="document.querySelector('[data-nav=tarefas]')?.click()">Tarefas</button>
+                <button onclick="window.open('/postagens','_blank')">Postagens</button>
               </div>
             </div>
 
@@ -736,7 +736,7 @@ function wfaSetTheme(t){
             <div id="md-jarvis" onclick="jarvisOpen()" title="Conversar com o JARVIS" style="cursor:pointer">
               <div class="jv-hd"><div class="jv-orb"></div><div><div class="jv-ttl">Assistente ARK</div><div class="jv-nm">JARVIS · seu resumo de hoje</div></div><span style="margin-left:auto;font-size:11px;color:var(--yel);font-weight:700;white-space:nowrap">Conversar →</span></div>
               <div class="jv-txt" id="md-jarvis-txt"></div>
-              <button class="jv-spk" onclick="event.stopPropagation();mdJarvisFalar()">🔊 JARVIS narra meu dia</button>
+              <button class="jv-spk" onclick="event.stopPropagation();mdJarvisFalar()">JARVIS narra meu dia</button>
             </div>
           </aside>
         </div>
@@ -1214,7 +1214,7 @@ function wfaSetTheme(t){
             </h3>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
               <select id="climap-sel" class="form-select" style="width:auto;font-size:12px;padding:7px 10px"></select>
-              <button class="icobtn" id="climap-place" onclick="cliMapPlaceToggle()" style="font-size:12px">📍 Posicionar no mapa</button>
+              <button class="icobtn" id="climap-place" onclick="cliMapPlaceToggle()" style="font-size:12px">Posicionar no mapa</button>
             </div>
           </div>
           <div id="climap" style="height:400px;background:#0a0a0c"></div>
@@ -1288,7 +1288,7 @@ function wfaSetTheme(t){
         @media(max-width:1100px){#page-jarvis .jv-shell{grid-template-columns:1fr;height:auto}#page-jarvis .jv-chatcol{height:56vh}}
         @media(prefers-reduced-motion:reduce){#page-jarvis .jv-orb-big{animation:none}}
         </style>
-        <div class="page-head"><div class="page-title"><h1>JARVIS</h1><p>Seu assistente executor · converse, dê comandos, rode skills e acompanhe o núcleo local.</p></div><button class="tb-btn" onclick="jarvisMemoriaToggle()" style="flex-shrink:0;font-size:12px">🧠 Memória</button></div>
+        <div class="page-head"><div class="page-title"><h1>JARVIS</h1><p>Seu assistente executor · converse, dê comandos, rode skills e acompanhe o núcleo local.</p></div><button class="tb-btn" onclick="jarvisMemoriaToggle()" style="flex-shrink:0;font-size:12px">Memória</button></div>
         <div id="jarvis-memoria-panel" style="display:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;margin-bottom:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
             <span style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:#9a9aa2;text-transform:uppercase">O que o JARVIS aprendeu sobre você</span>
@@ -1307,7 +1307,7 @@ function wfaSetTheme(t){
               </div>
               <input type="file" id="jarvis-file" style="display:none" accept=".txt,.md,.markdown,.html,.htm,.csv,.json,.rtf,.srt,.vtt,text/*" onchange="jarvisFileChosen(this)">
               <div style="display:flex;gap:8px;align-items:flex-end">
-                <button id="jarvis-conv" class="jv-neu" title="Modo conversa (voz)" style="flex-shrink:0;font-weight:700;padding:0 10px;height:40px;font-size:11px" onclick="jarvisConversaToggle()">🎙 VOZ</button>
+                <button id="jarvis-conv" class="jv-neu" title="Modo conversa (voz)" style="flex-shrink:0;font-weight:700;padding:0 10px;height:40px;font-size:11px" onclick="jarvisConversaToggle()">VOZ</button>
                 <button id="jarvis-mic" class="jv-neu" onclick="jarvisMic()" title="Falar uma vez" style="font-size:18px;flex-shrink:0;height:40px;padding:0 11px">🎙️</button>
                 <button class="jv-neu" onclick="jarvisAttach()" title="Anexar documento" style="font-size:17px;flex-shrink:0;height:40px;padding:0 11px">📎</button>
                 <textarea id="jarvis-input" class="form-input" placeholder="Fale, digite ou cole um documento…  (Enter envia · Shift+Enter pula linha)" rows="1" style="flex:1;border-radius:14px;resize:none;max-height:160px;min-height:40px;padding:9px 14px;line-height:1.4;font-family:inherit" oninput="jarvisAutoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();jarvisSend();}"></textarea>
@@ -1394,110 +1394,7 @@ function wfaSetTheme(t){
           <button type="button" class="icobtn" id="filt-limpar" onclick="limparFiltros()" style="display:none;color:var(--red)">Limpar filtros</button>
         </div>
 
-        <style>
-          /* vistas, cartao ligado a projeto e botoes de vista: estilos no fim de workflowark-*.css (revisao Apple, 10/09/2026) */
-          #page-tarefas .tc-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-          #page-tarefas select.tv-more{font:inherit;cursor:pointer}
-          /* cartao ligado a um projeto (aba Projetos): mesma tarefa, sem copia */
-          #page-tarefas .tl-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
-          #page-tarefas .tl-table th{background:#fafafa;text-align:left;padding:10px 12px;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);border-bottom:1px solid var(--line)}
-          #page-tarefas .tl-table td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
-          #page-tarefas .tl-row{cursor:pointer}#page-tarefas .tl-row:hover{background:#fafafa}
-          #page-tarefas .tl-tt{font-weight:600;color:var(--ink)}
-          #page-tarefas .tl-pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
-          #page-tarefas .tl-st-backlog{background:#f0f0ee;color:#777}
-          #page-tarefas .tl-st-andamento{background:#fff3cd;color:#8a6d00}
-          #page-tarefas .tl-st-iniciar{background:#e7f0ff;color:#2b62c4}
-          #page-tarefas .tl-st-aprovacao{background:#fdf3d6;color:#8a6a00}
-          #page-tarefas .tl-st-homologcli{background:#ffe8d9;color:#c2410c}
-          #page-tarefas .tl-st-concluido{background:#e6f8ec;color:#127a3e}
-          /* MODO ESCURO DA VISTA LISTA: as regras claras acima usam ID (#page-tarefas .tl-table
-             = 1 id + 1 classe) e venciam a regra de tema (body.aura-dark .tl-table = 0 id + 2
-             classes), porque id ganha de classe. Resultado: a lista pintava BRANCA no escuro.
-             Estas regras tem 1 id + 2 classes, entao ganham. As pilulas e o hover nem tinham
-             versao escura. */
-          body.aura-dark #page-tarefas .tl-table{background:var(--surface);border-color:var(--line)}
-          body.aura-dark #page-tarefas .tl-table th{background:rgba(255,255,255,.05);color:var(--mute);border-bottom-color:var(--line)}
-          body.aura-dark #page-tarefas .tl-table td{border-bottom-color:var(--line)}
-          body.aura-dark #page-tarefas .tl-row:hover{background:rgba(255,255,255,.06)}
-          body.aura-dark #page-tarefas .tl-tt{color:var(--txt)}
-          body.aura-dark #page-tarefas .tl-st-backlog{background:rgba(255,255,255,.09);color:#b9b6ae}
-          body.aura-dark #page-tarefas .tl-st-andamento{background:rgba(255,199,0,.16);color:#ffcf3d}
-          body.aura-dark #page-tarefas .tl-st-aprovacao{background:rgba(59,111,255,.20);color:#8db0ff}
-          body.aura-dark #page-tarefas .tl-st-concluido{background:rgba(25,179,107,.18);color:#4fd396}
-          body.aura-dark #page-tarefas .tl-st-iniciar{background:rgba(59,111,255,.20);color:#8db0ff}
-          body.aura-dark #page-tarefas .tl-st-homologcli{background:rgba(234,88,12,.22);color:#fdba74}
-          #page-tarefas .tl-late{color:var(--red,#e0364f);font-weight:700}
-          #page-tarefas .tcal{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
-          #page-tarefas .tcal-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:800;text-transform:capitalize}
-          #page-tarefas .tcal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
-          #page-tarefas .tcal-dow{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--mute);text-align:center;padding:7px 0;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
-          #page-tarefas .tcal-dow:nth-child(7){border-right:none}
-          #page-tarefas .tcal-cell{min-height:92px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px;display:flex;flex-direction:column;gap:3px}
-          #page-tarefas .tcal-cell:nth-child(7n){border-right:none}
-          #page-tarefas .tcal-cell.muted{background:#fafafa}
-          #page-tarefas .tcal-num{font-size:10.5px;color:var(--mute);font-weight:600;align-self:flex-start}
-          #page-tarefas .tcal-cell.today .tcal-num{background:var(--yel,#ffd400);color:#111;border-radius:5px;padding:0 5px}
-          #page-tarefas .tcal-chip{font-size:10px;line-height:1.2;padding:3px 5px;border-radius:6px;cursor:pointer;background:#fff7d6;border-left:3px solid var(--yel,#ffd400);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-          #page-tarefas .tcal-chip.late{background:#ffe9ec;border-left-color:var(--red,#e0364f)}
-          #page-tarefas .tcal-chip.done{background:#e6f8ec;border-left-color:#19b36b;text-decoration:line-through;opacity:.7}
-          #page-tarefas .tp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
-          #page-tarefas .tp-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
-          #page-tarefas .tp-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-          #page-tarefas .tp-av{width:36px;height:36px;border-radius:50%;background:#111;color:var(--yel,#ffd400);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
-          #page-tarefas .tp-nm{font-weight:700;font-size:14px}
-          #page-tarefas .tp-sub{font-size:11px;color:var(--mute)}
-          #page-tarefas .tp-bar{display:flex;height:7px;border-radius:999px;overflow:hidden;margin:8px 0;background:#f0f0ee}
-          #page-tarefas .tp-seg{height:100%}
-          #page-tarefas .tp-task{font-size:12px;padding:6px 8px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center}
-          #page-tarefas .tp-task:hover{background:#fafafa}
-          #page-tarefas .tp-task .d{font-size:10.5px;color:var(--mute)}
-          #page-tarefas .tp-task.late .d{color:var(--red,#e0364f);font-weight:700}
-          #page-tarefas .tc-av{width:20px;height:20px;border-radius:50%;background:#111;color:var(--yel,#ffd400);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:9px;flex-shrink:0}
-          #page-tarefas .db-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-          #page-tarefas .db-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
-          #page-tarefas .db-card h3{font-size:13px;font-weight:800;margin-bottom:12px}
-          #page-tarefas .db-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-          #page-tarefas .db-lb{width:120px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
-          #page-tarefas .db-track{flex:1;height:9px;background:#f0f0ee;border-radius:999px;overflow:hidden}
-          #page-tarefas .db-fill{height:100%;border-radius:999px;min-width:2px}
-          #page-tarefas .db-val{width:58px;text-align:right;font-size:12px;font-weight:700;flex-shrink:0}
-          @media(max-width:760px){#page-tarefas .db-grid{grid-template-columns:1fr}}
-          /* relatorio de execucao por area */
-          #task-relatorio .rl-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-          #task-relatorio .rl-pers{display:flex;gap:6px;flex-wrap:wrap}
-          #task-relatorio .rl-per{border:1px solid var(--bd);background:var(--card);color:var(--txt);border-radius:9px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer}
-          #task-relatorio .rl-per.on{background:#111;color:#fff;border-color:#111}
-          body.aura-dark #task-relatorio .rl-per.on{background:var(--yel);color:#111;border-color:var(--yel)}
-          #task-relatorio .rl-emit{border:none;background:var(--yel);color:#111;border-radius:9px;padding:8px 16px;font-size:12px;font-weight:800;cursor:pointer}
-          #task-relatorio .rl-cap{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--mute);margin-bottom:10px}
-          #task-relatorio .rl-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:16px}
-          #task-relatorio .rl-kpi{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:13px 11px;text-align:center}
-          #task-relatorio .rl-kpi .v{font-size:24px;font-weight:800;line-height:1.1}
-          #task-relatorio .rl-kpi .l{font-size:9.5px;font-weight:700;text-transform:uppercase;color:var(--mute);margin-top:5px;letter-spacing:.3px}
-          #task-relatorio .rl-kpi.grn .v{color:var(--green)}
-          #task-relatorio .rl-kpi.red .v{color:var(--red)}
-          #task-relatorio .rl-tab{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
-          #task-relatorio .rl-tab th{text-align:left;font-size:9.5px;font-weight:700;text-transform:uppercase;color:var(--mute);padding:10px 9px;border-bottom:1px solid var(--bd);letter-spacing:.3px}
-          #task-relatorio .rl-tab td{padding:8px 9px;border-bottom:1px solid var(--bd)}
-          #task-relatorio .rl-tab .n{text-align:right;font-variant-numeric:tabular-nums}
-          #task-relatorio .rl-tab tr.rl-area td{font-weight:800;background:var(--bg2,rgba(128,128,128,.06))}
-          #task-relatorio .rl-tab tr.rl-pes td{color:var(--txt)}
-          #task-relatorio .rl-ind{display:inline-block;width:12px;height:1px;background:var(--mute);margin-right:9px;vertical-align:middle;opacity:.6}
-          #task-relatorio .rl-tab td.bad{color:var(--red);font-weight:700}
-          #task-relatorio .rl-na{color:var(--mute);opacity:.7}
-          #task-relatorio .rl-vazio{text-align:center;color:var(--mute);padding:26px}
-          #task-relatorio .rl-avi{background:rgba(255,199,0,.12);border:1px solid rgba(255,199,0,.4);border-radius:11px;padding:11px 13px;font-size:12.5px;line-height:1.5;margin-bottom:14px}
-          #task-relatorio .rl-cob{margin-top:18px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:15px}
-          #task-relatorio .rl-cob h3{font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--mute);letter-spacing:.4px}
-          #task-relatorio .rl-cob p{font-size:12px;color:var(--mute);margin:5px 0 12px}
-          #task-relatorio .rl-cobg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-          #task-relatorio .rl-cobg div{text-align:center}
-          #task-relatorio .rl-cobg b{display:block;font-size:19px;font-weight:800}
-          #task-relatorio .rl-cobg span{font-size:10px;color:var(--mute)}
-          @media(max-width:760px){#task-relatorio .rl-kpis{grid-template-columns:repeat(2,1fr)}#task-relatorio .rl-cobg{grid-template-columns:repeat(2,1fr)}#task-relatorio .rl-tab{display:block;overflow-x:auto}}
-
-        </style>
+        <!-- estilos das vistas de Atividades: movidos para workflowark-*.css (10/09/2026), para que a camada nova, no fim do CSS, vença por ordem -->
         <div class="tf-linha">
           <div class="task-views" id="task-views" role="tablist">
             <button type="button" class="tv-btn on" data-tv="kanban" onclick="tarefaSetView('kanban')">Kanban</button>
@@ -1622,7 +1519,7 @@ function wfaSetTheme(t){
         <div class="page-head">
           <div class="page-title"><h1>Chat da equipe</h1><p>Geral e grupos · toca um som quando chega mensagem · imagens por botão ou Ctrl+V</p></div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button class="icobtn" id="chat-som" onclick="chatToggleSom()">🔔 Som ligado</button>
+            <button class="icobtn" id="chat-som" onclick="chatToggleSom()">Som ligado</button>
             <button class="tb-btn dk" onclick="chatNovoGrupo()">+ Novo grupo</button>
           </div>
         </div>
@@ -1964,7 +1861,35 @@ function wfaSetTheme(t){
           .tkcampos{border:1px solid var(--line);border-radius:16px;padding:2px 14px;margin-bottom:16px;background:var(--surface)}
           .tkr{display:grid;grid-template-columns:124px 1fr;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
           .tkr:last-child{border-bottom:0}
-          .tkl{font-size:12.5px;color:var(--mute);font-weight:600}
+          .tkl{font-size:12.5px;color:var(--mute);font-weight:600;display:flex;align-items:center;gap:7px}
+          /* Segunda passada Apple (10/09/2026): icones SVG nas linhas e nos botoes, prioridade em pilula,
+             Funcao e Tags no visual das etiquetas, botao de trocar a capa. */
+          .tkl svg,.tksech svg,.tktimer svg,.tkbtn svg,.tkanx a svg{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+          .tksech svg{margin-right:2px}
+          .tktimer{display:inline-flex;align-items:center;gap:6px}
+          .tktimer svg{width:12px;height:12px;opacity:1}
+          .tktimer.on svg,.tkbtn svg{opacity:1}
+          .tktimer [data-tktimer] svg path{fill:currentColor}
+          .tkbtn{display:inline-flex;align-items:center;gap:6px}
+          .tkanx a{display:inline-flex;align-items:center;gap:6px}
+          .tkprio{font-weight:700;border-radius:999px!important;padding:6px 12px!important;border:0!important;background:rgba(118,118,128,.12)!important;color:var(--txt)}
+          .tkprio[data-prio=alta]{background:rgba(220,38,38,.12)!important;color:#c62828}
+          .tkprio[data-prio=baixa]{color:var(--mute)}
+          body.aura-dark .tkprio[data-prio=alta]{color:#ff8a80}
+          .tkfunc{display:inline-flex;align-items:center;gap:6px;background:rgba(118,118,128,.10);border:1px solid transparent;border-radius:999px;padding:4px 11px;font:inherit;font-size:11.5px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s}
+          .tkfunc:hover{background:rgba(118,118,128,.18)}
+          /* !important: o normalizador do tema escuro grava fundo inline nos botoes e apagava a pilula ligada */
+          .tkfunc.on{background:var(--ink)!important;color:var(--bg)!important;border-color:var(--ink)!important}
+          body.aura-dark .tkfunc.on{background:#f5f5f7!important;color:#111!important;border-color:#f5f5f7!important}
+          .tkpp i{width:7px;height:7px;border-radius:50%;display:inline-block}
+          .tkpp b{font-size:10px;font-weight:700;opacity:.85;cursor:pointer;margin-left:2px}
+          #tk-tags-pills{margin-bottom:6px}
+          #tk-tags-pills .tkpp{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;font-size:11.5px;font-weight:600;border-radius:999px;border:1px solid transparent}
+          .tkcapa-trocar{position:absolute;right:12px;bottom:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .15s,background .15s}
+          .tkcapa-trocar svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+          .tkcapa:hover .tkcapa-trocar,.tkcapa-trocar:focus-visible{opacity:1}
+          .tkcapa-trocar:hover{background:rgba(0,0,0,.75)}
+          @media (hover:none){.tkcapa-trocar{opacity:1}}
           .tkv{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
           .tkv select,.tkv input{background:rgba(118,118,128,.10);border:1px solid transparent;border-radius:10px;color:var(--txt);padding:7px 10px;font:inherit;font-size:13px;transition:background .15s,border-color .15s,box-shadow .15s}
           .tkv select:hover,.tkv input:hover{background:rgba(118,118,128,.16)}
@@ -2686,7 +2611,7 @@ function wfaSetTheme(t){
         <div class="page-head">
           <div class="page-title"><h1>Drive</h1><p>Arquivos e documentos da ARK por cliente · tudo num lugar só.</p></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="tb-btn" onclick="driveSyncConselhoBtn()" title="Arquiva as últimas ideias do Conselho de IA em cada cliente">🧠 Recuperar ideias do conselho</button>
+            <button class="tb-btn" onclick="driveSyncConselhoBtn()" title="Arquiva as últimas ideias do Conselho de IA em cada cliente">Recuperar ideias do conselho</button>
             <label class="tb-btn" style="cursor:pointer">📎 Enviar arquivo<input type="file" style="display:none" onchange="arquivoUpload(this)"></label>
           </div>
         </div>
@@ -2712,10 +2637,10 @@ function wfaSetTheme(t){
             <textarea id="rot-ref" class="form-input" style="min-height:70px" placeholder="Cole aqui roteiros técnicos antigos, tom de voz, regras do cliente, HTML… o roteirista usa como referência pra manter o padrão."></textarea>
           </div>
           <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
-            <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="rotGerar()">🎬 Gerar roteiros</button>
-            <button class="tb-btn" onclick="rotPuxarCriativos()">📈 Criativos que deram certo</button>
+            <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="rotGerar()">Gerar roteiros</button>
+            <button class="tb-btn" onclick="rotPuxarCriativos()">Criativos que deram certo</button>
             <button class="tb-btn" onclick="rotCopiar()">⧉ Copiar</button>
-            <button class="tb-btn" onclick="rotSalvarNoDrive()">💾 Salvar no Drive</button>
+            <button class="tb-btn" onclick="rotSalvarNoDrive()">Salvar no Drive</button>
             <button class="tb-btn" onclick="legDeTema((document.getElementById('rot-out').textContent||document.getElementById('rot-tema').value||'').trim(),document.getElementById('rot-cliente').value||'')">✍️ Virar legenda</button>
             <span id="rot-status" style="font-size:12px;color:var(--mute)"></span>
           </div>
@@ -2807,13 +2732,13 @@ function wfaSetTheme(t){
         <div id="pl-views" style="display:none;margin-bottom:6px">
           <div class="pl-bar">
             <div class="pl-seg">
-              <button class="on" id="pl-view-cal" onclick="planSetView('cal')">🗓️ Calendário</button>
-              <button id="pl-view-list" onclick="planSetView('list')">☰ Lista</button>
+              <button class="on" id="pl-view-cal" onclick="planSetView('cal')">Calendário</button>
+              <button id="pl-view-list" onclick="planSetView('list')">Lista</button>
             </div>
-            <button class="pl-save" onclick="planSalvarNoDrive()">💾 Salvar no Drive</button>
-            <button class="pl-save" onclick="planGerarAprovacao(this)">🔗 Link de aprovação</button>
-            <button class="pl-save" onclick="planRoteirizarTudo(this)">🎬 Roteirizar tudo</button>
-            <button class="pl-save" onclick="planGerarPortal(this)">🌐 Portal do cliente</button>
+            <button class="pl-save" onclick="planSalvarNoDrive()">Salvar no Drive</button>
+            <button class="pl-save" onclick="planGerarAprovacao(this)">Link de aprovação</button>
+            <button class="pl-save" onclick="planRoteirizarTudo(this)">Roteirizar tudo</button>
+            <button class="pl-save" onclick="planGerarPortal(this)">Portal do cliente</button>
             <button class="pl-save" onclick="planGerarLegendas(this)">✍️ Legendas das edições prontas</button>
           </div>
           <div class="pl-legend">
@@ -2843,7 +2768,7 @@ function wfaSetTheme(t){
           <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center">
             <button class="tb-btn" style="background:var(--yel,#ffd400);color:#111;border-color:var(--yel,#ffd400);font-weight:700" onclick="legGerar()">✍️ Gerar legendas</button>
             <button class="tb-btn" onclick="legCopiar()">⧉ Copiar</button>
-            <button class="tb-btn" onclick="legSalvarNoDrive()">💾 Salvar no Drive</button>
+            <button class="tb-btn" onclick="legSalvarNoDrive()">Salvar no Drive</button>
             <span id="leg-status" style="font-size:12px;color:var(--mute)"></span>
           </div>
         </div>
@@ -3103,70 +3028,7 @@ function wfaSetTheme(t){
 
       <!-- =================== CRM PROFISSIONAL =================== -->
       <div class="page" id="page-crm">
-        <style>
-          .crm-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
-          @media(max-width:1100px){.crm-kpis{grid-template-columns:repeat(3,1fr)}}
-          .crm-pipeline{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:start}
-          @media(max-width:1200px){.crm-pipeline{grid-template-columns:repeat(3,1fr)}}
-          @media(max-width:800px){.crm-pipeline{grid-template-columns:1fr 1fr}}
-          .crm-col{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:18px;display:flex;flex-direction:column;min-height:200px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 28px -18px rgba(0,0,0,.20)}
-          .crm-col-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
-          .crm-col-head h4{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
-          .crm-col-head .ct{font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;font-family:var(--mono)}
-          .crm-cards{padding:9px;display:flex;flex-direction:column;gap:8px;flex:1}
-          .crm-card{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:14px;padding:11px 12px;cursor:pointer;transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s cubic-bezier(.16,1,.3,1),border-color .15s ease;border-left:3px solid var(--mute-2);box-shadow:0 1px 2px rgba(0,0,0,.03)}
-          .crm-card:hover{transform:translateY(-2px);box-shadow:0 14px 26px -14px rgba(0,0,0,.22);border-color:var(--line-2)}
-          .crm-card:active{transform:translateY(-2px) scale(.98)}
-          .crm-card .nm{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:3px}
-          .crm-card .meta{font-size:10.5px;color:var(--mute);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-          .crm-card .val{font-size:11.5px;font-weight:700;font-family:var(--mono);color:var(--green);margin-top:4px}
-          .crm-card .next{font-size:10.5px;color:var(--txt);margin-top:4px;line-height:1.4;padding-top:5px;border-top:1px solid var(--line)}
-          .crm-card.stage-0{border-left-color:#94a3b8}
-          .crm-card.stage-1{border-left-color:#3b82f6}
-          .crm-card.stage-2{border-left-color:var(--yel-d)}
-          .crm-card.stage-3{border-left-color:var(--orange)}
-          .crm-card.stage-4{border-left-color:var(--green)}
-          .crm-card.stage-5{border-left-color:var(--red)}
-          .crm-add-btn{margin:6px 9px 9px;padding:9px;border:1.5px dashed var(--line-2);border-radius:11px;font-size:11.5px;color:var(--mute);text-align:center;cursor:pointer;transition:transform .18s cubic-bezier(.34,1.56,.64,1),background .15s ease,border-color .15s ease,color .15s ease}
-          .crm-add-btn:hover{background:var(--yel-bg);border-color:var(--yel);color:var(--ink);transform:scale(1.02)}
-          .crm-add-btn:active{transform:scale(.96)}
-          .crm-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;align-items:center;justify-content:center}
-          .crm-modal.open{display:flex}
-          .crm-mbox{background:#fff;border-radius:22px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 30px 70px -20px rgba(0,0,0,.35);animation:crmModalIn .32s cubic-bezier(.16,1,.3,1)}
-          @keyframes crmModalIn{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
-          @media(prefers-reduced-motion:reduce){.crm-mbox{animation:none}}
-          .crm-mhead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-          .crm-mhead h3{font-size:16px;font-weight:700}
-          .crm-mbody{padding:18px;display:flex;flex-direction:column;gap:12px}
-          .crm-mfoot{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
-          .crm-fi{display:flex;flex-direction:column;gap:4px}
-          .crm-fi label{font-size:11px;font-weight:600;color:var(--mute);letter-spacing:.05em;text-transform:uppercase}
-          .crm-fi input,.crm-fi select,.crm-fi textarea{font-family:inherit;font-size:13px;border:1px solid var(--line-2);border-radius:6px;padding:8px 10px;outline:none;width:100%;color:var(--ink)}
-          .crm-fi input:focus,.crm-fi select:focus,.crm-fi textarea:focus{border-color:var(--yel)}
-          .crm-g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-          .crm-hist{display:flex;flex-direction:column;gap:6px;margin-top:6px}
-          .crm-hist-item{background:var(--bg);border-radius:5px;padding:8px 10px;font-size:12px;line-height:1.45;color:var(--txt)}
-          .crm-hist-item .hi-date{font-size:10px;color:var(--mute);font-family:var(--mono)}
-          .crm-hist-item .hi-del{float:right;color:var(--mute);cursor:pointer;font-size:13px}
-          .crm-hist-item .hi-del:hover{color:var(--red)}
-          .crm-source-badge{font-size:9.5px;font-weight:700;font-family:var(--mono);padding:1px 6px;border-radius:4px;background:var(--blue-soft);color:#444;border:1px solid var(--line)}
-          .crm-overdue{background:var(--red-soft);border-color:#fca5a5}
-          /* Follow quente: faixa dedicada no topo do CRM */
-          .crm-fh{background:linear-gradient(135deg,#fff4ed,#ffe8d6);border:1px solid #f6c89a;border-radius:10px;padding:12px 14px;margin-bottom:14px}
-          .crm-fh-hd{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#9a3412;margin-bottom:10px;letter-spacing:.02em;flex-wrap:wrap}
-          .crm-fh-hd small{font-weight:600;color:#b06a3c;font-size:10.5px;letter-spacing:0}
-          .crm-fh-cards{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
-          .crm-fh-card{flex:0 0 218px;background:#fff;border:1px solid #f6c89a;border-left:3px solid #f97316;border-radius:14px;padding:10px 12px;cursor:pointer;transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s cubic-bezier(.16,1,.3,1)}
-          .crm-fh-card:hover{transform:translateY(-2px);box-shadow:0 14px 26px -14px rgba(154,52,18,.3)}
-          .crm-fh-card .nm{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:3px}
-          .crm-fh-card .mt{font-size:10px;color:var(--mute);display:flex;justify-content:space-between;gap:6px}
-          .crm-fh-card .nx{font-size:10.5px;color:var(--txt);margin-top:5px;padding-top:5px;border-top:1px solid #f3e3d3;line-height:1.35}
-          .crm-fh-card .due-late{color:var(--red);font-weight:700}
-          .crm-card{position:relative}
-          .crm-hot-btn{position:absolute;top:6px;right:6px;border:none;background:none;cursor:pointer;font-size:13px;line-height:1;opacity:.28;filter:grayscale(1);transition:all .12s;padding:2px}
-          .crm-hot-btn:hover{opacity:.85}
-          .crm-hot-btn.on{opacity:1;filter:none}
-        </style>
+        <!-- estilos do CRM: movidos para workflowark-*.css (11/09/2026), para a camada Apple vencer por ordem -->
 
         <div class="page-head">
           <div class="page-title">
@@ -3340,7 +3202,7 @@ function wfaSetTheme(t){
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
             <div style="flex:1;min-width:220px"><label class="form-label">Convocar reunião · o que o conselho deve resolver?</label><input id="cons-tema" class="form-input" placeholder="Ex: como aumentar agendamentos da Vivenda na Copa? / o que postar essa semana?" onkeydown="if(event.key==='Enter')consRodar()"></div>
             <div style="min-width:160px"><label class="form-label">Cliente (opcional)</label><select id="cons-cliente" class="form-select"></select></div>
-            <button class="tb-btn" onclick="consRodar()">⚖️ Reunir o conselho</button>
+            <button class="tb-btn" onclick="consRodar()">Reunir o conselho</button>
           </div>
           <div id="cons-status2" style="font-size:12px;color:var(--mute);margin-top:8px"></div>
         </div>
@@ -3383,7 +3245,7 @@ function wfaSetTheme(t){
         </style>
         <div class="page-head">
           <div class="page-title"><h1>Tutorial & Conhecimento</h1><p>Como usar o WorkFlowArk · guia rápido pra qualquer pessoa da equipe</p></div>
-          <div style="display:flex;gap:8px"><button class="tb-btn" onclick="onboardOpen()">▶ Ver introdução</button><button class="tb-btn dk" onclick="tutorialNarrar()">🔊 JARVIS narra</button></div>
+          <div style="display:flex;gap:8px"><button class="tb-btn" onclick="onboardOpen()">▶ Ver introdução</button><button class="tb-btn dk" onclick="tutorialNarrar()">JARVIS narra</button></div>
         </div>
         <div class="tut-hero">
           <h2>Bem-vindo ao WorkFlowArk</h2>
@@ -3513,102 +3375,7 @@ function wfaSetTheme(t){
            NAO mexe na aba Atividades > Tarefas: este quadro tem dados proprios
            (wfa-projetos) e roda em paralelo ao kanban operacional que ja existe. -->
       <div class="page" id="page-projetos">
-        <style>
-          #page-projetos .pj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-          #page-projetos .pj-c{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;cursor:pointer;transition:transform .16s var(--ease-out),box-shadow .16s var(--ease-out)}
-          #page-projetos .pj-c:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
-          #page-projetos .pj-c h3{font-size:16px;font-weight:720;letter-spacing:-.02em;margin:0}
-          #page-projetos .pj-c .sub{font-size:11.5px;color:var(--mute);margin-top:3px}
-          #page-projetos .pj-temp{width:8px;height:8px;border-radius:99px;display:inline-block;margin-right:6px;vertical-align:middle}
-          #page-projetos .pj-temp.gr{background:var(--green)}#page-projetos .pj-temp.y{background:var(--yel)}#page-projetos .pj-temp.r{background:var(--red)}
-          #page-projetos .pj-bar{height:5px;background:var(--blue-soft);border-radius:99px;overflow:hidden;margin:14px 0 7px}
-          #page-projetos .pj-bar i{display:block;height:100%;background:var(--yel);border-radius:99px;transition:width .3s var(--ease)}
-          #page-projetos .pj-mini{display:flex;gap:12px;font-size:11px;color:var(--mute);flex-wrap:wrap}
-          #page-projetos .pj-mini b{color:var(--ink);font-weight:700}
-          #page-projetos .pj-empty{padding:40px;text-align:center;color:var(--mute);border:1px dashed var(--line);border-radius:16px}
-
-          #page-projetos .pj-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
-          #page-projetos .pj-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-          #page-projetos .pj-tab{font-size:12.5px;font-weight:640;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--txt);cursor:pointer;transition:.15s}
-          #page-projetos .pj-tab:hover{border-color:var(--line-2)}
-          #page-projetos .pj-tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-
-          #page-projetos .pj-cargabar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 0 13px;padding:9px 12px;background:var(--blue-soft);border:1px solid var(--line);border-radius:12px}
-          #page-projetos .pj-cargabar .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);font-weight:800;margin-right:3px}
-          #page-projetos .pj-carga{font-size:11.5px;color:var(--txt);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
-          #page-projetos .pj-carga b{font-weight:700}
-          #page-projetos .pj-carga.sem{color:var(--red);border-color:var(--red)}
-          #page-projetos .pj-carga.tot{background:var(--ink);color:var(--bg);border-color:var(--ink);margin-left:auto}
-          #page-projetos .pj-board{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:11px;overflow-x:auto;padding-bottom:10px;align-items:start}
-          #page-projetos .pj-col{background:var(--blue-soft);border:1px solid var(--line);border-radius:14px;padding:10px;min-height:120px}
-          #page-projetos .pj-col.over{border-color:var(--yel);background:var(--yel-bg)}
-          #page-projetos .pj-colh{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin-bottom:9px;padding:0 3px}
-          #page-projetos .pj-colh .n{margin-left:auto;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:1px 7px;font-size:10px;color:var(--txt)}
-          #page-projetos .pj-dot{width:7px;height:7px;border-radius:99px;flex:none}
-          #page-projetos .pj-t{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:11px 12px;margin-bottom:8px;cursor:grab;transition:box-shadow .15s,border-color .15s}
-          #page-projetos .pj-t:hover{box-shadow:var(--sh-2);border-color:var(--line-2)}
-          #page-projetos .pj-t.drag{opacity:.4}
-          #page-projetos .pj-t .tt{font-size:12.8px;font-weight:600;line-height:1.4;color:var(--ink)}
-          #page-projetos .pj-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
-          #page-projetos .pj-tag{font-size:9.5px;font-weight:750;padding:2.5px 7px;border-radius:99px;letter-spacing:.01em;white-space:nowrap}
-          #page-projetos .pj-tag.sp{background:var(--yel-soft);color:var(--yel-d);border:1px solid var(--yel)}
-          #page-projetos .pj-venc{font-size:10.5px;color:var(--mute);margin-top:7px;display:flex;align-items:center;gap:5px}
-          #page-projetos .pj-venc.late{color:var(--red);font-weight:700}
-          #page-projetos .pj-add{width:100%;font-size:11.5px;color:var(--mute);border:1px dashed var(--line);border-radius:10px;padding:7px;background:none;text-align:center}
-          #page-projetos .pj-add:hover{color:var(--ink);border-color:var(--line-2)}
-
-          #page-projetos .pj-tb{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-          #page-projetos .pj-tb th{background:var(--blue-soft);text-align:left;padding:10px 12px;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);border-bottom:1px solid var(--line)}
-          #page-projetos .pj-tb td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--txt)}
-          #page-projetos .pj-tb tr:last-child td{border-bottom:none}
-          #page-projetos .pj-tb tbody tr{cursor:pointer}
-          #page-projetos .pj-tb tbody tr:hover{background:var(--blue-soft)}
-
-          #page-projetos .pr-wrap{display:grid;grid-template-columns:190px 1fr;gap:16px;align-items:start}
-          #page-projetos .pr-nav{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;position:sticky;top:0}
-          #page-projetos .pr-nav button{display:block;width:100%;text-align:left;font-size:12.8px;font-weight:600;padding:9px 11px;border-radius:9px;color:var(--txt);transition:.14s}
-          #page-projetos .pr-nav button:hover{background:var(--blue-soft)}
-          #page-projetos .pr-nav button.on{background:var(--ink);color:var(--bg)}
-          #page-projetos .pr-body{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
-          #page-projetos .pr-body h2{font-size:19px;font-weight:740;letter-spacing:-.025em;margin:0 0 3px}
-          #page-projetos .pr-body .lede{font-size:12.5px;color:var(--mute);margin-bottom:18px}
-          #page-projetos .pr-sec{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
-          #page-projetos .pr-sec.first{border-top:none;margin-top:0;padding-top:0}
-          #page-projetos .pr-sec h4{font-size:13.5px;font-weight:720;margin:0 0 11px;color:var(--ink)}
-          #page-projetos .pr-f{margin-bottom:11px}
-          #page-projetos .pr-f label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);margin-bottom:5px;font-weight:700}
-          #page-projetos .pr-f input,#page-projetos .pr-f textarea,#page-projetos .pr-f select,
-          #page-projetos .pj-f input,#page-projetos .pj-f textarea,#page-projetos .pj-f select{width:100%;background:var(--blue-soft);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:9px 11px;font:inherit;font-size:13px}
-          #page-projetos .pr-f textarea{min-height:76px;resize:vertical;line-height:1.55}
-          #page-projetos .pr-f input:focus,#page-projetos .pr-f textarea:focus,#page-projetos .pr-f select:focus{outline:none;border-color:var(--yel)}
-          #page-projetos .pr-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-          #page-projetos .pr-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
-          #page-projetos .pr-lin{background:var(--blue-soft);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:9px}
-          #page-projetos .pr-lin .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
-          #page-projetos .pr-lin .top b{font-size:12.5px}
-          #page-projetos .pr-pend{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--red-soft);color:var(--red)}
-          #page-projetos .pr-ok{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--green-soft);color:var(--green)}
-          /* o modal de tarefa nasce em document.body, fora de #page-projetos.
-             Sem repetir as regras aqui ele perde o estilo do formulario e o rotulo
-             cola no campo (bug de 31/08). Mexeu numa lista, mexe nas duas. */
-          #pj-modal .pr-f{margin-bottom:11px}
-          #pj-modal .pr-f label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);margin-bottom:5px;font-weight:700}
-          #pj-modal .pr-f input,#pj-modal .pr-f textarea,#pj-modal .pr-f select,
-          #pj-modal .pj-f:not(.largo) input,#pj-modal .pj-f:not(.largo) textarea,#pj-modal .pj-f:not(.largo) select{width:100%;background:var(--blue-soft);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:9px 11px;font:inherit;font-size:13px}
-          #pj-modal .pr-f textarea{min-height:76px;resize:vertical;line-height:1.55}
-          #pj-modal .pr-f input:focus,#pj-modal .pr-f textarea:focus,#pj-modal .pr-f select:focus{outline:none;border-color:var(--yel)}
-          #pj-modal .pr-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-          #pj-modal .pr-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
-          #pj-modal .pj-tag{font-weight:750;border-radius:99px;letter-spacing:.01em;white-space:nowrap}
-          @media(max-width:900px){
-            #page-projetos .pr-wrap{grid-template-columns:1fr}
-            #page-projetos .pr-nav{position:static;display:flex;gap:6px;overflow-x:auto}
-            #page-projetos .pr-nav button{white-space:nowrap;width:auto}
-            #page-projetos .pr-2,#page-projetos .pr-3{grid-template-columns:1fr}
-            #pj-modal .pr-2,#pj-modal .pr-3{grid-template-columns:1fr}
-            #page-projetos .pj-board{grid-template-columns:repeat(6,minmax(180px,1fr))}
-          }
-        </style>
+        <!-- estilos de Projetos: movidos para workflowark-*.css (10/09/2026), para a camada Apple vencer por ordem -->
 
         <!-- VISTA 1: carteira de projetos -->
         <div id="pj-lista">
@@ -3868,7 +3635,7 @@ function wfaSetTheme(t){
   <div class="modal" style="max-width:560px;max-height:86vh;display:flex;flex-direction:column">
     <div class="modal-head"><h3>🧠 Resumo do dia · WhatsApp</h3><span class="x" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">✕</span></div>
     <div class="modal-body" id="wres-body" style="overflow:auto;flex:1;min-height:0"></div>
-    <div class="modal-foot"><button class="icobtn" onclick="wppFalar()">🔊 Ouvir (JARVIS)</button><button class="icobtn" onclick="wppPararVoz()">⏹ Parar</button><button class="tb-btn" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">Fechar</button></div>
+    <div class="modal-foot"><button class="icobtn" onclick="wppFalar()">Ouvir (JARVIS)</button><button class="icobtn" onclick="wppPararVoz()">⏹ Parar</button><button class="tb-btn" onclick="wppPararVoz();closeModal('modal-wpp-resumo')">Fechar</button></div>
   </div>
 </div>
 
@@ -3974,7 +3741,7 @@ function wfaSetTheme(t){
         <div class="form-group"><label class="form-label">Captações/mês</label><input class="form-input" id="cli-f-cap" type="number" min="0" placeholder="Ex: 1"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Situação</label><select class="form-select" id="cli-f-status"><option value="gr">🟢 Saudável</option><option value="y">🟡 Em ajuste</option><option value="r">🔴 Urgente</option><option value="churn">⚫ Churn / Cancelado</option></select></div>
+        <div class="form-group"><label class="form-label">Situação</label><select class="form-select" id="cli-f-status"><option value="gr">Saudável</option><option value="y">Em ajuste</option><option value="r">Urgente</option><option value="churn">Churn / Cancelado</option></select></div>
         <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="cli-f-meta" placeholder="Ex: Novo · onboarding"></div>
       </div>
     </div>
@@ -4035,7 +3802,7 @@ function wfaSetTheme(t){
         <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="nt-data" type="date"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="nt-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
+        <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="nt-prio"><option value="media">Média</option><option value="alta">Alta</option><option value="baixa">Baixa</option></select></div>
         <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="nt-status"><option value="backlog">Backlog</option><option value="iniciar">A iniciar</option><option value="andamento">Em Andamento</option><option value="aprovacao">Homologação</option><option value="homologcli">Homologação do cliente</option><option value="concluido">Concluído</option></select></div>
       </div>
       <div class="form-row">
@@ -4133,7 +3900,7 @@ function wfaSetTheme(t){
             </div>
           </div>
           <div class="td2-fld"><label>Status</label><select class="form-select" id="td-status"><option value="backlog">Backlog</option><option value="iniciar">A iniciar</option><option value="andamento">Em Andamento</option><option value="aprovacao">Homologação</option><option value="homologcli">Homologação do cliente</option><option value="concluido">Concluído</option></select></div>
-          <div class="td2-fld"><label>Prioridade</label><select class="form-select" id="td-prio"><option value="media">🟡 Média</option><option value="alta">🔴 Alta</option><option value="baixa">🟢 Baixa</option></select></div>
+          <div class="td2-fld"><label>Prioridade</label><select class="form-select" id="td-prio"><option value="media">Média</option><option value="alta">Alta</option><option value="baixa">Baixa</option></select></div>
           <div class="td2-fld"><label>Responsável <a onclick="colabOpen()" style="color:#a07e00;cursor:pointer;font-weight:700">+ pessoa</a></label><select class="form-select" id="td-resp"><option>Lucas Rosi</option><option>Danilo de Lima</option><option>Gabriel Andrade</option><option>Maria Luiza</option><option>Bruno</option><option>Saulo</option><option>Márcio</option><option>Henrique</option><option>Nicolas</option><option>Anderson</option><option>João Gabriel</option><option>Maria Clara</option><option>Luckas Gomes</option><option>Kaique</option><option>Lush</option></select></div>
           <div class="td2-fld"><label>Início</label><input class="form-input" id="td-ini" type="date"></div>
           <div class="td2-fld"><label>Vencimento</label><input class="form-input" id="td-data" type="date"></div>
@@ -4181,8 +3948,8 @@ function wfaSetTheme(t){
     <div class="modal-foot">
       <button class="icobtn" onclick="closeModal('modal-relatorio')">Fechar</button>
       <div style="flex:1"></div>
-      <button class="icobtn" onclick="relatorioCopiar()">📋 Copiar resumo</button>
-      <button class="tb-btn" onclick="relatorioImprimir()">🖨 Imprimir / PDF</button>
+      <button class="icobtn" onclick="relatorioCopiar()">Copiar resumo</button>
+      <button class="tb-btn" onclick="relatorioImprimir()">Imprimir / PDF</button>
     </div>
   </div>
 </div>
@@ -4373,6 +4140,6 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260910f.js"></script>
+<script src="workflowark-app-20260911a.js"></script>
 </body>
 </html>
