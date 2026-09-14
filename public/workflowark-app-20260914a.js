@@ -5721,6 +5721,11 @@ let WFA_DROP_FEITO=false;   // o drop chegou a acontecer? (ver dragend)
 var WFA_DRAGGING=false, WFA_RENDER_PENDENTE=false, WFA_DRAG_TIMER=null;
 var WFA_DROP_ATE=0;   // janela pós-drop: até este instante, a puxada da nuvem não reaplica wfa-tarefas
 var WFA_DRAG_TID='';  // id do cartao em arrasto (fallback quando o dataTransfer chega vazio)
+var WFA_DRAG_LAST=null; // ultima posicao do mouse durante o arrasto (pro dragend sem drop)
+/* Documento inteiro aceita o arrasto de cartao (dragover cancelado): o navegador entrega o
+   drop/dragend com coordenadas e nunca mostra o cursor de "proibido" no meio do quadro. */
+document.addEventListener('dragover',e=>{if(WFA_DRAGGING){e.preventDefault();WFA_DRAG_LAST=[e.clientX,e.clientY];}});
+document.addEventListener('drop',e=>{if(WFA_DRAGGING&&!WFA_DROP_FEITO){e.preventDefault();const el=document.elementFromPoint(e.clientX,e.clientY);const colAlvo=el&&el.closest?el.closest('#page-tarefas .task-col'):null;const listAlvo=colAlvo&&colAlvo.querySelector('.task-list');if(listAlvo&&WFA_DRAG_TID){try{wfaDropEm(listAlvo,colAlvo,WFA_DRAG_TID);}catch(_){}}}});
 function wfaDragInicio(){
   WFA_DRAGGING=true; WFA_DROP_FEITO=false;
   // rede de seguranca: se o dragend nao disparar (drop cancelado pelo SO no celular),
@@ -5823,6 +5828,19 @@ function bindDrag(){
       WFA_DRAG_TID=c.dataset.tid;
       e.dataTransfer.effectAllowed='move';wfaDragInicio();requestAnimationFrame(()=>c.classList.add('dragging'));});
     c.addEventListener('dragend',e=>{c.classList.remove('dragging');document.querySelectorAll('.task-col.drop-on').forEach(x=>x.classList.remove('drop-on'));
+      /* DROP ENGOLIDO (14/09/2026): no Mac (Chrome e Safari) um solta rapido chegava como
+         dragend SEM drop, e o cartao voltava. Se o arrasto terminou sem drop, acha a coluna
+         embaixo do ponto onde soltou (dragend traz clientX/Y; senao o ultimo dragover) e
+         aplica o mesmo movimento do drop. Fora de qualquer coluna = cancelado, como antes. */
+      try{
+        if(!WFA_DROP_FEITO){
+          let x=e.clientX,y=e.clientY;if(!(x||y)&&WFA_DRAG_LAST){x=WFA_DRAG_LAST[0];y=WFA_DRAG_LAST[1];}
+          const el=(x||y)?document.elementFromPoint(x,y):null;const colAlvo=el&&el.closest?el.closest('#page-tarefas .task-col'):null;
+          const listAlvo=colAlvo&&colAlvo.querySelector('.task-list');
+          if(listAlvo&&WFA_DRAG_TID)wfaDropEm(listAlvo,colAlvo,WFA_DRAG_TID);
+        }
+      }catch(_){}
+      WFA_DRAG_LAST=null;
       /* Sempre repinta ao terminar o arrasto: desfaz o preview se soltou fora e aplica
          qualquer render que a puxada da nuvem tenha adiado enquanto o arrasto rolava. */
       wfaDragFim();
@@ -5831,18 +5849,36 @@ function bindDrag(){
   document.querySelectorAll('.task-list').forEach(list=>{
     if(list.__dragBound)return;list.__dragBound=1;
     const col=list.closest('.task-col')||list;
-    list.addEventListener('dragover',e=>{
+    /* ALVO DE DROP = A COLUNA INTEIRA, E dragenter CANCELADO (14/09/2026). Regra do HTML5:
+       o navegador so entrega o `drop` se o ULTIMO dragenter/dragover naquele elemento foi
+       cancelado com preventDefault. Aqui so o dragover era cancelado, e so na lista. Quem
+       cruzava pra coluna e soltava rapido caia entre o dragenter (nao cancelado) e o proximo
+       dragover (que so vem com movimento ou a cada ~350ms): o drop era RECUSADO, vinha so o
+       dragend e o cartao voltava. Segurando o cartao por segundos "funcionava". Provado com
+       mouse real: dragstart > dragenter:andamento > dragend, sem drop. Agora dragenter e
+       cancelado e a coluna inteira (cabecalho, rodape, vazio) aceita o cartao. */
+    const alvo=col;
+    alvo.addEventListener('dragenter',e=>{e.preventDefault();try{e.dataTransfer.dropEffect='move';}catch(_){}col.classList.add('drop-on');});
+    alvo.addEventListener('dragover',e=>{
       e.preventDefault();e.dataTransfer.dropEffect='move';col.classList.add('drop-on');
       const dragging=document.querySelector('.task-card.dragging');if(!dragging)return;
       const empty=list.querySelector('.muted');if(empty)empty.remove();
       const after=taskDragAfterElement(list,e.clientY);
       if(after==null)list.appendChild(dragging);else if(after!==dragging)list.insertBefore(dragging,after);
     });
-    list.addEventListener('dragleave',e=>{if(!list.contains(e.relatedTarget)&&!col.contains(e.relatedTarget))col.classList.remove('drop-on');});
-    list.addEventListener('drop',e=>{
+    alvo.addEventListener('dragleave',e=>{if(!col.contains(e.relatedTarget))col.classList.remove('drop-on');});
+    alvo.addEventListener('drop',e=>{
       e.preventDefault();col.classList.remove('drop-on');
       let id='';try{id=e.dataTransfer.getData('id')||e.dataTransfer.getData('text/plain');}catch(_){}
       if(!id)id=WFA_DRAG_TID||'';   // ultimo recurso: o id guardado no dragstart desta aba
+      wfaDropEm(list,col,id);
+    });
+  });
+}
+/* Aplica o solta numa coluna. Chamado pelo `drop` e, quando o navegador engole o drop
+   (so vem o dragend), pelo dragend com a coluna achada pela posicao do mouse. */
+function wfaDropEm(list,col,id){
+      if(WFA_DROP_FEITO)return;      // ja aplicado por este arrasto
       if(String(id).indexOf('pj:')===0){
         /* Cartao ligado a um projeto: o status muda LA (fonte unica). Soltar em Backlog
            devolve a tarefa pro backlog do projeto, que mora na Jornada. */
@@ -5885,8 +5921,6 @@ function bindDrag(){
       saveTarefas();
       if(bloqueado){renderTarefas();setTimeout(()=>{try{openTaskDetail(id);}catch(_){}},900);return;}
       if(changedCol)toast('✓ Movida para '+taskStatusLabel(t.status));
-    });
-  });
 }
 
 /* ====== Quick-add inline estilo Trello ====== */
