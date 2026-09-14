@@ -264,6 +264,7 @@ const WFA_RECENT=new Map();       // chave -> timestamp (ms) até quando o local
 const WFA_RECENT_MS=15000;
 function wfaLocalAuth(key){return WFA_DIRTY.has(key)||(WFA_RECENT.get(key)||0)>Date.now();}
 let _wfaFlushing=false;
+const WFA_SAVE_FAILS={};          // chave -> falhas seguidas de gravacao (zera no sucesso)
 // wfa-whatsapp é SERVER-OWNED: o servidor (webhook) escreve as mensagens e o cliente só LÊ.
 // Empurrar do cliente daria 400 ("Bloco inválido") -> "Erro ao sincronizar" eterno, e ainda
 // poderia sobrescrever mensagens que chegaram no servidor. Então nunca enfileira essa chave.
@@ -321,6 +322,7 @@ async function wfaFlush(){
       WFA_PENDING.delete(key);
       try{
         await cloudCall('save',{action:'save-state',key,data});
+        WFA_SAVE_FAILS[key]=0;
         if(!WFA_PENDING.has(key))WFA_DIRTY.delete(key); // confirmou (e não houve edição nova no meio)
         atualizarBadgeSync(true);
       }catch(e){
@@ -345,6 +347,12 @@ async function wfaFlush(){
         // esta gravação estava em voo — senão o retry sobrescreve a edição nova com a antiga.
         if(!WFA_PENDING.has(key))WFA_PENDING.set(key,data);
         atualizarBadgeSync('retry');
+        /* AVISO BARULHENTO (14/09/2026): 3 falhas seguidas na mesma chave viram um toast
+           vermelho com a mensagem real do servidor. Antes ficava so um badge discreto e a
+           pessoa seguia editando achando que estava salvando. */
+        WFA_SAVE_FAILS[key]=(WFA_SAVE_FAILS[key]||0)+1;
+        console.error('[sync] gravacao de "'+key+'" falhou ('+WFA_SAVE_FAILS[key]+'x):',(e&&e.message)||e);
+        if(WFA_SAVE_FAILS[key]===3){try{if(typeof toast==='function')toast('⚠ Não está salvando ('+key.replace('wfa-','')+'): '+(((e&&e.message)||'erro')+'').slice(0,80)+'. Recarregue a página; se continuar, avise o Gabriel.',9000);}catch(_){}}
         break;                                 // para; tenta de novo no próximo tick
       }
     }
@@ -446,6 +454,15 @@ function applyCloudState(remote){
      arrasto acabar e a gravação do drop confirmar. typeof guard: applyCloudState mora em
      outro bloco de script, a flag pode ainda não existir na 1ª carga. */
   if(typeof WFA_DRAGGING!=='undefined' && (WFA_DRAGGING || (typeof WFA_DROP_ATE!=='undefined' && Date.now() < WFA_DROP_ATE))) return false;
+  /* GUARDA (14/09/2026): WFA_CLOUD_MUTED=true silencia TODA gravacao pra nuvem (cloudSave
+     devolve na hora) e tira o carimbo `up`. Se qualquer coisa dentro da mescla estourar, a
+     flag ficava presa em true e o aparelho parava de salvar em silencio, com a tela
+     funcionando normal. Agora a mescla roda dentro de try/finally: a flag sempre volta. */
+  try{ return _applyCloudStateCore(remote); }
+  catch(e){ console.error('[sync] mescla falhou; nada foi aplicado desta puxada',e); return false; }
+  finally{ WFA_CLOUD_MUTED=false; }
+}
+function _applyCloudStateCore(remote){
   WFA_CLOUD_MUTED=true;
   // mudou=false ao fim => o remoto era idêntico ao local => NÃO re-renderiza nada.
   // (Era o re-render incondicional a cada 6s que fazia o app inteiro piscar em branco.)

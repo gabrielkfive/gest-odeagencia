@@ -122,7 +122,7 @@ async function salvarMesclando(ctx: { db: any; user: { id: string } }, key: stri
   for (let tentativa = 0; tentativa < 4; tentativa++) {
     const { data: row, error: e1 } = await ctx.db
       .from("workflowark_state").select("data,updated_at").eq("key", key).maybeSingle();
-    if (e1) return false;
+    if (e1) { console.error(`[save-state] ${key} leitura falhou: ${String(e1.message || e1)}`); return false; }
     let deletados: unknown[] = [];
     try {
       const { data: lap } = await ctx.db
@@ -142,9 +142,10 @@ async function salvarMesclando(ctx: { db: any; user: { id: string } }, key: stri
       .eq("key", key)
       .eq("updated_at", row.updated_at)
       .select("key");
-    if (error) return false;
+    if (error) { console.error(`[save-state] ${key} update falhou: ${String(error.message || error)}`); return false; }
     if (Array.isArray(gravadas) && gravadas.length) return true;
     // updated_at mudou entre a leitura e a gravação: outro save entrou. Tenta de novo.
+    console.warn(`[save-state] ${key} tentativa ${tentativa + 1}: updated_at mudou no meio, repetindo`);
   }
   return false;
 }
@@ -413,7 +414,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           if (row.updated_at && (!maxT || String(row.updated_at) > maxT)) maxT = String(row.updated_at);
         }
         if (since && !(rows ?? []).length) {
-          return json({ unchanged: true, t: since, member: ctx.member });
+          return json({ unchanged: true, t: since, member: ctx.member, now: new Date().toISOString() });
         }
 
         const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key)).map((row: any) => {
@@ -433,7 +434,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           members = result.data ?? [];
         }
 
-        return json({ state, member: ctx.member, members, t: maxT || null });
+        return json({ state, member: ctx.member, members, t: maxT || null, now: new Date().toISOString() });
       },
 
       POST: async ({ request }) => {
@@ -470,18 +471,25 @@ export const Route = createFileRoute("/api/workflowark/state")({
           // (cartão "voltava" de coluna, tarefa de projeto saía da homologação do cliente).
           // Regra em src/lib/merge-estado.js (a mesma do cliente). Concorrência otimista: lê a
           // linha, mescla, grava só se o updated_at não mudou no meio; senão tenta de novo.
+          // LOG DE GRAVACAO (14/09/2026): cada save-state deixa rastro no log do Worker
+          // (quem, qual bloco, tamanho, resultado). Sem isto, "nao esta salvando" era
+          // impossivel de investigar sem estar na frente do aparelho que falha.
+          const quem = String((ctx.member as any)?.email || ctx.user.id || "?");
+          const tam = Array.isArray(data) ? data.length : (data == null ? 0 : JSON.stringify(data).length);
           if (CHAVES_MESCLA.includes(key) && Array.isArray(data)) {
             const ok = await salvarMesclando(ctx, key, data);
+            console.log(`[save-state] ${quem} ${key} itens=${tam} mesclado=${ok ? "ok" : "FALHOU"}`);
             if (!ok) return json({ error: "Não foi possível salvar." }, { status: 500 });
-            return json({ ok: true, mesclado: true });
+            return json({ ok: true, mesclado: true, now: new Date().toISOString() });
           }
           const { error } = await ctx.db.from("workflowark_state").upsert({
             key,
             data,
             updated_by: ctx.user.id,
           });
+          console.log(`[save-state] ${quem} ${key} tam=${tam} ${error ? "ERRO " + String(error.message || error) : "ok"}`);
           if (error) return json({ error: "Não foi possível salvar." }, { status: 500 });
-          return json({ ok: true });
+          return json({ ok: true, now: new Date().toISOString() });
         }
 
         if (action === "save-many") {
