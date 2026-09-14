@@ -2066,26 +2066,31 @@ function wfaSetTheme(t){
           .tkcl span{transition:color .2s}
           /* Acoes do cartao como pilulas compactas em linha (revisao Apple, 10/09/2026): mesma
              funcao dos botoes altos de antes, menos peso visual, e o feed ganha espaco. */
-          .tkacoes{padding:18px 16px 4px;display:flex;flex-direction:column;gap:4px}
+          .tkacoes{padding:18px 16px 4px;display:flex;flex-direction:column;gap:6px}
           .tkacth{font-size:10.5px;font-weight:600;color:var(--mute);letter-spacing:.02em;text-transform:none;margin:6px 2px 2px}
-          .tkacoes button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:rgba(118,118,128,.10);border:0;border-radius:9px;padding:0 11px;font:inherit;font-size:12.5px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s,transform .12s;min-height:34px}
-          .tkacoes button:hover{background:rgba(118,118,128,.18)}
-          .tkacoes button:active{transform:scale(.97)}
-          .tkacoes button svg{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
-          .tkacoes button.ok{color:var(--green)}
-          .tkacoes button.ok:hover{background:rgba(22,163,74,.14)}
-          .tkacoes button.bad{color:var(--red)}
-          .tkacoes button.bad:hover{background:rgba(220,38,38,.12)}
+          /* Trilho compacto de icones (revisao 14/09/2026): os botoes altos com texto
+             duplicavam campos que ja estao visiveis no formulario principal (Status,
+             Responsaveis, Datas...). Viram icones pequenos, acessiveis por title (tooltip)
+             e aria-label (leitor de tela), sem perder nenhuma acao. */
+          .tkicorow{display:flex;flex-wrap:wrap;gap:6px}
+          .tkico{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex:none;background:rgba(118,118,128,.10);border:0;border-radius:9px;color:var(--txt);cursor:pointer;transition:background .15s,transform .12s;padding:0}
+          .tkico:hover{background:rgba(118,118,128,.18)}
+          .tkico:active{transform:scale(.9)}
+          .tkico svg{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+          .tkico.ok{color:var(--green)}
+          .tkico.ok:hover{background:rgba(22,163,74,.14)}
+          .tkico.bad{color:var(--red)}
+          .tkico.bad:hover{background:rgba(220,38,38,.12)}
           .tksideh{padding-top:12px}
           .tkcrow{display:flex;gap:8px;align-items:flex-start}
           .tkcrow .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--yel),var(--yel-d));color:#000;display:grid;place-items:center;font-size:10px;font-weight:800;font-style:normal;flex:none;margin-top:4px}
           .tkcrow textarea{flex:1}
           body.aura-dark .tkna b{background:rgba(255,255,255,.08)}
           body.aura-dark .tkna-avs .av{border-color:#0d0e10}
-          body.aura-dark .tkacoes button{background:rgba(255,255,255,.06);color:#e6e8ec}
-          body.aura-dark .tkacoes button:hover{background:rgba(255,255,255,.12)}
+          body.aura-dark .tkico{background:rgba(255,255,255,.06);color:#e6e8ec}
+          body.aura-dark .tkico:hover{background:rgba(255,255,255,.12)}
           body.aura-dark .tkr:hover{background:rgba(255,255,255,.04)}
-          @media(max-width:900px){.tkacoes{padding:12px 14px 4px;flex-direction:row;flex-wrap:wrap}.tkacoes button{width:auto;flex:1 1 30%}.tkacth{flex:0 0 100%}.tkr:hover{margin:0;padding-left:0;padding-right:0}}
+          @media(max-width:900px){.tkacoes{padding:12px 14px 4px}.tkr:hover{margin:0;padding-left:0;padding-right:0}}
           @media(max-width:900px){
             /* Uma rolagem so no celular: o conteudo principal e a atividade correm juntos,
                em vez de duas areas de rolagem presas dentro de 92vh (revisao Apple). */

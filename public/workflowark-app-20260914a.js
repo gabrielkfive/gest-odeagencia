@@ -69,6 +69,9 @@ function fillClienteSelects(){
   set('nt-cliente','');                       // criar tarefa
   set('td-cliente','');                        // modal de detalhe da tarefa
   set('filt-cli','<option value="">Todo cliente</option>'); // filtro do board
+  /* Cliente tambem se escolhe DIGITANDO (pedido de 14/09/2026): mesmo campo de busca que
+     o responsavel ja tem, no filtro do quadro e nos modais de tarefa. */
+  ['filt-cli','nt-cliente','td-cliente'].forEach(id=>{const el=document.getElementById(id);try{if(el){wfaBuscaPessoa(el,{vazio:'Nenhum cliente com esse nome.',placeholder:'Buscar cliente…'});if(el.__ppSync)el.__ppSync();}}catch(e){}});
 }
 
 // ---- Novo / Editar / Remover cliente ----
@@ -288,7 +291,8 @@ function fillRespSelects(){
    equipe quer digitar o nome. Transforma um <select> comum em campo de busca. O
    select continua existindo (escondido) e continua sendo a fonte do valor, entao
    todo codigo que le .value ou escuta change segue funcionando igual. */
-function wfaBuscaPessoa(sel){
+function wfaBuscaPessoa(sel,opt){
+  opt=opt||{};
   if(!sel||sel.__pp||sel.tagName!=='SELECT')return;
   sel.__pp=1;
   const wrap=document.createElement('div');wrap.className='pp-wrap';
@@ -298,7 +302,7 @@ function wfaBuscaPessoa(sel){
   inp.className=(sel.className||'').replace(/\bform-select\b/,'form-input')||'form-input';
   const st=sel.getAttribute('style');if(st)inp.setAttribute('style',st);
   const op0=sel.options[0];
-  inp.placeholder=(op0&&op0.value==='')?(op0.textContent||'Buscar pessoa…'):'Buscar pessoa…';
+  inp.placeholder=(op0&&op0.value==='')?(op0.textContent||opt.placeholder||'Buscar pessoa…'):(opt.placeholder||'Buscar pessoa…');
   wrap.appendChild(inp);
   sel.style.display='none';
   const dd=document.createElement('div');dd.className='pp-dd';dd.hidden=true;document.body.appendChild(dd);
@@ -317,7 +321,7 @@ function wfaBuscaPessoa(sel){
     const ops=[...sel.options].filter(o=>!n||nm(o.textContent).includes(n));
     const r=inp.getBoundingClientRect();
     dd.style.top=(r.bottom+4)+'px';dd.style.left=r.left+'px';dd.style.width=Math.max(r.width,190)+'px';
-    dd.innerHTML=ops.length?ops.slice(0,80).map((o,i)=>`<div class="pp-it${(n?i===0:o.value===sel.value)?' on':''}" data-v="${mdEsc(o.value)}">${mdEsc(o.textContent||'—')}</div>`).join(''):'<div class="pp-none">Ninguém com esse nome. Use "+ pessoa" para cadastrar.</div>';
+    dd.innerHTML=ops.length?ops.slice(0,80).map((o,i)=>`<div class="pp-it${(n?i===0:o.value===sel.value)?' on':''}" data-v="${mdEsc(o.value)}">${mdEsc(o.textContent||'—')}</div>`).join(''):'<div class="pp-none">'+(opt.vazio||'Ninguém com esse nome. Use "+ pessoa" para cadastrar.')+'</div>';
     dd.hidden=false;
   };
   const escolher=v=>{sel.value=v;fechar();sel.dispatchEvent(new Event('change',{bubbles:true}));sync();};
@@ -742,6 +746,11 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='agentes'){try{agPolish();agLive();}catch(e){}}
     if(p==='jarvis'){try{jarvisPageEnter();}catch(e){} try{jvHudInit();}catch(e){console.warn('jvhud',e);}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
+    /* Atividades: a altura das colunas (--wfa-colmax) é medida com getBoundingClientRect(), que
+       dá tudo zero se a página ainda estiver display:none (ex.: ao abrir a aba pela 1ª vez, sem
+       ter sido a página inicial). Sem isto a coluna nascia maior que a tela e a rolagem vazava
+       pra página (bug relatado: quadro não cabe na tela / roda passa pra página). */
+    if(p==='tarefas'&&typeof wfaAjustaAlturaBoard==='function'){requestAnimationFrame(()=>{try{wfaAjustaAlturaBoard();}catch(e){}});}
     if(p==='integracoes'&&typeof metaStatusLoad==='function'){try{metaStatusLoad();}catch(e){}try{gcalStatus();}catch(e){}}
     if(p==='reunioes'){try{const g=document.getElementById('gcal-iframe');if(g&&!g.getAttribute('src')){const u=g.dataset.pendingSrc||g.dataset.src||'';if(u)g.setAttribute('src',u);}if(typeof applyCalendars==='function')applyCalendars();}catch(e){}}
     if(p==='whatsapp'&&WFA_WPP_OFF){try{document.querySelector('[data-nav="dashboard"]').click();}catch(e){}return;}
@@ -768,17 +777,14 @@ document.querySelectorAll('[data-toggle]').forEach(el=>{
    só porque o mouse ainda tá em cima. */
 (function(){
   const side=document.querySelector('.side');if(!side)return;
-  let leaveTimer=null,suppressUntil=0;
-  side.addEventListener('mouseenter',()=>{
-    if(!side.classList.contains('compact')||Date.now()<suppressUntil)return;
-    clearTimeout(leaveTimer);
-    side.classList.add('peek');
-  });
-  side.addEventListener('mouseleave',()=>{
-    clearTimeout(leaveTimer);
-    leaveTimer=setTimeout(()=>side.classList.remove('peek'),200);
-  });
-  window.__sideSuppressPeek=(ms)=>{suppressUntil=Date.now()+(ms||500);side.classList.remove('peek');};
+  /* PEEK DESLIGADO (14/09/2026, pedido do Gabriel): recolhida, a barra abria por cima de
+     tudo so de encostar o mouse e fechava 200ms depois de sair. Qualquer passada virava um
+     abre-fecha "de mola". Agora recolhida fica recolhida (icones com tooltip) e so expande
+     no clique do botao, igual ao Trello. */
+  window.__sideSuppressPeek=()=>{side.classList.remove('peek');};
+  /* Tooltip com o nome da pagina enquanto a barra esta recolhida. */
+  const tips=()=>{const c=side.classList.contains('compact');side.querySelectorAll('.navitem,[data-nav]').forEach(el=>{const t=(el.querySelector('span')||{}).textContent||'';if(c&&t.trim())el.setAttribute('title',t.trim());else if(el.getAttribute('title')===t.trim())el.removeAttribute('title');});};
+  tips();window.__sideTips=tips;
 })();
 function toggleSideCompact(){
   const app=document.querySelector('.app'),side=document.querySelector('.side');
@@ -795,7 +801,8 @@ function toggleSideCompact(){
   side.classList.toggle('compact',on);
   app.classList.toggle('side-compact',on);
   try{localStorage.setItem('wfa-side-compact',on?'1':'0');}catch(e){}
-  if(window.__sideSuppressPeek)window.__sideSuppressPeek(on?600:600);
+  if(window.__sideSuppressPeek)window.__sideSuppressPeek();
+  if(window.__sideTips)window.__sideTips();
 }
 (function(){
   try{
@@ -2985,16 +2992,20 @@ function wfaEstDecimal(hStr,mStr){
       '<div class="tkside">'+
         '<div class="tkacoes">'+
           '<div class="tkacth">Adicionar ao cartão</div>'+
-          '<button type="button" data-tkgo="tk-addresp">'+TKI.user+'Membros</button>'+
-          (ctx.semPapeis?'':'<button type="button" data-tkgo="tk-papeis">'+TKI.tag+'Etiquetas</button>')+
-          '<button type="button" data-tkgo="tk-clnovo">'+TKI.check+'Checklist</button>'+
-          '<button type="button" data-tkgo="tk-venc">'+TKI.cal+'Datas</button>'+
-          '<button type="button" data-tkgo="tk-anxnm">'+TKI.clip+'Anexo</button>'+
-          '<button type="button" data-tkcapa="1">'+TKI.img+'Capa / imagem</button>'+
+          '<div class="tkicorow">'+
+          '<button type="button" class="tkico" data-tkgo="tk-addresp" title="Membros" aria-label="Membros">'+TKI.user+'</button>'+
+          (ctx.semPapeis?'':'<button type="button" class="tkico" data-tkgo="tk-papeis" title="Etiquetas" aria-label="Etiquetas">'+TKI.tag+'</button>')+
+          '<button type="button" class="tkico" data-tkgo="tk-clnovo" title="Checklist" aria-label="Checklist">'+TKI.check+'</button>'+
+          '<button type="button" class="tkico" data-tkgo="tk-venc" title="Datas" aria-label="Datas">'+TKI.cal+'</button>'+
+          '<button type="button" class="tkico" data-tkgo="tk-anxnm" title="Anexo" aria-label="Anexo">'+TKI.clip+'</button>'+
+          '<button type="button" class="tkico" data-tkcapa="1" title="Capa / imagem" aria-label="Capa ou imagem">'+TKI.img+'</button>'+
+          '</div>'+
           '<div class="tkacth">Ações</div>'+
-          '<button type="button" data-tkgo="tk-st">'+TKI.move+'Mover</button>'+
-          (t.st==='concluido'?'':'<button type="button" data-tkdone="1" class="ok">'+TKI.done+'Concluir</button>')+
-          (ehNova?'':'<button type="button" data-tkdel2="1" class="bad">'+TKI.trash+'Excluir</button>')+
+          '<div class="tkicorow">'+
+          '<button type="button" class="tkico" data-tkgo="tk-st" title="Mover" aria-label="Mover">'+TKI.move+'</button>'+
+          (t.st==='concluido'?'':'<button type="button" class="tkico ok" data-tkdone="1" title="Concluir" aria-label="Concluir">'+TKI.done+'</button>')+
+          (ehNova?'':'<button type="button" class="tkico bad" data-tkdel2="1" title="Excluir" aria-label="Excluir">'+TKI.trash+'</button>')+
+          '</div>'+
         '</div>'+
         '<div class="tksideh">Atividade</div>'+
         '<div id="tk-feed" class="tkfeed"></div>'+
@@ -5428,6 +5439,7 @@ function tfFiltrosToggle(force){
   pg.classList.toggle('filtros-abertos',abre);
   if(b)b.setAttribute('aria-expanded',abre?'true':'false');
   if(abre){try{var i=document.getElementById('filt-busca');if(i&&matchMedia('(hover:hover)').matches)i.focus({preventScroll:true});}catch(e){}}
+  if(typeof wfaAjustaAlturaBoard==='function')requestAnimationFrame(()=>{try{wfaAjustaAlturaBoard();}catch(e){}});
 }
 function tfFiltrosBadge(){
   var b=document.getElementById('tf-filtros-btn'),n=document.getElementById('tf-filtros-n');if(!b||!n)return;
