@@ -196,6 +196,7 @@ async function directCloudCall(action,payload){
   clearTimeout(to);
   const result=await resp.json().catch(()=>({}));
   if(!resp.ok)throw new Error(result.error||'Erro ao sincronizar');
+  if(result&&result.now)wfaAjustaRelogio(result.now);
   return result;
 }
 /* BOOT LEVE: o WhatsApp (todas as conversas) ficou FORA do load inicial (maior payload do
@@ -279,6 +280,13 @@ const WFA_TOMBSTONE_KEYS=['wfa-tarefas','wfa-agenda-events','wfa-crm','wfa-produ
    resolver conflito POR ITEM (quem editou por último vence) em vez de reverter edição.
    As tarefas já têm o próprio mecanismo (wfaTarefaSnapshot) e ficam de fora. */
 const WFA_UP_SNAP={};
+/* RELOGIO DO SERVIDOR (14/09/2026): o conflito por item e decidido por "carimbo `up` mais
+   novo vence". Um aparelho com o relogio atrasado perde TODO conflito e ve a propria
+   edicao "voltar". Load e save devolvem `now`; guardamos a diferenca e carimbamos com a
+   hora do servidor. Sem resposta ainda, usa a hora local (comportamento antigo). */
+let WFA_CLOCK_OFFSET=0;
+function wfaAjustaRelogio(now){try{if(!now)return;const d=Date.parse(now)-Date.now();if(isFinite(d))WFA_CLOCK_OFFSET=d;}catch(e){}}
+function wfaAgoraISO(){return new Date(Date.now()+WFA_CLOCK_OFFSET).toISOString();}
 /* wfa-projetos: foto TAMBÉM por tarefa (projId -> Map(taskId -> json)). O projeto inteiro era o
    item da mescla, então duas pessoas mexendo em tarefas diferentes do MESMO projeto brigavam
    pelo projeto todo e a mudança de uma delas sumia ("mandei a LP pra homologação do cliente
@@ -295,12 +303,12 @@ function wfaStampUp(key,value){
     const snap=WFA_UP_SNAP[key];
     let stamped=false;
     if(key==='wfa-projetos'){
-      const agora=new Date().toISOString();
+      const agora=wfaAgoraISO();
       arr.forEach(p=>{if(!p||!p.id||!Array.isArray(p.tarefas))return;const tsnap=WFA_UP_SNAP_T[p.id]||new Map();const novo=new Map();
         p.tarefas.forEach(t=>{if(!t||!t.id)return;const c=Object.assign({},t);delete c.up;const j=JSON.stringify(c);if(tsnap.get(t.id)!==j){t.up=agora;stamped=true;}novo.set(t.id,j);});
         WFA_UP_SNAP_T[p.id]=novo;});
     }
-    arr.forEach(o=>{if(o&&o.id){const c=Object.assign({},o);delete c.up;const j=JSON.stringify(c);if(snap.get(o.id)!==j){o.up=new Date().toISOString();stamped=true;}}});
+    arr.forEach(o=>{if(o&&o.id){const c=Object.assign({},o);delete c.up;const j=JSON.stringify(c);if(snap.get(o.id)!==j){o.up=wfaAgoraISO();stamped=true;}}});
     wfaSnapKey(key,arr);
     return stamped?JSON.stringify(arr):value;
   }catch(e){return value;}

@@ -658,7 +658,7 @@ let WFA_TAR_SNAP=new Map();
 function wfaTarefaJson(t){const c=Object.assign({},t);delete c.up;return JSON.stringify(c);}
 function wfaTarefaSnapshot(){WFA_TAR_SNAP=new Map();(state.tarefas||[]).forEach(t=>{if(t&&t.id)WFA_TAR_SNAP.set(t.id,wfaTarefaJson(t));});}
 function saveTarefas(){
-  try{(state.tarefas||[]).forEach(t=>{if(!t||!t.id)return;const j=wfaTarefaJson(t);if(WFA_TAR_SNAP.get(t.id)!==j){t.up=new Date().toISOString();WFA_TAR_SNAP.set(t.id,j);}});}catch(e){}
+  try{const agora=(typeof wfaAgoraISO==='function')?wfaAgoraISO():new Date().toISOString();(state.tarefas||[]).forEach(t=>{if(!t||!t.id)return;const j=wfaTarefaJson(t);if(WFA_TAR_SNAP.get(t.id)!==j){t.up=agora;WFA_TAR_SNAP.set(t.id,j);}});}catch(e){}
   localStorage.setItem('wfa-tarefas',JSON.stringify(state.tarefas));renderTarefas();renderSprints();updateBadges();}
 wfaTarefaSnapshot();
 function saveRegua(){localStorage.setItem('wfa-regua',JSON.stringify(state.regua));}
@@ -5708,12 +5708,23 @@ let WFA_DROP_FEITO=false;   // o drop chegou a acontecer? (ver dragend)
    deixaria o board BRANCO. Com var, hoista como undefined (falsy) e nunca quebra. */
 var WFA_DRAGGING=false, WFA_RENDER_PENDENTE=false, WFA_DRAG_TIMER=null;
 var WFA_DROP_ATE=0;   // janela pós-drop: até este instante, a puxada da nuvem não reaplica wfa-tarefas
+var WFA_DRAG_TID='';  // id do cartao em arrasto (fallback quando o dataTransfer chega vazio)
 function wfaDragInicio(){
   WFA_DRAGGING=true; WFA_DROP_FEITO=false;
   // rede de seguranca: se o dragend nao disparar (drop cancelado pelo SO no celular),
-  // destrava em 4s (era 20s, longo demais: o board ficava "travado" a vista do usuario).
+  // destrava sozinho. ERA 4s e repintava o board sem checar nada: quem segurava o cartao
+  // por mais de 4s (mirando a coluna, rolando ate ela) tinha o cartao DESTRUIDO na mao
+  // pela repintada e o drop falhava ("primeira vez nao vai, na terceira vai", 14/09/2026).
+  // Agora: 30s, e so age se nao existe mais cartao .dragging na tela (arrasto morto de
+  // verdade). Se ainda tem cartao sendo arrastado, rearma e espera.
   if(WFA_DRAG_TIMER)clearTimeout(WFA_DRAG_TIMER);
-  WFA_DRAG_TIMER=setTimeout(()=>{WFA_DRAGGING=false;WFA_DRAG_TIMER=null;try{renderTarefas();}catch(e){}},4000);
+  const vigia=()=>{
+    WFA_DRAG_TIMER=null;
+    if(!WFA_DRAGGING)return;
+    if(document.querySelector('.task-card.dragging')){WFA_DRAG_TIMER=setTimeout(vigia,5000);return;}
+    WFA_DRAGGING=false;try{renderTarefas();}catch(e){}
+  };
+  WFA_DRAG_TIMER=setTimeout(vigia,30000);
 }
 function wfaDragFim(){
   WFA_DRAGGING=false;
@@ -5792,7 +5803,13 @@ function bindDrag(){
   // Cada elemento é atado UMA vez na vida (__dragBound).
   document.querySelectorAll('.task-card').forEach(c=>{
     if(c.__dragBound)return;c.__dragBound=1;
-    c.addEventListener('dragstart',e=>{e.dataTransfer.setData('id',c.dataset.tid);e.dataTransfer.effectAllowed='move';wfaDragInicio();requestAnimationFrame(()=>c.classList.add('dragging'));});
+    c.addEventListener('dragstart',e=>{
+      /* Safari so preserva tipos padrao no dataTransfer: com so 'id', getData('id') chegava
+         vazio no drop e o cartao voltava. Grava nos dois e le com fallback (14/09/2026). */
+      try{e.dataTransfer.setData('id',c.dataset.tid);}catch(_){}
+      try{e.dataTransfer.setData('text/plain',c.dataset.tid);}catch(_){}
+      WFA_DRAG_TID=c.dataset.tid;
+      e.dataTransfer.effectAllowed='move';wfaDragInicio();requestAnimationFrame(()=>c.classList.add('dragging'));});
     c.addEventListener('dragend',e=>{c.classList.remove('dragging');document.querySelectorAll('.task-col.drop-on').forEach(x=>x.classList.remove('drop-on'));
       /* Sempre repinta ao terminar o arrasto: desfaz o preview se soltou fora e aplica
          qualquer render que a puxada da nuvem tenha adiado enquanto o arrasto rolava. */
@@ -5812,7 +5829,8 @@ function bindDrag(){
     list.addEventListener('dragleave',e=>{if(!list.contains(e.relatedTarget)&&!col.contains(e.relatedTarget))col.classList.remove('drop-on');});
     list.addEventListener('drop',e=>{
       e.preventDefault();col.classList.remove('drop-on');
-      const id=e.dataTransfer.getData('id');
+      let id='';try{id=e.dataTransfer.getData('id')||e.dataTransfer.getData('text/plain');}catch(_){}
+      if(!id)id=WFA_DRAG_TID||'';   // ultimo recurso: o id guardado no dragstart desta aba
       if(String(id).indexOf('pj:')===0){
         /* Cartao ligado a um projeto: o status muda LA (fonte unica). Soltar em Backlog
            devolve a tarefa pro backlog do projeto, que mora na Jornada. */
