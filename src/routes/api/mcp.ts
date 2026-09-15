@@ -117,6 +117,19 @@ const TOOLS = [
     },
   },
   {
+    name: "agentes_decide",
+    description: "Marca um item da fila dos agentes locais (wfa-agentes-fila) como aprovado, recusado ou pendente. Usado pela rotina de e-mail depois de criar o rascunho no Gmail.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "id do item na fila" },
+        decisao: { type: "string", description: "aprovado | recusado | pendente" },
+        quem: { type: "string", description: "quem decidiu (ex.: rotina-gmail)" },
+      },
+      required: ["id", "decisao"],
+    },
+  },
+  {
     name: "update_lead",
     description:
       "Atualiza um lead do pipeline comercial (wfa-crm): mover de etapa (stage 0=Prospecção 1=Diagnóstico 2=Proposta 3=Negociação 4=Fechado 5=Perdido), mudar valor, próxima ação ou anexar observação.",
@@ -281,6 +294,19 @@ async function callTool(name: string, args: any): Promise<{ text: string; isErro
       arr.push(lead);
       await saveBlock("wfa-crm", arr);
       return { text: `Lead criado (#${lead.id}): "${nm}" em Prospecção → ${lead.resp}.` };
+    }
+
+    if (name === "agentes_decide") {
+      const id = String(args?.id || "");
+      const decisao = String(args?.decisao || "");
+      if (!id || !["aprovado", "recusado", "pendente"].includes(decisao)) return { text: "id e decisao (aprovado|recusado|pendente) obrigatórios.", isError: true };
+      const fila = (await loadBlock("wfa-agentes-fila")) || [];
+      if (!Array.isArray(fila)) return { text: "fila vazia.", isError: true };
+      const idx = fila.findIndex((i: any) => String(i?.id) === id);
+      if (idx < 0) return { text: `Item não encontrado: ${id}`, isError: true };
+      fila[idx] = { ...fila[idx], status: decisao, decididoPor: String(args?.quem || "mcp"), decididoEm: new Date().toISOString() };
+      await saveBlock("wfa-agentes-fila", fila);
+      return { text: `Item ${id} marcado como ${decisao}.` };
     }
 
     if (name === "update_lead") {
