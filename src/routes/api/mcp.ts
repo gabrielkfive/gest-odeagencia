@@ -20,14 +20,12 @@ import { createFileRoute } from "@tanstack/react-router";
 const PROTOCOL = "2024-11-05";
 
 async function authorized(request: Request, url: URL): Promise<boolean> {
-  const { runSecret } = await import("@/integrations/run-auth.server");
-  const secret = await runSecret();
-  if (!secret) return false;
+  const { isRunKey } = await import("@/integrations/run-auth.server");
   const auth = request.headers.get("authorization") ?? "";
   const bearer = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
   const hdr = request.headers.get("x-run-key") ?? "";
   const qs = url.searchParams.get("key") ?? "";
-  return bearer === secret || hdr === secret || qs === secret;
+  return (await isRunKey(bearer)) || (await isRunKey(hdr)) || (await isRunKey(qs));
 }
 
 // ---- Definição das ferramentas expostas ao Claude -------------------------

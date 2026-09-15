@@ -7,18 +7,34 @@
 // projeto, igual client.server.ts) — cloudflare:workers não existe no dev local.
 
 export async function runSecret(): Promise<string> {
+  return (await runSecrets())[0] ?? "";
+}
+
+// RUN_KEY (conector do claude.ai, cron) e RUN_KEY_LOCAL (agentes locais no PC do Gabriel,
+// set/26). Duas chaves pra não rotacionar a primeira quando a segunda precisar trocar.
+export async function runSecrets(): Promise<string[]> {
+  const nomes = ["RUN_KEY", "RUN_KEY_LOCAL"];
+  const out: string[] = [];
+  let env: Record<string, string | undefined> = {};
   try {
-    const { env } = await import("cloudflare:workers");
-    const v = (env as Record<string, string | undefined>)?.RUN_KEY;
-    if (v) return String(v);
+    const mod = await import("cloudflare:workers");
+    env = (mod.env as Record<string, string | undefined>) ?? {};
   } catch { /* dev local (Node): módulo cloudflare:workers não existe */ }
-  return (typeof process !== "undefined" ? process.env?.RUN_KEY : "") ?? "";
+  for (const n of nomes) {
+    const v = env?.[n] ?? (typeof process !== "undefined" ? process.env?.[n] : "");
+    if (v) out.push(String(v));
+  }
+  return out;
+}
+
+export async function isRunKey(k: string): Promise<boolean> {
+  if (!k) return false;
+  return (await runSecrets()).includes(k);
 }
 
 export async function isRunAuthorized(request: Request, url: URL): Promise<boolean> {
-  const secret = await runSecret();
   const key = url.searchParams.get("key");
-  if (secret && key && key === secret) return true;
+  if (key && (await isRunKey(key))) return true;
 
   const auth = request.headers.get("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
