@@ -146,6 +146,22 @@ const TOOLS = [
     },
   },
   {
+    name: "update_task",
+    description:
+      "Atualiza um cartão do Kanban (wfa-tarefas) pelo id: anexa texto na descrição (obs), muda status (backlog|iniciar|andamento|aprovacao|homologcli|concluido) ou responsável. Usado pelos agentes locais pra devolver o resultado de uma tarefa executada.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "id do cartão (ex.: tmu28c262sk9x)" },
+        obs: { type: "string", description: "texto a anexar no fim da descrição (até 12000 chars)" },
+        status: { type: "string", description: "novo status (opcional)" },
+        resp: { type: "string", description: "novo responsável (opcional)" },
+        tag: { type: "string", description: "tag a adicionar (opcional, ex.: 'agentes')" },
+      },
+      required: ["id"],
+    },
+  },
+  {
     name: "add_despesa",
     description:
       "Registra uma despesa/pagamento (wfa-acerto), ex.: pagamento a um freelancer/parceiro. pago=true se já saiu.",
@@ -323,6 +339,40 @@ async function callTool(name: string, args: any): Promise<{ text: string; isErro
       lead.up = new Date().toISOString();
       await saveBlock("wfa-crm", arr);
       return { text: `Lead "${lead.nm}" atualizado${args?.stage !== undefined ? " (etapa " + args.stage + ")" : ""}.` };
+    }
+
+    if (name === "update_task") {
+      const id = String(args?.id || "").trim();
+      if (!id) return { text: "id obrigatório.", isError: true };
+      const arr = (await loadBlock("wfa-tarefas")) || [];
+      if (!Array.isArray(arr)) return { text: "wfa-tarefas não é uma lista.", isError: true };
+      const t = arr.find((x: any) => String(x?.id) === id);
+      if (!t) return { text: `Cartão não encontrado: ${id}`, isError: true };
+      const STATUS_OK = ["backlog", "iniciar", "andamento", "aprovacao", "homologcli", "concluido"];
+      const mudou: string[] = [];
+      if (args?.obs) {
+        const add = String(args.obs).slice(0, 12000);
+        t.desc = (String(t.desc || "").trim() + "\n\n" + add).trim().slice(0, 16000);
+        mudou.push("descrição");
+      }
+      if (args?.status && STATUS_OK.includes(String(args.status))) {
+        t.status = String(args.status);
+        if (t.status === "concluido") t.concluidaEm = new Date().toISOString();
+        mudou.push("status " + t.status);
+      }
+      if (args?.resp) {
+        t.resp = String(args.resp);
+        mudou.push("resp " + t.resp);
+      }
+      if (args?.tag) {
+        const tags = Array.isArray(t.tags) ? t.tags : [];
+        if (!tags.includes(String(args.tag))) tags.push(String(args.tag));
+        t.tags = tags;
+        mudou.push("tag " + args.tag);
+      }
+      t.up = new Date().toISOString();
+      await saveBlock("wfa-tarefas", arr);
+      return { text: `Cartão #${id} "${String(t.title || "").slice(0, 60)}" atualizado (${mudou.join(", ") || "nada mudou"}).` };
     }
 
     if (name === "add_despesa") {
