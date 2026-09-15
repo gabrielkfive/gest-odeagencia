@@ -46,7 +46,10 @@ export const GlassEffect: React.FC<GlassEffectProps> = ({
           isolation: "isolate",
         }}
       />
-      <div className="absolute inset-0 z-10 rounded-[inherit]" style={{ background: "rgba(255, 255, 255, 0.14)" }} />
+      <div
+        className="absolute inset-0 z-10 rounded-[inherit]"
+        style={{ background: "rgba(255, 255, 255, 0.14)" }}
+      />
       <div
         className="absolute inset-0 z-20 rounded-[inherit] overflow-hidden"
         style={{
@@ -77,14 +80,19 @@ export interface DockItem {
 }
 
 // Tile estilo icone de app da Apple: quadrado arredondado com gradiente, brilho no topo e glifo branco.
-export const AppTile: React.FC<{ tint?: string; children: React.ReactNode; size?: number }> = ({ tint = "linear-gradient(180deg,#5b5b5f 0%,#2c2c30 100%)", children, size = 44 }) => (
+export const AppTile: React.FC<{ tint?: string; children: React.ReactNode; size?: number }> = ({
+  tint = "linear-gradient(180deg,#5b5b5f 0%,#2c2c30 100%)",
+  children,
+  size = 44,
+}) => (
   <span
     className="relative flex items-center justify-center overflow-hidden rounded-[11px] text-white"
     style={{
       width: size,
       height: size,
       background: tint,
-      boxShadow: "inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.25), 0 4px 10px rgba(0,0,0,.35)",
+      boxShadow:
+        "inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.25), 0 4px 10px rgba(0,0,0,.35)",
     }}
   >
     <span
@@ -95,7 +103,10 @@ export const AppTile: React.FC<{ tint?: string; children: React.ReactNode; size?
   </span>
 );
 
-export const GlassDock: React.FC<{ items: DockItem[]; className?: string }> = ({ items, className = "" }) => (
+export const GlassDock: React.FC<{ items: DockItem[]; className?: string }> = ({
+  items,
+  className = "",
+}) => (
   <GlassEffect className={`rounded-3xl p-2.5 ${className}`}>
     <div className="flex flex-wrap items-center justify-center gap-1">
       {items.map((it) => {
@@ -106,7 +117,7 @@ export const GlassDock: React.FC<{ items: DockItem[]; className?: string }> = ({
             title={it.label}
             onClick={it.onClick}
           >
-            <AppTile tint={it.tint}>{it.icon}</AppTile>
+            {it.tint ? <AppTile tint={it.tint}>{it.icon}</AppTile> : it.icon}
             <span className="text-[9px] font-semibold uppercase tracking-[.1em] text-white/80 group-hover:text-white">
               {it.label}
             </span>
@@ -124,24 +135,39 @@ export const GlassDock: React.FC<{ items: DockItem[]; className?: string }> = ({
   </GlassEffect>
 );
 
-export const GlassButton: React.FC<{ children: React.ReactNode; href?: string; onClick?: () => void; className?: string }> = ({
-  children,
-  href,
-  onClick,
-  className = "",
-}) => (
-  <GlassEffect href={href} onClick={onClick} className={`rounded-3xl px-8 py-4 cursor-pointer will-change-transform hover:scale-[1.03] ${className}`}>
-    <div>
-      {children}
-    </div>
+export const GlassButton: React.FC<{
+  children: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
+  className?: string;
+}> = ({ children, href, onClick, className = "" }) => (
+  <GlassEffect
+    href={href}
+    onClick={onClick}
+    className={`rounded-3xl px-8 py-4 cursor-pointer will-change-transform hover:scale-[1.03] ${className}`}
+  >
+    <div>{children}</div>
   </GlassEffect>
 );
 
 // Filtro SVG que faz a refracao "liquida". Renderizar uma vez por pagina.
 export const GlassFilter: React.FC = () => (
   <svg style={{ display: "none" }} aria-hidden="true">
-    <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
-      <feTurbulence type="fractalNoise" baseFrequency="0.001 0.005" numOctaves="1" seed="17" result="turbulence" />
+    <filter
+      id="glass-distortion"
+      x="0%"
+      y="0%"
+      width="100%"
+      height="100%"
+      filterUnits="objectBoundingBox"
+    >
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.001 0.005"
+        numOctaves="1"
+        seed="17"
+        result="turbulence"
+      />
       <feComponentTransfer in="turbulence" result="mapped">
         <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
         <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
@@ -158,8 +184,22 @@ export const GlassFilter: React.FC = () => (
       >
         <fePointLight x="-200" y="-200" z="300" />
       </feSpecularLighting>
-      <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
-      <feDisplacementMap in="SourceGraphic" in2="softMap" scale="200" xChannelSelector="R" yChannelSelector="G" />
+      <feComposite
+        in="specLight"
+        operator="arithmetic"
+        k1="0"
+        k2="1"
+        k3="1"
+        k4="0"
+        result="litImage"
+      />
+      <feDisplacementMap
+        in="SourceGraphic"
+        in2="softMap"
+        scale="200"
+        xChannelSelector="R"
+        yChannelSelector="G"
+      />
     </filter>
   </svg>
 );

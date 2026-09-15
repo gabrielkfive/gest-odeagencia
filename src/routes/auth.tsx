@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, CalendarDays, FileSignature, FileText, Globe, KanbanSquare, Lock, Mail, Store, UserRound } from "lucide-react";
+import { ArrowRight, Lock, Mail, UserRound } from "lucide-react";
+import { ArkAppIcon } from "@/components/ui/ark-app-icons";
 import { GlassButton, GlassDock, GlassEffect, GlassFilter } from "@/components/ui/liquid-glass";
 import { SmokeyBackground } from "@/components/ui/smokey-background";
 
@@ -124,12 +125,12 @@ function AuthPage() {
   };
 
   const dock = [
-    { icon: <KanbanSquare size={22} />, label: "Tarefas", href: "/app", tint: "linear-gradient(180deg,#FFD84D 0%,#E5A800 100%)" },
-    { icon: <CalendarDays size={22} />, label: "Agenda", href: "/calendario", tint: "linear-gradient(180deg,#FF6B6B 0%,#D92626 100%)" },
-    { icon: <FileText size={22} />, label: "Propostas", href: "/propostas", tint: "linear-gradient(180deg,#5AB0FF 0%,#1E6FE0 100%)" },
-    { icon: <FileSignature size={22} />, label: "Contratos", href: "/contratos.html", tint: "linear-gradient(180deg,#5FD68A 0%,#1F9D4E 100%)" },
-    { icon: <Store size={22} />, label: "Comercial", href: "/comercial.html", tint: "linear-gradient(180deg,#B78CFF 0%,#6E3BE0 100%)" },
-    { icon: <Globe size={22} />, label: "Páginas", href: "/paginas", tint: "linear-gradient(180deg,#4FD8D0 0%,#128F89 100%)" },
+    { icon: <ArkAppIcon name="tarefas" />, label: "Tarefas", href: "/app" },
+    { icon: <ArkAppIcon name="agenda" />, label: "Agenda", href: "/calendario" },
+    { icon: <ArkAppIcon name="propostas" />, label: "Propostas", href: "/propostas" },
+    { icon: <ArkAppIcon name="contratos" />, label: "Contratos", href: "/contratos.html" },
+    { icon: <ArkAppIcon name="comercial" />, label: "Comercial", href: "/comercial.html" },
+    { icon: <ArkAppIcon name="paginas" />, label: "Páginas", href: "/paginas" },
   ];
 
   return (
