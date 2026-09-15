@@ -1217,6 +1217,21 @@ body.aura-dark .crm-modal.open .crm-mbox,body.aura-light .crm-modal.open .crm-mb
 @keyframes osModalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){
   body.aura-dark .modal-bg.open .modal,body.aura-light .modal-bg.open .modal{animation:none}}
+/* Vidro líquido (15/09/2026, mesmo vidro da tela de entrada): o cartão do modal fica
+   translúcido sobre o fundo desfocado, com brilho na borda de cima e sombra funda.
+   Só em cor e sombra; nada de transform, pra não brigar com a animação de entrada. */
+body.aura-dark .modal,body.aura-dark .crm-mbox{
+  background:rgba(14,15,19,.78);
+  backdrop-filter:blur(26px) saturate(1.3);-webkit-backdrop-filter:blur(26px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.22),inset -1px -1px 0 rgba(255,255,255,.08),0 30px 80px rgba(0,0,0,.6)}
+body.aura-light .modal,body.aura-light .crm-mbox{
+  background:rgba(255,255,255,.74);
+  backdrop-filter:blur(26px) saturate(1.3);-webkit-backdrop-filter:blur(26px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.9),inset -1px -1px 0 rgba(255,255,255,.4),0 30px 80px rgba(0,0,0,.28)}
+body.aura-dark .modal-head,body.aura-dark .modal-foot{border-color:rgba(255,255,255,.1)}
+body.aura-light .modal-head,body.aura-light .modal-foot{border-color:rgba(0,0,0,.08)}
 /* Botões uniformes (padrão do print do ARK OS): mesma altura, mesmo raio, sem variação por tela */
 body.aura-dark .tb-btn,body.aura-light .tb-btn,body.aura-dark .icobtn,body.aura-light .icobtn{
   min-height:34px;border-radius:980px;font-size:12.5px;font-weight:600;letter-spacing:-.01em}

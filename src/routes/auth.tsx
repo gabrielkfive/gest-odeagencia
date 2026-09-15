@@ -124,12 +124,12 @@ function AuthPage() {
   };
 
   const dock = [
-    { icon: <KanbanSquare size={22} />, label: "Tarefas", href: "/app" },
-    { icon: <CalendarDays size={22} />, label: "Agenda", href: "/calendario" },
-    { icon: <FileText size={22} />, label: "Propostas", href: "/propostas" },
-    { icon: <FileSignature size={22} />, label: "Contratos", href: "/contratos.html" },
-    { icon: <Store size={22} />, label: "Comercial", href: "/comercial.html" },
-    { icon: <Globe size={22} />, label: "Páginas", href: "/paginas" },
+    { icon: <KanbanSquare size={22} />, label: "Tarefas", href: "/app", tint: "linear-gradient(180deg,#FFD84D 0%,#E5A800 100%)" },
+    { icon: <CalendarDays size={22} />, label: "Agenda", href: "/calendario", tint: "linear-gradient(180deg,#FF6B6B 0%,#D92626 100%)" },
+    { icon: <FileText size={22} />, label: "Propostas", href: "/propostas", tint: "linear-gradient(180deg,#5AB0FF 0%,#1E6FE0 100%)" },
+    { icon: <FileSignature size={22} />, label: "Contratos", href: "/contratos.html", tint: "linear-gradient(180deg,#5FD68A 0%,#1F9D4E 100%)" },
+    { icon: <Store size={22} />, label: "Comercial", href: "/comercial.html", tint: "linear-gradient(180deg,#B78CFF 0%,#6E3BE0 100%)" },
+    { icon: <Globe size={22} />, label: "Páginas", href: "/paginas", tint: "linear-gradient(180deg,#4FD8D0 0%,#128F89 100%)" },
   ];
 
   return (
@@ -143,13 +143,13 @@ function AuthPage() {
         <div className="flex flex-col justify-center gap-6 px-[8vw] pb-[3vh] pt-[7vh] md:px-[5vw] md:py-[6vh]">
           <div className="flex items-center gap-3">
             <img src="/ark-mark.png" alt="ARK Content" className="block h-14 w-14 object-contain" />
-            <span className="font-mono text-xs tracking-[.35em] text-[#FFC700]">ARK CONTENT</span>
+            <span className="text-[17px] font-extrabold tracking-[-.01em] text-white">Ark<sup className="ml-px text-[9px] font-semibold text-[#FFC700] align-super">®</sup> Content</span>
           </div>
           <h1 className="m-0 max-w-[14ch] text-[clamp(26px,3.4vw,46px)] font-extrabold leading-[1.08] tracking-[-.02em]">
             Seja bem-vindo ao centro de comando da <span className="text-[#FFC700]">maior agência de marketing do Brasil</span>.
           </h1>
           <p className="m-0 max-w-[34ch] border-l-[3px] border-[#FFC700] pl-3.5 text-[clamp(14px,1.3vw,18px)] leading-normal text-[#d4d0c4]">
-            Trabalhar na ARK não é brincadeira. É método, ritmo e resultado, todo santo dia.
+            Trabalhar na Ark® não é brincadeira. É método, ritmo e resultado, todo santo dia.
           </p>
 
           <div className="mt-2 flex flex-col items-start gap-4">
@@ -158,7 +158,7 @@ function AuthPage() {
             </div>
             <GlassButton onClick={() => document.getElementById("floating_email")?.focus()}>
               <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <span>Entrar no WorkFlowArk</span>
+                <span>Entrar no WorkFlowArk<sup className="ml-px text-[8px] align-super">®</sup></span>
                 <ArrowRight size={16} />
               </div>
             </GlassButton>
@@ -183,8 +183,8 @@ function AuthPage() {
             <div className="space-y-6 p-7">
               <div className="text-center">
                 <img src="/ark-logo.png" alt="ARK Content" className="mx-auto mb-3 block h-14 w-14 rounded-2xl object-contain" />
-                <h2 className="text-2xl font-extrabold tracking-[-.02em] text-white">WorkFlowArk</h2>
-                <p className="mt-1 text-xs text-white/60">Sistema operacional da ARK Content</p>
+                <h2 className="text-2xl font-extrabold tracking-[-.02em] text-white">WorkFlowArk<sup className="ml-px text-[10px] font-semibold text-[#FFC700] align-super">®</sup></h2>
+                <p className="mt-1 text-xs text-white/60">Sistema operacional da Ark® Content</p>
               </div>
 
               <div className="grid grid-cols-2 gap-1 rounded-xl bg-white/10 p-1">
@@ -258,7 +258,7 @@ function AuthPage() {
               </form>
 
               <p className="text-center text-[10.5px] leading-snug text-white/50">
-                Acesso restrito à equipe ARK. Novos cadastros passam por liberação do gestor.
+                Acesso restrito à equipe Ark®. Novos cadastros passam por liberação do gestor.
               </p>
             </div>
           </GlassEffect>

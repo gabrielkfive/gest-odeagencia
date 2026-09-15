@@ -14,13 +14,6 @@ interface GlassEffectProps {
   onClick?: () => void;
 }
 
-export interface DockItem {
-  icon: React.ReactNode;
-  label: string;
-  href?: string;
-  onClick?: () => void;
-}
-
 const EASE = "cubic-bezier(0.175, 0.885, 0.32, 2.2)";
 
 export const GlassEffect: React.FC<GlassEffectProps> = ({
@@ -39,7 +32,7 @@ export const GlassEffect: React.FC<GlassEffectProps> = ({
 
   const content = (
     <div
-      className={`relative flex overflow-hidden text-white transition-all duration-700 ${className}`}
+      className={`relative flex overflow-hidden text-white transition-transform duration-500 ${className}`}
       style={glassStyle}
       onClick={onClick}
     >
@@ -74,19 +67,47 @@ export const GlassEffect: React.FC<GlassEffectProps> = ({
   );
 };
 
+export interface DockItem {
+  icon: React.ReactNode;
+  label: string;
+  href?: string;
+  onClick?: () => void;
+  /** gradiente do tile (estilo icone de app da Apple) */
+  tint?: string;
+}
+
+// Tile estilo icone de app da Apple: quadrado arredondado com gradiente, brilho no topo e glifo branco.
+export const AppTile: React.FC<{ tint?: string; children: React.ReactNode; size?: number }> = ({ tint = "linear-gradient(180deg,#5b5b5f 0%,#2c2c30 100%)", children, size = 44 }) => (
+  <span
+    className="relative flex items-center justify-center overflow-hidden rounded-[11px] text-white"
+    style={{
+      width: size,
+      height: size,
+      background: tint,
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.25), 0 4px 10px rgba(0,0,0,.35)",
+    }}
+  >
+    <span
+      className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+      style={{ background: "linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0))" }}
+    />
+    <span className="relative drop-shadow-[0_1px_1px_rgba(0,0,0,.35)]">{children}</span>
+  </span>
+);
+
 export const GlassDock: React.FC<{ items: DockItem[]; className?: string }> = ({ items, className = "" }) => (
   <GlassEffect className={`rounded-3xl p-2.5 ${className}`}>
-    <div className="flex flex-wrap items-center justify-center gap-1.5">
+    <div className="flex flex-wrap items-center justify-center gap-1">
       {items.map((it) => {
         const inner = (
           <div
-            className="group flex h-14 w-14 sm:h-16 sm:w-16 flex-col items-center justify-center gap-1 rounded-2xl transition-all duration-500 hover:scale-110 hover:bg-white/15 cursor-pointer"
-            style={{ transformOrigin: "center center", transitionTimingFunction: EASE }}
+            className="group flex w-[68px] flex-col items-center justify-center gap-1.5 py-1.5 cursor-pointer will-change-transform transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.08]"
+            style={{ transformOrigin: "center bottom" }}
             title={it.label}
             onClick={it.onClick}
           >
-            <span className="text-white drop-shadow">{it.icon}</span>
-            <span className="text-[9px] font-semibold uppercase tracking-[.12em] text-white/80 group-hover:text-white">
+            <AppTile tint={it.tint}>{it.icon}</AppTile>
+            <span className="text-[9px] font-semibold uppercase tracking-[.1em] text-white/80 group-hover:text-white">
               {it.label}
             </span>
           </div>
@@ -109,8 +130,8 @@ export const GlassButton: React.FC<{ children: React.ReactNode; href?: string; o
   onClick,
   className = "",
 }) => (
-  <GlassEffect href={href} onClick={onClick} className={`rounded-3xl px-8 py-4 hover:px-9 hover:py-5 cursor-pointer ${className}`}>
-    <div className="transition-all duration-700 hover:scale-95" style={{ transitionTimingFunction: EASE }}>
+  <GlassEffect href={href} onClick={onClick} className={`rounded-3xl px-8 py-4 cursor-pointer will-change-transform hover:scale-[1.03] ${className}`}>
+    <div>
       {children}
     </div>
   </GlassEffect>
