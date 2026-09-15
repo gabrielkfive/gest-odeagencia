@@ -222,7 +222,7 @@ async function callTool(name: string, args: any): Promise<{ text: string; isErro
         data: args?.data ? String(args.data) : "",
         clienteId: args?.clienteId ? String(args.clienteId) : "",
         funcao: args?.funcao ? String(args.funcao) : "",
-        obs: args?.obs ? String(args.obs).slice(0, 4000) : "",
+        desc: args?.obs ? String(args.obs).slice(0, 4000) : "",
         status: "backlog",
         ord: 0,
         criadaEm: now,
