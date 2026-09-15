@@ -58,10 +58,15 @@ for (const m of temFundoClaro) {
 
 /* ---------- 3. gate de POP nao pode reverter em silencio ---------- */
 console.log('\n[3] Gate de POP');
-// janela = do inicio do listener ate o fecho dele (indentacao de 4 espacos), nao ate o
-// primeiro '});', que cai dentro do forEach de ordenacao e cegava o teste.
-const iDrop = fonte.indexOf("list.addEventListener('drop'");
-const fim = iDrop >= 0 ? fonte.indexOf('\n    });', iDrop) : -1;
+// Desde e6f96b4 (14/09/2026) a logica do drop mora em `function wfaDropEm(list,col,id)`
+// (o listener so delega). Janela = da assinatura ate o fecho da funcao no nivel zero.
+// Antes disso era o listener inline; mantido como fallback pra versao antiga.
+let iDrop = fonte.indexOf('function wfaDropEm(list,col,id){');
+let fim = iDrop >= 0 ? fonte.indexOf('\n}', iDrop) : -1;
+if (iDrop < 0) {
+  iDrop = fonte.indexOf("list.addEventListener('drop'");
+  fim = iDrop >= 0 ? fonte.indexOf('\n    });', iDrop) : -1;
+}
 if (iDrop < 0 || fim < 0) nok('handler de drop nao encontrado');
 else {
   const d = fonte.slice(iDrop, fim);
