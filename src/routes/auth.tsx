@@ -1,6 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ArrowRight, CalendarDays, FileSignature, FileText, Globe, KanbanSquare, Lock, Mail, Store, UserRound } from "lucide-react";
+import { GlassButton, GlassDock, GlassEffect, GlassFilter } from "@/components/ui/liquid-glass";
+import { SmokeyBackground } from "@/components/ui/smokey-background";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -120,163 +123,175 @@ function AuthPage() {
     else setOk("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
   };
 
+  const dock = [
+    { icon: <KanbanSquare size={22} />, label: "Tarefas", href: "/app" },
+    { icon: <CalendarDays size={22} />, label: "Agenda", href: "/calendario" },
+    { icon: <FileText size={22} />, label: "Propostas", href: "/propostas" },
+    { icon: <FileSignature size={22} />, label: "Contratos", href: "/contratos.html" },
+    { icon: <Store size={22} />, label: "Comercial", href: "/comercial.html" },
+    { icon: <Globe size={22} />, label: "Páginas", href: "/paginas" },
+  ];
+
   return (
-    <div className="ax-wrap">
-      <style>{CSS}</style>
+    <div className="fixed inset-0 overflow-auto bg-[#0a0a0a] font-[Inter,system-ui,sans-serif] text-white">
+      <GlassFilter />
+      <SmokeyBackground color="#8A6A00" backdropBlurAmount="sm" className="fixed" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(120%_90%_at_0%_0%,rgba(0,0,0,.15)_0%,rgba(0,0,0,.65)_70%)]" />
 
-      <div className="ax-brand">
-        <div className="ax-logo">
-          <img src="/ark-mark.png" alt="ARK Content" className="ax-logo-img" />
-          <span className="ax-logo-sub">ARK CONTENT</span>
-        </div>
-        <h1 className="ax-h1">
-          Seja bem-vindo ao centro de comando da <span className="hl">maior agência de marketing do Brasil</span>.
-        </h1>
-        <p className="ax-quote">
-          Trabalhar na ARK não é brincadeira. É método, ritmo e resultado, todo santo dia.
-        </p>
-        <div className="ax-badges">
-          {/* Quem entra aqui e a equipe, entao o selo fala de quem a ARK e, nao de
-              recorte interno de carteira. Carteira ativa (27) sai do painel de KPIs da
-              pagina Clientes, conferida em 30/08/2026. Posicionamento e metodo vem de
-              "A Agencia ARK" e "Metodo dos 5 Eixos". */}
-          <span>+500 clientes atendidos</span>
-          <span>27 clientes ativos</span>
-          <span>Especialistas em gastronomia</span>
-          <span>Método dos 5 Eixos</span>
-        </div>
-      </div>
-
-      <div className="ax-card-shell">
-        <div className="ax-card">
-          <div className="ax-card-head">
-            <img src="/ark-logo.png" alt="ARK Content" className="ax-card-logo" />
-            <div className="ax-card-title">WorkFlowArk</div>
-            <div className="ax-card-sb">Sistema operacional da ARK Content</div>
+      <div className="relative z-10 grid min-h-full grid-cols-1 md:grid-cols-[1.1fr_.9fr]">
+        {/* Lado da marca: texto + dock de vidro com os apps da ARK */}
+        <div className="flex flex-col justify-center gap-6 px-[8vw] pb-[3vh] pt-[7vh] md:px-[5vw] md:py-[6vh]">
+          <div className="flex items-center gap-3">
+            <img src="/ark-mark.png" alt="ARK Content" className="block h-14 w-14 object-contain" />
+            <span className="font-mono text-xs tracking-[.35em] text-[#FFC700]">ARK CONTENT</span>
           </div>
+          <h1 className="m-0 max-w-[14ch] text-[clamp(26px,3.4vw,46px)] font-extrabold leading-[1.08] tracking-[-.02em]">
+            Seja bem-vindo ao centro de comando da <span className="text-[#FFC700]">maior agência de marketing do Brasil</span>.
+          </h1>
+          <p className="m-0 max-w-[34ch] border-l-[3px] border-[#FFC700] pl-3.5 text-[clamp(14px,1.3vw,18px)] leading-normal text-[#d4d0c4]">
+            Trabalhar na ARK não é brincadeira. É método, ritmo e resultado, todo santo dia.
+          </p>
 
-          <div className="ax-tabs">
-            <button
-              className={"ax-tab" + (mode === "signin" ? " on" : "")}
-              onClick={() => { setMode("signin"); setErr(null); setOk(null); }}
-            >Entrar</button>
-            <button
-              className={"ax-tab" + (mode === "signup" ? " on" : "")}
-              onClick={() => { setMode("signup"); setErr(null); setOk(null); }}
-            >Criar conta</button>
-          </div>
-
-          <div className="ax-form">
-            {mode === "signup" && (
-              <div className="ax-fi">
-                <label>Nome completo</label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ex: Gabriel Andrade"
-                  autoComplete="name"
-                />
+          <div className="mt-2 flex flex-col items-start gap-4">
+            <div className="max-w-full">
+              <GlassDock items={dock} />
+            </div>
+            <GlassButton onClick={() => document.getElementById("floating_email")?.focus()}>
+              <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                <span>Entrar no WorkFlowArk</span>
+                <ArrowRight size={16} />
               </div>
-            )}
-            <div className="ax-fi">
-              <label>E-mail</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && submit()}
-                placeholder="voce@arkcontent.com"
-                autoComplete="email"
-              />
-            </div>
-            <div className="ax-fi">
-              <label>Senha</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && submit()}
-                placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "••••••••"}
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              />
-            </div>
-
-            {err && <div className="ax-msg err">{err}</div>}
-            {ok && <div className="ax-msg ok">{ok}</div>}
-
-            <button className="ax-btn" onClick={submit} disabled={loading}>
-              {loading ? "Aguarde…" : mode === "signin" ? "Entrar" : "Criar conta"}
-            </button>
-
-            {mode === "signin" && (
-              <button type="button" className="ax-forgot" onClick={forgotPassword} disabled={loading}>
-                Esqueci minha senha
-              </button>
-            )}
-
-            <div className="ax-or"><span>ou</span></div>
-
-            <button className="ax-btn ghost" onClick={signInGoogle} disabled={loading}>
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                <path fill="#FFC700" d="M21.35 11.1H12v3.2h5.35c-.25 1.5-1.7 4.4-5.35 4.4a5.7 5.7 0 110-11.4c1.6 0 2.7.7 3.3 1.3l2.25-2.2A8.9 8.9 0 0012 3a9 9 0 100 18c5.2 0 8.65-3.65 8.65-8.8 0-.6-.06-1.05-.15-1.5z"/>
-              </svg>
-              Entrar com Google
-            </button>
+            </GlassButton>
           </div>
 
-          <div className="ax-foot">
-            Acesso restrito à equipe ARK · novos cadastros passam por liberação do gestor.
+          <div className="flex flex-wrap gap-2">
+            {/* Quem entra aqui e a equipe, entao o selo fala de quem a ARK e, nao de
+                recorte interno de carteira. Carteira ativa (27) sai do painel de KPIs da
+                pagina Clientes, conferida em 30/08/2026. Posicionamento e metodo vem de
+                "A Agencia ARK" e "Metodo dos 5 Eixos". */}
+            {["+500 clientes atendidos", "27 clientes ativos", "Especialistas em gastronomia", "Método dos 5 Eixos"].map((t) => (
+              <span key={t} className="rounded-full border border-[#FFC700]/25 bg-[#FFC700]/10 px-2.5 py-1 font-mono text-[10.5px] text-[#FFC700]">
+                {t}
+              </span>
+            ))}
           </div>
+        </div>
+
+        {/* Cartao de vidro com o formulario */}
+        <div className="flex items-center justify-center px-[8vw] pb-[8vh] md:px-[4vw] md:py-[5vh]">
+          <GlassEffect className="w-full max-w-[400px] rounded-3xl">
+            <div className="space-y-6 p-7">
+              <div className="text-center">
+                <img src="/ark-logo.png" alt="ARK Content" className="mx-auto mb-3 block h-14 w-14 rounded-2xl object-contain" />
+                <h2 className="text-2xl font-extrabold tracking-[-.02em] text-white">WorkFlowArk</h2>
+                <p className="mt-1 text-xs text-white/60">Sistema operacional da ARK Content</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-1 rounded-xl bg-white/10 p-1">
+                {(["signin", "signup"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => { setMode(m); setErr(null); setOk(null); }}
+                    className={
+                      "rounded-lg py-2 text-[13px] font-bold transition-colors " +
+                      (mode === m ? "bg-[#0a0a0a] text-[#FFC700]" : "text-white/60 hover:text-white")
+                    }
+                  >
+                    {m === "signin" ? "Entrar" : "Criar conta"}
+                  </button>
+                ))}
+              </div>
+
+              <form className="space-y-7" onSubmit={(e) => { e.preventDefault(); submit(); }}>
+                {mode === "signup" && (
+                  <Field id="floating_name" type="text" value={name} onChange={setName} label="Nome completo" icon={<UserRound size={15} />} autoComplete="name" />
+                )}
+                <Field id="floating_email" type="email" value={email} onChange={setEmail} label="E-mail" icon={<Mail size={15} />} autoComplete="email" />
+                <Field
+                  id="floating_password"
+                  type="password"
+                  value={password}
+                  onChange={setPassword}
+                  label={mode === "signup" ? "Senha (mínimo 6 caracteres)" : "Senha"}
+                  icon={<Lock size={15} />}
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                />
+
+                {err && <div className="rounded-lg border border-red-300/40 bg-red-500/20 px-3 py-2.5 text-[12.5px] leading-snug text-red-100">{err}</div>}
+                {ok && <div className="rounded-lg border border-[#FFC700]/50 bg-[#FFC700]/15 px-3 py-2.5 text-[12.5px] leading-snug text-[#FFE680]">{ok}</div>}
+
+                {mode === "signin" && (
+                  <div className="-mt-3 flex items-center justify-between">
+                    <button type="button" onClick={forgotPassword} disabled={loading} className="text-xs text-white/60 transition hover:text-white disabled:opacity-50">
+                      Esqueci minha senha
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group flex w-full items-center justify-center rounded-lg bg-[#FFC700] px-4 py-3 text-sm font-extrabold text-[#0a0a0a] transition-all duration-300 hover:bg-[#ffd53d] focus:outline-none focus:ring-2 focus:ring-[#FFC700] focus:ring-offset-2 focus:ring-offset-black disabled:opacity-60"
+                >
+                  {loading ? "Aguarde…" : mode === "signin" ? "Entrar" : "Criar conta"}
+                  {!loading && <ArrowRight className="ml-2 h-5 w-5 transform transition-transform group-hover:translate-x-1" />}
+                </button>
+
+                <div className="relative flex items-center py-1">
+                  <div className="flex-grow border-t border-white/20" />
+                  <span className="mx-4 flex-shrink text-[11px] uppercase tracking-wider text-white/50">ou continue com</span>
+                  <div className="flex-grow border-t border-white/20" />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={signInGoogle}
+                  disabled={loading}
+                  className="flex w-full items-center justify-center rounded-lg bg-white/90 px-4 py-2.5 text-sm font-semibold text-gray-800 transition-all duration-300 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#FFC700] focus:ring-offset-2 focus:ring-offset-black disabled:opacity-60"
+                >
+                  <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48" aria-hidden="true">
+                    <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039L38.802 8.841C34.553 4.806 29.613 2.5 24 2.5C11.983 2.5 2.5 11.983 2.5 24s9.483 21.5 21.5 21.5S45.5 36.017 45.5 24c0-1.538-.135-3.022-.389-4.417z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12.5 24 12.5c3.059 0 5.842 1.154 7.961 3.039l5.839-5.841C34.553 4.806 29.613 2.5 24 2.5C16.318 2.5 9.642 6.723 6.306 14.691z"/><path fill="#4CAF50" d="M24 45.5c5.613 0 10.553-2.306 14.802-6.341l-5.839-5.841C30.842 35.846 27.059 38 24 38c-5.039 0-9.345-2.608-11.124-6.481l-6.571 4.819C9.642 41.277 16.318 45.5 24 45.5z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l5.839 5.841C44.196 35.123 45.5 29.837 45.5 24c0-1.538-.135-3.022-.389-4.417z"/>
+                  </svg>
+                  Entrar com Google
+                </button>
+              </form>
+
+              <p className="text-center text-[10.5px] leading-snug text-white/50">
+                Acesso restrito à equipe ARK. Novos cadastros passam por liberação do gestor.
+              </p>
+            </div>
+          </GlassEffect>
         </div>
       </div>
     </div>
   );
 }
 
-const CSS = `
-.ax-wrap{position:fixed;inset:0;background:#0a0a0a;color:#fff;display:grid;grid-template-columns:1.1fr .9fr;font-family:'Inter',system-ui,sans-serif;overflow:auto}
-.ax-wrap *{box-sizing:border-box}
-.ax-brand{padding:6vh 5vw;display:flex;flex-direction:column;justify-content:center;gap:22px;background:radial-gradient(120% 90% at 0% 0%,#1a1a1a 0%,#0a0a0a 60%)}
-.ax-logo{display:flex;align-items:center;gap:12px}
-.ax-logo-img{height:56px;width:56px;object-fit:contain;display:block}
-.ax-logo-mark{font-weight:900;font-size:26px;letter-spacing:-.02em;color:#FFC700}
-.ax-logo-sub{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.35em;color:#FFC700}
-.ax-card-logo{height:58px;width:58px;object-fit:contain;display:block;margin:0 auto 12px;border-radius:14px}
-.ax-h1{font-size:clamp(26px,3.4vw,46px);line-height:1.08;font-weight:800;letter-spacing:-.02em;margin:0;max-width:14ch}
-.ax-h1 .hl{color:#FFC700}
-.ax-quote{font-size:clamp(14px,1.3vw,18px);color:#d4d0c4;margin:0;max-width:34ch;line-height:1.5;border-left:3px solid #FFC700;padding-left:14px}
-.ax-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.ax-badges span{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#FFC700;background:rgba(255,199,0,.08);border:1px solid rgba(255,199,0,.25);padding:5px 10px;border-radius:20px}
-.ax-card-shell{display:flex;align-items:center;justify-content:center;padding:5vh 4vw}
-.ax-card{width:100%;max-width:380px;background:#fff;color:#0a0a0a;border:2px solid #FFC700;border-radius:18px;padding:26px 24px;box-shadow:0 24px 70px rgba(0,0,0,.55),0 0 0 6px rgba(255,199,0,.08)}
-.ax-card-head{text-align:center;margin-bottom:18px}
-.ax-card-title{font-size:20px;font-weight:800;letter-spacing:-.02em}
-.ax-card-sb{font-size:11.5px;color:#737373;margin-top:2px}
-.ax-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#f4f2ec;border-radius:10px;padding:4px;margin-bottom:18px}
-.ax-tab{border:none;background:none;padding:9px;border-radius:7px;font-size:13px;font-weight:700;color:#737373;cursor:pointer;font-family:inherit}
-.ax-tab.on{background:#0a0a0a;color:#FFC700}
-.ax-form{display:flex;flex-direction:column;gap:12px}
-.ax-fi{display:flex;flex-direction:column;gap:5px}
-.ax-fi label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1a1a1a}
-.ax-fi input{padding:11px 12px;border:1px solid #e2e0d8;border-radius:9px;font-size:14px;color:#0a0a0a;outline:none;transition:border-color .12s,box-shadow .12s;font-family:inherit}
-.ax-fi input:focus{border-color:#FFC700;box-shadow:0 0 0 3px rgba(255,199,0,.25)}
-.ax-msg{font-size:12.5px;padding:10px 12px;border-radius:9px;line-height:1.4}
-.ax-msg.err{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5}
-.ax-msg.ok{background:#fffbeb;color:#854d0e;border:1px solid #FFC700}
-.ax-btn{margin-top:4px;padding:12px;border:none;border-radius:10px;background:#0a0a0a;color:#FFC700;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .06s,opacity .12s}
-.ax-btn:hover{transform:translateY(-1px)}
-.ax-btn:disabled{opacity:.6;cursor:default;transform:none}
-.ax-btn.ghost{background:#fff;color:#0a0a0a;border:1px solid #e2e0d8}
-.ax-or{display:flex;align-items:center;gap:10px;color:#a3a3a3;font-size:11px;margin:2px 0}
-.ax-or::before,.ax-or::after{content:"";flex:1;height:1px;background:#e8e6e0}
-.ax-forgot{background:none;border:none;color:#737373;font-size:12px;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline;text-underline-offset:2px;align-self:center;margin-top:-4px}
-.ax-forgot:hover{color:#0a0a0a}
-.ax-forgot:disabled{opacity:.5;cursor:default}
-.ax-foot{margin-top:16px;font-size:10.5px;color:#a3a3a3;text-align:center;line-height:1.45}
-@media(max-width:860px){
-  .ax-wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr}
-  .ax-brand{padding:7vh 8vw 3vh}
-  .ax-h1{max-width:none}
-  .ax-card-shell{padding:0 8vw 8vh}
+// Campo com rotulo flutuante (padrao do Login Form do 21st), na paleta da ARK.
+// Fica fora do AuthPage pra nao ser recriado a cada render (perderia o foco ao digitar).
+function Field({ id, type, value, onChange, label, icon, autoComplete }: {
+  id: string; type: string; value: string; onChange: (v: string) => void; label: string; icon: ReactNode; autoComplete: string;
+}) {
+  return (
+    <div className="relative z-0">
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        autoComplete={autoComplete}
+        placeholder=" "
+        required
+        className="peer block w-full appearance-none border-0 border-b-2 border-white/30 bg-transparent px-0 py-2.5 text-[15px] text-white focus:border-[#FFC700] focus:outline-none focus:ring-0"
+      />
+      <label
+        htmlFor={id}
+        className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-white/60 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#FFC700]"
+      >
+        <span className="-mt-1 mr-2 inline-block align-middle">{icon}</span>
+        {label}
+      </label>
+    </div>
+  );
 }
-`;

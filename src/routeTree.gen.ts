@@ -20,6 +20,7 @@ import { Route as InteligenciaRouteImport } from './routes/inteligencia'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AprovarRouteImport } from './routes/aprovar'
+import { Route as AgentesRouteImport } from './routes/agentes'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TccApresentacaoRouteImport } from './routes/tcc.apresentacao'
@@ -37,6 +38,7 @@ import { Route as ApiWorkflowarkBridgeRouteImport } from './routes/api/workflowa
 import { Route as ApiWorkflowarkApproveRouteImport } from './routes/api/workflowark.approve'
 import { Route as ApiWorkflowarkAiCheckRouteImport } from './routes/api/workflowark.ai-check'
 import { Route as ApiWorkflowarkAgentsRunRouteImport } from './routes/api/workflowark.agents-run'
+import { Route as ApiWorkflowarkAgentesLocaisRouteImport } from './routes/api/workflowark.agentes-locais'
 import { Route as ApiIgPerfilRouteImport } from './routes/api/ig.perfil'
 import { Route as ApiIaProxyRouteImport } from './routes/api/ia.proxy'
 import { Route as ApiGoogleCallbackRouteImport } from './routes/api/google.callback'
@@ -102,6 +104,11 @@ const AuthRoute = AuthRouteImport.update({
 const AprovarRoute = AprovarRouteImport.update({
   id: '/aprovar',
   path: '/aprovar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentesRoute = AgentesRouteImport.update({
+  id: '/agentes',
+  path: '/agentes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -190,6 +197,12 @@ const ApiWorkflowarkAgentsRunRoute = ApiWorkflowarkAgentsRunRouteImport.update({
   path: '/api/workflowark/agents-run',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWorkflowarkAgentesLocaisRoute =
+  ApiWorkflowarkAgentesLocaisRouteImport.update({
+    id: '/api/workflowark/agentes-locais',
+    path: '/api/workflowark/agentes-locais',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiIgPerfilRoute = ApiIgPerfilRouteImport.update({
   id: '/api/ig/perfil',
   path: '/api/ig/perfil',
@@ -253,6 +266,7 @@ const ApiWorkflowarkWhatsappWebhookSplatRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agentes': typeof AgentesRoute
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
@@ -273,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/api/google/callback': typeof ApiGoogleCallbackRoute
   '/api/ia/proxy': typeof ApiIaProxyRoute
   '/api/ig/perfil': typeof ApiIgPerfilRoute
+  '/api/workflowark/agentes-locais': typeof ApiWorkflowarkAgentesLocaisRoute
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
@@ -293,6 +308,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agentes': typeof AgentesRoute
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
@@ -313,6 +329,7 @@ export interface FileRoutesByTo {
   '/api/google/callback': typeof ApiGoogleCallbackRoute
   '/api/ia/proxy': typeof ApiIaProxyRoute
   '/api/ig/perfil': typeof ApiIgPerfilRoute
+  '/api/workflowark/agentes-locais': typeof ApiWorkflowarkAgentesLocaisRoute
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
@@ -335,6 +352,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/agentes': typeof AgentesRoute
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
@@ -355,6 +373,7 @@ export interface FileRoutesById {
   '/api/google/callback': typeof ApiGoogleCallbackRoute
   '/api/ia/proxy': typeof ApiIaProxyRoute
   '/api/ig/perfil': typeof ApiIgPerfilRoute
+  '/api/workflowark/agentes-locais': typeof ApiWorkflowarkAgentesLocaisRoute
   '/api/workflowark/agents-run': typeof ApiWorkflowarkAgentsRunRoute
   '/api/workflowark/ai-check': typeof ApiWorkflowarkAiCheckRoute
   '/api/workflowark/approve': typeof ApiWorkflowarkApproveRoute
@@ -377,6 +396,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/agentes'
     | '/aprovar'
     | '/auth'
     | '/calendario'
@@ -397,6 +417,7 @@ export interface FileRouteTypes {
     | '/api/google/callback'
     | '/api/ia/proxy'
     | '/api/ig/perfil'
+    | '/api/workflowark/agentes-locais'
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
@@ -417,6 +438,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/agentes'
     | '/aprovar'
     | '/auth'
     | '/calendario'
@@ -437,6 +459,7 @@ export interface FileRouteTypes {
     | '/api/google/callback'
     | '/api/ia/proxy'
     | '/api/ig/perfil'
+    | '/api/workflowark/agentes-locais'
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
@@ -458,6 +481,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/agentes'
     | '/aprovar'
     | '/auth'
     | '/calendario'
@@ -478,6 +502,7 @@ export interface FileRouteTypes {
     | '/api/google/callback'
     | '/api/ia/proxy'
     | '/api/ig/perfil'
+    | '/api/workflowark/agentes-locais'
     | '/api/workflowark/agents-run'
     | '/api/workflowark/ai-check'
     | '/api/workflowark/approve'
@@ -500,6 +525,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AgentesRoute: typeof AgentesRoute
   AprovarRoute: typeof AprovarRoute
   AuthRoute: typeof AuthRoute
   CalendarioRoute: typeof CalendarioRoute
@@ -519,6 +545,7 @@ export interface RootRouteChildren {
   ApiGoogleCallbackRoute: typeof ApiGoogleCallbackRoute
   ApiIaProxyRoute: typeof ApiIaProxyRoute
   ApiIgPerfilRoute: typeof ApiIgPerfilRoute
+  ApiWorkflowarkAgentesLocaisRoute: typeof ApiWorkflowarkAgentesLocaisRoute
   ApiWorkflowarkAgentsRunRoute: typeof ApiWorkflowarkAgentsRunRoute
   ApiWorkflowarkAiCheckRoute: typeof ApiWorkflowarkAiCheckRoute
   ApiWorkflowarkApproveRoute: typeof ApiWorkflowarkApproveRoute
@@ -614,6 +641,13 @@ declare module '@tanstack/react-router' {
       path: '/aprovar'
       fullPath: '/aprovar'
       preLoaderRoute: typeof AprovarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agentes': {
+      id: '/agentes'
+      path: '/agentes'
+      fullPath: '/agentes'
+      preLoaderRoute: typeof AgentesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -735,6 +769,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWorkflowarkAgentsRunRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/workflowark/agentes-locais': {
+      id: '/api/workflowark/agentes-locais'
+      path: '/api/workflowark/agentes-locais'
+      fullPath: '/api/workflowark/agentes-locais'
+      preLoaderRoute: typeof ApiWorkflowarkAgentesLocaisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ig/perfil': {
       id: '/api/ig/perfil'
       path: '/api/ig/perfil'
@@ -844,6 +885,7 @@ const ApiWorkflowarkWhatsappWebhookRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AgentesRoute: AgentesRoute,
   AprovarRoute: AprovarRoute,
   AuthRoute: AuthRoute,
   CalendarioRoute: CalendarioRoute,
@@ -863,6 +905,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGoogleCallbackRoute: ApiGoogleCallbackRoute,
   ApiIaProxyRoute: ApiIaProxyRoute,
   ApiIgPerfilRoute: ApiIgPerfilRoute,
+  ApiWorkflowarkAgentesLocaisRoute: ApiWorkflowarkAgentesLocaisRoute,
   ApiWorkflowarkAgentsRunRoute: ApiWorkflowarkAgentsRunRoute,
   ApiWorkflowarkAiCheckRoute: ApiWorkflowarkAiCheckRoute,
   ApiWorkflowarkApproveRoute: ApiWorkflowarkApproveRoute,
