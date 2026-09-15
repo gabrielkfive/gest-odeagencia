@@ -31,7 +31,8 @@ export const Route = createFileRoute("/api/workflowark/agentes-locais")({
           db.from("workflowark_state").select("data").eq("key", CMD).maybeSingle(),
         ]);
         const fila: any[] = Array.isArray(f.data?.data) ? f.data.data : [];
-        return Response.json({ ok: true, fila, cmd: c.data?.data ?? null });
+        const cmd = c.data?.data && c.data.data.ts ? c.data.data : null;
+        return Response.json({ ok: true, fila, cmd });
       },
 
       POST: async ({ request }) => {
@@ -74,7 +75,8 @@ export const Route = createFileRoute("/api/workflowark/agentes-locais")({
               .slice(0, LIMITE);
             await gravar(FILA, lista);
             const pendentesExecucao = lista.filter((i) => i.status === "aprovado" && !i.executadoNoPc);
-            return Response.json({ ok: true, adicionados, total: lista.length, aprovados: pendentesExecucao, cmd: (await ler(CMD)) ?? null });
+            const cmdAtual = await ler(CMD);
+            return Response.json({ ok: true, adicionados, total: lista.length, aprovados: pendentesExecucao, cmd: cmdAtual && cmdAtual.ts ? cmdAtual : null });
           }
 
           if (op === "decide") {
@@ -111,7 +113,7 @@ export const Route = createFileRoute("/api/workflowark/agentes-locais")({
             }
             if (body.cmdTs) {
               const c = await ler(CMD);
-              if (c && Number(c.ts) === Number(body.cmdTs)) await gravar(CMD, null);
+              if (c && Number(c.ts) === Number(body.cmdTs)) await gravar(CMD, {});
             }
             return Response.json({ ok: true });
           }
