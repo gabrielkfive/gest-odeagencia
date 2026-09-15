@@ -72,7 +72,7 @@ async function api(method: "GET" | "POST", body?: Record<string, unknown>) {
 
 // Campos estruturados de um lead: usa item.lead quando o PC mandou, senão lê do texto.
 function campo(corpo: string, rotulo: string): string {
-  const m = corpo.match(new RegExp(rotulo + ":\\s*([^\\n]*?)(?=\\s{2,}[A-ZÇÃÉ\\-]{3,}:|\\n|$)"));
+  const m = corpo.match(new RegExp(rotulo + ":[ ]?([^\\n]*?)(?=[ ]{2,}[A-ZÇÃÉ\\-]{2,}[A-ZÇÃÉ \\-]*:|\\n|$)"));
   return m ? m[1].trim() : "";
 }
 function leadDe(i: Item & { lead?: Record<string, string> }) {
@@ -96,32 +96,6 @@ function ehAntigo(i: Item) {
   return !isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 > DIAS_ANTIGO;
 }
 
-
-// Campos estruturados de um lead: usa item.lead quando o PC mandou, senão lê do texto.
-function campo(corpo: string, rotulo: string): string {
-  const m = corpo.match(new RegExp(rotulo + ":\\s*([^\\n]*?)(?=\\s{2,}[A-ZÇÃÉ\\-]{3,}:|\\n|$)"));
-  return m ? m[1].trim() : "";
-}
-function leadDe(i: Item & { lead?: Record<string, string> }) {
-  const l = i.lead ?? {};
-  const c = i.corpo || "";
-  const empresa = l.empresa || i.titulo.replace(/\s*\((alto|medio|médio|baixo)\)\s*$/i, "").replace(/^Alvo:\s*/i, "");
-  return {
-    empresa,
-    encaixe: (l.encaixe || campo(c, "ENCAIXE") || "").toLowerCase().replace("médio", "medio"),
-    decisor: l.decisor || campo(c, "DECISOR"),
-    telefone: l.telefone || campo(c, "TELEFONE"),
-    whatsapp: l.whatsapp || campo(c, "WHATSAPP"),
-    instagram: l.instagram || campo(c, "INSTAGRAM"),
-    produto: l.produto || campo(c, "PRODUTO"),
-    nota: l.nota || campo(c, "NOTA"),
-  };
-}
-const DIAS_ANTIGO = 7;
-function ehAntigo(i: Item) {
-  const d = new Date((i.criado || "").replace(" ", "T"));
-  return !isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 > DIAS_ANTIGO;
-}
 
 function Agentes() {
   const [fila, setFila] = useState<Item[]>([]);
@@ -135,8 +109,6 @@ function Agentes() {
   const [copiado, setCopiado] = useState("");
   const [pedir, setPedir] = useState("");
   const [quem, setQuem] = useState("");
-  const [vista, setVista] = useState<"cards" | "tabela">("cards");
-  const [mostrarAntigos, setMostrarAntigos] = useState(false);
   const [vista, setVista] = useState<"cards" | "tabela">("cards");
   const [mostrarAntigos, setMostrarAntigos] = useState(false);
 
