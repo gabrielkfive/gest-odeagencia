@@ -33,14 +33,20 @@ export const Route = createFileRoute("/api/google/callback")({
           );
 
         if (err) return page("Conexão cancelada", "Você cancelou ou o Google recusou. Tente de novo pela aba Integrações.", false, true);
-        if (!storedState || storedState !== returnedState) {
+        // state = csrf, ou "csrf|m:<memberId>" quando e a conexao pessoal do Meu Dia
+        const [csrfPart, memberPart] = returnedState.split("|");
+        const memberId = memberPart?.startsWith("m:") ? memberPart.slice(2) : "";
+        if (!storedState || storedState !== csrfPart) {
           return page("Sessão inválida", "Solicitação de autorização inválida ou expirada. Inicie a conexão novamente pela aba Integrações.");
         }
         if (!code) return page("Faltou o código", "O Google não devolveu o código de autorização.");
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { exchangeCode } = await import("@/integrations/google.server");
-          const rec = await exchangeCode(supabaseAdmin as any, url.origin, code);
+          const rec = await exchangeCode(supabaseAdmin as any, url.origin, code, memberId);
+          if (memberId) {
+            return new Response(null, { status: 302, headers: { Location: "/meu-dia?google=ok", "Set-Cookie": clearState } });
+          }
           return page("Google Calendar conectado!", `Conta: <b>${rec.email || "ok"}</b>. O JARVIS já pode marcar sua agenda.`, true, true);
         } catch (e) {
           return page("Falha ao conectar", (e as Error)?.message || "Erro desconhecido", false, true);

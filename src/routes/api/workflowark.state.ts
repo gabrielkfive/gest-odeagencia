@@ -1113,6 +1113,26 @@ export const Route = createFileRoute("/api/workflowark/state")({
           } catch (e) { return json({ ok: false, error: (e as Error)?.message || "Falha no TTS" }, { status: 502 }); }
         }
 
+        // Meu Dia: inicia a conexao PESSOAL da agenda do membro (state leva o id do membro)
+        if (action === "google-link-start") {
+          try {
+            const { googleConfig, googleAuthUrl } = await import("@/integrations/google.server");
+            if (!googleConfig().clientId) return json({ error: "Google não configurado no servidor" }, { status: 503 });
+            const csrf = crypto.randomUUID();
+            const origin = new URL(request.url).origin;
+            return json({ ok: true, url: googleAuthUrl(origin, `${csrf}|m:${ctx.member.id}`) }, {
+              headers: { "Set-Cookie": `oauth_state=${csrf}; HttpOnly; SameSite=Lax; Path=/; Max-Age=600` },
+            });
+          } catch (e) { return json({ error: (e as Error)?.message || "Falha" }, { status: 502 }); }
+        }
+        // Meu Dia: eventos de hoje da agenda do membro
+        if (action === "google-my-events") {
+          try {
+            const { listTodayEventsForMember } = await import("@/integrations/google.server");
+            const r = await listTodayEventsForMember(ctx.db, ctx.member.id, ctx.member.email || "");
+            return json({ ok: true, ...r });
+          } catch (e) { return json({ ok: false, connected: true, events: [], error: (e as Error)?.message || "Falha ao ler a agenda" }, { status: 502 }); }
+        }
         // Google Calendar: status da conexão
         if (action === "google-status") {
           try {

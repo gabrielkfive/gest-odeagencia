@@ -25,6 +25,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TccApresentacaoRouteImport } from './routes/tcc.apresentacao'
 import { Route as ApiMcpRouteImport } from './routes/api/mcp'
+import { Route as AuthenticatedMeuDiaRouteImport } from './routes/_authenticated/meu-dia'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
 import { Route as ApiWorkflowarkSocialRunRouteImport } from './routes/api/workflowark.social-run'
@@ -129,6 +130,11 @@ const ApiMcpRoute = ApiMcpRouteImport.update({
   id: '/api/mcp',
   path: '/api/mcp',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedMeuDiaRoute = AuthenticatedMeuDiaRouteImport.update({
+  id: '/meu-dia',
+  path: '/meu-dia',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/robo': typeof RoboRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
+  '/meu-dia': typeof AuthenticatedMeuDiaRoute
   '/api/mcp': typeof ApiMcpRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
@@ -321,6 +328,7 @@ export interface FileRoutesByTo {
   '/robo': typeof RoboRoute
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
+  '/meu-dia': typeof AuthenticatedMeuDiaRoute
   '/api/mcp': typeof ApiMcpRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
@@ -365,6 +373,7 @@ export interface FileRoutesById {
   '/robo': typeof RoboRoute
   '/sistema': typeof SistemaRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
+  '/_authenticated/meu-dia': typeof AuthenticatedMeuDiaRoute
   '/api/mcp': typeof ApiMcpRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
@@ -409,6 +418,7 @@ export interface FileRouteTypes {
     | '/robo'
     | '/sistema'
     | '/app'
+    | '/meu-dia'
     | '/api/mcp'
     | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
@@ -451,6 +461,7 @@ export interface FileRouteTypes {
     | '/robo'
     | '/sistema'
     | '/app'
+    | '/meu-dia'
     | '/api/mcp'
     | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
@@ -494,6 +505,7 @@ export interface FileRouteTypes {
     | '/robo'
     | '/sistema'
     | '/_authenticated/app'
+    | '/_authenticated/meu-dia'
     | '/api/mcp'
     | '/tcc/apresentacao'
     | '/api/auth/seed-evaluators'
@@ -678,6 +690,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMcpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/meu-dia': {
+      id: '/_authenticated/meu-dia'
+      path: '/meu-dia'
+      fullPath: '/meu-dia'
+      preLoaderRoute: typeof AuthenticatedMeuDiaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app': {
       id: '/_authenticated/app'
       path: '/app'
@@ -858,10 +877,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
+  AuthenticatedMeuDiaRoute: typeof AuthenticatedMeuDiaRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRoute,
+  AuthenticatedMeuDiaRoute: AuthenticatedMeuDiaRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
