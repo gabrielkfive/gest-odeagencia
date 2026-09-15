@@ -52,6 +52,8 @@ const AGENTES = [
   { k: "", l: "todos os agentes" }, { k: "prospeccao", l: "prospecção" }, { k: "ideias", l: "ideias" },
   { k: "conteudo_ark", l: "conteúdo da ARK" }, { k: "followup", l: "follow-up" },
   { k: "tarefas_equipe", l: "tarefas pra equipe" }, { k: "processos", l: "processos" }, { k: "proposta", l: "proposta" },
+  { k: "linkedin", l: "LinkedIn (teaser)" },
+  { k: "executar_tarefas", l: "EXECUTAR cartões do kanban (Implantar / Testar ideia)" },
 ];
 
 async function api(method: "GET" | "POST", body?: Record<string, unknown>) {
