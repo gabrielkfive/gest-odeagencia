@@ -69,6 +69,60 @@ async function api(method: "GET" | "POST", body?: Record<string, unknown>) {
   return out;
 }
 
+
+// Campos estruturados de um lead: usa item.lead quando o PC mandou, senão lê do texto.
+function campo(corpo: string, rotulo: string): string {
+  const m = corpo.match(new RegExp(rotulo + ":\\s*([^\\n]*?)(?=\\s{2,}[A-ZÇÃÉ\\-]{3,}:|\\n|$)"));
+  return m ? m[1].trim() : "";
+}
+function leadDe(i: Item & { lead?: Record<string, string> }) {
+  const l = i.lead ?? {};
+  const c = i.corpo || "";
+  const empresa = l.empresa || i.titulo.replace(/\s*\((alto|medio|médio|baixo)\)\s*$/i, "").replace(/^Alvo:\s*/i, "");
+  return {
+    empresa,
+    encaixe: (l.encaixe || campo(c, "ENCAIXE") || "").toLowerCase().replace("médio", "medio"),
+    decisor: l.decisor || campo(c, "DECISOR"),
+    telefone: l.telefone || campo(c, "TELEFONE"),
+    whatsapp: l.whatsapp || campo(c, "WHATSAPP"),
+    instagram: l.instagram || campo(c, "INSTAGRAM"),
+    produto: l.produto || campo(c, "PRODUTO"),
+    nota: l.nota || campo(c, "NOTA"),
+  };
+}
+const DIAS_ANTIGO = 7;
+function ehAntigo(i: Item) {
+  const d = new Date((i.criado || "").replace(" ", "T"));
+  return !isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 > DIAS_ANTIGO;
+}
+
+
+// Campos estruturados de um lead: usa item.lead quando o PC mandou, senão lê do texto.
+function campo(corpo: string, rotulo: string): string {
+  const m = corpo.match(new RegExp(rotulo + ":\\s*([^\\n]*?)(?=\\s{2,}[A-ZÇÃÉ\\-]{3,}:|\\n|$)"));
+  return m ? m[1].trim() : "";
+}
+function leadDe(i: Item & { lead?: Record<string, string> }) {
+  const l = i.lead ?? {};
+  const c = i.corpo || "";
+  const empresa = l.empresa || i.titulo.replace(/\s*\((alto|medio|médio|baixo)\)\s*$/i, "").replace(/^Alvo:\s*/i, "");
+  return {
+    empresa,
+    encaixe: (l.encaixe || campo(c, "ENCAIXE") || "").toLowerCase().replace("médio", "medio"),
+    decisor: l.decisor || campo(c, "DECISOR"),
+    telefone: l.telefone || campo(c, "TELEFONE"),
+    whatsapp: l.whatsapp || campo(c, "WHATSAPP"),
+    instagram: l.instagram || campo(c, "INSTAGRAM"),
+    produto: l.produto || campo(c, "PRODUTO"),
+    nota: l.nota || campo(c, "NOTA"),
+  };
+}
+const DIAS_ANTIGO = 7;
+function ehAntigo(i: Item) {
+  const d = new Date((i.criado || "").replace(" ", "T"));
+  return !isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 > DIAS_ANTIGO;
+}
+
 function Agentes() {
   const [fila, setFila] = useState<Item[]>([]);
   const [cmd, setCmd] = useState<any>(null);
@@ -81,6 +135,10 @@ function Agentes() {
   const [copiado, setCopiado] = useState("");
   const [pedir, setPedir] = useState("");
   const [quem, setQuem] = useState("");
+  const [vista, setVista] = useState<"cards" | "tabela">("cards");
+  const [mostrarAntigos, setMostrarAntigos] = useState(false);
+  const [vista, setVista] = useState<"cards" | "tabela">("cards");
+  const [mostrarAntigos, setMostrarAntigos] = useState(false);
 
   const carregar = useCallback(async () => {
     setErro("");
@@ -170,9 +228,61 @@ function Agentes() {
         {["pendente", "aprovado", "executado", "recusado", "todos"].map((s) => (
           <Chip key={s} ativo={status === s} onClick={() => setStatus(s)} cor="#ccc">{s}</Chip>
         ))}
+        <span style={{ width: 8 }} />
+        <Chip ativo={vista === "cards"} onClick={() => setVista("cards")} cor="#7CE0A6">Cartões</Chip>
+        <Chip ativo={vista === "tabela"} onClick={() => { setVista("tabela"); setTipo("lead"); }} cor="#7CE0A6">Tabela de leads</Chip>
       </div>
 
-      {loading ? <p style={{ color: "#888" }}>Carregando…</p> : visiveis.length === 0 ? (
+      {vista === "tabela" ? (() => {
+        const leads = fila.filter((i) => i.tipo === "lead" && (status === "todos" || i.status === status) && (!agente || i.agente === agente));
+        const ordem: Record<string, number> = { alto: 0, medio: 1, baixo: 2, "": 3 };
+        const linhas = leads.map((i) => ({ i, l: leadDe(i), antigo: ehAntigo(i) }))
+          .sort((a, b) => (ordem[a.l.encaixe] ?? 3) - (ordem[b.l.encaixe] ?? 3) || String(b.i.criado).localeCompare(String(a.i.criado)));
+        const recentes = linhas.filter((x) => !x.antigo);
+        const antigos = linhas.filter((x) => x.antigo);
+        const visiveisT = mostrarAntigos ? linhas : recentes;
+        const corEnc = (e: string) => e === "alto" ? AMARELO : e === "medio" ? "#8AB4F8" : "#777";
+        const th: React.CSSProperties = { textAlign: "left", padding: "10px 10px", fontSize: 11, textTransform: "uppercase", letterSpacing: ".06em", color: "#999", borderBottom: `1px solid ${LINHA}`, whiteSpace: "nowrap" };
+        const td: React.CSSProperties = { padding: "10px 10px", fontSize: 13, borderBottom: `1px solid ${LINHA}`, verticalAlign: "top" };
+        return (
+          <div>
+            <div style={{ color: "#999", fontSize: 13, marginBottom: 10 }}>
+              {recentes.length} leads dos últimos {DIAS_ANTIGO} dias · {antigos.length} antigos escondidos
+              {antigos.length > 0 && <button onClick={() => setMostrarAntigos(!mostrarAntigos)} style={{ marginLeft: 10, background: "#222", color: "#bbb", border: 0, borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontFamily: SANS, fontSize: 12 }}>{mostrarAntigos ? "esconder antigos" : "mostrar antigos"}</button>}
+            </div>
+            <div style={{ overflowX: "auto", background: SUP, border: `1px solid ${LINHA}`, borderRadius: 12 }}>
+              <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 980 }}>
+                <thead><tr>
+                  <th style={th}>Encaixe</th><th style={th}>Empresa</th><th style={th}>Decisor</th><th style={th}>Telefone</th><th style={th}>WhatsApp</th><th style={th}>Instagram</th><th style={th}>Produto</th><th style={th}>Nota</th><th style={th}>Quando</th><th style={th}>Status</th><th style={th}></th>
+                </tr></thead>
+                <tbody>
+                  {visiveisT.map(({ i, l, antigo }) => (
+                    <tr key={i.id} style={{ background: l.encaixe === "alto" ? "rgba(254,239,2,.07)" : "transparent", opacity: antigo ? .6 : 1 }}>
+                      <td style={{ ...td, color: corEnc(l.encaixe), fontWeight: 700, textTransform: "uppercase", fontSize: 11 }}>{l.encaixe || "sem"}</td>
+                      <td style={{ ...td, fontWeight: 600 }}>{l.empresa}</td>
+                      <td style={td}>{l.decisor && !/não identificado/i.test(l.decisor) ? l.decisor : <span style={{ color: "#666" }}>pedir o dono</span>}</td>
+                      <td style={{ ...td, whiteSpace: "nowrap" }}>{l.telefone}</td>
+                      <td style={{ ...td, whiteSpace: "nowrap" }}>{l.whatsapp ? <a style={{ color: AMARELO }} href={`https://wa.me/${l.whatsapp}`} target="_blank" rel="noopener">{l.whatsapp}</a> : ""}</td>
+                      <td style={td}>{l.instagram ? <a style={{ color: "#8AB4F8" }} href={`https://instagram.com/${l.instagram.replace("@", "")}`} target="_blank" rel="noopener">{l.instagram}</a> : ""}</td>
+                      <td style={td}>{l.produto}</td>
+                      <td style={{ ...td, whiteSpace: "nowrap" }}>{l.nota}</td>
+                      <td style={{ ...td, whiteSpace: "nowrap", color: "#999" }}>{(i.criado || "").slice(0, 10)}</td>
+                      <td style={{ ...td, color: i.status === "pendente" ? "#ccc" : AMARELO, whiteSpace: "nowrap" }}>{i.status}</td>
+                      <td style={{ ...td, whiteSpace: "nowrap" }}>
+                        {i.status === "pendente" ? (<>
+                          <button disabled={busy === i.id} onClick={() => decidir(i.id, "aprovado")} style={btn(AMARELO, "#111")}>CRM</button>{" "}
+                          <button disabled={busy === i.id} onClick={() => decidir(i.id, "recusado")} style={btn("#333", "#eee")}>Não</button>
+                        </>) : <button onClick={() => copiar(i)} style={btn("#222", "#bbb")}>Copiar</button>}
+                      </td>
+                    </tr>
+                  ))}
+                  {visiveisT.length === 0 && <tr><td style={td} colSpan={11}>Nenhum lead com esse filtro.</td></tr>}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })() : loading ? <p style={{ color: "#888" }}>Carregando…</p> : visiveis.length === 0 ? (
         <p style={{ color: "#888" }}>Nada aqui. O PC manda itens novos a cada rodada (todo dia 7h, ou quando você pede uma rodada).</p>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 14 }}>
@@ -187,7 +297,7 @@ function Agentes() {
                 </header>
                 <h3 style={{ margin: 0, fontFamily: DISPLAY, fontWeight: 700, letterSpacing: "-.02em", fontSize: 16 }}>{i.titulo}</h3>
                 <pre style={{ whiteSpace: "pre-wrap", fontFamily: SANS, fontSize: 13, lineHeight: 1.5, background: "#111", padding: 12, borderRadius: 8, margin: 0, maxHeight: 320, overflow: "auto" }}>{i.corpo}</pre>
-                {i.tarefa && <div style={{ fontSize: 12, color: "#bbb" }}>Se aprovar, o PC cria a tarefa: <b>{i.tarefa.title}</b> · {i.tarefa.resp} · {i.tarefa.prio ?? "media"}</div>}
+                {i.tipo === "lead" ? <div style={{ fontSize: 12, color: "#bbb" }}>Se aprovar, o PC coloca no CRM (Prospecção, Saulo) com telefone e a mensagem.</div> : i.tarefa && <div style={{ fontSize: 12, color: "#bbb" }}>Se aprovar, o PC cria a tarefa: <b>{i.tarefa.title}</b> · {i.tarefa.resp} · {i.tarefa.prio ?? "media"}</div>}
                 {i.status === "pendente" && (
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button disabled={busy === i.id} onClick={() => decidir(i.id, "aprovado")} style={btn(AMARELO, "#111")}>Aprovar</button>

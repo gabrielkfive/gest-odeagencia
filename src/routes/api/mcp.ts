@@ -97,6 +97,26 @@ const TOOLS = [
     },
   },
   {
+    name: "create_lead",
+    description:
+      "Cria um lead no pipeline comercial (wfa-crm) em Prospecção (stage 0). contact = telefone/WhatsApp. val = valor estimado R$/mês. resp = quem cuida (ex.: Saulo).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        nm: { type: "string", description: "nome do lead (empresa e, se souber, a pessoa)" },
+        contact: { type: "string", description: "telefone ou WhatsApp" },
+        seg: { type: "string", description: "segmento (ex.: Automotivo, Gastronomia, Saúde)" },
+        val: { type: "number", description: "valor estimado R$/mês (opcional)" },
+        next: { type: "string", description: "próxima ação (opcional)" },
+        obs: { type: "string", description: "observações: decisor, Instagram, site, mensagem sugerida" },
+        resp: { type: "string", description: "responsável (padrão Saulo)" },
+        source: { type: "string", description: "origem (padrão 'Agentes locais')" },
+        stage: { type: "number", description: "0=Prospecção (padrão) ... 5=Perdido" },
+      },
+      required: ["nm"],
+    },
+  },
+  {
     name: "update_lead",
     description:
       "Atualiza um lead do pipeline comercial (wfa-crm): mover de etapa (stage 0=Prospecção 1=Diagnóstico 2=Proposta 3=Negociação 4=Fechado 5=Perdido), mudar valor, próxima ação ou anexar observação.",
@@ -232,6 +252,35 @@ async function callTool(name: string, args: any): Promise<{ text: string; isErro
       arr.push(task);
       await saveBlock("wfa-tarefas", arr);
       return { text: `Tarefa criada (#${task.id}): "${title}" → ${resp} [${task.prio}]${task.data ? " até " + task.data : ""}.` };
+    }
+
+    if (name === "create_lead") {
+      const nm = String(args?.nm || "").trim();
+      if (!nm) return { text: "nm obrigatório.", isError: true };
+      const arr = (await loadBlock("wfa-crm")) || [];
+      if (!Array.isArray(arr)) return { text: "wfa-crm não é uma lista.", isError: true };
+      const existe = arr.find((l: any) => String(l?.nm || "").toLowerCase() === nm.toLowerCase());
+      if (existe) return { text: `Lead já existe: "${existe.nm}" (etapa ${existe.stage}).`, isError: true };
+      const now = new Date().toISOString();
+      const lead = {
+        id: "crm" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        nm,
+        contact: args?.contact ? String(args.contact) : "",
+        seg: args?.seg ? String(args.seg) : "",
+        val: args?.val ? Number(args.val) : 0,
+        next: args?.next ? String(args.next) : "",
+        obs: args?.obs ? String(args.obs).slice(0, 4000) : "",
+        resp: args?.resp ? String(args.resp) : "Saulo",
+        source: args?.source ? String(args.source) : "Agentes locais",
+        stage: args?.stage !== undefined && args?.stage !== null ? Number(args.stage) : 0,
+        due: "",
+        hist: [],
+        created: now,
+        up: now,
+      };
+      arr.push(lead);
+      await saveBlock("wfa-crm", arr);
+      return { text: `Lead criado (#${lead.id}): "${nm}" em Prospecção → ${lead.resp}.` };
     }
 
     if (name === "update_lead") {
