@@ -125,12 +125,12 @@ function AuthPage() {
   };
 
   const dock = [
+    { icon: <ArkAppIcon name="meudia" />, label: "Meu Dia", href: "/meu-dia" },
     { icon: <ArkAppIcon name="tarefas" />, label: "Tarefas", href: "/app" },
     { icon: <ArkAppIcon name="agenda" />, label: "Agenda", href: "/calendario" },
     { icon: <ArkAppIcon name="propostas" />, label: "Propostas", href: "/propostas" },
     { icon: <ArkAppIcon name="contratos" />, label: "Contratos", href: "/contratos.html" },
     { icon: <ArkAppIcon name="comercial" />, label: "Comercial", href: "/comercial.html" },
-    { icon: <ArkAppIcon name="paginas" />, label: "Páginas", href: "/paginas" },
   ];
 
   return (

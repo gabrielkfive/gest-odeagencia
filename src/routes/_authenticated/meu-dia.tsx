@@ -98,7 +98,6 @@ function MeuDia() {
     { icon: <ArkAppIcon name="propostas" size={44} />, label: "Propostas", href: "/propostas" },
     { icon: <ArkAppIcon name="contratos" size={44} />, label: "Contratos", href: "/contratos.html" },
     { icon: <ArkAppIcon name="comercial" size={44} />, label: "Comercial", href: "/comercial.html" },
-    { icon: <ArkAppIcon name="paginas" size={44} />, label: "Páginas", href: "/paginas" },
   ];
 
   const Card = ({ title, icon, count, children, className = "" }: { title: string; icon: React.ReactNode; count?: string | number; children: React.ReactNode; className?: string }) => (
