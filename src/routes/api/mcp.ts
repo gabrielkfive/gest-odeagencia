@@ -154,6 +154,7 @@ const TOOLS = [
       properties: {
         id: { type: "string", description: "id do cartão (ex.: tmu28c262sk9x)" },
         obs: { type: "string", description: "texto a anexar no fim da descrição (até 12000 chars)" },
+        desc: { type: "string", description: "SUBSTITUI a descrição inteira (até 16000 chars); use em vez de obs quando for refazer o entregável" },
         status: { type: "string", description: "novo status (opcional)" },
         resp: { type: "string", description: "novo responsável (opcional)" },
         tag: { type: "string", description: "tag a adicionar (opcional, ex.: 'agentes')" },
@@ -350,6 +351,10 @@ async function callTool(name: string, args: any): Promise<{ text: string; isErro
       if (!t) return { text: `Cartão não encontrado: ${id}`, isError: true };
       const STATUS_OK = ["backlog", "iniciar", "andamento", "aprovacao", "homologcli", "concluido"];
       const mudou: string[] = [];
+      if (args?.desc !== undefined && args?.desc !== null) {
+        t.desc = String(args.desc).slice(0, 16000);
+        mudou.push("descrição substituída");
+      }
       if (args?.obs) {
         const add = String(args.obs).slice(0, 12000);
         t.desc = (String(t.desc || "").trim() + "\n\n" + add).trim().slice(0, 16000);
