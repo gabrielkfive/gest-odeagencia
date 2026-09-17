@@ -207,6 +207,19 @@ function novoTokenPublico(): string | null {
   return null;
 }
 
+// Aviso único no sino do gestor quando alguém entra pela primeira vez (conta nova, Google
+// ou e-mail). Uma linha em wfa-notificacoes, mesmo padrão dos outros avisos do servidor.
+async function avisarPrimeiraEntrada(db: any, email: string, nome: string | null) {
+  try {
+    const { data: nRow, error } = await db.from("workflowark_state").select("data").eq("key", "wfa-notificacoes").maybeSingle();
+    if (error) return;
+    const arr = Array.isArray(nRow?.data) ? nRow.data : [];
+    const quem = nome ? `${nome} (${email})` : email;
+    arr.unshift({ id: "login" + Date.now(), ts: Date.now(), lido: false, tipo: "acesso", texto: `🔓 ${quem} entrou no WorkFlowArk pela primeira vez. Ajuste o papel e as abas em Configurações > Equipe.` });
+    await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) });
+  } catch { /* aviso é cortesia, nunca trava o login */ }
+}
+
 async function getContext(request: Request) {
   // ACESSO DE SERVIÇO (automações do Claude na nuvem / cron): header "x-run-key" com o
   // segredo RUN_KEY dá o contexto do DONO (admin), sem sessão de navegador. Não usamos
@@ -322,21 +335,25 @@ async function getContext(request: Request) {
     member = created.data;
   }
 
-  // Usuário autenticado sem cadastro: registra como pendente (inativo) para o gestor liberar.
+  // Usuário autenticado sem cadastro: ENTRA NA HORA como viewer (decisão do Gabriel em
+  // 17/09/2026: ninguém mais fica travado esperando liberação) e o gestor recebe um aviso
+  // no sino dizendo quem entrou. Papel e abas ele ajusta depois em Configurações > Equipe.
   if (!member) {
+    const nome = user.user_metadata?.full_name ?? user.user_metadata?.name ?? null;
     const created = await db
       .from("workflowark_members")
       .insert({
         email,
         user_id: user.id,
-        full_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+        full_name: nome,
         role: "viewer",
-        active: false,
+        active: true,
         created_by: user.id,
       })
       .select("*")
       .single();
     member = created.data;
+    await avisarPrimeiraEntrada(db, email, nome);
   }
 
   if (!member || !member.active) {

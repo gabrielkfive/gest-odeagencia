@@ -57,25 +57,44 @@ export const Route = createFileRoute("/api/auth/signup")({
           }
         }
 
-        // Primeiro usuário do sistema vira admin ativo; os demais ficam pendentes de liberação pelo gestor.
+        // Primeiro usuário do sistema vira admin; os demais entram na hora como viewer
+        // (17/09/2026: sem fila de liberação, o gestor ajusta o papel depois). Se o e-mail já
+        // foi convidado pelo gestor, mantém o papel que ele escolheu.
         const { count } = await db
           .from("workflowark_members")
           .select("id", { count: "exact", head: true });
         const isFirst = (count ?? 0) === 0;
+        const { data: existente } = await db
+          .from("workflowark_members")
+          .select("role")
+          .eq("email", email)
+          .maybeSingle();
 
         await db.from("workflowark_members").upsert(
           {
             email,
             full_name,
             user_id: user?.id ?? null,
-            role: isFirst ? "admin" : "viewer",
-            active: isFirst,
+            role: isFirst ? "admin" : (existente?.role ?? "viewer"),
+            active: true,
             created_by: user?.id ?? null,
           },
           { onConflict: "email" },
         );
 
-        return json({ ok: true, pending: !isFirst });
+        // Aviso no sino do gestor (mesmo formato do avisarPrimeiraEntrada do state).
+        if (!isFirst) {
+          try {
+            const { data: nRow, error: nErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-notificacoes").maybeSingle();
+            if (!nErr) {
+              const arr = Array.isArray(nRow?.data) ? nRow.data : [];
+              arr.unshift({ id: "login" + Date.now(), ts: Date.now(), lido: false, tipo: "acesso", texto: `🔓 ${full_name ? `${full_name} (${email})` : email} criou conta e entrou no WorkFlowArk. Ajuste o papel e as abas em Configurações > Equipe.` });
+              await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) });
+            }
+          } catch { /* aviso é cortesia */ }
+        }
+
+        return json({ ok: true, pending: false });
       },
     },
   },

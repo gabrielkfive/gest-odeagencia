@@ -259,7 +259,7 @@ function AuthPage() {
               </form>
 
               <p className="text-center text-[10.5px] leading-snug text-white/50">
-                Acesso restrito à equipe Ark®. Novos cadastros passam por liberação do gestor.
+                Acesso da equipe Ark®. Criou a conta ou entrou com Google? Você já está dentro.
               </p>
             </div>
           </GlassEffect>
