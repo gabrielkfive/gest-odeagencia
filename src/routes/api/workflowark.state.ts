@@ -645,6 +645,39 @@ export const Route = createFileRoute("/api/workflowark/state")({
           return json({ ok: true });
         }
 
+        /* Redefinir senha de um membro pelo gestor (17/09/2026). O "Esqueci minha senha" da
+           tela de login depende do e-mail embutido do Supabase, que sem SMTP proprio so entrega
+           pra quem e membro do projeto no painel do Supabase (o Darman ficou trancado assim).
+           O admin gera aqui uma senha provisoria pela service_role e passa pro membro. */
+        if (action === "reset-member-password") {
+          if (!ctx.isAdmin) return json({ error: "Apenas admin pode redefinir senhas." }, { status: 403 });
+          const id = String(body.id ?? "");
+          const { data: m } = await ctx.db
+            .from("workflowark_members")
+            .select("user_id,email,full_name")
+            .eq("id", id)
+            .maybeSingle();
+          if (!m) return json({ error: "Membro não encontrado." }, { status: 404 });
+          let userId: string | null = m.user_id ?? null;
+          if (!userId && m.email) {
+            // Membro convidado que ja criou conta mas nunca entrou: acha pelo e-mail no auth.
+            const { data: list } = await ctx.db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+            const found = (list?.users ?? []).find(
+              (u: any) => String(u.email ?? "").toLowerCase() === String(m.email).toLowerCase(),
+            );
+            userId = found?.id ?? null;
+          }
+          if (!userId) return json({ error: "Este membro ainda não criou a conta. Peça pra ele usar \"Criar conta\" com o mesmo e-mail." }, { status: 400 });
+          // Senha provisoria legivel: Ark- + 8 caracteres sem ambiguidade (sem 0/O, 1/l/I).
+          const alfabeto = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+          const rnd = new Uint8Array(8);
+          crypto.getRandomValues(rnd);
+          const password = "Ark-" + Array.from(rnd, (b) => alfabeto[b % alfabeto.length]).join("");
+          const { error } = await ctx.db.auth.admin.updateUserById(userId, { password, email_confirm: true });
+          if (error) return json({ error: "Não foi possível redefinir a senha." }, { status: 500 });
+          return json({ ok: true, password, email: m.email });
+        }
+
         /* ===== CHAT INTERNO DA EQUIPE (02/09/2026) =====
            Cada mensagem e uma LINHA propria em workflowark_state (key wfa-chat-m-<ts>-<id>),
            nunca um blob unico: o WhatsApp ja mostrou que blob que so cresce estoura o Worker.

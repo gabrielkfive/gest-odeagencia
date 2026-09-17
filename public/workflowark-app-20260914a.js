@@ -5110,6 +5110,7 @@ function renderSettingsTeam(){
       <label class="set-act"><input type="checkbox" class="set-ac" ${m.active?'checked':''}> ativo</label>
       <button class="set-accbtn" type="button" onclick="toggleAcc('${mdEsc(m.id)}')">Abas ▾</button>
       <button class="icobtn" onclick="salvarMembro('${mdEsc(m.id)}')">Salvar</button>
+      <button class="set-accbtn" type="button" title="Gerar senha provisória pra este membro" onclick="redefinirSenhaMembro('${mdEsc(m.id)}')">🔑 Senha</button>
       <button class="set-accbtn" type="button" title="Remover membro" style="color:var(--red);border-color:#f3b4b4" onclick="removerMembro('${mdEsc(m.id)}')">✕</button>
       <div class="set-em">${mdEsc(m.email||'')}</div>
       <div style="grid-column:1/-1;display:flex;gap:6px;align-items:center;margin-top:2px">
@@ -5167,6 +5168,19 @@ async function removerMembro(id){
     renderSettingsTeam();renderMeuDia();
     toast('✓ Membro removido');
   }catch(e){toast('⚠ '+(e.message||'Erro ao remover'));}
+}
+/* Senha provisoria gerada pelo gestor (17/09/2026): o "Esqueci minha senha" do login
+   depende de e-mail do Supabase que nao chega pra quem esta fora do projeto. */
+async function redefinirSenhaMembro(id){
+  const m=(WFA_MEMBERS||[]).find(x=>x.id===id);const quem=m?(m.full_name||m.email||'este membro'):'este membro';
+  if(!confirm('Gerar uma senha provisória para '+quem+'? A senha atual dele deixa de valer.'))return;
+  try{
+    const r=await cloudCall('save',{action:'reset-member-password',id});
+    const senha=r&&r.password;if(!senha)throw new Error('Senha não veio do servidor');
+    try{await navigator.clipboard.writeText(senha);}catch(e){}
+    prompt('Senha provisória de '+quem+' (já copiada). Passe pra ele e peça pra entrar com ela:',senha);
+    toast('✓ Senha provisória gerada');
+  }catch(e){toast('⚠ '+(e.message||'Erro ao redefinir senha'));}
 }
 async function inviteMember(){
   const emIn=document.getElementById('inv-email');const rlIn=document.getElementById('inv-role');
