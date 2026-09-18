@@ -1,9 +1,13 @@
 # Documentos do app SEMPRE revalidam (ETag/304): navegador nunca roda build velho.
 # Os assets com hash continuam cacheáveis para sempre por padrão.
+# no-transform (17/09/2026): sem ele a borda da Cloudflare reprocessava o text/html
+# (chunked, sem Content-Length e SEM ETag), então o "revalidar" nunca virava 304 e os
+# ~390 KB do documento desciam em toda abertura. Com no-transform o ETag do asset passa
+# e If-None-Match responde 304 (medido por curl). JS e CSS já vinham com ETag.
 /workflowark
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-cache, no-transform, must-revalidate
 /workflowark.html
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-cache, no-transform, must-revalidate
 # Desde o split do monolito (06/09/2026) o app vive em workflowark-*.js e .css. Sem esta
 # regra o navegador podia guardar o script velho por heuristica e a equipe testava a
 # versao antiga com o HTML novo (o fix do arrastar "continuava" quebrado).
