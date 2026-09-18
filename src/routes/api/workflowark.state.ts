@@ -188,6 +188,25 @@ function isStateKey(key: string) {
   return STATE_KEYS.has(key) || key.startsWith("wfa-ckl-");
 }
 
+// BLOCOS FINANCEIROS POR PAPEL (17/09/2026, auditoria 09/09 P1). Antes o GET entregava
+// wfa-cobranca e wfa-acerto (Pix e valores da equipe) a qualquer membro ativo; o front
+// só escondia a aba. Regra espelhada do memberAccess do app (ROLE_ACCESS):
+//   cobranca: admin, gestor, financeiro, ou liberação manual permissions.nav.cobranca;
+//   acerto:   só admin, ou liberação manual permissions.nav.acerto.
+// Override false também fecha (igual ao front). Quem não pode ver também não grava:
+// o save-state desses blocos vira no-op pra esse papel (o planAutoSeed roda em todo
+// cliente e podia sobrescrever o acerto do admin com um bloco vazio).
+const BLOCOS_FIN: Record<string, string> = { "wfa-cobranca": "cobranca", "wfa-acerto": "acerto" };
+function podeVerBloco(member: WorkflowMember | null | undefined, isAdmin: boolean, key: string): boolean {
+  const aba = BLOCOS_FIN[key];
+  if (!aba) return true;
+  if (isAdmin || member?.role === "admin") return true;
+  const ov = (member?.permissions as any)?.nav;
+  if (ov && typeof ov === "object" && typeof ov[aba] === "boolean") return ov[aba];
+  if (aba === "cobranca") return member?.role === "gestor" || member?.role === "financeiro";
+  return false;
+}
+
 // TOKEN DE LINK PUBLICO (portal do cliente e aprovacao de conteudo).
 // Estes links sao o unico segredo: quem tem a URL ve os dados daquele cliente, sem login,
 // e no caso do portal o token e PERSISTENTE, reusado pra sempre.
@@ -397,6 +416,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
         const soKey = String(u.searchParams.get("key") || "");
         if (soKey) {
           if (isSensitive(soKey)) return json({ error: "chave reservada" }, { status: 403 });
+          if (!podeVerBloco(ctx.member, ctx.isAdmin, soKey)) return json({ error: "Sem permissão para este bloco." }, { status: 403 });
           const { data: row, error: e1 } = await ctx.db
             .from("workflowark_state")
             .select("key,data")
@@ -434,7 +454,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           return json({ unchanged: true, t: since, member: ctx.member, now: new Date().toISOString() });
         }
 
-        const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key)).map((row: any) => {
+        const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key) && podeVerBloco(ctx.member, ctx.isAdmin, row.key)).map((row: any) => {
           // wfa-gcal: cada membro vê apenas sua própria entrada de agenda (não a de todos)
           if (row.key === "wfa-gcal") {
             const memberId = ctx.member.id;
@@ -464,6 +484,12 @@ export const Route = createFileRoute("/api/workflowark/state")({
         if (action === "save-state") {
           const key = String(body.key ?? "");
           if (!isStateKey(key)) return json({ error: "Bloco inválido" }, { status: 400 });
+          if (!podeVerBloco(ctx.member, ctx.isAdmin, key)) {
+            // 200 de propósito: erro aqui viraria "chave veneno" com toast no cliente de
+            // quem nem deveria ter esse bloco. Não grava, só registra.
+            console.warn(`[save-state] ignorado: ${String((ctx.member as any)?.email || ctx.user.id)} (${ctx.member?.role}) tentou gravar ${key} sem permissão`);
+            return json({ ok: true, ignorado: "sem permissão para este bloco", now: new Date().toISOString() });
+          }
           let data = body.data ?? null;
           // LÁPIDE É MONOTÔNICA: wfa-deleted-ids só cresce. UNIÃO com o que já está no
           // servidor em vez de substituir — um aparelho desatualizado não pode apagar a

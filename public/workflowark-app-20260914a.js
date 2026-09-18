@@ -722,6 +722,10 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
   el.addEventListener('click',()=>{
     const p=el.dataset.nav;
     if(el.style.display==='none')return; // RBAC: item escondido pelo controle de acesso não navega nem via clique programático (cards da Central, busca, voz)
+    // RBAC pela permissão real (17/09/2026): o display só é aplicado depois que o membro
+    // carrega; até lá um .click() programático (card da Central, busca) abria Cobranças
+    // e Acerto pra qualquer papel. Agora a regra é a mesma do menu, sempre.
+    if(typeof memberAccess==='function'){try{if(memberAccess(WFA_MEMBER)[p]===false)return;}catch(e){}}
     try{localStorage.setItem('wfa-current-page',p);}catch(e){} // lembra a aba p/ restaurar ao recarregar
     document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.navitem,.subitem').forEach(x=>x.classList.remove('active'));
@@ -1139,7 +1143,7 @@ function cliCard(c){
       <button class="cli-btn" onclick="event.stopPropagation();relatorioCliente('${c.id}')">📄 Relatório</button>
       <button class="cli-btn" onclick="event.stopPropagation();abrirCriativos('${c.id}')">📈 Criativos</button>
       <button class="cli-btn" onclick="event.stopPropagation();abrirOnboarding('${c.id}')">🚀 Onboarding</button>
-      ${isArk?`<button class="cli-btn" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
+      ${isArk?`<button class="cli-btn" data-req="cobranca" onclick="event.stopPropagation();document.querySelector('[data-nav=cobranca]').click()">Cobrança</button>`:''}
       <button class="cli-btn" onclick="event.stopPropagation();cliEditOpen('${c.id}')">Editar</button>
     </div>
   </div>`;
@@ -4626,7 +4630,7 @@ function mdwBody(w,B){
     const body=`<div class="mdw-kpis" style="grid-template-columns:1fr 1fr">
       <div class="mdw-kpi y"><div class="v">${pend.length}</div><div class="l">A cobrar</div></div>
       <div class="mdw-kpi g"><div class="v">${reais.length-pend.length}</div><div class="l">Cobrados</div></div>
-      <div class="mdw-kpi" style="grid-column:1/-1;cursor:pointer" onclick="document.querySelector('[data-nav=cobranca]')?.click()"><div class="v" style="font-size:18px">${totalReceber?'R$ '+totalReceber.toLocaleString('pt-BR'):'R$ 0'}</div><div class="l">A receber este mês${pend.length?' · ver cobrança':''}</div></div>
+      <div class="mdw-kpi" data-req="cobranca" style="grid-column:1/-1;cursor:pointer" onclick="document.querySelector('[data-nav=cobranca]')?.click()"><div class="v" style="font-size:18px">${totalReceber?'R$ '+totalReceber.toLocaleString('pt-BR'):'R$ 0'}</div><div class="l">A receber este mês${pend.length?' · ver cobrança':''}</div></div>
     </div>`;
     return {body,count:pend.length||null};
   }
@@ -5030,7 +5034,7 @@ function memberAccess(m){
   const acc={};
   // FECHA por padrão quando o membro ainda não carregou (evita vazar WhatsApp/Acerto/Notificações
   // pra quem tá vendo o sistema antes do RBAC real resolver — bug relatado pelo Gabriel).
-  if(!m){_ALL_NAV.forEach(k=>acc[k]=true);acc.whatsapp=false;acc.acerto=false;acc.notificacoes=false;return acc;}
+  if(!m){_ALL_NAV.forEach(k=>acc[k]=true);acc.whatsapp=false;acc.acerto=false;acc.cobranca=false;acc.notificacoes=false;return acc;}
   const allow=roleAccessList(m.role);
   _ALL_NAV.forEach(k=>acc[k]=allow.includes(k));
   const ov=m.permissions&&m.permissions.nav;
@@ -5052,6 +5056,9 @@ function applyAccess(){
   const acc=memberAccess(WFA_MEMBER);
   const hid=new Set([...HIDDEN_NAV,...prefHidden()]);
   document.querySelectorAll('[data-nav]').forEach(el=>{const k=el.dataset.nav;if(hid.has(k)){el.style.display='none';return;}if(!(k in acc))return;el.style.display=acc[k]===false?'none':'';});
+  // Atalhos que levam a uma aba (cards da Central de Agentes, botão Cobrança, KPI a receber)
+  // seguem a mesma permissão da aba: quem não vê Cobranças/Acerto no menu não vê o card.
+  document.querySelectorAll('[data-req]').forEach(el=>{const k=el.dataset.req;if(!(k in acc))return;el.style.display=acc[k]===false?'none':'';});
   document.querySelectorAll('.subnav').forEach(sub=>{
     const anyVis=[...sub.querySelectorAll('[data-nav]')].some(el=>el.style.display!=='none');
     const parent=sub.previousElementSibling;
