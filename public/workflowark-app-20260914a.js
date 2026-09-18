@@ -6162,6 +6162,46 @@ function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;',
    (#modal-detail e #modal-nova) fica no HTML como reserva, sem uso. */
 const WFA_TK_COLS=[{k:'backlog',n:'Backlog'},{k:'iniciar',n:'A iniciar'},{k:'andamento',n:'Em Andamento'},{k:'aprovacao',n:'Homologação'},{k:'homologcli',n:'Homologação do cliente'},{k:'concluido',n:'Concluído'}];
 const WFA_FUNCOES=['Account Manager','Gestor de Tráfego','Criador','Editor','Designer','Captação'];
+/* Cliente automatico no modal de tarefa (17/09/2026). Gabriel: "ainda tem que escolher o
+   cliente na mao, isso e chato". Ordem da inferencia:
+   (1) titulo casa com nome, apelido ou palavra unica de um cliente ATIVO (churn fica fora;
+       sem acento, sem caixa, palavra inteira: "Reels Vivenda" acha vivenda, "royal" acha royalface);
+   (2) ultimo cliente das tarefas do mesmo responsavel nos ultimos 14 dias;
+   (3) cliente com mais tarefas abertas (empate = vazio).
+   So preenche quando o select ainda esta vazio e a pessoa nao mexeu nele. Escolha manual manda. */
+const WFA_CLI_APELIDOS={royal:'royalface',mazuchi:'mazuki',mazuki:'mazuki',nain:'naeo',emface:'eemface',attraversiamo:'attra','4b':'4bburger',patrick:'lapatrick',ark:'ark'};
+function wfaInferirClienteDet(titulo,resp){
+  const N=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+  let lista=[];try{lista=(typeof CLIENTES!=='undefined'&&Array.isArray(CLIENTES))?CLIENTES:[];}catch(e){}
+  const ativos=lista.filter(c=>c&&c.id&&c.status!=='churn');
+  const ids=new Set(ativos.map(c=>c.id));
+  const t=' '+N(titulo)+' ';
+  const casa=(p,min)=>{p=N(p);return p.length>=(min||3)&&t.indexOf(' '+p+' ')>=0;};
+  if(t.trim()){
+    // nome completo (o mais longo ganha), depois apelido, depois palavra do nome com 4+ letras que so um cliente tem
+    let hit=ativos.filter(c=>casa(c.nm)).sort((a,b)=>String(b.nm).length-String(a.nm).length)[0];
+    if(hit)return {id:hit.id,por:'titulo'};
+    for(const k in WFA_CLI_APELIDOS){if(ids.has(WFA_CLI_APELIDOS[k])&&casa(k,2))return {id:WFA_CLI_APELIDOS[k],por:'titulo'};}
+    const donos={};ativos.forEach(c=>N(c.nm).split(' ').forEach(w=>{if(w.length>=4)(donos[w]=donos[w]||new Set()).add(c.id);}));
+    for(const w in donos){if(donos[w].size===1&&casa(w))return {id:[...donos[w]][0],por:'titulo'};}
+    hit=ativos.find(c=>casa(c.id));if(hit)return {id:hit.id,por:'titulo'};
+  }
+  let tarefas=[];try{tarefas=(state&&Array.isArray(state.tarefas))?state.tarefas:[];}catch(e){}
+  const nomeN=x=>{try{return wfaNorm((typeof migCanonNome==='function')?migCanonNome(x):x);}catch(e){return String(x||'').toLowerCase();}};
+  const quem=nomeN(resp);
+  if(quem){
+    const lim=Date.now()-14*86400000;
+    const minhas=tarefas.filter(x=>x&&x.clienteId&&ids.has(x.clienteId)&&((Array.isArray(x.resps)&&x.resps.length)?x.resps:[x.resp]).some(r=>nomeN(r)===quem));
+    const rec=minhas.filter(x=>{const d=new Date(x.criadaEm||x.ini||0).getTime();return d>=lim;})
+      .sort((a,b)=>String(b.criadaEm||b.ini||'').localeCompare(String(a.criadaEm||a.ini||'')))[0];
+    if(rec)return {id:rec.clienteId,por:'resp'};
+  }
+  const cont={};tarefas.forEach(x=>{if(x&&x.clienteId&&ids.has(x.clienteId)&&x.status!=='concluido')cont[x.clienteId]=(cont[x.clienteId]||0)+1;});
+  const top=Object.entries(cont).sort((a,b)=>b[1]-a[1]);
+  if(top.length&&(top.length===1||top[0][1]>top[1][1]))return {id:top[0][0],por:'abertas'};
+  return {id:'',por:''};
+}
+function wfaInferirCliente(titulo,resp){return wfaInferirClienteDet(titulo,resp).id;}
 function wfaTarefaModal(t,ehNova){
   const c=CLIENTES.find(x=>x.id===t.clienteId);
   const norm={
@@ -6222,6 +6262,30 @@ function wfaTarefaModal(t,ehNova){
     },
     onDelete:()=>{if(!ehNova)delTask(t.id);}
   });
+  /* Cliente automatico (17/09/2026): so em tarefa nova. Ao abrir, se o select esta vazio,
+     pre-seleciona; ao digitar o titulo (300 ms), atualiza enquanto a pessoa nao mexeu no select
+     a mao. Mudou a mao: para de sugerir e a dica some. Vazio continua permitido. */
+  if(ehNova){try{
+    const m=document.getElementById('pj-modal');
+    const tit=m&&m.querySelector('#tk-t'),sel=m&&m.querySelector('#tk-cli');
+    if(tit&&sel){
+      const dica=document.createElement('span');dica.id='tk-cli-dica';dica.className='tkvazio';dica.style.cssText='margin-left:8px;display:none';
+      sel.insertAdjacentElement('afterend',dica);
+      const ROT={titulo:'sugerido pelo título',resp:'sugerido pelas tarefas do responsável',abertas:'sugerido pelas tarefas abertas'};
+      const respAtual=()=>{const r=(m.dataset.resps||'').split('|').filter(Boolean)[0];if(r)return r;try{return (WFA_MEMBER&&WFA_MEMBER.full_name)||'';}catch(e){return '';}};
+      const sugerir=()=>{
+        if(sel.dataset.manual||m.style.display==='none')return;
+        const s=wfaInferirClienteDet(tit.value,respAtual());
+        if(!s.id||!sel.querySelector('option[value="'+s.id+'"]'))return;
+        if(sel.value!==s.id)sel.value=s.id;
+        dica.textContent=ROT[s.por]||'sugerido';dica.style.display='';
+      };
+      sel.addEventListener('change',()=>{sel.dataset.manual='1';dica.style.display='none';});
+      let tm=null;tit.addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(sugerir,300);});
+      const ar=m.querySelector('#tk-addresp');if(ar)ar.addEventListener('change',()=>{setTimeout(sugerir,0);});
+      if(!sel.value)sugerir();
+    }
+  }catch(e){console.warn('cliente automatico',e);}}
 }
 function openTaskDetail(id){
   if(String(id).indexOf('pj:')===0){const p=String(id).split(':');if(typeof pjAbrirTarefaModal==='function')pjAbrirTarefaModal(p[1],p[2]);return;}
