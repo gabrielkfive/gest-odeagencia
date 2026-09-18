@@ -8815,16 +8815,24 @@ function finPopulateMonths(){
         ||FIN_SHEETS[FIN_SHEETS.length-1];
   if(pick)sel.value=pick.gid;
 }
+// Proxy da planilha financeira exige sessão desde 17/09/2026 (o servidor devolve 401 sem
+// Bearer). Mesmo token do directCloudCall. Sem sessão o fetch segue sem header e o 401
+// cai no catch de quem chamou (a tela mostra o aviso de "não consegui ler a planilha").
+async function sheetFetch(url,opts){
+  const o=Object.assign({},opts||{});
+  try{
+    const {data:{session}}=await _wfaSb.auth.getSession();
+    const token=session&&session.access_token;
+    if(token)o.headers=Object.assign({},o.headers||{},{Authorization:'Bearer '+token});
+  }catch(e){}
+  return fetch(url,o);
+}
 async function renderFin(force){
   if(!document.getElementById('fin-tables')&&!document.getElementById('fin-kpis'))return;
   const sub=document.getElementById('fin-sub');
   try{
     if(!FIN_SHEETS){
-      // TODO-SEGURANÇA (Fase 1, item 2): este endpoint expõe a DFC sem login.
-      // Fix correto = adicionar auth no servidor (sheet.ts) E mandar o token aqui
-      // (Bearer, igual ao cloudCall ~linha 2166). Precisa testar LOGADO antes de subir,
-      // senão quebra o Financeiro da equipe. Não aplicado às cegas (login local quebrado).
-      const lr=await fetch('/api/workflowark/sheet?list=1');
+      const lr=await sheetFetch('/api/workflowark/sheet?list=1');
       const lj=await lr.json().catch(()=>({}));
       FIN_SHEETS=(lj.sheets&&lj.sheets.length)?lj.sheets:[];
       finPopulateMonths();
@@ -8834,7 +8842,7 @@ async function renderFin(force){
     if(force&&sub)sub.textContent='Atualizando da planilha...';
     let csv=FIN_CSV_CACHE[gid];
     if(!csv||force){
-      const resp=await fetch('/api/workflowark/sheet'+(gid?('?gid='+encodeURIComponent(gid)):''),{cache:force?'reload':'default'});
+      const resp=await sheetFetch('/api/workflowark/sheet'+(gid?('?gid='+encodeURIComponent(gid)):''),{cache:force?'reload':'default'});
       if(!resp.ok)throw new Error('falha');
       csv=await resp.text();FIN_CSV_CACHE[gid]=csv;
     }
@@ -9053,7 +9061,7 @@ function planExportCSV(){
   const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='planilha-'+(m.nome||'mes').replace(/\s+/g,'-')+'.csv';document.body.appendChild(a);a.click();a.remove();toast('CSV exportado');
 }
 async function planFillFromGoogle(m,gid){
-  const resp=await fetch('/api/workflowark/sheet'+(gid?('?gid='+encodeURIComponent(gid)):''),{cache:'reload'});
+  const resp=await sheetFetch('/api/workflowark/sheet'+(gid?('?gid='+encodeURIComponent(gid)):''),{cache:'reload'});
   if(!resp.ok)throw new Error('falha');
   const d=finParse(finParseCSV(await resp.text()));
   m.receitas=d.receitas.map(x=>({nome:x.nome,valor:x.valor,custo:x.custo}));
@@ -9075,7 +9083,7 @@ async function planAutoSeed(){
   if(planHasData()){state.planilha.seeded=true;savePlanilha();if(typeof finSyncFromPlanilha==='function')finSyncFromPlanilha();return;}
   PLAN_SEEDING=true;
   try{
-    if(!FIN_SHEETS){const lr=await fetch('/api/workflowark/sheet?list=1');const lj=await lr.json().catch(()=>({}));FIN_SHEETS=(lj.sheets&&lj.sheets.length)?lj.sheets:[];finPopulateMonths();}
+    if(!FIN_SHEETS){const lr=await sheetFetch('/api/workflowark/sheet?list=1');const lj=await lr.json().catch(()=>({}));FIN_SHEETS=(lj.sheets&&lj.sheets.length)?lj.sheets:[];finPopulateMonths();}
     const sel=document.getElementById('fin-month');
     let gid=sel&&sel.value?sel.value:'';
     let nomeMes=sel&&sel.selectedOptions[0]?sel.selectedOptions[0].textContent.trim():'';

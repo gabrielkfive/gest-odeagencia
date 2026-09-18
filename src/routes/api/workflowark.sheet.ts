@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 // Planilha financeira publicada na web (somente leitura). O servidor busca o conteúdo
-// e repassa para o front — o navegador não consegue ler o Google direto (CORS).
+// e repassa para o front, porque o navegador não consegue ler o Google direto (CORS).
 const SHEET_BASE =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf";
 
@@ -28,12 +28,21 @@ export const Route = createFileRoute("/api/workflowark/sheet")({
         try {
           const url = new URL(request.url);
 
+          // Guarda (17/09/2026): desde 29/06 este proxy devolvia a DFC inteira pra quem
+          // chamasse a URL, sem login. Mesma regra das outras rotas autenticadas
+          // (agents-run, social-run): Bearer da sessão validado como membro ATIVO,
+          // ou ?key= com o segredo RUN_KEY pra cron/servidor. Sem isso, 401.
+          const { isRunAuthorized } = await import("@/integrations/run-auth.server");
+          if (!(await isRunAuthorized(request, url))) {
+            return Response.json({ error: "Não autenticado" }, { status: 401 });
+          }
+
           // ?list=1 → devolve as abas (meses) disponíveis
           if (url.searchParams.get("list")) {
             const sheets = await listSheets();
             return Response.json(
               { sheets },
-              { headers: { "Cache-Control": "public, max-age=300" } },
+              { headers: { "Cache-Control": "private, max-age=300" } },
             );
           }
 
@@ -58,7 +67,7 @@ export const Route = createFileRoute("/api/workflowark/sheet")({
             status: 200,
             headers: {
               "Content-Type": "text/csv; charset=utf-8",
-              "Cache-Control": "public, max-age=60",
+              "Cache-Control": "private, max-age=60",
             },
           });
         } catch {
