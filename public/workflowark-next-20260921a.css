@@ -21,3 +21,63 @@ body.next .main{border-radius:26px}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){body.next.aura-dark .side{background:#151518}}
 @media (prefers-reduced-transparency:reduce){body.next .side{backdrop-filter:none;-webkit-backdrop-filter:none;background:#151518}}
 @media (max-width:900px){body.next .app{padding:0;gap:0}body.next .side,body.next .main{border-radius:0}body.next.aura-dark .side{background:#151518}}
+
+/* ---- pagina do cliente com abas (workflowark-next-<data>.js) ---- */
+.nxc-wrap{padding:18px 22px 60px;max-width:1200px}
+.nxc-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.nxc-av{width:52px;height:52px;border-radius:16px;background:#ffd400;color:#111;font-weight:800;display:grid;place-items:center;font-size:18px}
+.nxc-hd{min-width:0}.nxc-nm{font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}.nxc-sub{color:var(--mute);font-size:13px}
+.nxc-mes{margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 6px}
+.nxc-mes span{font-size:13px;font-weight:600;min-width:130px;text-align:center;color:var(--ink)}
+.nxc-mes button{width:30px;height:30px;border-radius:50%;background:transparent;border:0;color:var(--ink);font-size:18px;cursor:pointer}
+.nxc-mes button:hover{background:rgba(255,255,255,.08)}
+.nxc-acoes{display:flex;gap:8px}
+.nxc-btn{border-radius:999px;padding:9px 14px;font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--line-2);color:var(--ink);cursor:pointer;min-height:38px}
+.nxc-btn.yel{background:#ffd400;color:#111;border-color:#ffd400}
+.nxc-tabs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 16px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.nxc-tab{border:0;background:transparent;color:var(--mute);font-size:13px;font-weight:500;padding:8px 12px;border-radius:999px;cursor:pointer;min-height:36px}
+.nxc-tab b{font-size:11px;font-weight:600;background:rgba(255,255,255,.08);padding:1px 7px;border-radius:999px;margin-left:4px;color:var(--ink)}
+.nxc-tab:hover{background:rgba(255,255,255,.06);color:var(--ink)}
+.nxc-tab.on{background:rgba(255,212,0,.16);color:#ffd400}
+.nxc-tab.on b{background:#ffd400;color:#111}
+.nxc-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.nxc-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:8px;min-height:120px}
+.nxc-card:hover{border-color:var(--line-2)}
+.nxc-card-top{display:flex;gap:6px;flex-wrap:wrap}
+.nxc-card-t{font-size:14px;font-weight:600;color:var(--ink);line-height:1.3}
+.nxc-card-l{font-size:12px;color:var(--mute);line-height:1.4}
+.nxc-card-m{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--mute);margin-top:auto}
+.nxc-card-m .late{color:#ff6b6b;font-weight:600}
+.nxc-mini{align-self:flex-start;border:1px solid var(--line-2);background:transparent;color:var(--ink);border-radius:999px;font-size:11.5px;padding:5px 10px;cursor:pointer}
+.nxc-mini:hover{border-color:#ffd400;color:#ffd400}
+.nxc-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--line);color:var(--ink)}
+.nxc-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c,#888)}
+.nxc-empty{padding:28px 12px;color:var(--mute);font-size:13.5px;text-align:center;border:1px dashed var(--line);border-radius:16px}
+.nxc-list{display:flex;flex-direction:column}
+.nxc-row{display:flex;align-items:center;gap:10px;padding:10px 6px;border-top:1px solid var(--line);min-height:44px}
+.nxc-row:first-child{border-top:0}
+.nxc-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.nxc-row .t{flex:1;min-width:0}.nxc-row .t b{display:block;font-weight:500;color:var(--ink)}.nxc-row .t span{display:block;font-size:11.5px;color:var(--mute)}
+.nxc-row .m{font-size:11.5px;color:var(--mute);font-variant-numeric:tabular-nums}
+.nxc-ficha{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.nxc-fi label{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:3px}
+.nxc-fi div{font-size:13.5px;color:var(--ink);word-break:break-word}.nxc-fi a{color:#ffd400}
+.nxc-mute{color:var(--mute)}
+.nxc-kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.nxc-kpi .l{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}.nxc-kpi .v{font-size:26px;font-weight:600;color:var(--ink)}
+/* cartao de post */
+.nxc-ov{position:fixed;inset:0;z-index:6000;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;padding:0}
+.nxc-box{width:min(100%,640px);max-height:92vh;overflow:auto;background:var(--bg,#0a0a0a);border:1px solid var(--line-2);border-radius:22px 22px 0 0;padding:18px 18px 22px;display:flex;flex-direction:column;gap:6px;color:var(--ink)}
+@media (min-width:700px){.nxc-ov{align-items:center;padding:20px}.nxc-box{border-radius:22px}}
+.nxc-box-h{display:flex;align-items:center;gap:10px;margin-bottom:6px}.nxc-box-h b{font-size:16px}.nxc-box-h .nxc-mute{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px}
+.nxc-x{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-2);background:transparent;color:var(--ink);font-size:18px;cursor:pointer}
+.nxc-box label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-top:8px}
+.nxc-box input,.nxc-box textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:10px 12px;font:inherit;font-size:14px;color-scheme:dark}
+body.aura-light .nxc-box input,body.aura-light .nxc-box textarea{color-scheme:light}
+.nxc-fmt{display:flex;gap:6px;flex-wrap:wrap}
+.nxc-fmt button{border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink);padding:7px 14px;font-size:13px;cursor:pointer;min-height:36px}
+.nxc-fmt button.on{background:#ffd400;color:#111;border-color:#ffd400}
+.nxc-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:600px){.nxc-2{grid-template-columns:1fr}}
+.nxc-box-f{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}.nxc-box-f .nxc-mute{flex:1;font-size:12px}
+@media (max-width:900px){.nxc-wrap{padding:12px 12px 80px}.nxc-mes{margin-left:0}}

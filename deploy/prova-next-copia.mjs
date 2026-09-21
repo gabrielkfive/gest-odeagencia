@@ -41,6 +41,36 @@ for (const L of [{ w: 1440, h: 900 }, { w: 390, h: 844, mobile: true }]) {
   await page.evaluate(() => openTaskDetail('t-capa'));
   await page.waitForTimeout(600);
   await page.screenshot({ path: `deploy/prova-next-copia-detalhe-${L.w}.png`, fullPage: false });
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(400);
+  if (!L.mobile) {
+    // pagina do cliente com abas (workflowark-next-<data>.js): abre Vivenda, ve abas, salva cartao de post
+    await page.evaluate(() => { const n = document.querySelector('[data-nav="cliente"]'); n && n.click(); });
+    await page.waitForTimeout(400);
+    await page.evaluate(() => { const s = document.getElementById('cli-area-sel'); if (s) { s.value = 'vivenda'; cliAreaSelect('vivenda'); } });
+    await page.waitForTimeout(300);
+    const abas = await page.$$eval('.nxc-tab', (els) => els.map((e) => e.textContent.trim().split(' ')[0]));
+    ok(abas.length >= 8 && abas.includes('Posts') && abas.includes('Ficha') && abas.includes('Saúde'), `pagina do cliente com abas (${abas.join(', ')})`);
+    await page.evaluate(() => nxCliAba('todas'));
+    await page.waitForTimeout(200);
+    const nCards = await page.$$eval('.nxc-card', (els) => els.length);
+    ok(nCards >= 1, `tarefas da Vivenda no mes aparecem como cartoes (${nCards})`);
+    await page.screenshot({ path: `deploy/prova-next-copia-cliente-${L.w}.png`, fullPage: false });
+    const id = await page.$eval('.nxc-card .nxc-mini', (b) => b.getAttribute('onclick').match(/nxPost\('([^']+)'\)/)[1]);
+    await page.evaluate((i) => nxPost(i), id);
+    await page.waitForTimeout(200);
+    await page.click('.nxc-fmt button[data-f="reel"]');
+    await page.fill('#nxp-pub', '2026-09-25T18:30');
+    await page.fill('#nxp-leg', 'Legenda de teste do cartao');
+    await page.screenshot({ path: `deploy/prova-next-copia-cartao-${L.w}.png`, fullPage: false });
+    await page.evaluate((i) => nxPostSalva(i), id);
+    await page.waitForTimeout(700);
+    const salvo = await page.evaluate((i) => { const t = JSON.parse(localStorage.getItem('wfa-tarefas') || '[]').find((x) => x.id === i); return t && t.formato === 'reel' && t.publicarEm === '2026-09-25T18:30' && t.legenda === 'Legenda de teste do cartao' && !!t.up; }, id);
+    ok(salvo, 'cartao de post gravou formato, publicarEm, legenda e up na tarefa real');
+    await page.evaluate(() => nxCliAba('reels'));
+    await page.waitForTimeout(200);
+    ok((await page.$$eval('.nxc-card', (els) => els.length)) >= 1, 'tarefa aparece na aba Reels depois de salvar');
+  }
   ok(erros.length === 0, 'sem erro de JS' + (erros.length ? ': ' + [...new Set(erros)].join(' | ') : ''));
   await ctx.close();
 }
