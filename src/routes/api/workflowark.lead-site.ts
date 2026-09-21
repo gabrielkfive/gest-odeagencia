@@ -37,6 +37,8 @@ const CHAVE = "wfa-crm";
 const ORIGENS_EXTERNAS = new Set([
   "https://ark-content.arkcontent.workers.dev",
   "https://arkmed.arkcontent.workers.dev",
+  // Landing de venda do WorkFlowArk (clone da estrutura AgencyFlow), no Worker v2.
+  "https://workflowark-v2.arkcontent.workers.dev",
 ]);
 // Rótulo de origem por landing; qualquer valor fora da lista cai no padrão /conheca.
 const ORIGENS_LEAD: Record<string, { source: string; seg: string }> = {
