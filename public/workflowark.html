@@ -1,4 +1,4 @@
-<!-- build 20260921d-yuri -->
+<!-- build 20260921e-descricao -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -50,7 +50,10 @@
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
 <link rel="stylesheet" href="workflowark-20260915a.css">
 <link rel="stylesheet" href="workflowark-cliente-20260921a.css">
-<style>.side-foot .av{min-width:34px;width:34px;height:34px;overflow:hidden;flex:none}.side-foot .av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.side.compact .side-foot .av{min-width:34px}</style>
+<style>.side-foot .av{min-width:34px;width:34px;height:34px;overflow:hidden;flex:none}.side-foot .av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.side.compact .side-foot .av{min-width:34px}
+/* descrição da tarefa: cresce com o texto, legível (pedido 21/09, ref. Trello) */
+#td-desc{min-height:168px;max-height:52vh;font-size:14.5px;line-height:1.65;padding:14px 16px;resize:vertical;overflow:auto;white-space:pre-wrap}
+@media(max-width:900px){#td-desc{min-height:140px;max-height:40vh}}</style>
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -1999,7 +2002,7 @@ function wfaSetTheme(t){
           .tktimer:active{transform:scale(.96)}
           .tktimer.on{background:var(--red);color:#fff}
           .tkgasto{font-family:var(--mono);font-size:12.5px;color:var(--mute);font-variant-numeric:tabular-nums}
-          .tkdesc{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;color:var(--txt);font:inherit;font-size:14px;line-height:1.6;padding:12px 14px;min-height:92px;resize:vertical;transition:border-color .15s,box-shadow .15s}
+          .tkdesc{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;color:var(--txt);font:inherit;font-size:14.5px;line-height:1.65;padding:14px 16px;min-height:168px;max-height:52vh;overflow:auto;resize:vertical;transition:border-color .15s,box-shadow .15s}
           .tkdesc:focus{outline:none;border-color:var(--yel);box-shadow:0 0 0 3px rgba(255,199,0,.22)}
           .tksec{margin-top:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:12px 14px}
           .tksech{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;gap:8px;align-items:center}
@@ -4099,7 +4102,7 @@ function wfaSetTheme(t){
           <input class="td2-title" id="td-title" placeholder="Título da tarefa">
           <div>
             <div class="td2-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Descrição</div>
-            <textarea class="form-input" id="td-desc" rows="3" placeholder="Detalhes, links, contexto..."></textarea>
+            <textarea class="form-input" id="td-desc" rows="6" placeholder="Detalhes, links, contexto..." oninput="tdDescAuto()"></textarea>
           </div>
           <div>
             <div class="td2-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Checklist</div>

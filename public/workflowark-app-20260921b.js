@@ -3094,6 +3094,10 @@ function wfaEstDecimal(hStr,mStr){
       m.dataset.papeis=cur.join(',');
       pjPintaPapeis(m);
     });
+    /* descricao cresce com o texto ate o teto do CSS (pedido do Gabriel 21/09, referencia Trello) */
+    var obs=m.querySelector('#tk-obs');
+    function tkObsAuto(){if(!obs)return;obs.style.height='auto';obs.style.height=Math.max(168,obs.scrollHeight+4)+'px';}
+    if(obs){obs.addEventListener('input',tkObsAuto);setTimeout(tkObsAuto,0);}
     var selResp=m.querySelector('#tk-addresp');
     try{if(typeof wfaBuscaPessoa==='function')wfaBuscaPessoa(selResp);}catch(e){}
     if(selResp)selResp.addEventListener('change',function(){
@@ -5091,6 +5095,8 @@ function renderMonthPill(){
 }
 
 /* ============ CONFIGURAÇÕES ============ */
+/* descricao da tarefa: altura acompanha o texto ate o teto do CSS (max-height) */
+function tdDescAuto(){const d=document.getElementById('td-desc');if(!d)return;d.style.height='auto';d.style.height=Math.max(168,d.scrollHeight+4)+'px';}
 function openSettingsIr(pagina){try{closeModal('modal-settings');}catch(e){}const el=document.querySelector('[data-nav="'+pagina+'"]');if(el)el.click();}
 function setTab(name){
   document.querySelectorAll('#modal-settings .set-tab').forEach(b=>b.classList.toggle('active',b.dataset.st===name));
@@ -6316,7 +6322,7 @@ function openTaskDetail(id){
   sel.innerHTML=CLIENTES.map(c=>`<option value="${c.id}">${c.nm}</option>`).join('');
   document.getElementById('td-id').value=t.id;
   document.getElementById('td-title').value=t.title||'';
-  document.getElementById('td-desc').value=t.desc||'';
+  document.getElementById('td-desc').value=t.desc||'';setTimeout(tdDescAuto,0);
   document.getElementById('td-status').value=t.status||'backlog';
   document.getElementById('td-prio').value=t.prio||'media';
   document.getElementById('td-resp').value=t.resp||'Lucas Rosi';
