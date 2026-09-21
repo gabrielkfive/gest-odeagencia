@@ -11,9 +11,10 @@ export async function runSecret(): Promise<string> {
 }
 
 // RUN_KEY (conector do claude.ai, cron) e RUN_KEY_LOCAL (agentes locais no PC do Gabriel,
-// set/26). Duas chaves pra não rotacionar a primeira quando a segunda precisar trocar.
+// set/26) e RUN_KEY_BRAIN (Ark Brain puxa blocos a cada hora, 21/09/26). Chaves separadas
+// pra não rotacionar uma quando a outra precisar trocar.
 export async function runSecrets(): Promise<string[]> {
-  const nomes = ["RUN_KEY", "RUN_KEY_LOCAL"];
+  const nomes = ["RUN_KEY", "RUN_KEY_LOCAL", "RUN_KEY_BRAIN"];
   const out: string[] = [];
   let env: Record<string, string | undefined> = {};
   try {
