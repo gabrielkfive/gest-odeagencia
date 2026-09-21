@@ -19,7 +19,10 @@ export const Route = createFileRoute("/portal")({
 
 type Ideia = { data?: string; dia?: string; formato?: string; tema?: string; produto?: string; angulo?: string; legenda?: string };
 type DemandaItem = { id: string; titulo: string; criadaEm?: string; status: string };
-type Data = { cliente?: string; periodo?: string; ideias?: Ideia[]; agency?: string; demandas?: DemandaItem[] };
+type Link = { nome: string; url: string; tipo?: string };
+type Entrega = { id: string; titulo: string; formato?: string; publicarEm?: string; concluidaEm?: string; legenda?: string; links: Link[] };
+type Aprovacao = { id: string; titulo: string; formato?: string; publicarEm?: string; briefing?: string; legenda?: string; desde?: string; links: Link[] };
+type Data = { cliente?: string; periodo?: string; ideias?: Ideia[]; agency?: string; demandas?: DemandaItem[]; entregas?: Entrega[]; aprovacoes?: Aprovacao[] };
 
 const GOLD = "#E3B341";
 const BG = "#0C0A09";
@@ -37,6 +40,24 @@ function Portal() {
   const [msg, setMsg] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [coment, setComent] = useState<Record<string, string>>({});
+  const [decidindo, setDecidindo] = useState("");
+  const [feito, setFeito] = useState<Record<string, string>>({});
+
+  // Aprovar ou pedir ajuste: grava na tarefa da equipe pelo mesmo token do portal
+  async function decidir(id: string, acao: "aprovar" | "ajustar") {
+    const texto = (coment[id] || "").trim();
+    if (acao === "ajustar" && !texto) { setFeito((f) => ({ ...f, [id]: "Escreva o ajuste antes de enviar." })); return; }
+    setDecidindo(id);
+    try {
+      const r = await fetch("/api/workflowark/portal", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ t, acao, id, comentario: texto }) });
+      const j = await r.json();
+      if (j?.error) { setFeito((f) => ({ ...f, [id]: j.error })); return; }
+      setFeito((f) => ({ ...f, [id]: acao === "aprovar" ? "Aprovado. A equipe já foi avisada." : "Ajuste enviado. A equipe já foi avisada." }));
+      setD((prev) => prev ? { ...prev, aprovacoes: (prev.aprovacoes || []).filter((a) => a.id !== id) } : prev);
+    } catch { setFeito((f) => ({ ...f, [id]: "Não foi possível enviar. Tente novamente." })); }
+    finally { setDecidindo(""); }
+  }
 
   useEffect(() => {
     if (!t) { setErr("Link inválido."); setLoading(false); return; }
@@ -75,6 +96,10 @@ function Portal() {
   );
 
   const ideias = d?.ideias || [];
+  const aprovacoes = d?.aprovacoes || [];
+  const entregas = d?.entregas || [];
+  const fmtLabel = (f?: string) => ({ estatico: "Estático", carrossel: "Carrossel", reel: "Reel", story: "Story" } as Record<string, string>)[f || ""] || f || "";
+  const fmtPub = (v?: string) => (v ? `${fmtDate(v)}${v.length >= 16 ? " às " + v.slice(11, 16) : ""}` : "");
 
   return (
     <div style={wrap}>
@@ -83,7 +108,7 @@ function Portal() {
         <div style={inner}>
           <div style={{ fontSize: 11, letterSpacing: ".24em", textTransform: "uppercase", color: GOLD, fontWeight: 600 }}>{d?.agency || "ARK Content"}</div>
           <h1 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 700, margin: "10px 0 4px", letterSpacing: "-.01em", lineHeight: 1.1 }}>Olá, {d?.cliente || "cliente"}</h1>
-          <p style={{ color: "#A8A29E", fontSize: 14.5 }}>Seu portal com a ARK Content — acompanhe o conteúdo e fale com a gente.</p>
+          <p style={{ color: "#A8A29E", fontSize: 14.5 }}>Seu portal com a ARK Content. Acompanhe o conteúdo, aprove e fale com a gente.</p>
         </div>
       </header>
 
@@ -101,6 +126,51 @@ function Portal() {
             {i.tema ? <h3 style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, marginBottom: 5, lineHeight: 1.25 }}>{i.tema}</h3> : null}
             {i.angulo ? <p style={{ fontSize: 13.5, color: "#B6AFA8", lineHeight: 1.55 }}>{i.angulo}</p> : null}
             {i.legenda ? <p style={{ fontSize: 13.5, color: "#E7E3DD", fontStyle: "italic", borderLeft: `2px solid ${GOLD}`, paddingLeft: 12, marginTop: 8 }}>“{i.legenda}”</p> : null}
+          </article>
+        ))}
+
+        {(aprovacoes.length > 0 || Object.keys(feito).length > 0) && (
+          <div style={{ marginTop: 30 }}>
+            <SectionTitle icon={<IconCheck size={17} />} text={`Esperando a sua aprovação${aprovacoes.length ? ` · ${aprovacoes.length}` : ""}`} />
+            {aprovacoes.length === 0 ? <p style={{ color: "#A8A29E", fontSize: 14 }}>Nada esperando você agora.</p> : null}
+            {aprovacoes.map((a) => (
+              <article key={a.id} style={{ background: SURFACE, border: `1px solid ${GOLD}55`, borderRadius: 16, padding: "17px 19px", marginBottom: 12 }}>
+                <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 8 }}>
+                  {a.formato ? <span style={{ ...tag, background: "#211B0F", color: GOLD, borderColor: "#3A2F12" }}>{fmtLabel(a.formato)}</span> : null}
+                  {a.publicarEm ? <span style={tag}>publica {fmtPub(a.publicarEm)}</span> : null}
+                </div>
+                <h3 style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, marginBottom: 6, lineHeight: 1.25 }}>{a.titulo}</h3>
+                {a.briefing ? <p style={{ fontSize: 13.5, color: "#B6AFA8", lineHeight: 1.55 }}>{a.briefing}</p> : null}
+                {a.legenda ? <p style={{ fontSize: 13.5, color: "#E7E3DD", fontStyle: "italic", borderLeft: `2px solid ${GOLD}`, paddingLeft: 12, marginTop: 8 }}>“{a.legenda}”</p> : null}
+                {a.links.length ? <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>{a.links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noreferrer" className="ark-link" style={{ fontSize: 13 }}>Ver {l.nome}</a>)}</div> : null}
+                {feito[a.id] ? <p style={{ color: "#CDE6CD", fontSize: 13.5, marginTop: 10 }}>{feito[a.id]}</p> : (
+                  <div style={{ marginTop: 12 }}>
+                    <textarea className="ark-field" value={coment[a.id] || ""} onChange={(e) => setComent((c) => ({ ...c, [a.id]: e.target.value }))} placeholder="Comentário (obrigatório para pedir ajuste)"
+                      style={{ width: "100%", minHeight: 64, background: BG, border: `1px solid ${BORDER}`, borderRadius: 12, color: "#F5F3F0", padding: "11px 13px", fontSize: 14, fontFamily: SANS, resize: "vertical" }} />
+                    <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                      <button className="ark-btn" disabled={decidindo === a.id} onClick={() => decidir(a.id, "aprovar")} style={{ flex: 1, background: GOLD, color: "#1A1206", border: "none", borderRadius: 12, padding: "12px 16px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Aprovar</button>
+                      <button className="ark-btn" disabled={decidindo === a.id} onClick={() => decidir(a.id, "ajustar")} style={{ flex: 1, background: "transparent", color: "#F5F3F0", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "12px 16px", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Pedir ajuste</button>
+                    </div>
+                  </div>
+                )}
+              </article>
+            ))}
+            {Object.entries(feito).filter(([id]) => !aprovacoes.some((a) => a.id === id)).map(([id, m]) => <p key={id} style={{ color: "#CDE6CD", fontSize: 13.5 }}>{m}</p>)}
+          </div>
+        )}
+
+        <div style={{ marginTop: 30 }}><SectionTitle icon={<IconList />} text={`Entregas${entregas.length ? ` · ${entregas.length}` : ""}`} /></div>
+        {entregas.length === 0 ? (
+          <p style={{ color: "#A8A29E", fontSize: 14 }}>As entregas concluídas aparecem aqui, com o arquivo e a legenda.</p>
+        ) : entregas.map((e) => (
+          <article key={e.id} style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "15px 19px", marginBottom: 10 }}>
+            <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 6, alignItems: "center" }}>
+              {e.formato ? <span style={{ ...tag, background: "#211B0F", color: GOLD, borderColor: "#3A2F12" }}>{fmtLabel(e.formato)}</span> : null}
+              <span style={tag}>{e.publicarEm ? `publica ${fmtPub(e.publicarEm)}` : `entregue ${fmtDate(e.concluidaEm)}`}</span>
+            </div>
+            <h3 style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 600, marginBottom: 4, lineHeight: 1.25 }}>{e.titulo}</h3>
+            {e.legenda ? <p style={{ fontSize: 13.5, color: "#E7E3DD", fontStyle: "italic", borderLeft: `2px solid ${GOLD}`, paddingLeft: 12, marginTop: 6 }}>“{e.legenda}”</p> : null}
+            {e.links.length ? <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>{e.links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noreferrer" className="ark-link" style={{ fontSize: 13 }}>Abrir {l.nome}</a>)}</div> : null}
           </article>
         ))}
 

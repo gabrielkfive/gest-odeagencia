@@ -190,6 +190,7 @@
       ["ficha", "Ficha", ""],
       ["faturas", "Faturas", ""],
       ["saude", "Saúde", atras.length],
+      ["entregas", "Entregas", todas.filter(function (t) { return t.status === "concluido" && ((t.attachments || []).length || t.legenda || t.publicarEm); }).length],
     ];
     var html =
       '<div class="nxc-wrap">' +
@@ -214,7 +215,7 @@
       '</span><button type="button" onclick="nxCliMes(1)">›</button></div>' +
       '<div class="nxc-acoes"><button type="button" class="nxc-btn" onclick="cliDetalhe(\'' +
       CLI +
-      '\')">Ficha completa</button><button type="button" class="nxc-btn yel" onclick="nxNovaEntrega()">+ Nova entrega</button></div></div>' +
+      '\')">Ficha completa</button><button type="button" class="nxc-btn" onclick="nxPortalLink()">Link do portal</button><button type="button" class="nxc-btn yel" onclick="nxNovaEntrega()">+ Nova entrega</button></div></div>' +
       '<div class="nxc-tabs">' +
       abas
         .map(function (a) {
@@ -344,6 +345,16 @@
           (pago ? "Cobrado" : "Pendente") +
           '</span></div></div><button type="button" class="nxc-btn" style="margin-top:12px" onclick="document.querySelector(\'[data-nav=cobranca]\')&&document.querySelector(\'[data-nav=cobranca]\').click()">Abrir cobranças</button>';
       }
+    } else if (ABA === "entregas") {
+      /* o que o cliente ve no portal: concluidas com midia, legenda ou data de publicacao */
+      var ent = todas.filter(function (t) { return t.status === "concluido" && ((t.attachments || []).length || t.legenda || t.publicarEm); })
+        .sort(function (a, b) { return String(b.publicarEm || b.concluidaEm || "").localeCompare(String(a.publicarEm || a.concluidaEm || "")); });
+      html += ent.length
+        ? '<div class="nxc-list">' + ent.map(function (t) {
+            var links = (t.attachments || []).filter(function (a) { return a && /^https?:/.test(a.url || ""); });
+            return '<div class="nxc-row" data-tid="' + esc(t.id) + '" onclick="openTaskDetail(this.getAttribute(&quot;data-tid&quot;))" style="cursor:pointer"><span class="nxc-dot" style="background:#4ade80"></span><span class="t"><b>' + esc(t.title || "") + '</b><span>' + (t.formato ? FMT[t.formato] + " · " : "") + (t.publicarEm ? "publica " + brData(t.publicarEm) : "entregue " + brData(t.concluidaEm)) + (links.length ? " · " + links.length + " arquivo(s)" : " · sem arquivo") + '</span></span>' + (links.length ? '<a class="nxc-mini" href="' + esc(links[0].url) + '" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">Abrir</a>' : "") + "</div>";
+          }).join("") + '</div><p class="nxc-mute" style="margin-top:10px;font-size:12px">É isto que o cliente vê no portal (link sem login). Anexe o arquivo ou o link do Drive na tarefa antes de concluir.</p>'
+        : '<div class="nxc-empty">Nenhuma entrega concluída com arquivo, legenda ou data ainda.</div>';
     } else if (ABA === "saude") {
       var parada = aprov.filter(function (t) {
         return t.aprovacaoEm && Date.now() - new Date(t.aprovacaoEm).getTime() > 3 * 86400000;
@@ -409,6 +420,19 @@
   window.nxCliMes = function (n) {
     MES = new Date(MES.getFullYear(), MES.getMonth() + n, 1);
     render();
+  };
+  /* Link do portal do cliente (mesmo token do Planejamento): gera, copia e mostra */
+  window.nxPortalLink = async function () {
+    var c = (typeof CLIENTES !== "undefined" ? CLIENTES : []).find(function (x) { return x.id === CLI; });
+    if (!c || typeof cloudCall !== "function") return;
+    try {
+      var r = await cloudCall("save", { action: "create-portal", cliente: c.nm, planKey: typeof planKey === "function" ? planKey(c.nm) : String(c.nm).toLowerCase() });
+      if (!r || !r.token) throw new Error((r && r.error) || "Falha ao gerar");
+      var url = location.origin + "/portal?t=" + r.token;
+      try { await navigator.clipboard.writeText(url); } catch (e) {}
+      if (typeof prompt === "function") prompt("Portal de " + c.nm + " (link copiado, mande pra ele):", url);
+      if (typeof toast === "function") toast("Link do portal copiado");
+    } catch (e) { if (typeof toast === "function") toast("Não consegui gerar o link: " + (e.message || e)); }
   };
   window.nxNovaEntrega = function () {
     if (typeof openNovaTarefa !== "function") return;
