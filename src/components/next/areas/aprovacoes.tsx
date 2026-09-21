@@ -257,12 +257,12 @@ export function Aprovacoes() {
             Fluxo do cliente
           </div>
           <div className="nxa-fluxo">
-            <a className="nx-btn ghost" href="/aprovar" target="_blank" rel="noreferrer">
-              <Link2 size={14} /> Aprovação por link
-            </a>
-            <a className="nx-btn ghost" href="/portal" target="_blank" rel="noreferrer">
-              <Users size={14} /> Portal do cliente
-            </a>
+            <button type="button" className="nx-btn ghost" onClick={() => abrirApp("tarefas")}>
+              <Link2 size={14} /> Gerar link de aprovação (no cartão da tarefa)
+            </button>
+            <button type="button" className="nx-btn ghost" onClick={() => abrirApp("cliente")}>
+              <Users size={14} /> Portal do cliente (Área do Cliente)
+            </button>
           </div>
           <p className="nx-mute" style={{ fontSize: 11.5, margin: 0 }}>
             O link de aprovação é gerado no clássico (create-approval) e o cliente decide sem conta.

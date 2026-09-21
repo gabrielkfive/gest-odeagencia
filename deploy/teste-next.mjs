@@ -1,5 +1,5 @@
 /*
- Teste do WorkFlowArk Next (/next), 20/09/2026.
+ Teste dos paineis React (/painel, antes /next) e da landing /conheca, 20/09/2026.
 
  Sobe o build com `wrangler dev` (o `vite dev` nao serve SSR nesta base: cloudflare:workers),
  entra com sessao FALSA (localStorage do supabase-js +
@@ -130,7 +130,7 @@ try {
     page.on('pageerror', (e) => erros.push(String(e)));
     const logs = [];
     page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') logs.push(m.text().slice(0, 300)); });
-    await page.goto(`${BASE}/next`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/painel`, { waitUntil: 'networkidle' });
     try { await page.waitForSelector('.nx-kpi', { timeout: 20000 }); } catch (e) {
       await page.screenshot({ path: 'deploy/prova-next-falha.png', fullPage: true });
       console.log('URL:', page.url()); console.log('BODY:', (await page.textContent('body') || '').slice(0, 600)); console.log('LOGS:', logs.slice(0, 8).join(' | '), erros.slice(0, 3).join(' | '));
@@ -160,12 +160,12 @@ try {
     ok(kpisDepois[0] === '1', `atrasadas caiu para 1 sem recarregar, veio ${kpisDepois[0]}`);
     // 3. areas
     for (const a of AREAS) {
-      await page.goto(`${BASE}/next/${a}`, { waitUntil: 'networkidle' });
+      await page.goto(`${BASE}/painel/${a}`, { waitUntil: 'networkidle' });
       const h1 = await page.textContent('.nx-main h1').catch(() => '');
       ok(!!h1 && !(await page.$('.nx-alert.err')), `área ${a} abre (${(h1 || '').trim().slice(0, 30)})`);
       if (a === 'comercial' || a === 'financeiro' || a === 'clientes') await page.screenshot({ path: `deploy/prova-next-${a}.png`, fullPage: true });
     }
-    await page.goto(`${BASE}/next/nao-existe`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/painel/nao-existe`, { waitUntil: 'networkidle' });
     ok(!!(await page.$('.nx-alert')), 'área inexistente mostra aviso, não tela branca');
     ok(erros.length === 0, 'sem erro de JS na página' + (erros.length ? ': ' + erros[0] : ''));
     await ctx.close();
@@ -175,7 +175,7 @@ try {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     await prepara(ctx, true);
     const page = await ctx.newPage();
-    await page.goto(`${BASE}/next`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/painel`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.nx-kpi', { timeout: 20000 });
     console.log('Celular, claro');
     const box = await page.$eval('.nx-side', (e) => e.getBoundingClientRect().right);

@@ -60,7 +60,7 @@ const CSS = `
 
 export function Clientes() {
   const { carga, nomes, tarefas, abrirApp } = useNext();
-  const search = useSearch({ from: "/_authenticated/next/$area" }) as { q?: string };
+  const search = useSearch({ from: "/_authenticated/painel/$area" }) as { q?: string };
   const [q, setQ] = useState(search.q || "");
   const [sel, setSel] = useState<string | null>(null);
   useEffect(() => {

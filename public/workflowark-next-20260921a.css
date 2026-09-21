@@ -1,0 +1,135 @@
+/* ============ WorkFlowArk NEXT · vidro estilo iPhone (21/09/2026) ============
+   Camada por cima de workflowark-<data>.css, so em body.next. Mesma estrutura, mesma
+   sidebar, mesmas abas: so muda a pele. Liquid Glass: paineis translucidos com blur forte
+   e saturacao, brilho de borda no topo, cantos 26px, controles em pilula, fundo com luz
+   difusa por tras pro vidro ter o que refratar. Nao mexe em position/transform da sidebar,
+   topbar ou drawer (regra 6 do CLAUDE.md). Fallback opaco sem backdrop-filter e com
+   prefers-reduced-transparency. */
+
+body.next{
+  --g-bg:#050506;
+  --g-glass:rgba(255,255,255,.07);--g-glass2:rgba(255,255,255,.12);--g-glass3:rgba(255,255,255,.18);
+  --g-line:rgba(255,255,255,.12);--g-line2:rgba(255,255,255,.22);--g-hi:rgba(255,255,255,.35);
+  --g-ink:#f5f5f7;--g-ink2:rgba(245,245,247,.72);--g-ink3:rgba(245,245,247,.48);
+  --g-solid:#151518;--g-r:26px;--g-rs:16px;--g-blur:blur(34px) saturate(1.6);
+  --g-sh:0 20px 60px -20px rgba(0,0,0,.7),0 1px 0 rgba(255,255,255,.06);
+  --g-font:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+  --bg:var(--g-bg);--surface:var(--g-glass);--line:var(--g-line);--line-2:var(--g-line2);
+  --ink:var(--g-ink);--ink-2:var(--g-ink);--txt:var(--g-ink);--mute:var(--g-ink2);--mute-2:var(--g-ink3);
+  font-family:var(--g-font);letter-spacing:-.01em;
+}
+body.next.aura-light{
+  --g-bg:#e9e9ee;
+  --g-glass:rgba(255,255,255,.55);--g-glass2:rgba(255,255,255,.72);--g-glass3:rgba(255,255,255,.9);
+  --g-line:rgba(17,17,20,.08);--g-line2:rgba(17,17,20,.16);--g-hi:rgba(255,255,255,.95);
+  --g-ink:#111114;--g-ink2:rgba(17,17,20,.7);--g-ink3:rgba(17,17,20,.46);
+  --g-solid:#ffffff;--g-sh:0 20px 60px -24px rgba(0,0,0,.25),0 1px 0 rgba(255,255,255,.8);
+}
+
+/* fundo com luz por tras: e isso que faz o vidro parecer vidro */
+body.next,body.next .app{background:var(--g-bg)}
+body.next .app{position:relative;padding:12px;gap:12px;isolation:isolate}
+body.next .app::before,body.next .app::after{content:"";position:absolute;border-radius:50%;pointer-events:none;z-index:-1;filter:blur(80px)}
+body.next .app::before{width:60vw;height:60vw;left:-18vw;top:-24vw;background:radial-gradient(circle,rgba(255,199,0,.22),rgba(255,199,0,0) 70%)}
+body.next .app::after{width:50vw;height:50vw;right:-16vw;bottom:-20vw;background:radial-gradient(circle,rgba(120,140,255,.14),rgba(120,140,255,0) 70%)}
+body.next.aura-light .app::before{background:radial-gradient(circle,rgba(255,199,0,.45),rgba(255,199,0,0) 70%)}
+body.next.aura-light .app::after{background:radial-gradient(circle,rgba(120,140,255,.28),rgba(120,140,255,0) 70%)}
+body.next .main::before,body.next .main::after{display:none}
+
+/* vidro base */
+body.next .side,body.next .main,body.next .topbar,body.next .card,body.next .kpi,body.next .widget,body.next .md-card,body.next .md-block,
+body.next .aura-hero,body.next .aura-card,body.next .aura-stat,body.next .aura-goal,body.next .tb-search,body.next .tb-pill,body.next .tabs,
+body.next .task-col,body.next #gsearch-res,body.next .pp-dd{
+  background:var(--g-glass);border:1px solid var(--g-line);
+  backdrop-filter:var(--g-blur);-webkit-backdrop-filter:var(--g-blur);
+  box-shadow:inset 0 1px 0 var(--g-hi),inset 0 0 0 .5px rgba(255,255,255,.06),var(--g-sh)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  body.next .side,body.next .main,body.next .topbar,body.next .card,body.next .kpi,body.next .task-col,body.next .tabs{background:var(--g-solid)}}
+@media (prefers-reduced-transparency:reduce){
+  body.next .side,body.next .main,body.next .topbar,body.next .card,body.next .kpi,body.next .task-col,body.next .tabs,body.next .pj-f,body.next .modal{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--g-solid)}}
+
+/* moldura */
+body.next .side{border-radius:var(--g-r);border-right:1px solid var(--g-line)}
+body.next .main{border-radius:var(--g-r);background:rgba(255,255,255,.03);overflow:hidden}
+body.next.aura-light .main{background:rgba(255,255,255,.35)}
+@media (max-width:900px){
+  body.next .app{padding:0;gap:0}
+  body.next .side,body.next .main{border-radius:0;border:0}
+  body.next .side{background:var(--g-solid)}
+}
+
+/* sidebar (estrutura original; so a pele) */
+body.next .side-head{border-bottom:0;padding:16px 14px 8px}
+body.next .brand-mark img{border-radius:11px}
+body.next .brand-info .nm{font-weight:600;font-size:14px}
+body.next .nav-label{color:var(--g-ink3);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+body.next .navitem,body.next .subitem{border-radius:14px;font-weight:500;font-size:13.5px;color:var(--g-ink2);min-height:38px;transition:background .18s,color .18s}
+body.next .navitem svg,body.next .subitem svg{color:var(--g-ink3)}
+body.next .navitem:hover,body.next .subitem:hover{background:var(--g-glass2);color:var(--g-ink);transform:none}
+body.next .navitem.active,body.next .subitem.active{background:var(--g-glass3);color:var(--g-ink);box-shadow:inset 0 1px 0 var(--g-hi),inset 0 0 0 1px var(--g-line2)}
+body.next .navitem.active svg,body.next .subitem.active svg{color:#ffd400}
+body.next #nav-indicator{opacity:0!important}
+body.next .navitem .badge,body.next .subitem .badge,body.next .crm-pill .badge{background:#ffd400;color:#111;font-weight:700;border-radius:999px}
+body.next .crm-pill{background:var(--g-glass);border:1px solid var(--g-line);border-radius:14px;color:var(--g-ink)}
+body.next .crm-pill:hover{border-color:#ffd400}
+body.next .side-foot{border-top:1px solid var(--g-line)}
+body.next .side-foot .av{border-radius:12px;box-shadow:none;background:#ffd400;color:#111;font-weight:700}
+body.next .side-foot .ico:hover{background:var(--g-glass2);color:var(--g-ink)}
+body.next .nav::-webkit-scrollbar-thumb,body.next .view::-webkit-scrollbar-thumb{background:var(--g-line2);border-radius:999px}
+
+/* topo: barra de vidro flutuante (a posicao continua a do tema escuro original) */
+body.next.aura-dark .topbar{background:rgba(20,20,24,.45);border-bottom:1px solid var(--g-line);box-shadow:none}
+body.next.aura-light .topbar{background:rgba(255,255,255,.5);border-bottom:1px solid var(--g-line);box-shadow:none}
+body.next .crumbs{color:var(--g-ink3)}
+body.next .crumbs .here{color:var(--g-ink);font-weight:600}
+body.next .tb-search{border-radius:999px;box-shadow:none}
+body.next .tb-search input{background:transparent;border:0;color:var(--g-ink);font-size:13px}
+body.next .tb-pill{border-radius:999px;color:var(--g-ink2);box-shadow:none}
+body.next .tb-btn{border-radius:999px;font-weight:600;font-size:12.5px;min-height:36px;padding:8px 14px}
+body.next .tb-btn:not(.tb-ic){background:#ffd400;color:#111;border-color:transparent;box-shadow:0 8px 24px -8px rgba(255,212,0,.6)}
+body.next .tb-btn:not(.tb-ic):hover{transform:none;filter:brightness(1.05);box-shadow:0 10px 28px -8px rgba(255,212,0,.7)}
+body.next .icobtn,body.next .tb-btn.tb-ic{background:var(--g-glass);border:1px solid var(--g-line);border-radius:999px;color:var(--g-ink)}
+body.next .icobtn:hover,body.next .tb-btn.tb-ic:hover{background:var(--g-glass2)}
+body.next #sync-status{color:var(--g-ink3)}
+
+/* paginas */
+body.next .page-title h1,body.next .page-head h1{font-size:28px;font-weight:700;letter-spacing:-.025em;color:var(--g-ink)}
+body.next .page-title p{color:var(--g-ink2)}
+body.next .aura-saud{letter-spacing:-.025em}
+
+/* cartoes e indicadores */
+body.next .card,body.next .kpi,body.next .widget,body.next .md-card,body.next .md-block,body.next .aura-hero,body.next .aura-card,body.next .aura-stat,body.next .aura-goal{border-radius:var(--g-r)}
+body.next .card:hover,body.next .kpi:hover{transform:none;border-color:var(--g-line2)}
+body.next .kpi{padding:18px 20px;min-height:108px;gap:6px}
+body.next .kpi .l{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--g-ink2);font-weight:600}
+body.next .kpi .v{font-family:var(--g-font);font-size:32px;font-weight:600;letter-spacing:-.03em;color:var(--g-ink);font-variant-numeric:tabular-nums}
+body.next .kpi .d{color:var(--g-ink3)}
+body.next .kpi::after{display:none}
+body.next .kpi.yel{background:linear-gradient(135deg,rgba(255,212,0,.30),rgba(255,212,0,.06)),var(--g-glass)}
+body.next .card.dk{background:rgba(0,0,0,.35)}
+body.next .card.yel{background:linear-gradient(135deg,rgba(255,212,0,.30),rgba(255,212,0,.06)),var(--g-glass);color:var(--g-ink)}
+
+/* abas, botoes, campos: pilulas */
+body.next .tabs{gap:4px;padding:4px;border-radius:999px;display:inline-flex}
+body.next .tab{border-radius:999px;font-weight:500;font-size:12.5px;color:var(--g-ink2);border:0;background:transparent;padding:7px 14px}
+body.next .tab.active{background:var(--g-glass3);color:var(--g-ink);box-shadow:inset 0 1px 0 var(--g-hi)}
+body.next .btn,body.next button.btn{border-radius:999px;font-weight:600}
+body.next .btn.primary,body.next .btn-primary,body.next .btn.yel{background:#ffd400;color:#111;border-color:#ffd400}
+body.next .chip,body.next .pill,body.next .tag{border-radius:999px}
+body.next input:not([type=checkbox]):not([type=radio]),body.next select,body.next textarea{background:var(--g-glass);border:1px solid var(--g-line);color:var(--g-ink);border-radius:14px}
+body.next input:focus,body.next select:focus,body.next textarea:focus{border-color:rgba(255,212,0,.7);outline:0;box-shadow:0 0 0 3px rgba(255,212,0,.18)}
+
+/* Kanban de Atividades */
+body.next #page-tarefas{--tf-fill:var(--g-glass);--tf-col:rgba(255,255,255,.04);--tf-card:rgba(255,255,255,.08);--tf-line:var(--g-line);--tf-ink:var(--g-ink);--tf-mute:var(--g-ink3)}
+body.next.aura-light #page-tarefas{--tf-col:rgba(255,255,255,.35);--tf-card:rgba(255,255,255,.85)}
+body.next .task-col{border-radius:20px}
+body.next .task-card,body.next .tc{border-radius:18px;border:1px solid var(--g-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+body.next .task-card:hover{border-color:var(--g-line2);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 14px 34px -20px rgba(0,0,0,.8)}
+
+/* modais e menus: vidro mais denso pra leitura */
+body.next .pj-f,body.next .modal,body.next .md,body.next .ap-box{background:rgba(22,22,26,.82);border:1px solid var(--g-line2);border-radius:28px;backdrop-filter:blur(40px) saturate(1.5);-webkit-backdrop-filter:blur(40px) saturate(1.5);box-shadow:inset 0 1px 0 var(--g-hi),0 40px 100px -30px rgba(0,0,0,.9)}
+body.next.aura-light .pj-f,body.next.aura-light .modal,body.next.aura-light .md,body.next.aura-light .ap-box{background:rgba(255,255,255,.82)}
+body.next table th{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--g-ink3);font-weight:600}
+body.next table td{border-color:var(--g-line)}
+body.next ::selection{background:#ffd400;color:#111}
+@media (prefers-reduced-motion:reduce){body.next *{transition:none!important;animation:none!important}}

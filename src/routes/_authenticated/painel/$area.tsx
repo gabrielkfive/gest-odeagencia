@@ -16,7 +16,7 @@ import { Automacoes } from "@/components/next/areas/automacoes";
 import { Hermes } from "@/components/next/areas/hermes";
 import { Configuracoes } from "@/components/next/areas/configuracoes";
 
-export const Route = createFileRoute("/_authenticated/next/$area")({
+export const Route = createFileRoute("/_authenticated/painel/$area")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>): { q?: string } =>
     typeof s.q === "string" && s.q ? { q: s.q } : {},
@@ -49,7 +49,7 @@ function Area() {
     return (
       <div className="nx-alert" role="alert">
         Essa área não existe.{" "}
-        <Link to="/next" className="nx-link">
+        <Link to="/painel" className="nx-link">
           Voltar para o Meu Dia
         </Link>
       </div>

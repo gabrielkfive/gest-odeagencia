@@ -42,10 +42,19 @@ export function FormularioLead() {
     return Object.keys(e).length === 0;
   }
 
+  // Modo de demonstracao (direcao 04, 20/09/2026): enquanto o Gabriel nao confirmar o destino
+  // do lead (hoje o endpoint grava em wfa-crm para o Saulo), o formulario NAO envia contato
+  // real. Troque para false quando o destino for confirmado.
+  const DEMO = true;
+
   async function enviar(ev: FormEvent<HTMLFormElement>) {
     ev.preventDefault();
     setErro("");
     if (!validar()) return;
+    if (DEMO) {
+      setErro("Modo de demonstração: o envio está desligado até a ARK confirmar o destino dos contatos.");
+      return;
+    }
     setEstado("enviando");
     try {
       const res = await fetch(ENDPOINT, {

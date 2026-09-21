@@ -26,7 +26,7 @@ import {
   notificacoes,
 } from "@/components/next/dados";
 
-export const Route = createFileRoute("/_authenticated/next/")({
+export const Route = createFileRoute("/_authenticated/painel/")({
   ssr: false,
   head: () => ({ meta: [{ title: "Meu Dia · WorkFlowArk Next" }] }),
   component: MeuDiaV2,
@@ -225,7 +225,7 @@ function MeuDiaV2() {
           title="Agenda de hoje"
           icon={<CalendarDays size={16} />}
           action={
-            <Link to="/next/$area" params={{ area: "calendario" }} search={{}} className="nx-link">
+            <Link to="/painel/$area" params={{ area: "calendario" }} search={{}} className="nx-link">
               Calendário
             </Link>
           }
@@ -271,7 +271,7 @@ function MeuDiaV2() {
           icon={<CheckSquare size={16} />}
           count={v.aprov.length + v.fila.length}
           action={
-            <Link to="/next/$area" params={{ area: "aprovacoes" }} search={{}} className="nx-link">
+            <Link to="/painel/$area" params={{ area: "aprovacoes" }} search={{}} className="nx-link">
               Ver todas
             </Link>
           }
