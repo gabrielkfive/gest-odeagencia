@@ -3,9 +3,10 @@
 // grava item unico em wfa-tarefas com status "andamento" (servidor mescla por id).
 // Cartao de projeto (pj:) nao grava daqui: vai pro quadro de Projetos.
 import { useMemo, useState } from "react";
-import { Bot, CheckSquare, Link2, UserCheck, Users } from "lucide-react";
+import { Bot, CheckSquare, Link2, PanelRight, UserCheck, Users } from "lucide-react";
 import { useNext } from "@/components/next/contexto";
 import { Card, Kpi, Pill, Vazio } from "@/components/next/ui";
+import { EntregaSocial, type TarefaSocial } from "@/components/next/entrega-social";
 import {
   STATUS_COR,
   dataBR,
@@ -54,6 +55,7 @@ function Linha({
   agoraMs,
   onAprovar,
   onDevolver,
+  onAbrir,
   abrirApp,
 }: {
   t: Tarefa;
@@ -62,6 +64,7 @@ function Linha({
   agoraMs: number;
   onAprovar: (t: Tarefa) => Promise<void>;
   onDevolver: (t: Tarefa) => Promise<void>;
+  onAbrir: (t: Tarefa) => void;
   abrirApp: (p: string) => void;
 }) {
   const [busy, setBusy] = useState<"" | "ok" | "dev">("");
@@ -119,6 +122,14 @@ function Linha({
           <>
             <button
               type="button"
+              className="nx-btn ghost"
+              onClick={() => onAbrir(t)}
+              title="Abrir cartão da entrega: legenda, briefing, checklist e arquivos"
+            >
+              <PanelRight size={14} /> Abrir cartão
+            </button>
+            <button
+              type="button"
               className={`nx-btn ok ${busy ? "busy" : ""}`}
               onClick={() => roda("ok", onAprovar)}
               title="Aprovar: move para Concluído (grava no Kanban)"
@@ -145,6 +156,7 @@ export function Aprovacoes() {
   const st = useMemo(() => carga?.state || {}, [carga]);
   const hoje = hojeSP();
   const agoraMs = Date.now();
+  const [sel, setSel] = useState<TarefaSocial | null>(null);
 
   const v = useMemo(() => {
     const interna = tarefas.filter((t) => t.status === "aprovacao").sort(ordData);
@@ -187,6 +199,7 @@ export function Aprovacoes() {
             agoraMs={agoraMs}
             onAprovar={concluir}
             onDevolver={devolver}
+            onAbrir={(x) => setSel(x as TarefaSocial)}
             abrirApp={abrirApp}
           />
         ))}
@@ -312,6 +325,8 @@ export function Aprovacoes() {
           )}
         </Card>
       </div>
+
+      <EntregaSocial tarefa={sel} onFechar={() => setSel(null)} />
     </>
   );
 }

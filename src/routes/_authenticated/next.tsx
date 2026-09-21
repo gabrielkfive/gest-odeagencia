@@ -29,18 +29,34 @@ function NextPage() {
         if (!token) token = (await supabase.auth.refreshSession()).data.session?.access_token;
         if (!token) throw new Error("Sessão expirada. Entre novamente.");
         const isGet = e.data.action === "load";
-        const qs = isGet && e.data.payload?.since ? `?since=${encodeURIComponent(e.data.payload.since)}` : "";
-        const payload = isGet ? undefined : JSON.stringify({ action: e.data.action, ...(e.data.payload ?? {}) });
+        const qs =
+          isGet && e.data.payload?.since
+            ? `?since=${encodeURIComponent(e.data.payload.since)}`
+            : "";
+        const payload = isGet
+          ? undefined
+          : JSON.stringify({ action: e.data.action, ...(e.data.payload ?? {}) });
         const response = await fetch("/api/workflowark/state" + qs, {
           method: isGet ? "GET" : "POST",
-          headers: { ...(payload ? { "Content-Type": "application/json" } : {}), Authorization: `Bearer ${token}` },
+          headers: {
+            ...(payload ? { "Content-Type": "application/json" } : {}),
+            Authorization: `Bearer ${token}`,
+          },
           body: payload,
         });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || "Erro ao sincronizar dados.");
         frame?.postMessage({ type: "wfa-cloud-response", id, ok: true, data: result }, "*");
       } catch (error) {
-        frame?.postMessage({ type: "wfa-cloud-response", id, ok: false, error: error instanceof Error ? error.message : String(error) }, "*");
+        frame?.postMessage(
+          {
+            type: "wfa-cloud-response",
+            id,
+            ok: false,
+            error: error instanceof Error ? error.message : String(error),
+          },
+          "*",
+        );
       }
     };
     window.addEventListener("message", handler);

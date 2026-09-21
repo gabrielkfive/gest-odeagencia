@@ -1,10 +1,27 @@
-// Area Producao do /next: quadro resumido das tarefas unificadas (Kanban + cartoes de
-// projeto), captacoes audiovisuais e projetos por cliente. Tudo lido de carga.state;
-// nada grava daqui, as acoes levam pro fluxo do classico.
-import { useMemo } from "react";
-import { Clapperboard, FolderKanban, LayoutGrid, ListChecks, Sparkles } from "lucide-react";
+// Area Producao do /next: entregas de social (cartao editavel, grava na tarefa real),
+// contagem por status com link pro Kanban, captacoes audiovisuais e projetos por cliente.
+// Tudo lido de carga.state; a unica gravacao daqui e o cartao de entrega (EntregaSocial).
+import { useMemo, useState } from "react";
+import {
+  Clapperboard,
+  FolderKanban,
+  Instagram,
+  LayoutGrid,
+  ListChecks,
+  Plus,
+  Sparkles,
+} from "lucide-react";
 import { useNext } from "@/components/next/contexto";
 import { Abrir, Card, Kpi, Pill, Vazio } from "@/components/next/ui";
+import {
+  EntregaSocial,
+  ehSocial,
+  formatoLabel,
+  novaEntrega,
+  publicarBR,
+  textoItem,
+  type TarefaSocial,
+} from "@/components/next/entrega-social";
 import {
   STATUS_COR,
   STATUS_LABEL,
@@ -19,11 +36,6 @@ import {
 
 const CSS = `
 .nxp-kpis{display:grid;gap:14px;grid-template-columns:repeat(5,1fr)}
-.nxp-chk{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;color:var(--ink3);margin-left:6px}
-.nxp-it{display:flex;align-items:center;gap:6px;width:100%;text-align:left}
-.nxp-it b{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nxp-it small{color:var(--ink3);font-size:10.5px;white-space:nowrap}
-.nxp-it small.late{color:var(--red);font-weight:600}
 .nxp-atalhos{display:flex;flex-wrap:wrap;gap:8px}
 .nxp-proj{display:grid;gap:0}
 .nxp-proj .p{display:grid;gap:6px;padding:10px 6px;border-top:1px solid var(--line)}
@@ -31,11 +43,26 @@ const CSS = `
 .nxp-proj .h{display:flex;align-items:center;gap:8px;min-width:0}
 .nxp-proj .h b{font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nxp-proj .h span{font-size:11px;color:var(--ink3);white-space:nowrap;font-variant-numeric:tabular-nums}
-.nxp-modo{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.nxp-modo div{padding:10px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--line);font-size:12.5px}
-.nxp-modo b{display:block;font-weight:600;margin-bottom:2px}
-.nxp-modo span{color:var(--ink3);font-size:11.5px}
-@media (max-width:900px){.nxp-kpis{grid-template-columns:repeat(2,1fr);gap:10px}.nxp-kpis .nx-kpi:last-child{grid-column:span 2}}
+.nxp-st{display:flex;flex-wrap:wrap;gap:8px}
+.nxp-st button{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--line);font-size:12.5px;color:var(--ink2);min-height:38px}
+.nxp-st button:hover{background:var(--glass2);color:var(--ink)}
+.nxp-st i{width:8px;height:8px;border-radius:50%;flex:none}
+.nxp-st b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--ink)}
+.nxp-soc{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 6px;border-top:1px solid var(--line);min-height:48px;cursor:pointer;border-radius:10px;text-align:left;width:100%}
+.nxp-soc:first-child{border-top:0}
+.nxp-soc:hover{background:var(--glass2)}
+.nxp-soc .fmt{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:4px 8px;border-radius:8px;background:var(--glass2);border:1px solid var(--line);color:var(--ink2);white-space:nowrap;min-width:64px;text-align:center}
+.nxp-soc .t{min-width:0}
+.nxp-soc .t b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nxp-soc .t span{display:block;font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nxp-soc .d{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:11px;color:var(--ink3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.nxp-soc .d b{font-weight:600;color:var(--ink)}
+.nxp-soc .d .late{color:var(--red);font-weight:600}
+@media (max-width:900px){
+  .nxp-kpis{grid-template-columns:repeat(2,1fr);gap:10px}.nxp-kpis .nx-kpi:last-child{grid-column:span 2}
+  .nxp-soc{grid-template-columns:1fr auto;row-gap:4px}
+  .nxp-soc .fmt{grid-column:1 / -1;justify-self:start;min-width:0}
+}
 `;
 
 const ORDEM = ["backlog", "iniciar", "andamento", "aprovacao", "homologcli", "concluido"];
@@ -52,16 +79,21 @@ export function Producao() {
   const { carga, nomes, tarefas, abrirApp } = useNext();
   const st = useMemo(() => carga?.state || {}, [carga]);
   const hoje = hojeSP();
+  const [sel, setSel] = useState<{ t: TarefaSocial; nova: boolean } | null>(null);
 
   const v = useMemo(() => {
     const abertas = tarefas.filter(aberta);
-    const porStatus: Record<string, Tarefa[]> = {};
-    for (const s of ORDEM) porStatus[s] = [];
+    const porStatus: Record<string, number> = {};
+    for (const s of ORDEM) porStatus[s] = 0;
     for (const t of tarefas) {
-      const s = t.status && porStatus[t.status] ? t.status : "backlog";
-      porStatus[s].push(t);
+      const s = t.status && t.status in porStatus ? t.status : "backlog";
+      porStatus[s] += 1;
     }
-    for (const s of ORDEM) porStatus[s].sort(ordData);
+    const social = (abertas as TarefaSocial[])
+      .filter(ehSocial)
+      .sort(
+        (a, b) => (a.publicarEm || "9999").localeCompare(b.publicarEm || "9999") || ordData(a, b),
+      );
     const caps = captacoes(st);
     const capsAbertas = caps.filter((c) => c.status !== "concluida");
     const proximas = capsAbertas.filter((c) => c.data && c.data >= hoje).sort(ordData);
@@ -85,6 +117,7 @@ export function Producao() {
     return {
       abertas,
       porStatus,
+      social,
       andamento: abertas.filter((t) => t.status === "andamento").length,
       homolog: abertas.filter((t) => t.status === "aprovacao" || t.status === "homologcli").length,
       atrasadas: abertas.filter((t) => t.data && t.data < hoje).length,
@@ -99,6 +132,9 @@ export function Producao() {
 
   const temProducao = "wfa-producao" in st;
   const temProjetos = "wfa-projetos" in st;
+
+  const abrirCartao = (t: Tarefa) => setSel({ t: t as TarefaSocial, nova: false });
+  const novaEnt = () => setSel({ t: novaEntrega(), nova: true });
 
   const linhaCap = (c: Captacao, extra?: string) => {
     const pop = Array.isArray(c.pop) ? c.pop : [];
@@ -140,12 +176,73 @@ export function Producao() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <h1 className="nx-h1">Produção</h1>
       <p className="nx-sub">
-        Quadro da equipe inteira: {v.abertas.length} tarefa{v.abertas.length === 1 ? "" : "s"}{" "}
-        aberta{v.abertas.length === 1 ? "" : "s"} de {tarefas.length} no total, contando cartões de
-        projeto uma vez só.
+        {v.abertas.length} tarefa{v.abertas.length === 1 ? "" : "s"} aberta
+        {v.abertas.length === 1 ? "" : "s"} de {tarefas.length}, contando cartões de projeto uma vez
+        só.
       </p>
 
       <div className="nx-grid">
+        <Card
+          className="c12"
+          title="Entregas de social"
+          icon={<Instagram size={16} />}
+          count={v.social.length}
+          action={
+            <button type="button" className="nx-btn" onClick={novaEnt}>
+              <Plus size={14} /> Nova entrega
+            </button>
+          }
+        >
+          {v.social.length === 0 ? (
+            <Vazio
+              titulo="Nenhuma entrega de social aberta"
+              texto="Uma tarefa vira entrega quando ganha formato ou data de publicação. Crie a primeira em Nova entrega ou abra uma tarefa do checklist abaixo."
+            />
+          ) : (
+            <div>
+              {v.social.map((t) => {
+                const ck = Array.isArray(t.checklist) ? t.checklist : [];
+                const feitos = ck.filter((i) => i && i.done).length;
+                const late = !!t.data && t.data < hoje;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    className="nxp-soc"
+                    onClick={() => abrirCartao(t)}
+                    title={ck.map(textoItem).join(", ") || undefined}
+                  >
+                    <span className="fmt">{formatoLabel(t.formato) || "post"}</span>
+                    <span className="t">
+                      <b>{t.title || "(sem título)"}</b>
+                      <span>
+                        {[
+                          nomes[t.clienteId || ""],
+                          t.resp,
+                          STATUS_LABEL[t.status || ""],
+                          ck.length ? `checklist ${feitos}/${ck.length}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    </span>
+                    <span className="d">
+                      <b>
+                        {t.publicarEm
+                          ? `publica ${publicarBR(t.publicarEm)}`
+                          : "sem data de publicação"}
+                      </b>
+                      <span className={late ? "late" : ""}>
+                        {t.data ? `prazo ${dataBR(t.data).slice(0, 5)}` : "sem prazo"}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+
         <div className="c12 nxp-kpis">
           <Kpi
             label="Abertas"
@@ -185,7 +282,7 @@ export function Producao() {
 
         <Card
           className="c12"
-          title="Quadro por status"
+          title="Por status"
           icon={<LayoutGrid size={16} />}
           action={<Abrir onClick={() => abrirApp("tarefas")}>Kanban completo</Abrir>}
         >
@@ -195,52 +292,19 @@ export function Producao() {
               texto="Crie a primeira no Kanban do clássico."
             />
           ) : (
-            <div className="nx-cols">
-              {ORDEM.map((s) => {
-                const lst = v.porStatus[s];
-                return (
-                  <div key={s} className="nx-col">
-                    <div className="h">
-                      <i style={{ background: STATUS_COR[s] }} />
-                      {STATUS_LABEL[s]}
-                      <b>{lst.length}</b>
-                    </div>
-                    {lst.length === 0 && (
-                      <div className="nx-mute" style={{ fontSize: 12 }}>
-                        vazia
-                      </div>
-                    )}
-                    {lst.slice(0, 5).map((t) => {
-                      const late = aberta(t) && !!t.data && t.data < hoje;
-                      const c = chk(t);
-                      return (
-                        <button
-                          key={t.id}
-                          type="button"
-                          className="it nxp-it"
-                          onClick={() => abrirApp("tarefas")}
-                          title={[t.title, nomes[t.clienteId || ""], t.resp]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        >
-                          <b>{t.title || "(sem título)"}</b>
-                          {c && <span className="nxp-chk">{c}</span>}
-                          {t.data && (
-                            <small className={late ? "late" : ""}>
-                              {dataBR(t.data).slice(0, 5)}
-                            </small>
-                          )}
-                        </button>
-                      );
-                    })}
-                    {lst.length > 5 && (
-                      <div className="nx-mute" style={{ fontSize: 11, marginTop: 6 }}>
-                        +{lst.length - 5} no Kanban
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="nxp-st">
+              {ORDEM.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => abrirApp("tarefas")}
+                  title={`${STATUS_LABEL[s]}: abrir no Kanban`}
+                >
+                  <i style={{ background: STATUS_COR[s] }} />
+                  {STATUS_LABEL[s]}
+                  <b>{v.porStatus[s]}</b>
+                </button>
+              ))}
             </div>
           )}
         </Card>
@@ -341,14 +405,22 @@ export function Producao() {
           {v.comChecklist.length === 0 ? (
             <Vazio
               titulo="Nenhuma tarefa aberta com checklist"
-              texto="Checklist é preenchido no modal da tarefa, no clássico."
+              texto="Abra uma entrega de social e adicione itens no cartão."
             />
           ) : (
             <div>
               {v.comChecklist.slice(0, 8).map((t) => {
                 const late = !!t.data && t.data < hoje;
+                const projeto = String(t.id).startsWith("pj:");
                 return (
-                  <div key={t.id} className="nx-row clk" onClick={() => abrirApp("tarefas")}>
+                  <div
+                    key={t.id}
+                    className="nx-row clk"
+                    onClick={() => (projeto ? abrirApp("projetos") : abrirCartao(t))}
+                    title={
+                      projeto ? "Cartão de projeto: abre no quadro de Projetos" : "Abrir cartão"
+                    }
+                  >
                     <span
                       className="dot"
                       style={{ background: STATUS_COR[t.status || "backlog"] || "#888" }}
@@ -387,33 +459,10 @@ export function Producao() {
               Briefings
             </button>
           </div>
-          <div className="nx-h2" style={{ marginTop: 6 }}>
-            Modo Criador: o que a entrega de social tem hoje
-          </div>
-          <div className="nxp-modo">
-            <div>
-              <b>Prazo e checklist</b>
-              <span>na tarefa (campos data e checklist)</span>
-            </div>
-            <div>
-              <b>Briefing</b>
-              <span>em Briefings, no clássico</span>
-            </div>
-            <div>
-              <b>Formato e data de publicação</b>
-              <span>no editorial (/calendario)</span>
-            </div>
-            <div>
-              <b>Legenda e mídia</b>
-              <span>no Estúdio (roteirista, legenda) e no Drive</span>
-            </div>
-          </div>
-          <p className="nx-mute" style={{ fontSize: 11.5, margin: 0 }}>
-            Ainda não existe um registro único juntando tudo isso por entrega. Este painel mostra o
-            que o dado atual permite.
-          </p>
         </Card>
       </div>
+
+      <EntregaSocial tarefa={sel?.t || null} nova={!!sel?.nova} onFechar={() => setSel(null)} />
     </>
   );
 }
