@@ -269,7 +269,7 @@ function seedValhalla(){
 /* Roster do organograma de setembro/2026. Sairam Marcio, Luckas Gomes e Giuseppe;
    entraram Caio (PO), Guilherme (trafego), Christopher Mike, Victor e Darman.
    Tirar da lista so muda o seletor: tarefa ja salva guarda o nome em texto. */
-const TEAM_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Saulo','Caio Neves','Guilherme','Bruno','Maria Luiza','Samuel Magalhães','M. Portela','Christopher Mike','Victor','Darman','Omar','Henrique','Nicolas','Kaique','Lush','Anderson','João Gabriel','Maria Clara'];
+const TEAM_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Saulo','Caio Neves','Guilherme','Bruno','Maria Luiza','Samuel Magalhães','M. Portela','Christopher Mike','Victor','Darman','Omar','Henrique','Nicolas','Kaique','Lush','Anderson','João Gabriel','Maria Clara','Yuri'];
 function loadColabCustom(){ try{ return JSON.parse(localStorage.getItem('wfa-colab-custom')||'[]'); }catch(e){ return []; } }
 function saveColabCustom(arr){ localStorage.setItem('wfa-colab-custom', JSON.stringify(arr)); if(typeof rebuildPeople==='function')rebuildPeople(); fillRespSelects(); if(typeof renderMeuDia==='function')renderMeuDia(); }
 // Lista completa da equipe (base + adicionados), sem duplicar.
@@ -5004,7 +5004,7 @@ function mdRenderBriefings(){
 
 /* ============ IDENTIDADE / MÊS ============ */
 const ROLE_LABEL={admin:'CEO · Admin',gestor:'Gestor',financeiro:'Financeiro',operacao:'Operação',comercial:'Comercial',marketing:'Marketing',viewer:'Visualização',avaliador:'Avaliador · Professor'};
-const MD_PEOPLE_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Samuel Magalhães','Maria Luiza','Bruno','Saulo','Henrique','Nicolas','Luckas Gomes','Giuseppe','Márcio','Kaique'];
+const MD_PEOPLE_BASE=['Gabriel Andrade','Danilo de Lima','Lucas Rosi','Samuel Magalhães','Maria Luiza','Bruno','Saulo','Henrique','Nicolas','Luckas Gomes','Giuseppe','Márcio','Kaique','Yuri'];
 let MD_PEOPLE=MD_PEOPLE_BASE.slice();
 function rebuildPeople(){ MD_PEOPLE = MD_PEOPLE_BASE.concat(loadColabCustom().filter(n=>!MD_PEOPLE_BASE.includes(n))); }
 rebuildPeople();
