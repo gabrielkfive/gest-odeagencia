@@ -70,13 +70,18 @@ function texto(v: unknown, max: number): string {
   return typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "";
 }
 
-function validar(body: Record<string, unknown>): { ok: true; dados: Entrada } | { ok: false; erro: string } {
+function validar(
+  body: Record<string, unknown>,
+): { ok: true; dados: Entrada } | { ok: false; erro: string } {
   const nome = texto(body.nome, 120);
   if (!nome) return { ok: false, erro: "Diga seu nome." };
   const empresa = texto(body.empresa, 120);
   const whatsapp = String(body.whatsapp ?? "").replace(/\D/g, "");
   if (whatsapp.length < 10 || whatsapp.length > 13)
-    return { ok: false, erro: "WhatsApp inválido. Informe o número com DDD, só dígitos (10 a 13)." };
+    return {
+      ok: false,
+      erro: "WhatsApp inválido. Informe o número com DDD, só dígitos (10 a 13).",
+    };
   const email = texto(body.email, 160);
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     return { ok: false, erro: "E-mail inválido." };
@@ -87,7 +92,10 @@ function validar(body: Record<string, unknown>): { ok: true; dados: Entrada } | 
 // ---- Gravação em wfa-crm com mescla por item ----------------------------------------
 function novoLead(d: Entrada) {
   const now = new Date().toISOString();
-  const obs = [d.mensagem, d.email ? `E-mail: ${d.email}` : ""].filter(Boolean).join("\n\n").slice(0, 4000);
+  const obs = [d.mensagem, d.email ? `E-mail: ${d.email}` : ""]
+    .filter(Boolean)
+    .join("\n\n")
+    .slice(0, 4000);
   return {
     id: "crm" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     nm: d.empresa ? `${d.empresa} (${d.nome})` : d.nome,
@@ -124,8 +132,14 @@ type Gravacao = { ok: true; repetido: boolean; id?: string } | { ok: false };
 async function gravarLead(db: any, d: Entrada): Promise<Gravacao> {
   for (let tentativa = 0; tentativa < TENTATIVAS; tentativa++) {
     const { data: row, error: e1 } = await db
-      .from("workflowark_state").select("data,updated_at").eq("key", CHAVE).maybeSingle();
-    if (e1) { console.error(`[lead-site] leitura de ${CHAVE} falhou`); return { ok: false }; }
+      .from("workflowark_state")
+      .select("data,updated_at")
+      .eq("key", CHAVE)
+      .maybeSingle();
+    if (e1) {
+      console.error(`[lead-site] leitura de ${CHAVE} falhou`);
+      return { ok: false };
+    }
     const atual: unknown[] = Array.isArray(row?.data) ? row.data : [];
     // Dedupe olhando a leitura mais fresca possível (dentro do laço).
     if (ehRepetido(atual, d.whatsapp)) return { ok: true, repetido: true };
@@ -133,9 +147,14 @@ async function gravarLead(db: any, d: Entrada): Promise<Gravacao> {
     let deletados: unknown[] = [];
     try {
       const { data: lap } = await db
-        .from("workflowark_state").select("data").eq("key", "wfa-deleted-ids").maybeSingle();
+        .from("workflowark_state")
+        .select("data")
+        .eq("key", "wfa-deleted-ids")
+        .maybeSingle();
       if (Array.isArray(lap?.data)) deletados = lap.data;
-    } catch { /* sem lápide: mescla sem ela */ }
+    } catch {
+      /* sem lápide: mescla sem ela */
+    }
 
     const lead = novoLead(d);
     const mesclado = mesclarChave(CHAVE, atual, [lead], deletados);
@@ -151,8 +170,12 @@ async function gravarLead(db: any, d: Entrada): Promise<Gravacao> {
       .eq("key", CHAVE)
       .eq("updated_at", row.updated_at)
       .select("key");
-    if (error) { console.error(`[lead-site] update de ${CHAVE} falhou`); return { ok: false }; }
-    if (Array.isArray(gravadas) && gravadas.length) return { ok: true, repetido: false, id: lead.id };
+    if (error) {
+      console.error(`[lead-site] update de ${CHAVE} falhou`);
+      return { ok: false };
+    }
+    if (Array.isArray(gravadas) && gravadas.length)
+      return { ok: true, repetido: false, id: lead.id };
     console.warn(`[lead-site] tentativa ${tentativa + 1}: updated_at mudou no meio, repetindo`);
   }
   return { ok: false };
@@ -168,24 +191,33 @@ export const Route = createFileRoute("/api/workflowark/lead-site")({
           return json({ error: "Envie o formulário em JSON." }, { status: 415 });
 
         const declarado = Number(request.headers.get("content-length") || 0);
-        if (declarado > MAX_CORPO) return json({ error: "Mensagem grande demais." }, { status: 413 });
+        if (declarado > MAX_CORPO)
+          return json({ error: "Mensagem grande demais." }, { status: 413 });
         const bruto = await request.text();
-        if (bruto.length > MAX_CORPO) return json({ error: "Mensagem grande demais." }, { status: 413 });
+        if (bruto.length > MAX_CORPO)
+          return json({ error: "Mensagem grande demais." }, { status: 413 });
 
         let body: Record<string, unknown>;
         try {
           const parsed = JSON.parse(bruto);
-          if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("formato");
+          if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+            throw new Error("formato");
           body = parsed;
         } catch {
-          return json({ error: "Não entendi o envio. Recarregue a página e tente de novo." }, { status: 400 });
+          return json(
+            { error: "Não entendi o envio. Recarregue a página e tente de novo." },
+            { status: 400 },
+          );
         }
 
         // Honeypot: robô preencheu "site". Finge sucesso e não grava nada.
         if (typeof body.site === "string" && body.site.trim()) return json({ ok: true });
 
         if (passouDoLimite(ipDe(request)))
-          return json({ error: "Muitos envios seguidos. Aguarde alguns minutos e tente de novo." }, { status: 429 });
+          return json(
+            { error: "Muitos envios seguidos. Aguarde alguns minutos e tente de novo." },
+            { status: 429 },
+          );
 
         const v = validar(body);
         if (!v.ok) return json({ error: v.erro }, { status: 400 });
@@ -193,12 +225,19 @@ export const Route = createFileRoute("/api/workflowark/lead-site")({
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const r = await gravarLead(supabaseAdmin as any, v.dados);
-          if (!r.ok) return json({ error: "Não foi possível registrar agora. Tente de novo em instantes." }, { status: 500 });
+          if (!r.ok)
+            return json(
+              { error: "Não foi possível registrar agora. Tente de novo em instantes." },
+              { status: 500 },
+            );
           console.log(`[lead-site] ${r.repetido ? "repetido" : "novo lead " + r.id}`);
           return json(r.repetido ? { ok: true, repetido: true } : { ok: true });
         } catch {
           console.error("[lead-site] falha inesperada ao gravar");
-          return json({ error: "Não foi possível registrar agora. Tente de novo em instantes." }, { status: 500 });
+          return json(
+            { error: "Não foi possível registrar agora. Tente de novo em instantes." },
+            { status: 500 },
+          );
         }
       },
     },
