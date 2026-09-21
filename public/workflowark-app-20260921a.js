@@ -3827,6 +3827,10 @@ function cobToggle(id,on,mes){
     delete d.cobradoMeses[key];
     d.feitas=Math.max(0,(d.feitas||1)-1);
   }
+  /* carimbo por cliente (21/09/2026): o servidor mescla wfa-cobranca por cliente e, com
+     `up` dos dois lados, o mais novo vence inteiro; assim marcar E desmarcar viajam entre
+     aparelhos sem uma copia velha apagar o que o outro fez (src/lib/merge-estado.js). */
+  d.up=(typeof wfaAgoraISO==='function')?wfaAgoraISO():new Date().toISOString();
   saveCobranca();renderCobranca();
 }
 function cobCopiar(id){

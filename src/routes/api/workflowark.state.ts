@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { hojeSP } from "@/lib/datas";
 // JavaScript puro de propósito (o teste deploy/teste-merge-estado.mjs importa direto no Node).
 // @ts-ignore
-import { CHAVES_MESCLA, mesclarChave } from "@/lib/merge-estado.js";
+import { CHAVES_MESCLA, CHAVES_OBJETO, mesclarChave } from "@/lib/merge-estado.js";
 
 const STATE_KEYS = new Set([
   "wfa-tarefas",
@@ -118,7 +118,7 @@ type WorkflowMember = {
    Até 4 tentativas: (1) lê a linha atual e a lápide; (2) mescla por item; (3) UPDATE
    condicionado ao updated_at lido (se outro save entrou no meio, zero linhas voltam e
    repete). Linha inexistente: INSERT (conflito de chave = alguém criou antes, repete). */
-async function salvarMesclando(ctx: { db: any; user: { id: string } }, key: string, novo: unknown[]): Promise<boolean> {
+async function salvarMesclando(ctx: { db: any; user: { id: string } }, key: string, novo: unknown): Promise<boolean> {
   for (let tentativa = 0; tentativa < 4; tentativa++) {
     const { data: row, error: e1 } = await ctx.db
       .from("workflowark_state").select("data,updated_at").eq("key", key).maybeSingle();
@@ -129,7 +129,7 @@ async function salvarMesclando(ctx: { db: any; user: { id: string } }, key: stri
         .from("workflowark_state").select("data").eq("key", "wfa-deleted-ids").maybeSingle();
       if (Array.isArray(lap?.data)) deletados = lap.data;
     } catch { /* sem lápide no servidor: mescla sem ela */ }
-    const atual = Array.isArray(row?.data) ? row.data : [];
+    const atual = row?.data ?? (Array.isArray(novo) ? [] : {});
     const mesclado = mesclarChave(key, atual, novo, deletados);
     if (!row) {
       const { error } = await ctx.db.from("workflowark_state").insert({ key, data: mesclado, updated_by: ctx.user.id });
@@ -519,7 +519,8 @@ export const Route = createFileRoute("/api/workflowark/state")({
           // impossivel de investigar sem estar na frente do aparelho que falha.
           const quem = String((ctx.member as any)?.email || ctx.user.id || "?");
           const tam = Array.isArray(data) ? data.length : (data == null ? 0 : JSON.stringify(data).length);
-          if (CHAVES_MESCLA.includes(key) && Array.isArray(data)) {
+          const ehObjeto = !!data && typeof data === "object" && !Array.isArray(data);
+          if ((CHAVES_MESCLA.includes(key) && Array.isArray(data)) || (CHAVES_OBJETO.includes(key) && ehObjeto)) {
             const ok = await salvarMesclando(ctx, key, data);
             console.log(`[save-state] ${quem} ${key} itens=${tam} mesclado=${ok ? "ok" : "FALHOU"}`);
             if (!ok) return json({ error: "Não foi possível salvar." }, { status: 500 });

@@ -13,7 +13,7 @@
  Uso: node deploy/teste-merge-estado.mjs
 */
 import { readFile } from 'fs/promises';
-import { mesclarPorId, mesclarChave, CHAVES_MESCLA, CHAVES_LAPIDE } from '../src/lib/merge-estado.js';
+import { mesclarPorId, mesclarChave, mesclarCobranca, CHAVES_MESCLA, CHAVES_LAPIDE, CHAVES_OBJETO } from '../src/lib/merge-estado.js';
 
 const falhas = [];
 const ok = [];
@@ -125,6 +125,26 @@ checa(listaDe('WFA_TOMBSTONE_KEYS').sort().join() === [...CHAVES_LAPIDE].sort().
 {
   checa(mesclarChave('wfa-regua', { a: 1 }, { b: 2 }, []).b === 2, 'chave nao-mesclavel: grava o que o cliente mandou');
   checa(mesclarChave('wfa-tarefas', [{ id: 'z' }], null, []) === null, 'null (delecao explicita) passa como veio');
+}
+
+// 6) wfa-cobranca (objeto por cliente, 21/09/2026): copia velha nao apaga mes cobrado.
+{
+  checa(CHAVES_OBJETO.includes('wfa-cobranca'), 'wfa-cobranca esta em CHAVES_OBJETO (mescla no servidor)');
+  // servidor tem set marcado pelo celular; PC salva copia velha sem setembro (sem `up` dos dois lados)
+  const servidor = { vivenda: { cobradoMes: '2026-09', cobradoMeses: { '2026-08': true, '2026-09': true }, feitas: 4 } };
+  const pcVelho = { vivenda: { cobradoMes: '2026-08', cobradoMeses: { '2026-08': true }, feitas: 3, pix: 'novo@pix' }, fercon: { cobradoMeses: { '2026-09': true } } };
+  const m = mesclarChave('wfa-cobranca', servidor, pcVelho, []);
+  checa(m.vivenda.cobradoMeses['2026-09'] === true && m.vivenda.cobradoMes === '2026-09', 'setembro marcado sobrevive a save de copia velha (uniao)');
+  checa(m.vivenda.pix === 'novo@pix' && m.vivenda.feitas === 4, 'campo novo do PC entra, feitas fica o maior');
+  checa(!!m.fercon && m.fercon.cobradoMeses['2026-09'] === true, 'cliente que so existia no PC entra');
+  // com `up` dos dois lados, o mais novo vence inteiro (desmarcar tambem viaja)
+  const s2 = { vivenda: { cobradoMeses: { '2026-09': true }, cobradoMes: '2026-09', up: '2026-09-21T10:00:00.000Z' } };
+  const desmarca = { vivenda: { cobradoMeses: {}, cobradoMes: '', up: '2026-09-21T11:00:00.000Z' } };
+  const m2 = mesclarCobranca(s2, desmarca);
+  checa(!m2.vivenda.cobradoMeses['2026-09'], 'desmarcar com carimbo mais novo vence');
+  const m3 = mesclarCobranca(desmarca, s2);
+  checa(!m3.vivenda.cobradoMeses['2026-09'], 'carimbo mais velho (novo) nao sobrescreve o mais novo (servidor)');
+  checa(Array.isArray(mesclarChave('wfa-cobranca', {}, [], [])), 'lista em chave objeto passa direto (compatibilidade)');
 }
 
 console.log('=== PASSOU ===');

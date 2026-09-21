@@ -40,6 +40,12 @@ export const CHAVES_MESCLA = [
   "wfa-projetos",
 ];
 
+/* Blocos OBJETO (chave = clienteId) que tambem precisam de mescla no servidor. Bug de
+   21/09/2026 (Gabriel): os meses marcados como cobrados sumiam. Causa: wfa-cobranca era
+   gravado por upsert cego; um aparelho com copia velha (ou o seed historico no boot)
+   sobrescrevia o que outro aparelho tinha marcado. Regra por cliente abaixo. */
+export const CHAVES_OBJETO = ["wfa-cobranca"];
+
 export const CHAVES_LAPIDE = [
   "wfa-tarefas",
   "wfa-agenda-events",
@@ -148,7 +154,37 @@ export function mesclarProjetos(atual, novo, deletados) {
 
 /* Ponto unico usado pelo save-state. Chave fora da lista de mescla, ou valor que nao e
    lista: devolve o que o cliente mandou (comportamento de sempre). */
+const ehObj = (v) => v && typeof v === "object" && !Array.isArray(v);
+
+/* wfa-cobranca: { [clienteId]: { cobradoMes, cobradoMeses:{ "AAAA-MM": true }, feitas, resp,
+   whatsapp, pix, _valor, _nome, up? } }. Por cliente: os dois lados com `up`, vence o mais
+   novo inteiro (assim desmarcar um mes tambem viaja); sem `up` dos dois lados, campos do
+   cliente que salva por cima, MAS cobradoMeses vira UNIAO, cobradoMes o maior e feitas o
+   maior: mes marcado nunca some por copia velha. */
+export function mesclarCobranca(atual, novo) {
+  const a = ehObj(atual) ? atual : {};
+  const n = ehObj(novo) ? novo : {};
+  const out = {};
+  const ids = new Set([...Object.keys(a), ...Object.keys(n)]);
+  for (const id of ids) {
+    const x = ehObj(a[id]) ? a[id] : null;
+    const y = ehObj(n[id]) ? n[id] : null;
+    if (!x) { out[id] = y || a[id]; continue; }
+    if (!y) { out[id] = x; continue; }
+    if (x.up && y.up) { out[id] = y.up >= x.up ? y : x; continue; }
+    const meses = Object.assign({}, x.cobradoMeses || {}, y.cobradoMeses || {});
+    const cm = [x.cobradoMes, y.cobradoMes].filter(Boolean).sort().pop() || "";
+    out[id] = Object.assign({}, x, y, {
+      cobradoMeses: meses,
+      cobradoMes: cm,
+      feitas: Math.max(Number(x.feitas) || 0, Number(y.feitas) || 0),
+    });
+  }
+  return out;
+}
+
 export function mesclarChave(key, atual, novo, deletados) {
+  if (CHAVES_OBJETO.includes(key) && ehObj(novo)) return mesclarCobranca(atual, novo);
   if (!CHAVES_MESCLA.includes(key) || !Array.isArray(novo)) return novo;
   const del = CHAVES_LAPIDE.includes(key) ? deletados : [];
   if (key === "wfa-projetos") return mesclarProjetos(atual, novo, del);
