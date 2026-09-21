@@ -238,9 +238,9 @@ function NextShell() {
   const [menuId, setMenuId] = useState<MenuDef["id"]>("v2");
   const [grupos, setGrupos] = useState<Record<string, boolean>>({});
   useEffect(() => {
-    try { const v = localStorage.getItem("nx-menu"); if (v === "v2" || v === "agencyflow" || v === "modocriador" || v === "ark") setMenuId(v); } catch { /* sem storage */ }
+    try { const v = localStorage.getItem("nx-menu-v2"); if (v === "v2" || v === "agencyflow" || v === "modocriador" || v === "ark") setMenuId(v); } catch { /* sem storage */ }
   }, []);
-  const trocarMenu = (id: MenuDef["id"]) => { setMenuId(id); try { localStorage.setItem("nx-menu", id); } catch { /* sem storage */ } };
+  const trocarMenu = (id: MenuDef["id"]) => { setMenuId(id); try { localStorage.setItem("nx-menu-v2", id); } catch { /* sem storage */ } };
   const menuDef = MENUS.find((m) => m.id === menuId) || MENUS[0];
   const ir = (d: Destino) => {
     setMenu(false);
@@ -259,7 +259,7 @@ function NextShell() {
 
   return (
     <Ctx.Provider value={ctx}>
-      <div className={`nx ${claro ? "claro" : ""}`} data-build="v2-20260921a">
+      <div className={`nx ${claro ? "claro" : ""}`} data-build="v2-20260921b">
         <style dangerouslySetInnerHTML={{ __html: CSS }} />
         <div className="nx-bg" aria-hidden="true">
           <i />
@@ -350,6 +350,7 @@ function NextShell() {
               <span>WorkFlowArk clássico</span>
             </a>
             <div className="nx-foot">
+              <span style={{ display: "block", color: "var(--yel)", fontSize: 10.5, letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 4 }}>WorkFlowArk 2 · v2-20260921b</span>
               {member?.full_name || member?.email || ""}
               {member?.role ? ` · ${member.role}` : ""}
               <br />
