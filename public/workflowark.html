@@ -1,4 +1,4 @@
-<!-- build 20260921a-cobranca-merge -->
+<!-- build 20260921b-lote1-app -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -49,6 +49,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
 <link rel="stylesheet" href="workflowark-20260915a.css">
+<link rel="stylesheet" href="workflowark-cliente-20260921a.css">
+<style>.side-foot .av{min-width:34px;width:34px;height:34px;overflow:hidden;flex:none}.side-foot .av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.side.compact .side-foot .av{min-width:34px}</style>
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -187,10 +189,6 @@ function wfaSetTheme(t){
         <div class="subitem" data-nav="jornada">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span>Jornada · Sprints</span>
-        </div>
-        <div class="subitem" data-nav="regua">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
-          <span>Régua dos 15</span>
         </div>
         <div class="subitem" data-nav="alpha">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="9" width="3" height="9"/><rect x="12" y="5" width="3" height="13"/><rect x="17" y="12" width="3" height="6"/></svg>
@@ -508,7 +506,6 @@ function wfaSetTheme(t){
             <h1 id="md-greet">Meu Dia</h1>
             <p id="md-sub">Carregando seu dia…</p>
           </div>
-          <a href="/meu-dia" target="_top" class="tb-btn" style="background:#ffd400;color:#000;border-color:#ffd400;text-decoration:none;margin-right:8px" title="Versão nova: agenda Google e tarefas do dia em vidro">✦ Novo Meu Dia</a>
           <button class="icobtn" onclick="renderMeuDia()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>Atualizar</button>
         </div>
 
@@ -4282,6 +4279,7 @@ function wfaSetTheme(t){
         <button class="set-tab active" data-st="perfil" onclick="setTab('perfil')">Perfil</button>
         <button class="set-tab" data-st="equipe" id="set-tab-equipe" onclick="setTab('equipe')" style="display:none">Equipe &amp; Acessos</button>
         <button class="set-tab" data-st="conta" onclick="setTab('conta')">Conta</button>
+        <button class="set-tab" data-st="sistema" onclick="setTab('sistema')">Sistema</button>
       </div>
 
       <!-- PERFIL -->
@@ -4299,14 +4297,21 @@ function wfaSetTheme(t){
           <datalist id="set-people"></datalist>
           <p class="muted" style="font-size:10.5px;margin-top:6px">Use o mesmo nome que aparece nas tarefas (campo "responsável") para o "Meu Dia" reconhecer as suas atividades.</p>
         </div>
-        <div class="set-sect-t" style="margin:18px 0 8px">Preferências de menu</div>
-        <label style="display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer">
-          <input type="checkbox" id="pref-regua" onchange="togglePrefRegua(this.checked)">
-          <span>Mostrar a aba <strong>Régua dos 15</strong> no menu (em Clientes)</span>
-        </label>
-        <p class="muted" style="font-size:10.5px;margin-top:6px">Desligada por padrão enquanto não está em uso. Ligue aqui quando quiser usá-la de novo — nada é apagado.</p>
       </div>
 
+
+      <!-- SISTEMA (blocos aprovados em 21/09, vindos da base v2) -->
+      <div class="set-pane" data-stp="sistema">
+        <div class="set-sect-t" style="margin-bottom:10px">Sistema</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px">
+          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('integracoes')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Marca</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Logo, cores e link público do cliente</div></button>
+          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="setTab('equipe')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Equipe e papéis</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Quem vê o quê. Financeiro restrito.</div></button>
+          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('integracoes')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Integrações</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Google Agenda, Drive, Instagram, WhatsApp, Meta Ads</div></button>
+          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('contratos')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Planos e contratos</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Modelos de contrato e propostas</div></button>
+          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('rotinas')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Automações</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Rotinas e agentes, sempre com aprovação</div></button>
+          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="toast('Assinatura eletrônica: em preparação')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Assinatura eletrônica</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Enviar contrato para assinar (em preparação)</div></button>
+        </div>
+      </div>
       <!-- EQUIPE & ACESSOS (admin) -->
       <div class="set-pane" data-stp="equipe">
         <div class="set-sect-t" style="margin-bottom:4px">Membros da equipe</div>
@@ -4379,6 +4384,7 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260921a.js"></script>
+<script src="workflowark-app-20260921b.js"></script>
+<script src="workflowark-cliente-20260921a.js" defer></script>
 </body>
 </html>

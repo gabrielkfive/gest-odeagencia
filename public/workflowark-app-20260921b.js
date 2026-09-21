@@ -4381,7 +4381,7 @@ function mdRenderDecisoes(){
   }
   if(!cards.length){
     box.style.display='';box.dataset.sig='zero';
-    box.innerHTML='<div class="dec-hd"><b>🎯 Decisões de hoje</b></div><div class="dec-zero"><div class="e">🏆</div><b>A agência está rodando</b><p><span class="pulse-dot"></span>Nada esperando você agora. Os agentes seguem trabalhando — a próxima decisão aparece aqui.</p></div>';
+    box.innerHTML='<div class="dec-hd"><b>Decisões que esperam você</b></div><div class="dec-zero"><div class="e">🏆</div><b>A agência está rodando</b><p><span class="pulse-dot"></span>Nada esperando você agora. Os agentes seguem trabalhando — a próxima decisão aparece aqui.</p></div>';
     return;
   }
   cards.sort((a,b)=>(b.urg||0)-(a.urg||0));
@@ -4390,7 +4390,7 @@ function mdRenderDecisoes(){
   const nUrg=cards.filter(c=>c.urg===2).length;
   const URG_LBL=['pode esperar','importante','urgente'];
   box.style.display='';
-  box.innerHTML='<div class="dec-hd"><b>🎯 Decisões de hoje</b><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou — só falta o seu aval')+'</span></div>'+
+  box.innerHTML='<div class="dec-hd"><b>Decisões que esperam você</b><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou — só falta o seu aval')+'</span></div>'+
     cards.slice(0,8).map(c=>`<div class="dec-card${c.urg===2?' u2':''}"><div class="dec-top"><span class="dec-ico" style="background:${c.bg}">${c.ico}</span><span class="dec-cli">${mdEsc(c.cli)}</span><span class="dec-urg u${c.urg}">${URG_LBL[c.urg]}</span></div><div class="dec-t">${mdEsc(c.t)}</div><div class="dec-d">${mdEsc(c.d)}</div><div class="dec-acts">${c.acts}</div></div>`).join('');
 }
 async function decRoteiro(id,status){
@@ -5076,9 +5076,13 @@ function renderIdentity(){
   const m=WFA_MEMBER;
   const nm=m&&m.full_name?m.full_name:(m&&m.email?m.email.split('@')[0]:'Sem nome');
   const rl=m?(ROLE_LABEL[m.role]||m.role||'Membro'):'—';
-  const av=document.getElementById('side-av');if(av)av.textContent=mdInitial(nm);
+  /* foto do login (Google) quando existe, sigla so de reserva; cargo + ARK Content no rodape (pedido de 21/09) */
+  let foto='';
+  try{const s=JSON.parse(localStorage.getItem('sb-fxfnonozzekxnxddxsnh-auth-token')||'null');const u=s&&s.user&&s.user.user_metadata;foto=(u&&(u.avatar_url||u.picture))||'';}catch(e){}
+  const av=document.getElementById('side-av');
+  if(av){if(foto&&/^(https?:|data:image\/)/.test(foto)){av.innerHTML='<img src="'+foto.replace(/"/g,'')+'" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.textContent=\''+mdInitial(nm).replace(/'/g,'')+'\'">';}else av.textContent=mdInitial(nm);}
   const n=document.getElementById('side-nm');if(n)n.textContent=nm;
-  const r=document.getElementById('side-rl');if(r)r.textContent=rl;
+  const r=document.getElementById('side-rl');if(r)r.textContent=m?rl+' · ARK Content':'ARK Content';
 }
 function renderMonthPill(){
   const el=document.getElementById('tb-month');if(!el)return;
@@ -5087,6 +5091,7 @@ function renderMonthPill(){
 }
 
 /* ============ CONFIGURAÇÕES ============ */
+function openSettingsIr(pagina){try{closeModal('modal-settings');}catch(e){}const el=document.querySelector('[data-nav="'+pagina+'"]');if(el)el.click();}
 function setTab(name){
   document.querySelectorAll('#modal-settings .set-tab').forEach(b=>b.classList.toggle('active',b.dataset.st===name));
   document.querySelectorAll('#modal-settings .set-pane').forEach(p=>p.classList.toggle('active',p.dataset.stp===name));
