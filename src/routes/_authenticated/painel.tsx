@@ -7,7 +7,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bell, Menu, Moon, RefreshCw, Search, Sun, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CSS } from "@/components/next/estilo";
-import { AREAS, Ctx, type AreaId, type NextCtx } from "@/components/next/contexto";
+import { Ctx, type AreaId, type NextCtx } from "@/components/next/contexto";
+import { MENUS, type Destino, type MenuDef } from "@/components/next/menus";
 import {
   aberta,
   carregarEstado,
@@ -231,6 +232,24 @@ function NextShell() {
     atualizadoEm,
   };
 
+  // Layout do menu copiado dos benchmarks (AgencyFlow, Modo Criador) ou ARK; guardado por aparelho.
+  const [menuId, setMenuId] = useState<MenuDef["id"]>("agencyflow");
+  const [grupos, setGrupos] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    try { const v = localStorage.getItem("nx-menu"); if (v === "agencyflow" || v === "modocriador" || v === "ark") setMenuId(v); } catch { /* sem storage */ }
+  }, []);
+  const trocarMenu = (id: MenuDef["id"]) => { setMenuId(id); try { localStorage.setItem("nx-menu", id); } catch { /* sem storage */ } };
+  const menuDef = MENUS.find((m) => m.id === menuId) || MENUS[0];
+  const ir = (d: Destino) => {
+    setMenu(false);
+    if (d.tipo === "painel") {
+      if (d.area === "") navigate({ to: "/painel" });
+      else navigate({ to: "/painel/$area", params: { area: d.area }, search: {} });
+    } else if (d.tipo === "classico") irParaApp(d.pagina);
+    else window.location.href = d.href;
+  };
+  const ativo = (d: Destino) => d.tipo === "painel" && d.area === areaAtual;
+
   const sair = async () => {
     await supabase.auth.signOut();
     navigate({ to: "/auth" });
@@ -264,43 +283,65 @@ function NextShell() {
                 <X size={16} />
               </button>
             </div>
-            <div className="nx-sec">Trabalho</div>
-            {AREAS.map((a) => {
-              const n = badges[a.id] || 0;
-              const on = areaAtual === a.id;
-              const inner = (
-                <>
-                  <a.Icon size={17} strokeWidth={1.9} />
-                  <span>{a.label}</span>
-                  {n > 0 && (
-                    <span className={`n ${a.id === "" || a.id === "aprovacoes" ? "hot" : ""}`}>
-                      {n}
-                    </span>
+            <div className="nx-sec">Menu · {menuDef.nome}</div>
+            {menuDef.itens.map((it) => {
+              const key = it.label;
+              const aberto = !!grupos[key];
+              const on = ativo(it.destino);
+              const n = it.badge !== undefined ? badges[it.badge] || 0 : 0;
+              return (
+                <div key={key}>
+                  <button
+                    type="button"
+                    className={`nx-it ${on ? "on" : ""}`}
+                    onClick={() => {
+                      if (it.filhos) setGrupos((g) => ({ ...g, [key]: !aberto }));
+                      ir(it.destino);
+                    }}
+                  >
+                    {it.Icon && <it.Icon size={17} strokeWidth={1.9} />}
+                    <span>{it.label}</span>
+                    {n > 0 && <span className={`n ${it.badge === "" || it.badge === "aprovacoes" ? "hot" : ""}`}>{n}</span>}
+                    {it.filhos && (
+                      <span style={{ marginLeft: n > 0 ? 6 : "auto", opacity: 0.6, fontSize: 10 }}>{aberto ? "▾" : "▸"}</span>
+                    )}
+                  </button>
+                  {it.filhos && aberto && (
+                    <div style={{ margin: "2px 0 6px 14px", paddingLeft: 10, borderLeft: "1px solid var(--line)" }}>
+                      {it.filhos.map((f) => {
+                        const fn = f.badge ? badges[f.badge] || 0 : 0;
+                        return (
+                          <button
+                            key={f.label}
+                            type="button"
+                            className={`nx-it ${ativo(f.destino) ? "on" : ""}`}
+                            style={{ minHeight: 34, fontSize: 13 }}
+                            onClick={() => ir(f.destino)}
+                          >
+                            <span>{f.label}</span>
+                            {fn > 0 && <span className="n hot">{fn}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
-                </>
-              );
-              return a.id === "" ? (
-                <Link
-                  key="home"
-                  to="/painel"
-                  className={`nx-it ${on ? "on" : ""}`}
-                  onClick={() => setMenu(false)}
-                >
-                  {inner}
-                </Link>
-              ) : (
-                <Link
-                  key={a.id}
-                  to="/painel/$area"
-                  params={{ area: a.id }}
-                  search={{}}
-                  className={`nx-it ${on ? "on" : ""}`}
-                  onClick={() => setMenu(false)}
-                >
-                  {inner}
-                </Link>
+                </div>
               );
             })}
+            <div className="nx-sec">Layout do menu</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "0 6px 4px" }}>
+              {MENUS.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  className={`nx-pill ${m.id === menuId ? "yel" : ""}`}
+                  title={`Estrutura copiada: ${m.fonte}`}
+                  onClick={() => trocarMenu(m.id)}
+                >
+                  {m.nome}
+                </button>
+              ))}
+            </div>
             <div className="nx-sec">Sistema</div>
             <a className="nx-it" href="/app">
               <Menu size={17} strokeWidth={1.9} />
