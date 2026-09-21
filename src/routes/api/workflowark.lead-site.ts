@@ -32,8 +32,28 @@ const DIAS_DEDUPE = 7;
 const TENTATIVAS = 4;
 const CHAVE = "wfa-crm";
 
+// Origens externas autorizadas a postar aqui (landings fora do WorkFlowArk).
+// A landing ArkMed vive no Worker ark-content; sem CORS o navegador barra o POST.
+const ORIGENS_EXTERNAS = new Set([
+  "https://ark-content.arkcontent.workers.dev",
+  "https://arkmed.arkcontent.workers.dev",
+]);
+// Rótulo de origem por landing; qualquer valor fora da lista cai no padrão /conheca.
+const ORIGENS_LEAD: Record<string, { source: string; seg: string }> = {
+  arkmed: { source: "Landing ArkMed", seg: "ArkMed" },
+};
+let origemPedido = "";
+
+function cors(init?: ResponseInit): ResponseInit {
+  if (!origemPedido || !ORIGENS_EXTERNAS.has(origemPedido)) return init || {};
+  const h = new Headers(init?.headers);
+  h.set("Access-Control-Allow-Origin", origemPedido);
+  h.set("Vary", "Origin");
+  return { ...init, headers: h };
+}
+
 function json(data: unknown, init?: ResponseInit) {
-  return Response.json(data, init);
+  return Response.json(data, cors(init));
 }
 
 // ---- Limite por IP (memória do isolate) -----------------------------------------
@@ -64,7 +84,7 @@ function passouDoLimite(ip: string): boolean {
 }
 
 // ---- Validação ---------------------------------------------------------------------
-type Entrada = { nome: string; empresa: string; whatsapp: string; email: string; mensagem: string };
+type Entrada = { nome: string; empresa: string; whatsapp: string; email: string; mensagem: string; origem: string };
 
 function texto(v: unknown, max: number): string {
   return typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "";
@@ -86,7 +106,8 @@ function validar(
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     return { ok: false, erro: "E-mail inválido." };
   const mensagem = typeof body.mensagem === "string" ? body.mensagem.trim().slice(0, 1000) : "";
-  return { ok: true, dados: { nome, empresa, whatsapp, email, mensagem } };
+  const origem = texto(body.origem, 40).toLowerCase();
+  return { ok: true, dados: { nome, empresa, whatsapp, email, mensagem, origem } };
 }
 
 // ---- Gravação em wfa-crm com mescla por item ----------------------------------------
@@ -96,16 +117,17 @@ function novoLead(d: Entrada) {
     .filter(Boolean)
     .join("\n\n")
     .slice(0, 4000);
+  const rotulo = ORIGENS_LEAD[d.origem] || { source: "Site /conheca", seg: "Landing" };
   return {
     id: "crm" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     nm: d.empresa ? `${d.empresa} (${d.nome})` : d.nome,
     contact: d.whatsapp,
-    seg: "Landing",
+    seg: rotulo.seg,
     val: 0,
     next: "",
     obs,
     resp: "Saulo",
-    source: "Site /conheca",
+    source: rotulo.source,
     stage: 0,
     due: "",
     hist: [],
@@ -185,7 +207,20 @@ async function gravarLead(db: any, d: Entrada): Promise<Gravacao> {
 export const Route = createFileRoute("/api/workflowark/lead-site")({
   server: {
     handlers: {
+      OPTIONS: async ({ request }) => {
+        origemPedido = request.headers.get("origin") || "";
+        const h = new Headers();
+        if (ORIGENS_EXTERNAS.has(origemPedido)) {
+          h.set("Access-Control-Allow-Origin", origemPedido);
+          h.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+          h.set("Access-Control-Allow-Headers", "Content-Type");
+          h.set("Access-Control-Max-Age", "86400");
+          h.set("Vary", "Origin");
+        }
+        return new Response(null, { status: 204, headers: h });
+      },
       POST: async ({ request }) => {
+        origemPedido = request.headers.get("origin") || "";
         const ct = (request.headers.get("content-type") || "").toLowerCase();
         if (!ct.includes("application/json"))
           return json({ error: "Envie o formulário em JSON." }, { status: 415 });
