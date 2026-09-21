@@ -611,4 +611,55 @@
     }
     window.renderProjetos = function () { orig(); try { visao(); } catch (e) { console.warn("nx projetos", e); } };
   })();
+
+  /* Producao audiovisual "que pensa" (21/09, voz do Gabriel): compara o combinado de cada
+     cliente (campo `cap` = captacoes por mes na carteira) com as captacoes agendadas no mes
+     (wfa-producao) e com os reels/videos com data de publicacao sem captacao. Sugere e
+     pre-preenche o formulario existente (prodNovaToggle + prodCriar), sem criar nada sozinho. */
+  (function () {
+    var orig = window.renderProducao;
+    if (typeof orig !== "function") return;
+    function plano() {
+      var list = document.getElementById("prod-list");
+      if (!list) return;
+      var box = document.getElementById("nx-prod-plano");
+      if (!box) { box = document.createElement("div"); box.id = "nx-prod-plano"; list.parentElement.insertBefore(box, list); }
+      var mesK = hoje().slice(0, 7);
+      var caps = (typeof loadProducao === "function" ? loadProducao() : []).filter(function (c) { return c && String(c.data || "").slice(0, 7) === mesK; });
+      var cli = (typeof CLIENTES !== "undefined" ? CLIENTES : []).filter(function (c) { return c && c.status !== "churn"; });
+      var linhas = [];
+      cli.forEach(function (c) {
+        var meta = Number(c.cap) || 0;
+        var feitas = caps.filter(function (x) { return x.clienteId === c.id; });
+        var reels = (state.tarefas || []).filter(function (t) { return t && t.clienteId === c.id && t.status !== "concluido" && (t.formato === "reel" || t.origem === "captacao") && String(t.publicarEm || t.data || "").slice(0, 7) === mesK; });
+        var falta = Math.max(0, meta - feitas.length);
+        if (!meta && !reels.length) return;
+        linhas.push({ c: c, meta: meta, feitas: feitas.length, falta: falta, reels: reels });
+      });
+      linhas.sort(function (a, b) { return b.falta - a.falta || b.reels.length - a.reels.length; });
+      var pend = linhas.filter(function (l) { return l.falta > 0; });
+      box.innerHTML = '<div class="nxp-h"><h2>Plano de captações do mês</h2><span class="nxc-mute">' + pend.length + ' cliente(s) abaixo do combinado · combinado vem da carteira (captações por mês)</span></div>'
+        + (linhas.length ? '<div class="nxp-grid">' + linhas.map(function (l) {
+          var pc = l.meta ? Math.min(100, Math.round((100 * l.feitas) / l.meta)) : 0;
+          return '<div class="nxp-card" style="cursor:default">'
+            + '<div class="nxp-top"><b>' + esc(l.c.nm) + '</b>' + (l.meta ? '<span class="nxc-pill">' + l.feitas + "/" + l.meta + " no mês</span>" : '<span class="nxc-pill">sem combinado</span>') + "</div>"
+            + '<div class="nxp-bar"><i style="width:' + pc + '%;background:' + (l.falta ? "#ffd400" : "#4ade80") + '"></i></div>'
+            + '<div class="nxp-m"><span>' + (l.falta ? "faltam " + l.falta + " captação(ões)" : l.meta ? "combinado do mês cumprido" : "") + "</span><span>" + (l.reels.length ? l.reels.length + " reel(s) com data" : "") + "</span></div>"
+            + (l.falta || l.reels.length ? '<button type="button" class="nxc-btn yel" style="align-self:flex-start" onclick="nxProdAgendar(\'' + l.c.id + "')\">Agendar captação</button>" : "")
+            + "</div>";
+        }).join("") + "</div>" : '<div class="nxc-empty">Nenhum cliente com combinado de captações na carteira. Preencha "captações por mês" na ficha.</div>');
+    }
+    window.nxProdAgendar = function (id) {
+      var f = document.getElementById("prod-form");
+      if (!f) return;
+      if (!f.classList.contains("open") && typeof prodNovaToggle === "function") prodNovaToggle();
+      var sel = document.getElementById("prod-cliente"); if (sel) sel.value = id;
+      var mesK = hoje().slice(0, 7);
+      var reels = (state.tarefas || []).filter(function (t) { return t && t.clienteId === id && t.status !== "concluido" && t.formato === "reel" && String(t.publicarEm || t.data || "").slice(0, 7) === mesK; });
+      var v = document.getElementById("prod-videos");
+      if (v && !v.value && reels.length) v.value = reels.map(function (t) { return t.title; }).join("\n");
+      f.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    window.renderProducao = function () { orig(); try { plano(); } catch (e) { console.warn("nx producao", e); } };
+  })();
 })();

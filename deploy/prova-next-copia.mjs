@@ -70,6 +70,13 @@ for (const L of [{ w: 1440, h: 900 }, { w: 390, h: 844, mobile: true }]) {
     await page.evaluate(() => nxCliAba('reels'));
     await page.waitForTimeout(200);
     ok((await page.$$eval('.nxc-card', (els) => els.length)) >= 1, 'tarefa aparece na aba Reels depois de salvar');
+    // Producao audiovisual: plano de captacoes do mes (combinado x agendado) e pre-preenchimento
+    await page.evaluate(() => { const n = document.querySelector('[data-nav="producao"]'); n && n.click(); });
+    await page.waitForTimeout(500);
+    ok(!!(await page.$('#nx-prod-plano .nxp-h')), 'plano de captacoes do mes aparece na Producao');
+    const temBtn = await page.$('#nx-prod-plano button.nxc-btn');
+    if (temBtn) { await temBtn.click(); await page.waitForTimeout(400); ok(await page.evaluate(() => document.getElementById('prod-form').classList.contains('open')), 'Agendar captacao abre o formulario pre-preenchido'); }
+    await page.screenshot({ path: `deploy/prova-next-copia-producao-${L.w}.png`, fullPage: false });
     // Projetos: visao geral no molde AgencyFlow antes da carteira
     await page.evaluate(() => { const n = document.querySelector('[data-nav="projetos"]'); n && n.click(); });
     await page.waitForTimeout(500);
