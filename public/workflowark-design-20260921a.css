@@ -1,0 +1,77 @@
+/* ============ WorkFlowArk · sistema de design (21/09/2026, doc 11 Parte 1) ============
+   Princípios da HIG aplicados ao /app: clareza (uma escala de tipo, rótulos legíveis),
+   deferência (uma cor de acento, superfície neutra), profundidade (camadas com sombra
+   suave e mola curta). Só tokens e overrides de tipo, cor, borda, raio, espaçamento e
+   movimento. Nenhum position/transform (regra 6 do CLAUDE.md). Sidebar e Kanban mantêm
+   a forma. Carregado por último em workflowark.html. */
+
+/* ---- tokens ---- */
+:root{
+  --ds-h1:28px;--ds-h2:17px;--ds-body:14px;--ds-label:12px;
+  --ds-r:16px;--ds-r-sm:10px;--ds-r-chip:999px;
+  --ds-ease:cubic-bezier(.22,1,.36,1);--ds-t:.3s;
+  --ds-ok:#4ADE80;--ds-bad:#F87171;--ds-warn:#F59E0B;--ds-info:#60A5FA;--ds-viol:#A78BFA;
+}
+body.aura-dark{
+  --bg:#0B0B0C;--surface:#141416;--surface-2:#1C1C1F;
+  --ink:#F5F5F7;--ink-2:#F5F5F7;--txt:#E8E8EA;--mute:#A1A1A6;--mute-2:#6E6E73;
+  --line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.14);
+  --shadow:0 24px 64px rgba(0,0,0,.45);--sh-1:none;--sh-2:0 24px 64px rgba(0,0,0,.45);
+}
+body.aura-light{
+  --bg:#F5F5F7;--surface:#FFFFFF;--surface-2:#FFFFFF;
+  --ink:#1D1D1F;--ink-2:#1D1D1F;--txt:#2B2B2E;--mute:#6E6E73;--mute-2:#98989D;
+  --line:rgba(0,0,0,.06);--line-2:rgba(0,0,0,.12);
+  --shadow:0 24px 64px rgba(0,0,0,.10);--sh-1:none;--sh-2:0 24px 64px rgba(0,0,0,.10);
+}
+
+/* ---- escala tipográfica única ---- */
+.page-title h1{font-size:var(--ds-h1);font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.page-title p{font-size:13px;color:var(--mute);margin-top:4px}
+.card h3,.md-card h3,.kpi h3,.set-sect-t,.rail-label,.dec-hd b{font-size:var(--ds-h2);font-weight:600;letter-spacing:-.01em}
+body{font-size:var(--ds-body)}
+/* rótulos: sem caixa alta, sem mono, sem espaçamento de letra (a hierarquia vem do tamanho) */
+.kpi .l,.form-label,.nav-label,.barpanel .lbl,.cli-kpi .kl,.role-head .rl,.task-col-head h4,.sprint-col .col-head h4,.cal-dh,.ckl .tg,.aura-light .ahc .l,.ahc .l,.set-sect-t,.rail-label,.jv-ttl,.mdb .top .c,.eyebrow,.set-meta-line,.md-subhd,.brand-info .sb{
+  text-transform:none;letter-spacing:0;font-family:inherit;font-size:var(--ds-label);font-weight:500;color:var(--mute)}
+.kpi .v,.cli-kpi .kv,.t .num,.tc-check-prog,.mdw-hd .ct,.tab .ct,.task-col-head .ct,.sprint-col .col-head .ct,.barpanel .ct{font-family:inherit;font-variant-numeric:tabular-nums}
+.kpi .v{font-size:30px;font-weight:600;letter-spacing:-.02em}
+.tag,.tb-pill,.cli-chip,.prio-badge,.tc-tag,.tc-cli,.task-card .tc-cli,.task-card .tc-date,.crm-pill .badge{font-family:inherit;text-transform:none;letter-spacing:0;font-weight:500}
+.navitem .badge,.subitem .badge{font-family:inherit;font-weight:600}
+
+/* ---- superfície, borda, raio ---- */
+body.aura-dark .card,body.aura-dark .kpi,body.aura-dark .md-card,body.aura-dark .widget,body.aura-dark .mdw,body.aura-dark .dec-card,body.aura-dark .nxc-card,body.aura-dark .nxc-kpi,body.aura-dark .set-merow,body.aura-dark .al-kpi{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--ds-r);box-shadow:none;background-image:none}
+body.aura-light .card,body.aura-light .kpi,body.aura-light .md-card,body.aura-light .widget,body.aura-light .mdw,body.aura-light .dec-card,body.aura-light .nxc-card,body.aura-light .nxc-kpi{
+  background:#fff;border:1px solid var(--line);border-radius:var(--ds-r);box-shadow:none}
+.card:hover,.kpi:hover,.md-card:hover{box-shadow:none}
+body.aura-dark .aura-hero,body.aura-dark .aura-goal{background:var(--surface);border-radius:24px;box-shadow:none;background-image:none}
+body.aura-dark .aura-hero .sphere{display:none}
+.aura-hero .eyebrow{text-transform:none;letter-spacing:0;font-size:12px}
+.aura-saud{font-weight:600!important;letter-spacing:-.02em}
+.ahc{background:var(--surface-2)!important;border:1px solid var(--line)!important;border-radius:var(--ds-r)!important;box-shadow:none!important}
+.ahc .n{font-weight:600!important;letter-spacing:-.02em}
+
+/* ---- uma cor de acento: amarelo só em ação e estado ativo ---- */
+.tb-btn{border-radius:var(--ds-r-sm);font-size:13px;font-weight:600;padding:8px 14px;border-color:transparent}
+.icobtn,.nxc-btn{border-radius:var(--ds-r-sm);font-weight:500}
+body.aura-dark .kpi .v,body.aura-dark .aura-n-abertas,body.aura-dark .aura-n-hoje{color:var(--ink)}
+.kpi.red .v,.al-kpi.red .v{color:var(--ds-bad)}.kpi.green .v,.al-kpi.green .v{color:var(--ds-ok)}.kpi.yel .v,.al-kpi.yel .v{color:var(--yel)}
+.tc-chips .tc-cli{background:rgba(255,255,255,.06);color:var(--mute)}
+
+/* ---- densidade: grade de 8 ---- */
+.page-head{margin-bottom:24px}
+.card,.md-card,.kpi{padding:16px 18px}
+.g4,.md-grid{gap:16px}
+.form-input,.form-select,textarea.form-input{border-radius:var(--ds-r-sm);font-size:var(--ds-body);padding:10px 12px}
+
+/* ---- movimento: mola curta, nada em loop ---- */
+.modal,.modal-body,.tkm,.nxc-box{transition:opacity var(--ds-t) var(--ds-ease),transform var(--ds-t) var(--ds-ease)}
+.card,.kpi,.task-card,.tc,.navitem,.subitem,.tb-btn,.icobtn{transition:background .18s var(--ds-ease),border-color .18s var(--ds-ease),color .18s var(--ds-ease)}
+.jv-orb{animation:none!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- ícones: um só conjunto, 16 px, traço 1,8 ---- */
+.navitem svg,.subitem svg,.card h3 svg,.md-hd h3 svg,.icobtn svg,.tb-btn svg{width:16px;height:16px;stroke-width:1.8}
+
+/* rótulos que ainda escapavam (herói e decisões) */
+.aura-hero .ahc .top .l,.aura-hero .ahc .l,.ahc .top .l,.dec-card .tag,.dec-card .lbl,.dec-card .badge,.dec-n,.dec-card .n{text-transform:none!important;letter-spacing:0!important;font-family:inherit!important;font-size:12px!important;font-weight:500!important}
