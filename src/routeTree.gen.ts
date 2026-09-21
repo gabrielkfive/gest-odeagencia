@@ -25,8 +25,10 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TccApresentacaoRouteImport } from './routes/tcc.apresentacao'
 import { Route as ApiMcpRouteImport } from './routes/api/mcp'
+import { Route as AuthenticatedNextRouteImport } from './routes/_authenticated/next'
 import { Route as AuthenticatedMeuDiaRouteImport } from './routes/_authenticated/meu-dia'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedNextIndexRouteImport } from './routes/_authenticated/next/index'
 import { Route as ApiWorkflowarkStateRouteImport } from './routes/api/workflowark.state'
 import { Route as ApiWorkflowarkSocialRunRouteImport } from './routes/api/workflowark.social-run'
 import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowark.sheet'
@@ -46,6 +48,7 @@ import { Route as ApiGoogleCallbackRouteImport } from './routes/api/google.callb
 import { Route as ApiGoogleAuthRouteImport } from './routes/api/google.auth'
 import { Route as ApiAuthSignupRouteImport } from './routes/api/auth.signup'
 import { Route as ApiAuthSeedEvaluatorsRouteImport } from './routes/api/auth.seed-evaluators'
+import { Route as AuthenticatedNextAreaRouteImport } from './routes/_authenticated/next/$area'
 import { Route as ApiWorkflowarkWhatsappWebhookRouteImport } from './routes/api/workflowark.whatsapp.webhook'
 import { Route as ApiWorkflowarkWhatsappSendRouteImport } from './routes/api/workflowark.whatsapp.send'
 import { Route as ApiWorkflowarkWhatsappQrRouteImport } from './routes/api/workflowark.whatsapp.qr'
@@ -131,6 +134,11 @@ const ApiMcpRoute = ApiMcpRouteImport.update({
   path: '/api/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedNextRoute = AuthenticatedNextRouteImport.update({
+  id: '/next',
+  path: '/next',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMeuDiaRoute = AuthenticatedMeuDiaRouteImport.update({
   id: '/meu-dia',
   path: '/meu-dia',
@@ -140,6 +148,11 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNextIndexRoute = AuthenticatedNextIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedNextRoute,
 } as any)
 const ApiWorkflowarkStateRoute = ApiWorkflowarkStateRouteImport.update({
   id: '/api/workflowark/state',
@@ -239,6 +252,11 @@ const ApiAuthSeedEvaluatorsRoute = ApiAuthSeedEvaluatorsRouteImport.update({
   path: '/api/auth/seed-evaluators',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedNextAreaRoute = AuthenticatedNextAreaRouteImport.update({
+  id: '/$area',
+  path: '/$area',
+  getParentRoute: () => AuthenticatedNextRoute,
+} as any)
 const ApiWorkflowarkWhatsappWebhookRoute =
   ApiWorkflowarkWhatsappWebhookRouteImport.update({
     id: '/api/workflowark/whatsapp/webhook',
@@ -286,8 +304,10 @@ export interface FileRoutesByFullPath {
   '/sistema': typeof SistemaRoute
   '/app': typeof AuthenticatedAppRoute
   '/meu-dia': typeof AuthenticatedMeuDiaRoute
+  '/next': typeof AuthenticatedNextRouteWithChildren
   '/api/mcp': typeof ApiMcpRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
+  '/next/$area': typeof AuthenticatedNextAreaRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
@@ -307,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
+  '/next/': typeof AuthenticatedNextIndexRoute
   '/api/workflowark/whatsapp/meta': typeof ApiWorkflowarkWhatsappMetaRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
   '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
@@ -331,6 +352,7 @@ export interface FileRoutesByTo {
   '/meu-dia': typeof AuthenticatedMeuDiaRoute
   '/api/mcp': typeof ApiMcpRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
+  '/next/$area': typeof AuthenticatedNextAreaRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
@@ -350,6 +372,7 @@ export interface FileRoutesByTo {
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
+  '/next': typeof AuthenticatedNextIndexRoute
   '/api/workflowark/whatsapp/meta': typeof ApiWorkflowarkWhatsappMetaRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
   '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
@@ -374,8 +397,10 @@ export interface FileRoutesById {
   '/sistema': typeof SistemaRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/meu-dia': typeof AuthenticatedMeuDiaRoute
+  '/_authenticated/next': typeof AuthenticatedNextRouteWithChildren
   '/api/mcp': typeof ApiMcpRoute
   '/tcc/apresentacao': typeof TccApresentacaoRoute
+  '/_authenticated/next/$area': typeof AuthenticatedNextAreaRoute
   '/api/auth/seed-evaluators': typeof ApiAuthSeedEvaluatorsRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/google/auth': typeof ApiGoogleAuthRoute
@@ -395,6 +420,7 @@ export interface FileRoutesById {
   '/api/workflowark/sheet': typeof ApiWorkflowarkSheetRoute
   '/api/workflowark/social-run': typeof ApiWorkflowarkSocialRunRoute
   '/api/workflowark/state': typeof ApiWorkflowarkStateRoute
+  '/_authenticated/next/': typeof AuthenticatedNextIndexRoute
   '/api/workflowark/whatsapp/meta': typeof ApiWorkflowarkWhatsappMetaRoute
   '/api/workflowark/whatsapp/qr': typeof ApiWorkflowarkWhatsappQrRoute
   '/api/workflowark/whatsapp/send': typeof ApiWorkflowarkWhatsappSendRoute
@@ -419,8 +445,10 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/app'
     | '/meu-dia'
+    | '/next'
     | '/api/mcp'
     | '/tcc/apresentacao'
+    | '/next/$area'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
     | '/api/google/auth'
@@ -440,6 +468,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/sheet'
     | '/api/workflowark/social-run'
     | '/api/workflowark/state'
+    | '/next/'
     | '/api/workflowark/whatsapp/meta'
     | '/api/workflowark/whatsapp/qr'
     | '/api/workflowark/whatsapp/send'
@@ -464,6 +493,7 @@ export interface FileRouteTypes {
     | '/meu-dia'
     | '/api/mcp'
     | '/tcc/apresentacao'
+    | '/next/$area'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
     | '/api/google/auth'
@@ -483,6 +513,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/sheet'
     | '/api/workflowark/social-run'
     | '/api/workflowark/state'
+    | '/next'
     | '/api/workflowark/whatsapp/meta'
     | '/api/workflowark/whatsapp/qr'
     | '/api/workflowark/whatsapp/send'
@@ -506,8 +537,10 @@ export interface FileRouteTypes {
     | '/sistema'
     | '/_authenticated/app'
     | '/_authenticated/meu-dia'
+    | '/_authenticated/next'
     | '/api/mcp'
     | '/tcc/apresentacao'
+    | '/_authenticated/next/$area'
     | '/api/auth/seed-evaluators'
     | '/api/auth/signup'
     | '/api/google/auth'
@@ -527,6 +560,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/sheet'
     | '/api/workflowark/social-run'
     | '/api/workflowark/state'
+    | '/_authenticated/next/'
     | '/api/workflowark/whatsapp/meta'
     | '/api/workflowark/whatsapp/qr'
     | '/api/workflowark/whatsapp/send'
@@ -690,6 +724,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMcpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/next': {
+      id: '/_authenticated/next'
+      path: '/next'
+      fullPath: '/next'
+      preLoaderRoute: typeof AuthenticatedNextRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/meu-dia': {
       id: '/_authenticated/meu-dia'
       path: '/meu-dia'
@@ -703,6 +744,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/next/': {
+      id: '/_authenticated/next/'
+      path: '/'
+      fullPath: '/next/'
+      preLoaderRoute: typeof AuthenticatedNextIndexRouteImport
+      parentRoute: typeof AuthenticatedNextRoute
     }
     '/api/workflowark/state': {
       id: '/api/workflowark/state'
@@ -837,6 +885,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSeedEvaluatorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/next/$area': {
+      id: '/_authenticated/next/$area'
+      path: '/$area'
+      fullPath: '/next/$area'
+      preLoaderRoute: typeof AuthenticatedNextAreaRouteImport
+      parentRoute: typeof AuthenticatedNextRoute
+    }
     '/api/workflowark/whatsapp/webhook': {
       id: '/api/workflowark/whatsapp/webhook'
       path: '/api/workflowark/whatsapp/webhook'
@@ -875,14 +930,29 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedNextRouteChildren {
+  AuthenticatedNextAreaRoute: typeof AuthenticatedNextAreaRoute
+  AuthenticatedNextIndexRoute: typeof AuthenticatedNextIndexRoute
+}
+
+const AuthenticatedNextRouteChildren: AuthenticatedNextRouteChildren = {
+  AuthenticatedNextAreaRoute: AuthenticatedNextAreaRoute,
+  AuthenticatedNextIndexRoute: AuthenticatedNextIndexRoute,
+}
+
+const AuthenticatedNextRouteWithChildren =
+  AuthenticatedNextRoute._addFileChildren(AuthenticatedNextRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
   AuthenticatedMeuDiaRoute: typeof AuthenticatedMeuDiaRoute
+  AuthenticatedNextRoute: typeof AuthenticatedNextRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRoute,
   AuthenticatedMeuDiaRoute: AuthenticatedMeuDiaRoute,
+  AuthenticatedNextRoute: AuthenticatedNextRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
