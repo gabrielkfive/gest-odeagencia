@@ -8,10 +8,10 @@
 
 body.next{
   --g-bg:#050506;
-  --g-glass:rgba(255,255,255,.07);--g-glass2:rgba(255,255,255,.12);--g-glass3:rgba(255,255,255,.18);
-  --g-line:rgba(255,255,255,.12);--g-line2:rgba(255,255,255,.22);--g-hi:rgba(255,255,255,.35);
+  --g-glass:rgba(26,26,30,.86);--g-glass2:rgba(255,255,255,.08);--g-glass3:rgba(255,255,255,.14);
+  --g-line:rgba(255,255,255,.12);--g-line2:rgba(255,255,255,.22);--g-hi:rgba(255,255,255,.18);
   --g-ink:#f5f5f7;--g-ink2:rgba(245,245,247,.72);--g-ink3:rgba(245,245,247,.48);
-  --g-solid:#151518;--g-r:26px;--g-rs:16px;--g-blur:blur(34px) saturate(1.6);
+  --g-solid:#151518;--g-r:26px;--g-rs:16px;--g-blur:blur(18px) saturate(1.25);
   --g-sh:0 20px 60px -20px rgba(0,0,0,.7),0 1px 0 rgba(255,255,255,.06);
   --g-font:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
   --bg:var(--g-bg);--surface:var(--g-glass);--line:var(--g-line);--line-2:var(--g-line2);
@@ -20,7 +20,7 @@ body.next{
 }
 body.next.aura-light{
   --g-bg:#e9e9ee;
-  --g-glass:rgba(255,255,255,.55);--g-glass2:rgba(255,255,255,.72);--g-glass3:rgba(255,255,255,.9);
+  --g-glass:rgba(255,255,255,.92);--g-glass2:rgba(17,17,20,.05);--g-glass3:rgba(17,17,20,.09);
   --g-line:rgba(17,17,20,.08);--g-line2:rgba(17,17,20,.16);--g-hi:rgba(255,255,255,.95);
   --g-ink:#111114;--g-ink2:rgba(17,17,20,.7);--g-ink3:rgba(17,17,20,.46);
   --g-solid:#ffffff;--g-sh:0 20px 60px -24px rgba(0,0,0,.25),0 1px 0 rgba(255,255,255,.8);
@@ -30,19 +30,21 @@ body.next.aura-light{
 body.next,body.next .app{background:var(--g-bg)}
 body.next .app{position:relative;padding:12px;gap:12px;isolation:isolate}
 body.next .app::before,body.next .app::after{content:"";position:absolute;border-radius:50%;pointer-events:none;z-index:-1;filter:blur(80px)}
-body.next .app::before{width:60vw;height:60vw;left:-18vw;top:-24vw;background:radial-gradient(circle,rgba(255,199,0,.22),rgba(255,199,0,0) 70%)}
-body.next .app::after{width:50vw;height:50vw;right:-16vw;bottom:-20vw;background:radial-gradient(circle,rgba(120,140,255,.14),rgba(120,140,255,0) 70%)}
+body.next .app::before{width:60vw;height:60vw;left:-18vw;top:-24vw;background:radial-gradient(circle,rgba(255,199,0,.12),rgba(255,199,0,0) 70%)}
+body.next .app::after{width:50vw;height:50vw;right:-16vw;bottom:-20vw;background:radial-gradient(circle,rgba(120,140,255,.07),rgba(120,140,255,0) 70%)}
 body.next.aura-light .app::before{background:radial-gradient(circle,rgba(255,199,0,.45),rgba(255,199,0,0) 70%)}
 body.next.aura-light .app::after{background:radial-gradient(circle,rgba(120,140,255,.28),rgba(120,140,255,0) 70%)}
 body.next .main::before,body.next .main::after{display:none}
 
 /* vidro base */
-body.next .side,body.next .main,body.next .topbar,body.next .card,body.next .kpi,body.next .widget,body.next .md-card,body.next .md-block,
-body.next .aura-hero,body.next .aura-card,body.next .aura-stat,body.next .aura-goal,body.next .tb-search,body.next .tb-pill,body.next .tabs,
-body.next .task-col,body.next #gsearch-res,body.next .pp-dd{
-  background:var(--g-glass);border:1px solid var(--g-line);
+body.next .side,body.next .topbar,body.next #gsearch-res,body.next .pp-dd{
+  background:rgba(22,22,26,.6);border:1px solid var(--g-line);
   backdrop-filter:var(--g-blur);-webkit-backdrop-filter:var(--g-blur);
-  box-shadow:inset 0 1px 0 var(--g-hi),inset 0 0 0 .5px rgba(255,255,255,.06),var(--g-sh)}
+  box-shadow:inset 0 1px 0 var(--g-hi),var(--g-sh)}
+body.next.aura-light .side,body.next.aura-light .topbar{background:rgba(255,255,255,.62)}
+body.next .main,body.next .card,body.next .kpi,body.next .widget,body.next .md-card,body.next .md-block,
+body.next .aura-hero,body.next .aura-card,body.next .aura-stat,body.next .aura-goal,body.next .tb-search,body.next .tb-pill,body.next .tabs,body.next .task-col{
+  background:var(--g-glass);border:1px solid var(--g-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   body.next .side,body.next .main,body.next .topbar,body.next .card,body.next .kpi,body.next .task-col,body.next .tabs{background:var(--g-solid)}}
 @media (prefers-reduced-transparency:reduce){
@@ -50,8 +52,8 @@ body.next .task-col,body.next #gsearch-res,body.next .pp-dd{
 
 /* moldura */
 body.next .side{border-radius:var(--g-r);border-right:1px solid var(--g-line)}
-body.next .main{border-radius:var(--g-r);background:rgba(255,255,255,.03);overflow:hidden}
-body.next.aura-light .main{background:rgba(255,255,255,.35)}
+body.next .main{border-radius:var(--g-r);background:#0f0f12;overflow:hidden}
+body.next.aura-light .main{background:#f4f4f6}
 @media (max-width:900px){
   body.next .app{padding:0;gap:0}
   body.next .side,body.next .main{border-radius:0;border:0}
