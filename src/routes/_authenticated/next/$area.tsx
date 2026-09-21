@@ -18,7 +18,8 @@ import { Configuracoes } from "@/components/next/areas/configuracoes";
 
 export const Route = createFileRoute("/_authenticated/next/$area")({
   ssr: false,
-  validateSearch: (s: Record<string, unknown>): { q?: string } => (typeof s.q === "string" && s.q ? { q: s.q } : {}),
+  validateSearch: (s: Record<string, unknown>): { q?: string } =>
+    typeof s.q === "string" && s.q ? { q: s.q } : {},
   head: ({ params }) => {
     const a = AREAS.find((x) => x.id === params.area);
     return { meta: [{ title: `${a?.label || "Área"} · WorkFlowArk Next` }] };
@@ -27,9 +28,17 @@ export const Route = createFileRoute("/_authenticated/next/$area")({
 });
 
 const VIEWS: Record<string, () => React.ReactElement> = {
-  comercial: Comercial, clientes: Clientes, producao: Producao, aprovacoes: Aprovacoes,
-  calendario: Calendario, financeiro: Financeiro, equipe: Equipe, relatorios: Relatorios,
-  automacoes: Automacoes, hermes: Hermes, configuracoes: Configuracoes,
+  comercial: Comercial,
+  clientes: Clientes,
+  producao: Producao,
+  aprovacoes: Aprovacoes,
+  calendario: Calendario,
+  financeiro: Financeiro,
+  equipe: Equipe,
+  relatorios: Relatorios,
+  automacoes: Automacoes,
+  hermes: Hermes,
+  configuracoes: Configuracoes,
 };
 
 function Area() {
@@ -39,11 +48,18 @@ function Area() {
   if (!View) {
     return (
       <div className="nx-alert" role="alert">
-        Essa área não existe. <Link to="/next" className="nx-link">Voltar para o Meu Dia</Link>
+        Essa área não existe.{" "}
+        <Link to="/next" className="nx-link">
+          Voltar para o Meu Dia
+        </Link>
       </div>
     );
   }
   if (carregando && !carga) return <Skeleton />;
   if (!carga) return null;
-  return <div className="nx-in" key={area}><View /></div>;
+  return (
+    <div className="nx-in" key={area}>
+      <View />
+    </div>
+  );
 }

@@ -12,7 +12,8 @@
    2. concluir tarefa manda save-state com UM item e carimbo `up`, e a linha some;
    3. as 11 areas abrem sem tela branca;
    4. no celular (390px) o menu comeca escondido, abre no hamburger e fecha no X;
-   5. tema claro e escuro; capturas em deploy/prova-next-*.png.
+   5. tema claro e escuro; capturas em deploy/prova-next-*.png;
+   6. landing publica /conheca (200, 390px sem overflow, endpoint 400/415/honeypot).
  Uso: npm run build && node deploy/teste-next.mjs
 */
 import { chromium } from 'playwright-core';
@@ -41,9 +42,9 @@ const STATE = {
     ] },
   ],
   'wfa-crm': [
-    { id: 'l1', nm: 'Pizzaria do Zé', stage: 'proposta', val: 3500, resp: 'Gabriel Andrade', due: DIA(1), up: AGORA },
-    { id: 'l2', nm: 'Bar do Leo', stage: 'fechado', val: 2000, up: AGORA },
-    { id: 'l3', nm: 'Café Central', stage: 'prospeccao', val: 1500, due: DIA(-1), up: AGORA },
+    { id: 'l1', nm: 'Pizzaria do Zé', stage: 2, val: 3500, resp: 'Gabriel Andrade', due: DIA(1), up: AGORA },
+    { id: 'l2', nm: 'Bar do Leo', stage: 4, val: 2000, up: AGORA },
+    { id: 'l3', nm: 'Café Central', stage: 0, val: 1500, due: DIA(-1), up: AGORA },
   ],
   'wfa-demandas': [{ id: 'd1', titulo: 'Cliente pediu story urgente', cliente: 'Fercon', origem: 'WhatsApp', status: 'nova', criadaEm: AGORA }],
   'wfa-rotinas': [{ id: 'r1', titulo: 'Relatório semanal', freq: 'semanal', dia: 'seg', hora: '09:00', resp: 'Caio Neves', ativo: true }],
@@ -191,6 +192,40 @@ try {
     await page.waitForTimeout(350);
     ok((await page.$eval('.nx-side', (e) => e.getBoundingClientRect().right)) <= 0, 'X fecha o menu');
     await ctx.close();
+  }
+  // 5. landing publica /conheca (sem sessao): abre, sem rolagem horizontal, formulario
+  //    valida no navegador e o endpoint responde 400 (invalido), 200 (honeypot) e nunca
+  //    mostra sucesso quando o servidor falha (aqui sem segredo do Supabase = 500).
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    await ctx.route('**/*', (rota) => {
+      const u = rota.request().url();
+      if (u.startsWith('http://127.0.0.1') || u.startsWith('data:') || u.startsWith('blob:')) return rota.continue();
+      return rota.abort('blockedbyclient');
+    });
+    const page = await ctx.newPage();
+    const erros = [];
+    page.on('pageerror', (e) => erros.push(String(e)));
+    const r = await page.goto(`${BASE}/conheca`, { waitUntil: 'networkidle' });
+    console.log('Landing /conheca');
+    ok(r && r.status() === 200, `abre com 200 (veio ${r && r.status()})`);
+    ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'sem rolagem horizontal em 390px');
+    ok((await page.$$('form')).length >= 1, 'tem formulario');
+    ok(!(await page.textContent('body')).match(/[—–─━]/), 'sem travessao/traco no texto');
+    await page.screenshot({ path: 'deploy/prova-conheca-celular.png', fullPage: true });
+    const res400 = await page.evaluate(async (b) => { const r = await fetch(b + '/api/workflowark/lead-site', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: 'X', whatsapp: '12' }) }); return r.status; }, BASE);
+    ok(res400 === 400, `whatsapp invalido devolve 400 (veio ${res400})`);
+    const resHp = await page.evaluate(async (b) => { const r = await fetch(b + '/api/workflowark/lead-site', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: 'Robo', whatsapp: '61999999999', site: 'spam' }) }); return [r.status, await r.json()]; }, BASE);
+    ok(resHp[0] === 200 && resHp[1].ok === true, `honeypot devolve 200 ok sem gravar (veio ${resHp[0]})`);
+    const res415 = await page.evaluate(async (b) => { const r = await fetch(b + '/api/workflowark/lead-site', { method: 'POST', body: 'nome=x' }); return r.status; }, BASE);
+    ok(res415 === 415, `sem JSON devolve 415 (veio ${res415})`);
+    ok(erros.length === 0, 'sem erro de JS na landing' + (erros.length ? ': ' + erros[0] : ''));
+    await ctx.close();
+    const ctx2 = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const p2 = await ctx2.newPage();
+    await p2.goto(`${BASE}/conheca`, { waitUntil: 'networkidle' });
+    await p2.screenshot({ path: 'deploy/prova-conheca-desktop.png', fullPage: true });
+    await ctx2.close();
   }
 } finally {
   await browser.close();

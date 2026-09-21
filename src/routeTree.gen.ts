@@ -17,6 +17,7 @@ import { Route as PortalRouteImport } from './routes/portal'
 import { Route as PaginasRouteImport } from './routes/paginas'
 import { Route as OsRouteImport } from './routes/os'
 import { Route as InteligenciaRouteImport } from './routes/inteligencia'
+import { Route as ConhecaRouteImport } from './routes/conheca'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AprovarRouteImport } from './routes/aprovar'
@@ -35,6 +36,7 @@ import { Route as ApiWorkflowarkSheetRouteImport } from './routes/api/workflowar
 import { Route as ApiWorkflowarkSdrRouteImport } from './routes/api/workflowark.sdr'
 import { Route as ApiWorkflowarkRemoteRouteImport } from './routes/api/workflowark.remote'
 import { Route as ApiWorkflowarkPortalRouteImport } from './routes/api/workflowark.portal'
+import { Route as ApiWorkflowarkLeadSiteRouteImport } from './routes/api/workflowark.lead-site'
 import { Route as ApiWorkflowarkFinanceiroRunRouteImport } from './routes/api/workflowark.financeiro-run'
 import { Route as ApiWorkflowarkComercialRunRouteImport } from './routes/api/workflowark.comercial-run'
 import { Route as ApiWorkflowarkBridgeRouteImport } from './routes/api/workflowark.bridge'
@@ -93,6 +95,11 @@ const OsRoute = OsRouteImport.update({
 const InteligenciaRoute = InteligenciaRouteImport.update({
   id: '/inteligencia',
   path: '/inteligencia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConhecaRoute = ConhecaRouteImport.update({
+  id: '/conheca',
+  path: '/conheca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarioRoute = CalendarioRouteImport.update({
@@ -182,6 +189,11 @@ const ApiWorkflowarkRemoteRoute = ApiWorkflowarkRemoteRouteImport.update({
 const ApiWorkflowarkPortalRoute = ApiWorkflowarkPortalRouteImport.update({
   id: '/api/workflowark/portal',
   path: '/api/workflowark/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWorkflowarkLeadSiteRoute = ApiWorkflowarkLeadSiteRouteImport.update({
+  id: '/api/workflowark/lead-site',
+  path: '/api/workflowark/lead-site',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWorkflowarkFinanceiroRunRoute =
@@ -294,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
+  '/conheca': typeof ConhecaRoute
   '/inteligencia': typeof InteligenciaRoute
   '/os': typeof OsRoute
   '/paginas': typeof PaginasRoute
@@ -321,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/api/workflowark/bridge': typeof ApiWorkflowarkBridgeRoute
   '/api/workflowark/comercial-run': typeof ApiWorkflowarkComercialRunRoute
   '/api/workflowark/financeiro-run': typeof ApiWorkflowarkFinanceiroRunRoute
+  '/api/workflowark/lead-site': typeof ApiWorkflowarkLeadSiteRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
   '/api/workflowark/sdr': typeof ApiWorkflowarkSdrRoute
@@ -340,6 +354,7 @@ export interface FileRoutesByTo {
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
+  '/conheca': typeof ConhecaRoute
   '/inteligencia': typeof InteligenciaRoute
   '/os': typeof OsRoute
   '/paginas': typeof PaginasRoute
@@ -366,6 +381,7 @@ export interface FileRoutesByTo {
   '/api/workflowark/bridge': typeof ApiWorkflowarkBridgeRoute
   '/api/workflowark/comercial-run': typeof ApiWorkflowarkComercialRunRoute
   '/api/workflowark/financeiro-run': typeof ApiWorkflowarkFinanceiroRunRoute
+  '/api/workflowark/lead-site': typeof ApiWorkflowarkLeadSiteRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
   '/api/workflowark/sdr': typeof ApiWorkflowarkSdrRoute
@@ -387,6 +403,7 @@ export interface FileRoutesById {
   '/aprovar': typeof AprovarRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof CalendarioRoute
+  '/conheca': typeof ConhecaRoute
   '/inteligencia': typeof InteligenciaRoute
   '/os': typeof OsRoute
   '/paginas': typeof PaginasRoute
@@ -414,6 +431,7 @@ export interface FileRoutesById {
   '/api/workflowark/bridge': typeof ApiWorkflowarkBridgeRoute
   '/api/workflowark/comercial-run': typeof ApiWorkflowarkComercialRunRoute
   '/api/workflowark/financeiro-run': typeof ApiWorkflowarkFinanceiroRunRoute
+  '/api/workflowark/lead-site': typeof ApiWorkflowarkLeadSiteRoute
   '/api/workflowark/portal': typeof ApiWorkflowarkPortalRoute
   '/api/workflowark/remote': typeof ApiWorkflowarkRemoteRoute
   '/api/workflowark/sdr': typeof ApiWorkflowarkSdrRoute
@@ -435,6 +453,7 @@ export interface FileRouteTypes {
     | '/aprovar'
     | '/auth'
     | '/calendario'
+    | '/conheca'
     | '/inteligencia'
     | '/os'
     | '/paginas'
@@ -462,6 +481,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/bridge'
     | '/api/workflowark/comercial-run'
     | '/api/workflowark/financeiro-run'
+    | '/api/workflowark/lead-site'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
     | '/api/workflowark/sdr'
@@ -481,6 +501,7 @@ export interface FileRouteTypes {
     | '/aprovar'
     | '/auth'
     | '/calendario'
+    | '/conheca'
     | '/inteligencia'
     | '/os'
     | '/paginas'
@@ -507,6 +528,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/bridge'
     | '/api/workflowark/comercial-run'
     | '/api/workflowark/financeiro-run'
+    | '/api/workflowark/lead-site'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
     | '/api/workflowark/sdr'
@@ -527,6 +549,7 @@ export interface FileRouteTypes {
     | '/aprovar'
     | '/auth'
     | '/calendario'
+    | '/conheca'
     | '/inteligencia'
     | '/os'
     | '/paginas'
@@ -554,6 +577,7 @@ export interface FileRouteTypes {
     | '/api/workflowark/bridge'
     | '/api/workflowark/comercial-run'
     | '/api/workflowark/financeiro-run'
+    | '/api/workflowark/lead-site'
     | '/api/workflowark/portal'
     | '/api/workflowark/remote'
     | '/api/workflowark/sdr'
@@ -575,6 +599,7 @@ export interface RootRouteChildren {
   AprovarRoute: typeof AprovarRoute
   AuthRoute: typeof AuthRoute
   CalendarioRoute: typeof CalendarioRoute
+  ConhecaRoute: typeof ConhecaRoute
   InteligenciaRoute: typeof InteligenciaRoute
   OsRoute: typeof OsRoute
   PaginasRoute: typeof PaginasRoute
@@ -598,6 +623,7 @@ export interface RootRouteChildren {
   ApiWorkflowarkBridgeRoute: typeof ApiWorkflowarkBridgeRoute
   ApiWorkflowarkComercialRunRoute: typeof ApiWorkflowarkComercialRunRoute
   ApiWorkflowarkFinanceiroRunRoute: typeof ApiWorkflowarkFinanceiroRunRoute
+  ApiWorkflowarkLeadSiteRoute: typeof ApiWorkflowarkLeadSiteRoute
   ApiWorkflowarkPortalRoute: typeof ApiWorkflowarkPortalRoute
   ApiWorkflowarkRemoteRoute: typeof ApiWorkflowarkRemoteRoute
   ApiWorkflowarkSdrRoute: typeof ApiWorkflowarkSdrRoute
@@ -666,6 +692,13 @@ declare module '@tanstack/react-router' {
       path: '/inteligencia'
       fullPath: '/inteligencia'
       preLoaderRoute: typeof InteligenciaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conheca': {
+      id: '/conheca'
+      path: '/conheca'
+      fullPath: '/conheca'
+      preLoaderRoute: typeof ConhecaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendario': {
@@ -792,6 +825,13 @@ declare module '@tanstack/react-router' {
       path: '/api/workflowark/portal'
       fullPath: '/api/workflowark/portal'
       preLoaderRoute: typeof ApiWorkflowarkPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflowark/lead-site': {
+      id: '/api/workflowark/lead-site'
+      path: '/api/workflowark/lead-site'
+      fullPath: '/api/workflowark/lead-site'
+      preLoaderRoute: typeof ApiWorkflowarkLeadSiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/workflowark/financeiro-run': {
@@ -980,6 +1020,7 @@ const rootRouteChildren: RootRouteChildren = {
   AprovarRoute: AprovarRoute,
   AuthRoute: AuthRoute,
   CalendarioRoute: CalendarioRoute,
+  ConhecaRoute: ConhecaRoute,
   InteligenciaRoute: InteligenciaRoute,
   OsRoute: OsRoute,
   PaginasRoute: PaginasRoute,
@@ -1003,6 +1044,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWorkflowarkBridgeRoute: ApiWorkflowarkBridgeRoute,
   ApiWorkflowarkComercialRunRoute: ApiWorkflowarkComercialRunRoute,
   ApiWorkflowarkFinanceiroRunRoute: ApiWorkflowarkFinanceiroRunRoute,
+  ApiWorkflowarkLeadSiteRoute: ApiWorkflowarkLeadSiteRoute,
   ApiWorkflowarkPortalRoute: ApiWorkflowarkPortalRoute,
   ApiWorkflowarkRemoteRoute: ApiWorkflowarkRemoteRoute,
   ApiWorkflowarkSdrRoute: ApiWorkflowarkSdrRoute,
