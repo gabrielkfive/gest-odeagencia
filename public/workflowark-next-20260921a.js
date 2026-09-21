@@ -561,4 +561,54 @@
     add.parentElement.insertBefore(b, add);
     add.title = "Adicionar widget";
   })();
+
+  /* Projetos: "Visao geral" no molde AgencyFlow (E03), antes da carteira: um cartao por
+     projeto (cliente, sprint, progresso, atrasadas, pessoas, proximo vencimento) e barras
+     gerais (tarefas em andamento / abertas, entregas de social do mes). Clique abre o
+     projeto pelo mesmo caminho do legado (data-open). Le wfa-projetos + state.tarefas. */
+  (function () {
+    var orig = window.renderProjetos;
+    if (typeof orig !== "function") return;
+    function projetos() {
+      try { var a = JSON.parse(localStorage.getItem("wfa-projetos") || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+    }
+    function ini(n) { return String(n || "?").split(/\s+/).map(function (w) { return w[0] || ""; }).join("").slice(0, 2).toUpperCase(); }
+    function visao() {
+      var l = document.getElementById("pj-lista");
+      if (!l) return;
+      var box = document.getElementById("nx-pj-overview");
+      if (!box) { box = document.createElement("div"); box.id = "nx-pj-overview"; l.parentElement.insertBefore(box, l); }
+      if (l.style.display === "none") { box.style.display = "none"; return; }
+      box.style.display = "";
+      var hj = hoje(), pjs = projetos();
+      var cards = pjs.map(function (p) {
+        var ts = (p.tarefas || []).filter(function (t) { return t && t.id; });
+        var done = ts.filter(function (t) { return t.st === "concluido"; }).length;
+        var abertas = ts.filter(function (t) { return t.st !== "concluido"; });
+        var atras = abertas.filter(function (t) { return t.venc && t.venc < hj; }).length;
+        var pct = ts.length ? Math.round((100 * done) / ts.length) : 0;
+        var pessoas = []; abertas.forEach(function (t) { (t.resps || (t.resp ? [t.resp] : [])).forEach(function (r) { if (r && pessoas.indexOf(r) < 0) pessoas.push(r); }); });
+        var prox = abertas.map(function (t) { return t.venc; }).filter(Boolean).sort()[0];
+        var dias = prox ? Math.round((new Date(prox + "T12:00:00") - new Date(hj + "T12:00:00")) / 86400000) : null;
+        return '<div class="nxp-card" data-open="' + esc(p.id) + '">'
+          + '<div class="nxp-top"><b>' + esc(p.cliente || p.nome || "Projeto") + '</b>' + (p.sprint ? '<span class="nxc-pill">' + esc(p.sprint) + "</span>" : "") + "</div>"
+          + '<div class="nxp-bar"><i style="width:' + pct + '%"></i></div>'
+          + '<div class="nxp-m"><span>' + pct + "% · " + done + "/" + ts.length + " concluídas</span>"
+          + (dias === null ? "" : '<span class="' + (dias < 0 ? "late" : "") + '">' + (dias < 0 ? Math.abs(dias) + " dia(s) atrasado" : dias === 0 ? "vence hoje" : dias + " dia(s) pro próximo prazo") + "</span>") + "</div>"
+          + '<div class="nxp-foot"><span class="nxp-avs">' + pessoas.slice(0, 5).map(function (n) { return '<i title="' + esc(n) + '">' + esc(ini(n)) + "</i>"; }).join("") + (pessoas.length > 5 ? "<i>+" + (pessoas.length - 5) + "</i>" : "") + "</span>"
+          + '<span class="nxp-cnt" title="pessoas · abertas · atrasadas">👤 ' + pessoas.length + " · ☐ " + abertas.length + (atras ? ' · <b class="late">⚠ ' + atras + "</b>" : "") + "</span></div>"
+          + "</div>";
+      }).join("");
+      var tAb = (state.tarefas || []).filter(function (t) { return t && t.status !== "concluido"; });
+      var tAnd = tAb.filter(function (t) { return t.status === "andamento"; }).length;
+      var mesK = hj.slice(0, 7);
+      var social = (state.tarefas || []).filter(function (t) { return t && t.publicarEm && String(t.publicarEm).slice(0, 7) === mesK; });
+      var socialOk = social.filter(function (t) { return t.status === "concluido"; }).length;
+      var barra = function (l, a, b, cor) { var pc = b ? Math.round((100 * a) / b) : 0; return '<div class="nxp-geral"><div class="nxp-gl"><span>' + l + "</span><b>" + a + "/" + b + "</b></div><div class=\"nxp-bar\"><i style=\"width:" + pc + "%;background:" + cor + '"></i></div></div>'; };
+      box.innerHTML = '<div class="nxp-h"><h2>Visão geral dos projetos</h2><span class="nxc-mute">' + pjs.length + " projeto(s) · clique pra abrir o quadro</span></div>"
+        + (cards ? '<div class="nxp-grid">' + cards + "</div>" : '<div class="nxc-empty">Nenhum projeto ainda. Crie o primeiro na carteira abaixo.</div>')
+        + '<div class="nxp-gerais">' + barra("Tarefas gerais (em andamento / abertas)", tAnd, tAb.length, "#ffd400") + barra("Entregas de social do mês (publicadas / com data)", socialOk, social.length, "#4ade80") + "</div>";
+    }
+    window.renderProjetos = function () { orig(); try { visao(); } catch (e) { console.warn("nx projetos", e); } };
+  })();
 })();

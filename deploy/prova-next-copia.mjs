@@ -70,6 +70,16 @@ for (const L of [{ w: 1440, h: 900 }, { w: 390, h: 844, mobile: true }]) {
     await page.evaluate(() => nxCliAba('reels'));
     await page.waitForTimeout(200);
     ok((await page.$$eval('.nxc-card', (els) => els.length)) >= 1, 'tarefa aparece na aba Reels depois de salvar');
+    // Projetos: visao geral no molde AgencyFlow antes da carteira
+    await page.evaluate(() => { const n = document.querySelector('[data-nav="projetos"]'); n && n.click(); });
+    await page.waitForTimeout(500);
+    const nPj = await page.$$eval('#nx-pj-overview .nxp-card', (els) => els.length);
+    ok(nPj >= 1, `visao geral dos projetos com ${nPj} cartao(oes) e barras gerais`);
+    ok((await page.$$eval('#nx-pj-overview .nxp-geral', (els) => els.length)) === 2, 'barras gerais (tarefas e entregas de social)');
+    await page.screenshot({ path: `deploy/prova-next-copia-projetos-${L.w}.png`, fullPage: false });
+    await page.click('#nx-pj-overview .nxp-card');
+    await page.waitForTimeout(400);
+    ok(await page.evaluate(() => document.getElementById('pj-detalhe').style.display !== 'none'), 'clicar no cartao abre o projeto');
   }
   ok(erros.length === 0, 'sem erro de JS' + (erros.length ? ': ' + [...new Set(erros)].join(' | ') : ''));
   await ctx.close();
