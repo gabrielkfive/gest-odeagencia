@@ -1,4 +1,4 @@
-<!-- build 20260921e-descricao -->
+<!-- build 20260921f-inicio-limpo -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -53,7 +53,11 @@
 <style>.side-foot .av{min-width:34px;width:34px;height:34px;overflow:hidden;flex:none}.side-foot .av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.side.compact .side-foot .av{min-width:34px}
 /* descrição da tarefa: cresce com o texto, legível (pedido 21/09, ref. Trello) */
 #td-desc{min-height:168px;max-height:52vh;font-size:14.5px;line-height:1.65;padding:14px 16px;resize:vertical;overflow:auto;white-space:pre-wrap}
-@media(max-width:900px){#td-desc{min-height:140px;max-height:40vh}}</style>
+@media(max-width:900px){#td-desc{min-height:140px;max-height:40vh}}
+/* Início quase nada (pedido do Gabriel 21/09): fica saudação, Operação em dia e Decisões que esperam você */
+#page-dashboard #md-exec,#page-dashboard #md-aprovacao,#page-dashboard #md-council-bar,#page-dashboard #mdapp-rail,#page-dashboard #mdw-head,#page-dashboard #mdw-board,#page-dashboard #mdw-addmenu,#page-dashboard .aura-missao{display:none!important}
+#page-dashboard #mdapp{display:block}
+#page-dashboard #mdapp-main{max-width:none;width:100%}</style>
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
@@ -743,7 +747,7 @@ function wfaSetTheme(t){
         </div>
 
         <!-- Widgets (fusão Meu Painel → Meu Dia): board personalizável no fim da página -->
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:26px 0 12px">
+        <div id="mdw-head" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:26px 0 12px">
           <h2 style="font-size:17px;font-weight:800;letter-spacing:-.02em">Meus widgets</h2>
           <div style="display:flex;gap:6px;align-items:center">
             <button class="icobtn" id="mdw-preset" onclick="mdwApplyPreset()" title="Montar o painel com os widgets certos pro seu papel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>Painel do meu papel</button>

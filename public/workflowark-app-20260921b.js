@@ -4394,7 +4394,7 @@ function mdRenderDecisoes(){
   const nUrg=cards.filter(c=>c.urg===2).length;
   const URG_LBL=['pode esperar','importante','urgente'];
   box.style.display='';
-  box.innerHTML='<div class="dec-hd"><b>Decisões que esperam você</b><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou — só falta o seu aval')+'</span></div>'+
+  box.innerHTML='<div class="dec-hd"><b>Decisões que esperam você</b><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou, só falta o seu aval')+'</span></div>'+
     cards.slice(0,8).map(c=>`<div class="dec-card${c.urg===2?' u2':''}"><div class="dec-top"><span class="dec-ico" style="background:${c.bg}">${c.ico}</span><span class="dec-cli">${mdEsc(c.cli)}</span><span class="dec-urg u${c.urg}">${URG_LBL[c.urg]}</span></div><div class="dec-t">${mdEsc(c.t)}</div><div class="dec-d">${mdEsc(c.d)}</div><div class="dec-acts">${c.acts}</div></div>`).join('');
 }
 async function decRoteiro(id,status){
