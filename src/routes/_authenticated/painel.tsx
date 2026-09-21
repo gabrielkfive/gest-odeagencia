@@ -170,8 +170,10 @@ function NextShell() {
       (c) => c.status !== "concluida" && c.data && c.data >= hoje,
     ).length;
     const edit = editorial(st).filter((e) => e.data === hoje && e.status !== "postado").length;
+    const abertas = tarefas.filter(aberta).length;
     return {
       "": minhasAtrasadas,
+      atividades: abertas,
       aprovacoes: aprov,
       comercial: lds,
       producao: capt,
@@ -233,10 +235,10 @@ function NextShell() {
   };
 
   // Layout do menu copiado dos benchmarks (AgencyFlow, Modo Criador) ou ARK; guardado por aparelho.
-  const [menuId, setMenuId] = useState<MenuDef["id"]>("agencyflow");
+  const [menuId, setMenuId] = useState<MenuDef["id"]>("v2");
   const [grupos, setGrupos] = useState<Record<string, boolean>>({});
   useEffect(() => {
-    try { const v = localStorage.getItem("nx-menu"); if (v === "agencyflow" || v === "modocriador" || v === "ark") setMenuId(v); } catch { /* sem storage */ }
+    try { const v = localStorage.getItem("nx-menu"); if (v === "v2" || v === "agencyflow" || v === "modocriador" || v === "ark") setMenuId(v); } catch { /* sem storage */ }
   }, []);
   const trocarMenu = (id: MenuDef["id"]) => { setMenuId(id); try { localStorage.setItem("nx-menu", id); } catch { /* sem storage */ } };
   const menuDef = MENUS.find((m) => m.id === menuId) || MENUS[0];
@@ -257,7 +259,7 @@ function NextShell() {
 
   return (
     <Ctx.Provider value={ctx}>
-      <div className={`nx ${claro ? "claro" : ""}`} data-build="next-20260920a">
+      <div className={`nx ${claro ? "claro" : ""}`} data-build="v2-20260921a">
         <style dangerouslySetInnerHTML={{ __html: CSS }} />
         <div className="nx-bg" aria-hidden="true">
           <i />

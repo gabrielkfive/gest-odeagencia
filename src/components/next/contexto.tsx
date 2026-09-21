@@ -32,6 +32,7 @@ export function useNext(): NextCtx {
 export const AREAS = [
   { id: "", label: "Meu Dia", Icon: Sunrise, legado: "dashboard" },
   { id: "comercial", label: "Comercial", Icon: Handshake, legado: "comercial" },
+  { id: "atividades", label: "Atividades", Icon: CheckSquare, legado: "tarefas" },
   { id: "clientes", label: "Clientes", Icon: Briefcase, legado: "lista-clientes" },
   { id: "producao", label: "Produção", Icon: Clapperboard, legado: "tarefas" },
   { id: "aprovacoes", label: "Aprovações", Icon: CheckSquare, legado: "tarefas" },

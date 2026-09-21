@@ -5,7 +5,7 @@ import type { ComponentType } from "react";
 import {
   BarChart3, BookOpen, Briefcase, CalendarDays, CheckSquare, Clapperboard, FileSignature, FolderOpen,
   Handshake, HelpCircle, Home, Image, Inbox, Instagram, Landmark, LayoutDashboard, ListTodo, PieChart,
-  Settings, ShoppingBag, Sunrise, Trash2, UserCircle, Users, UsersRound, Wallet, Wrench,
+  Settings, ShoppingBag, Sunrise, Trash2, UserCircle, Users, UsersRound, Wallet, Wrench, Bot, KanbanSquare,
 } from "lucide-react";
 
 export type Destino =
@@ -13,11 +13,37 @@ export type Destino =
   | { tipo: "classico"; pagina: string }
   | { tipo: "href"; href: string };
 export type ItemMenu = { label: string; Icon?: ComponentType<{ size?: number; strokeWidth?: number }>; destino: Destino; filhos?: ItemMenu[]; badge?: string };
-export type MenuDef = { id: "agencyflow" | "modocriador" | "ark"; nome: string; fonte: string; itens: ItemMenu[] };
+export type MenuDef = { id: "v2" | "agencyflow" | "modocriador" | "ark"; nome: string; fonte: string; itens: ItemMenu[] };
 
 const P = (area: string): Destino => ({ tipo: "painel", area });
 const C = (pagina: string): Destino => ({ tipo: "classico", pagina });
 const H = (href: string): Destino => ({ tipo: "href", href });
+
+// Estrutura aprovada pelo Gabriel em 21/09/2026 (base v2, workflowark-v2.arkcontent.workers.dev):
+// CRM acima de Início, Atividades com subtópicos (Quadro, Lista, Projetos, Gestão de clientes),
+// sem lista de clientes na lateral (software pra empresa, não pra cliente).
+export const MENU_V2: MenuDef = {
+  id: "v2", nome: "WorkFlowArk 2", fonte: "base v2 aprovada em 21/09",
+  itens: [
+    { label: "CRM", Icon: Handshake, destino: P("comercial"), badge: "comercial" },
+    { label: "Início", Icon: Home, destino: P(""), badge: "" },
+    { label: "Atividades", Icon: KanbanSquare, destino: P("atividades"), badge: "atividades", filhos: [
+      { label: "Quadro", destino: C("tarefas") },
+      { label: "Lista", destino: P("atividades") },
+      { label: "Projetos", destino: C("projetos") },
+      { label: "Gestão de clientes", destino: P("clientes") },
+    ] },
+    { label: "Clientes", Icon: Briefcase, destino: P("clientes") },
+    { label: "Entregas", Icon: CheckSquare, destino: P("aprovacoes"), badge: "aprovacoes" },
+    { label: "Produção", Icon: Clapperboard, destino: P("producao"), badge: "producao" },
+    { label: "Calendário", Icon: CalendarDays, destino: P("calendario"), badge: "calendario" },
+    { label: "Financeiro", Icon: Wallet, destino: P("financeiro") },
+    { label: "Equipe", Icon: UsersRound, destino: P("equipe") },
+    { label: "Relatórios", Icon: BarChart3, destino: P("relatorios") },
+    { label: "Hermes", Icon: Bot, destino: P("hermes") },
+    { label: "Configurações", Icon: Settings, destino: P("configuracoes") },
+  ],
+};
 
 export const MENU_AGENCYFLOW: MenuDef = {
   id: "agencyflow", nome: "AgencyFlow", fonte: "estrutura observada em E01 a E05",
@@ -114,4 +140,4 @@ export const MENU_ARK: MenuDef = {
   ],
 };
 
-export const MENUS: MenuDef[] = [MENU_AGENCYFLOW, MENU_MODOCRIADOR, MENU_ARK];
+export const MENUS: MenuDef[] = [MENU_V2, MENU_AGENCYFLOW, MENU_MODOCRIADOR, MENU_ARK];

@@ -3,9 +3,11 @@
 // topo e paineis; listas e tabelas ficam opacas e legiveis. Fallback sem backdrop-filter e
 // sem movimento respeitando prefers-reduced-transparency / prefers-reduced-motion.
 export const CSS = `
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap");
+.nx h1,.nx h2,.nx h3,.nx .nx-title{font-family:Sora,Inter,system-ui,sans-serif;letter-spacing:-.02em}
 .nx{--yel:#FFC700;--ink:#F5F5F7;--ink2:rgba(245,245,247,.68);--ink3:rgba(245,245,247,.42);
-  --bg:#08080a;--glow:rgba(255,199,0,.16);--glass:rgba(255,255,255,.055);--glass2:rgba(255,255,255,.09);
-  --line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.18);--card:rgba(20,20,24,.72);--solid:#141418;
+  --bg:#0F0E0C;--glow:rgba(255,199,0,.12);--glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.085);
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);--card:rgba(25,24,21,.78);--solid:#191815;
   --red:#ff6b6b;--green:#4ade80;--blue:#60a5fa;--pink:#f472b6;--vio:#a78bfa;
   --sh:0 18px 50px rgba(0,0,0,.45);--r:20px;--rs:12px;
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;

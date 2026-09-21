@@ -15,6 +15,7 @@ import { Relatorios } from "@/components/next/areas/relatorios";
 import { Automacoes } from "@/components/next/areas/automacoes";
 import { Hermes } from "@/components/next/areas/hermes";
 import { Configuracoes } from "@/components/next/areas/configuracoes";
+import { Atividades } from "@/components/next/areas/atividades";
 
 export const Route = createFileRoute("/_authenticated/painel/$area")({
   ssr: false,
@@ -39,6 +40,7 @@ const VIEWS: Record<string, () => React.ReactElement> = {
   automacoes: Automacoes,
   hermes: Hermes,
   configuracoes: Configuracoes,
+  atividades: Atividades,
 };
 
 function Area() {
