@@ -75,11 +75,12 @@ export const ESTILO_CONHECA = `
   transition:transform .15s ease,background .15s ease,opacity .15s ease;
 }
 .lc-btn:disabled{opacity:.6;cursor:default}
-.lc-btn-amarelo{background:var(--lc-amarelo);color:#0a0a0a}
-.lc-btn-amarelo:hover:not(:disabled){background:#fff44d}
+.lc-pagina .lc-btn-amarelo{background:var(--lc-amarelo);color:#0a0a0a}
+.lc-pagina .lc-btn-amarelo:hover:not(:disabled){background:#fff44d}
 .lc-btn-vazado{background:transparent;color:var(--lc-texto);border:1px solid rgba(255,255,255,.22)}
 .lc-btn-vazado:hover{border-color:rgba(255,255,255,.5)}
-.lc-btn-peq{min-height:44px;padding:8px 14px;font-size:14px}
+.lc-btn-peq{min-height:44px;padding:8px 14px;font-size:14px;white-space:nowrap}
+@media (max-width:480px){.lc-btn-peq{font-size:13px;padding:8px 12px}.lc-marca{font-size:16px}}
 @media (prefers-reduced-motion:no-preference){
   .lc-btn:active:not(:disabled){transform:scale(.98)}
 }
@@ -164,10 +165,9 @@ export const ESTILO_CONHECA = `
 .lc-tag-amarelo{border-color:rgba(254,239,2,.4);color:var(--lc-amarelo)}
 
 /* Jornada: lista numerada em linha no desktop */
-.lc-jornada{display:grid;gap:14px;grid-template-columns:1fr;counter-reset:passo}
+.lc-jornada{display:grid;gap:14px;grid-template-columns:1fr;list-style:none;margin:0;padding:0}
 @media (min-width:900px){.lc-jornada{grid-template-columns:repeat(5,1fr)}}
-.lc-passo{position:relative;background:var(--lc-bg2);border:1px solid var(--lc-linha);border-radius:16px;padding:20px 18px}
-.lc-passo-seta{display:none}
+.lc-passo{position:relative;background:var(--lc-bg2);border:1px solid var(--lc-linha);border-radius:16px;padding:20px 18px;margin:0}
 @media (min-width:900px){
   .lc-passo:not(:last-child)::after{
     content:"";position:absolute;right:-9px;top:50%;width:14px;height:1px;background:rgba(254,239,2,.5);
