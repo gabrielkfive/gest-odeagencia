@@ -14,7 +14,7 @@ body.next.aura-light .side{
   backdrop-filter:blur(22px) saturate(1.3);-webkit-backdrop-filter:blur(22px) saturate(1.3);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 20px 60px -24px rgba(0,0,0,.25)}
 body.next .navitem,body.next .subitem{border-radius:14px}
-body.next.aura-dark .navitem.active,body.next.aura-dark .subitem.active{background:rgba(255,255,255,.12);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 1px rgba(255,255,255,.2)}
+body.next.aura-dark .navitem.active,body.next.aura-dark .subitem.active{background:linear-gradient(90deg,rgba(255,212,0,.22),rgba(255,212,0,.05));color:#ffd400;box-shadow:inset 3px 0 0 #ffd400,inset 0 1px 0 rgba(255,255,255,.08)}
 body.next.aura-dark .navitem.active svg,body.next.aura-dark .subitem.active svg{color:#ffd400}
 body.next #nav-indicator{opacity:0!important}
 body.next .main{border-radius:26px}
@@ -81,3 +81,23 @@ body.aura-light .nxc-box input,body.aura-light .nxc-box textarea{color-scheme:li
 @media (max-width:600px){.nxc-2{grid-template-columns:1fr}}
 .nxc-box-f{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}.nxc-box-f .nxc-mute{flex:1;font-size:12px}
 @media (max-width:900px){.nxc-wrap{padding:12px 12px 80px}.nxc-mes{margin-left:0}}
+
+/* ---- ajustes 21/09 (voz do Gabriel): destaque de Atividades, black piano, Inicio enxuto ---- */
+body.next .navitem.nx-destaque{margin:6px 8px 8px;background:linear-gradient(180deg,#1a1a1c,#0c0c0e);border:1px solid rgba(255,212,0,.35);box-shadow:0 8px 24px -12px rgba(255,212,0,.35);color:#fff;font-weight:600}
+body.next .navitem.nx-destaque svg{color:#ffd400}
+body.next .navitem.nx-destaque.active{background:linear-gradient(180deg,rgba(255,212,0,.28),rgba(255,212,0,.08));color:#ffd400}
+body.next.aura-dark .card,body.next.aura-dark .kpi,body.next.aura-dark .md-card,body.next.aura-dark .widget,body.next.aura-dark .aura-hero,body.next.aura-dark .aura-goal,body.next.aura-dark .task-col{
+  background:linear-gradient(180deg,#141416 0%,#0a0a0b 100%);border:1px solid rgba(255,255,255,.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 14px 34px -22px rgba(0,0,0,.9)}
+body.next.aura-dark #page-tarefas{--tf-col:#0c0c0d;--tf-card:#131315;--tf-line:rgba(255,255,255,.09)}
+body.next.aura-dark .task-card,body.next.aura-dark .tc{background:linear-gradient(180deg,#161618,#0e0e10);border:1px solid rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 10px 26px -18px #000}
+body.next.aura-dark .task-card:hover{border-color:rgba(255,212,0,.45)}
+/* Inicio: so Mission Control (hero com Operacao em dia) e Panorama do time */
+body.next #md-exec,body.next #mdapp-main,body.next #md-kpis,body.next #mdapp-rail .rail-label:first-child,body.next #mdapp-rail .md-grid{display:none!important}
+body.next #mdapp{display:block}
+body.next #mdapp-rail{max-width:none;width:100%}
+body.next #mdw-board.nx-min{display:none}
+body.next #mdw-preset,body.next #mdw-edit-btn{display:none}
+body.next .nx-widgets-h{opacity:.6}
+/* Gestao de clientes: so o mapa, sem saldo */
+body.next #page-lista-clientes #cli-kpis,body.next #page-lista-clientes #cli-health{display:none!important}
