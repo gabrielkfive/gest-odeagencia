@@ -25,7 +25,7 @@ for (const L of [{ w: 1440, h: 900 }, { w: 390, h: 844, mobile: true }]) {
   console.log(`Largura ${L.w}`);
   ok(await page.evaluate(() => document.body.classList.contains('next')), 'body.next presente');
   ok(await page.evaluate(() => !!document.querySelector('link[href^="workflowark-next-"]')), 'skin carregada');
-  ok(await page.evaluate(() => document.querySelectorAll('[data-nav]').length) === 44, '44 entradas de navegacao preservadas');
+  ok(await page.evaluate(() => document.querySelectorAll('[data-nav]').length) === 44, '44 entradas de navegacao preservadas (43 + crm)');
   ok(await page.evaluate(() => document.querySelectorAll('[data-toggle]').length) >= 6, 'grupos da sidebar original preservados');
   if (L.mobile) {
     const r = await page.evaluate(() => document.querySelector('.side').getBoundingClientRect().right);
