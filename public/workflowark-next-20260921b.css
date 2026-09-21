@@ -120,3 +120,60 @@ body.aura-light .nxp-bar{background:rgba(0,0,0,.08)}
 .nxp-geral{background:linear-gradient(180deg,#141416,#0a0a0b);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 14px}
 body.aura-light .nxp-geral{background:#fff;border-color:rgba(0,0,0,.08)}
 .nxp-gl{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mute);margin-bottom:8px}.nxp-gl b{color:var(--ink)}
+
+/* ---- Início no molde "instrumento, não formulário" (doc 07, lote 1, 21/09) ----
+   Tokens tirados das referências (painel claro Superpower / painel escuro de frota),
+   acento na cor da marca. O herói antigo (.aura-hero-row) sai só no /next. */
+body.next{--nxi-card:#141416;--nxi-ink:#F5F5F7;--nxi-ink2:#A1A1A6;--nxi-ink3:#6E6E73;--nxi-line:rgba(255,255,255,.08);--nxi-acc:#ffd400;--nxi-alert:#F08A2E;--nxi-ok:#3DDC84;--nxi-r:28px;--nxi-num:Doto,ui-monospace,"JetBrains Mono",monospace}
+body.next.aura-light{--nxi-card:#F4F4F5;--nxi-ink:#111114;--nxi-ink2:#5C5C62;--nxi-ink3:#8A8A8F;--nxi-line:rgba(0,0,0,.06)}
+body.next .aura-hero-row{display:none!important}
+/* a saudação volta (o legado a escondia porque o herói a repetia) */
+body.next.aura-dark #page-dashboard #md-greet,body.next.aura-light #page-dashboard #md-greet{display:block;font-weight:300;font-size:34px;letter-spacing:-.02em;color:var(--nxi-ink)}
+body.next.aura-dark #page-dashboard #md-sub,body.next.aura-light #page-dashboard #md-sub{display:block;color:var(--nxi-ink3)}
+#nx-inicio{margin:4px 0 26px;color:var(--nxi-ink)}
+.nxi-in{animation:nxiIn .45s cubic-bezier(.25,.1,.25,1) both}
+@keyframes nxiIn{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.nxi-in{animation:none}}
+/* KPIs: o número é o herói, rótulo pequeno em pílula */
+.nxi-kpis{display:flex;gap:30px;flex-wrap:wrap;margin:0 0 20px}
+.nxi-kpi{display:flex;align-items:flex-start;gap:8px;cursor:pointer;background:none;border:0;padding:0;color:var(--nxi-ink);font:inherit;text-align:left}
+.nxi-kpi .n{font-family:var(--nxi-num);font-weight:700;font-size:46px;line-height:1;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.nxi-kpi .l{font-size:11px;background:var(--nxi-card);border:1px solid var(--nxi-line);border-radius:999px;padding:4px 9px;color:var(--nxi-ink2);margin-top:6px;white-space:nowrap}
+.nxi-kpi.alerta .n{color:var(--nxi-alert)}
+.nxi-kpi:hover .l{color:var(--nxi-ink)}
+/* linha do mês: um ponto por entrega, marcador de hoje, etiqueta flutuante */
+.nxi-tl{position:relative;height:62px;margin:0 6px 20px}
+.nxi-tl .line{position:absolute;left:0;right:0;top:36px;height:1px;background:var(--nxi-line)}
+.nxi-tl .d{position:absolute;top:32px;width:9px;height:9px;border-radius:50%;transform:translateX(-50%);cursor:pointer}
+.nxi-tl .d.ok{background:var(--nxi-ok)}.nxi-tl .d.andamento{background:var(--nxi-acc)}.nxi-tl .d.planejado{background:var(--nxi-ink3)}.nxi-tl .d.alerta{background:var(--nxi-alert)}
+.nxi-tl .hoje{position:absolute;top:26px;width:1px;height:21px;background:var(--nxi-ink);transform:translateX(-50%)}
+.nxi-tl .hoje::after{content:"hoje";position:absolute;top:22px;left:50%;transform:translateX(-50%);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--nxi-ink3)}
+.nxi-tl .m1,.nxi-tl .m2{position:absolute;top:46px;font-size:10.5px;color:var(--nxi-ink3)}.nxi-tl .m1{left:0}.nxi-tl .m2{right:0}
+.nxi-tl .flag{position:absolute;top:0;left:50%;transform:translateX(-50%);background:rgba(20,20,22,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--nxi-line);border-radius:999px;padding:6px 12px;font-size:12px;color:var(--nxi-ink);white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+body.next.aura-light .nxi-tl .flag{background:rgba(255,255,255,.78)}
+/* dois cartões aurora: só os dois números que importam */
+.nxi-aur{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.nxi-aurora{border-radius:var(--nxi-r);padding:22px;color:#fff;min-height:176px;position:relative;overflow:hidden;text-align:center;cursor:pointer;border:0;font:inherit;text-shadow:0 1px 2px rgba(0,0,0,.14);width:100%}
+.nxi-aurora.bom{background:radial-gradient(120% 90% at 30% 25%,#F2A33A 0%,transparent 55%),radial-gradient(120% 100% at 70% 90%,#3FBF5A 0%,#7dc98a 60%,transparent 100%),#8fd69b}
+.nxi-aurora.atencao{background:radial-gradient(110% 90% at 65% 40%,#F2A33A 0%,transparent 60%),radial-gradient(120% 110% at 15% 85%,#7FB3E6 0%,#b9d3ec 60%,transparent 100%),#c9d9ea}
+.nxi-aurora.vazio{background:var(--nxi-card);color:var(--nxi-ink3);border:1px solid var(--nxi-line);text-shadow:none;cursor:default}
+.nxi-aurora .t{font-size:13px;opacity:.94}
+.nxi-aurora .n{font-family:var(--nxi-num);font-weight:700;font-size:64px;line-height:1.1;margin:8px 0 2px}
+.nxi-aurora.vazio .n{font-family:inherit;font-weight:300;font-size:28px;margin:22px 0 6px}
+.nxi-aurora .s{font-size:12px;opacity:.94}
+.nxi-aurora .bars{position:absolute;left:24px;right:24px;bottom:12px;height:12px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 1px,transparent 1px 6px);opacity:.7}
+/* três clientes que pedem atenção */
+.nxi-minis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.nxi-mini{background:var(--nxi-card);border:1px solid var(--nxi-line);border-radius:20px;padding:16px;cursor:pointer;text-align:left;color:var(--nxi-ink);font:inherit;min-height:88px;width:100%}
+.nxi-mini:hover{border-color:rgba(255,212,0,.5)}
+.nxi-mini .l{font-size:12px;color:var(--nxi-ink3);display:flex;justify-content:space-between;gap:8px}
+.nxi-mini .l i{font-style:normal;color:var(--nxi-ink2)}
+.nxi-mini .n{font-family:var(--nxi-num);font-weight:700;font-size:30px;margin-top:8px;line-height:1}
+.nxi-mini .n small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;color:var(--nxi-ink3);margin-left:6px}
+.nxi-mini.tudo{cursor:default;border-style:dashed}
+@media(max-width:900px){
+  .nxi-kpis{gap:18px 22px}.nxi-kpi .n{font-size:38px}
+  .nxi-aur{grid-template-columns:1fr}.nxi-aurora{min-height:150px}.nxi-aurora .n{font-size:54px}
+  .nxi-minis{grid-template-columns:1fr}
+  .nxi-tl .flag{font-size:11px;padding:5px 10px}
+}

@@ -662,4 +662,127 @@
     };
     window.renderProducao = function () { orig(); try { plano(); } catch (e) { console.warn("nx producao", e); } };
   })();
+
+  /* Início no molde "instrumento, não formulário" (doc 07, lote 1, 21/09). Bloco #nx-inicio
+     depois do cabeçalho do Meu Dia: KPIs em matriz de pontos, linha do mês, dois cartões
+     aurora (saúde da carteira, entregas no prazo) e três clientes que pedem atenção. Os
+     números vêm de NX_CALC.inicio (workflowark-next-calc-<data>.js, testado em Node). Só
+     repinta quando os números mudam, como o md-kpis do legado. Nada é criado, só lido. */
+  (function () {
+    var orig = window.renderMeuDia;
+    if (typeof orig !== "function" || typeof NX_CALC === "undefined") return;
+    var SIG = "";
+    function editorialLista() {
+      try { var a = JSON.parse(localStorage.getItem("wfa-editorial") || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+    }
+    function nomeMembro() {
+      return (typeof WFA_MEMBER !== "undefined" && WFA_MEMBER && WFA_MEMBER.full_name) || "";
+    }
+    function nav(id) {
+      var el = document.querySelector('[data-nav="' + id + '"]');
+      if (el) el.click();
+      return !!el;
+    }
+    window.nxIrTarefas = function () { nav("tarefas"); };
+    window.nxIrClientes = function () { nav("lista-clientes") || nav("cliente"); };
+    window.nxIrCliente = function (id) {
+      if (!nav("cliente")) return;
+      setTimeout(function () {
+        var sel = document.getElementById("cli-area-sel");
+        if (sel) sel.value = id;
+        if (typeof cliAreaSelect === "function") cliAreaSelect(id);
+      }, 80);
+    };
+    function mesCurto(iso) {
+      return new Date(iso + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "short" }).replace(".", "");
+    }
+    function mesLongo(iso) {
+      return new Date(iso + "T12:00:00").toLocaleDateString("pt-BR", { month: "long" });
+    }
+    function kpi(n, rotulo, alerta, acao) {
+      return '<button type="button" class="nxi-kpi' + (alerta && n ? " alerta" : "") + '" onclick="' + acao + '"><span class="n">' + n + '</span><span class="l">' + rotulo + "</span></button>";
+    }
+    function linhaMes(r, H) {
+      var y = +H.slice(0, 4), m = +H.slice(5, 7);
+      var dim = new Date(y, m, 0).getDate();
+      var pos = function (d) { return ((+d.slice(8, 10) - 1) / (dim - 1)) * 100; };
+      var porDia = {};
+      r.linha.forEach(function (p) { (porDia[p.dia] = porDia[p.dia] || []).push(p); });
+      var pontos = Object.keys(porDia).map(function (d) {
+        var l = porDia[d];
+        var cor = l.some(function (p) { return p.cor === "alerta"; }) ? "alerta" : l.every(function (p) { return p.cor === "ok"; }) ? "ok" : l.some(function (p) { return p.cor === "andamento"; }) ? "andamento" : "planejado";
+        var t = l.map(function (p) { return p.titulo; }).join(" · ");
+        var id = (l.find(function (p) { return p.id; }) || {}).id;
+        return '<span class="d ' + cor + '" style="left:' + pos(d).toFixed(2) + '%" title="' + esc(brData(d) + ": " + t) + '"' + (id ? ' onclick="openTaskDetail(\'' + esc(id) + "')\"" : "") + "></span>";
+      }).join("");
+      var pub = r.linha.filter(function (p) { return p.cor === "ok"; }).length;
+      var flag = r.linha.length
+        ? r.linha.length + " entrega" + (r.linha.length === 1 ? "" : "s") + " em " + mesLongo(H) + " · " + pub + " publicada" + (pub === 1 ? "" : "s")
+        : "Nenhuma entrega com data em " + mesLongo(H);
+      return '<div class="nxi-tl"><div class="line"></div>' + pontos +
+        '<span class="hoje" style="left:' + pos(H).toFixed(2) + '%"></span>' +
+        '<span class="m1">' + mesCurto(H.slice(0, 8) + "01") + '</span><span class="m2">' + mesCurto(H.slice(0, 8) + pad(dim)) + "</span>" +
+        '<div class="flag">' + flag + "</div></div>";
+    }
+    function aurora(classe, titulo, numero, sub, acao) {
+      /* data-aura-keep em cada filho: o normalizador AURA escurece por elemento, não por subárvore */
+      return '<button type="button" class="nxi-aurora ' + classe + '" data-aura-keep' + (acao ? ' onclick="' + acao + '"' : "") + '><div class="t" data-aura-keep>' + titulo + '</div><div class="n" data-aura-keep>' + numero + '</div><div class="s" data-aura-keep>' + sub + '</div>' + (classe === "vazio" ? "" : '<div class="bars" data-aura-keep></div>') + "</button>";
+    }
+    function render() {
+      var pg = document.getElementById("page-dashboard");
+      if (!pg || typeof state === "undefined") return;
+      var box = document.getElementById("nx-inicio");
+      if (!box) {
+        box = document.createElement("div");
+        box.id = "nx-inicio";
+        box.className = "nxi-in";
+        var head = pg.querySelector(".page-head");
+        if (head) head.insertAdjacentElement("afterend", box);
+        else pg.insertAdjacentElement("afterbegin", box);
+      }
+      var H = typeof hojeSP === "function" ? hojeSP() : hoje();
+      var r = NX_CALC.inicio({
+        tarefas: state.tarefas || [],
+        clientes: typeof CLIENTES !== "undefined" ? CLIENTES : [],
+        editorial: editorialLista(),
+        hoje: H,
+        nome: nomeMembro(),
+      });
+      var sig = JSON.stringify([H, r.kpis, r.saude.verdes, r.saude.total, r.prazo, r.linha, r.atencao]);
+      if (sig === SIG) return;
+      SIG = sig;
+      var s = r.saude, p = r.prazo;
+      var html =
+        '<div class="nxi-kpis">' +
+        kpi(r.kpis.hoje, "vencem hoje", false, "nxIrTarefas()") +
+        kpi(r.kpis.atrasadas, r.kpis.atrasadas === 1 ? "atrasada" : "atrasadas", true, "nxIrTarefas()") +
+        kpi(r.kpis.aprovacao, "em aprovação", false, "nxIrTarefas()") +
+        kpi(r.kpis.publicamSemana, "publicam esta semana", false, "nxIrTarefas()") +
+        "</div>" +
+        linhaMes(r, H) +
+        '<div class="nxi-aur">' +
+        (s.total
+          ? aurora(s.verdes / s.total >= 0.7 ? "bom" : "atencao", "Saúde da carteira", s.verdes, s.verdes + " de " + s.total + " cliente" + (s.total === 1 ? "" : "s") + " sem alerta", "nxIrClientes()")
+          : aurora("vazio", "Saúde da carteira", "sem dados", "nenhum cliente ativo na carteira")) +
+        (p.pct === null
+          ? aurora("vazio", "Entregas no prazo", "sem dados", "nenhuma entrega concluída com prazo em " + mesLongo(H))
+          : aurora(p.pct >= 80 ? "bom" : "atencao", "Entregas no prazo", p.pct + "%", p.ok + " de " + p.total + " concluída" + (p.total === 1 ? "" : "s") + " no prazo em " + mesLongo(H), "nxIrTarefas()")) +
+        "</div>" +
+        '<div class="nxi-minis">' +
+        (r.atencao.length
+          ? r.atencao.map(function (c) {
+              var semEntrega = c.rotulo === "sem entrega no mês";
+              return '<button type="button" class="nxi-mini" onclick="nxIrCliente(\'' + esc(c.id) + '\')"><div class="l"><span>' + esc(c.nm) + "</span><i>" + c.sinais + " sinal" + (c.sinais === 1 ? "" : "is") + '</i></div><div class="n">' + (semEntrega ? "0" : c.n) + "<small>" + (semEntrega ? "entregas no mês" : esc(c.rotulo)) + "</small></div></button>";
+            }).join("")
+          : '<div class="nxi-mini tudo"><div class="l"><span>Carteira</span></div><div class="n">' + s.total + "<small>cliente" + (s.total === 1 ? "" : "s") + " sem alerta</small></div></div>") +
+        "</div>";
+      box.innerHTML = html;
+    }
+    window.renderMeuDia = function () {
+      orig.apply(this, arguments);
+      try { render(); } catch (e) { console.warn("nx inicio", e); }
+    };
+    setInterval(function () { try { render(); } catch (e) {} }, 60000);
+    try { render(); } catch (e) { console.warn("nx inicio", e); }
+  })();
 })();
