@@ -251,4 +251,13 @@ export const ESTILO_CONHECA = `
 .lc-rodape a{text-decoration:none;color:var(--lc-texto2);padding:8px 0;display:inline-block}
 .lc-rodape a:hover{color:var(--lc-texto)}
 .lc-rodape-links{display:flex;gap:18px;flex-wrap:wrap}
+
+/* Capturas reais do sistema (22/09/2026). Moldura discreta, a imagem manda. */
+.lc-print{margin:0;border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;background:#0f0f10}
+.lc-print img{display:block;width:100%;height:auto}
+.lc-print figcaption{padding:12px 16px;font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.62);border-top:1px solid rgba(255,255,255,.08)}
+.lc-print figcaption b{color:rgba(255,255,255,.9);font-weight:600}
+.lc-print-hero{box-shadow:0 30px 70px rgba(0,0,0,.5)}
+.lc-prints{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+@media (max-width:760px){.lc-prints{grid-template-columns:1fr}}
 `;

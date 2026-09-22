@@ -20,7 +20,7 @@ import { FormularioLead } from "@/components/landing/formulario-lead";
 
 const TITULO = "Conheça o WorkFlowArk · ARK Content";
 const DESCRICAO =
-  "Sua agência inteira no mesmo fluxo. O sistema que a ARK Content usa todo dia para produção, clientes, aprovações, comercial e financeiro, agora disponível para outras agências. Conversa de 30 minutos e acesso de demonstração.";
+  "Sua agência inteira no mesmo fluxo. O sistema que a ARK Content usa todo dia para produção, clientes, aprovações, comercial e financeiro, agora disponível para outras agências. Trinta dias grátis, sem cartão, com onboarding assistido de 30 minutos.";
 
 export const Route = createFileRoute("/conheca")({
   head: () => ({
@@ -97,6 +97,43 @@ function Icone({ nome }: { nome: string }) {
   );
 }
 
+// Capturas reais da V1 (Documents\\WorkFlowArk-Next-2026-09-20\\lp, comprimidas pra webp).
+// Ordem do fluxo comercial: entra lead, vira cliente, a equipe produz, o cliente aprova.
+const PRINTS = [
+  {
+    src: "/lp/v1-crm-dark.webp",
+    alt: "CRM do WorkFlowArk com o funil de leads por etapa",
+    titulo: "CRM.",
+    texto: "O lead entra pelo site e cai no funil, com dono e próximo passo.",
+    w: 1440,
+    h: 900,
+  },
+  {
+    src: "/lp/v1-cliente-dark.webp",
+    alt: "Área do Cliente do WorkFlowArk com abas de posts, reels, stories e aprovação",
+    titulo: "Área do Cliente.",
+    texto: "Cada cliente com posts, reels, stories, aprovação, ficha e faturas no mesmo lugar.",
+    w: 1440,
+    h: 900,
+  },
+  {
+    src: "/lp/v1-meu-dia-dark.webp",
+    alt: "Tela inicial do WorkFlowArk com as decisões que esperam a pessoa",
+    titulo: "Início.",
+    texto: "Cada pessoa abre o dia sabendo o que decide agora, sem varrer quadro.",
+    w: 1440,
+    h: 900,
+  },
+  {
+    src: "/lp/v1-celular-dark.webp",
+    alt: "WorkFlowArk aberto no celular, com o menu lateral e as tarefas do dia",
+    titulo: "No celular.",
+    texto: "O que muda na gravação aparece no computador em segundos, item por item.",
+    w: 560,
+    h: 1212,
+  },
+];
+
 // Ilustração do Kanban em HTML e CSS: colunas e rótulos reais, cartões de exemplo.
 // Marcada como ilustração na legenda pra não passar por captura de tela.
 function QuadroIlustracao() {
@@ -165,7 +202,7 @@ function Conheca() {
             <a href="#faq">Perguntas</a>
           </nav>
           <a className="lc-btn lc-btn-amarelo lc-btn-peq" href="#contato">
-            Quero ver funcionando
+            Começar grátis
           </a>
         </div>
       </header>
@@ -186,18 +223,55 @@ function Conheca() {
               </p>
               <div className="lc-hero-ctas">
                 <a className="lc-btn lc-btn-amarelo" href="#contato">
-                  Quero ver funcionando
+                  Começar grátis por 30 dias
                 </a>
                 <a className="lc-btn lc-btn-vazado" href="#produto">
                   Ver o que existe hoje
                 </a>
               </div>
               <p className="lc-hero-nota">
-                Conversa de 30 minutos e acesso de demonstração. Sem cartão, sem cadastro em massa.
+                Trinta dias grátis, sem cartão. A conta sai no mesmo dia, com onboarding assistido de 30 minutos.
               </p>
             </div>
             <div className="lc-hero-visual">
-              <QuadroIlustracao />
+              {/* Captura real do sistema em uso (V1, tema escuro). A ilustracao em CSS saiu:
+                  o Gabriel quer que a landing mostre o software, nao um desenho dele. */}
+              <figure className="lc-print lc-print-hero">
+                <img
+                  src="/lp/v1-kanban-dark.webp"
+                  alt="Kanban de Atividades do WorkFlowArk, com colunas Backlog, A iniciar, Em andamento e Homologação"
+                  width={1440}
+                  height={900}
+                  loading="eager"
+                />
+                <figcaption>Kanban de Atividades, captura do sistema em uso na ARK Content.</figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        {/* 1b) O sistema por dentro, em captura real */}
+        <section className="lc-sec" id="porDentro" aria-labelledby="pordentro-titulo">
+          <div className="lc-wrap">
+            <div className="lc-cabeca">
+              <span className="lc-rotulo">Por dentro</span>
+              <h2 className="lc-h2" id="pordentro-titulo">
+                O fluxo de uma agência, do primeiro contato até o cliente aprovar.
+              </h2>
+              <p className="lc-p lc-p-max">
+                Todas as imagens abaixo são capturas do sistema em uso, com a carteira real da ARK
+                Content. Nada de maquete.
+              </p>
+            </div>
+            <div className="lc-prints">
+              {PRINTS.map((f) => (
+                <figure className="lc-print" key={f.src}>
+                  <img src={f.src} alt={f.alt} width={f.w} height={f.h} loading="lazy" />
+                  <figcaption>
+                    <b>{f.titulo}</b> {f.texto}
+                  </figcaption>
+                </figure>
+              ))}
             </div>
           </div>
         </section>
@@ -351,22 +425,22 @@ function Conheca() {
             <div>
               <span className="lc-rotulo">Oferta</span>
               <h2 className="lc-h2" id="oferta-titulo">
-                Conversa de 30 minutos e acesso de demonstração.
+                Trinta dias grátis, com a sua agência rodando de verdade.
               </h2>
               <p className="lc-p lc-p-max">
                 Primeiro a gente entende como a sua agência trabalha: quantas pessoas, quantos
-                clientes, o que trava. Depois você recebe acesso de demonstração para andar pelo
-                sistema com calma. Valor e implantação são combinados nessa conversa, de acordo com
-                o tamanho da operação.
+                clientes, o que trava. No mesmo dia a sua conta sai, com os seus clientes já
+                cadastrados, e você usa por 30 dias sem cartão e sem limite de gente. Valor e
+                implantação são combinados no fim do teste, de acordo com o tamanho da operação.
               </p>
             </div>
             <ul className="lc-lista">
               <li>
                 Conversa por videochamada ou WhatsApp, 30 minutos, com quem opera o sistema na ARK.
               </li>
-              <li>Acesso de demonstração para você e mais uma pessoa da equipe.</li>
+              <li>Conta da sua agência liberada no mesmo dia, com usuários ilimitados no teste.</li>
               <li>Migração de dados combinada caso a caso, sem promessa automática.</li>
-              <li>Sem cartão de crédito nesta etapa.</li>
+              <li>Sem cartão de crédito, e você cancela quando quiser.</li>
             </ul>
           </div>
         </section>
@@ -397,11 +471,11 @@ function Conheca() {
             <div>
               <span className="lc-rotulo">Vamos conversar</span>
               <h2 className="lc-h2" id="contato-titulo">
-                Quero ver funcionando.
+                Começar grátis por 30 dias.
               </h2>
               <p className="lc-p lc-p-max">
-                Deixe nome e WhatsApp. O Saulo, do comercial da ARK, responde e marca a conversa de
-                30 minutos. Seu contato entra no mesmo funil que você viu aqui em cima, como lead de
+                Deixe nome e WhatsApp. O Saulo, do comercial da ARK, responde, marca os 30 minutos de
+                onboarding e abre a sua conta no mesmo dia. Seu contato entra no mesmo funil que você viu aqui em cima, como lead de
                 Prospecção.
               </p>
             </div>
