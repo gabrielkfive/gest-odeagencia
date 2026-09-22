@@ -417,8 +417,8 @@ function Conheca() {
             ARK Content.
           </div>
           <div className="lc-rodape-links">
-            <a href="/privacidade.html">Privacidade</a>
-            <a href="/termos.html">Termos</a>
+            <a href="/privacidade">Privacidade</a>
+            <a href="/termos">Termos</a>
             <a href="/auth">Entrar</a>
           </div>
         </div>

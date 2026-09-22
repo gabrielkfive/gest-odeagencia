@@ -261,6 +261,20 @@ function AuthPage() {
               <p className="text-center text-[10.5px] leading-snug text-white/50">
                 Acesso da equipe Ark®. Criou a conta ou entrou com Google? Você já está dentro.
               </p>
+
+              {/* Exigencia do Google pra tela de login com a conta Google: os dois documentos
+                  precisam estar visiveis e clicaveis aqui, nao so no rodape da landing. */}
+              <p className="text-center text-[10.5px] leading-snug text-white/50">
+                Ao entrar você aceita os{" "}
+                <a href="/termos" target="_blank" rel="noreferrer" className="text-[#FFC700]/80 underline underline-offset-2 hover:text-[#FFC700]">
+                  Termos de Uso
+                </a>{" "}
+                e a{" "}
+                <a href="/privacidade" target="_blank" rel="noreferrer" className="text-[#FFC700]/80 underline underline-offset-2 hover:text-[#FFC700]">
+                  Política de Privacidade
+                </a>
+                .
+              </p>
             </div>
           </GlassEffect>
         </div>
