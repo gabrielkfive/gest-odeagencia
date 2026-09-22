@@ -52,6 +52,60 @@
     concluido: "#4ade80",
   };
   var FMT = { estatico: "Estático", carrossel: "Carrossel", reel: "Reel", story: "Story" };
+  /* ===== APROVACAO SEM ESTRESSE (tarefa 07 do doc 11, 22/09/2026) =====
+     Espelho do modulo puro src/lib/aprovacao.js, que e quem os testes cobrem
+     (deploy/teste-aprovacao.mjs). Mudou la, muda aqui. */
+  var APR_CORTE = 125;
+  var APR_PROP = { reel: "9:16", reels: "9:16", story: "9:16", stories: "9:16", carrossel: "1:1", carousel: "1:1" };
+  var APR_IMG = /\.(png|jpe?g|webp|gif|avif)(\?|$)/i;
+  var APR_VID = /\.(mp4|mov|webm|m4v)(\?|$)/i;
+  function aprAnexos(t) {
+    return (Array.isArray(t.attachments) ? t.attachments : []).filter(function (a) {
+      return a && /^https?:\/\//.test(String(a.url || ""));
+    });
+  }
+  function aprPrevia(lista) {
+    var img = lista.find(function (a) {
+      return APR_IMG.test(String(a.url)) || /imagem|image/i.test(String(a.tipo || ""));
+    });
+    var alvo = img || lista.find(function (a) { return APR_VID.test(String(a.url)); }) || lista[0];
+    if (!alvo) return null;
+    var url = String(alvo.url);
+    return {
+      url: url,
+      nome: String(alvo.nome || url),
+      tipo: APR_IMG.test(url) || img === alvo ? "imagem" : APR_VID.test(url) ? "video" : "arquivo",
+    };
+  }
+  function aprDias(deIso) {
+    if (!deIso) return 0;
+    var de = new Date(deIso).getTime();
+    if (!de) return 0;
+    var d = Math.floor((Date.now() - de) / 86400000);
+    return d > 0 ? d : 0;
+  }
+  function aprDerivar(tarefas) {
+    return (tarefas || []).map(function (t) {
+      var lista = aprAnexos(t);
+      var legenda = String(t.legenda || "");
+      var corta = legenda.length > APR_CORTE;
+      return {
+        id: t.id,
+        titulo: t.title || "(sem titulo)",
+        formato: t.formato || "",
+        proporcao: APR_PROP[String(t.formato || "").toLowerCase()] || "4:5",
+        publicarEm: t.publicarEm || "",
+        previa: aprPrevia(lista),
+        arquivos: lista.length,
+        semArquivo: lista.length === 0,
+        legenda: legenda,
+        legendaCurta: corta ? legenda.slice(0, APR_CORTE).replace(/\s+$/, "") + "..." : legenda,
+        legendaMais: corta,
+        diasParado: aprDias(t.aprovacaoEm),
+        enviadoClienteEm: t.enviadoClienteEm || "",
+      };
+    });
+  }
   function editorial() {
     try {
       var a = JSON.parse(localStorage.getItem("wfa-editorial") || "[]");
@@ -247,7 +301,51 @@
     else if (ABA === "reels") html += grid(reels, "Nenhum reel em " + mesNome(MES) + ".");
     else if (ABA === "stories") html += grid(stories, "Nenhum story em " + mesNome(MES) + ".");
     else if (ABA === "todas") html += grid(semF, "Todas as tarefas do mês já têm formato.");
-    else if (ABA === "aprov") html += grid(aprov, "Nada em homologação para este cliente.");
+    else if (ABA === "aprov") {
+      var itens = aprDerivar(aprov);
+      html += itens.length
+        ? '<div class="apr-wrap">' +
+          itens
+            .map(function (a) {
+              var prev = a.previa
+                ? a.previa.tipo === "imagem"
+                  ? '<img src="' + esc(a.previa.url) + '" alt="' + esc(a.titulo) + '" loading="lazy">'
+                  : '<div class="apr-arq"><b>' + esc(a.previa.nome) + "</b><span>" +
+                    (a.previa.tipo === "video" ? "vídeo anexado" : "arquivo anexado") + "</span></div>"
+                : '<div class="apr-vazio"><b>Sem arte anexada</b><span>o cliente não tem o que aprovar</span></div>';
+              return (
+                '<article class="apr-card' + (a.semArquivo ? " falta" : "") + '">' +
+                '<div class="apr-midia r' + a.proporcao.replace(":", "x") + '">' + prev + "</div>" +
+                '<div class="apr-corpo">' +
+                '<div class="apr-top"><b>' + esc(a.titulo) + "</b>" +
+                '<span class="apr-tags">' + (a.formato ? esc(FMT[a.formato] || a.formato) : "sem formato") +
+                (a.publicarEm
+                  ? " · publica " + brData(a.publicarEm) + (brHora(a.publicarEm) ? " " + brHora(a.publicarEm) : "")
+                  : "") +
+                "</span></div>" +
+                (a.legenda
+                  ? '<p class="apr-leg">' + esc(a.legendaCurta) +
+                    (a.legendaMais
+                      ? ' <button type="button" class="apr-mais" data-leg="' + esc(a.legenda) + '" onclick="nxAprMais(this)">mais</button>'
+                      : "") + "</p>"
+                  : '<p class="apr-leg apr-mute">Sem legenda escrita.</p>') +
+                '<div class="apr-rod">' +
+                '<span class="apr-espera' + (a.diasParado >= 3 ? " alerta" : "") + '">' +
+                (a.diasParado
+                  ? "esperando há " + a.diasParado + (a.diasParado === 1 ? " dia" : " dias")
+                  : "esperando o cliente") +
+                (a.enviadoClienteEm ? " · enviado " + brData(a.enviadoClienteEm) : " · ainda não enviado") +
+                "</span>" +
+                '<span class="apr-acoes">' +
+                '<button type="button" class="nxc-btn" data-tid="' + esc(a.id) + '" onclick="openTaskDetail(this.getAttribute(&quot;data-tid&quot;))">Abrir tarefa</button>' +
+                '<button type="button" class="nxc-btn yel" data-tid="' + esc(a.id) + '" onclick="nxAprEnviar(this.getAttribute(&quot;data-tid&quot;))">Enviar ao cliente</button>' +
+                "</span></div></div></article>"
+              );
+            })
+            .join("") +
+          '</div><p class="nxc-mute" style="margin-top:10px;font-size:12px">É exatamente isto que o cliente abre no portal, sem login. Enviar ao cliente gera o link, copia e registra na tarefa.</p>'
+        : '<div class="nxc-empty">Nada em homologação para este cliente.</div>';
+    }
     else if (ABA === "editorial")
       html += ed.length
         ? '<div class="nxc-list">' +
@@ -543,6 +641,41 @@
     if (typeof toast === "function") toast("Cartão de post salvo");
     setTimeout(nxPostFecha, 500);
     render();
+  };
+  window.nxAprMais = function (btn) {
+    var p = btn.parentNode;
+    if (p) p.textContent = btn.getAttribute("data-leg") || "";
+  };
+  /* Enviar ao cliente: gera o link do portal, copia e registra na tarefa (uma linha por dia,
+     espelho de marcarEnviadoAoCliente em src/lib/aprovacao.js). */
+  window.nxAprEnviar = async function (id) {
+    var t = (state.tarefas || []).find(function (x) { return x.id === id; });
+    var c = (typeof CLIENTES !== "undefined" ? CLIENTES : []).find(function (x) { return x.id === CLI; });
+    if (!t || !c || typeof cloudCall !== "function") return;
+    try {
+      var r = await cloudCall("save", {
+        action: "create-portal",
+        cliente: c.nm,
+        planKey: typeof planKey === "function" ? planKey(c.nm) : String(c.nm).toLowerCase(),
+      });
+      if (!r || !r.token) throw new Error((r && r.error) || "Falha ao gerar");
+      var url = location.origin + "/portal?t=" + r.token;
+      try { await navigator.clipboard.writeText(url); } catch (e) {}
+      var agora = typeof wfaAgoraISO === "function" ? wfaAgoraISO() : new Date().toISOString();
+      t.hist = Array.isArray(t.hist) ? t.hist : [];
+      var dia = String(agora).slice(0, 10);
+      var jaHoje = t.hist.some(function (h) {
+        return h && /[Ee]nviad/.test(String(h.txt || "")) && String(h.em || "").slice(0, 10) === dia;
+      });
+      if (!jaHoje) t.hist.push({ em: agora, txt: "Enviado ao cliente para aprovação (link do portal)" });
+      t.enviadoClienteEm = agora;
+      if (typeof saveTarefas === "function") saveTarefas();
+      if (typeof toast === "function") toast("Link copiado e envio registrado na tarefa");
+      if (typeof prompt === "function") prompt("Portal de " + c.nm + " (link copiado, mande pra ele):", url);
+      render();
+    } catch (e) {
+      if (typeof toast === "function") toast("Não consegui gerar o link: " + (e.message || e));
+    }
   };
   /* ao entrar na aba do cliente, abre o ultimo cliente escolhido */
   document.querySelectorAll('[data-nav="cliente"]').forEach(function (el) {
