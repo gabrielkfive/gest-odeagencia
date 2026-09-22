@@ -302,7 +302,12 @@
     else if (ABA === "stories") html += grid(stories, "Nenhum story em " + mesNome(MES) + ".");
     else if (ABA === "todas") html += grid(semF, "Todas as tarefas do mês já têm formato.");
     else if (ABA === "aprov") {
-      var itens = aprDerivar(aprov);
+      /* O portal so mostra o que esta esperando o CLIENTE (homologcli). Homologacao
+         interna (aprovacao) e coisa de equipe e fica numa secao separada. */
+      var itens = aprDerivar(
+        aprov.filter(function (t) { return t.status === "homologcli"; }),
+      );
+      var internas = aprov.filter(function (t) { return t.status === "aprovacao"; });
       html += itens.length
         ? '<div class="apr-wrap">' +
           itens
@@ -344,7 +349,13 @@
             })
             .join("") +
           '</div><p class="nxc-mute" style="margin-top:10px;font-size:12px">É exatamente isto que o cliente abre no portal, sem login. Enviar ao cliente gera o link, copia e registra na tarefa.</p>'
-        : '<div class="nxc-empty">Nada em homologação para este cliente.</div>';
+        : '<div class="nxc-empty">Nada esperando o cliente agora.</div>';
+      if (internas.length)
+        html +=
+          '<h3 class="apr-sec">Homologação interna <span>' +
+          internas.length +
+          '</span></h3><p class="nxc-mute" style="font-size:12px;margin:0 0 10px">A equipe ainda está revisando. O cliente não vê isto no portal.</p>' +
+          '<div class="nxc-grid">' + internas.map(cardTarefa).join("") + '</div>';
     }
     else if (ABA === "editorial")
       html += ed.length

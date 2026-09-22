@@ -45,6 +45,8 @@ tarefas = [
      'clienteId': 'vivenda', 'formato': 'story', 'data': d(1), 'up': agora},
     {'id': 'ap3', 'title': 'Carrossel Novo Gama', 'status': 'concluido', 'resp': 'Bruno',
      'clienteId': 'vivenda', 'formato': 'carrossel', 'concluidaEm': d(-1) + 'T10:00:00.000Z', 'up': agora},
+    {'id': 'ap4', 'title': 'Post revisao interna', 'status': 'aprovacao', 'resp': 'Lucas Rosi',
+     'clienteId': 'vivenda', 'formato': 'estatico', 'data': d(1), 'up': agora},
 ]
 seed = ("localStorage.setItem('sb-fxfnonozzekxnxddxsnh-auth-token',%s);"
         "localStorage.setItem('wfa-theme','dark');"
@@ -85,6 +87,9 @@ with sync_playwright() as pw:
     for c in cards:
         print('  -', c['titulo'], '|', c['proporcao'], '| arte:', c['temArte'],
               '| falta arquivo:', c['falta'], '|', (c['espera'] or '').strip())
+    print('secao de homologacao interna:',
+          p.evaluate("() => { const h = document.querySelector('.apr-sec'); return h ? h.textContent.trim() : 'nenhuma'; }"),
+          '| cartoes internos:', p.evaluate("() => document.querySelectorAll('.nxc-grid .nxc-card').length"))
     print('legenda cortada com mais:',
           p.evaluate("() => !!document.querySelector('.apr-mais')"))
     p.screenshot(path=f'deploy/prova-aprovacao-{fase}-aba.png', full_page=False)
