@@ -6,6 +6,22 @@ import { ArkAppIcon } from "@/components/ui/ark-app-icons";
 import { GlassButton, GlassDock, GlassEffect, GlassFilter } from "@/components/ui/liquid-glass";
 import { SmokeyBackground } from "@/components/ui/smokey-background";
 
+// Marca da agencia (white label). O /app grava wfa-brand no localStorage desta mesma origem,
+// entao a tela de entrada mostra o logo e o nome de quem esta usando o sistema, nao o da ARK.
+type Marca = { name?: string; color?: string; logo?: string };
+function usarMarca(): Marca {
+  const [marca, setMarca] = useState<Marca>({});
+  useEffect(() => {
+    try {
+      const cru = localStorage.getItem("wfa-brand");
+      if (cru) setMarca(JSON.parse(cru) || {});
+    } catch {
+      // navegador sem localStorage (aba privada, cookie bloqueado): fica a marca ARK
+    }
+  }, []);
+  return marca;
+}
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({ meta: [{ title: "Entrar · WorkFlowArk" }] }),
@@ -13,6 +29,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const marca = usarMarca();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -143,7 +160,12 @@ function AuthPage() {
         {/* Lado da marca: texto + dock de vidro com os apps da ARK */}
         <div className="flex flex-col justify-center gap-6 px-[8vw] pb-[3vh] pt-[7vh] md:px-[5vw] md:py-[6vh]">
           <div className="flex items-center gap-3">
-            <img src="/ark-mark.png" alt="ARK Content" className="block h-14 w-14 object-contain" />
+            <img
+              src={marca.logo || "/ark-mark.png"}
+              alt={marca.name || "ARK Content"}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/ark-mark.png"; }}
+              className="block h-14 w-14 object-contain"
+            />
             <span className="text-[17px] font-extrabold tracking-[-.01em] text-white">Ark<sup className="ml-px text-[9px] font-semibold text-[#FFC700] align-super">®</sup> Content</span>
           </div>
           <h1 className="m-0 max-w-[14ch] text-[clamp(26px,3.4vw,46px)] font-extrabold leading-[1.08] tracking-[-.02em]">
@@ -159,7 +181,15 @@ function AuthPage() {
             </div>
             <GlassButton onClick={() => document.getElementById("floating_email")?.focus()}>
               <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <span>Entrar no WorkFlowArk<sup className="ml-px text-[8px] align-super">®</sup></span>
+                <span>
+                  {marca.name ? (
+                    "Entrar em " + marca.name
+                  ) : (
+                    <>
+                      Entrar no WorkFlowArk<sup className="ml-px text-[8px] align-super">®</sup>
+                    </>
+                  )}
+                </span>
                 <ArrowRight size={16} />
               </div>
             </GlassButton>
@@ -183,8 +213,19 @@ function AuthPage() {
           <GlassEffect className="w-full max-w-[400px] rounded-3xl">
             <div className="space-y-6 p-7">
               <div className="text-center">
-                <img src="/ark-logo.png" alt="ARK Content" className="mx-auto mb-3 block h-14 w-14 rounded-2xl object-contain" />
-                <h2 className="text-2xl font-extrabold tracking-[-.02em] text-white">WorkFlowArk<sup className="ml-px text-[10px] font-semibold text-[#FFC700] align-super">®</sup></h2>
+                <img
+                  src={marca.logo || "/ark-logo.png"}
+                  alt={marca.name || "ARK Content"}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/ark-logo.png"; }}
+                  className="mx-auto mb-3 block h-14 w-14 rounded-2xl object-contain"
+                />
+                <h2 className="text-2xl font-extrabold tracking-[-.02em] text-white">
+                  {marca.name || (
+                    <>
+                      WorkFlowArk<sup className="ml-px text-[10px] font-semibold text-[#FFC700] align-super">®</sup>
+                    </>
+                  )}
+                </h2>
                 <p className="mt-1 text-xs text-white/60">Sistema operacional da Ark® Content</p>
               </div>
 

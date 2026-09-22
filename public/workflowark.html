@@ -1,4 +1,4 @@
-<!-- build 20260922c-aprovacao-app -->
+<!-- build 20260922d-white-label -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -4379,6 +4379,11 @@ function wfaSetTheme(t){
           <div><label class="form-label">Nome do produto</label><input id="brand-name" class="form-input" placeholder="WorkFlowArk"></div>
           <div><label class="form-label">Cor de destaque</label><input id="brand-color" type="color" value="#FFC700" style="width:52px;height:38px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff;cursor:pointer"></div>
         </div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
+          <div><label class="form-label">Logo (endereço da imagem)</label><input id="brand-logo" class="form-input" placeholder="https://.../logo.png" oninput="brandLogoPreview()"></div>
+          <div><label class="form-label">Prévia</label><div id="brand-logo-prev" style="width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--surface)"><img src="/ark-mark.png" alt="" style="max-width:100%;max-height:100%;object-fit:contain"></div></div>
+        </div>
+        <p class="muted" style="font-size:10.5px;margin-bottom:9px">O logo troca na barra lateral e na tela de entrada. Use PNG ou SVG com fundo transparente.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
           <button class="tb-btn" onclick="saveBrand()">Aplicar marca</button>
           <button class="icobtn" onclick="resetBrand()">Restaurar ARK</button>
@@ -4398,7 +4403,7 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260921b.js"></script>
+<script src="workflowark-app-20260922a.js"></script>
 <script src="workflowark-cliente-20260922b.js" defer></script>
 </body>
 </html>

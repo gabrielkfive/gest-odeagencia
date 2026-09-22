@@ -1041,12 +1041,32 @@ function applyBrand(){
     const nm=document.querySelector('.brand-info .nm');if(nm)nm.textContent=b.name;
     try{document.title=b.name+' · Sistema';}catch(e){}
   }
+  // Logo da agencia (white label, 22/09/2026): troca na barra lateral e no icone da aba.
+  // Endereco invalido nao pode apagar a marca, entao o onerror devolve a da ARK.
+  if(b.logo){
+    const img=document.querySelector('.brand-mark img');
+    if(img){img.onerror=function(){this.onerror=null;this.src='/ark-mark.png';};img.src=b.logo;}
+    try{document.querySelectorAll('link[rel="icon"]').forEach(l=>l.setAttribute('href',b.logo));}catch(e){}
+  }
 }
 function saveBrand(){
   const name=(document.getElementById('brand-name').value||'').trim();
   const color=document.getElementById('brand-color').value||'#FFC700';
-  localStorage.setItem('wfa-brand',JSON.stringify({name,color}));
+  const el=document.getElementById('brand-logo');
+  const logo=(el&&el.value||'').trim();
+  if(logo&&!/^(https?:\/\/|\/)/.test(logo)){toast('O logo precisa de um endere\u00e7o que comece com https:// ou /');return;}
+  localStorage.setItem('wfa-brand',JSON.stringify({name,color,logo}));
   applyBrand();toast('Marca aplicada ✓');
+}
+function brandLogoPreview(){
+  const el=document.getElementById('brand-logo');
+  const box=document.getElementById('brand-logo-prev');
+  if(!el||!box)return;
+  const img=box.querySelector('img');
+  if(!img)return;
+  const v=(el.value||'').trim();
+  img.onerror=function(){this.onerror=null;this.src='/ark-mark.png';};
+  img.src=v||'/ark-mark.png';
 }
 function resetBrand(){
   localStorage.removeItem('wfa-brand');
@@ -1057,10 +1077,13 @@ function resetBrand(){
   const nm=document.querySelector('.brand-info .nm');if(nm)nm.textContent='ARK Content';
   const bn=document.getElementById('brand-name');if(bn)bn.value='';
   const bc=document.getElementById('brand-color');if(bc)bc.value='#FFC700';
+  const bl=document.getElementById('brand-logo');if(bl)bl.value='';
+  const bm=document.querySelector('.brand-mark img');if(bm)bm.src='/ark-mark.png';
+  brandLogoPreview();
   toast('Marca ARK restaurada');
 }
 // aplica a marca salva no carregamento e preenche os campos
-window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{applyBrand();const b=loadBrand();const bn=document.getElementById('brand-name');if(bn&&b.name)bn.value=b.name;const bc=document.getElementById('brand-color');if(bc&&b.color)bc.value=b.color;},120);});
+window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{applyBrand();const b=loadBrand();const bn=document.getElementById('brand-name');if(bn&&b.name)bn.value=b.name;const bc=document.getElementById('brand-color');if(bc&&b.color)bc.value=b.color;const bl=document.getElementById('brand-logo');if(bl&&b.logo)bl.value=b.logo;brandLogoPreview();},120);});
 
 /* ============ TABS ============ */
 document.querySelectorAll('[data-tabs]').forEach(group=>{
