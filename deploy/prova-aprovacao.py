@@ -125,6 +125,16 @@ with sync_playwright() as pw:
 
     p.set_viewport_size({'width': 390, 'height': 844}); p.wait_for_timeout(800)
     p.screenshot(path=f'deploy/prova-aprovacao-{fase}-celular.png')
+    # Item 4: o cartao de post (aba Posts/Reels) mostra a arte, nao so um icone
+    p.set_viewport_size({'width': 1440, 'height': 900}); p.wait_for_timeout(400)
+    p.evaluate("() => { if (typeof nxCliAba === 'function') nxCliAba('reels'); }")
+    p.wait_for_timeout(700)
+    print('cartao de post com midia:',
+          p.evaluate("() => { const m = document.querySelector('.nxc-card-midia img');"
+                     " return m ? 'sim, carregou=' + (m.naturalWidth > 0) : 'nao'; }"))
+    alvo2 = p.query_selector('.nxc-card')
+    if alvo2:
+        alvo2.screenshot(path=f'deploy/prova-aprovacao-{fase}-cartao-post.png')
     print('erros de pagina:', erros or 'nenhum')
     b.close()
 if srv: srv.shutdown()

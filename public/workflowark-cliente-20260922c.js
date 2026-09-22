@@ -152,6 +152,18 @@
       '<div class="nxc-card" onclick="openTaskDetail(\'' +
       t.id +
       "')\">" +
+      /* A arte entra antes de tudo: o Gabriel quer ver o post, nao um ícone. Mesma escolha
+         de prévia da aba Aprovação (aprPrevia), com o enquadramento do formato. */
+      (function () {
+        var pv = aprPrevia(aprAnexos(t));
+        if (!pv || pv.tipo !== "imagem") return "";
+        var prop = APR_PROP[String(t.formato || "").toLowerCase()] || "4:5";
+        return (
+          '<div class="nxc-card-midia r' + prop.replace(":", "x") + '">' +
+          '<img src="' + esc(pv.url) + '" alt="" loading="lazy" onerror="this.parentNode.remove()">' +
+          "</div>"
+        );
+      })() +
       '<div class="nxc-card-top">' +
       pill(ST[t.status] || t.status || "", STC[t.status] || "#888") +
       (t.formato ? pill(FMT[t.formato] || t.formato) : "") +
