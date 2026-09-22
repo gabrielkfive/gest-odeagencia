@@ -47,6 +47,14 @@ tarefas = [
      'clienteId': 'vivenda', 'formato': 'carrossel', 'concluidaEm': d(-1) + 'T10:00:00.000Z', 'up': agora},
     {'id': 'ap4', 'title': 'Post revisao interna', 'status': 'aprovacao', 'resp': 'Lucas Rosi',
      'clienteId': 'vivenda', 'formato': 'estatico', 'data': d(1), 'up': agora},
+    {'id': 'ap5', 'title': 'Post Semana do Consumidor', 'status': 'concluido', 'resp': 'Bruno',
+     'clienteId': 'vivenda', 'formato': 'estatico', 'publicarEm': d(-2) + 'T12:00',
+     'concluidaEm': d(-2) + 'T10:00:00.000Z',
+     'attachments': [{'nome': 'arte.png', 'url': ARTE, 'tipo': 'imagem'}], 'up': agora},
+    {'id': 'ap6', 'title': 'Carrossel bastidores', 'status': 'concluido', 'resp': 'Bruno',
+     'clienteId': 'vivenda', 'formato': 'carrossel', 'publicarEm': d(-5) + 'T12:00',
+     'concluidaEm': d(-5) + 'T10:00:00.000Z',
+     'attachments': [{'nome': 'p1.png', 'url': ARTE, 'tipo': 'imagem'}], 'up': agora},
 ]
 seed = ("localStorage.setItem('sb-fxfnonozzekxnxddxsnh-auth-token',%s);"
         "localStorage.setItem('wfa-theme','dark');"
@@ -135,6 +143,15 @@ with sync_playwright() as pw:
     alvo2 = p.query_selector('.nxc-card')
     if alvo2:
         alvo2.screenshot(path=f'deploy/prova-aprovacao-{fase}-cartao-post.png')
+    # Item 5: previa do feed
+    p.evaluate("() => { if (typeof nxCliAba === 'function') nxCliAba('feed'); }")
+    p.wait_for_timeout(800)
+    print('itens no feed:', p.evaluate("() => document.querySelectorAll('.feed-item').length"),
+          '| artes carregadas:', p.evaluate("() => [...document.querySelectorAll('.feed-item img')].filter(i => i.naturalWidth > 0).length"),
+          '| marcados como futuros:', p.evaluate("() => document.querySelectorAll('.feed-item.futuro').length"))
+    fg = p.query_selector('.feed-grade')
+    if fg:
+        fg.screenshot(path=f'deploy/prova-aprovacao-{fase}-feed.png')
     print('erros de pagina:', erros or 'nenhum')
     b.close()
 if srv: srv.shutdown()

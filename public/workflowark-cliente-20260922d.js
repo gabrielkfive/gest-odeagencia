@@ -106,6 +106,44 @@
       };
     });
   }
+  /* ===== PREVIA DO FEED (tela 5 do doc 11, 22/09/2026) =====
+     Espelho de src/lib/feed.js (testado em deploy/teste-feed.mjs). Story fica fora: nao
+     aparece na grade do perfil. */
+  var FEED_FORA = ["story", "stories"];
+  function feedDerivar(tarefas, limite) {
+    var agora = Date.now();
+    return (tarefas || [])
+      .filter(function (t) {
+        return (
+          FEED_FORA.indexOf(String(t.formato || "").toLowerCase()) < 0 &&
+          (t.status === "concluido" || t.status === "homologcli")
+        );
+      })
+      .map(function (t) {
+        var pv = aprPrevia(aprAnexos(t));
+        if (!pv || pv.tipo !== "imagem") return null;
+        var quando = String(t.publicarEm || "");
+        return {
+          id: t.id,
+          titulo: t.title || "(sem titulo)",
+          formato: t.formato || "",
+          proporcao: APR_PROP[String(t.formato || "").toLowerCase()] || "4:5",
+          publicarEm: quando,
+          futuro: !!quando && new Date(quando).getTime() > agora,
+          aprovado: t.status === "concluido",
+          previa: pv,
+        };
+      })
+      .filter(Boolean)
+      .sort(function (a, b) {
+        if (!a.publicarEm && !b.publicarEm) return 0;
+        if (!a.publicarEm) return 1;
+        if (!b.publicarEm) return -1;
+        return b.publicarEm.localeCompare(a.publicarEm);
+      })
+      .slice(0, limite || 12);
+  }
+
   function editorial() {
     try {
       var a = JSON.parse(localStorage.getItem("wfa-editorial") || "[]");
@@ -256,6 +294,7 @@
       ["ficha", "Ficha", ""],
       ["faturas", "Faturas", ""],
       ["saude", "Saúde", atras.length],
+      ["feed", "Feed", ""],
       ["entregas", "Entregas", todas.filter(function (t) { return t.status === "concluido" && ((t.attachments || []).length || t.legenda || t.publicarEm); }).length],
     ];
     var html =
@@ -476,6 +515,25 @@
             return '<div class="nxc-row" data-tid="' + esc(t.id) + '" onclick="openTaskDetail(this.getAttribute(&quot;data-tid&quot;))" style="cursor:pointer"><span class="nxc-dot" style="background:#4ade80"></span><span class="t"><b>' + esc(t.title || "") + '</b><span>' + (t.formato ? FMT[t.formato] + " · " : "") + (t.publicarEm ? "publica " + brData(t.publicarEm) : "entregue " + brData(t.concluidaEm)) + (links.length ? " · " + links.length + " arquivo(s)" : " · sem arquivo") + '</span></span>' + (links.length ? '<a class="nxc-mini" href="' + esc(links[0].url) + '" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">Abrir</a>' : "") + "</div>";
           }).join("") + '</div><p class="nxc-mute" style="margin-top:10px;font-size:12px">É isto que o cliente vê no portal (link sem login). Anexe o arquivo ou o link do Drive na tarefa antes de concluir.</p>'
         : '<div class="nxc-empty">Nenhuma entrega concluída com arquivo, legenda ou data ainda.</div>';
+    } else if (ABA === "feed") {
+      var grade = feedDerivar(todas, 12);
+      html += grade.length
+        ? '<p class="nxc-mute" style="font-size:12px;margin:0 0 12px">Como o perfil vai ficar, na ordem de publica\u00e7\u00e3o. Story fica de fora porque n\u00e3o entra na grade.</p>' +
+          '<div class="feed-grade">' +
+          grade
+            .map(function (g) {
+              return (
+                '<figure class="feed-item' + (g.futuro ? " futuro" : "") + '" title="' + esc(g.titulo) + '">' +
+                '<img src="' + esc(g.previa.url) + '" alt="' + esc(g.titulo) + '" loading="lazy" onerror="this.parentNode.classList.add(\'quebrada\')">' +
+                '<figcaption>' +
+                (g.publicarEm ? brData(g.publicarEm) : "sem data") +
+                (g.aprovado ? "" : " \u00b7 esperando o cliente") +
+                "</figcaption></figure>"
+              );
+            })
+            .join("") +
+          "</div>"
+        : '<div class="nxc-empty">Sem arte anexada ainda. O feed aparece quando as tarefas tiverem imagem.</div>';
     } else if (ABA === "saude") {
       var parada = aprov.filter(function (t) {
         return t.aprovacaoEm && Date.now() - new Date(t.aprovacaoEm).getTime() > 3 * 86400000;
