@@ -1,15 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Lock, Mail, UserRound } from "lucide-react";
 import { ArkAppIcon } from "@/components/ui/ark-app-icons";
 import { GlassButton, GlassDock, GlassEffect, GlassFilter } from "@/components/ui/liquid-glass";
 import { SmokeyBackground } from "@/components/ui/smokey-background";
 import { lerEGuardarModo, type Modo } from "@/lib/modo-agencia";
+import { corAceita, corSobre, nomeCurto, nomeProduto } from "@/lib/marca-agencia";
 
 // Marca da agencia (white label). O /app grava wfa-brand no localStorage desta mesma origem,
 // entao a tela de entrada mostra o logo e o nome de quem esta usando o sistema, nao o da ARK.
-type Marca = { name?: string; color?: string; logo?: string };
+type Marca = { name?: string; short?: string; color?: string; logo?: string };
 function usarMarca(): Marca {
   const [marca, setMarca] = useState<Marca>({});
   useEffect(() => {
@@ -162,6 +163,17 @@ function AuthPage() {
     { icon: <ArkAppIcon name="contratos" />, label: "Contratos", href: "/contratos.html" },
     { icon: <ArkAppIcon name="comercial" />, label: "Comercial", href: "/comercial.html" },
   ];
+
+  if (modo === null) return <div className="fixed inset-0 bg-[#0b0b0d]" />;
+  if (agencia) {
+    return (
+      <EntradaAgencia
+        marca={marca} mode={mode} setMode={(m) => { setMode(m); setErr(null); setOk(null); }}
+        email={email} setEmail={setEmail} password={password} setPassword={setPassword} name={name} setName={setName}
+        loading={loading} err={err} ok={ok} submit={submit} forgotPassword={forgotPassword} signInGoogle={signInGoogle}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 overflow-auto bg-[#0a0a0a] font-[Inter,system-ui,sans-serif] text-white">
@@ -351,6 +363,149 @@ function AuthPage() {
           </GlassEffect>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Entrada da instância de outra agência (23/09/2026, pedido do Gabriel: "se for a agência do Zé
+// vai ser WorkFlowZé"). Nome do produto, logo e cor vêm da agência; nada da ARK aparece aqui.
+type EntradaProps = {
+  marca: Marca; mode: "signin" | "signup"; setMode: (m: "signin" | "signup") => void;
+  email: string; setEmail: (v: string) => void; password: string; setPassword: (v: string) => void;
+  name: string; setName: (v: string) => void; loading: boolean; err: string | null; ok: string | null;
+  submit: () => void; forgotPassword: () => void; signInGoogle: () => void;
+};
+function EntradaAgencia(p: EntradaProps) {
+  const cor = p.marca.color && corAceita(p.marca.color) ? p.marca.color : "#FFC700";
+  const produto = nomeProduto(p.marca);
+  const agencia = (p.marca.name || "").trim();
+  const inicial = (nomeCurto(p.marca) || "W").charAt(0);
+  const registrado = produto === "WorkFlowArk";
+  useEffect(() => {
+    document.title = (p.mode === "signin" ? "Entrar · " : "Criar acesso · ") + produto;
+  }, [produto, p.mode]);
+  const vars = { "--acc": cor, "--on": corSobre(cor) } as CSSProperties;
+  const logo = p.marca.logo ? (
+    <img src={p.marca.logo} alt={agencia || produto} className="block h-12 w-12 rounded-2xl object-contain" />
+  ) : (
+    <div aria-hidden="true" className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--acc)] text-2xl font-extrabold text-[var(--on)]">
+      {inicial}
+    </div>
+  );
+  return (
+    <div data-agx="entrada" style={vars} className="fixed inset-0 overflow-auto bg-[#0b0b0d] font-[Inter,system-ui,sans-serif] text-white">
+      <div className="pointer-events-none fixed inset-0 opacity-[.18] [background:radial-gradient(60%_50%_at_15%_10%,var(--acc)_0%,transparent_70%)]" />
+      <div className="relative z-10 mx-auto grid min-h-full max-w-[1120px] grid-cols-1 items-center gap-10 px-6 py-10 md:grid-cols-[1.05fr_.95fr] md:px-10">
+        <div className="flex flex-col gap-7">
+          <div className="flex items-center gap-3.5">
+            {logo}
+            <div className="leading-tight">
+              <div className="text-[19px] font-extrabold tracking-[-.01em]" data-agx="produto">
+                {produto}
+                {registrado && <sup className="ml-px text-[.45em] font-semibold text-[var(--acc)] align-super">®</sup>}
+              </div>
+              {agencia && <div className="text-[13px] text-white/55">{agencia}</div>}
+            </div>
+          </div>
+          <div>
+            <h1 className="m-0 max-w-[15ch] text-[clamp(30px,4vw,52px)] font-extrabold leading-[1.04] tracking-[-.03em]">
+              {p.mode === "signin" ? "Bom te ver de novo." : "Crie o acesso da sua agência."}
+            </h1>
+            <p className="mt-4 max-w-[38ch] text-[clamp(15px,1.35vw,18px)] leading-relaxed text-white/60">
+              Clientes, tarefas, aprovação e financeiro da sua agência no mesmo fluxo.
+            </p>
+          </div>
+        </div>
+
+        <div className="w-full max-w-[420px] justify-self-center md:justify-self-end">
+          <div className="rounded-3xl border border-white/10 bg-[#141417]/90 p-7 shadow-[0_30px_80px_rgba(0,0,0,.45)] backdrop-blur">
+            <div className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-white/[.06] p-1">
+              {(["signin", "signup"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => p.setMode(m)}
+                  className={"rounded-lg py-2 text-[13px] font-bold transition-colors " + (p.mode === m ? "bg-white/[.12] text-white" : "text-white/50 hover:text-white")}
+                >
+                  {m === "signin" ? "Entrar" : "Criar acesso"}
+                </button>
+              ))}
+            </div>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); p.submit(); }}>
+              {p.mode === "signup" && (
+                <CampoAg id="floating_name" type="text" label="Seu nome" value={p.name} onChange={p.setName} autoComplete="name" />
+              )}
+              <CampoAg id="floating_email" type="email" label="E-mail" value={p.email} onChange={p.setEmail} autoComplete="email" />
+              <CampoAg
+                id="floating_password"
+                type="password"
+                label={p.mode === "signup" ? "Senha (mínimo 6 caracteres)" : "Senha"}
+                value={p.password}
+                onChange={p.setPassword}
+                autoComplete={p.mode === "signup" ? "new-password" : "current-password"}
+              />
+              {p.err && <div className="rounded-lg border border-red-300/30 bg-red-500/15 px-3 py-2.5 text-[12.5px] leading-snug text-red-100">{p.err}</div>}
+              {p.ok && <div className="rounded-lg border border-white/15 bg-white/[.06] px-3 py-2.5 text-[12.5px] leading-snug text-white/85">{p.ok}</div>}
+              {p.mode === "signin" && (
+                <button type="button" onClick={p.forgotPassword} disabled={p.loading} className="text-xs text-white/50 transition hover:text-white disabled:opacity-50">
+                  Esqueci minha senha
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={p.loading}
+                className="group flex w-full items-center justify-center rounded-xl bg-[var(--acc)] px-4 py-3 text-sm font-extrabold text-[var(--on)] transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--acc)] focus:ring-offset-2 focus:ring-offset-[#141417] disabled:opacity-60"
+              >
+                {p.loading ? "Aguarde…" : p.mode === "signin" ? "Entrar" : "Criar acesso"}
+                {!p.loading && <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />}
+              </button>
+              <div className="flex items-center gap-3 py-1 text-[11px] uppercase tracking-wider text-white/35">
+                <div className="h-px flex-1 bg-white/10" />ou<div className="h-px flex-1 bg-white/10" />
+              </div>
+              <button
+                type="button"
+                onClick={p.signInGoogle}
+                disabled={p.loading}
+                className="flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/[.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[.08] disabled:opacity-60"
+              >
+                <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48" aria-hidden="true">
+                  <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039L38.802 8.841C34.553 4.806 29.613 2.5 24 2.5C11.983 2.5 2.5 11.983 2.5 24s9.483 21.5 21.5 21.5S45.5 36.017 45.5 24c0-1.538-.135-3.022-.389-4.417z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12.5 24 12.5c3.059 0 5.842 1.154 7.961 3.039l5.839-5.841C34.553 4.806 29.613 2.5 24 2.5C16.318 2.5 9.642 6.723 6.306 14.691z"/><path fill="#4CAF50" d="M24 45.5c5.613 0 10.553-2.306 14.802-6.341l-5.839-5.841C30.842 35.846 27.059 38 24 38c-5.039 0-9.345-2.608-11.124-6.481l-6.571 4.819C9.642 41.277 16.318 45.5 24 45.5z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l5.839 5.841C44.196 35.123 45.5 29.837 45.5 24c0-1.538-.135-3.022-.389-4.417z"/>
+                </svg>
+                Entrar com Google
+              </button>
+            </form>
+            <p className="mt-5 text-center text-[11px] leading-snug text-white/40">
+              {p.mode === "signup"
+                ? "Teste grátis de 30 dias. O primeiro acesso vira o administrador da agência."
+                : "Recebeu um convite? Entre com o e-mail em que ele chegou."}
+            </p>
+            <p className="mt-2 text-center text-[11px] leading-snug text-white/40">
+              Ao entrar você aceita os{" "}
+              <a href="/termos" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-white">Termos de Uso</a> e a{" "}
+              <a href="/privacidade" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-white">Política de Privacidade</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CampoAg({ id, type, label, value, onChange, autoComplete }: {
+  id: string; type: string; label: string; value: string; onChange: (v: string) => void; autoComplete: string;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-[12px] font-semibold text-white/55">{label}</label>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        autoComplete={autoComplete}
+        required
+        className="block w-full rounded-xl border border-white/10 bg-white/[.05] px-3.5 py-2.5 text-[15px] text-white outline-none transition focus:border-[var(--acc)] focus:bg-white/[.07]"
+      />
     </div>
   );
 }

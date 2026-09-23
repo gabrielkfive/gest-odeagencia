@@ -1,4 +1,4 @@
-<!-- build onboarding-20260923b -->
+<!-- build onboarding-20260923c -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -4294,6 +4294,7 @@ function wfaSetTheme(t){
       <div class="set-tabs">
         <button class="set-tab active" data-st="perfil" onclick="setTab('perfil')">Perfil</button>
         <button class="set-tab" data-st="equipe" id="set-tab-equipe" onclick="setTab('equipe')" style="display:none">Equipe &amp; Acessos</button>
+        <button class="set-tab" data-st="marca" onclick="setTab('marca')">Marca</button>
         <button class="set-tab" data-st="conta" onclick="setTab('conta')">Conta</button>
         <button class="set-tab" data-st="sistema" onclick="setTab('sistema')">Sistema</button>
       </div>
@@ -4320,7 +4321,7 @@ function wfaSetTheme(t){
       <div class="set-pane" data-stp="sistema">
         <div class="set-sect-t" style="margin-bottom:10px">Sistema</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px">
-          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('integracoes')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Marca</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Logo, cores e link público do cliente</div></button>
+          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="setTab('marca')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Marca</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Logo, cores e link público do cliente</div></button>
           <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="setTab('equipe')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Equipe e papéis</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Quem vê o quê. Financeiro restrito.</div></button>
           <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('integracoes')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Integrações</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Google Agenda, Drive, Instagram, WhatsApp, Meta Ads</div></button>
           <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('contratos')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Planos e contratos</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Modelos de contrato e propostas</div></button>
@@ -4348,6 +4349,26 @@ function wfaSetTheme(t){
         </div>
       </div>
 
+      <!-- MARCA (23/09/2026): antes ficava escondida no fim da aba Conta e o cartão Sistema > Marca levava pra Integrações -->
+      <div class="set-pane" data-stp="marca">
+        <div class="set-sect-t" style="margin-bottom:9px">Marca</div>
+        <p class="muted" style="font-size:10.5px;margin-bottom:9px">Personalize o nome e a cor do sistema. Base para vender o WorkFlowArk como produto de outras agências.</p>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
+          <div><label class="form-label">Nome do produto</label><input id="brand-name" class="form-input" placeholder="WorkFlowArk"></div>
+          <div><label class="form-label">Cor de destaque</label><input id="brand-color" type="color" value="#FFC700" style="width:52px;height:38px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff;cursor:pointer"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
+          <div><label class="form-label">Logo (endereço da imagem)</label><input id="brand-logo" class="form-input" placeholder="https://.../logo.png" oninput="brandLogoPreview()"></div>
+          <div><label class="form-label">Prévia</label><div id="brand-logo-prev" style="width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--surface)"><img src="/ark-mark.png" alt="" style="max-width:100%;max-height:100%;object-fit:contain"></div></div>
+        </div>
+        <p class="muted" style="font-size:10.5px;margin-bottom:9px">O logo troca na barra lateral e na tela de entrada. Use PNG ou SVG com fundo transparente.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+          <button class="tb-btn" onclick="saveBrand()">Aplicar marca</button>
+          <button class="icobtn" onclick="resetBrand()">Restaurar ARK</button>
+        </div>
+
+      </div>
+
       <!-- CONTA -->
       <div class="set-pane" data-stp="conta">
         <div class="set-sect-t" style="margin-bottom:9px">Sincronização &amp; sessão</div>
@@ -4373,22 +4394,6 @@ function wfaSetTheme(t){
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
           <button class="tb-btn" id="clap-btn" onclick="arkClapToggle()">Ativar abrir por 2 palmas</button>
           <button class="icobtn" onclick="jarvisBootSound()">▶ Ouvir o som</button>
-        </div>
-
-        <div class="set-sect-t" style="margin-bottom:9px">Marca (White Label)</div>
-        <p class="muted" style="font-size:10.5px;margin-bottom:9px">Personalize o nome e a cor do sistema. Base para vender o WorkFlowArk como produto de outras agências.</p>
-        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
-          <div><label class="form-label">Nome do produto</label><input id="brand-name" class="form-input" placeholder="WorkFlowArk"></div>
-          <div><label class="form-label">Cor de destaque</label><input id="brand-color" type="color" value="#FFC700" style="width:52px;height:38px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff;cursor:pointer"></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
-          <div><label class="form-label">Logo (endereço da imagem)</label><input id="brand-logo" class="form-input" placeholder="https://.../logo.png" oninput="brandLogoPreview()"></div>
-          <div><label class="form-label">Prévia</label><div id="brand-logo-prev" style="width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--surface)"><img src="/ark-mark.png" alt="" style="max-width:100%;max-height:100%;object-fit:contain"></div></div>
-        </div>
-        <p class="muted" style="font-size:10.5px;margin-bottom:9px">O logo troca na barra lateral e na tela de entrada. Use PNG ou SVG com fundo transparente.</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
-          <button class="tb-btn" onclick="saveBrand()">Aplicar marca</button>
-          <button class="icobtn" onclick="resetBrand()">Restaurar ARK</button>
         </div>
 
         <div class="set-sect-t" style="margin-bottom:9px">Dados de demonstração</div>

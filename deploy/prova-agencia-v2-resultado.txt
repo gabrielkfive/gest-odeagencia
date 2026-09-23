@@ -1,0 +1,40 @@
+marcador: build onboarding-20260923c
+passo1 titulo: Bem-vindo ao WorkFlowArk
+passo1 previa ao vivo: WorkFlowZé
+depois do passo 1, titulo da aba: WorkFlowZé
+passo2 progresso: 2 de 3
+passo2 linhas na revisao: 3
+passo2 mensagem: 3 clientes importados.
+clientes no sistema: Agência do Zé, Padaria Pão de Mel, Barbearia do Bairro, Mercado Central
+tarefas criadas pela importacao: 0
+passo3 titulo: Sua equipe
+fim: Tudo pronto
+assistente fechou: True
+titulo da aba: WorkFlowZé
+nome na barra lateral: Agência do Zé
+textos da ARK no Meu Dia: []
+config abas: AGÊNCIA | EQUIPE | CLIENTES | INTEGRAÇÕES | CONTA
+textos tecnicos ou da ARK nas Configuracoes: nenhum
+modal antigo abriu junto: False
+config fechou no Voltar: True
+assistente nao volta depois de concluido: True
+erros de pagina (agencia): nenhum
+sem rolagem lateral 1440-claro: True
+erros 1440-claro: nenhum
+sem rolagem lateral 390-escuro: True
+erros 390-escuro: nenhum
+sem rolagem lateral 390-claro: True
+erros 390-claro: nenhum
+entrada 1440 produto: WorkFlowZé
+entrada 1440 titulo da aba: Entrar · WorkFlowZé
+entrada 1440 textos da ARK: nenhum
+entrada 390 produto: WorkFlowZé
+entrada 390 titulo da aba: Entrar · WorkFlowZé
+entrada 390 textos da ARK: nenhum
+entrada sem marca: WorkFlowArk®
+ARK: modo: ark
+ARK: assistente ou pagina da agencia: False
+ARK: Sistema > Marca abre: marca
+ARK: continua na pagina atual (nao foi pra Integracoes): True
+ARK: aba Conta mantem JARVIS: True
+ARK: entrada com os textos de hoje: True
