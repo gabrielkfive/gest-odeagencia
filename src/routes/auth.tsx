@@ -5,6 +5,7 @@ import { ArrowRight, Lock, Mail, UserRound } from "lucide-react";
 import { ArkAppIcon } from "@/components/ui/ark-app-icons";
 import { GlassButton, GlassDock, GlassEffect, GlassFilter } from "@/components/ui/liquid-glass";
 import { SmokeyBackground } from "@/components/ui/smokey-background";
+import { lerEGuardarModo, type Modo } from "@/lib/modo-agencia";
 
 // Marca da agencia (white label). O /app grava wfa-brand no localStorage desta mesma origem,
 // entao a tela de entrada mostra o logo e o nome de quem esta usando o sistema, nao o da ARK.
@@ -22,6 +23,16 @@ function usarMarca(): Marca {
   return marca;
 }
 
+// Modo agência (23/09/2026): na instância de outra agência (ou na prévia com ?agencia=1) a
+// entrada vira white label, sem os textos, números e apps da ARK. Na ARK nada muda.
+function usarModo(): Modo | null {
+  const [modo, setModo] = useState<Modo | null>(null);
+  useEffect(() => {
+    setModo(lerEGuardarModo(window.location, window.localStorage));
+  }, []);
+  return modo;
+}
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({ meta: [{ title: "Entrar · WorkFlowArk" }] }),
@@ -30,6 +41,8 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const marca = usarMarca();
+  const modo = usarModo();
+  const agencia = modo === "agencia";
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -159,6 +172,9 @@ function AuthPage() {
       <div className="relative z-10 grid min-h-full grid-cols-1 md:grid-cols-[1.1fr_.9fr]">
         {/* Lado da marca: texto + dock de vidro com os apps da ARK */}
         <div className="flex flex-col justify-center gap-6 px-[8vw] pb-[3vh] pt-[7vh] md:px-[5vw] md:py-[6vh]">
+          {modo === null ? null : agencia ? (
+            <LadoAgencia marca={marca} />
+          ) : (<>
           <div className="flex items-center gap-3">
             <img
               src={marca.logo || "/ark-mark.png"}
@@ -206,6 +222,7 @@ function AuthPage() {
               </span>
             ))}
           </div>
+          </>)}
         </div>
 
         {/* Cartao de vidro com o formulario */}
@@ -213,12 +230,16 @@ function AuthPage() {
           <GlassEffect className="w-full max-w-[400px] rounded-3xl">
             <div className="space-y-6 p-7">
               <div className="text-center">
-                <img
-                  src={marca.logo || "/ark-logo.png"}
-                  alt={marca.name || "ARK Content"}
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/ark-logo.png"; }}
-                  className="mx-auto mb-3 block h-14 w-14 rounded-2xl object-contain"
-                />
+                {agencia && !marca.logo ? (
+                  <MonogramaNeutro className="mx-auto mb-3" />
+                ) : (
+                  <img
+                    src={marca.logo || "/ark-logo.png"}
+                    alt={marca.name || (agencia ? "WorkFlowArk" : "ARK Content")}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/ark-logo.png"; }}
+                    className="mx-auto mb-3 block h-14 w-14 rounded-2xl object-contain"
+                  />
+                )}
                 <h2 className="text-2xl font-extrabold tracking-[-.02em] text-white">
                   {marca.name || (
                     <>
@@ -226,7 +247,9 @@ function AuthPage() {
                     </>
                   )}
                 </h2>
-                <p className="mt-1 text-xs text-white/60">Sistema operacional da Ark® Content</p>
+                <p className="mt-1 text-xs text-white/60">
+                  {agencia ? "A gestão da sua agência num lugar só" : "Sistema operacional da Ark® Content"}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-1 rounded-xl bg-white/10 p-1">
@@ -240,7 +263,7 @@ function AuthPage() {
                       (mode === m ? "bg-[#0a0a0a] text-[#FFC700]" : "text-white/60 hover:text-white")
                     }
                   >
-                    {m === "signin" ? "Entrar" : "Criar conta"}
+                    {m === "signin" ? "Entrar" : agencia ? "Criar acesso" : "Criar conta"}
                   </button>
                 ))}
               </div>
@@ -299,9 +322,17 @@ function AuthPage() {
                 </button>
               </form>
 
-              <p className="text-center text-[10.5px] leading-snug text-white/50">
-                Acesso da equipe Ark®. Criou a conta ou entrou com Google? Você já está dentro.
-              </p>
+              {agencia ? (
+                <p className="text-center text-[10.5px] leading-snug text-white/50">
+                  {mode === "signup"
+                    ? "Teste de 30 dias. O primeiro acesso da agência vira o administrador; quem vem depois espera a liberação em Configurações, Equipe."
+                    : "Acesso da sua agência. Criou o acesso ou entrou com Google? Você já está dentro."}
+                </p>
+              ) : (
+                <p className="text-center text-[10.5px] leading-snug text-white/50">
+                  Acesso da equipe Ark®. Criou a conta ou entrou com Google? Você já está dentro.
+                </p>
+              )}
 
               {/* Exigencia do Google pra tela de login com a conta Google: os dois documentos
                   precisam estar visiveis e clicaveis aqui, nao so no rodape da landing. */}
@@ -320,6 +351,56 @@ function AuthPage() {
           </GlassEffect>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Lado esquerdo da entrada no modo agência: só a marca da agência e o que o sistema faz.
+// Nada de número, cliente ou app da ARK.
+function LadoAgencia({ marca }: { marca: Marca }) {
+  return (
+    <>
+      <div className="flex items-center gap-3" data-agx="entrada">
+        {marca.logo ? (
+          <img src={marca.logo} alt={marca.name || "Agência"} className="block h-14 w-14 object-contain" />
+        ) : (
+          <MonogramaNeutro />
+        )}
+        <span className="text-[17px] font-extrabold tracking-[-.01em] text-white">
+          {marca.name || (
+            <>
+              WorkFlowArk<sup className="ml-px text-[9px] font-semibold text-[#FFC700] align-super">®</sup>
+            </>
+          )}
+        </span>
+      </div>
+      <h1 className="m-0 max-w-[16ch] text-[clamp(26px,3.4vw,46px)] font-extrabold leading-[1.08] tracking-[-.02em]">
+        Entre no WorkFlowArk<sup className="ml-px text-[.4em] font-semibold text-[#FFC700] align-super">®</sup> da{" "}
+        <span className="text-[#FFC700]">sua agência</span>.
+      </h1>
+      <p className="m-0 max-w-[36ch] border-l-[3px] border-[#FFC700] pl-3.5 text-[clamp(14px,1.3vw,18px)] leading-normal text-[#d4d0c4]">
+        Clientes, tarefas, aprovação e financeiro no mesmo fluxo. No primeiro acesso, o sistema mostra onde fica cada coisa.
+      </p>
+      <div className="mt-2 flex flex-col items-start gap-4">
+        <GlassButton onClick={() => document.getElementById("floating_email")?.focus()}>
+          <div className="flex items-center gap-2 text-sm font-semibold text-white">
+            <span>{marca.name ? "Entrar em " + marca.name : "Entrar"}</span>
+            <ArrowRight size={16} />
+          </div>
+        </GlassButton>
+      </div>
+    </>
+  );
+}
+
+// Marca neutra quando a agência ainda não enviou o logo: um W em vez do símbolo da ARK.
+function MonogramaNeutro({ className = "" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={"flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-2xl font-extrabold text-[#FFC700] " + className}
+    >
+      W
     </div>
   );
 }

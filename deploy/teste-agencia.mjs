@@ -5,6 +5,7 @@
 */
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import * as M from '../src/lib/modo-agencia.js';
 
 const src = readFileSync(new URL('../public/workflowark-agencia-20260923a.js', import.meta.url), 'utf8');
 const ctx = { window: {}, console };
@@ -83,6 +84,20 @@ const jor = A.jornadaSo({ 0: ['vivenda', 'padaria'], 1: ['fercon'], 2: [] }, ['a
 ok(JSON.stringify(jor) === '{"0":["padaria"],"1":[],"2":[]}', 'jornada fica so com os clientes da agencia');
 ok(JSON.stringify(A.jornadaSo('lixo', ['x'])) === '{}', 'jornada quebrada vira vazia');
 ok(A.idDeExemploDaArk('set26-c-viv1') && A.idDeExemploDaArk('ago26-r-fon') && !A.idDeExemploDaArk('ev-1695'), 'agenda: ids de exemplo da ARK reconhecidos pelo prefixo');
+
+// 7) a regra das telas React concorda com a do sistema, e o flag sobrevive ao redirect
+const casos = [['workflowark.arkcontent.workers.dev', ''], ['129acb62-workflowark.arkcontent.workers.dev', ''],
+  ['129acb62-workflowark.arkcontent.workers.dev', '?agencia=1'], ['agencia-z.test', ''], ['agencia-z.test', '?agencia=0'], ['', '']];
+casos.forEach(([h, b]) => ok(M.decidirModo({ host: h, busca: b }) === A.decidirModo({ host: h, busca: b }), 'mesma regra nas duas pontas: ' + (h || 'file') + b));
+const mem = () => { const d = {}; return { getItem: k => (k in d ? d[k] : null), setItem: (k, v) => { d[k] = String(v); } }; };
+const st = mem();
+ok(M.lerEGuardarModo({ hostname: '129acb62-workflowark.arkcontent.workers.dev', search: '?agencia=1' }, st) === 'agencia', 'entrada com ?agencia=1 liga');
+ok(M.lerEGuardarModo({ hostname: '129acb62-workflowark.arkcontent.workers.dev', search: '' }, st) === 'agencia', 'depois do redirect pro /auth sem parametro continua agencia');
+ok(M.lerEGuardarModo({ hostname: '129acb62-workflowark.arkcontent.workers.dev', search: '?code=abc' }, st) === 'agencia', 'volta do Google (/app?code=) continua agencia');
+ok(M.lerEGuardarModo({ hostname: '129acb62-workflowark.arkcontent.workers.dev', search: '?agencia=0' }, st) === 'ark', '?agencia=0 desliga e grava');
+ok(M.lerEGuardarModo({ hostname: 'workflowark.arkcontent.workers.dev', search: '' }, mem()) === 'ark', 'ARK sem nada salvo = ark');
+const quebrado = { getItem() { throw new Error('x'); }, setItem() { throw new Error('x'); } };
+ok(M.lerEGuardarModo({ hostname: 'agencia-z.test', search: '?agencia=1' }, quebrado) === 'agencia', 'storage bloqueado nao derruba');
 
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo verde');
 process.exit(falhas ? 1 : 0);
