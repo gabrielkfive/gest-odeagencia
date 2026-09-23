@@ -1,4 +1,4 @@
-/* Modo agência (23/09/2026): mesma regra de public/workflowark-agencia-20260923a.js, para as
+/* Modo agência (23/09/2026): mesma regra de public/workflowark-agencia-20260923c.js, para as
    telas React (entrada, /app). Domínio que não é da ARK = agência. No domínio da ARK só com
    ?agencia=1 (demonstração); ?agencia=0 desliga. A escolha fica salva em wfa-modo para
    sobreviver ao redirect pro login e à volta do Google. Teste: deploy/teste-agencia.mjs. */

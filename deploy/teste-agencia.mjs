@@ -1,13 +1,14 @@
 /*
- Teste do nucleo puro do modo agencia (public/workflowark-agencia-20260923a.js).
+ Teste do nucleo puro do modo agencia (public/workflowark-agencia-20260923c.js).
  O arquivo roda no navegador; aqui ele e carregado num contexto sem document, onde so o
  nucleo (window.WFA_AGENCIA) e montado. Uso: node deploy/teste-agencia.mjs
 */
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import * as M from '../src/lib/modo-agencia.js';
+import * as MA from '../src/lib/marca-agencia.js';
 
-const src = readFileSync(new URL('../public/workflowark-agencia-20260923a.js', import.meta.url), 'utf8');
+const src = readFileSync(new URL('../public/workflowark-agencia-20260923c.js', import.meta.url), 'utf8');
 const ctx = { window: {}, console };
 vm.createContext(ctx);
 vm.runInContext(src, ctx);
@@ -98,6 +99,51 @@ ok(M.lerEGuardarModo({ hostname: '129acb62-workflowark.arkcontent.workers.dev', 
 ok(M.lerEGuardarModo({ hostname: 'workflowark.arkcontent.workers.dev', search: '' }, mem()) === 'ark', 'ARK sem nada salvo = ark');
 const quebrado = { getItem() { throw new Error('x'); }, setItem() { throw new Error('x'); } };
 ok(M.lerEGuardarModo({ hostname: 'agencia-z.test', search: '?agencia=1' }, quebrado) === 'agencia', 'storage bloqueado nao derruba');
+
+// 8) nome do produto derivado da agencia (WorkFlowZé), igual nas duas pontas
+const nomes = [
+  [{ name: 'Zé' }, 'WorkFlowZé', 'Zé'],
+  [{ name: 'Agência Z Digital' }, 'WorkFlowZ', 'Z'],
+  [{ name: 'Agência do Zé Marketing' }, 'WorkFlowZé', 'Zé'],
+  [{ name: 'agência yera' }, 'WorkFlowYera', 'Yera'],
+  [{ name: 'Studio Bela Vista Comunicação' }, 'WorkFlowBela', 'Bela'],
+  [{ name: 'Qualquer', short: 'Zezinho' }, 'WorkFlowZezinho', 'Zezinho'],
+  [{ name: 'Nome', short: '  ' }, 'WorkFlowNome', 'Nome'],
+  [{}, 'WorkFlowArk', ''],
+  [{ name: '   ' }, 'WorkFlowArk', ''],
+  [{ name: 'ARK Content' }, 'WorkFlowArk', 'Ark'],
+  [{ name: 'Agência Marketing Digital' }, 'WorkFlowAgência', 'Agência'],
+  [{ name: 'Supercalifragilisticexpialidocious' }, 'WorkFlowSupercalifrag', 'Supercalifrag'],
+];
+nomes.forEach(([m, prod, curto]) => {
+  ok(A.nomeProduto(m) === prod, 'produto de ' + JSON.stringify(m) + ' = ' + prod + ' (veio ' + A.nomeProduto(m) + ')');
+  ok(A.nomeCurto(m) === curto, 'nome curto de ' + JSON.stringify(m) + ' = ' + curto + ' (veio ' + A.nomeCurto(m) + ')');
+  ok(MA.nomeProduto(m) === A.nomeProduto(m), 'entrada React concorda: ' + prod);
+});
+
+// 9) cor da agencia: cor escura demais deixa texto do botao ilegivel e e recusada
+ok(A.corAceita('#FFC700') && A.corAceita('#7c5cff') && A.corAceita('#22c55e'), 'amarelo, lilas e verde aceitos');
+ok(!A.corAceita('#0b1f44') && !A.corAceita('#000000') && !A.corAceita('#1e1e1e'), 'azul marinho, preto e grafite recusados');
+ok(!A.corAceita('amarelo') && !A.corAceita('#fff') && !A.corAceita(''), 'formato invalido recusado');
+ok(A.corSobre('#FFC700') === '#111111' && A.corSobre('#7c3aed') === '#ffffff', 'texto sobre a cor: escuro no amarelo, branco no roxo');
+['#FFC700', '#0b1f44', '#7c3aed', 'x'].forEach(c => ok(MA.corAceita(c) === A.corAceita(c) && MA.corSobre(c) === A.corSobre(c), 'cor igual nas duas pontas: ' + c));
+
+// 10) planilha de clientes: Excel brasileiro, aspas, cabecalho, valor em reais, repetidos
+const csvBr = 'Cliente;Valor mensal;Tipo;Instagram\n"Padaria Pão; Mel";R$ 1.500,00;Mensal;@padaria\nBarbearia do Zé;800;Pré pago;\n\n;;;\nVivenda Farmácia;2.000,50;;';
+const lidos = A.clientesDaPlanilha(csvBr, [{ nm: 'Vivenda  farmacia' }]);
+ok(lidos.length === 3, 'le 3 clientes e ignora linhas vazias (veio ' + lidos.length + ')');
+ok(lidos[0].nm === 'Padaria Pão; Mel' && lidos[0].valor === 1500, 'aspas com separador dentro e R$ 1.500,00 = 1500');
+ok(lidos[0].tipo === 'ARK' && lidos[1].tipo === 'Alpha', 'Mensal vira ARK, Pré pago vira Alpha (tipos do sistema)');
+ok(lidos[0].meta === '@padaria', 'instagram vai pra descricao');
+ok(lidos[2].valor === 2000.5 && lidos[2].repetido === true, 'repetido detectado sem acento e caixa');
+ok(!lidos[0].repetido, 'novo nao marcado como repetido');
+const semCab = A.clientesDaPlanilha('Padaria\tSP\nMercado\tRJ', []);
+ok(semCab.length === 2 && semCab[0].nm === 'Padaria' && semCab[1].nm === 'Mercado', 'sem cabecalho, colado do Excel com tab: primeira coluna e o nome');
+const virg = A.clientesDaPlanilha('nome,mensalidade\nLoja A,1200\nLoja A,1200', []);
+ok(virg.length === 2 && virg[0].valor === 1200 && virg[1].repetido, 'virgula como separador e repetido dentro da propria planilha');
+ok(A.clientesDaPlanilha('', []).length === 0 && A.clientesDaPlanilha(null, []).length === 0, 'planilha vazia nao quebra');
+const modelo = A.modeloCsv();
+ok(/^Cliente;Valor mensal;Tipo;Instagram/.test(modelo) && A.clientesDaPlanilha(modelo, []).length >= 1, 'modelo de planilha le a si mesmo');
 
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo verde');
 process.exit(falhas ? 1 : 0);

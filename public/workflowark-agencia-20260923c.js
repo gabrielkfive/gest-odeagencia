@@ -85,7 +85,97 @@
   // agenda semeada da ARK usa ids com prefixo do mês (ago26-, set26-)
   function idDeExemploDaArk(id) { return /^(jul|ago|set|out|nov|dez)\d{2}-/.test(String(id || "")); }
 
-  var A = { jornadaSo: jornadaSo, idDeExemploDaArk: idDeExemploDaArk, hostDaArk: hostDaArk, semSementes: semSementes, decidirModo: decidirModo, passos: passos, progresso: progresso, abasOcultas: abasOcultas,
+
+  /* ---- marca da agência: "agência do Zé" vira WorkFlowZé (mesma regra de src/lib/marca-agencia.js) ---- */
+  var GENERICAS = ["agencia", "digital", "marketing", "mkt", "comunicacao", "studio", "estudio", "content",
+    "conteudo", "criativa", "criativo", "publicidade", "propaganda", "midia", "media", "social", "ltda", "me",
+    "eireli", "grupo", "company", "co", "do", "da", "de", "dos", "das", "e", "&", "the"];
+  function semAcento(s) { return String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function capitaliza(p) { return p ? p.charAt(0).toLocaleUpperCase("pt-BR") + p.slice(1).toLocaleLowerCase("pt-BR") : ""; }
+  function nomeCurto(marca) {
+    var m = marca || {};
+    var curto = String(m.short || "").trim();
+    if (curto) return curto.slice(0, 13);
+    var palavras = String(m.name || "").replace(/[.,;:!?()"'\/\\]/g, " ").split(/\s+/).filter(Boolean);
+    if (!palavras.length) return "";
+    var uteis = palavras.filter(function (p) { return GENERICAS.indexOf(semAcento(p)) < 0; });
+    return capitaliza((uteis[0] || palavras[0]).slice(0, 13));
+  }
+  function nomeProduto(marca) {
+    var c = nomeCurto(marca);
+    if (!c || semAcento(c) === "ark") return "WorkFlowArk";
+    return "WorkFlow" + c;
+  }
+  function luminancia(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    function canal(v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+    return 0.2126 * canal((n >> 16) & 255) + 0.7152 * canal((n >> 8) & 255) + 0.0722 * canal(n & 255);
+  }
+  function corAceita(hex) { return /^#[0-9a-f]{6}$/i.test(String(hex || "")) && luminancia(hex) >= 0.12; }
+  function corSobre(hex) {
+    if (!/^#[0-9a-f]{6}$/i.test(String(hex || ""))) return "#111111";
+    var l = luminancia(hex);
+    return (l + 0.05) / (0.0056 + 0.05) >= 1.05 / (l + 0.05) ? "#111111" : "#ffffff";
+  }
+
+  /* ---- planilha de clientes: CSV, ponto e vírgula do Excel brasileiro ou colado com tab ---- */
+  function separador(linha) {
+    if (linha.indexOf("\t") >= 0) return "\t";
+    var pv = (linha.match(/;/g) || []).length, vg = (linha.match(/,/g) || []).length;
+    return pv >= vg && pv > 0 ? ";" : (vg > 0 ? "," : ";");
+  }
+  function quebrarLinha(linha, sep) {
+    var out = [], cur = "", aspas = false;
+    for (var i = 0; i < linha.length; i++) {
+      var ch = linha[i];
+      if (ch === '"') { if (aspas && linha[i + 1] === '"') { cur += '"'; i++; } else aspas = !aspas; }
+      else if (ch === sep && !aspas) { out.push(cur); cur = ""; }
+      else cur += ch;
+    }
+    out.push(cur);
+    return out.map(function (c) { return c.trim(); });
+  }
+  function lerPlanilha(texto) {
+    var linhas = String(texto || "").replace(/^﻿/, "").split(/\r?\n/).filter(function (l) { return l.replace(/[;,\t\s]/g, "") !== ""; });
+    if (!linhas.length) return { cabecalho: null, linhas: [] };
+    var sep = separador(linhas[0]);
+    var rows = linhas.map(function (l) { return quebrarLinha(l, sep); });
+    var chaves = { nome: /^(cliente|nome|empresa|razao|marca)/, valor: /(valor|mensal|fee|preco)/, tipo: /^(tipo|plano|modelo|contrato)/, instagram: /(instagram|insta|@)/, contato: /(contato|responsavel|telefone|whats)/ };
+    var cab = null, h = rows[0].map(semAcento);
+    var mapa = {};
+    Object.keys(chaves).forEach(function (k) { h.forEach(function (c, i) { if (mapa[k] == null && chaves[k].test(c)) mapa[k] = i; }); });
+    if (mapa.nome != null) { cab = mapa; rows = rows.slice(1); }
+    return { cabecalho: cab, linhas: rows };
+  }
+  function valorReais(v) {
+    v = String(v || "").replace(/r\$|\s/gi, "");
+    if (!v) return 0;
+    if (v.indexOf(",") >= 0) v = v.replace(/\./g, "").replace(",", ".");
+    else if (/^\d{1,3}(\.\d{3})+$/.test(v)) v = v.replace(/\./g, "");
+    var n = parseFloat(v);
+    return isFinite(n) ? n : 0;
+  }
+  function chaveNome(nm) { return semAcento(nm).replace(/\s+/g, " ").trim(); }
+  function clientesDaPlanilha(texto, existentes) {
+    var p = lerPlanilha(texto), c = p.cabecalho || { nome: 0 };
+    var vistos = {};
+    (existentes || []).forEach(function (e) { if (e && e.nm) vistos[chaveNome(e.nm)] = 1; });
+    var out = [];
+    p.linhas.forEach(function (r) {
+      var nm = String(r[c.nome] || "").trim();
+      if (!nm) return;
+      var tipoTxt = c.tipo != null ? semAcento(r[c.tipo]) : "";
+      var meta = [c.instagram != null ? r[c.instagram] : "", c.contato != null ? r[c.contato] : ""].filter(Boolean).join(" · ");
+      var k = chaveNome(nm);
+      out.push({ nm: nm, valor: c.valor != null ? valorReais(r[c.valor]) : 0, tipo: /(pre|pacote|avulso)/.test(tipoTxt) ? "Alpha" : "ARK", meta: meta, repetido: !!vistos[k] });
+      vistos[k] = 1;
+    });
+    return out;
+  }
+  function modeloCsv() { return "Cliente;Valor mensal;Tipo;Instagram\nCliente exemplo;;Mensal;@cliente\n"; }
+
+  var A = { nomeCurto: nomeCurto, nomeProduto: nomeProduto, corAceita: corAceita, corSobre: corSobre, lerPlanilha: lerPlanilha, clientesDaPlanilha: clientesDaPlanilha, modeloCsv: modeloCsv, valorReais: valorReais,
+    jornadaSo: jornadaSo, idDeExemploDaArk: idDeExemploDaArk, hostDaArk: hostDaArk, semSementes: semSementes, decidirModo: decidirModo, passos: passos, progresso: progresso, abasOcultas: abasOcultas,
     sementesDaArk: sementesDaArk, logoValido: logoValido };
   W.WFA_AGENCIA = A;
 
