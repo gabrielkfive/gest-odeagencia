@@ -15,13 +15,16 @@ const estranho = papelNovoMembro({ isFirst: false, existente: null });
 ok(estranho.active === false, 'conta nova sem convite fica pendente');
 ok(estranho.role === 'viewer', 'e com o menor papel');
 
-const convidado = papelNovoMembro({ isFirst: false, existente: { role: 'operacao', active: true } });
-ok(convidado.role === 'operacao' && convidado.active === true, 'convidado pelo gestor entra com o papel escolhido');
+const convidado = papelNovoMembro({ isFirst: false, existente: { role: 'operacao', active: true }, emailVerificado: true });
+ok(convidado.role === 'operacao' && convidado.active === true, 'convidado com e-mail provado (Google) entra com o papel escolhido');
 
-const desligado = papelNovoMembro({ isFirst: false, existente: { role: 'gestor', active: false } });
+const impostor = papelNovoMembro({ isFirst: false, existente: { role: 'gestor', active: true }, emailVerificado: false });
+ok(impostor.active === false && impostor.role === 'gestor', 'cadastro por senha com e-mail de convidado fica pendente, sem herdar acesso');
+
+const desligado = papelNovoMembro({ isFirst: false, existente: { role: 'gestor', active: false }, emailVerificado: true });
 ok(desligado.active === false, 'membro desativado continua desativado ao recriar conta');
 
-const semPapel = papelNovoMembro({ isFirst: false, existente: { role: 'inventado', active: true } });
+const semPapel = papelNovoMembro({ isFirst: false, existente: { role: 'inventado', active: true }, emailVerificado: true });
 ok(semPapel.role === 'viewer', 'papel desconhecido vira viewer');
 
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');

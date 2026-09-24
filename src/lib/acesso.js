@@ -4,11 +4,13 @@
 // sistema está sendo anunciado pra fora e qualquer um pode criar conta.
 const PAPEIS = new Set(["admin", "gestor", "financeiro", "operacao", "comercial", "marketing", "viewer"]);
 
-export function papelNovoMembro({ isFirst, existente }) {
+// emailVerificado: true só quando o provedor provou o e-mail (Google). Cadastro por senha
+// não prova nada, então mesmo com e-mail de convidado fica pendente (auditoria 24/09).
+export function papelNovoMembro({ isFirst, existente, emailVerificado = false }) {
   if (isFirst) return { role: "admin", active: true };
   if (existente) {
     const role = PAPEIS.has(String(existente.role)) ? String(existente.role) : "viewer";
-    return { role, active: existente.active !== false };
+    return { role, active: emailVerificado && existente.active !== false };
   }
   return { role: "viewer", active: false };
 }

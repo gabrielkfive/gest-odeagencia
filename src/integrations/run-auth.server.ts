@@ -49,8 +49,10 @@ export async function isRunAuthorized(request: Request, url: URL): Promise<boole
 
   const { data: member } = await db
     .from("workflowark_members")
-    .select("id,active")
+    .select("id,active,role")
     .eq("user_id", user.id)
     .maybeSingle();
-  return Boolean(member?.active);
+  // Rotas de automação (planilha, SDR, agentes, IA) mexem em dinheiro, robô e crédito:
+  // só admin, gestor e financeiro (auditoria 24/09/2026; antes bastava ser membro ativo).
+  return Boolean(member?.active) && ["admin", "gestor", "financeiro"].includes(String(member?.role));
 }

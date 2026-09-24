@@ -38,9 +38,11 @@ export const Route = createFileRoute("/api/workflowark/sdr")({
           });
         }
 
+        const { isRunAuthorized } = await import("@/integrations/run-auth.server");
+        if (!(await isRunAuthorized(request, u))) return Response.json({ error: "unauthorized" }, { status: 401 });
         // Auto-configuração: o Worker manda a PRÓPRIA Evolution passar a postar o webhook
-        // com o token (header + ?token=). Sem auth de propósito: é idempotente, não recebe
-        // input e só re-sincroniza a config correta entre dois sistemas nossos.
+        // com o token (header + ?token=). Exige admin, gestor ou financeiro (auditoria 24/09/2026: sem auth,
+        // a resposta da Evolution devolvia a URL do webhook com o WEBHOOK_SECRET).
         if (u.searchParams.get("fixwebhook") === "1") {
           const { evoConfig, zapiEnv } = await import("@/integrations/zapi.server");
           const { url, key, instance } = evoConfig();
@@ -60,11 +62,9 @@ export const Route = createFileRoute("/api/workflowark/sdr")({
           // Evolution v2 usa corpo aninhado { webhook: {...} }; versões antigas, corpo plano.
           let r = await tenta({ webhook: { enabled: true, url: hookUrl, byEvents: false, base64: true, headers: { "x-webhook-token": secret }, events } });
           if (r.status >= 400) r = await tenta({ enabled: true, url: hookUrl, webhook_by_events: false, events });
-          return Response.json({ ok: r.status < 400, evolutionStatus: r.status, resposta: r.data });
+          return Response.json({ ok: r.status < 400, evolutionStatus: r.status });
         }
 
-        const { isRunAuthorized } = await import("@/integrations/run-auth.server");
-        if (!(await isRunAuthorized(request, u))) return Response.json({ error: "unauthorized" }, { status: 401 });
         const cfg = await sdrConfig(db);
         const { data: row } = await db.from("workflowark_state").select("data").eq("key", "wfa-leads").maybeSingle();
         return Response.json({ ok: true, config: cfg, leads: row?.data || {} });
@@ -72,8 +72,6 @@ export const Route = createFileRoute("/api/workflowark/sdr")({
 
       POST: async ({ request }) => {
         const u = new URL(request.url);
-        const { isRunAuthorized } = await import("@/integrations/run-auth.server");
-        if (!(await isRunAuthorized(request, u))) return Response.json({ error: "unauthorized" }, { status: 401 });
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const db = supabaseAdmin as any;
         const { sdrConfig, sdrSaveConfig } = await import("@/integrations/sdr.server");
