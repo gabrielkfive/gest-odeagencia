@@ -1,3 +1,4 @@
+import { papelNovoMembro } from "@/lib/acesso.js";
 import { createFileRoute } from "@tanstack/react-router";
 import { hojeSP } from "@/lib/datas";
 // JavaScript puro de propósito (o teste deploy/teste-merge-estado.mjs importa direto no Node).
@@ -234,7 +235,7 @@ async function avisarPrimeiraEntrada(db: any, email: string, nome: string | null
     if (error) return;
     const arr = Array.isArray(nRow?.data) ? nRow.data : [];
     const quem = nome ? `${nome} (${email})` : email;
-    arr.unshift({ id: "login" + Date.now(), ts: Date.now(), lido: false, tipo: "acesso", texto: `🔓 ${quem} entrou no WorkFlowArk pela primeira vez. Ajuste o papel e as abas em Configurações > Equipe.` });
+    arr.unshift({ id: "login" + Date.now(), ts: Date.now(), lido: false, tipo: "acesso", texto: `🔒 ${quem} pediu acesso ao WorkFlowArk e está aguardando liberação. Libere em Configurações > Equipe.` });
     await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) });
   } catch { /* aviso é cortesia, nunca trava o login */ }
 }
@@ -354,9 +355,9 @@ async function getContext(request: Request) {
     member = created.data;
   }
 
-  // Usuário autenticado sem cadastro: ENTRA NA HORA como viewer (decisão do Gabriel em
-  // 17/09/2026: ninguém mais fica travado esperando liberação) e o gestor recebe um aviso
-  // no sino dizendo quem entrou. Papel e abas ele ajusta depois em Configurações > Equipe.
+  // Usuário autenticado sem cadastro nem convite: fica PENDENTE (24/09/2026, o sistema está
+  // anunciado pra fora; entre 17/09 e 24/09 entrava direto como viewer e lia a operação).
+  // O gestor recebe aviso no sino e libera em Configurações > Equipe. Regra em src/lib/acesso.js.
   if (!member) {
     const nome = user.user_metadata?.full_name ?? user.user_metadata?.name ?? null;
     const created = await db
@@ -365,8 +366,7 @@ async function getContext(request: Request) {
         email,
         user_id: user.id,
         full_name: nome,
-        role: "viewer",
-        active: true,
+        ...papelNovoMembro({ isFirst: false, existente: null }),
         created_by: user.id,
       })
       .select("*")

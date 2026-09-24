@@ -1,3 +1,4 @@
+import { papelNovoMembro } from "@/lib/acesso.js";
 import { createFileRoute } from "@tanstack/react-router";
 
 function json(data: unknown, init?: ResponseInit) {
@@ -57,16 +58,16 @@ export const Route = createFileRoute("/api/auth/signup")({
           }
         }
 
-        // Primeiro usuário do sistema vira admin; os demais entram na hora como viewer
-        // (17/09/2026: sem fila de liberação, o gestor ajusta o papel depois). Se o e-mail já
-        // foi convidado pelo gestor, mantém o papel que ele escolheu.
+        // Primeiro usuário do sistema vira admin. Quem foi convidado pelo gestor entra com o
+        // papel escolhido. Qualquer outro fica pendente até o admin liberar (24/09/2026, regra
+        // em src/lib/acesso.js; de 17/09 a 24/09 entrava direto como viewer).
         const { count } = await db
           .from("workflowark_members")
           .select("id", { count: "exact", head: true });
         const isFirst = (count ?? 0) === 0;
         const { data: existente } = await db
           .from("workflowark_members")
-          .select("role")
+          .select("role,active")
           .eq("email", email)
           .maybeSingle();
 
@@ -75,8 +76,7 @@ export const Route = createFileRoute("/api/auth/signup")({
             email,
             full_name,
             user_id: user?.id ?? null,
-            role: isFirst ? "admin" : (existente?.role ?? "viewer"),
-            active: true,
+            ...papelNovoMembro({ isFirst, existente }),
             created_by: user?.id ?? null,
           },
           { onConflict: "email" },
@@ -88,13 +88,14 @@ export const Route = createFileRoute("/api/auth/signup")({
             const { data: nRow, error: nErr } = await db.from("workflowark_state").select("data").eq("key", "wfa-notificacoes").maybeSingle();
             if (!nErr) {
               const arr = Array.isArray(nRow?.data) ? nRow.data : [];
-              arr.unshift({ id: "login" + Date.now(), ts: Date.now(), lido: false, tipo: "acesso", texto: `🔓 ${full_name ? `${full_name} (${email})` : email} criou conta e entrou no WorkFlowArk. Ajuste o papel e as abas em Configurações > Equipe.` });
+              arr.unshift({ id: "login" + Date.now(), ts: Date.now(), lido: false, tipo: "acesso", texto: `🔓 ${full_name ? `${full_name} (${email})` : email} criou conta e está aguardando liberação. Libere em Configurações > Equipe.` });
               await db.from("workflowark_state").upsert({ key: "wfa-notificacoes", data: arr.slice(0, 200) });
             }
           } catch { /* aviso é cortesia */ }
         }
 
-        return json({ ok: true, pending: false });
+        const final = papelNovoMembro({ isFirst, existente });
+        return json({ ok: true, pending: !final.active });
       },
     },
   },
