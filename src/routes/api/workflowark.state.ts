@@ -562,6 +562,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           const entries = body.entries && typeof body.entries === "object" ? body.entries : {};
           const matriz = await lerMatriz(ctx.db);
           // Mesma regra do save-state: bloco que o papel não vê ou não edita fica de fora.
+          const ignorados = Object.keys(entries).filter((key) => isStateKey(key) && !podeEditarBloco(ctx.member, ctx.isAdmin, key, matriz));
           const rows = Object.entries(entries)
             .filter(([key]) => isStateKey(key) && podeEditarBloco(ctx.member, ctx.isAdmin, key, matriz))
             .map(([key, data]) => ({ key, data, updated_by: ctx.user.id }));
@@ -569,7 +570,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
             const { error } = await ctx.db.from("workflowark_state").upsert(rows);
             if (error) return json({ error: "Não foi possível sincronizar." }, { status: 500 });
           }
-          return json({ ok: true, saved: rows.length });
+          return json({ ok: true, saved: rows.length, ignorados });
         }
 
         if (action === "load-key") {

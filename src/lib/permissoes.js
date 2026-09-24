@@ -10,7 +10,11 @@ export const PAPEIS = [
   { v: "admin", nome: "Admin", desc: "Sempre tudo, inclusive equipe e pagamentos." },
   { v: "gestor", nome: "Gestor", desc: "Toda a operação e o financeiro. Não vê pagamentos." },
   { v: "financeiro", nome: "Financeiro", desc: "Financeiro e cobranças. Consulta o dia a dia." },
-  { v: "operacao", nome: "Operação", desc: "Tarefas, clientes e o dia a dia. Não vê o financeiro." },
+  {
+    v: "operacao",
+    nome: "Operação",
+    desc: "Tarefas, clientes e o dia a dia. Não vê o financeiro.",
+  },
   { v: "comercial", nome: "Comercial", desc: "CRM, comercial e clientes. Não vê o financeiro." },
   { v: "marketing", nome: "Marketing", desc: "Tarefas, demandas e campanhas." },
   { v: "viewer", nome: "Visualização", desc: "Só consulta Meu Dia, agenda e processos." },
@@ -18,14 +22,92 @@ export const PAPEIS = [
 
 // Áreas da matriz. nav = abas do menu; blocos = chaves wfa-* que a área grava.
 export const AREAS = [
-  { k: "inicio", nome: "Meu Dia", nav: ["dashboard", "reunioes", "agenda", "meumes"], blocos: ["wfa-agenda-events", "wfa-widgets"] },
-  { k: "atividades", nome: "Atividades", nav: ["tarefas", "demandas", "rotinas", "projetos", "producao", "briefings"], blocos: ["wfa-tarefas", "wfa-demandas", "wfa-rotinas", "wfa-projetos", "wfa-producao", "wfa-briefings", "wfa-inline-edits"] },
-  { k: "clientes", nome: "Clientes", nav: ["lista-clientes", "jornada", "regua", "cliente", "marcas", "planejamentos"], blocos: ["wfa-regua", "wfa-jornada", "wfa-clientes-custom", "wfa-cliente-detalhes", "wfa-planejamentos", "wfa-cli-geo", "wfa-brand"] },
-  { k: "comercial", nome: "Comercial", nav: ["comercial", "crm", "propostas", "contratos"], blocos: ["wfa-crm", "wfa-comercial", "wfa-propostas"] },
-  { k: "financeiro", nome: "Financeiro", nav: ["financeiro", "cobranca"], blocos: ["wfa-fin", "wfa-cobranca", "wfa-planilha"] },
-  { k: "pagamentos", nome: "Pagamentos", nav: ["acerto"], blocos: ["wfa-acerto", "wfa-acertosrec"] },
-  { k: "conteudo", nome: "Conteúdo e IA", nav: ["planejamento", "legenda", "roteirista", "agentes", "conselho", "jarvis", "drive"], blocos: ["wfa-planejamento", "wfa-criativos", "wfa-conselho-briefings", "wfa-drive"] },
-  { k: "gestao", nome: "Gestão", nav: ["okrs", "campanhas", "allhands", "warroom", "alpha", "organograma", "pops", "processos", "tutorial", "base-conhecimento", "integracoes"], blocos: ["wfa-okrs", "wfa-okrs-edits", "wfa-processos", "wfa-alpha", "wfa-alpha-am", "wfa-alpha-gt", "wfa-alpha-cr", "wfa-alpha-bs", "wfa-warroom"] },
+  {
+    k: "inicio",
+    nome: "Meu Dia",
+    nav: ["dashboard", "reunioes", "agenda", "meumes"],
+    blocos: ["wfa-agenda-events", "wfa-widgets"],
+  },
+  {
+    k: "atividades",
+    nome: "Atividades",
+    nav: ["tarefas", "demandas", "rotinas", "projetos", "producao", "briefings"],
+    blocos: [
+      "wfa-tarefas",
+      "wfa-demandas",
+      "wfa-rotinas",
+      "wfa-projetos",
+      "wfa-producao",
+      "wfa-briefings",
+      "wfa-inline-edits",
+    ],
+  },
+  {
+    k: "clientes",
+    nome: "Clientes",
+    nav: ["lista-clientes", "jornada", "regua", "cliente", "marcas", "planejamentos"],
+    blocos: [
+      "wfa-regua",
+      "wfa-jornada",
+      "wfa-clientes-custom",
+      "wfa-cliente-detalhes",
+      "wfa-planejamentos",
+      "wfa-cli-geo",
+      "wfa-brand",
+    ],
+  },
+  {
+    k: "comercial",
+    nome: "Comercial",
+    nav: ["comercial", "crm", "propostas", "contratos"],
+    blocos: ["wfa-crm", "wfa-comercial", "wfa-propostas"],
+  },
+  {
+    k: "financeiro",
+    nome: "Financeiro",
+    nav: ["financeiro", "cobranca"],
+    blocos: ["wfa-fin", "wfa-cobranca", "wfa-planilha", "wfa-extratos"],
+  },
+  {
+    k: "pagamentos",
+    nome: "Pagamentos",
+    nav: ["acerto"],
+    blocos: ["wfa-acerto", "wfa-acertosrec"],
+  },
+  {
+    k: "conteudo",
+    nome: "Conteúdo e IA",
+    nav: ["planejamento", "legenda", "roteirista", "agentes", "conselho", "jarvis", "drive"],
+    blocos: ["wfa-planejamento", "wfa-criativos", "wfa-conselho-briefings", "wfa-drive"],
+  },
+  {
+    k: "gestao",
+    nome: "Gestão",
+    nav: [
+      "okrs",
+      "campanhas",
+      "allhands",
+      "warroom",
+      "alpha",
+      "organograma",
+      "pops",
+      "processos",
+      "tutorial",
+      "base-conhecimento",
+      "integracoes",
+    ],
+    blocos: [
+      "wfa-okrs",
+      "wfa-okrs-edits",
+      "wfa-processos",
+      "wfa-alpha",
+      "wfa-alpha-am",
+      "wfa-alpha-gt",
+      "wfa-alpha-cr",
+      "wfa-alpha-bs",
+      "wfa-warroom",
+    ],
+  },
   { k: "chat", nome: "Chat", nav: ["chat"], blocos: [] },
 ];
 
@@ -39,11 +121,37 @@ const SENSIVEIS = ["acerto", "notificacoes"];
 const PADRAO = {
   gestor: TUDO,
   comercial: BASE.concat(["comercial", "crm", "lista-clientes", "jornada", "regua", "tarefas"]),
-  operacao: BASE.concat(["tarefas", "rotinas", "demandas", "lista-clientes", "jornada", "regua", "campanhas", "okrs"]),
+  operacao: BASE.concat([
+    "tarefas",
+    "rotinas",
+    "demandas",
+    "lista-clientes",
+    "jornada",
+    "regua",
+    "campanhas",
+    "okrs",
+  ]),
   marketing: BASE.concat(["tarefas", "demandas", "lista-clientes", "campanhas"]),
   financeiro: BASE.concat(["financeiro", "cobranca", "campanhas"]),
   viewer: BASE,
-  avaliador: BASE.concat(["lista-clientes", "jornada", "regua", "tarefas", "agentes", "conselho", "planejamento", "legenda", "cliente", "roteirista", "drive", "crm", "okrs", "campanhas", "tutorial", "integracoes"]),
+  avaliador: BASE.concat([
+    "lista-clientes",
+    "jornada",
+    "regua",
+    "tarefas",
+    "agentes",
+    "conselho",
+    "planejamento",
+    "legenda",
+    "cliente",
+    "roteirista",
+    "drive",
+    "crm",
+    "okrs",
+    "campanhas",
+    "tutorial",
+    "integracoes",
+  ]),
 };
 
 const PAPEIS_MATRIZ = PAPEIS.map((p) => p.v).filter((v) => v !== "admin");
@@ -52,7 +160,10 @@ const areaPorK = Object.fromEntries(AREAS.map((a) => [a.k, a]));
 /** Abas que o papel vê sem matriz nem ajuste. */
 export function navPadrao(role) {
   const out = {};
-  if (role === "admin") { for (const k of NAV_CHAVES) out[k] = true; return out; }
+  if (role === "admin") {
+    for (const k of NAV_CHAVES) out[k] = true;
+    return out;
+  }
   const lista = PADRAO[role] || PADRAO.viewer;
   for (const k of NAV_CHAVES) out[k] = lista.includes(k) && !SENSIVEIS.includes(k);
   return out;
@@ -60,7 +171,8 @@ export function navPadrao(role) {
 
 /** Estado padrão de uma célula da matriz: ver (todas as abas), parcial (algumas). */
 export function celulaPadrao(role, area) {
-  const a = areaPorK[area]; const nav = navPadrao(role);
+  const a = areaPorK[area];
+  const nav = navPadrao(role);
   const n = a ? a.nav.filter((k) => nav[k]).length : 0;
   const ver = !!a && n === a.nav.length;
   // Editar segue o que já é visto: quem via parte da área já editava essas abas.
@@ -81,7 +193,6 @@ export function limparMatriz(v) {
       if (typeof c.ver === "boolean") cel.ver = c.ver;
       if (typeof c.editar === "boolean") cel.editar = c.editar;
       if (cel.ver === false) cel.editar = false;
-      if (cel.editar === true && cel.ver === undefined) cel.ver = true;
       if (!Object.keys(cel).length) continue;
       (out[p] ||= {})[a.k] = cel;
     }
@@ -105,9 +216,11 @@ export function navDoPapel(role, matriz) {
 
 /** Ajuste da pessoa para gravar em permissions.ajustes: só o que difere do papel com a matriz. */
 export function ajustesDaPessoa(role, nav, matriz) {
-  const base = navDoPapel(role, matriz); const out = {};
+  const base = navDoPapel(role, matriz);
+  const out = {};
   if (!nav || typeof nav !== "object") return out;
-  for (const k of NAV_CHAVES) if (typeof nav[k] === "boolean" && nav[k] !== base[k]) out[k] = nav[k];
+  for (const k of NAV_CHAVES)
+    if (typeof nav[k] === "boolean" && nav[k] !== base[k]) out[k] = nav[k];
   return out;
 }
 
@@ -135,7 +248,12 @@ export function navEfetivo(member, matriz) {
 }
 
 // Blocos que dependem de Ver no servidor (quem não vê não recebe nem grava).
-const BLOCO_ABA = { "wfa-cobranca": "cobranca", "wfa-acerto": "acerto", "wfa-acertosrec": "acerto" };
+const BLOCO_ABA = {
+  "wfa-cobranca": "cobranca",
+  "wfa-extratos": "financeiro",
+  "wfa-acerto": "acerto",
+  "wfa-acertosrec": "acerto",
+};
 
 export function podeVerBloco(member, isAdmin, key, matriz) {
   const aba = BLOCO_ABA[key];
@@ -150,13 +268,15 @@ export function areaDoBloco(key) {
   return a ? a.k : null;
 }
 
-/** Editar: só recusa quando a matriz desmarcou Ver ou Editar da área do bloco. */
+/** Editar: só recusa quando a matriz desmarcou Ver ou Editar da área do bloco. Ajuste da
+ *  pessoa que libera alguma aba da área vence a matriz do papel (mesma precedência do menu). */
 export function podeEditarBloco(member, isAdmin, key, matriz) {
   if (isAdmin || (member && member.role === "admin")) return true;
   if (!podeVerBloco(member, isAdmin, key, matriz)) return false;
   const area = areaDoBloco(key);
   if (!area) return true;
   const c = matriz && matriz[member && member.role] && matriz[member.role][area];
-  if (!c) return true;
-  return c.ver !== false && c.editar !== false;
+  if (!c || (c.ver !== false && c.editar !== false)) return true;
+  const aj = ajustesEmVigor(member);
+  return areaPorK[area].nav.some((k) => aj[k] === true);
 }

@@ -683,8 +683,11 @@ async function bootCloudSync(){
     // não nula). null no servidor = deleção explícita: NÃO ressuscita (senão a exclusão volta).
     Object.entries(local).forEach(([key,value])=>{if(remote[key]!==null&&isEmptyCloudValue(remote[key])&&!isEmptyCloudValue(value))upload[key]=value;});
     if(Object.keys(upload).length){
-      await cloudCall('save',{action:'save-many',entries:upload});
-      Object.assign(remote,upload);
+      const rMany=await cloudCall('save',{action:'save-many',entries:upload});
+      // Bloco que o papel não grava fica fora (servidor devolve a lista): não finge que subiu.
+      const ign=new Set((rMany&&rMany.ignorados)||[]);
+      Object.keys(upload).forEach(k=>{if(!ign.has(k))remote[k]=upload[k];});
+      if(ign.size)console.warn('[sync] servidor ignorou por papel:',[...ign]);
     }
     applyCloudState(remote);
     if(res.t)WFA_STATE_T=res.t; // carimbo pro sync condicional dos próximos ticks

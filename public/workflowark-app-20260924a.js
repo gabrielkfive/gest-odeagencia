@@ -5337,12 +5337,10 @@ function eqLigarEventos(){
       const {p,a,x}=t.dataset;EQ_MATRIZ=EQ_MATRIZ||{};
       const P=window.WFA_PERM;const base=P.celulaPadrao(p,a);
       const linha=(EQ_MATRIZ[p]=EQ_MATRIZ[p]||{});const cel=(linha[a]=linha[a]||{});
-      if(typeof cel.ver!=='boolean')cel.ver=base.ver;
-      if(typeof cel.editar!=='boolean')cel.editar=base.editar;
-      cel[x]=t.checked;
-      if(x==='editar'&&t.checked)cel.ver=true;
-      if(x==='ver'&&!t.checked)cel.editar=false;
-      if(x==='ver'&&t.checked&&base.parcial)cel.editar=true;
+      // Ver e Editar mexem só no que foi clicado: Editar numa célula Parte não amplia nem
+      // fecha as abas vistas. Editar exige Ver só quando Ver foi desmarcado de propósito.
+      if(x==='ver'){cel.ver=t.checked;if(!t.checked)cel.editar=false;else if(typeof cel.editar!=='boolean')cel.editar=true;}
+      else{cel.editar=t.checked;if(t.checked&&cel.ver===false)cel.ver=true;}
       EQ_MATRIZ_SUJA=true;eqRenderMatriz();
     }
   });

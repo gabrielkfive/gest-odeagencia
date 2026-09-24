@@ -91,6 +91,15 @@ ok(podeEditarBloco({ role: 'operacao' }, true, 'wfa-fin', m1), 'admin grava semp
 ok(!podeEditarBloco({ role: 'operacao' }, false, 'wfa-acerto', null), 'quem não vê acerto não grava acerto');
 ok(podeEditarBloco({ role: 'operacao' }, false, 'wfa-notif-read', m1), 'bloco pessoal grava sempre');
 
+// 10. Correções da revisão de 24/09.
+const mEd = limparMatriz({ operacao: { atividades: { editar: false } } });
+ok(!podeEditarBloco({ role: 'operacao' }, false, 'wfa-tarefas', mEd), 'Editar fechado na área recusa gravação');
+ok(podeEditarBloco({ role: 'operacao', permissions: { ajustes: { tarefas: true } } }, false, 'wfa-tarefas', mEd), 'ajuste da pessoa na área vence o Editar fechado do papel');
+ok(mEd.operacao.atividades.ver === undefined, 'mexer só em Editar não mexe em Ver (Parte continua Parte)');
+ok(navEfetivo({ role: 'operacao' }, mEd).tarefas && !navEfetivo({ role: 'operacao' }, mEd).projetos, 'Editar sozinho não amplia nem fecha as abas vistas');
+ok(limparMatriz({ comercial: { clientes: { editar: true } } }).comercial.clientes.ver === undefined, 'Editar marcado sem Ver não promove Parte para Ver');
+ok(!podeVerBloco({ role: 'operacao' }, false, 'wfa-extratos', null) && podeVerBloco({ role: 'financeiro' }, false, 'wfa-extratos', null), 'extrato bancário segue Financeiro');
+
 // 9. Papéis conhecidos e cópia do navegador idêntica.
 ok(PAPEIS.map((p) => p.v).join() === 'admin,gestor,financeiro,operacao,comercial,marketing,viewer', 'sete papéis do original');
 const a = readFileSync(new URL('../src/lib/permissoes.js', import.meta.url), 'utf8');
