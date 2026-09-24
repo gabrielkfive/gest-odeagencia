@@ -1,4 +1,5 @@
 import { papelNovoMembro } from "@/lib/acesso.js";
+import { podeVerBloco as podeVerBlocoMatriz, podeEditarBloco, limparMatriz, NAV_CHAVES } from "@/lib/permissoes.js";
 import { createFileRoute } from "@tanstack/react-router";
 import { hojeSP } from "@/lib/datas";
 // JavaScript puro de propósito (o teste deploy/teste-merge-estado.mjs importa direto no Node).
@@ -189,23 +190,38 @@ function isStateKey(key: string) {
   return STATE_KEYS.has(key) || key.startsWith("wfa-ckl-");
 }
 
-// BLOCOS FINANCEIROS POR PAPEL (17/09/2026, auditoria 09/09 P1). Antes o GET entregava
-// wfa-cobranca e wfa-acerto (Pix e valores da equipe) a qualquer membro ativo; o front
-// só escondia a aba. Regra espelhada do memberAccess do app (ROLE_ACCESS):
-//   cobranca: admin, gestor, financeiro, ou liberação manual permissions.nav.cobranca;
-//   acerto:   só admin, ou liberação manual permissions.nav.acerto.
-// Override false também fecha (igual ao front). Quem não pode ver também não grava:
-// o save-state desses blocos vira no-op pra esse papel (o planAutoSeed roda em todo
-// cliente e podia sobrescrever o acerto do admin com um bloco vazio).
-const BLOCOS_FIN: Record<string, string> = { "wfa-cobranca": "cobranca", "wfa-acerto": "acerto" };
-function podeVerBloco(member: WorkflowMember | null | undefined, isAdmin: boolean, key: string): boolean {
-  const aba = BLOCOS_FIN[key];
-  if (!aba) return true;
-  if (isAdmin || member?.role === "admin") return true;
-  const ov = (member?.permissions as any)?.nav;
-  if (ov && typeof ov === "object" && typeof ov[aba] === "boolean") return ov[aba];
-  if (aba === "cobranca") return member?.role === "gestor" || member?.role === "financeiro";
-  return false;
+// PERMISSÕES POR PAPEL (24/09/2026, tela Equipe da V3). Regra única em src/lib/permissoes.js,
+// testada em deploy/teste-permissoes.mjs. A matriz mora na linha wfa-permissoes, fora de
+// STATE_KEYS: só a ação save-permissoes (admin) grava. Sem matriz, o acesso é o de antes:
+//   cobranca: admin, gestor, financeiro, ou liberação manual da pessoa;
+//   acerto:   só admin, ou liberação manual da pessoa.
+// Quem não vê um bloco financeiro não recebe nem grava. Editar desmarcado na matriz faz o
+// save-state do bloco daquela área virar no-op (mesmo padrão: 200 com "ignorado").
+const CHAVE_PERMISSOES = "wfa-permissoes";
+let _matrizCache: { t: number; m: any } | null = null;
+async function lerMatriz(db: any): Promise<any> {
+  if (_matrizCache && Date.now() - _matrizCache.t < 10000) return _matrizCache.m;
+  try {
+    const { data, error } = await db.from("workflowark_state").select("data").eq("key", CHAVE_PERMISSOES).maybeSingle();
+    if (error) return _matrizCache?.m ?? null;
+    const m = limparMatriz(data?.data ?? null);
+    _matrizCache = { t: Date.now(), m };
+    return m;
+  } catch { return _matrizCache?.m ?? null; }
+}
+function podeVerBloco(member: WorkflowMember | null | undefined, isAdmin: boolean, key: string, matriz: any): boolean {
+  return podeVerBlocoMatriz(member, isAdmin, key, matriz);
+}
+function limparPermissoesMembro(v: any): Record<string, unknown> {
+  const out: Record<string, Record<string, boolean>> = {};
+  for (const campo of ["nav", "ajustes"]) {
+    const src = v?.[campo];
+    if (!src || typeof src !== "object") continue;
+    const limpo: Record<string, boolean> = {};
+    for (const k of [...NAV_CHAVES, "whatsapp"]) if (typeof src[k] === "boolean") limpo[k] = src[k];
+    out[campo] = limpo;
+  }
+  return out;
 }
 
 // TOKEN DE LINK PUBLICO (portal do cliente e aprovacao de conteudo).
@@ -414,9 +430,10 @@ export const Route = createFileRoute("/api/workflowark/state")({
 
         const u = new URL(request.url);
         const soKey = String(u.searchParams.get("key") || "");
+        const matriz = await lerMatriz(ctx.db);
         if (soKey) {
           if (isSensitive(soKey)) return json({ error: "chave reservada" }, { status: 403 });
-          if (!podeVerBloco(ctx.member, ctx.isAdmin, soKey)) return json({ error: "Sem permissão para este bloco." }, { status: 403 });
+          if (!podeVerBloco(ctx.member, ctx.isAdmin, soKey, matriz)) return json({ error: "Sem permissão para este bloco." }, { status: 403 });
           const { data: row, error: e1 } = await ctx.db
             .from("workflowark_state")
             .select("key,data")
@@ -454,7 +471,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           return json({ unchanged: true, t: since, member: ctx.member, now: new Date().toISOString() });
         }
 
-        const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key) && podeVerBloco(ctx.member, ctx.isAdmin, row.key)).map((row: any) => {
+        const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key) && podeVerBloco(ctx.member, ctx.isAdmin, row.key, matriz)).map((row: any) => {
           // wfa-gcal: cada membro vê apenas sua própria entrada de agenda (não a de todos)
           if (row.key === "wfa-gcal") {
             const memberId = ctx.member.id;
@@ -466,7 +483,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
         if (ctx.isAdmin) {
           const result = await ctx.db
             .from("workflowark_members")
-            .select("id,email,full_name,user_id,role,active,permissions")
+            .select("id,email,full_name,user_id,role,active,permissions,created_at")
             .order("created_at", { ascending: true });
           members = result.data ?? [];
         }
@@ -484,11 +501,16 @@ export const Route = createFileRoute("/api/workflowark/state")({
         if (action === "save-state") {
           const key = String(body.key ?? "");
           if (!isStateKey(key)) return json({ error: "Bloco inválido" }, { status: 400 });
-          if (!podeVerBloco(ctx.member, ctx.isAdmin, key)) {
+          const matriz = await lerMatriz(ctx.db);
+          if (!podeVerBloco(ctx.member, ctx.isAdmin, key, matriz)) {
             // 200 de propósito: erro aqui viraria "chave veneno" com toast no cliente de
             // quem nem deveria ter esse bloco. Não grava, só registra.
             console.warn(`[save-state] ignorado: ${String((ctx.member as any)?.email || ctx.user.id)} (${ctx.member?.role}) tentou gravar ${key} sem permissão`);
             return json({ ok: true, ignorado: "sem permissão para este bloco", now: new Date().toISOString() });
+          }
+          if (!podeEditarBloco(ctx.member, ctx.isAdmin, key, matriz)) {
+            console.warn(`[save-state] ignorado: ${String((ctx.member as any)?.email || ctx.user.id)} (${ctx.member?.role}) sem Editar em ${key}`);
+            return json({ ok: true, ignorado: "seu papel não edita esta área", now: new Date().toISOString() });
           }
           let data = body.data ?? null;
           // LÁPIDE É MONOTÔNICA: wfa-deleted-ids só cresce. UNIÃO com o que já está no
@@ -538,8 +560,10 @@ export const Route = createFileRoute("/api/workflowark/state")({
 
         if (action === "save-many") {
           const entries = body.entries && typeof body.entries === "object" ? body.entries : {};
+          const matriz = await lerMatriz(ctx.db);
+          // Mesma regra do save-state: bloco que o papel não vê ou não edita fica de fora.
           const rows = Object.entries(entries)
-            .filter(([key]) => isStateKey(key))
+            .filter(([key]) => isStateKey(key) && podeEditarBloco(ctx.member, ctx.isAdmin, key, matriz))
             .map(([key, data]) => ({ key, data, updated_by: ctx.user.id }));
           if (rows.length) {
             const { error } = await ctx.db.from("workflowark_state").upsert(rows);
@@ -653,6 +677,16 @@ export const Route = createFileRoute("/api/workflowark/state")({
           return json({ ok: true });
         }
 
+        // Matriz de papéis (Configurações > Equipe). Só admin grava; todos leem pelo load.
+        if (action === "save-permissoes") {
+          if (!ctx.isAdmin) return json({ error: "Apenas admin pode alterar permissões." }, { status: 403 });
+          const matriz = limparMatriz(body.matriz);
+          const { error } = await ctx.db.from("workflowark_state").upsert({ key: CHAVE_PERMISSOES, data: matriz, updated_by: ctx.user.id });
+          if (error) return json({ error: "Não foi possível salvar as permissões." }, { status: 500 });
+          _matrizCache = { t: Date.now(), m: matriz };
+          return json({ ok: true, matriz });
+        }
+
         if (action === "update-member") {
           if (!ctx.isAdmin) return json({ error: "Apenas admin pode alterar acessos." }, { status: 403 });
           const id = String(body.id ?? "");
@@ -661,7 +695,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
           if (VALID_ROLES.has(String(body.role)) && body.id !== ctx.member.id) patch.role = String(body.role);
           if (typeof body.active === "boolean") patch.active = body.id === ctx.member.id ? true : body.active;
           if (typeof body.full_name === "string") patch.full_name = body.full_name.trim() || null;
-          if (body.permissions && typeof body.permissions === "object") patch.permissions = body.permissions;
+          if (body.permissions && typeof body.permissions === "object") patch.permissions = limparPermissoesMembro(body.permissions);
           const { error } = await ctx.db.from("workflowark_members").update(patch).eq("id", id);
           if (error) return json({ error: "Não foi possível atualizar o acesso." }, { status: 500 });
           return json({ ok: true });

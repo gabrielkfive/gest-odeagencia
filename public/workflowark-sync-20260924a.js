@@ -329,7 +329,9 @@ async function wfaFlush(){
       const it=WFA_PENDING.entries().next().value;const key=it[0],data=it[1];
       WFA_PENDING.delete(key);
       try{
-        await cloudCall('save',{action:'save-state',key,data});
+        const rSave=await cloudCall('save',{action:'save-state',key,data});
+        // Servidor ignorou por papel (sem Editar na área): avisa uma vez por bloco.
+        if(rSave&&rSave.ignorado&&!(window._wfaIgnAvisado||(window._wfaIgnAvisado={}))[key]){window._wfaIgnAvisado[key]=1;try{if(typeof toast==='function')toast('Seu papel não altera esta área. A mudança não foi salva.');}catch(_){}}
         WFA_SAVE_FAILS[key]=0;
         if(!WFA_PENDING.has(key))WFA_DIRTY.delete(key); // confirmou (e não houve edição nova no meio)
         atualizarBadgeSync(true);
@@ -658,6 +660,15 @@ function wfaSeedRotinasV1(){
     if(add){ saveRot(arr); if(typeof toast==='function')toast('✓ '+add+' rotinas da equipe adicionadas'); }
   }catch(e){/* nunca derruba o boot */}
 }
+// Matriz de papéis (24/09/2026): vem no load como wfa-permissoes, fora das chaves
+// sincronizadas (só a ação save-permissoes grava). Com o sync condicional ela só desce
+// quando muda; guarda a última e reaplica o menu.
+let WFA_PERMISSOES=null;
+function wfaLerPermissoes(st){
+  if(!st||!Object.prototype.hasOwnProperty.call(st,'wfa-permissoes'))return;
+  WFA_PERMISSOES=st['wfa-permissoes']||{};
+  try{if(typeof applyAccess==='function')applyAccess();}catch(e){}
+}
 function isEmptyCloudValue(v){return v==null||(Array.isArray(v)&&v.length===0)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===0)||v==='';}
 async function bootCloudSync(){
   try{
@@ -666,6 +677,7 @@ async function bootCloudSync(){
     const res=await cloudCall('load');
     const remote=res.state||{};
     WFA_MEMBER=res.member||null;WFA_MEMBERS=res.members||[];
+    wfaLerPermissoes(res.state);
     const upload={};
     // Semeia o servidor com dados locais quando a chave NUNCA existiu lá (ou está vazia mas
     // não nula). null no servidor = deleção explícita: NÃO ressuscita (senão a exclusão volta).
@@ -720,6 +732,7 @@ async function sincronizarAgora(silent){
     if(!(res&&res.unchanged)){
       const remote=res.state||{};
       WFA_MEMBER=res.member||WFA_MEMBER;WFA_MEMBERS=res.members||WFA_MEMBERS;
+      wfaLerPermissoes(remote);
       aplicou=applyCloudState(remote)!==false;
     }
     /* O carimbo só avança quando a resposta foi APLICADA (10/09/2026). Antes avançava antes
