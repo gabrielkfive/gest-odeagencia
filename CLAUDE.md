@@ -1,6 +1,13 @@
-# Agency Sync Hub — WorkFlowArk
+# Agency Sync Hub, WorkFlowArk
 
-## ⚠️ REGRAS DE OPERAÇÃO (guardrails — ler antes de qualquer mudança)
+## Leia antes de escrever código
+
+`AGENTS.md` (regras de segurança, código, comandos e fronteiras), depois `docs/PRD.md`
+(o que é o produto e o que está fora de escopo), `docs/ARCHITECTURE.md` (como as partes
+se ligam) e `docs/DESIGN_SYSTEM.md` (como a tela deve parecer). Esses quatro são a fonte
+da verdade. Decisão de produto mudou? Atualize o arquivo correspondente no mesmo commit.
+
+## ⚠️ REGRAS DE OPERAÇÃO (guardrails, ler antes de qualquer mudança)
 
 Estamos numa fase de grandes melhorias. Estas regras existem para NÃO vacilar:
 o sistema está em produção sendo usado pela equipe da ARK todos os dias.
@@ -10,7 +17,7 @@ o sistema está em produção sendo usado pela equipe da ARK todos os dias.
 - `npm run build` TEM que passar antes de qualquer deploy. Build quebrado = não deploya.
 - Mudanças grandes vão em fatias pequenas e verificadas, nunca num bloco só.
 - Feature nova vai em rota React, não no monolito `public/workflowark.html` (9.6k linhas,
-  congelado como legado — refatorar só aos poucos e com cuidado).
+  congelado como legado; refatorar só aos poucos e com cuidado).
 
 ### 2. Deploy = SEMPRE commit + push junto (gotcha de durabilidade)
 - O CI (`.github/workflows/deploy.yml`) faz deploy a cada push e RECONSTRÓI do git.
@@ -65,7 +72,7 @@ o sistema está em produção sendo usado pela equipe da ARK todos os dias.
   renomeie (git mv + referência no HTML) e troque o marcador `<!-- build ... -->`.
 
 ## Dono do projeto
-Gabriel Andrade — dono da ARK Content (agência de marketing de gastronomia). Não é desenvolvedor. Quer o software funcionando em produção, sem precisar entender o código. Falar sempre em português, linguagem simples e direta.
+Gabriel Andrade, dono da ARK Content (agência de marketing de gastronomia). Não é desenvolvedor. Quer o software funcionando em produção, sem precisar entender o código. Falar sempre em português, linguagem simples e direta.
 
 ## O que é o projeto
 Hub operacional para a equipe da ARK Content. Integra tarefas, finanças, OKRs, calendário, clientes, demandas, rotinas e processos. Tem autenticação com Google OAuth e persiste estado no Supabase.
@@ -95,10 +102,10 @@ npm run build
 - Variáveis de ambiente necessárias: estão no `.env` (Supabase URL e chaves)
 
 ## Estrutura principal
-- `src/routes/` — páginas (auth, app principal, APIs)
-- `src/integrations/supabase/` — conexão com banco e autenticação
-- `public/workflowark.html` — interface principal do sistema (arquivo único de 149KB)
-- `src/routes/api/` — endpoints do servidor
+- `src/routes/`: páginas (auth, app principal, APIs)
+- `src/integrations/supabase/`: conexão com banco e autenticação
+- `public/workflowark.html`: interface principal do sistema (arquivo único de 149KB)
+- `src/routes/api/`: endpoints do servidor
 
 ## Banco de dados (Supabase)
 - Projeto: fxfnonozzekxnxddxsnh.supabase.co
