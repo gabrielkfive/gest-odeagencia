@@ -1,4 +1,4 @@
-<!-- build 20260922f-feed-cliente -->
+<!-- build 20260924a-equipe-papeis -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -2507,7 +2507,7 @@ function wfaSetTheme(t){
           });
         }
         </script>
-<script src="workflowark-sync-20260914a.js"></script>
+<script src="workflowark-sync-20260924a.js"></script>
       </div>
 
       <!-- =================== CENTRAL DE AGENTES (funcionários de IA) =================== -->
@@ -4326,23 +4326,81 @@ function wfaSetTheme(t){
           <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="toast('Assinatura eletrônica: em preparação')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Assinatura eletrônica</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Enviar contrato para assinar (em preparação)</div></button>
         </div>
       </div>
-      <!-- EQUIPE & ACESSOS (admin) -->
+      <!-- EQUIPE E PAPÉIS (admin, 24/09/2026: layout da V3) -->
       <div class="set-pane" data-stp="equipe">
-        <div class="set-sect-t" style="margin-bottom:4px">Membros da equipe</div>
-        <p class="muted" style="font-size:10.5px;margin-bottom:13px">Defina o <strong>nome</strong>, o <strong>papel</strong> e <strong>quais abas</strong> cada pessoa enxerga (botão "Abas"). Desmarcar "ativo" bloqueia o acesso.</p>
-        <div id="set-team-list"></div>
-        <div class="card" style="margin-top:14px;padding:12px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
-          <input id="inv-email" class="form-input" type="email" placeholder="E-mail do novo membro">
-          <select id="inv-role" class="form-select">
-            <option value="viewer">Viewer</option>
-            <option value="operacao">Operação</option>
-            <option value="marketing">Marketing</option>
-            <option value="comercial">Comercial</option>
-            <option value="financeiro">Financeiro</option>
-            <option value="gestor">Gestor</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button class="tb-btn" onclick="inviteMember()">Convidar</button>
+        <style>
+          .eq-cab{margin:2px 0 14px}.eq-cab h4{font-size:19px;font-weight:800;color:var(--ink);margin:0;letter-spacing:-.01em}.eq-cab p{font-size:12.5px;color:var(--mute);margin:3px 0 0}
+          .eq-cartao{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+          .eq-cartao-cab{display:flex;align-items:center;gap:9px;margin-bottom:12px}.eq-cartao-cab h5{font-size:14.5px;font-weight:800;color:var(--ink);margin:0}.eq-cartao-cab .dir{margin-left:auto;display:flex;gap:8px;align-items:center}
+          .eq-n{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--mute)}
+          .eq-btn{background:var(--yel);color:#141414;border:none;border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;gap:6px;align-items:center}
+          .eq-btn:disabled{opacity:.45;cursor:default}
+          .eq-lista,#eq-membros{list-style:none;margin:0;padding:0}
+          .eq-membro{border-top:1px solid var(--line)}.eq-membro:first-child{border-top:none}
+          .eq-linha{display:grid;grid-template-columns:auto 1fr 170px auto auto;gap:12px;align-items:center;padding:10px 0}
+          .eq-av{width:34px;height:34px;border-radius:50%;background:var(--yel);color:#141414;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+          .eq-quem{min-width:0;display:flex;flex-direction:column;gap:2px}.eq-quem strong{font-size:13.5px;color:var(--ink);font-weight:700}.eq-quem>span{font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+          .eq-etq{font-size:10.5px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:1px 7px;color:var(--mute);margin-left:4px;white-space:nowrap}
+          .eq-etq-alerta{color:var(--yel-d);border-color:var(--yel-d)}
+          .eq-ativo{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--mute);cursor:pointer}
+          .eq-alt{position:relative;width:40px;height:23px;display:inline-block}.eq-alt input{opacity:0;width:0;height:0;position:absolute}
+          .eq-alt span{position:absolute;inset:0;background:var(--line);border-radius:999px;transition:background .2s}.eq-alt span:before{content:"";position:absolute;width:17px;height:17px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s}
+          .eq-alt input:checked+span{background:#34c759}.eq-alt input:checked+span:before{transform:translateX(17px)}.eq-alt input:disabled+span{opacity:.55}
+          .eq-alt input:focus-visible+span{outline:2px solid var(--yel);outline-offset:2px}
+          .eq-mais{background:none;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;color:var(--mute);cursor:pointer;font-family:inherit}
+          .eq-det{display:none;padding:4px 0 14px 46px}.eq-membro.open .eq-det{display:block}
+          .eq-det-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+          .eq-det-t{font-size:11px;font-weight:700;color:var(--ink);margin:4px 0 2px}
+          .eq-det-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.eq-perigo{color:var(--red)!important}
+          .eq-conv{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}.eq-conv:first-child{border-top:none}
+          .eq-conv-ic{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--mute)}
+          .eq-vazio{font-size:12px;margin:2px 0}.eq-ajuda{font-size:11.5px;color:var(--mute);margin:10px 0 0}
+          .eq-convidar{border:1px dashed var(--line);border-radius:11px;padding:12px;margin-bottom:12px}
+          .eq-convidar-f{display:grid;grid-template-columns:1fr 180px auto;gap:8px;align-items:center}
+          .eq-papeis{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 14px;margin:10px 0 0}.eq-papeis dt{font-size:11.5px;font-weight:700;color:var(--ink)}.eq-papeis dd{font-size:11px;color:var(--mute);margin:0}
+          .eq-tabela-caixa{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+          .eq-tabela{border-collapse:collapse;width:100%;min-width:900px}
+          .eq-tabela th,.eq-tabela td{padding:9px 8px;border-top:1px solid var(--line);text-align:center;vertical-align:middle}
+          .eq-tabela thead th{border-top:none;font-size:11px;font-weight:700;color:var(--mute);white-space:nowrap}
+          .eq-tabela th[scope=row]{text-align:left;min-width:170px;max-width:210px}.eq-tabela th[scope=row] strong{display:block;font-size:13px;color:var(--ink)}.eq-tabela th[scope=row] .muted{display:flex;gap:4px;align-items:center;font-size:11px;font-weight:400;line-height:1.35;margin-top:2px}
+          .eq-perm{display:flex;flex-direction:column;gap:5px;align-items:center}
+          .eq-chip{position:relative;display:block;cursor:pointer}.eq-chip input{position:absolute;opacity:0;width:0;height:0}
+          .eq-chip span{display:block;min-width:64px;padding:5px 8px;border-radius:7px;border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--mute);text-align:center}
+          .eq-chip input:checked+span{background:color-mix(in srgb,var(--yel) 22%,transparent);border-color:color-mix(in srgb,var(--yel) 45%,transparent);color:var(--ink)}
+          .eq-chip.parte span{border-style:dashed;border-color:var(--yel-d);color:var(--yel-d)}
+          .eq-chip input:focus-visible+span{outline:2px solid var(--yel);outline-offset:1px}
+          .eq-chip input:disabled+span{cursor:default}
+          @media (max-width:760px){
+            .eq-linha{grid-template-columns:auto 1fr auto;row-gap:8px}.eq-linha .eq-papel{grid-column:2/4}.eq-linha .eq-ativo{grid-column:2}.eq-linha .eq-mais{grid-column:3}
+            .eq-det{padding-left:0}.eq-det-grid{grid-template-columns:1fr}
+            .eq-conv{grid-template-columns:auto 1fr}
+            .eq-convidar-f{grid-template-columns:1fr}
+          }
+        </style>
+        <div class="eq-cab"><h4>Equipe e papéis</h4><p>Quem entra e o que cada papel pode fazer.</p></div>
+        <div class="eq-cartao">
+          <div class="eq-cartao-cab"><h5>Membros</h5><span class="eq-n" id="eq-n">0</span><div class="dir"><button class="eq-btn" type="button" data-convidar><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Convidar</button></div></div>
+          <ul id="eq-membros"></ul>
+        </div>
+        <div class="eq-cartao">
+          <div class="eq-cartao-cab"><h5>Convites pendentes</h5></div>
+          <div class="eq-convidar" id="eq-convidar" style="display:none">
+            <div class="eq-convidar-f">
+              <input id="inv-email" class="form-input" type="email" placeholder="E-mail da pessoa" aria-label="E-mail do convite">
+              <select id="inv-role" class="form-select" aria-label="Papel do convite">
+                <option value="viewer">Visualização</option><option value="operacao">Operação</option><option value="marketing">Marketing</option><option value="comercial">Comercial</option><option value="financeiro">Financeiro</option><option value="gestor">Gestor</option><option value="admin">Admin</option>
+              </select>
+              <button class="eq-btn" type="button" onclick="inviteMember()">Gerar convite</button>
+            </div>
+            <dl class="eq-papeis"><div><dt>Admin</dt><dd>Sempre tudo, inclusive equipe e pagamentos.</dd></div><div><dt>Gestor</dt><dd>Toda a operação e o financeiro. Não vê pagamentos.</dd></div><div><dt>Financeiro</dt><dd>Financeiro e cobranças. Consulta o dia a dia.</dd></div><div><dt>Operação</dt><dd>Tarefas, clientes e o dia a dia. Não vê o financeiro.</dd></div><div><dt>Comercial</dt><dd>CRM, comercial e clientes. Não vê o financeiro.</dd></div><div><dt>Marketing</dt><dd>Tarefas, demandas e campanhas.</dd></div><div><dt>Visualização</dt><dd>Só consulta Meu Dia, agenda e processos.</dd></div></dl>
+          </div>
+          <div id="eq-convites"></div>
+          <p class="eq-ajuda">O convite libera o e-mail. A pessoa entra com o Google usando esse e-mail e cai direto no papel escolhido. Quem cria conta por senha fica aguardando liberação aqui em Membros.</p>
+        </div>
+        <div class="eq-cartao">
+          <div class="eq-cartao-cab"><h5>Papéis e permissões</h5><div class="dir"><button class="icobtn" type="button" data-desfazer-matriz>Desfazer</button><button class="eq-btn" type="button" id="eq-salvar-matriz" disabled>Salvar permissões</button></div></div>
+          <p class="muted" style="font-size:12px;margin:0 0 12px">Ver mostra a área no menu. Editar permite criar e mudar. Editar exige Ver. O Admin sempre pode tudo. Parte é o acesso de antes, com só algumas abas da área.</p>
+          <div id="eq-matriz"></div>
         </div>
       </div>
 
@@ -4403,7 +4461,8 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260922a.js"></script>
+<script src="workflowark-app-20260924a.js"></script>
+<script type="module">import * as P from "./workflowark-permissoes-20260924a.js";window.WFA_PERM=P;try{applyAccess();}catch(e){}</script>
 <script src="workflowark-cliente-20260922d.js" defer></script>
 </body>
 </html>

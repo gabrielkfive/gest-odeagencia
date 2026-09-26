@@ -45,7 +45,10 @@ docs/                  PRD, arquitetura, design system, planos
 
 - **Banco:** RLS travado; só o Worker fala com o Supabase via service_role
 - **Autenticação:** JWT do Supabase; conta nova pendente até liberação
-- **Autorização:** papel do membro checado no servidor, bloco a bloco
+- **Autorização:** papel do membro checado no servidor, bloco a bloco. Matriz de papéis
+  (Ver e Editar por área) em `wfa-permissoes`, gravada só pela ação `save-permissoes`
+  (admin); regra única em `src/lib/permissoes.js`, cópia idêntica no navegador, teste em
+  `deploy/teste-permissoes.mjs`
 - **Rotas públicas:** token criptográfico por cliente (portal, aprovação); lead-site só grava no CRM
 - **Segredos:** `wrangler secret`; blocos `-secret`, `-oauth`, `portal-tokens` nunca voltam ao navegador
 - **Página estática:** guarda de sessão no `workflowark.html` não pinta dado sem sessão

@@ -5066,6 +5066,14 @@ function memberAccess(m){
   // FECHA por padrão quando o membro ainda não carregou (evita vazar WhatsApp/Acerto/Notificações
   // pra quem tá vendo o sistema antes do RBAC real resolver — bug relatado pelo Gabriel).
   if(!m){_ALL_NAV.forEach(k=>acc[k]=true);acc.whatsapp=false;acc.acerto=false;acc.cobranca=false;acc.notificacoes=false;return acc;}
+  // Regra nova (24/09/2026): matriz de papéis + ajuste da pessoa, a mesma do servidor.
+  if(window.WFA_PERM){
+    const nav=WFA_PERM.navEfetivo(m,(typeof WFA_PERMISSOES!=='undefined'&&WFA_PERMISSOES)||{});
+    _ALL_NAV.forEach(k=>acc[k]=!!nav[k]);
+    const pp=m.permissions||{};const ovw=(pp.ajustes&&typeof pp.ajustes==='object')?pp.ajustes:pp.nav;
+    acc.whatsapp=m.role==='admin'||!!(ovw&&ovw.whatsapp===true);
+    return acc;
+  }
   const allow=roleAccessList(m.role);
   _ALL_NAV.forEach(k=>acc[k]=allow.includes(k));
   const ov=m.permissions&&m.permissions.nav;
@@ -5122,6 +5130,7 @@ function renderMonthPill(){
 function tdDescAuto(){const d=document.getElementById('td-desc');if(!d)return;d.style.height='auto';d.style.height=Math.max(168,d.scrollHeight+4)+'px';}
 function openSettingsIr(pagina){try{closeModal('modal-settings');}catch(e){}const el=document.querySelector('[data-nav="'+pagina+'"]');if(el)el.click();}
 function setTab(name){
+  const md=document.querySelector('#modal-settings .modal');if(md)md.style.maxWidth=name==='equipe'?'1120px':'660px';
   document.querySelectorAll('#modal-settings .set-tab').forEach(b=>b.classList.toggle('active',b.dataset.st===name));
   document.querySelectorAll('#modal-settings .set-pane').forEach(p=>p.classList.toggle('active',p.dataset.stp===name));
   if(name==='conta'){try{wfaRotinasRender();}catch(e){}}
@@ -5136,44 +5145,219 @@ function openSettings(){
   const meta=document.getElementById('set-me-meta');if(meta)meta.textContent=(m?(ROLE_LABEL[m.role]||m.role||'Membro'):'—')+(m&&m.email?' · '+m.email:'');
   const pr=document.getElementById('pref-regua');if(pr)pr.checked=localStorage.getItem('wfa-show-regua')==='1';
   setTab('perfil');
+  eqLigarEventos();EQ_MATRIZ_SUJA=false;EQ_ABERTO=null;EQ_CONVITE_ABERTO=false;
   renderSettingsTeam();
   document.getElementById('modal-settings').classList.add('open');
 }
+/* ============ EQUIPE E PAPÉIS (24/09/2026, tela Equipe da V3) ============
+   Três cartões: Membros (papel e ativo salvam na hora), Convites pendentes (e-mail
+   pré-autorizado que ainda não entrou) e Papéis e permissões (matriz Ver/Editar por área,
+   regra em workflowark-permissoes-<data>.js, a mesma do servidor). Só admin. */
+const EQ_PAPEIS=[{v:'admin',nome:'Admin',desc:'Sempre tudo, inclusive equipe e pagamentos.'},{v:'gestor',nome:'Gestor',desc:'Toda a operação e o financeiro. Não vê pagamentos.'},{v:'financeiro',nome:'Financeiro',desc:'Financeiro e cobranças. Consulta o dia a dia.'},{v:'operacao',nome:'Operação',desc:'Tarefas, clientes e o dia a dia. Não vê o financeiro.'},{v:'comercial',nome:'Comercial',desc:'CRM, comercial e clientes. Não vê o financeiro.'},{v:'marketing',nome:'Marketing',desc:'Tarefas, demandas e campanhas.'},{v:'viewer',nome:'Visualização',desc:'Só consulta Meu Dia, agenda e processos.'}];
+let EQ_MATRIZ=null,EQ_MATRIZ_SUJA=false,EQ_ABERTO=null,EQ_CONVITE_ABERTO=false;
+function eqPapeis(){return (window.WFA_PERM&&WFA_PERM.PAPEIS)||EQ_PAPEIS;}
+function eqNomePapel(r){const p=eqPapeis().find(x=>x.v===r);return p?p.nome:(ROLE_LABEL[r]||r||'Membro');}
+function eqData(iso){const d=new Date(iso);return isNaN(d)?'':d.toLocaleDateString('pt-BR');}
+function eqSeta(){return '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';}
+function eqConvidados(){return (WFA_MEMBERS||[]).filter(m=>!m.user_id&&m.id!==(WFA_MEMBER&&WFA_MEMBER.id));}
+function eqMembros(){return (WFA_MEMBERS||[]).filter(m=>m.user_id||m.id===(WFA_MEMBER&&WFA_MEMBER.id));}
 function renderSettingsTeam(){
   const isAdmin=WFA_MEMBER&&WFA_MEMBER.role==='admin';
   const tabBtn=document.getElementById('set-tab-equipe');
   if(tabBtn)tabBtn.style.display=isAdmin?'':'none';
   if(!isAdmin)return;
-  const roles=['admin','gestor','comercial','operacao','marketing','financeiro','viewer'];
-  const list=document.getElementById('set-team-list');
-  list.innerHTML=(WFA_MEMBERS||[]).map(m=>{
-    const acc=memberAccess(m);
-    const checks=NAV_CATALOG.map(s=>`<label><input type="checkbox" class="acc-ck" data-k="${s.k}" ${acc[s.k]?'checked':''} ${m.role==='admin'?'disabled':''}> ${mdEsc(s.l)}</label>`).join('');
-    return `<div class="set-row" data-id="${mdEsc(m.id)}">
-      <input class="form-input set-nm" value="${mdEsc(m.full_name||'')}" placeholder="Nome" list="set-people">
-      <select class="form-select set-rl" onchange="onRoleChange('${mdEsc(m.id)}')">${roles.map(r=>`<option value="${r}" ${m.role===r?'selected':''}>${ROLE_LABEL[r]||r}</option>`).join('')}</select>
-      <label class="set-act"><input type="checkbox" class="set-ac" ${m.active?'checked':''}> ativo</label>
-      <button class="set-accbtn" type="button" onclick="toggleAcc('${mdEsc(m.id)}')">Abas ▾</button>
-      <button class="icobtn" onclick="salvarMembro('${mdEsc(m.id)}')">Salvar</button>
-      <button class="set-accbtn" type="button" title="Gerar senha provisória pra este membro" onclick="redefinirSenhaMembro('${mdEsc(m.id)}')">🔑 Senha</button>
-      <button class="set-accbtn" type="button" title="Remover membro" style="color:var(--red);border-color:#f3b4b4" onclick="removerMembro('${mdEsc(m.id)}')">✕</button>
-      <div class="set-em">${mdEsc(m.email||'')}</div>
-      <div style="grid-column:1/-1;display:flex;gap:6px;align-items:center;margin-top:2px">
-        <span style="font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">📅 Agenda Google</span>
-        <input class="form-input set-cal" value="${mdEsc(calForMember(m))}" placeholder="Cole o código iframe da agenda OU o e-mail da agenda" style="flex:1;font-size:11px">
-      </div>
-      <div class="set-acc">
-        <div style="font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Abas visíveis ${m.role==='admin'?'· admin vê tudo':''}</div>
-        <div class="set-acc-grid">${checks}</div>
-      </div>
-    </div>`;
-  }).join('')||'<p class="muted" style="font-size:11px">Nenhum membro cadastrado ainda.</p>';
+  if(!EQ_MATRIZ_SUJA)EQ_MATRIZ=JSON.parse(JSON.stringify((typeof WFA_PERMISSOES!=='undefined'&&WFA_PERMISSOES)||{}));
+  eqRenderMembros();eqRenderConvites();eqRenderMatriz();
 }
-function toggleAcc(id){const r=document.querySelector('.set-row[data-id="'+id+'"]');if(r)r.classList.toggle('open');}
-function onRoleChange(id){
-  const r=document.querySelector('.set-row[data-id="'+id+'"]');if(!r)return;
-  const role=r.querySelector('.set-rl').value;const allow=roleAccessList(role);
-  r.querySelectorAll('.acc-ck').forEach(ck=>{ck.checked=role==='admin'?true:allow.includes(ck.dataset.k);ck.disabled=(role==='admin');});
+function eqRenderMembros(){
+  const el=document.getElementById('eq-membros');if(!el)return;
+  const lista=eqMembros();
+  const n=document.getElementById('eq-n');if(n)n.textContent=lista.length;
+  const opcoes=sel=>eqPapeis().map(p=>`<option value="${p.v}" ${p.v===sel?'selected':''}>${mdEsc(p.nome)}</option>`).join('');
+  el.innerHTML=lista.map(m=>{
+    const eu=WFA_MEMBER&&m.id===WFA_MEMBER.id;
+    const nm=m.full_name||'Sem nome';
+    const acc=memberAccess(m);
+    const aj=(m.permissions&&m.permissions.ajustes)?Object.keys(m.permissions.ajustes).length:0;
+    const checks=NAV_CATALOG.map(s=>`<label><input type="checkbox" class="acc-ck" data-k="${s.k}" ${acc[s.k]?'checked':''} ${m.role==='admin'?'disabled':''}> ${mdEsc(s.l)}</label>`).join('');
+    return `<li class="eq-membro${EQ_ABERTO===m.id?' open':''}" data-id="${mdEsc(m.id)}">
+      <div class="eq-linha">
+        <span class="eq-av" aria-hidden="true">${mdEsc(mdInitial(nm))}</span>
+        <div class="eq-quem"><strong>${mdEsc(nm)}${eu?' <span class="eq-etq">Você</span>':''}${!m.active&&!eu?' <span class="eq-etq eq-etq-alerta">Aguardando liberação</span>':''}${aj?` <span class="eq-etq">${aj} ${aj>1?'abas ajustadas':'aba ajustada'}</span>`:''}</strong><span>${mdEsc(m.email||'')}</span></div>
+        <select class="form-select eq-papel" data-papel aria-label="Papel de ${mdEsc(nm)}" ${eu?'disabled':''}>${opcoes(m.role)}</select>
+        <label class="eq-ativo"><span>${m.active?'Ativo':'Inativo'}</span><span class="eq-alt"><input type="checkbox" data-ativo ${m.active?'checked':''} ${eu?'disabled':''} aria-label="Acesso ativo"><span></span></span></label>
+        <button class="eq-mais" type="button" data-mais aria-expanded="${EQ_ABERTO===m.id}">Mais</button>
+      </div>
+      <div class="eq-det">
+        <div class="eq-det-grid">
+          <div><label class="form-label">Nome</label><input class="form-input" data-nome value="${mdEsc(m.full_name||'')}" placeholder="Nome" list="set-people"></div>
+          <div><label class="form-label">Agenda Google</label><input class="form-input" data-cal value="${mdEsc(calForMember(m))}" placeholder="Código iframe ou e-mail da agenda"></div>
+        </div>
+        <div class="eq-det-t">Abas desta pessoa ${m.role==='admin'?'<span class="muted">· admin vê tudo</span>':'<span class="muted">· o que for diferente do papel vira ajuste só dela</span>'}</div>
+        <div class="set-acc-grid">${checks}</div>
+        <div class="eq-det-acoes">
+          <button class="tb-btn" type="button" data-salvar>Salvar</button>
+          ${aj?'<button class="icobtn" type="button" data-seguir>Seguir o papel</button>':''}
+          ${eu?'':'<button class="icobtn" type="button" data-senha>Gerar senha provisória</button>'}
+          ${eu?'':'<button class="icobtn eq-perigo" type="button" data-remover>Remover da equipe</button>'}
+        </div>
+      </div>
+    </li>`;
+  }).join('')||'<li class="muted" style="font-size:12px;padding:6px 0">Nenhum membro cadastrado ainda.</li>';
+}
+function eqRenderConvites(){
+  const el=document.getElementById('eq-convites');if(!el)return;
+  const conv=eqConvidados();
+  const form=document.getElementById('eq-convidar');if(form)form.style.display=EQ_CONVITE_ABERTO?'':'none';
+  el.innerHTML=conv.length?`<ul class="eq-lista">${conv.map(v=>`<li class="eq-conv" data-id="${mdEsc(v.id)}">
+      <span class="eq-conv-ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
+      <div class="eq-quem"><strong>${mdEsc(v.email)}</strong><span>${mdEsc(eqNomePapel(v.role))}${v.created_at?', convidado em '+mdEsc(eqData(v.created_at)):''}</span></div>
+      <button class="icobtn" type="button" data-copiar>Copiar link</button>
+      <button class="icobtn" type="button" data-cancelar>Cancelar convite</button>
+    </li>`).join('')}</ul>`:'<p class="muted eq-vazio">Nenhum convite pendente.</p>';
+}
+function eqCelula(papel,area){
+  const P=window.WFA_PERM;const trava=papel==='admin';
+  const base=P?P.celulaPadrao(papel,area):{ver:false,editar:false,parcial:false};
+  const c=(EQ_MATRIZ&&EQ_MATRIZ[papel]&&EQ_MATRIZ[papel][area])||{};
+  const ver=trava?true:(typeof c.ver==='boolean'?c.ver:base.ver);
+  const ed=trava?true:(typeof c.editar==='boolean'?c.editar:(typeof c.ver==='boolean'?c.ver:base.editar));
+  const parcial=!trava&&typeof c.ver!=='boolean'&&base.parcial;
+  return `<td><div class="eq-perm">
+    <label class="eq-chip${parcial?' parte':''}" title="${parcial?'Parte das abas desta área, como era antes':''}"><input type="checkbox" data-p="${papel}" data-a="${area}" data-x="ver" ${ver?'checked':''} ${trava?'disabled':''}><span>${parcial?'Parte':'Ver'}</span></label>
+    <label class="eq-chip"><input type="checkbox" data-p="${papel}" data-a="${area}" data-x="editar" ${ed?'checked':''} ${trava?'disabled':''}><span>Editar</span></label>
+  </div></td>`;
+}
+function eqRenderMatriz(){
+  const el=document.getElementById('eq-matriz');if(!el)return;
+  const P=window.WFA_PERM;
+  if(!P){el.innerHTML='<p class="muted eq-vazio">Carregando as regras de acesso…</p>';return;}
+  el.innerHTML=`<div class="eq-tabela-caixa"><table class="eq-tabela">
+    <thead><tr><th>Papel</th>${P.AREAS.map(a=>`<th>${mdEsc(a.nome)}</th>`).join('')}</tr></thead>
+    <tbody>${eqPapeis().map(p=>`<tr class="${p.v==='admin'?'travada':''}"><th scope="row"><strong>${mdEsc(p.nome)}</strong><span class="muted">${p.v==='admin'?eqSeta()+' Sempre tudo':mdEsc(p.desc)}</span></th>${P.AREAS.map(a=>eqCelula(p.v,a.k)).join('')}</tr>`).join('')}</tbody>
+  </table></div>`;
+  const b=document.getElementById('eq-salvar-matriz');if(b)b.disabled=!EQ_MATRIZ_SUJA;
+}
+async function eqRecarregar(){
+  const res=await cloudCall('load');
+  if(res&&res.members)WFA_MEMBERS=res.members;
+  if(res&&res.member)WFA_MEMBER=res.member;
+  try{wfaLerPermissoes(res&&res.state);}catch(e){}
+  renderSettingsTeam();
+}
+async function eqAtualizarMembro(id,patch,desfazer){
+  const m=(WFA_MEMBERS||[]).find(x=>x.id===id);if(!m)return;
+  const corpo=Object.assign({action:'update-member',id},patch);
+  try{
+    await cloudCall('save',corpo);
+    Object.assign(m,patch);
+    if(WFA_MEMBER&&WFA_MEMBER.id===id){Object.assign(WFA_MEMBER,patch);renderIdentity();applyAccess();}
+    eqRenderMembros();renderMeuDia();
+    toast('✓ Equipe atualizada');
+  }catch(e){if(desfazer)desfazer();toast('⚠ '+(e.message||'Erro ao atualizar'));}
+}
+function eqSalvarDetalhe(li){
+  const id=li.dataset.id;const m=(WFA_MEMBERS||[]).find(x=>x.id===id);if(!m)return;
+  const nav={};li.querySelectorAll('.acc-ck').forEach(ck=>{nav[ck.dataset.k]=ck.checked;});
+  const P=window.WFA_PERM;
+  const ajustes=P?P.ajustesDaPessoa(m.role,nav,(typeof WFA_PERMISSOES!=='undefined'&&WFA_PERMISSOES)||{}):null;
+  const permissions=ajustes?{ajustes}:{nav};
+  const full_name=(li.querySelector('[data-nome]').value||'').trim();
+  const calRaw=(li.querySelector('[data-cal]').value||'').trim();
+  if(!state.gcal)state.gcal={};
+  if(calRaw)state.gcal[id]=extractCalSrc(calRaw);else delete state.gcal[id];
+  saveGcal();applyCalendars();
+  eqAtualizarMembro(id,{full_name,permissions});
+}
+async function eqRemover(id){
+  const m=(WFA_MEMBERS||[]).find(x=>x.id===id);const quem=m?(m.full_name||m.email):'este membro';
+  if(!confirm('Remover '+quem+' da equipe? A conta de acesso também será apagada.'))return;
+  try{
+    await cloudCall('save',{action:'remove-member',id});
+    WFA_MEMBERS=(WFA_MEMBERS||[]).filter(x=>x.id!==id);
+    renderSettingsTeam();renderMeuDia();
+    toast('✓ Membro removido');
+  }catch(e){toast('⚠ '+(e.message||'Erro ao remover'));}
+}
+async function eqCancelarConvite(id){
+  const m=(WFA_MEMBERS||[]).find(x=>x.id===id);
+  if(!confirm('Cancelar o convite de '+(m?m.email:'este e-mail')+'? Ele deixa de poder entrar.'))return;
+  try{
+    await cloudCall('save',{action:'remove-member',id});
+    WFA_MEMBERS=(WFA_MEMBERS||[]).filter(x=>x.id!==id);
+    eqRenderConvites();
+    toast('✓ Convite cancelado');
+  }catch(e){toast('⚠ '+(e.message||'Erro ao cancelar'));}
+}
+function eqTextoConvite(email){return 'Você foi convidado para o WorkFlowArk. Entre em '+location.origin+'/auth com o Google usando o e-mail '+email+'.';}
+async function eqCopiar(txt){try{await navigator.clipboard.writeText(txt);toast('✓ Convite copiado');}catch(e){prompt('Copie o convite:',txt);}}
+function redefinirSenhaMembro(id){return (async()=>{
+  const m=(WFA_MEMBERS||[]).find(x=>x.id===id);const quem=m?(m.full_name||m.email||'este membro'):'este membro';
+  if(!confirm('Gerar uma senha provisória para '+quem+'? A senha atual deixa de valer.'))return;
+  try{
+    const r=await cloudCall('save',{action:'reset-member-password',id});
+    const senha=r&&r.password;if(!senha)throw new Error('Senha não veio do servidor');
+    try{await navigator.clipboard.writeText(senha);}catch(e){}
+    prompt('Senha provisória de '+quem+' (já copiada). Passe para a pessoa entrar com ela:',senha);
+    toast('✓ Senha provisória gerada');
+  }catch(e){toast('⚠ '+(e.message||'Erro ao redefinir senha'));}
+})();}
+async function inviteMember(){
+  const emIn=document.getElementById('inv-email');const rlIn=document.getElementById('inv-role');
+  const email=(emIn?.value||'').trim().toLowerCase();const role=(rlIn?.value||'viewer');
+  if(!/^\S+@\S+\.\S+$/.test(email)){toast('Informe um e-mail válido');return;}
+  try{
+    await cloudCall('save',{action:'add-member',email,role});
+    if(emIn)emIn.value='';
+    EQ_CONVITE_ABERTO=false;
+    await eqRecarregar();
+    eqCopiar(eqTextoConvite(email));
+  }catch(e){toast('⚠ '+(e.message||'Erro ao convidar'));}
+}
+async function eqSalvarMatriz(){
+  const b=document.getElementById('eq-salvar-matriz');if(b)b.disabled=true;
+  try{
+    const r=await cloudCall('save',{action:'save-permissoes',matriz:EQ_MATRIZ||{}});
+    WFA_PERMISSOES=(r&&r.matriz)||EQ_MATRIZ||{};
+    EQ_MATRIZ_SUJA=false;EQ_MATRIZ=JSON.parse(JSON.stringify(WFA_PERMISSOES));
+    applyAccess();eqRenderMatriz();eqRenderMembros();
+    toast('✓ Permissões salvas');
+  }catch(e){if(b)b.disabled=false;toast('⚠ '+(e.message||'Erro ao salvar permissões'));}
+}
+function eqLigarEventos(){
+  const raiz=document.querySelector('[data-stp="equipe"]');if(!raiz||raiz._eq)return;raiz._eq=1;
+  raiz.addEventListener('change',e=>{
+    const t=e.target;const li=t.closest('.eq-membro');
+    if(li&&t.matches('[data-papel]')){
+      const m=(WFA_MEMBERS||[]).find(x=>x.id===li.dataset.id);const antes=m&&m.role;
+      eqAtualizarMembro(li.dataset.id,{role:t.value},()=>{t.value=antes;});return;
+    }
+    if(li&&t.matches('[data-ativo]')){eqAtualizarMembro(li.dataset.id,{active:t.checked},()=>{t.checked=!t.checked;});return;}
+    if(t.matches('.eq-chip input')){
+      const {p,a,x}=t.dataset;EQ_MATRIZ=EQ_MATRIZ||{};
+      const P=window.WFA_PERM;const base=P.celulaPadrao(p,a);
+      const linha=(EQ_MATRIZ[p]=EQ_MATRIZ[p]||{});const cel=(linha[a]=linha[a]||{});
+      // Ver e Editar mexem só no que foi clicado: Editar numa célula Parte não amplia nem
+      // fecha as abas vistas. Editar exige Ver só quando Ver foi desmarcado de propósito.
+      if(x==='ver'){cel.ver=t.checked;if(!t.checked)cel.editar=false;else if(typeof cel.editar!=='boolean')cel.editar=true;}
+      else{cel.editar=t.checked;if(t.checked&&cel.ver===false)cel.ver=true;}
+      EQ_MATRIZ_SUJA=true;eqRenderMatriz();
+    }
+  });
+  raiz.addEventListener('click',e=>{
+    const t=e.target;const li=t.closest('.eq-membro');
+    if(t.closest('[data-mais]')&&li){EQ_ABERTO=EQ_ABERTO===li.dataset.id?null:li.dataset.id;eqRenderMembros();return;}
+    if(t.closest('[data-salvar]')&&li){eqSalvarDetalhe(li);return;}
+    if(t.closest('[data-seguir]')&&li){eqAtualizarMembro(li.dataset.id,{permissions:{ajustes:{}}});return;}
+    if(t.closest('[data-senha]')&&li){redefinirSenhaMembro(li.dataset.id);return;}
+    if(t.closest('[data-remover]')&&li){eqRemover(li.dataset.id);return;}
+    const cv=t.closest('.eq-conv');
+    if(t.closest('[data-copiar]')&&cv){const m=(WFA_MEMBERS||[]).find(x=>x.id===cv.dataset.id);if(m)eqCopiar(eqTextoConvite(m.email));return;}
+    if(t.closest('[data-cancelar]')&&cv){eqCancelarConvite(cv.dataset.id);return;}
+    if(t.closest('[data-convidar]')){EQ_CONVITE_ABERTO=!EQ_CONVITE_ABERTO;eqRenderConvites();if(EQ_CONVITE_ABERTO){const i=document.getElementById('inv-email');i&&i.focus();}return;}
+    if(t.closest('#eq-salvar-matriz')){eqSalvarMatriz();return;}
+    if(t.closest('[data-desfazer-matriz]')){EQ_MATRIZ_SUJA=false;renderSettingsTeam();return;}
+  });
 }
 async function salvarMeuNome(){
   const inp=document.getElementById('set-myname');const nome=(inp.value||'').trim();
@@ -5184,60 +5368,6 @@ async function salvarMeuNome(){
     renderIdentity();renderMeuDia();
     toast('✓ Nome salvo');
   }catch(e){toast('⚠ '+(e.message||'Erro ao salvar nome'));}
-}
-async function salvarMembro(id){
-  const row=document.querySelector('.set-row[data-id="'+id+'"]');if(!row)return;
-  const full_name=row.querySelector('.set-nm').value.trim();
-  const role=row.querySelector('.set-rl').value;
-  const active=row.querySelector('.set-ac').checked;
-  const nav={};row.querySelectorAll('.acc-ck').forEach(ck=>{nav[ck.dataset.k]=ck.checked;});
-  const permissions={nav};
-  try{
-    await cloudCall('save',{action:'update-member',id,full_name,role,active,permissions});
-    const m=(WFA_MEMBERS||[]).find(x=>x.id===id);if(m){m.full_name=full_name;m.role=role;m.active=active;m.permissions=permissions;}
-    if(WFA_MEMBER&&WFA_MEMBER.id===id){WFA_MEMBER.full_name=full_name;WFA_MEMBER.role=role;WFA_MEMBER.permissions=permissions;renderIdentity();applyAccess();}
-    // Agenda Google do membro (guardada na nuvem em wfa-gcal, controlada só pelo admin)
-    const calRaw=(row.querySelector('.set-cal')?.value||'').trim();
-    if(!state.gcal)state.gcal={};
-    if(calRaw)state.gcal[id]=extractCalSrc(calRaw);else delete state.gcal[id];
-    saveGcal();applyCalendars();
-    renderMeuDia();
-    toast('✓ Membro atualizado');
-  }catch(e){toast('⚠ '+(e.message||'Erro ao atualizar'));}
-}
-async function removerMembro(id){
-  if(!confirm('Remover este membro? A conta de acesso dele também será apagada.'))return;
-  try{
-    await cloudCall('save',{action:'remove-member',id});
-    WFA_MEMBERS=(WFA_MEMBERS||[]).filter(x=>x.id!==id);
-    renderSettingsTeam();renderMeuDia();
-    toast('✓ Membro removido');
-  }catch(e){toast('⚠ '+(e.message||'Erro ao remover'));}
-}
-/* Senha provisoria gerada pelo gestor (17/09/2026): o "Esqueci minha senha" do login
-   depende de e-mail do Supabase que nao chega pra quem esta fora do projeto. */
-async function redefinirSenhaMembro(id){
-  const m=(WFA_MEMBERS||[]).find(x=>x.id===id);const quem=m?(m.full_name||m.email||'este membro'):'este membro';
-  if(!confirm('Gerar uma senha provisória para '+quem+'? A senha atual dele deixa de valer.'))return;
-  try{
-    const r=await cloudCall('save',{action:'reset-member-password',id});
-    const senha=r&&r.password;if(!senha)throw new Error('Senha não veio do servidor');
-    try{await navigator.clipboard.writeText(senha);}catch(e){}
-    prompt('Senha provisória de '+quem+' (já copiada). Passe pra ele e peça pra entrar com ela:',senha);
-    toast('✓ Senha provisória gerada');
-  }catch(e){toast('⚠ '+(e.message||'Erro ao redefinir senha'));}
-}
-async function inviteMember(){
-  const emIn=document.getElementById('inv-email');const rlIn=document.getElementById('inv-role');
-  const email=(emIn?.value||'').trim().toLowerCase();const role=(rlIn?.value||'viewer');
-  if(!/^\S+@\S+\.\S+$/.test(email)){toast('Informe um e-mail válido');return;}
-  try{
-    await cloudCall('save',{action:'add-member',email,role});
-    const res=await cloudCall('load');if(res&&res.members)WFA_MEMBERS=res.members;
-    renderSettingsTeam();
-    if(emIn)emIn.value='';
-    toast('✓ Convite salvo · '+email+' já pode entrar com este e-mail');
-  }catch(e){toast('⚠ '+(e.message||'Erro ao convidar'));}
 }
 
 /* ============ TAREFAS DE EXEMPLO ============ */
