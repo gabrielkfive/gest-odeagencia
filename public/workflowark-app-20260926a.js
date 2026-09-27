@@ -4408,7 +4408,7 @@ function mdRenderDecisoes(){
   }
   if(!cards.length){
     box.style.display='';box.dataset.sig='zero';
-    box.innerHTML='<div class="dec-hd"><b>Decisões que esperam você</b></div><div class="dec-zero"><div class="e">🏆</div><b>A agência está rodando</b><p><span class="pulse-dot"></span>Nada esperando você agora. Os agentes seguem trabalhando — a próxima decisão aparece aqui.</p></div>';
+    box.innerHTML='<div class="dec-hd"><b>Esperando sua aprovação</b></div><div class="dec-zero"><div class="e">🏆</div><b>A agência está rodando</b><p><span class="pulse-dot"></span>Nada esperando você agora. Os agentes seguem trabalhando — a próxima decisão aparece aqui.</p></div>';
     return;
   }
   cards.sort((a,b)=>(b.urg||0)-(a.urg||0));
@@ -4417,7 +4417,7 @@ function mdRenderDecisoes(){
   const nUrg=cards.filter(c=>c.urg===2).length;
   const URG_LBL=['pode esperar','importante','urgente'];
   box.style.display='';
-  box.innerHTML='<div class="dec-hd"><b>Decisões que esperam você</b><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou, só falta o seu aval')+'</span></div>'+
+  box.innerHTML='<div class="dec-hd"><b>Esperando sua aprovação</b><em class="dec-n">'+Math.min(cards.length,8)+'</em><span>'+(nUrg?nUrg+' urgente'+(nUrg>1?'s':'')+' primeiro':'a agência preparou, só falta o seu aval')+'</span></div>'+
     cards.slice(0,8).map(c=>`<div class="dec-card${c.urg===2?' u2':''}"><div class="dec-top"><span class="dec-ico" style="background:${c.bg}">${c.ico}</span><span class="dec-cli">${mdEsc(c.cli)}</span><span class="dec-urg u${c.urg}">${URG_LBL[c.urg]}</span></div><div class="dec-t">${mdEsc(c.t)}</div><div class="dec-d">${mdEsc(c.d)}</div><div class="dec-acts">${c.acts}</div></div>`).join('');
 }
 async function decRoteiro(id,status){
@@ -4902,6 +4902,7 @@ function renderMeuDia(){
   mdRenderJarvis(late.length,todayT.length,pend.length);
   // Decisões de hoje (fila por pessoa — agência autônoma)
   try{mdRenderDecisoes();decCarregarNuvem();}catch(e){console.warn('dec',e);}
+  try{if(typeof iniRender==='function')iniRender();}catch(e){}
   // Fila de aprovação (ref ARK OS)
   try{mdRenderAprovacao();}catch(e){}
   // Inteligência Executiva (gestor/admin): problemas + oportunidades do estado real
@@ -5129,11 +5130,25 @@ function renderMonthPill(){
 /* descricao da tarefa: altura acompanha o texto ate o teto do CSS (max-height) */
 function tdDescAuto(){const d=document.getElementById('td-desc');if(!d)return;d.style.height='auto';d.style.height=Math.max(168,d.scrollHeight+4)+'px';}
 function openSettingsIr(pagina){try{closeModal('modal-settings');}catch(e){}const el=document.querySelector('[data-nav="'+pagina+'"]');if(el)el.click();}
+/* Configurações no molde da V3 (26/09/2026): menu lateral com 9 seções. Perfil entrou
+   em Conta, Sistema virou as seções. Quem não é admin nem gestor vê só Conta. */
+const SET_ANTIGAS={perfil:'conta',sistema:'marca'};
+function setGestao(){const r=WFA_MEMBER&&WFA_MEMBER.role;return r==='admin'||r==='gestor';}
 function setTab(name){
-  const md=document.querySelector('#modal-settings .modal');if(md)md.style.maxWidth=name==='equipe'?'1120px':'660px';
-  document.querySelectorAll('#modal-settings .set-tab').forEach(b=>b.classList.toggle('active',b.dataset.st===name));
+  name=SET_ANTIGAS[name]||name;
+  const btn=document.querySelector('#modal-settings .set-tab[data-st="'+name+'"]');
+  if(!btn||btn.style.display==='none')name='conta';
+  document.querySelectorAll('#modal-settings .set-tab').forEach(b=>{const on=b.dataset.st===name;b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
   document.querySelectorAll('#modal-settings .set-pane').forEach(p=>p.classList.toggle('active',p.dataset.stp===name));
-  if(name==='conta'){try{wfaRotinasRender();}catch(e){}}
+  if(name==='automacoes'||name==='conta'){try{wfaRotinasRender();}catch(e){}}
+  if(name==='clientes')setClientesResumo();
+}
+function setClientesResumo(){
+  const el=document.getElementById('set-cli-kpis');if(!el)return;
+  const lista=(typeof CLIENTES!=='undefined'&&Array.isArray(CLIENTES))?CLIENTES:[];
+  const alerta=lista.filter(c=>c.status==='r').length;
+  const cap=lista.filter(c=>Number(c.cap)>0).length;
+  el.innerHTML=`<div><span>Clientes na carteira</span><b>${lista.length}</b></div><div><span>Com captação no contrato</span><b>${cap}</b></div><div><span>Em alerta</span><b>${alerta}</b></div>`;
 }
 function openSettings(){
   const dl=document.getElementById('set-people');
@@ -5144,7 +5159,8 @@ function openSettings(){
   const nmEl=document.getElementById('set-me-nm');if(nmEl)nmEl.textContent=m&&m.full_name?m.full_name:'Sem nome definido';
   const meta=document.getElementById('set-me-meta');if(meta)meta.textContent=(m?(ROLE_LABEL[m.role]||m.role||'Membro'):'—')+(m&&m.email?' · '+m.email:'');
   const pr=document.getElementById('pref-regua');if(pr)pr.checked=localStorage.getItem('wfa-show-regua')==='1';
-  setTab('perfil');
+  document.querySelectorAll('#modal-settings [data-st-gestao]').forEach(b=>{b.style.display=setGestao()?'':'none';});
+  setTab(setGestao()?'marca':'conta');
   eqLigarEventos();EQ_MATRIZ_SUJA=false;EQ_ABERTO=null;EQ_CONVITE_ABERTO=false;
   renderSettingsTeam();
   document.getElementById('modal-settings').classList.add('open');
