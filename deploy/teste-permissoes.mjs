@@ -31,7 +31,8 @@ ok(contagem.every((n) => n === 1), 'cada aba do menu pertence a uma área só');
 // 2. Sem matriz, o acesso é o de antes.
 for (const [papel, lista] of Object.entries(ANTES)) {
   const nav = navEfetivo({ role: papel }, null);
-  const igual = NAV_CHAVES.every((k) => nav[k] === lista.includes(k));
+  // Modo Criador (26/09) é aba nova: segue quem já via a Lista de Clientes.
+  const igual = NAV_CHAVES.every((k) => nav[k] === lista.includes(k === 'criador' ? 'lista-clientes' : k));
   ok(igual, `sem matriz, ${papel} vê as mesmas abas de antes`);
 }
 const gestor = navEfetivo({ role: 'gestor' }, null);
@@ -103,7 +104,7 @@ ok(!podeVerBloco({ role: 'operacao' }, false, 'wfa-extratos', null) && podeVerBl
 // 9. Papéis conhecidos e cópia do navegador idêntica.
 ok(PAPEIS.map((p) => p.v).join() === 'admin,gestor,financeiro,operacao,comercial,marketing,viewer', 'sete papéis do original');
 const a = readFileSync(new URL('../src/lib/permissoes.js', import.meta.url), 'utf8');
-const b = readFileSync(new URL('../public/workflowark-permissoes-20260924a.js', import.meta.url), 'utf8');
+const b = readFileSync(new URL('../public/workflowark-permissoes-20260926a.js', import.meta.url), 'utf8');
 ok(a === b, 'cópia do navegador idêntica à do servidor');
 
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');
