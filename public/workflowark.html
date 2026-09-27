@@ -1,4 +1,4 @@
-<!-- build 20260926a-financeiro-v3 -->
+<!-- build 20260926b-inicio-v3 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -684,7 +684,33 @@ function wfaSetTheme(t){
              (operação em dia, áreas, tarefas, agenda, JARVIS). No celular empilha, fila primeiro. -->
         <div id="mdapp">
           <div id="mdapp-main">
-            <div id="md-decisoes"><div class="dec-card skeleton" style="height:72px"></div><div class="dec-card skeleton" style="height:72px;opacity:.7;animation-delay:.2s"></div><div class="dec-card skeleton" style="height:56px;opacity:.45;animation-delay:.4s"></div></div>
+            <style>
+              #ini-passos{margin-bottom:16px}
+              .ini-cartao{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px 22px}
+              .ini-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+              .ini-cab h3{font-size:16px;font-weight:800;color:var(--ink);margin:0}.ini-cab p{font-size:12.5px;color:var(--mute);margin:4px 0 0}
+              .ini-link{background:none;border:none;color:var(--ink);font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit;padding:4px 0;white-space:nowrap}
+              .ini-prog{height:5px;border-radius:999px;background:var(--line);overflow:hidden;margin:4px 0 12px}.ini-prog i{display:block;height:100%;background:var(--yel)}
+              .ini-passos{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+              .ini-passo{position:relative;text-align:left;background:none;border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:4px;min-width:0;color:var(--ink)}
+              .ini-passo:hover{border-color:var(--ink)}.ini-passo:focus-visible,.ini-link:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
+              .ini-ic{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--mute);margin-bottom:8px}
+              .ini-passo.ok .ini-ic{background:var(--green);border-color:var(--green);color:#fff}
+              .ini-passo b{font-size:13.5px;font-weight:800}.ini-passo.ok b{text-decoration:line-through;color:var(--mute)}
+              .ini-d{font-size:11.5px;color:var(--mute);line-height:1.4}
+              .ini-feito{position:absolute;top:14px;right:14px;font-size:11px;font-weight:700;color:var(--green)}.ini-seta{position:absolute;top:12px;right:14px;color:var(--mute);font-size:16px}
+              .ini-grade{display:block}.ini-grade.com-mes{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+              .ini-mes .ini-linha{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:13px 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--mute)}
+              .ini-mes .ini-linha:first-of-type{border-top:none}.ini-mes .ini-linha b{font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+              .ini-neg{color:var(--red)!important}.ini-nota{font-size:11.5px;color:var(--mute);margin:6px 0 0}
+              #md-decisoes .dec-n{font-style:normal;font-size:11px;font-weight:800;background:var(--yel);color:#141414;border-radius:999px;padding:1px 8px;margin-left:8px;vertical-align:2px}
+              @media (max-width:1100px){.ini-passos{grid-template-columns:repeat(3,minmax(0,1fr))}.ini-grade.com-mes{grid-template-columns:minmax(0,1fr)}}
+              @media (max-width:640px){.ini-passos{grid-template-columns:minmax(0,1fr)}.ini-cartao{padding:16px}.ini-passo{padding:12px 12px 12px 58px;min-height:0}.ini-ic{position:absolute;left:12px;top:12px;margin:0}}
+            </style>
+            <div id="ini-passos" style="display:none"></div>
+            <div id="ini-grade" class="ini-grade"><div class="ini-fila">
+              <div id="md-decisoes"><div class="dec-card skeleton" style="height:72px"></div><div class="dec-card skeleton" style="height:72px;opacity:.7;animation-delay:.2s"></div><div class="dec-card skeleton" style="height:56px;opacity:.45;animation-delay:.4s"></div></div>
+            </div><aside id="ini-mes" style="display:none"></aside></div>
             <div id="md-aprovacao" style="margin-bottom:16px;display:none"></div>
             <div id="md-council-bar" style="display:none;margin-bottom:16px">
               <button id="md-council-hd" onclick="mdToggleCouncil()" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 14px;cursor:pointer;font-family:inherit">
@@ -4546,7 +4572,8 @@ function wfaSetTheme(t){
 <script src="workflowark-app-20260926a.js"></script>
 <script type="module">import * as P from "./workflowark-permissoes-20260924a.js";window.WFA_PERM=P;try{applyAccess();}catch(e){}</script>
 <script src="workflowark-finpainel-20260926a.js"></script>
-<script type="module">import * as F from "./workflowark-financeiro-20260926a.js";window.WFA_FIN=F;try{fxRender();}catch(e){}</script>
+<script src="workflowark-inicio-20260926a.js"></script>
+<script type="module">import * as F from "./workflowark-financeiro-20260926a.js";window.WFA_FIN=F;try{fxRender();}catch(e){}try{iniRender();}catch(e){}</script>
 <script src="workflowark-cliente-20260922d.js" defer></script>
 </body>
 </html>
