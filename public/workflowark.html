@@ -1,4 +1,4 @@
-<!-- build 20260926b-inicio-v3 -->
+<!-- build 20260926c-config-v3 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -4373,7 +4373,7 @@ function wfaSetTheme(t){
 
 <!-- =================== CONFIGURAÇÕES =================== -->
 <div class="modal-bg" id="modal-settings">
-  <div class="modal" style="max-width:660px">
+  <div class="modal" style="max-width:1120px">
     <style>
       .set-tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 0 16px;flex-wrap:wrap}
       .set-tab{background:none;border:none;padding:8px 13px;font-size:12.5px;font-weight:600;color:var(--mute);cursor:pointer;border-bottom:2px solid transparent;border-radius:0;font-family:var(--sans)}
@@ -4391,49 +4391,120 @@ function wfaSetTheme(t){
       .set-acc-grid label{font-size:11px;color:var(--txt);display:flex;align-items:center;gap:5px;cursor:pointer}
       .set-merow{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:14px}
       .set-meta-line{font-size:11px;color:var(--mute);font-family:var(--mono);margin-top:4px}
+      .set-nav{flex-direction:column;border-bottom:none;margin:0;gap:2px;flex-wrap:nowrap}
+      #modal-settings .modal-body{display:grid;grid-template-columns:230px minmax(0,1fr);gap:22px;align-items:start}
+      .set-nav .set-tab{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:9px 12px;border-radius:10px;border-bottom:none;border-left:3px solid transparent}
+      .set-nav .set-tab b{font-size:13px;color:var(--ink);font-weight:700}.set-nav .set-tab span{font-size:11px;color:var(--mute);font-weight:500;line-height:1.35}
+      .set-nav .set-tab.active{background:color-mix(in srgb,var(--yel) 14%,transparent);border-left-color:var(--yel)}
+      .set-nav .set-tab:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
+      .set-conteudo{min-width:0}
+      .set-cab{margin:2px 0 14px}.set-cab h4{font-size:19px;font-weight:800;color:var(--ink);margin:0}.set-cab p{font-size:12.5px;color:var(--mute);margin:3px 0 0}
+      .set-cards{display:grid;gap:10px;margin-bottom:14px}
+      .set-card{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--line);border-radius:14px;padding:13px 15px;background:var(--surface)}
+      .set-card b{display:block;font-size:13.5px;color:var(--ink)}.set-card span{font-size:12px;color:var(--mute)}
+      .set-card-caixa{border:1px solid var(--line);border-radius:14px;padding:15px 16px;background:var(--surface);margin-bottom:14px}
+      .set-em-prep{font-size:12px;color:var(--yel-d)}
+      .set-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+      .set-kpis div{border:1px solid var(--line);border-radius:14px;padding:13px 15px;background:var(--surface)}.set-kpis span{display:block;font-size:12px;color:var(--mute)}.set-kpis b{font-size:22px;color:var(--ink)}
+      @media (max-width:760px){
+        #modal-settings .modal-body{grid-template-columns:minmax(0,1fr);gap:12px}
+        .set-nav{flex-direction:row;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);padding-bottom:6px}
+        .set-nav::-webkit-scrollbar{display:none}
+        .set-nav .set-tab{flex:none;border-left:none;border-bottom:2px solid transparent;border-radius:8px}.set-nav .set-tab span{display:none}
+        .set-nav .set-tab.active{border-bottom-color:var(--yel)}
+        .set-card{flex-direction:column;align-items:flex-start}.set-kpis{grid-template-columns:minmax(0,1fr)}
+      }
     </style>
     <div class="modal-head">
       <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>Configurações</h3>
       <span class="x" onclick="closeModal('modal-settings')">✕</span>
     </div>
     <div class="modal-body">
-      <div class="set-tabs">
-        <button class="set-tab active" data-st="perfil" onclick="setTab('perfil')">Perfil</button>
-        <button class="set-tab" data-st="equipe" id="set-tab-equipe" onclick="setTab('equipe')" style="display:none">Equipe &amp; Acessos</button>
-        <button class="set-tab" data-st="conta" onclick="setTab('conta')">Conta</button>
-        <button class="set-tab" data-st="sistema" onclick="setTab('sistema')">Sistema</button>
-      </div>
+      <nav class="set-tabs set-nav" aria-label="Seções das configurações">
+        <button class="set-tab" data-st="marca" data-st-gestao onclick="setTab('marca')"><b>Marca</b><span>Logo, cor e nome do sistema.</span></button>
+        <button class="set-tab" data-st="equipe" id="set-tab-equipe" onclick="setTab('equipe')" style="display:none"><b>Equipe e papéis</b><span>Quem entra e o que cada papel pode fazer.</span></button>
+        <button class="set-tab" data-st="clientes" data-st-gestao onclick="setTab('clientes')"><b>Clientes</b><span>A carteira da agência.</span></button>
+        <button class="set-tab" data-st="integracoes" data-st-gestao onclick="setTab('integracoes')"><b>Integrações</b><span>Os canais que a agência já usa.</span></button>
+        <button class="set-tab" data-st="planos" data-st-gestao onclick="setTab('planos')"><b>Planos e contratos</b><span>Modelos de contrato e propostas.</span></button>
+        <button class="set-tab" data-st="automacoes" data-st-gestao onclick="setTab('automacoes')"><b>Automações</b><span>Rotinas e agentes, sempre com aprovação.</span></button>
+        <button class="set-tab" data-st="assinatura" data-st-gestao onclick="setTab('assinatura')"><b>Assinatura eletrônica</b><span>Contrato assinado por link.</span></button>
+        <button class="set-tab" data-st="cobranca" data-st-gestao onclick="setTab('cobranca')"><b>Plano e cobrança</b><span>Plano do sistema.</span></button>
+        <button class="set-tab active" data-st="conta" onclick="setTab('conta')"><b>Conta</b><span>Seus dados e a sua sessão.</span></button>
+      </nav>
+      <div class="set-conteudo">
 
-      <!-- PERFIL -->
-      <div class="set-pane active" data-stp="perfil">
-        <div class="set-merow">
-          <div id="set-me-nm" style="font-size:14px;font-weight:700;color:var(--ink)">—</div>
-          <div class="set-meta-line" id="set-me-meta">—</div>
+      <!-- MARCA -->
+      <div class="set-pane" data-stp="marca">
+        <div class="set-cab"><h4>Marca</h4><p>Logo, cor e nome do sistema. Base para vender o WorkFlowArk com a marca de outra agência.</p></div>
+        <div class="set-card-caixa">
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
+          <div><label class="form-label">Nome do produto</label><input id="brand-name" class="form-input" placeholder="WorkFlowArk"></div>
+          <div><label class="form-label">Cor de destaque</label><input id="brand-color" type="color" value="#FFC700" style="width:52px;height:38px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff;cursor:pointer"></div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Seu nome de exibição</label>
-          <div style="display:flex;gap:8px">
-            <input class="form-input" id="set-myname" list="set-people" placeholder="Ex: Gabriel Andrade" style="flex:1">
-            <button class="tb-btn" onclick="salvarMeuNome()">Salvar nome</button>
-          </div>
-          <datalist id="set-people"></datalist>
-          <p class="muted" style="font-size:10.5px;margin-top:6px">Use o mesmo nome que aparece nas tarefas (campo "responsável") para o "Meu Dia" reconhecer as suas atividades.</p>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
+          <div><label class="form-label">Logo (endereço da imagem)</label><input id="brand-logo" class="form-input" placeholder="https://.../logo.png" oninput="brandLogoPreview()"></div>
+          <div><label class="form-label">Prévia</label><div id="brand-logo-prev" style="width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--surface)"><img src="/ark-mark.png" alt="" style="max-width:100%;max-height:100%;object-fit:contain"></div></div>
         </div>
-      </div>
+        <p class="muted" style="font-size:10.5px;margin-bottom:9px">O logo troca na barra lateral e na tela de entrada. Use PNG ou SVG com fundo transparente.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+          <button class="tb-btn" onclick="saveBrand()">Aplicar marca</button>
+          <button class="icobtn" onclick="resetBrand()">Restaurar ARK</button>
+        </div>
 
-
-      <!-- SISTEMA (blocos aprovados em 21/09, vindos da base v2) -->
-      <div class="set-pane" data-stp="sistema">
-        <div class="set-sect-t" style="margin-bottom:10px">Sistema</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px">
-          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('integracoes')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Marca</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Logo, cores e link público do cliente</div></button>
-          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="setTab('equipe')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Equipe e papéis</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Quem vê o quê. Financeiro restrito.</div></button>
-          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('integracoes')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Integrações</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Google Agenda, Drive, Instagram, WhatsApp, Meta Ads</div></button>
-          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('contratos')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Planos e contratos</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Modelos de contrato e propostas</div></button>
-          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="openSettingsIr('rotinas')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Automações</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Rotinas e agentes, sempre com aprovação</div></button>
-          <button type="button" class="set-merow" style="text-align:left;cursor:pointer;margin:0;font-family:inherit" onclick="toast('Assinatura eletrônica: em preparação')"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Assinatura eletrônica</div><div class="set-meta-line" style="font-family:inherit;font-size:11.5px">Enviar contrato para assinar (em preparação)</div></button>
         </div>
       </div>
+      <!-- CLIENTES -->
+      <div class="set-pane" data-stp="clientes">
+        <div class="set-cab"><h4>Clientes</h4><p>A carteira que a agência atende.</p></div>
+        <div class="set-kpis" id="set-cli-kpis"></div>
+        <div class="set-cards">
+          <div class="set-card"><div><b>Lista de clientes</b><span>Cadastro, contrato, contato e status de cada cliente.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('lista-clientes')">Abrir lista</button></div>
+          <div class="set-card"><div><b>Gestão de clientes</b><span>Jornada, régua e o dia a dia por cliente.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('jornada')">Abrir gestão</button></div>
+        </div>
+      </div>
+      <!-- INTEGRAÇÕES -->
+      <div class="set-pane" data-stp="integracoes">
+        <div class="set-cab"><h4>Integrações</h4><p>Conecte os canais que a agência já usa.</p></div>
+        <div class="set-cards">
+          <div class="set-card"><div><b>Google Agenda</b><span>Reuniões e captações da equipe na agenda.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('integracoes')">Configurar</button></div>
+          <div class="set-card"><div><b>Google Drive</b><span>Pastas de cada cliente e entregas.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('integracoes')">Configurar</button></div>
+          <div class="set-card"><div><b>Instagram</b><span>Perfil, posts e prévia do feed do cliente.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('integracoes')">Configurar</button></div>
+          <div class="set-card"><div><b>WhatsApp</b><span>Conversas com clientes dentro do sistema.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('integracoes')">Configurar</button></div>
+          <div class="set-card"><div><b>Meta Ads</b><span>Campanhas e resultados de tráfego.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('integracoes')">Configurar</button></div>
+        </div>
+      </div>
+      <!-- PLANOS E CONTRATOS -->
+      <div class="set-pane" data-stp="planos">
+        <div class="set-cab"><h4>Planos e contratos</h4><p>Os pacotes que você vende e os modelos de contrato.</p></div>
+        <div class="set-cards">
+          <div class="set-card"><div><b>Contratos</b><span>Modelos e contratos gerados para cada cliente.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('contratos')">Abrir contratos</button></div>
+          <div class="set-card"><div><b>Propostas</b><span>Propostas comerciais prontas para enviar.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('propostas')">Abrir propostas</button></div>
+          <div class="set-card"><div><b>Comercial</b><span>Pacotes, preços e o funil de vendas.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('comercial')">Abrir comercial</button></div>
+        </div>
+      </div>
+      <!-- AUTOMAÇÕES -->
+      <div class="set-pane" data-stp="automacoes">
+        <div class="set-cab"><h4>Automações</h4><p>Regras que preparam o trabalho para você aprovar. Nada sai sozinho.</p></div>
+        <div class="set-cards">
+          <div class="set-card"><div><b>Central de Agentes</b><span>Os agentes de IA e o que cada um prepara.</span></div><button class="tb-btn" type="button" onclick="openSettingsIr('agentes')">Abrir agentes</button></div>
+        </div>
+        <div class="set-card-caixa">
+        <div class="set-sect-t" style="margin-bottom:9px">Rotinas</div>
+        <div id="set-rotinas" style="margin-bottom:18px"></div>
+
+        </div>
+      </div>
+      <!-- ASSINATURA ELETRÔNICA -->
+      <div class="set-pane" data-stp="assinatura">
+        <div class="set-cab"><h4>Assinatura eletrônica</h4><p>Contrato enviado por link e assinado com comprovante.</p></div>
+        <div class="set-card-caixa"><b class="set-em-prep">Em preparação</b><p class="muted" style="font-size:12.5px;margin:6px 0 0">A assinatura por link já funciona na versão para agências. Aqui ela entra depois de testada lá. Por enquanto, os contratos continuam em Contratos.</p><div style="margin-top:12px"><button class="tb-btn" type="button" onclick="openSettingsIr('contratos')">Abrir contratos</button></div></div>
+      </div>
+      <!-- PLANO E COBRANÇA -->
+      <div class="set-pane" data-stp="cobranca">
+        <div class="set-cab"><h4>Plano e cobrança</h4><p>O plano do sistema.</p></div>
+        <div class="set-card-caixa"><b>Instância da ARK Content</b><p class="muted" style="font-size:12.5px;margin:6px 0 0">Período de teste e assinatura do sistema existem só na versão para agências. Esta instância é a da própria ARK.</p></div>
+      </div>
+
       <!-- EQUIPE E PAPÉIS (admin, 24/09/2026: layout da V3) -->
       <div class="set-pane" data-stp="equipe">
         <style>
@@ -4514,6 +4585,20 @@ function wfaSetTheme(t){
 
       <!-- CONTA -->
       <div class="set-pane" data-stp="conta">
+        <div class="set-cab"><h4>Conta</h4><p>Seus dados de acesso e a sua sessão.</p></div>
+        <div class="set-merow">
+          <div id="set-me-nm" style="font-size:14px;font-weight:700;color:var(--ink)">—</div>
+          <div class="set-meta-line" id="set-me-meta">—</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Seu nome de exibição</label>
+          <div style="display:flex;gap:8px">
+            <input class="form-input" id="set-myname" list="set-people" placeholder="Ex: Gabriel Andrade" style="flex:1">
+            <button class="tb-btn" onclick="salvarMeuNome()">Salvar nome</button>
+          </div>
+          <datalist id="set-people"></datalist>
+          <p class="muted" style="font-size:10.5px;margin-top:6px">Use o mesmo nome que aparece nas tarefas (campo "responsável") para o "Meu Dia" reconhecer as suas atividades.</p>
+        </div>
         <div class="set-sect-t" style="margin-bottom:9px">Sincronização &amp; sessão</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
           <button class="icobtn" onclick="try{sincronizarAgora()}catch(e){}">↻ Sincronizar agora</button>
@@ -4529,30 +4614,11 @@ function wfaSetTheme(t){
           <button class="tb-btn" onclick="importarDados()">⬆ Importar dados</button>
         </div>
 
-        <div class="set-sect-t" style="margin-bottom:9px">Rotinas de uma vez só</div>
-        <div id="set-rotinas" style="margin-bottom:18px"></div>
-
         <div class="set-sect-t" style="margin-bottom:9px">JARVIS</div>
         <p class="muted" style="font-size:10.5px;margin-bottom:9px">Abra o JARVIS batendo <b>2 palmas</b> (usa o microfone; você autoriza uma vez). Toca um som de inicialização ao abrir.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
           <button class="tb-btn" id="clap-btn" onclick="arkClapToggle()">Ativar abrir por 2 palmas</button>
           <button class="icobtn" onclick="jarvisBootSound()">▶ Ouvir o som</button>
-        </div>
-
-        <div class="set-sect-t" style="margin-bottom:9px">Marca (White Label)</div>
-        <p class="muted" style="font-size:10.5px;margin-bottom:9px">Personalize o nome e a cor do sistema. Base para vender o WorkFlowArk como produto de outras agências.</p>
-        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
-          <div><label class="form-label">Nome do produto</label><input id="brand-name" class="form-input" placeholder="WorkFlowArk"></div>
-          <div><label class="form-label">Cor de destaque</label><input id="brand-color" type="color" value="#FFC700" style="width:52px;height:38px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff;cursor:pointer"></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
-          <div><label class="form-label">Logo (endereço da imagem)</label><input id="brand-logo" class="form-input" placeholder="https://.../logo.png" oninput="brandLogoPreview()"></div>
-          <div><label class="form-label">Prévia</label><div id="brand-logo-prev" style="width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--surface)"><img src="/ark-mark.png" alt="" style="max-width:100%;max-height:100%;object-fit:contain"></div></div>
-        </div>
-        <p class="muted" style="font-size:10.5px;margin-bottom:9px">O logo troca na barra lateral e na tela de entrada. Use PNG ou SVG com fundo transparente.</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
-          <button class="tb-btn" onclick="saveBrand()">Aplicar marca</button>
-          <button class="icobtn" onclick="resetBrand()">Restaurar ARK</button>
         </div>
 
         <div class="set-sect-t" style="margin-bottom:9px">Dados de demonstração</div>
@@ -4561,6 +4627,7 @@ function wfaSetTheme(t){
           <button class="icobtn" style="color:var(--red)" onclick="removerExemplos()">Remover exemplos</button>
         </div>
         <div class="set-meta-line">WorkFlowArk · ARK Content · v3</div>
+      </div>
       </div>
     </div>
     <div class="modal-foot"><button class="icobtn" onclick="closeModal('modal-settings')">Fechar</button></div>
