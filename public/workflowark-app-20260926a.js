@@ -9168,8 +9168,8 @@ function finPagAceId(nome){const n=normName(nome);return n?('fin-'+n.replace(/\s
 function finRecCobrado(nome,mes){const id=finRecCobId(nome);const mk=mes||cobMesKey();if(!id||!state.cobranca||!state.cobranca[id])return false;const d=state.cobranca[id];return d.cobradoMes===mk||!!(d.cobradoMeses&&d.cobradoMeses[mk]);}
 function finPagPago(nome,mes){const id=finPagAceId(nome);const mk=mes||cobMesKey();if(!id||!state.acerto||!state.acerto[id])return false;const d=state.acerto[id];return d.pagoMes===mk||!!(d.pagoMeses&&d.pagoMeses[mk]);}
 function finEnsurePagItem(x){if(!state.acerto)state.acerto={};const id=finPagAceId(x.nome);if(!id)return;const prev=state.acerto[id]||{};state.acerto[id]=Object.assign({custom:true,fixo:true,cat:acertoClassify(x.nome),pix:'',obs:'',pagoMes:''},prev,{nome:x.nome,valor:String(x.valor||''),dia:prev.dia||'10'});}
-function planToggleCob(i){const m=planActive();const x=m.receitas[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao cliente primeiro');return;}const planMes=m.mk||cobMesKey();const id=finRecCobId(x.nome);const on=!finRecCobrado(x.nome,planMes);if(!state.cobranca[id]||!state.cobranca[id]._plan){const n=normName(x.nome);if(!CLIENTES.find(c=>normName(c.nm)===n)){state.cobranca[id]=Object.assign({resp:'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},state.cobranca[id]||{},{_plan:true,_nome:x.nome,_valor:Number(x.valor)||0});}}if(typeof cobToggle==='function')cobToggle(id,on,planMes);renderPlanilha();}
-function planTogglePag(i){const m=planActive();const x=m.pagar[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao pagamento primeiro');return;}const planMes=m.mk||cobMesKey();finEnsurePagItem(x);const id=finPagAceId(x.nome);const on=!finPagPago(x.nome,planMes);if(typeof acertoToggle==='function')acertoToggle(id,on,planMes);renderPlanilha();}
+function planToggleCob(i,mesId){planEnsure();const m=(mesId&&state.planilha.meses.find(x=>x.id===mesId))||planActive();const x=m.receitas[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao cliente primeiro');return;}const planMes=m.mk||cobMesKey();const id=finRecCobId(x.nome);const on=!finRecCobrado(x.nome,planMes);if(!state.cobranca[id]||!state.cobranca[id]._plan){const n=normName(x.nome);if(!CLIENTES.find(c=>normName(c.nm)===n)){state.cobranca[id]=Object.assign({resp:'',whatsapp:'',pix:'',cobradoMes:'',feitas:0},state.cobranca[id]||{},{_plan:true,_nome:x.nome,_valor:Number(x.valor)||0});}}if(typeof cobToggle==='function')cobToggle(id,on,planMes);renderPlanilha();}
+function planTogglePag(i,mesId){planEnsure();const m=(mesId&&state.planilha.meses.find(x=>x.id===mesId))||planActive();const x=m.pagar[i];if(!x||!(x.nome||'').trim()){toast('Dê um nome ao pagamento primeiro');return;}const planMes=m.mk||cobMesKey();finEnsurePagItem(x);const id=finPagAceId(x.nome);const on=!finPagPago(x.nome,planMes);if(typeof acertoToggle==='function')acertoToggle(id,on,planMes);renderPlanilha();}
 // Replica a planilha do mês ativo para Cobranças e Acerto (aditivo)
 // O financeiro ao vivo (Cobranças/Acerto) espelha SÓ o mês corrente da planilha.
 // Antes, clicar/editar uma aba de mês antigo sobrescrevia a cobrança e o acerto do
@@ -9273,6 +9273,7 @@ function renderPlanilha(){
       </div>
     </div>
     <div id="plan-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px">${planSummaryHTML(m)}</div>`);
+  if(typeof fxRender==='function')fxRender();
 }
 function planRefreshSummary(){
   const m=planActive();const s=planSums(m);
@@ -9280,6 +9281,7 @@ function planRefreshSummary(){
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   set('plan-rectot',planFmt(s.tRec));set('plan-custot',planFmt(s.tCusto));set('plan-pagtot',planFmt(s.tPag));
   const sum=document.getElementById('plan-summary');if(sum)sum.innerHTML=planSummaryHTML(m);
+  if(typeof fxRender==='function')fxRender();
 }
 function planLiveRec(i,f,v){const m=planActive();if(!m.receitas[i])return;m.receitas[i][f]=(f==='nome')?String(v||''):(planNum(v)||0);planSaveSoon();planRefreshSummary();}
 function planLivePag(i,f,v){const m=planActive();if(!m.pagar[i])return;m.pagar[i][f]=(f==='nome')?String(v||''):(planNum(v)||0);planSaveSoon();planRefreshSummary();}

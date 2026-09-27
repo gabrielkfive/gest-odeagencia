@@ -1,4 +1,4 @@
-<!-- build 20260924a-equipe-papeis -->
+<!-- build 20260926a-financeiro-v3 -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -3016,8 +3016,89 @@ function wfaSetTheme(t){
 
       <!-- =================== FINANCEIRO (Sheets embed) =================== -->
       <div class="page" id="page-financeiro">
-        <div class="page-head">
-          <div class="page-title"><h1>Financeiro</h1><p id="fin-sub">Visão do mês · puxado direto da sua planilha do Google · você mexe só na planilha e aqui reflete.</p></div>
+        <style>
+          .fx-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+          .fx-cab h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0;color:var(--ink)}.fx-cab p{font-size:13.5px;color:var(--mute);margin:4px 0 0}
+          .fx-mesnav{display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:12px;padding:4px;background:var(--surface)}
+          .fx-mesnav button{background:none;border:none;color:var(--mute);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px}
+          .fx-mesnav button:hover{background:var(--line);color:var(--ink)}
+          .fx-mesnav span{min-width:150px;text-align:center;font-weight:700;font-size:13.5px;color:var(--ink)}
+          .fx-abas{display:flex;gap:2px;border:1px solid var(--line);border-radius:12px;padding:4px;background:var(--surface);margin-bottom:18px;overflow-x:auto;max-width:100%;width:max-content;scrollbar-width:none}
+          .fx-abas::-webkit-scrollbar{display:none}
+          .fx-abas button{background:none;border:none;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;color:var(--mute);cursor:pointer;white-space:nowrap;font-family:inherit}
+          .fx-abas button:hover{color:var(--ink)}.fx-abas button.ativo{background:var(--ink);color:var(--bg)}
+          .fx-abas button:focus-visible,.fx-btn:focus-visible,.fx-mesnav button:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
+          .fx-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}
+          .fx-kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;min-width:0}
+          .fx-kpi-t{font-size:12.5px;color:var(--mute);font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+          .fx-kpi-v{font-size:25px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin:8px 0 6px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+          .fx-kpi-p{font-size:11.5px;color:var(--mute)}
+          .fx-pos{color:var(--green)!important}.fx-neg{color:var(--red)!important}.fx-mute{color:var(--mute)!important}
+          .fx-alerta{font-size:10.5px;font-weight:700;color:#b36200;background:color-mix(in srgb,#f59e0b 18%,transparent);border-radius:999px;padding:2px 8px}
+          .fx-var{font-weight:700;font-size:11.5px;margin-right:4px}.fx-var.bom{color:var(--green)}.fx-var.ruim{color:var(--red)}
+          .fx-link{color:var(--ink);text-decoration:underline}
+          .fx-grade2{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+          .fx-cartao{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;min-width:0}
+          .fx-cartao-cab{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+          .fx-cartao-cab h3{font-size:15px;font-weight:800;color:var(--ink);margin:0}.fx-cartao-cab p{font-size:12px;color:var(--mute);margin:3px 0 0}
+          .fx-dir{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}.fx-dir b{font-size:19px;color:var(--ink)}.fx-grande{font-size:26px!important}
+          .fx-leg{display:flex;gap:12px;font-size:12px;color:var(--mute);white-space:nowrap}.fx-leg i,.fx-leg-lista i,.fx-par i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+          i.rec{background:var(--yel)}i.desp{background:color-mix(in srgb,var(--mute) 55%,transparent)}i.ab{background:color-mix(in srgb,var(--mute) 35%,transparent)}i.neg{background:var(--red)}
+          .fx-trio{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:8px}.fx-trio span{display:block;font-size:12px;color:var(--mute)}.fx-trio b{font-size:19px;color:var(--ink);font-variant-numeric:tabular-nums}
+          .fx-g{width:100%;height:auto;display:block}
+          .fx-g-grade{stroke:var(--line);stroke-width:1}.fx-g-eixo{fill:var(--mute);font-size:11px;font-family:var(--sans,inherit)}.fx-g-eixo.sel{fill:var(--ink);font-weight:700}
+          .fx-g-barra{fill:color-mix(in srgb,var(--mute) 40%,transparent)}.fx-g-barra.sel{fill:color-mix(in srgb,var(--mute) 70%,transparent)}
+          .fx-g-linha{fill:none;stroke:var(--yel);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+          .fx-g-area{fill:color-mix(in srgb,var(--yel) 16%,transparent)}
+          .fx-g-ponto{fill:var(--yel)}.fx-g-ponto.sel{fill:var(--surface);stroke:var(--yel);stroke-width:3}
+          .fx-rosca-caixa{display:flex;justify-content:center;margin:6px 0 12px}.fx-rosca{width:170px;height:170px}
+          .fx-rosca-fundo{fill:none;stroke:var(--line);stroke-width:14}.fx-rosca-val{fill:none;stroke:var(--yel);stroke-width:14;stroke-linecap:round}
+          .fx-rosca-n{fill:var(--ink);font-size:22px;font-weight:800}.fx-rosca-s{fill:var(--mute);font-size:11px}
+          .fx-leg-lista>div,.fx-par>div{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px;color:var(--ink)}
+          .fx-par{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}.fx-par>div{flex-direction:column;align-items:flex-start;gap:4px}.fx-par span{font-size:12px;color:var(--mute)}.fx-par b{font-size:20px;color:var(--ink)}
+          .fx-barra{height:8px;border-radius:999px;background:color-mix(in srgb,var(--red) 55%,transparent);overflow:hidden;margin:14px 0}.fx-barra i{display:block;height:100%;background:var(--green)}
+          .fx-saldo{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:12px;font-size:13px;color:var(--mute)}.fx-saldo b{font-size:18px}
+          .fx-nota{font-size:12px;color:var(--mute);margin:8px 0 12px;line-height:1.5}
+          .fx-vazio{font-size:12.5px;color:var(--mute);padding:14px 0;text-align:center}
+          .fx-res3{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:16px}
+          .fx-res3.fx-res2{grid-template-columns:repeat(2,minmax(0,1fr))}
+          .fx-res3>div:not(.fx-res3-barra){padding:16px 20px;border-left:1px solid var(--line)}.fx-res3>div:first-child{border-left:none}
+          .fx-res3 span{display:block;font-size:12.5px;color:var(--mute)}.fx-res3 b{display:block;font-size:24px;font-weight:800;color:var(--ink);margin:6px 0 4px;font-variant-numeric:tabular-nums}.fx-res3 em{font-style:normal;font-size:11.5px;color:var(--mute)}
+          .fx-res3-barra{grid-column:1/-1;height:3px;background:var(--line)}.fx-res3-barra i{display:block;height:100%;background:var(--green)}
+          .fx-sec-cab{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 12px;flex-wrap:wrap}.fx-sec-cab h3{font-size:16px;font-weight:800;color:var(--ink);margin:0}
+          .fx-tabela-caixa{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+          .fx-tabela{width:100%;border-collapse:collapse;font-size:13px;min-width:620px}
+          .fx-tabela th{font-size:11.5px;font-weight:600;color:var(--mute);text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+          .fx-tabela td{padding:12px 14px;border-top:1px solid var(--line);color:var(--ink);vertical-align:middle}
+          .fx-tabela tr:first-child td{border-top:none}.fx-tabela .n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+          .fx-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}.fx-chip i{width:6px;height:6px;border-radius:50%;background:currentColor}
+          .fx-chip.ok{color:var(--green);background:color-mix(in srgb,var(--green) 14%,transparent)}.fx-chip.aberto{color:var(--red);background:color-mix(in srgb,var(--red) 12%,transparent)}
+          .fx-btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:9px;padding:7px 12px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);white-space:nowrap}
+          .fx-btn.fantasma{border-color:transparent;background:none;color:var(--mute)}.fx-btn:hover{border-color:var(--ink)}
+          .fx-dre-sec td{font-size:10.5px!important;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)!important;padding-top:18px!important}
+          .fx-dre-tot td{font-weight:800}.fx-dre-res td{background:color-mix(in srgb,var(--green) 12%,transparent);font-weight:800}
+          .fx-dre-bar{min-width:200px}.fx-dre-bar span{display:inline-block;width:55%;height:5px;border-radius:999px;background:var(--line);vertical-align:middle;overflow:hidden}.fx-dre-bar span i{display:block;height:100%;background:var(--mute)}
+          .fx-dre-bar em{font-style:normal;font-size:11px;color:var(--mute);margin-left:8px}
+          @media (max-width:1180px){.fx-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+          @media (max-width:900px){.fx-grade2{grid-template-columns:minmax(0,1fr)}}
+          @media (max-width:640px){
+            .fx-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.fx-kpi{padding:13px 14px}.fx-kpi-v{font-size:20px}
+            .fx-cab h1{font-size:23px}.fx-mesnav{width:100%;justify-content:space-between}.fx-mesnav span{min-width:0}
+            .fx-res3,.fx-res3.fx-res2{grid-template-columns:minmax(0,1fr)}.fx-res3>div:not(.fx-res3-barra){border-left:none;border-top:1px solid var(--line)}.fx-res3>div:first-child{border-top:none}
+            .fx-cartao{padding:15px}.fx-trio{gap:16px}.fx-trio b{font-size:16px}.fx-cartao-cab{flex-wrap:wrap}
+          }
+        </style>
+        <div class="fx-cab">
+          <div><h1>Financeiro</h1><p id="fx-sub">Quanto entrou, quanto saiu e quanto sobrou.</p></div>
+          <div class="fx-mesnav" id="fx-mesnav" role="group" aria-label="Mês"><button type="button" data-fx-mes="-1" aria-label="Mês anterior">‹</button><span id="fx-meslbl"></span><button type="button" data-fx-mes="1" aria-label="Próximo mês">›</button></div>
+        </div>
+        <nav class="fx-abas" id="fx-abas" role="tablist" aria-label="Seções do financeiro">
+          <button type="button" role="tab" data-fx-aba="visao" class="ativo">Visão geral</button><button type="button" role="tab" data-fx-aba="receber">Recebimentos</button><button type="button" role="tab" data-fx-aba="pagar">Contas a pagar</button><button type="button" role="tab" data-fx-aba="inad">Inadimplência</button><button type="button" role="tab" data-fx-aba="dre">DRE</button><button type="button" role="tab" data-fx-aba="planilha">Planilha</button>
+        </nav>
+        <div id="fx-corpo"></div>
+        <div id="fx-planilha" style="display:none">
+        <div class="page-head" style="margin-bottom:10px">
+          <div class="page-title"><p id="fin-sub">A planilha do mês, com uma aba por mês. O resumo do Google fica logo abaixo.</p></div>
           <div style="display:flex;gap:6px;align-items:center">
             <button class="tb-btn" onclick="renderFin(true)">↻ Atualizar</button>
             <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOvW6PZJHWlv6jfIYt2bJ1aA0Tw6jzvJu-Uzjk6axIHtebnEDadNUojfdXOoLzjVUmzfexaPwionf/pubhtml" target="_blank" rel="noopener" class="tb-btn" style="text-decoration:none">↗ Abrir planilha</a>
@@ -3044,6 +3125,7 @@ function wfaSetTheme(t){
             </details>
           </div>
         </details>
+        </div>
       </div>
 
       <!-- =================== PROCESSOS POR ÁREA =================== -->
@@ -4461,8 +4543,10 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260924a.js"></script>
+<script src="workflowark-app-20260926a.js"></script>
 <script type="module">import * as P from "./workflowark-permissoes-20260924a.js";window.WFA_PERM=P;try{applyAccess();}catch(e){}</script>
+<script src="workflowark-finpainel-20260926a.js"></script>
+<script type="module">import * as F from "./workflowark-financeiro-20260926a.js";window.WFA_FIN=F;try{fxRender();}catch(e){}</script>
 <script src="workflowark-cliente-20260922d.js" defer></script>
 </body>
 </html>
