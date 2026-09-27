@@ -750,6 +750,7 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     if(p==='agentes'){try{agPolish();agLive();}catch(e){}}
     if(p==='jarvis'){try{jarvisPageEnter();}catch(e){} try{jvHudInit();}catch(e){console.warn('jvhud',e);}}
     if(p==='cliente'&&typeof cliAreaPopular==='function'){try{cliAreaPopular();}catch(e){}}
+    if(p==='criador'&&typeof criadorRender==='function'){try{criadorRender();}catch(e){console.warn('criador',e);}}
     /* Atividades: a altura das colunas (--wfa-colmax) é medida com getBoundingClientRect(), que
        dá tudo zero se a página ainda estiver display:none (ex.: ao abrir a aba pela 1ª vez, sem
        ter sido a página inicial). Sem isto a coluna nascia maior que a tela e a rolagem vazava
@@ -5040,7 +5041,7 @@ rebuildPeople();
 /* ============ CONTROLE DE ACESSO (RBAC) ============ */
 const NAV_CATALOG=[
   {k:'dashboard',l:'Meu Dia'},{k:'reunioes',l:'Reuniões · Agenda'},
-  {k:'lista-clientes',l:'Lista de Clientes'},{k:'jornada',l:'Jornada · Sprints'},{k:'regua',l:'Régua dos 15'},
+  {k:'lista-clientes',l:'Lista de Clientes'},{k:'criador',l:'Modo Criador'},{k:'jornada',l:'Jornada · Sprints'},{k:'regua',l:'Régua dos 15'},
   {k:'tarefas',l:'Tarefas'},{k:'demandas',l:'Demandas'},{k:'rotinas',l:'Rotinas'},
   {k:'okrs',l:'OKRs'},{k:'campanhas',l:'Campanhas'},{k:'financeiro',l:'Financeiro'},{k:'cobranca',l:'Cobranças'},{k:'acerto',l:'Acerto · Pagamentos'},{k:'agentes',l:'Central de Agentes'},{k:'conselho',l:'Conselho de IA'},{k:'planejamento',l:'Planejamento de Conteúdo'},{k:'legenda',l:'Legendas'},{k:'notificacoes',l:'Notificações'},{k:'cliente',l:'Área do Cliente'},{k:'roteirista',l:'Roteirista'},{k:'drive',l:'Drive'},{k:'comercial',l:'Comercial'},{k:'propostas',l:'Propostas'},{k:'contratos',l:'Contratos'},
   {k:'crm',l:'CRM · Pipeline'},
@@ -5052,14 +5053,14 @@ const _ALL_NAV=NAV_CATALOG.map(s=>s.k);
 const _BASE_NAV=['dashboard','reunioes','agenda','organograma','pops','processos','meumes'];
 const ROLE_ACCESS={
   admin:_ALL_NAV, gestor:_ALL_NAV,
-  comercial:_BASE_NAV.concat(['comercial','crm','lista-clientes','jornada','regua','tarefas']),
-  operacao:_BASE_NAV.concat(['tarefas','rotinas','demandas','lista-clientes','jornada','regua','campanhas','okrs']),
-  marketing:_BASE_NAV.concat(['tarefas','demandas','lista-clientes','campanhas']),
+  comercial:_BASE_NAV.concat(['comercial','crm','lista-clientes','criador','jornada','regua','tarefas']),
+  operacao:_BASE_NAV.concat(['tarefas','rotinas','demandas','lista-clientes','criador','jornada','regua','campanhas','okrs']),
+  marketing:_BASE_NAV.concat(['tarefas','demandas','lista-clientes','criador','campanhas']),
   financeiro:_BASE_NAV.concat(['financeiro','cobranca','campanhas']),
   viewer:_BASE_NAV,
   // Professores avaliadores: veem a vitrine completa do sistema, sem dados sensíveis
   // (financeiro, cobrança, pagamentos, WhatsApp e notificações ficam de fora).
-  avaliador:_BASE_NAV.concat(['lista-clientes','jornada','regua','tarefas','agentes','conselho','planejamento','legenda','cliente','roteirista','drive','crm','okrs','campanhas','tutorial','integracoes']),
+  avaliador:_BASE_NAV.concat(['lista-clientes','criador','jornada','regua','tarefas','agentes','conselho','planejamento','legenda','cliente','roteirista','drive','crm','okrs','campanhas','tutorial','integracoes']),
 };
 function roleAccessList(role){return ROLE_ACCESS[role]||ROLE_ACCESS.viewer;}
 function memberAccess(m){
@@ -11720,11 +11721,15 @@ async function cliMapInit(){
     box.innerHTML='<div style="display:grid;place-items:center;height:100%;color:var(--mute);font-size:12.5px">'+(err&&err.message||'Não deu pra carregar o mapa')+'</div>';
   }
 }
-document.addEventListener('click',function(e){
-  var nav=e.target.closest&&e.target.closest('[data-nav="lista-clientes"]');
-  if(nav)setTimeout(cliMapInit,350);
-},true);
-if(document.querySelector('#page-lista-clientes.active'))setTimeout(cliMapInit,900);
+/* Mapa dos clientes só abre no botão (pedido do Gabriel, 26/09/2026): o MapLibre só
+   carrega quando alguém quer ver o mapa, não a cada visita à Lista de Clientes. */
+function cliMapAbrir(){
+  var card=document.getElementById('climap-card'),b=document.getElementById('climap-abrir');if(!card)return;
+  var abrir=card.style.display==='none';
+  card.style.display=abrir?'':'none';
+  if(b)b.textContent=abrir?'Fechar mapa':'Ver mapa dos clientes';
+  if(abrir)setTimeout(cliMapInit,60);
+}
 
 /* AURA DARK: navbar de vidro some ao rolar pra baixo e volta ao subir (padrão aurasoftware.cloud) */
 (function(){

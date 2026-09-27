@@ -45,7 +45,7 @@ export const AREAS = [
   {
     k: "clientes",
     nome: "Clientes",
-    nav: ["lista-clientes", "jornada", "regua", "cliente", "marcas", "planejamentos"],
+    nav: ["lista-clientes", "criador", "jornada", "regua", "cliente", "marcas", "planejamentos"],
     blocos: [
       "wfa-regua",
       "wfa-jornada",
@@ -120,22 +120,22 @@ const SENSIVEIS = ["acerto", "notificacoes"];
 // Acesso de antes (ROLE_ACCESS do app até 22/09/2026).
 const PADRAO = {
   gestor: TUDO,
-  comercial: BASE.concat(["comercial", "crm", "lista-clientes", "jornada", "regua", "tarefas"]),
+  comercial: BASE.concat(["comercial", "crm", "lista-clientes", "criador", "jornada", "regua", "tarefas"]),
   operacao: BASE.concat([
     "tarefas",
     "rotinas",
     "demandas",
-    "lista-clientes",
+    "lista-clientes", "criador",
     "jornada",
     "regua",
     "campanhas",
     "okrs",
   ]),
-  marketing: BASE.concat(["tarefas", "demandas", "lista-clientes", "campanhas"]),
+  marketing: BASE.concat(["tarefas", "demandas", "lista-clientes", "criador", "campanhas"]),
   financeiro: BASE.concat(["financeiro", "cobranca", "campanhas"]),
   viewer: BASE,
   avaliador: BASE.concat([
-    "lista-clientes",
+    "lista-clientes", "criador",
     "jornada",
     "regua",
     "tarefas",

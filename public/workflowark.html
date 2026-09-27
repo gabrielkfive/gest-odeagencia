@@ -1,4 +1,4 @@
-<!-- build 20260926c-config-v3 -->
+<!-- build 20260926d-modo-criador -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -250,11 +250,11 @@ function wfaSetTheme(t){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
           <span>Projetos</span>
         </div>
-        <!-- GESTAO DE CLIENTES: atalho pedido pelo Gabriel (tarefa 08 do doc 11). Mesmo
-             destino da Lista de Clientes, dentro de Atividades, onde a equipe trabalha. -->
-        <div class="subitem" data-nav="lista-clientes">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          <span>Gestão de clientes</span>
+        <!-- MODO CRIADOR (26/09/2026): no lugar de "Gestão de clientes", pedido do Gabriel.
+             Painel por cliente no molde da V3; o cartão abre a página do cliente por abas. -->
+        <div class="subitem" data-nav="criador">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+          <span>Modo Criador</span>
         </div>
       </div>
 
@@ -1243,7 +1243,8 @@ function wfaSetTheme(t){
         <div id="cli-health"></div>
 
         <!-- Mapa dos clientes (MapLibre GL, o motor do mapcn, carregado sob demanda) -->
-        <div class="card" id="climap-card" style="padding:0;overflow:hidden;margin-bottom:16px">
+        <div style="display:flex;justify-content:flex-end;margin:-4px 0 12px"><button type="button" class="tb-btn" id="climap-abrir" onclick="cliMapAbrir()">Ver mapa dos clientes</button></div>
+        <div class="card" id="climap-card" style="padding:0;overflow:hidden;margin-bottom:16px;display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap">
             <h3 style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin:0">
               <span style="width:26px;height:26px;border-radius:8px;background:var(--yel);color:#131316;display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
@@ -2894,6 +2895,46 @@ function wfaSetTheme(t){
       </div>
 
       <!-- =================== ÁREA DO CLIENTE · VIVENDA (estilo Apple) =================== -->
+      <!-- =================== MODO CRIADOR (26/09/2026) =================== -->
+      <div class="page" id="page-criador">
+        <style>
+          #page-criador .cri-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+          #page-criador .cri-kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+          #page-criador .cri-kpi-t{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--mute);font-weight:600}
+          #page-criador .cri-kpi-v{font-size:28px;font-weight:800;color:var(--ink);margin-top:6px;font-variant-numeric:tabular-nums}
+          #page-criador .cri-neg{color:var(--red)}
+          #page-criador .cri-grade{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+          #page-criador .cri-card{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;transition:border-color .15s,transform .15s;min-width:0}
+          #page-criador .cri-card:hover{border-color:var(--ink);transform:translateY(-1px)}
+          #page-criador .cri-card:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
+          #page-criador .cri-card-cab{display:flex;align-items:center;gap:10px;min-width:0}
+          #page-criador .cri-av{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;background:color-mix(in srgb,var(--yel) 22%,transparent);color:var(--ink)}
+          #page-criador .cri-av-r{background:color-mix(in srgb,var(--red) 18%,transparent)}
+          #page-criador .cri-av-y{background:color-mix(in srgb,#f59e0b 22%,transparent)}
+          #page-criador .cri-nm{min-width:0;display:flex;flex-direction:column}
+          #page-criador .cri-nm b{font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+          #page-criador .cri-nm span{font-size:11.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+          #page-criador .cri-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:24px}
+          #page-criador .cri-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;color:var(--mute);border:1px solid var(--line)}
+          #page-criador .cri-chip i{width:6px;height:6px;border-radius:50%;background:currentColor}
+          #page-criador .cri-chip.am{color:#b36200;border-color:transparent;background:color-mix(in srgb,#f59e0b 18%,transparent)}
+          #page-criador .cri-chip.az{color:#2563eb;border-color:transparent;background:color-mix(in srgb,#3b82f6 14%,transparent)}
+          #page-criador .cri-chip.vm{color:var(--red);border-color:transparent;background:color-mix(in srgb,var(--red) 13%,transparent)}
+          #page-criador .cri-card-pe{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-top:1px solid var(--line);padding-top:10px;font-size:11.5px;color:var(--mute)}
+          #page-criador .cri-card-pe b{font-size:15px;color:var(--ink);white-space:nowrap}
+          #page-criador .cri-nota{font-size:11.5px;color:var(--mute);margin:14px 0 0;line-height:1.5}
+          #page-criador .cri-vazio{font-size:13px;color:var(--mute);padding:20px 0}
+          body.aura-dark #page-criador .cri-chip.az{color:#93c5fd}body.aura-dark #page-criador .cri-chip.am{color:#fbbf24}
+          @media(max-width:1180px){#page-criador .cri-grade{grid-template-columns:repeat(3,minmax(0,1fr))}}
+          @media(max-width:860px){#page-criador .cri-grade{grid-template-columns:repeat(2,minmax(0,1fr))}}
+          @media(max-width:560px){#page-criador .cri-grade{grid-template-columns:minmax(0,1fr)}#page-criador .cri-kpis{gap:8px}#page-criador .cri-kpi{padding:12px}#page-criador .cri-kpi-v{font-size:22px}#page-criador .cri-kpi-t{font-size:11px}}
+        </style>
+        <div class="page-head">
+          <div class="page-title"><h1>Modo Criador</h1><p>Escolha o cliente para ver posts, reels, stories, aprovação, editorial e ficha.</p></div>
+        </div>
+        <div id="cri-corpo"></div>
+      </div>
+
       <div class="page" id="page-cliente" style="padding:0">
         <style>
           #page-cliente{--cl-ink:#0a0a0a;--cl-yel:#FFC700;--cl-soft:#f5f5f7;--cl-mut:#86868b}
@@ -2931,6 +2972,7 @@ function wfaSetTheme(t){
           @media(max-width:760px){.cli-grid2,.cli-stats{grid-template-columns:1fr}.cli-sec{padding:60px 22px}}
         </style>
         <div style="padding:13px 18px;background:#fff;border-bottom:1px solid #e8e8ed;display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:6">
+          <button type="button" id="cri-voltar" data-cri-voltar class="tb-btn" style="display:none">‹ Modo Criador</button>
           <span style="font-weight:800;font-size:14px">Área do Cliente</span>
           <select id="cli-area-sel" class="form-select" style="max-width:260px" onchange="cliAreaSelect(this.value)"></select>
           <span style="font-size:11.5px;color:#86868b">escolha o cliente pra ver o portal dele</span>
@@ -4636,10 +4678,12 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260926a.js"></script>
-<script type="module">import * as P from "./workflowark-permissoes-20260924a.js";window.WFA_PERM=P;try{applyAccess();}catch(e){}</script>
+<script src="workflowark-app-20260926b.js"></script>
+<script type="module">import * as P from "./workflowark-permissoes-20260926a.js";window.WFA_PERM=P;try{applyAccess();}catch(e){}</script>
 <script src="workflowark-finpainel-20260926a.js"></script>
 <script src="workflowark-inicio-20260926a.js"></script>
+<script src="workflowark-criadorpainel-20260926a.js"></script>
+<script type="module">import * as C from "./workflowark-criador-20260926a.js";window.WFA_CRIADOR=C;try{if(document.querySelector("#page-criador.active"))criadorRender();}catch(e){}</script>
 <script type="module">import * as F from "./workflowark-financeiro-20260926a.js";window.WFA_FIN=F;try{fxRender();}catch(e){}try{iniRender();}catch(e){}</script>
 <script src="workflowark-cliente-20260922d.js" defer></script>
 </body>
