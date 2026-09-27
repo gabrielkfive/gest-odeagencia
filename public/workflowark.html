@@ -1,4 +1,4 @@
-<!-- build 20260926d-modo-criador -->
+<!-- build 20260926e-lista-clientes -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -1234,16 +1234,15 @@ function wfaSetTheme(t){
       <!-- =================== LISTA DE CLIENTES =================== -->
       <div class="page" id="page-lista-clientes">
         <div class="page-head">
-          <div class="page-title"><h1>Lista de Clientes</h1><p>Carteira consolidada · ARK direta + Squad Alpha</p></div>
-          <div style="display:flex;gap:6px"><button class="tb-btn dk" onclick="cliNovoOpen()">+ Novo cliente</button></div>
+          <div class="page-title"><h1>Clientes</h1><p id="cl-sub">Carteira da ARK</p></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="tb-btn" id="climap-abrir" onclick="cliMapAbrir()">Ver mapa dos clientes</button><button class="tb-btn dk" onclick="cliNovoOpen()">+ Novo cliente</button></div>
         </div>
 
         <div class="cli-kpis" id="cli-kpis"></div>
 
-        <div id="cli-health"></div>
+        <div id="cli-health" style="display:none"></div>
 
         <!-- Mapa dos clientes (MapLibre GL, o motor do mapcn, carregado sob demanda) -->
-        <div style="display:flex;justify-content:flex-end;margin:-4px 0 12px"><button type="button" class="tb-btn" id="climap-abrir" onclick="cliMapAbrir()">Ver mapa dos clientes</button></div>
         <div class="card" id="climap-card" style="padding:0;overflow:hidden;margin-bottom:16px;display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap">
             <h3 style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin:0">
@@ -1258,6 +1257,66 @@ function wfaSetTheme(t){
           <div id="climap" style="height:400px;background:#0a0a0c"></div>
         </div>
 
+        <style>
+          #page-lista-clientes .cl-barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 14px}
+          #page-lista-clientes .cl-busca{flex:1 1 260px;position:relative}
+          #page-lista-clientes .cl-busca input{width:100%;padding:10px 12px 10px 36px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font-size:13px;font-family:inherit;outline:none}
+          #page-lista-clientes .cl-busca input:focus{border-color:var(--yel)}
+          #page-lista-clientes .cl-busca svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mute)}
+          #page-lista-clientes .cl-seg{display:flex;gap:2px;border:1px solid var(--line);border-radius:12px;padding:4px;background:var(--surface);overflow-x:auto;max-width:100%;scrollbar-width:none}
+          #page-lista-clientes .cl-seg::-webkit-scrollbar{display:none}
+          #page-lista-clientes .cl-seg button{background:none;border:none;padding:7px 12px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--mute);cursor:pointer;white-space:nowrap;font-family:inherit;display:inline-flex;gap:6px;align-items:center}
+          #page-lista-clientes .cl-seg button em{font-style:normal;font-size:10.5px;opacity:.75}
+          #page-lista-clientes .cl-seg button.ativo{background:var(--ink);color:var(--bg)}
+          #page-lista-clientes .cl-seg button:focus-visible,#page-lista-clientes .cl-btn:focus-visible,#page-lista-clientes .cl-card:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
+          #page-lista-clientes .cl-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+          #page-lista-clientes .cl-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:border-color .15s,transform .15s;min-width:0;border-top:3px solid var(--line)}
+          #page-lista-clientes .cl-card:hover{border-color:var(--ink);transform:translateY(-1px)}
+          #page-lista-clientes .cl-card.st-r{border-top-color:var(--red)}#page-lista-clientes .cl-card.st-y{border-top-color:#f59e0b}#page-lista-clientes .cl-card.st-gr{border-top-color:var(--green)}
+          #page-lista-clientes .cl-card-cab{display:flex;align-items:center;gap:10px;min-width:0}
+          #page-lista-clientes .cl-av{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;background:color-mix(in srgb,var(--yel) 22%,transparent);color:var(--ink)}
+          #page-lista-clientes .cl-nm{min-width:0;flex:1;display:flex;flex-direction:column}
+          #page-lista-clientes .cl-nm b{font-size:14.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+          #page-lista-clientes .cl-nm span{font-size:11.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+          #page-lista-clientes .cl-valor{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+          #page-lista-clientes .cl-valor b{font-size:21px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+          #page-lista-clientes .cl-valor span{font-size:12px;color:var(--mute)}
+          #page-lista-clientes .cl-valor em{font-style:normal;font-size:11px;font-weight:700;color:var(--yel-d);margin-left:auto}
+          #page-lista-clientes .cl-jor-t{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mute);margin-bottom:6px}
+          #page-lista-clientes .cl-jor-t b{color:var(--ink);font-weight:700}
+          #page-lista-clientes .cl-jor-barra{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+          #page-lista-clientes .cl-jor-barra i{display:block;height:100%;background:var(--yel);border-radius:999px}
+          #page-lista-clientes .cl-jor.sem .cl-jor-t b{color:var(--mute);font-weight:600}
+          #page-lista-clientes .cl-meta{font-size:12px;color:var(--mute);margin:0;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+          #page-lista-clientes .cl-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;color:var(--mute);border:1px solid var(--line);white-space:nowrap}
+          #page-lista-clientes .cl-chip i{width:6px;height:6px;border-radius:50%;background:currentColor}
+          #page-lista-clientes .cl-chip.ok,#page-lista-clientes .cl-chip.st-gr{color:var(--green);border-color:transparent;background:color-mix(in srgb,var(--green) 13%,transparent)}
+          #page-lista-clientes .cl-chip.ab,#page-lista-clientes .cl-chip.st-y{color:#b36200;border-color:transparent;background:color-mix(in srgb,#f59e0b 18%,transparent)}
+          #page-lista-clientes .cl-chip.st-r{color:var(--red);border-color:transparent;background:color-mix(in srgb,var(--red) 13%,transparent)}
+          body.aura-dark #page-lista-clientes .cl-chip.ab,body.aura-dark #page-lista-clientes .cl-chip.st-y{color:#fbbf24}
+          #page-lista-clientes .cl-card-pe{display:flex;gap:6px;flex-wrap:wrap}
+          #page-lista-clientes .cl-acoes{display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+          #page-lista-clientes .cl-btn{font-family:inherit;font-size:11.5px;font-weight:700;border-radius:9px;padding:6px 10px;cursor:pointer;border:1px solid var(--line);background:none;color:var(--ink)}
+          #page-lista-clientes .cl-btn.pri{background:var(--yel);border-color:var(--yel);color:#141414}
+          #page-lista-clientes .cl-btn:hover{border-color:var(--ink)}
+          #page-lista-clientes .cl-tab-caixa{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+          #page-lista-clientes .cl-tab{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+          #page-lista-clientes .cl-tab th{font-size:11.5px;font-weight:600;color:var(--mute);text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+          #page-lista-clientes .cl-tab td{padding:11px 14px;border-top:1px solid var(--line);color:var(--ink);vertical-align:middle}
+          #page-lista-clientes .cl-tab tr:first-child td{border-top:none}
+          #page-lista-clientes .cl-tab tbody tr{cursor:pointer}#page-lista-clientes .cl-tab tbody tr:hover td{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+          #page-lista-clientes .cl-tab .n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+          #page-lista-clientes .cl-cel-nm{display:flex;align-items:center;gap:10px}#page-lista-clientes .cl-cel-nm b{display:block}#page-lista-clientes .cl-cel-nm span{font-size:11.5px;color:var(--mute)}
+          #page-lista-clientes .cl-mute{color:var(--mute)}#page-lista-clientes .cl-vazio{font-size:13px;color:var(--mute);padding:24px 0;text-align:center}
+          @media(max-width:560px){#page-lista-clientes .cl-grade{grid-template-columns:minmax(0,1fr)}#page-lista-clientes .cl-barra{gap:8px}}
+        </style>
+        <div class="cl-barra">
+          <label class="cl-busca"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="cl-busca" type="search" placeholder="Buscar por nome ou plano" aria-label="Buscar cliente"></label>
+          <div class="cl-seg" role="group" aria-label="Visualização"><button type="button" data-cl-vista="cartoes">Cartões</button><button type="button" data-cl-vista="lista">Lista</button></div>
+        </div>
+        <div class="cl-seg" id="cl-abas" role="tablist" aria-label="Objetivos" style="margin-bottom:14px;width:max-content"></div>
+        <div id="cl-corpo"></div>
+        <div hidden aria-hidden="true">
         <div class="tabs" data-tabs>
           <div class="tab active" data-sub="todos">Todos <span class="ct">14</span></div>
           <div class="tab" data-sub="ark">ARK Direto <span class="ct">8</span></div>
@@ -1273,6 +1332,7 @@ function wfaSetTheme(t){
         </div>
         <div class="subpage" data-subpage="ark"><div class="g3" id="ark-clientes-2"></div></div>
         <div class="subpage" data-subpage="alpha"><div class="g3" id="alpha-clientes-2"></div></div>
+        </div>
       </div>
 
       <!-- =================== JORNADA / SPRINTS =================== -->
@@ -4678,11 +4738,13 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260926b.js"></script>
+<script src="workflowark-app-20260926c.js"></script>
 <script type="module">import * as P from "./workflowark-permissoes-20260926a.js";window.WFA_PERM=P;try{applyAccess();}catch(e){}</script>
 <script src="workflowark-finpainel-20260926a.js"></script>
 <script src="workflowark-inicio-20260926a.js"></script>
 <script src="workflowark-criadorpainel-20260926a.js"></script>
+<script src="workflowark-clientes-20260926a.js"></script>
+<script type="module">import * as L from "./workflowark-clientes-lista-20260926a.js";window.WFA_CLI=L;try{cliListaRender();}catch(e){}</script>
 <script type="module">import * as C from "./workflowark-criador-20260926a.js";window.WFA_CRIADOR=C;try{if(document.querySelector("#page-criador.active"))criadorRender();}catch(e){}</script>
 <script type="module">import * as F from "./workflowark-financeiro-20260926a.js";window.WFA_FIN=F;try{fxRender();}catch(e){}try{iniRender();}catch(e){}</script>
 <script src="workflowark-cliente-20260922d.js" defer></script>

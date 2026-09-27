@@ -33,7 +33,7 @@ with sync_playwright() as pw:
         p.on('pageerror', lambda e: erros.append(str(e)[:160]))
         p.goto(base + '/workflowark.html', wait_until='load'); p.wait_for_timeout(3500)
         print(tema, 'marcador:', p.evaluate("async () => { const t = await (await fetch(location.href,{cache:'no-store'})).text(); return (t.match(/build [0-9a-z-]+/)||[''])[0]; }"))
-        p.evaluate("() => { WFA_MEMBER = {id:'m1', role:'admin', full_name:'Dono da Agência'}; WFA_MEMBERS=[WFA_MEMBER]; try{localStorage.removeItem('wfa-ini-passos-ok-m1');}catch(e){} renderMeuDia(); }"); p.wait_for_timeout(800)
+        p.evaluate("() => { CLIENTES.length = 0; [{id:'aurora',nm:'Café Aurora',plano:'Crescimento',tipo:'ARK',status:'gr',valor:1800,cap:2,meta:''},{id:'petfeliz',nm:'Pet Feliz',plano:'Essencial',tipo:'ARK',status:'y',valor:2200,cap:1,meta:''},{id:'burger',nm:'Burger do Bairro',plano:'Crescimento',tipo:'ARK',status:'r',valor:1500,cap:0,meta:''}].forEach(c => CLIENTES.push(c)); WFA_MEMBER = {id:'m1', role:'admin', full_name:'Dono da Agência'}; WFA_MEMBERS=[WFA_MEMBER]; try{localStorage.removeItem('wfa-ini-passos-ok-m1');}catch(e){} renderMeuDia(); }"); p.wait_for_timeout(800)
         print('  passos visiveis:', p.evaluate("() => getComputedStyle(document.getElementById('ini-passos')).display"),
               '| feitos:', p.evaluate("() => document.querySelectorAll('.ini-passo.ok').length"), 'de', p.evaluate("() => document.querySelectorAll('.ini-passo').length"),
               '| este mes:', p.evaluate("() => (document.getElementById('ini-mes').innerText||'').split(String.fromCharCode(10)).filter(Boolean).join(' | ').slice(0,160)"),

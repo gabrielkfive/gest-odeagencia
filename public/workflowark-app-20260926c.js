@@ -1143,6 +1143,7 @@ function renderClientes(){
   ['alpha-clientes','alpha-clientes-2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=alpha.map(cliCard).join('');});
   renderClientesKPIs();
   try{renderClienteSaude();}catch(e){console.warn('saude',e);}
+  try{if(typeof cliListaRender==='function')cliListaRender();}catch(e){console.warn('lista',e);}
   // popular select da modal nova
   const sel=document.getElementById('nt-cliente');
   if(sel) sel.innerHTML=CLIENTES.filter(c=>c.status!=='churn').map(c=>`<option value="${c.id}">${c.nm}</option>`).join('');
