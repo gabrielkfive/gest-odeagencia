@@ -27,3 +27,18 @@ Worktree `C:\Users\USER\wfa-sidebar`, branch `feat/sidebar-ordem-final`, empurra
 1. Aval da prévia libera a tarefa 06 (tokens em 6 telas, prova antes x depois em cada uma).
 2. Preço libera a seção de planos da landing e a régua comercial do doc 11.
 3. Depois disso, tela 4 do plano: modal da tarefa em uma coluna, rótulos sem caixa alta, comentários com foto, tudo cabendo em 100% sem rolagem interna.
+
+## Atualização 28/09/2026 (conferido contra o código e o git log)
+
+- Entregues da tabela: seguem no ar pelos commits de 22/09 (ebb2463, 92fdb79, 85522d1,
+  2565e03, 17e3340, 38c6eb9, 3c0321f) com as provas 513a9c7, a6e6f9e e 4057da7.
+- Bloqueio 1 (tarefa 06, tokens): segue parado. O commit 93d6aca não está no histórico
+  de `main`. Entre 24/09 e 26/09 entraram telas da V3 no app original (PRs #9, #10, #13 e
+  #15: Equipe, Financeiro, Início, Configurações, Modo Criador, Lista de Clientes), mas isso
+  não é a rodada de tokens nas 6 telas.
+- Bloqueio 2 (preço): segue parado; a landing `/conheca` não tem seção de planos.
+- Bloqueio 3 (WhatsApp): segue igual. E-mail continua sendo o canal que funciona.
+- Bloqueio 4 (cadastro self-service): segue fora de escopo. Desde 24/09 (8602334) conta
+  nova fica pendente até o admin liberar, o que reforça o onboarding assistido.
+- Fato novo que afeta tudo de IA: a API da Anthropic está desligada desde 05/09 por falta
+  de crédito. Lista única do que falta em `memoria.md`, seção "28/09/2026, estado real".
