@@ -1,4 +1,4 @@
-<!-- build 20260928c-sidebar-como-antes -->
+<!-- build 20260928d-sidebar-e-prazo -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -50,7 +50,7 @@
 <script src="https://cdn.jsdelivr.net/npm/animejs@4/lib/anime.iife.min.js" defer></script>
 <link rel="stylesheet" href="workflowark-tokens-20260927a.css">
 <link rel="stylesheet" href="workflowark-20260927a.css">
-<link rel="stylesheet" href="workflowark-cliente-20260922d.css">
+<link rel="stylesheet" href="workflowark-cliente-20260928a.css">
 <style>.side-foot .av{min-width:34px;width:34px;height:34px;overflow:hidden;flex:none}.side-foot .av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.side.compact .side-foot .av{min-width:34px}
 /* descrição da tarefa: cresce com o texto, legível (pedido 21/09, ref. Trello) */
 #td-desc{min-height:168px;max-height:52vh;font-size:14.5px;line-height:1.65;padding:14px 16px;resize:vertical;overflow:auto;white-space:pre-wrap}
@@ -893,7 +893,7 @@ function wfaSetTheme(t){
         <div class="page-head">
           <div class="page-title">
             <h1>Squad Alpha · Acompanhamento</h1>
-            <p class="al-sub">Réplica viva da planilha do Alpha Senior — edite as células, marque os checks e exporte. Para operação semanal e investidores.</p>
+            <p class="al-sub">Réplica viva da planilha do Alpha Senior, edite as células, marque os checks e exporte. Para operação semanal e investidores.</p>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             <button class="icobtn" onclick="alphaAddRow()" title="Adicionar cliente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Cliente</button>
@@ -1438,7 +1438,7 @@ function wfaSetTheme(t){
         <div class="explainer">
           <h4>Como funciona</h4>
           <h3>Cada cliente percorre 20 sprints semanais até a renovação anual.</h3>
-          <p><strong>Arraste</strong> os clientes entre sprints conforme avançam. <strong>Clique em um card</strong> para abrir o modal de Atividades Sugeridas — elas viram tarefas no Kanban (Backlog · Andamento · Aprovação · Concluído).</p>
+          <p><strong>Arraste</strong> os clientes entre sprints conforme avançam. <strong>Clique em um card</strong> para abrir o modal de Atividades Sugeridas, elas viram tarefas no Kanban (Backlog · Andamento · Aprovação · Concluído).</p>
           <p style="font-size:11.5px;color:var(--mute)">Padrão de jornada baseado em Silver / Gold / Plano X conforme contrato.</p>
         </div>
 
@@ -1758,7 +1758,7 @@ function wfaSetTheme(t){
           <h4>Treinamento · Como ler esta tela</h4>
           <h3>Toda semana, seis perguntas para cada cliente.</h3>
           <p>Cada <strong>linha</strong> é um cliente. Cada <strong>coluna</strong> é um dos seis status semanais que precisam estar feitos para o cliente sentir a régua. <strong>Clique na célula</strong> para alternar entre: vazio (pendente), verde (feito), vermelho (não-feito), traço (não se aplica esta semana).</p>
-          <p>Toda segunda na reunião do squad, esta tela é a primeira a abrir. Quem aparece vermelho, é endereçado. Cliente sem reunião mensal há mais de 30 dias começa o ciclo de churn — sem exceção.</p>
+          <p>Toda segunda na reunião do squad, esta tela é a primeira a abrir. Quem aparece vermelho, é endereçado. Cliente sem reunião mensal há mais de 30 dias começa o ciclo de churn, sem exceção.</p>
         </div>
 
         <div class="regua-wrap">
@@ -1777,17 +1777,17 @@ function wfaSetTheme(t){
         </div>
       </div>
 
-      <!-- =================== AGENDA (estática antiga — substituída pela AGENDA EDITÁVEL abaixo; mantida oculta) =================== -->
+      <!-- =================== AGENDA (estática antiga, substituída pela AGENDA EDITÁVEL abaixo; mantida oculta) =================== -->
       <div class="page" id="page-agenda-static-old" style="display:none" aria-hidden="true">
         <div class="page-head">
           <div class="page-title"><h1>Agenda · Junho 2026</h1><p>Distribuição estratégica do mês · semana de preparação, semana de planos, semana de apresentação, semana de captação</p></div>
         </div>
 
         <div class="g4" style="margin-bottom:14px">
-          <div class="kpi"><div class="l">Sem. 03–07</div><div class="v" style="font-size:14px;color:var(--ink)">Preparação</div><div class="d">Alinhamento por área</div></div>
-          <div class="kpi"><div class="l">Sem. 08–14</div><div class="v" style="font-size:14px;color:var(--ink)">Planejamentos</div><div class="d">Construir planos mensais</div></div>
-          <div class="kpi yel"><div class="l">Sem. 15–22</div><div class="v" style="font-size:14px;color:#7a5c00">Apresentações</div><div class="d">100% apresentados</div></div>
-          <div class="kpi dk"><div class="l">Sem. 22–30</div><div class="v" style="font-size:14px;color:#fff">Captações</div><div class="d">Janela Copa abre 18/06</div></div>
+          <div class="kpi"><div class="l">Sem. 03 a 07</div><div class="v" style="font-size:14px;color:var(--ink)">Preparação</div><div class="d">Alinhamento por área</div></div>
+          <div class="kpi"><div class="l">Sem. 08 a 14</div><div class="v" style="font-size:14px;color:var(--ink)">Planejamentos</div><div class="d">Construir planos mensais</div></div>
+          <div class="kpi yel"><div class="l">Sem. 15 a 22</div><div class="v" style="font-size:14px;color:#7a5c00">Apresentações</div><div class="d">100% apresentados</div></div>
+          <div class="kpi dk"><div class="l">Sem. 22 a 30</div><div class="v" style="font-size:14px;color:#fff">Captações</div><div class="d">Janela Copa abre 18/06</div></div>
         </div>
 
         <div class="cal-wrap">
@@ -1839,12 +1839,12 @@ function wfaSetTheme(t){
       <!-- =================== CAMPANHAS =================== -->
       <div class="page" id="page-campanhas">
         <div class="page-head">
-          <div class="page-title"><h1>Performance das Campanhas</h1><p>Análise histórica · semana 11–17/05/2026 — dados não atualizados automaticamente</p></div>
+          <div class="page-title"><h1>Performance das Campanhas</h1><p>Análise histórica · semana 11 a 17/05/2026, dados não atualizados automaticamente</p></div>
         </div>
 
         <div class="alert yel" style="margin-bottom:14px">
           <h4>Leitura honesta</h4>
-          Os números abaixo não são para comemorar — são para corrigir. Comparados a outros restaurantes do nicho, estamos abaixo da média em CPA e em volume de compras. O cenário Copa + Dia dos Namorados é a janela para virar o jogo: criativos promocionais funcionam melhor, captação intensiva nas próximas duas semanas gera estoque para escalar.
+          Os números abaixo não são para comemorar, são para corrigir. Comparados a outros restaurantes do nicho, estamos abaixo da média em CPA e em volume de compras. O cenário Copa + Dia dos Namorados é a janela para virar o jogo: criativos promocionais funcionam melhor, captação intensiva nas próximas duas semanas gera estoque para escalar.
         </div>
 
         <div class="g3">
@@ -1872,7 +1872,7 @@ function wfaSetTheme(t){
 
           <div class="card" style="opacity:.6">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"><h3 style="font-size:14px;font-weight:700;color:var(--ink)">Bellato Pizzaria</h3><span class="tag gray">CHURN</span></div>
-            <p style="font-size:12px;color:var(--mute);line-height:1.5">Cliente saiu em maio mesmo após recuperação na semana 19/05. Devolução estimada ~R$8k a acertar. Documentado como churn — não compõe mais a carteira ativa.</p>
+            <p style="font-size:12px;color:var(--mute);line-height:1.5">Cliente saiu em maio mesmo após recuperação na semana 19/05. Devolução estimada ~R$8k a acertar. Documentado como churn, não compõe mais a carteira ativa.</p>
           </div>
         </div>
 
@@ -1885,7 +1885,7 @@ function wfaSetTheme(t){
         <div class="g2">
           <div class="card">
             <h4 style="font-size:11px;font-weight:700;color:var(--yel-d);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Cenário</h4>
-            <p style="font-size:12.5px;line-height:1.5">63% dos estabelecimentos gastronômicos brasileiros projetam crescimento em 2026, com expansão entre 5–10%. Copa abre 18/06 — disparador do trimestre.</p>
+            <p style="font-size:12.5px;line-height:1.5">63% dos estabelecimentos gastronômicos brasileiros projetam crescimento em 2026, com expansão entre 5 a 10%. Copa abre 18/06, disparador do trimestre.</p>
           </div>
           <div class="card yel">
             <h4 style="font-size:11px;font-weight:700;color:var(--yel-d);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Pacote ARK</h4>
@@ -1929,7 +1929,7 @@ function wfaSetTheme(t){
         <div id="comercial-capacidade" style="margin-bottom:16px"></div>
 
         <div class="g4" style="margin-bottom:14px" id="comercial-kpis">
-          <div class="kpi"><div class="l">Leads Growth comprados</div><div class="v" contenteditable="true" data-com-key="leads_growth">4</div><div class="d" contenteditable="true" data-com-key="leads_growth_d">~R$700–900 invest.</div></div>
+          <div class="kpi"><div class="l">Leads Growth comprados</div><div class="v" contenteditable="true" data-com-key="leads_growth">4</div><div class="d" contenteditable="true" data-com-key="leads_growth_d">~R$700 a 900 invest.</div></div>
           <div class="kpi"><div class="l">Leads Tráfego ARK</div><div class="v" contenteditable="true" data-com-key="leads_trafego">~37</div><div class="d" contenteditable="true" data-com-key="leads_trafego_d">R$916 investidos</div></div>
           <div class="kpi yel"><div class="l">Fechamentos ARK</div><div class="v" contenteditable="true" data-com-key="fechamentos_ark" style="color:inherit">5</div><div class="d" contenteditable="true" data-com-key="fechamentos_ark_d" style="color:#7a5c00">Sasse · Fonseca · Vaca Velha · Brisa</div></div>
           <div class="kpi dk"><div class="l">Fechamento Alpha real</div><div class="v" contenteditable="true" data-com-key="fechamentos_alpha">1</div><div class="d" contenteditable="true" data-com-key="fechamentos_alpha_d">Attraversiamo · resto repasse matriz</div></div>
@@ -1959,8 +1959,8 @@ function wfaSetTheme(t){
           </div>
           <div>
             <div class="sect-title"><h2><span class="ic" style="background:var(--red-soft);color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></span>Análise do período</h2></div>
-            <div class="alert red" style="margin-bottom:9px"><h4 contenteditable="true" data-com-key="analise1_titulo">Variação 1 — Tráfego com perfil aberto</h4><span contenteditable="true" data-com-key="analise1_txt">Primeira frente trouxe volume sem filtro de qualificação. Correção: Saulo conduz discovery antes do closer.</span></div>
-            <div class="alert red"><h4 contenteditable="true" data-com-key="analise2_titulo">Variação 2 — Growth Hub mal calibrado</h4><span contenteditable="true" data-com-key="analise2_txt">Pacotes da matriz vieram com ICP fora. Decisão: não escalar essa fonte sem mudar critério.</span></div>
+            <div class="alert red" style="margin-bottom:9px"><h4 contenteditable="true" data-com-key="analise1_titulo">Variação 1, Tráfego com perfil aberto</h4><span contenteditable="true" data-com-key="analise1_txt">Primeira frente trouxe volume sem filtro de qualificação. Correção: Saulo conduz discovery antes do closer.</span></div>
+            <div class="alert red"><h4 contenteditable="true" data-com-key="analise2_titulo">Variação 2, Growth Hub mal calibrado</h4><span contenteditable="true" data-com-key="analise2_txt">Pacotes da matriz vieram com ICP fora. Decisão: não escalar essa fonte sem mudar critério.</span></div>
           </div>
         </div>
 
@@ -2333,18 +2333,18 @@ function wfaSetTheme(t){
           <div class="role-block">
             <div class="role-head"><div class="av">L</div><div><div class="rl">Head de CS · Account</div><div class="nm">Lucas Rosi</div></div><div class="tg-grp"><span class="tag yel">Régua dos 15</span></div></div>
             <div class="role-body">
-              <p style="font-size:13px;color:var(--txt);margin-bottom:12px"><strong>O Account é dono da régua.</strong> Não é secretário do cliente — é quem garante que cada um dos 15 passa pelos seis status semanais, que a reunião mensal acontece, e que ninguém vira churn por silêncio.</p>
+              <p style="font-size:13px;color:var(--txt);margin-bottom:12px"><strong>O Account é dono da régua.</strong> Não é secretário do cliente, é quem garante que cada um dos 15 passa pelos seis status semanais, que a reunião mensal acontece, e que ninguém vira churn por silêncio.</p>
               <div class="barpanel" data-prog="pop-account"><div class="lbl">Progresso</div><div class="bar"><i></i></div><div class="ct" data-ct>0 / 0</div><button class="rst" data-reset="pop-account">Reset</button></div>
               <ul class="ckl" data-k="pop-account">
-                <li><input type="checkbox"><span class="lab"><strong>Toque semanal com cada cliente</strong> — ao menos uma mensagem confirmando andamento</span><span class="tg">Semana</span></li>
+                <li><input type="checkbox"><span class="lab"><strong>Toque semanal com cada cliente</strong>, ao menos uma mensagem confirmando andamento</span><span class="tg">Semana</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>Relatório de performance enviado às segundas até 12h</strong></span><span class="tg">Seg 12h</span></li>
-                <li><input type="checkbox"><span class="lab"><strong>Planejamento estratégico apresentado até o dia 15</strong> — todo cliente, todo mês</span><span class="tg">Dia 15</span></li>
-                <li><input type="checkbox"><span class="lab"><strong>Reunião mensal realizada e registrada</strong> — não basta marcar</span><span class="tg">Mês</span></li>
+                <li><input type="checkbox"><span class="lab"><strong>Planejamento estratégico apresentado até o dia 15</strong>, todo cliente, todo mês</span><span class="tg">Dia 15</span></li>
+                <li><input type="checkbox"><span class="lab"><strong>Reunião mensal realizada e registrada</strong>, não basta marcar</span><span class="tg">Mês</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>Captação alinhada</strong> com produtores · roteiro 48h antes</span><span class="tg">D-2</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>Onboarding novo em ≤ 5 dias</strong></span><span class="tg">Novo</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>NPS coletado</strong> ao final do ciclo</span><span class="tg">Fim mês</span></li>
-                <li><input type="checkbox"><span class="lab"><strong>Oportunidade de upsell mapeada</strong> — Silver → Gold → Plano X</span><span class="tg">Mês</span></li>
-                <li><input type="checkbox"><span class="lab"><strong>Sistema sempre atualizado</strong> — toda demanda passa por aqui</span><span class="tg">Diário</span></li>
+                <li><input type="checkbox"><span class="lab"><strong>Oportunidade de upsell mapeada</strong>, Silver → Gold → Plano X</span><span class="tg">Mês</span></li>
+                <li><input type="checkbox"><span class="lab"><strong>Sistema sempre atualizado</strong>, toda demanda passa por aqui</span><span class="tg">Diário</span></li>
               </ul>
             </div>
           </div>
@@ -2359,7 +2359,7 @@ function wfaSetTheme(t){
               <div class="barpanel" data-prog="pop-trafego"><div class="lbl">Progresso</div><div class="bar"><i></i></div><div class="ct" data-ct>0 / 0</div><button class="rst" data-reset="pop-trafego">Reset</button></div>
               <ul class="ckl" data-k="pop-trafego">
                 <li><input type="checkbox"><span class="lab"><strong>CPA conferido diariamente</strong> em todos os clientes com campanha no ar</span><span class="tg">Rotina</span></li>
-                <li><input type="checkbox"><span class="lab"><strong>Campanha sem retorno pausada</strong> — não queimar verba sem decisão</span><span class="tg">Rotina</span></li>
+                <li><input type="checkbox"><span class="lab"><strong>Campanha sem retorno pausada</strong>, não queimar verba sem decisão</span><span class="tg">Rotina</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>Pixel e gerenciador conferidos</strong> em cada conta nova</span><span class="tg">Setup</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>Teste A/B</strong> rodando onde faz sentido</span><span class="tg">Rotina</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>Otimização semanal documentada</strong> · toda sexta</span><span class="tg">Sexta</span></li>
@@ -2379,7 +2379,7 @@ function wfaSetTheme(t){
               <p style="font-size:13px;color:var(--txt);margin-bottom:12px">Função direta: <em>fazer o vídeo bem feito e passar o material organizado</em>. Sem material bem captado, não existe edição que salve.</p>
               <div class="barpanel" data-prog="pop-produtor"><div class="lbl">Progresso</div><div class="bar"><i></i></div><div class="ct" data-ct>0 / 0</div><button class="rst" data-reset="pop-produtor">Reset</button></div>
               <ul class="ckl" data-k="pop-produtor">
-                <li><input type="checkbox"><span class="lab"><strong>Roteiro recebido 48h antes</strong> — sem roteiro, não grava</span><span class="tg">D-2</span></li>
+                <li><input type="checkbox"><span class="lab"><strong>Roteiro recebido 48h antes</strong>, sem roteiro, não grava</span><span class="tg">D-2</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>Equipamento conferido na véspera</strong></span><span class="tg">D-1</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>Confirmação com cliente</strong> horário, local, pratos previstos</span><span class="tg">D-1</span></li>
                 <li><input type="checkbox"><span class="lab"><strong>Chegada com folga</strong> · 15 min antes</span><span class="tg">Dia D</span></li>
@@ -2523,7 +2523,7 @@ function wfaSetTheme(t){
           <table class="okr-table" data-okr-key="comercial">
             <thead><tr><th style="width:160px">Função</th><th style="width:32%">Objetivo</th><th>Key Results</th></tr></thead>
             <tbody>
-              <tr><td class="fn" contenteditable="true" rowspan="6">SDR / Closer</td><td class="obj" contenteditable="true" rowspan="6">Atingir o faturamento de R$ 100K no primeiro mês.</td><td class="kr" contenteditable="true">Vender R$ 62k via Growth Hub (através de Leads Comprados) — AMBICIOSO.</td></tr>
+              <tr><td class="fn" contenteditable="true" rowspan="6">SDR / Closer</td><td class="obj" contenteditable="true" rowspan="6">Atingir o faturamento de R$ 100K no primeiro mês.</td><td class="kr" contenteditable="true">Vender R$ 62k via Growth Hub (através de Leads Comprados), AMBICIOSO.</td></tr>
               <tr><td class="kr" contenteditable="true">Comprar o equivalente a R$ 33k via Growth Hub (Lance Embutido).</td></tr>
               <tr><td class="kr" contenteditable="true">Comprar e trabalhar 50 Leads dentro do Growth Hub.</td></tr>
               <tr><td class="kr" contenteditable="true">Buscar uma conversão ≥ 20%.</td></tr>
@@ -2640,7 +2640,7 @@ function wfaSetTheme(t){
 
         <div class="ag-hero">
           <h2>Como os agentes trabalham</h2>
-          <p>Você não fica no operacional. O robô faz o trabalho pesado, organiza tudo e espera o seu toque final — liberdade com rédea curta.</p>
+          <p>Você não fica no operacional. O robô faz o trabalho pesado, organiza tudo e espera o seu toque final, liberdade com rédea curta.</p>
           <div class="ag-flow">
             <span class="ag-step">1 · O <b>robô prepara</b> sozinho</span>
             <span class="ag-arrow">→</span>
@@ -2670,7 +2670,7 @@ function wfaSetTheme(t){
           </div>
           <div class="ag-card on" onclick="document.querySelector('[data-nav=roteirista]').click()">
             <div class="ag-top"><div class="ag-ico">🎬</div><div><div class="ag-nm">Roteirista Viral</div><div class="ag-role">Conteúdo</div></div></div>
-            <div class="ag-desc">Transforma um tema em roteiro de Reels/TikTok com gancho, estrutura e legenda — pronto para gravar.</div>
+            <div class="ag-desc">Transforma um tema em roteiro de Reels/TikTok com gancho, estrutura e legenda, pronto para gravar.</div>
             <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
           </div>
           <div class="ag-card on" onclick="document.querySelector('[data-nav=propostas]').click()">
@@ -2690,7 +2690,7 @@ function wfaSetTheme(t){
           </div>
           <div class="ag-card on" onclick="document.querySelector('[data-nav=legenda]').click()">
             <div class="ag-top"><div class="ag-ico">✍️</div><div><div class="ag-nm">Legendas</div><div class="ag-role">Social Media</div></div></div>
-            <div class="ag-desc">Escreve as legendas dos posts no tom da marca, com gancho, CTA e hashtags — a partir do tema ou do roteiro.</div>
+            <div class="ag-desc">Escreve as legendas dos posts no tom da marca, com gancho, CTA e hashtags, a partir do tema ou do roteiro.</div>
             <div class="ag-foot"><span class="ag-badge on">🟢 No ar</span><span class="ag-open">Abrir</span></div>
           </div>
         </div>
@@ -3043,7 +3043,7 @@ function wfaSetTheme(t){
           <section class="cli-hero">
             <div class="cli-kick">ARK Content · Planejamento Estratégico</div>
             <h1 class="cli-h1">Farmácia <em>Vivenda</em></h1>
-            <p class="cli-lead">Junho 2026 · Saúde, bem-estar e proximidade — transformando presença digital em gente entrando na farmácia.</p>
+            <p class="cli-lead">Junho 2026 · Saúde, bem-estar e proximidade, transformando presença digital em gente entrando na farmácia.</p>
             <div class="cli-pills" style="justify-content:center">
               <span class="cli-pill" style="border-color:rgba(255,255,255,.25);color:#fff">Plano X</span>
               <span class="cli-pill" style="border-color:rgba(255,255,255,.25);color:#fff">Posicionamento: Bem-Estar</span>
@@ -3054,7 +3054,7 @@ function wfaSetTheme(t){
           <section class="cli-sec">
             <div class="cli-eyebrow">O mês em foco</div>
             <h2 class="cli-h2">Duas datas que<br>movem Junho.</h2>
-            <p class="cli-sub">Construído pela ARK pra Vivenda — campanhas pensadas pra vender de verdade, não só postar bonito.</p>
+            <p class="cli-sub">Construído pela ARK pra Vivenda, campanhas pensadas pra vender de verdade, não só postar bonito.</p>
             <div class="cli-grid2">
               <div class="cli-card dark">
                 <span class="cli-emoji">🏆</span>
@@ -3110,7 +3110,7 @@ function wfaSetTheme(t){
           <section class="cli-sec">
             <div class="cli-eyebrow">Produções deste mês</div>
             <h2 class="cli-h2">O que a ARK produziu.</h2>
-            <p class="cli-sub">Preencha com o que foi entregue no mês (clique e edite — salva sozinho).</p>
+            <p class="cli-sub">Preencha com o que foi entregue no mês (clique e edite, salva sozinho).</p>
             <div class="cli-stats">
               <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_prod_revista">1</div><div class="l">Revista</div></div>
               <div class="cli-stat"><div class="v" contenteditable="true" data-com-key="viv_prod_videos">—</div><div class="l">Vídeos</div></div>
@@ -3122,14 +3122,14 @@ function wfaSetTheme(t){
           <section class="cli-sec">
             <div class="cli-eyebrow">Galeria · Vivenda</div>
             <h2 class="cli-h2">As imagens da marca.</h2>
-            <p class="cli-sub">Cole os links das imagens (Drive público, Instagram, etc.) — elas aparecem aqui. Em breve: upload direto.</p>
+            <p class="cli-sub">Cole os links das imagens (Drive público, Instagram, etc.), elas aparecem aqui. Em breve: upload direto.</p>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:28px">
               <label style="cursor:pointer"><div id="vimg1" style="aspect-ratio:1;border-radius:20px;background:var(--cl-soft) center/cover no-repeat;border:1px dashed #d2d2d7;display:flex;align-items:center;justify-content:center;color:#86868b;font-size:13px">+ enviar imagem</div><input type="file" accept="image/*" style="display:none" onchange="vivGalImg(this,'vimg1')"></label>
               <label style="cursor:pointer"><div id="vimg2" style="aspect-ratio:1;border-radius:20px;background:var(--cl-soft) center/cover no-repeat;border:1px dashed #d2d2d7;display:flex;align-items:center;justify-content:center;color:#86868b;font-size:13px">+ enviar imagem</div><input type="file" accept="image/*" style="display:none" onchange="vivGalImg(this,'vimg2')"></label>
               <label style="cursor:pointer"><div id="vimg3" style="aspect-ratio:1;border-radius:20px;background:var(--cl-soft) center/cover no-repeat;border:1px dashed #d2d2d7;display:flex;align-items:center;justify-content:center;color:#86868b;font-size:13px">+ enviar imagem</div><input type="file" accept="image/*" style="display:none" onchange="vivGalImg(this,'vimg3')"></label>
             </div>
             <div class="cli-card" style="margin-top:22px">
-              <h3 style="font-size:18px">📎 Enviar arquivo — PDF, imagem ou doc</h3>
+              <h3 style="font-size:18px">📎 Enviar arquivo, PDF, imagem ou doc</h3>
               <p style="font-size:13px;color:var(--cl-mut);margin:6px 0 12px">Sobe qualquer arquivo e gera um link pra usar e compartilhar.</p>
               <label class="tb-btn" style="cursor:pointer;background:#0a0a0a;color:#fff;border-color:#0a0a0a;font-weight:700">Escolher arquivo<input type="file" style="display:none" onchange="arquivoUpload(this)"></label>
               <div class="arq-out" style="margin-top:14px;font-size:13.5px"></div>
@@ -3301,7 +3301,7 @@ function wfaSetTheme(t){
         </style>
         <div class="proc-hero">
           <h1>Procedimentos por área</h1>
-          <p>O passo a passo de cada operação da ARK. Quando alguém tem dúvida de "como faz", está tudo aqui — padronizado, área por área.</p>
+          <p>O passo a passo de cada operação da ARK. Quando alguém tem dúvida de "como faz", está tudo aqui, padronizado, área por área.</p>
           <div class="kpis">
             <div class="kpi"><b id="pr-k-total">0</b><span>Processos</span></div>
             <div class="kpi"><b id="pr-k-areas">0</b><span>Áreas</span></div>
@@ -3526,14 +3526,14 @@ function wfaSetTheme(t){
         </div>
         <div class="card" style="padding:18px;opacity:.65">
           <h3 style="font-size:15px;font-weight:800;margin-bottom:4px">E-mail · Google Ads · n8n</h3>
-          <p style="font-size:12.5px;color:var(--mute);line-height:1.5">Em breve — precisam de configuração extra (serviço de e-mail, developer token do Google, instância n8n). Veja o passo-a-passo no <b>Tutorial → Conectar integrações</b>.</p>
+          <p style="font-size:12.5px;color:var(--mute);line-height:1.5">Em breve, precisam de configuração extra (serviço de e-mail, developer token do Google, instância n8n). Veja o passo-a-passo no <b>Tutorial → Conectar integrações</b>.</p>
         </div>
       </div>
 
       <!-- =================== CONSELHO DE IA =================== -->
       <div class="page" id="page-conselho">
         <div class="page-head">
-          <div class="page-title"><h1>Conselho de IA</h1><p>Os agentes da ARK debatem sozinhos, todo dia, cliente por cliente — e deixam decisões, planos e tarefas prontas pra você de manhã.</p></div>
+          <div class="page-title"><h1>Conselho de IA</h1><p>Os agentes da ARK debatem sozinhos, todo dia, cliente por cliente, e deixam decisões, planos e tarefas prontas pra você de manhã.</p></div>
           <button class="tb-btn dk" id="cons-run-btn" onclick="consRodarAuto()">▶ Rodar conselho agora</button>
         </div>
         <style>
@@ -3615,7 +3615,7 @@ function wfaSetTheme(t){
         </div>
         <div class="tut-hero">
           <h2>Bem-vindo ao WorkFlowArk</h2>
-          <p>O cérebro da ARK Content: tarefas, clientes, financeiro, WhatsApp, Drive e os agentes de IA — tudo num lugar só. Siga os passos abaixo e em 5 minutos você está operando.</p>
+          <p>O cérebro da ARK Content: tarefas, clientes, financeiro, WhatsApp, Drive e os agentes de IA, tudo num lugar só. Siga os passos abaixo e em 5 minutos você está operando.</p>
           <div class="acts"><button class="tb-btn" style="background:#ffd400;color:#000;border-color:#ffd400" onclick="onboardOpen()">Começar tour</button><button class="tb-btn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.3)" onclick="document.querySelector('[data-nav=dashboard]').click()">Ir pro Meu Dia</button></div>
         </div>
         <div class="tut-sec">Primeiros passos</div>
@@ -4090,7 +4090,7 @@ function wfaSetTheme(t){
 
 <!-- BOTÃO FLUTUANTE + MODAL: JARVIS (voz) -->
 <style>#jarvis-fab[data-voice='fallback']{border-color:#ef4444!important;opacity:.75;}</style>
-<button onclick="jarvisOpen()" title="JARVIS — fale comigo" id="jarvis-fab" style="position:fixed;bottom:18px;right:18px;z-index:9000;width:54px;height:54px;border-radius:50%;border:2px solid var(--yel,#ffd400);background:#0a0a0a;color:var(--yel,#ffd400);font-size:23px;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer">🎙️</button>
+<button onclick="jarvisOpen()" title="JARVIS, fale comigo" id="jarvis-fab" style="position:fixed;bottom:18px;right:18px;z-index:9000;width:54px;height:54px;border-radius:50%;border:2px solid var(--yel,#ffd400);background:#0a0a0a;color:var(--yel,#ffd400);font-size:23px;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer">🎙️</button>
 <!-- MODAL: Resumo do dia (WhatsApp + voz JARVIS) -->
 <div class="modal-bg" id="modal-wpp-resumo">
   <div class="modal" style="max-width:560px;max-height:86vh;display:flex;flex-direction:column">
@@ -4461,7 +4461,7 @@ function wfaSetTheme(t){
     </style>
     <div class="modal-head"><h3><span class="ic">📈</span>Banco de criativos · <span id="cri-cli-nome"></span></h3><span class="x" onclick="closeModal('modal-criativos')">✕</span></div>
     <div class="modal-body">
-      <p style="font-size:12px;color:var(--mute);margin:0 0 12px">Guarde os Reels e artes que <b>deram certo</b> — o Roteirista usa de inspiração no que já funcionou.</p>
+      <p style="font-size:12px;color:var(--mute);margin:0 0 12px">Guarde os Reels e artes que <b>deram certo</b>, o Roteirista usa de inspiração no que já funcionou.</p>
       <div class="cri-add">
         <input class="form-input full" id="cri-url" placeholder="Link do criativo (Reel, arte, Drive...)">
         <input class="form-input" id="cri-nota" placeholder="Por que funcionou / métrica" style="grid-column:1">
@@ -4748,7 +4748,8 @@ function wfaSetTheme(t){
 <script type="module">import * as L from "./workflowark-clientes-lista-20260926a.js";window.WFA_CLI=L;try{cliListaRender();}catch(e){}</script>
 <script type="module">import * as C from "./workflowark-criador-20260926a.js";window.WFA_CRIADOR=C;try{if(document.querySelector("#page-criador.active"))criadorRender();}catch(e){}</script>
 <script type="module">import * as F from "./workflowark-financeiro-20260926a.js";window.WFA_FIN=F;try{fxRender();}catch(e){}try{iniRender();}catch(e){}</script>
-<script src="workflowark-cliente-20260922d.js" defer></script>
+<script type="module">import * as CP from "./workflowark-cliente-prazo-20260928a.js";window.WFA_CLIPRAZO=CP;try{if(typeof nxCliAtualiza==="function")nxCliAtualiza();}catch(e){}</script>
+<script src="workflowark-cliente-20260928a.js" defer></script>
 <link rel="stylesheet" href="workflowark-hig-20260928a.css">
 <link rel="stylesheet" href="workflowark-vidro-20260928b.css">
 <script src="workflowark-icones-20260928b.js" defer></script>

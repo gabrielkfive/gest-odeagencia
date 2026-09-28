@@ -103,8 +103,8 @@ ok(!podeVerBloco({ role: 'operacao' }, false, 'wfa-extratos', null) && podeVerBl
 
 // 9. Papéis conhecidos e cópia do navegador idêntica.
 ok(PAPEIS.map((p) => p.v).join() === 'admin,gestor,financeiro,operacao,comercial,marketing,viewer', 'sete papéis do original');
-const a = readFileSync(new URL('../src/lib/permissoes.js', import.meta.url), 'utf8');
-const b = readFileSync(new URL('../public/workflowark-permissoes-20260926a.js', import.meta.url), 'utf8');
+const a = readFileSync(new URL('../src/lib/permissoes.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+const b = readFileSync(new URL('../public/workflowark-permissoes-20260926a.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 ok(a === b, 'cópia do navegador idêntica à do servidor');
 
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');

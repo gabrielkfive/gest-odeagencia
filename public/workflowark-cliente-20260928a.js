@@ -1,5 +1,5 @@
 /* ============ WorkFlowArk · pagina do cliente com abas (21/09/2026, exportada do /next) ============
-   Posts / Reels / Stories / Aprovacao / Editorial / Ficha / Faturas / Saude por cliente e mes,
+   Posts / Reels / Stories / Aprovacao / Prazo / Editorial / Ficha / Faturas / Saude / Feed por cliente e mes,
    lendo o MESMO estado e gravando por saveTarefas (item unico). Pedido do Gabriel no video de 21/09.
    Carregada depois do app. Nao toca em mais nada. */
 (function () {
@@ -240,6 +240,116 @@
     );
   }
 
+  /* ===== ABA PRAZO + BOLINHAS DE STORIES (28/09/2026, molde do Modo Criador da V3) ===== */
+  var DIAS_SEMANA = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+  var agoraLocal = function () {
+    return new Date()
+      .toLocaleString("sv-SE", { timeZone: "America/Sao_Paulo" })
+      .replace(" ", "T")
+      .slice(0, 16);
+  };
+  var plural = function (n, um, varios) {
+    return n + " " + (n === 1 ? um : varios);
+  };
+  function linhaPrazo(t, extra) {
+    var d = String(t.data || "").slice(0, 10);
+    var dt = d ? new Date(d + "T12:00:00") : null;
+    return (
+      '<li><button type="button" class="pz-linha" data-tid="' + esc(t.id) +
+      '" onclick="openTaskDetail(this.getAttribute(&quot;data-tid&quot;))">' +
+      '<span class="pz-data">' +
+      (dt ? brData(d).slice(0, 5) + "<small>" + DIAS_SEMANA[dt.getDay()] + "</small>" : "<small>sem</small>") +
+      "</span>" +
+      '<span class="pz-txt"><b>' + esc(t.title || "(sem título)") + "</b><span>" +
+      [t.formato ? esc(FMT[t.formato] || t.formato) : "", esc(ST[t.status] || t.status || ""), t.resp ? esc(t.resp) : "",
+        t.publicarEm ? "publica " + brData(t.publicarEm) + (brHora(t.publicarEm) ? " " + brHora(t.publicarEm) : "") : ""]
+        .filter(Boolean)
+        .join(" · ") +
+      "</span></span>" + extra + "</button></li>"
+    );
+  }
+  function abaPrazo(pz) {
+    if (!pz) return '<div class="nxc-empty">Carregando os prazos. Abra a aba de novo em instantes.</div>';
+    var grupos = [
+      ["atrasado", "Atrasado", "#ff6b6b"],
+      ["hoje", "Vence hoje", "#FFC700"],
+      ["semana", "Próximos 7 dias", "#60a5fa"],
+      ["depois", "Depois", "#8b8b8b"],
+      ["sem", "Sem prazo", "#8b8b8b"],
+    ].filter(function (g) { return pz[g[0]].length; });
+    var html = grupos.length
+      ? grupos
+          .map(function (g) {
+            return (
+              '<section class="pz-sec"><h3 class="apr-sec"><span class="nxc-dot" style="background:' + g[2] + '"></span>' +
+              g[1] + " <span>" + pz[g[0]].length + "</span></h3>" +
+              '<ul class="pz-lista">' +
+              pz[g[0]]
+                .map(function (t) {
+                  return linhaPrazo(
+                    t,
+                    g[0] === "atrasado"
+                      ? '<span class="pz-etq late">' + plural(t.diasAtraso, "dia", "dias") + " de atraso</span>"
+                      : pill(ST[t.status] || t.status || "", STC[t.status] || "#888"),
+                  );
+                })
+                .join("") +
+              "</ul></section>"
+            );
+          })
+          .join("")
+      : '<div class="nxc-empty">Nenhum prazo em aberto com a equipe.</div>';
+    if (pz.comCliente.length)
+      html +=
+        '<section class="pz-sec"><h3 class="apr-sec"><span class="nxc-dot" style="background:#f472b6"></span>Com o cliente <span>' +
+        pz.comCliente.length +
+        '</span></h3><p class="nxc-mute" style="font-size:12px;margin:0 0 10px">Esperando a aprovação do cliente. Não conta como prazo da equipe.</p>' +
+        '<ul class="pz-lista">' +
+        pz.comCliente
+          .map(function (t) {
+            return linhaPrazo(
+              t,
+              '<span class="pz-etq' + (t.diasEsperando >= 3 ? " alerta" : "") + '">' +
+                (t.diasEsperando === null
+                  ? "esperando"
+                  : t.diasEsperando === 0
+                    ? "esperando há menos de 1 dia"
+                    : "esperando há " + plural(t.diasEsperando, "dia", "dias")) +
+                "</span>",
+            );
+          })
+          .join("") +
+        "</ul></section>";
+    return html;
+  }
+  function bolinhasStories(todas) {
+    var CP = window.WFA_CLIPRAZO;
+    if (!CP) return "";
+    var st = CP.proximosStoriesCliente(todas, agoraLocal(), 8);
+    if (!st.length) return "";
+    return (
+      '<div class="st-bolas" aria-label="Próximos stories">' +
+      st
+        .map(function (s) {
+          var pv = aprPrevia(aprAnexos(s));
+          var img = pv && pv.tipo === "imagem";
+          return (
+            '<button type="button" class="st-bola' + (s.status === "homologcli" ? " esperando" : "") +
+            '" data-tid="' + esc(s.id) + '" title="' + esc(s.title || "Story") +
+            '" onclick="openTaskDetail(this.getAttribute(&quot;data-tid&quot;))">' +
+            '<span class="st-anel">' +
+            (img
+              ? '<img src="' + esc(pv.url) + '" alt="" loading="lazy" onerror="this.remove()">'
+              : '<span class="st-vazio">' + esc(String(s.title || "S").trim().slice(0, 1).toUpperCase()) + "</span>") +
+            "</span>" +
+            '<span class="st-data">' + (s.quando ? brData(s.quando).slice(0, 5) : "sem data") + "</span></button>"
+          );
+        })
+        .join("") +
+      "</div>"
+    );
+  }
+
   function render() {
     var gen = document.getElementById("cli-portal-generic");
     var orig = document.getElementById("cli-vivenda-orig");
@@ -281,6 +391,10 @@
     var ed = editorial().filter(function (e) {
       return e.clienteId === CLI && String(e.data || "").slice(0, 7) === k;
     });
+    /* Aba Prazo (28/09/2026): regra em src/lib/cliente-prazo.js, carregada como modulo em
+       window.WFA_CLIPRAZO. Sem o modulo (arquivo ainda baixando), a aba mostra aviso. */
+    var CP = window.WFA_CLIPRAZO;
+    var pz = CP ? CP.agruparPrazoCliente(todas, hoje(), Date.now()) : null;
     var cob = (state.cobranca || {})[CLI];
     var d = typeof cliDetData === "function" ? cliDetData(CLI) : {};
     var stL = { r: "Urgente", y: "Em ajuste", gr: "Saudável", churn: "Churn" }[c.status] || "Ativo";
@@ -290,6 +404,7 @@
       ["stories", "Stories", stories.length],
       ["todas", "Sem formato", semF.length],
       ["aprov", "Aprovação", aprov.length],
+      ["prazo", "Prazo", pz ? pz.atrasado.length : ""],
       ["editorial", "Editorial", ed.length],
       ["ficha", "Ficha", ""],
       ["faturas", "Faturas", ""],
@@ -408,6 +523,7 @@
           '</span></h3><p class="nxc-mute" style="font-size:12px;margin:0 0 10px">A equipe ainda está revisando. O cliente não vê isto no portal.</p>' +
           '<div class="nxc-grid">' + internas.map(cardTarefa).join("") + '</div>';
     }
+    else if (ABA === "prazo") html += abaPrazo(pz);
     else if (ABA === "editorial")
       html += ed.length
         ? '<div class="nxc-list">' +
@@ -517,6 +633,8 @@
         : '<div class="nxc-empty">Nenhuma entrega concluída com arquivo, legenda ou data ainda.</div>';
     } else if (ABA === "feed") {
       var grade = feedDerivar(todas, 12);
+      /* Proximos stories em bolinhas acima da grade, como no Instagram. Story continua fora da grade. */
+      html += bolinhasStories(todas);
       html += grade.length
         ? '<p class="nxc-mute" style="font-size:12px;margin:0 0 12px">Como o perfil vai ficar, na ordem de publica\u00e7\u00e3o. Story fica de fora porque n\u00e3o entra na grade.</p>' +
           '<div class="feed-grade">' +
@@ -591,6 +709,9 @@
       localStorage.setItem("wfa-cliente-ativo", CLI);
     } catch (e) {}
     render();
+  };
+  window.nxCliAtualiza = function () {
+    if (CLI) render();
   };
   window.nxCliAba = function (a) {
     ABA = a;
