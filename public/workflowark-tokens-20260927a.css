@@ -1,6 +1,9 @@
 /* WorkFlowArk · tokens do sistema (lote 2 do doc 11, 27/09/2026).
    Único lugar onde :root, body.aura-dark e body.aura-light declaram variável.
-   Tela nova usa estas variáveis; cor solta no código é erro. Teste: deploy/teste-tokens.py */
+   Tela nova usa estas variáveis; cor solta no código é erro. Teste: deploy/teste-tokens.py
+   Valores: doc 11 (Apple no /app) + referência Apple DESIGN.md. Amarelo é o único acento;
+   verde e vermelho só em status. Fundo escuro #000 (pedido do Gabriel: preto absoluto). Fundo claro #fbfbfd (o #f5f5f7 foi recusado como off-white gasto).
+   Escala: título 28/600, seção 17/600, corpo 14, rótulo 12 sem caixa alta; raio 16 cartão, 10 botão, 999 chip. */
 :root{
   --card:var(--surface);
   --bd:var(--line);
@@ -48,19 +51,32 @@
   --txt:#1d1d1f;
   --mute:#6e6e73;
   --mute-2:#8e8e93;
-  --line:#e5e5ea;
-  --line-2:#d1d1d6;
+  --line:rgba(0,0,0,.06);
+  --line-2:rgba(0,0,0,.1);
+  --surface-2:#f5f5f7;
+  --fs-title:28px;
+  --fs-section:17px;
+  --fs-body:14px;
+  --fs-label:12px;
+  --fw-head:600;
+  --tr-title:-.02em;
+  --tr-section:-.022em;
+  --r-card:16px;
+  --r-btn:10px;
+  --r-chip:999px;
+  --sh-panel:0 24px 64px rgba(0,0,0,.18);
+  --on-accent:#131316;
 }
 body.aura-dark{
   --bg:#000000;
-  --surface:rgba(255,255,255,.04);
-  --ink:#ffffff;
-  --ink-2:#f4f5f7;
-  --txt:#eef0f3;
-  --mute:#a6adba;
-  --mute-2:#7b8494;
-  --line:rgba(255,255,255,.12);
-  --line-2:rgba(255,255,255,.18);
+  --surface:#141416;
+  --ink:#F5F5F7;
+  --ink-2:#F5F5F7;
+  --txt:#F5F5F7;
+  --mute:#A1A1A6;
+  --mute-2:#6E6E73;
+  --line:rgba(255,255,255,.08);
+  --line-2:rgba(255,255,255,.12);
   --yel-soft:rgba(255,199,0,.14);
   --yel-bg:rgba(255,199,0,.09);
   --blue-soft:rgba(255,255,255,.06);
@@ -72,4 +88,10 @@ body.aura-dark{
   --sh-3:0 12px 28px -6px rgba(0,0,0,.55);
   --sh-4:0 28px 60px -12px rgba(0,0,0,.65);
   --sh-yel:0 8px 40px rgba(255,199,0,.35);
+  --surface-2:#1C1C1F;
+  --green:#4ADE80;
+  --red:#F87171;
+  --sh-panel:0 24px 64px rgba(0,0,0,.45);
+  --card:var(--surface);
+  --bd:var(--line);
 }
