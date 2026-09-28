@@ -1727,10 +1727,11 @@ body.aura-dark #page-tarefas .tc-prio.alta{color:#ff8a80;background:rgba(255,69,
    Fica por último para vencer as camadas antigas com cor fixa (cartão com vidro rgba(13,14,17,.55),
    modal #0b0c10, .app #000). Sidebar e Kanban não entram aqui: herdam os tokens como estão. */
 body.aura-dark,body.aura-dark .app{background:var(--bg)}
-body.aura-dark .card,body.aura-dark .kpi,body.aura-dark .md-card,body.aura-dark .mdw,body.aura-dark .al-kpi{
+/* variantes coloridas (.yel, .green, .red, .nota-y) mantêm fundo e borda próprios */
+body.aura-dark .card:not(.yel):not(.green):not(.red):not(.nota-y),body.aura-dark .kpi:not(.yel):not(.green):not(.red):not(.nota-y),body.aura-dark .md-card:not(.yel):not(.green):not(.red):not(.nota-y),body.aura-dark .mdw:not(.yel):not(.green):not(.red):not(.nota-y),body.aura-dark .al-kpi:not(.yel):not(.green):not(.red):not(.nota-y){
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);
   backdrop-filter:none;-webkit-backdrop-filter:none}
-body.aura-light .card,body.aura-light .kpi,body.aura-light .md-card,body.aura-light .mdw,body.aura-light .al-kpi{
+body.aura-light .card:not(.yel):not(.green):not(.red):not(.nota-y),body.aura-light .kpi:not(.yel):not(.green):not(.red):not(.nota-y),body.aura-light .md-card:not(.yel):not(.green):not(.red):not(.nota-y),body.aura-light .mdw:not(.yel):not(.green):not(.red):not(.nota-y),body.aura-light .al-kpi:not(.yel):not(.green):not(.red):not(.nota-y){
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card)}
 body.aura-dark .modal,body.aura-dark .crm-mbox{background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-panel)}
 body.aura-light .modal,body.aura-light .crm-mbox{box-shadow:var(--sh-panel)}
@@ -1738,6 +1739,6 @@ body.aura-dark .page-head h1,body.aura-light .page-head h1,.page-title h1{
   font-size:var(--fs-title);font-weight:var(--fw-head);letter-spacing:var(--tr-title);color:var(--ink)}
 .kpi .l,.card .l{font-size:var(--fs-label);font-weight:500;letter-spacing:0;text-transform:none;font-family:var(--sans)}
 /* Rótulos: 12 px, sem caixa alta e sem tracking largo (havia 5 estilos na mesma tela). Sidebar fica. */
-body.aura-dark .ahc .l,body.aura-light .ahc .l,.rail-label{
+body.aura-dark .ahc .l,body.aura-light .ahc .l,body.aura-dark .rail-label,body.aura-light .rail-label{
   font-size:var(--fs-label);font-weight:500;letter-spacing:0;text-transform:none}
 body.aura-dark .aura-saud,body.aura-light .aura-saud{font-weight:var(--fw-head);letter-spacing:var(--tr-title)}
