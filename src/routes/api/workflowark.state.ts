@@ -576,6 +576,10 @@ export const Route = createFileRoute("/api/workflowark/state")({
         if (action === "load-key") {
           const key = String(body.key ?? "");
           if (!isStateKey(key)) return json({ error: "Bloco inválido" }, { status: 400 });
+          // Mesma regra do GET (?key=): sem isto, qualquer membro ativo lia cobrança, acerto
+          // (Pix e valores da equipe) e extratos por aqui, passando por cima do Ver (28/09/2026).
+          const matriz = await lerMatriz(ctx.db);
+          if (!podeVerBloco(ctx.member, ctx.isAdmin, key, matriz)) return json({ error: "Sem permissão para este bloco." }, { status: 403 });
           const { data, error } = await ctx.db.from("workflowark_state").select("data").eq("key", key).maybeSingle();
           if (error) return json({ error: "Não foi possível carregar." }, { status: 500 });
           return json(data?.data ?? null);
