@@ -213,6 +213,13 @@ async function lerMatriz(db: any): Promise<any> {
 function podeVerBloco(member: WorkflowMember | null | undefined, isAdmin: boolean, key: string, matriz: any): boolean {
   return podeVerBlocoMatriz(member, isAdmin, key, matriz);
 }
+// wfa-gcal guarda a agenda Google de cada membro (pode ser o endereço secreto do iCal).
+// Cada um recebe só a própria entrada, em qualquer caminho de leitura (load geral, ?key= e
+// load-key). Antes só o load geral filtrava (28/09/2026).
+function soDoMembro(key: string, data: any, memberId: string): any {
+  if (key !== "wfa-gcal") return data;
+  return { [memberId]: data?.[memberId] ?? null };
+}
 function limparPermissoesMembro(v: any): Record<string, unknown> {
   const out: Record<string, Record<string, boolean>> = {};
   for (const campo of ["nav", "ajustes"]) {
@@ -441,7 +448,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
             .eq("key", soKey)
             .maybeSingle();
           if (e1) return json({ error: "Não foi possível carregar os dados." }, { status: 500 });
-          return json({ state: { [soKey]: row?.data ?? null } });
+          return json({ state: { [soKey]: soDoMembro(soKey, row?.data ?? null, ctx.member.id) } });
         }
 
         // Exclui o wfa-whatsapp JÁ NA CONSULTA: o blob (1,6MB+) era baixado e parseado
@@ -474,11 +481,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
 
         const state = Object.fromEntries((rows ?? []).filter((row: any) => !isSensitive(row.key) && !isHeavy(row.key) && podeVerBloco(ctx.member, ctx.isAdmin, row.key, matriz)).map((row: any) => {
           // wfa-gcal: cada membro vê apenas sua própria entrada de agenda (não a de todos)
-          if (row.key === "wfa-gcal") {
-            const memberId = ctx.member.id;
-            return [row.key, { [memberId]: (row.data as any)?.[memberId] ?? null }];
-          }
-          return [row.key, row.data];
+          return [row.key, soDoMembro(row.key, row.data, ctx.member.id)];
         }));
         let members: WorkflowMember[] = [];
         if (ctx.isAdmin) {
@@ -577,9 +580,13 @@ export const Route = createFileRoute("/api/workflowark/state")({
         if (action === "load-key") {
           const key = String(body.key ?? "");
           if (!isStateKey(key)) return json({ error: "Bloco inválido" }, { status: 400 });
+          // Mesma regra do GET (?key=): sem isto, qualquer membro ativo lia cobrança, acerto
+          // (Pix e valores da equipe) e extratos por aqui, passando por cima do Ver (28/09/2026).
+          const matriz = await lerMatriz(ctx.db);
+          if (!podeVerBloco(ctx.member, ctx.isAdmin, key, matriz)) return json({ error: "Sem permissão para este bloco." }, { status: 403 });
           const { data, error } = await ctx.db.from("workflowark_state").select("data").eq("key", key).maybeSingle();
           if (error) return json({ error: "Não foi possível carregar." }, { status: 500 });
-          return json(data?.data ?? null);
+          return json(soDoMembro(key, data?.data ?? null, ctx.member.id));
         }
 
         // AGENTE SOCIAL MEDIA: aprovar/recusar uma proposta da fila (wfa-social-fila).
