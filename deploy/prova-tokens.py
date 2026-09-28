@@ -53,7 +53,9 @@ if not base:
     class Q(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a): pass
     socketserver.TCPServer.allow_reuse_address = True
-    srv = socketserver.TCPServer(('127.0.0.1', 5189), functools.partial(Q, directory='public'))
+    # servidor com várias conexões: o de uma conexão por vez deixava cair folha de estilo e a captura saía sem a camada HIG
+    srv = socketserver.ThreadingTCPServer(('127.0.0.1', 5189), functools.partial(Q, directory='public'))
+    srv.daemon_threads = True
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     base = 'http://127.0.0.1:5189'
 hoje = date(2026, 9, 27); d = lambda n: (hoje + timedelta(days=n)).isoformat(); agora = '2026-09-27T12:00:00.000Z'
@@ -93,6 +95,8 @@ with sync_playwright() as pw:
         p.goto(base + '/workflowark.html', wait_until='load'); p.wait_for_timeout(3500)
         p.add_style_tag(content='*,*::before,*::after{transition:none!important;caret-color:transparent!important}')
         tema_certo(p, tema)
+        falta = p.evaluate("() => [...document.querySelectorAll('link[rel=stylesheet]')].filter(l => !l.sheet).map(l => l.getAttribute('href'))")
+        if falta: print('ATENCAO folha de estilo sem carregar em', tema, falta)
         if tema == 'dark':
             print('marcador:', p.evaluate("() => (document.documentElement.outerHTML.match(/build [0-9a-z-]+/)||[''])[0]"))
         def foto(tela):

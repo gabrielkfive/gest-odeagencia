@@ -1,4 +1,4 @@
-<!-- build 20260928d-sidebar-e-prazo -->
+<!-- build 20260929a-atividades-quadro -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -62,8 +62,8 @@
 </head>
 <!-- build AURA-DARK-OS-MIX 20260703-1830 -->
 <body class="aura-dark">
-<script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = escuro) */
-try{if(localStorage.getItem('wfa-theme')==='light'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){}</script>
+<script>/* tema salvo por usuário: aplica ANTES do primeiro paint (padrão = claro, decisão do Gabriel 28/09/2026) */
+try{if(localStorage.getItem('wfa-theme')!=='dark'){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}}catch(e){document.body.classList.remove('aura-dark');document.body.classList.add('aura-light');}</script>
 <div id="wfa-aparencia" onclick="if(event.target===this)wfaAparencia(false)">
   <div class="ap-box">
     <h3>Personalizar aparência</h3>
@@ -88,7 +88,7 @@ function wfaAparencia(open){
   var m=document.getElementById('wfa-aparencia');if(!m)return;
   m.classList.toggle('open',!!open);
   if(open){
-    var t;try{t=localStorage.getItem('wfa-theme')||'dark';}catch(e){t='dark';}
+    var t;try{t=localStorage.getItem('wfa-theme')||'light';}catch(e){t='light';}
     document.getElementById('ap-opt-light').classList.toggle('on',t==='light');
     document.getElementById('ap-opt-dark').classList.toggle('on',t!=='light');
   }
@@ -4753,5 +4753,7 @@ function wfaSetTheme(t){
 <link rel="stylesheet" href="workflowark-hig-20260928a.css">
 <link rel="stylesheet" href="workflowark-vidro-20260928b.css">
 <script src="workflowark-icones-20260928b.js" defer></script>
+<link rel="stylesheet" href="workflowark-quadro-20260929a.css">
+<script src="workflowark-quadro-20260929a.js" defer></script>
 </body>
 </html>
