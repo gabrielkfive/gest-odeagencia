@@ -1,13 +1,13 @@
 /* WorkFlowArk · aba Atividades no piloto Liquid Glass aprovado (28/09/2026).
-   Quadro estilo Trello sobre plano de fundo (amarelo por padrão), colunas em vidro fosco, cartões sólidos,
+   Quadro estilo Trello sobre plano de fundo (gradiente do piloto por padrão, amarelo como opção), colunas em vidro fosco, cartões sólidos,
    controles em cápsulas de vidro. Sidebar não muda (preta, ícones neutros). Teste: python deploy/teste-quadro.py */
 
 /* ---------- plano de fundo da página ---------- */
 :is(body.aura-dark,body.aura-light) #page-tarefas{
-  background:var(--quadro-fundo,linear-gradient(135deg,#FFE066 0%,#FFC700 45%,#FFAE00 100%))!important;
+  background:var(--quadro-fundo,linear-gradient(135deg,#ffb86b,#ff6fa3 45%,#7b6cff))!important;
   background-attachment:local!important;min-height:100%}
 /* no escuro o fundo escurece para o texto claro manter contraste */
-body.aura-dark #page-tarefas{background:linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.58)),var(--quadro-fundo,linear-gradient(135deg,#FFE066 0%,#FFC700 45%,#FFAE00 100%))!important;background-attachment:local!important}
+body.aura-dark #page-tarefas{background:linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.58)),var(--quadro-fundo,linear-gradient(135deg,#ffb86b,#ff6fa3 45%,#7b6cff))!important;background-attachment:local!important}
 /* título e textos soltos sobre o fundo */
 body.aura-light #page-tarefas :is(.page-title h1,.page-title h1 *){color:#1D1D1F!important}
 body.aura-light #page-tarefas .page-title p,body.aura-light #page-tarefas #sync-status{color:rgba(0,0,0,.72)!important}
