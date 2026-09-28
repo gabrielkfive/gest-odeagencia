@@ -1,15 +1,15 @@
 /* WorkFlowArk · aba Atividades no piloto Liquid Glass aprovado (28/09/2026).
    - Rolagem livre estilo Trello: arrastar o fundo do quadro (ou o fundo da coluna) com o mouse rola na horizontal,
      com inércia (projeção de momento da Apple). Cartão, botão e campo não iniciam o arraste do quadro.
-   - Plano de fundo por pessoa neste aparelho: amarelo por padrão, gradientes prontos ou uma foto.
+   - Plano de fundo por pessoa neste aparelho: gradiente do piloto por padrão, amarelo e outros gradientes, ou uma foto.
    - Refração de Liquid Glass nas cápsulas da barra do topo e da barra de vistas (só no Chrome; nos outros fica o desfoque).
    Teste: python deploy/teste-quadro.py */
 (function () {
   'use strict';
   var CHAVE = 'wfa-quadro-fundo';
   var FUNDOS = [
-    'linear-gradient(135deg,#FFE066 0%,#FFC700 45%,#FFAE00 100%)',
-    'linear-gradient(135deg,#ffb86b,#ff6fa3 45%,#7b6cff)',
+    'linear-gradient(135deg,#ffb86b,#ff6fa3 45%,#7b6cff)', // padrão: o gradiente do piloto aprovado
+    'linear-gradient(135deg,#FFE066 0%,#FFC700 45%,#FFAE00 100%)', // amarelo ARK, opção
     'linear-gradient(135deg,#4facfe,#00f2fe)',
     'linear-gradient(135deg,#43e97b,#38f9d7)',
     'linear-gradient(135deg,#fa709a,#fee140)',
@@ -74,7 +74,7 @@
     pop = document.createElement('div');
     pop.className = 'qf-pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Plano de fundo do quadro');
     var h = '<div class="qf-tit">Plano de fundo do quadro</div><div class="qf-grade">';
-    FUNDOS.forEach(function (f, j) { h += '<button type="button" class="qf-amostra" style="background:' + f + '" aria-label="' + (j ? 'Fundo ' + (j + 1) : 'Amarelo ARK') + '" data-i="' + j + '"></button>'; });
+    FUNDOS.forEach(function (f, j) { h += '<button type="button" class="qf-amostra" style="background:' + f + '" aria-label="' + (j === 1 ? 'Amarelo ARK' : j ? 'Fundo ' + (j + 1) : 'Gradiente do piloto') + '" data-i="' + j + '"></button>'; });
     h += '</div><label class="qf-foto"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 15V5M7.8 9.2L12 5l4.2 4.2M5 16v2.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>Usar uma foto minha<input type="file" accept="image/*" hidden></label>';
     pop.innerHTML = h;
     document.body.appendChild(pop);

@@ -3,7 +3,7 @@
 Uso: python deploy/teste-quadro.py [url-base]    (sai 1 se alguma regra quebrar)
 
 1. Sem escolha salva, o tema abre claro (sidebar continua preta).
-2. O quadro tem fundo amarelo por padrão.
+2. O quadro abre com o gradiente do piloto (laranja, rosa e roxo); amarelo é opção.
 3. Arrastar o fundo do quadro com o mouse rola na horizontal (rolagem livre, estilo Trello).
 4. Arrastar a partir de um cartão NÃO rola o quadro (o arrasto do cartão é outro gesto).
 5. Fundo escolhido fica salvo e volta depois de recarregar.
@@ -48,8 +48,9 @@ with sync_playwright() as pw:
         falhas.append('tema padrão não é claro (body: %s)' % classe)
     p.evaluate("() => document.querySelector('[data-nav=tarefas]').click()"); p.wait_for_timeout(900)
     fundo = p.evaluate("() => { const s = getComputedStyle(document.getElementById('page-tarefas')); return s.backgroundImage + ' | ' + s.backgroundColor; }")
-    if not any(k in fundo for k in ('255, 199, 0', '255, 214, 0', '255, 204, 0', '#ffc700')):
-        falhas.append('quadro sem fundo amarelo padrão (%s)' % fundo[:120])
+    # padrão = gradiente do piloto aprovado (laranja, rosa e roxo); o amarelo virou opção (pedido do Gabriel 28/09)
+    if not all(k in fundo for k in ('255, 184, 107', '255, 111, 163', '123, 108, 255')):
+        falhas.append('quadro sem o gradiente do piloto como padrão (%s)' % fundo[:120])
     col = p.evaluate("() => { const c = document.querySelector('#task-board .task-col'); const s = getComputedStyle(c); return { bg: s.backgroundColor, bf: s.backdropFilter }; }")
     if 'blur' not in (col['bf'] or '') or (len(cor(col['bg'])) > 3 and cor(col['bg'])[3] >= .95) or (len(cor(col['bg'])) == 3):
         falhas.append('coluna não é vidro fosco (%s, %s)' % (col['bg'], col['bf']))
@@ -109,4 +110,4 @@ with sync_playwright() as pw:
 if srv: srv.shutdown()
 if falhas:
     print('FALHA (%d)' % len(falhas)); [print(' -', f) for f in falhas]; sys.exit(1)
-print('OK: tema claro padrão, fundo amarelo, rolagem livre, cartão não rola, fundo salvo, colunas de vidro')
+print('OK: tema claro padrão, gradiente do piloto, rolagem livre, cartão não rola, fundo salvo, colunas de vidro')
