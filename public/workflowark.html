@@ -1,4 +1,4 @@
-<!-- build 20260928a-modal-tarefa -->
+<!-- build 20260926e-lista-clientes -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -2204,71 +2204,6 @@ function wfaSetTheme(t){
             .tkv{overflow:hidden}
             .tkv select,.tkv input{max-width:100%}
             #tk-addresp{flex:1 1 100%;min-width:0;max-width:220px}
-          }
-          /* ===== Modal da tarefa em uma coluna (tela 4 do doc 11, 28/09/2026) =====
-             Sem a coluna lateral: acoes viram um trilho de icones no topo, a atividade com
-             comentarios vem depois dos anexos e o rodape (Salvar) fica preso embaixo. Uma
-             area de rolagem so, a do modal inteiro; o feed nao rola sozinho. */
-          .av.foto{background:none!important;overflow:hidden;padding:0}
-          .av.foto img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
-          .tktopo .tkacoes{padding:0;margin-left:auto;flex-direction:row;gap:0}
-          .tktopo .tkico{width:30px;height:30px;border-radius:999px}
-          .tktopo .tkico svg{width:14px;height:14px}
-          .tkicosep{width:1px;height:18px;background:var(--line);margin:0 4px;align-self:center}
-          .tkside{border-left:none}
-          .tksideh{padding:16px 0 8px}
-          .tkfoot{margin-top:0;background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface))}
-          @media(min-width:901px){
-            .tkwrap{display:flex;flex-direction:column;max-height:calc(100vh - 36px);overflow:auto;scrollbar-width:thin;scrollbar-color:rgba(120,120,128,.35) transparent}
-            body.aura-dark .tkwrap{scrollbar-color:rgba(255,255,255,.22) transparent}
-            .tkmain{overflow:visible;flex:none;padding:0 28px}
-            .tktopo{padding:12px 0 0}
-            .tktitulo{font-size:22px;padding:2px 0 6px}
-            .tkna{display:none}
-            .tkcampos{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:row dense;column-gap:20px;padding:3px 14px;margin-bottom:8px}
-            .tkr{grid-template-columns:112px 1fr;padding:1px 0;border-bottom:0;min-height:34px}
-            .tkl{white-space:nowrap}
-            .tkr:has(#tk-resps),.tkr:has([data-tktimer]){grid-column:1/-1}
-            .tkdata{width:128px}
-            .tkv select,.tkv input{padding-top:6px;padding-bottom:6px}
-            #tk-addresp{max-width:150px}
-            .tkdesc{min-height:64px;padding:10px 14px;font-size:14px;line-height:1.55}
-            .tkduo{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;margin-top:8px}
-            .tkduo .tksec{margin-top:0;padding:10px 12px;position:relative}
-            .tkduo .tkprog{position:absolute;top:12px;right:12px;width:45%;margin:0}
-            .tkduo .tksech{margin-bottom:6px}
-            .tkcl{padding:3px 6px}
-            .tkduo .tkinline{flex-wrap:nowrap;margin-top:6px}
-            .tkduo .tkinline input{min-width:0;padding:6px 10px}
-            #tk-anxnm{flex:0 0 84px}
-            .tkduo .tkbtn{padding:6px 11px}
-            .tkside{flex:none;padding:0 28px 8px}
-            .tksideh{padding:10px 0 4px}
-            .tkfeed{overflow:visible;padding:0;flex:none}
-            .tkev{margin-bottom:4px;align-items:baseline}
-            .tkev .dot{margin-top:0;align-self:center}
-            .tkev p span{display:inline;margin:0 0 0 8px}
-            .tkcm{padding:6px 10px;margin-bottom:6px}
-            .tkcmh{margin-bottom:2px}
-            .tkcmh .av{width:22px;height:22px}
-            .tkcbox{border-top:0;padding:2px 0 0;flex-direction:row;align-items:flex-start;gap:8px}
-            .tkcbox .tkcrow{flex:1}
-            .tkcbox .tkbtn{align-self:flex-start;margin-top:5px}
-            .tkcbox textarea{min-height:36px;resize:none}
-            .tkfoot{position:sticky;bottom:0;z-index:2;flex:none;padding:8px 28px;border-top:1px solid var(--line)}
-          }
-          @media(max-width:900px){
-            .tktopo{flex-wrap:wrap}
-            .tktopo .tkbc{flex:1 1 0;min-width:0}
-            .tktopo .tkacoes{order:3;flex-basis:100%;margin-left:0}
-            .tktopo .tkicorow{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-            .tktopo .tkicorow{gap:4px}
-            .tktopo .tkico{width:28px;height:28px}
-            .tkside{padding:0 18px 12px}
-            .tkfeed{padding:4px 0 12px}
-            .tkcbox{padding:12px 0 4px;border-top:0}
-            /* o rodape agora e o ultimo bloco: folga embaixo para o botao flutuante do assistente nao cobrir o Salvar */
-            .tkfoot{padding:14px 18px 76px;margin-top:0}
           }
           @media(max-width:1200px){#page-organograma .org-areas{grid-template-columns:repeat(3,1fr)}}
           @media(max-width:900px){
@@ -4803,7 +4738,7 @@ function wfaSetTheme(t){
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Pronto</span></div>
 
-<script src="workflowark-app-20260928a.js"></script>
+<script src="workflowark-app-20260926c.js"></script>
 <script type="module">import * as P from "./workflowark-permissoes-20260926a.js";window.WFA_PERM=P;try{applyAccess();}catch(e){}</script>
 <script src="workflowark-finpainel-20260926a.js"></script>
 <script src="workflowark-inicio-20260926a.js"></script>

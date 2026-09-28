@@ -44,11 +44,6 @@ escreve cor própria para o escuro, herda.
 `task-card` e colunas do kanban, `form-group` e `form-select`, `toast`, modal de tarefa
 (`openTaskDetail`), modal de lead (`crmOpenModal`).
 
-Modal de tarefa (28/09/2026): uma coluna só, sem painel lateral. Ações em trilho de ícones
-no topo, campos em grade de duas colunas no desktop, checklist e anexos lado a lado,
-atividade com comentários (foto do autor quando é quem está logado) e rodapé preso embaixo.
-Uma área de rolagem só, a do modal; em 1440x900 uma tarefa comum cabe sem rolar.
-
 ## Ícones e marcas
 
 Ícones de interface em SVG de traço 2 px. Serviço externo aparece com o **logo oficial**

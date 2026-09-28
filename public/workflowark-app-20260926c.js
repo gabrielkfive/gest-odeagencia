@@ -2885,7 +2885,7 @@ function wfaEstDecimal(hStr,mStr){
     }
     /* no tema escuro --surface e rgba(...,.04): sozinho ele deixa a pagina aparecer
        atraves do modal. Por isso o fundo opaco por baixo, e a superficie por cima. */
-    m.innerHTML='<div class="pj-f'+(largo?' largo':'')+'" style="background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface));border:1px solid var(--line);border-radius:18px;padding:'+(largo?'0':'22px')+';width:min('+(largo?'960px':'560px')+',100%);max-height:'+(largo?'calc(100vh - 36px)':'88vh')+';overflow:'+(largo?'hidden':'auto')+'">'+html+'</div>';
+    m.innerHTML='<div class="pj-f'+(largo?' largo':'')+'" style="background-color:var(--bg);background-image:linear-gradient(var(--surface),var(--surface));border:1px solid var(--line);border-radius:18px;padding:'+(largo?'0':'22px')+';width:min('+(largo?'1080px':'560px')+',100%);max-height:'+(largo?'92vh':'88vh')+';overflow:'+(largo?'hidden':'auto')+'">'+html+'</div>';
     m.style.display='flex';
   }
   function fecharModal(){
@@ -2914,22 +2914,6 @@ function wfaEstDecimal(hStr,mStr){
   function tkDur(s){s=Math.max(0,Math.floor(s||0));var h=Math.floor(s/3600),m=Math.floor(s%3600/60);
     return h?(h+'h '+(m<10?'0':'')+m+'m'):(m+'m '+((s%60)<10?'0':'')+(s%60)+'s');}
   function tkGasto(t){var s=t.timeSpent||0;if(t.timerSince)s+=(Date.now()-new Date(t.timerSince).getTime())/1000;return s;}
-  /* Foto de quem comenta (tela 4 do doc 11, 28/09/2026): a unica foto que o app conhece e a
-     do login Google de quem esta usando (a mesma do rodape do menu). Comentario dessa pessoa
-     sai com a foto; dos outros, com a sigla, como antes. */
-  function tkFotoUrl(nome){
-    try{
-      if(!nome||String(nome).trim().toLowerCase()!==String(tkQuem()).trim().toLowerCase())return '';
-      var s=JSON.parse(localStorage.getItem('sb-fxfnonozzekxnxddxsnh-auth-token')||'null');
-      var u=s&&s.user&&s.user.user_metadata;var f=(u&&(u.avatar_url||u.picture))||'';
-      return /^(https?:|data:image\/)/.test(f)?f:'';
-    }catch(e){return '';}
-  }
-  function tkAv(nome){
-    var ini=tkIni(nome),f=tkFotoUrl(nome);
-    if(!f)return '<i class="av" title="'+esc(nome)+'">'+ini+'</i>';
-    return '<i class="av foto" title="'+esc(nome)+'"><img src="'+esc(f)+'" alt="" referrerpolicy="no-referrer" onerror="var p=this.parentNode;p.classList.remove(\'foto\');p.textContent=\''+ini.replace(/[^A-Z0-9]/g,'')+'\'"></i>';
-  }
   function tkIni(n){return String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(function(s){return s[0]||'';}).join('').toUpperCase();}
 
   function abrirTarefa(tid,stInicial){
@@ -2998,22 +2982,7 @@ function wfaEstDecimal(hStr,mStr){
     modal(
       '<div class="tkwrap">'+
       '<div class="tkmain">'+
-        '<div id="tk-capa" class="tkcapa"></div>'+'<div class="tktopo"><div class="tkbc">'+(ctx.crumb||'')+'</div>'+
-        '<div class="tkacoes">'+
-          '<div class="tkicorow">'+
-          '<button type="button" class="tkico" data-tkgo="tk-addresp" title="Membros" aria-label="Membros">'+TKI.user+'</button>'+
-          (ctx.semPapeis?'':'<button type="button" class="tkico" data-tkgo="tk-papeis" title="Etiquetas" aria-label="Etiquetas">'+TKI.tag+'</button>')+
-          '<button type="button" class="tkico" data-tkgo="tk-clnovo" title="Checklist" aria-label="Checklist">'+TKI.check+'</button>'+
-          '<button type="button" class="tkico" data-tkgo="tk-venc" title="Datas" aria-label="Datas">'+TKI.cal+'</button>'+
-          '<button type="button" class="tkico" data-tkgo="tk-anxnm" title="Anexo" aria-label="Anexo">'+TKI.clip+'</button>'+
-          '<button type="button" class="tkico" data-tkcapa="1" title="Capa / imagem" aria-label="Capa ou imagem">'+TKI.img+'</button>'+
-          '<span class="tkicosep" aria-hidden="true"></span>'+
-          '<button type="button" class="tkico" data-tkgo="tk-st" title="Mover" aria-label="Mover">'+TKI.move+'</button>'+
-          (t.st==='concluido'?'':'<button type="button" class="tkico ok" data-tkdone="1" title="Concluir" aria-label="Concluir">'+TKI.done+'</button>')+
-          (ehNova?'':'<button type="button" class="tkico bad" data-tkdel2="1" title="Excluir" aria-label="Excluir">'+TKI.trash+'</button>')+
-          '</div>'+
-        '</div>'+
-        '<button type="button" class="tkx" data-tkx="1" aria-label="Fechar" title="Fechar">✕</button></div>'+
+        '<div id="tk-capa" class="tkcapa"></div>'+'<div class="tktopo"><div class="tkbc">'+(ctx.crumb||'')+'</div><button type="button" class="tkx" data-tkx="1" aria-label="Fechar" title="Fechar">✕</button></div>'+
         '<input id="tk-t" class="tktitulo" value="'+esc(t.t)+'" placeholder="O que precisa ser feito">'+
       '<div class="tkna">na lista <b id="tk-na">'+esc((cols.filter(function(c){return c.k===t.st;})[0]||cols[0]||{n:''}).n)+'</b>'+((t.resps||[]).length?'<span class="tkna-avs">'+(t.resps||[]).map(function(r){return '<i class="av" title="'+esc(r)+'">'+tkIni(r)+'</i>';}).join('')+'</span>':'')+'</div>'+
         '<div class="tkcampos">'+
@@ -3032,7 +3001,6 @@ function wfaEstDecimal(hStr,mStr){
           (typeof ctx.extrasHTML==='function'?ctx.extrasHTML(t):'')+
         '</div>'+
         '<textarea id="tk-obs" class="tkdesc" placeholder="Adicione uma descrição">'+esc(t.obs||'')+'</textarea>'+
-        '<div class="tkduo">'+
         '<div class="tksec"><div class="tksech">☑ Checklist <span id="tk-clct">'+(cl.length?clOk+'/'+cl.length:'')+'</span></div>'+
           '<div class="tkprog" id="tk-clprog"'+(cl.length?'':' style="display:none"')+'><span id="tk-clpct">'+(cl.length?Math.round(clOk/cl.length*100):0)+'%</span><div class="tkbar"><div id="tk-clbar" style="width:'+(cl.length?Math.round(clOk/cl.length*100):0)+'%"></div></div></div>'+
           '<div id="tk-cl"></div>'+
@@ -3043,19 +3011,35 @@ function wfaEstDecimal(hStr,mStr){
           '<button type="button" class="tkbtn" data-anxup="1" title="Enviar imagem ou PDF do computador ou do celular. Também dá pra colar a imagem com Ctrl+V.">📷 Imagem</button>'+
           '<input type="file" id="tk-anxfile" accept="image/*,application/pdf" style="display:none"></div>'+
           '<div id="tk-anxstatus" class="tkvazio" style="margin-top:4px"></div></div>'+
-        '</div>'+
-      '</div>'+
-      '<div class="tkside">'+
-        '<div class="tksideh">Atividade</div>'+
-        '<div id="tk-feed" class="tkfeed"></div>'+
-        '<div class="tkcbox"><div class="tkcrow">'+tkAv(tkQuem())+'<textarea id="tk-cmt" placeholder="Escreva um comentário"></textarea></div>'+
-          '<button type="button" class="tkbtn" data-cmtadd="1">Enviar</button></div>'+
-      '</div>'+
-      '<div class="tkfoot">'+
+        '<div class="tkfoot">'+
           (ehNova?'':'<button class="icobtn" data-tkdel="1" style="color:var(--red)">Excluir</button>')+
           '<span id="tk-autosave" class="tkvazio" style="margin-right:auto;padding-left:8px"></span>'+
           '<button class="tb-btn alt" data-tkcancel="1">'+(ehNova?'Cancelar':'Fechar')+'</button>'+
           '<button class="tb-btn dk" data-tksave="1">Salvar</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="tkside">'+
+        '<div class="tkacoes">'+
+          '<div class="tkacth">Adicionar ao cartão</div>'+
+          '<div class="tkicorow">'+
+          '<button type="button" class="tkico" data-tkgo="tk-addresp" title="Membros" aria-label="Membros">'+TKI.user+'</button>'+
+          (ctx.semPapeis?'':'<button type="button" class="tkico" data-tkgo="tk-papeis" title="Etiquetas" aria-label="Etiquetas">'+TKI.tag+'</button>')+
+          '<button type="button" class="tkico" data-tkgo="tk-clnovo" title="Checklist" aria-label="Checklist">'+TKI.check+'</button>'+
+          '<button type="button" class="tkico" data-tkgo="tk-venc" title="Datas" aria-label="Datas">'+TKI.cal+'</button>'+
+          '<button type="button" class="tkico" data-tkgo="tk-anxnm" title="Anexo" aria-label="Anexo">'+TKI.clip+'</button>'+
+          '<button type="button" class="tkico" data-tkcapa="1" title="Capa / imagem" aria-label="Capa ou imagem">'+TKI.img+'</button>'+
+          '</div>'+
+          '<div class="tkacth">Ações</div>'+
+          '<div class="tkicorow">'+
+          '<button type="button" class="tkico" data-tkgo="tk-st" title="Mover" aria-label="Mover">'+TKI.move+'</button>'+
+          (t.st==='concluido'?'':'<button type="button" class="tkico ok" data-tkdone="1" title="Concluir" aria-label="Concluir">'+TKI.done+'</button>')+
+          (ehNova?'':'<button type="button" class="tkico bad" data-tkdel2="1" title="Excluir" aria-label="Excluir">'+TKI.trash+'</button>')+
+          '</div>'+
+        '</div>'+
+        '<div class="tksideh">Atividade</div>'+
+        '<div id="tk-feed" class="tkfeed"></div>'+
+        '<div class="tkcbox"><div class="tkcrow"><i class="av">'+tkIni(tkQuem())+'</i><textarea id="tk-cmt" placeholder="Escreva um comentário"></textarea></div>'+
+          '<button type="button" class="tkbtn" data-cmtadd="1">Enviar</button></div>'+
       '</div>'+
       '</div>'
     , true);
@@ -3137,7 +3121,7 @@ function wfaEstDecimal(hStr,mStr){
     });
     /* descricao cresce com o texto ate o teto do CSS (pedido do Gabriel 21/09, referencia Trello) */
     var obs=m.querySelector('#tk-obs');
-    function tkObsAuto(){if(!obs)return;obs.style.height='auto';obs.style.height='';var piso=parseFloat(getComputedStyle(obs).minHeight)||168;obs.style.height='auto';obs.style.height=Math.max(piso,obs.scrollHeight+4)+'px';}
+    function tkObsAuto(){if(!obs)return;obs.style.height='auto';obs.style.height=Math.max(168,obs.scrollHeight+4)+'px';}
     if(obs){obs.addEventListener('input',tkObsAuto);setTimeout(tkObsAuto,0);}
     var selResp=m.querySelector('#tk-addresp');
     try{if(typeof wfaBuscaPessoa==='function')wfaBuscaPessoa(selResp);}catch(e){}
@@ -3287,7 +3271,7 @@ function wfaEstDecimal(hStr,mStr){
     itens.sort(function(a,b){return String(a.em).localeCompare(String(b.em));});
     box.innerHTML=itens.length?itens.map(function(i){
       var q=new Date(i.em);var dd=isNaN(q.getTime())?'':q.toLocaleDateString('pt-BR')+' '+q.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      if(i.tipo==='c')return '<div class="tkcm"><div class="tkcmh">'+tkAv(i.autor)+esc(i.autor)+'<span>'+dd+'</span></div><p>'+esc(i.txt)+'</p></div>';
+      if(i.tipo==='c')return '<div class="tkcm"><div class="tkcmh"><i class="av">'+tkIni(i.autor)+'</i>'+esc(i.autor)+'<span>'+dd+'</span></div><p>'+esc(i.txt)+'</p></div>';
       return '<div class="tkev"><span class="dot"></span><p>'+esc(i.txt)+'<span>'+dd+'</span></p></div>';
     }).join(''):'<div class="tkvazio" style="padding:10px 0">Nada aconteceu aqui ainda.</div>';
     box.scrollTop=box.scrollHeight;
