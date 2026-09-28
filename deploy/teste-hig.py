@@ -125,13 +125,26 @@ with sync_playwright() as pw:
           let capsula = 'sem item'; if (sel) { const r = sel.getBoundingClientRect(); capsula = parseFloat(getComputedStyle(sel).borderTopLeftRadius) >= r.height / 2 - 1; }
           return { side: bf('.side'), busca: bf('.tb-search'), icone: bf('.topbar .tb-btn.tb-ic'), topo: tb.backgroundColor, capsula: capsula };
         }''')
-        for k in ('side', 'busca', 'icone'):
+        for k in ('busca', 'icone'):
             if 'blur' not in (vid[k] or ''):
                 falhas.append('%s vidro: %s sem desfoque de fundo (%s)' % (tema, k, vid[k]))
         if vid['topo'] not in ('rgba(0, 0, 0, 0)', 'transparent'):
             falhas.append('%s vidro: barra do topo com fundo chapado %s' % (tema, vid['topo']))
-        if vid['capsula'] is not True:
-            falhas.append('%s vidro: item selecionado não é cápsula (%s)' % (tema, vid['capsula']))
+        # pedido do Gabriel (28/09): sidebar preta nos dois temas, ícones neutros (sem amarelo), linha retangular arredondada
+        sb = p.evaluate('''() => {
+          const lum = c => { const m = c.match(/[\d.]+/g); const v = m.slice(0,3).map(x => { x = x/255; return x <= .03928 ? x/12.92 : Math.pow((x+.055)/1.055, 2.4); }); return .2126*v[0] + .7152*v[1] + .0722*v[2]; };
+          const s = document.querySelector('.side'); let bg = getComputedStyle(s).backgroundColor, bgi = getComputedStyle(s).backgroundImage;
+          const ic = document.querySelector('.side .navitem:not(.active) svg'); const cor = ic ? getComputedStyle(ic).color : '';
+          const m = cor.match(/[\d.]+/g) || [0,0,0]; const amarelo = +m[0] > 200 && +m[1] > 150 && +m[2] < 90;
+          const sel = [...document.querySelectorAll('.side .navitem.active[data-nav]:not([data-nav=""]), .side .subitem.active')].find(e => e.getBoundingClientRect().height > 4);
+          const r = sel ? parseFloat(getComputedStyle(sel).borderTopLeftRadius) : 0, h = sel ? sel.getBoundingClientRect().height : 0;
+          return { escura: bgi !== 'none' ? /rgba?\((1?\d{1,2}|2[0-4]\d), ?(1?\d{1,2}|2[0-4]\d), ?(1?\d{1,2}|2[0-4]\d)/.test(bgi) && !/255, ?255, ?255/.test(bgi.slice(0,40)) : lum(bg) < .05, bg, bgi: bgi.slice(0, 60), amarelo, cor, capsula: sel ? r >= h / 2 - 1 : false }; }''')
+        if not sb['escura']:
+            falhas.append('%s sidebar: não está escura (%s %s)' % (tema, sb['bg'], sb['bgi']))
+        if sb['amarelo']:
+            falhas.append('%s sidebar: ícones em amarelo (%s)' % (tema, sb['cor']))
+        if sb['capsula']:
+            falhas.append('%s sidebar: item selecionado em cápsula' % tema)
         # ícones: não mexe em texto editável pela equipe; botão só com ✕ mantém nome acessível;
         # --glass continua sendo filtro (cabeçalho das colunas do Kanban usa backdrop-filter:var(--glass))
         ic = p.evaluate(r'''async () => {
