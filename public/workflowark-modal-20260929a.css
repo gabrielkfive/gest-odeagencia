@@ -1,0 +1,11 @@
+/* WorkFlowArk · modal do cartão estilo Trello (28/09/2026): tarefa existente salva sozinha, sem botão Salvar.
+   Tarefa nova (sem o botão Excluir no rodapé) continua com Salvar. Teste: python deploy/teste-modal-autosave.py */
+#pj-modal .tkfoot:has([data-tkdel]) [data-tksave]{display:none!important}
+#pj-modal .tktopo:has(.tk-salvo-alto){display:flex;align-items:center}
+#pj-modal .tk-salvo-alto{margin-left:auto;margin-right:10px;display:inline-flex;align-items:center;gap:5px;padding:4px 11px;
+  border-radius:999px;background:rgba(52,199,89,.14);color:#1a7f37;font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none}
+#pj-modal .tk-salvo-alto.pendente{background:rgba(255,159,10,.16);color:#8a5300}
+#pj-modal .tk-salvo-alto.erro{background:rgba(233,21,45,.12);color:#B3121F}
+body.aura-dark #pj-modal .tk-salvo-alto{background:rgba(48,209,88,.16);color:#4AD968}
+body.aura-dark #pj-modal .tk-salvo-alto.pendente{background:rgba(255,159,10,.18);color:#FFB340}
+body.aura-dark #pj-modal .tk-salvo-alto.erro{background:rgba(255,66,69,.18);color:#FF6165}
