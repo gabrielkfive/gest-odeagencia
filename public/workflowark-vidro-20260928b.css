@@ -1,0 +1,84 @@
+/* WorkFlowArk · Liquid Glass na camada de navegação (28/09/2026).
+   Referências oficiais em Documents/WorkFlowArk-Next-2026-09-20/apple-ref (HIG materials, sidebars, toolbars, sheets).
+   Regras da Apple aplicadas: vidro só em navegação e controles, nunca no conteúdo; sidebar flutuante em vidro que
+   segue o tema; barra do topo sem fundo, com controles agrupados em cápsulas de vidro e o conteúdo passando por baixo;
+   item selecionado em cápsula na cor de acento; ícones da sidebar na cor de acento; ação principal tingida.
+   Carregada depois da camada HIG. Teste: python deploy/teste-hig.py */
+
+/* ---------- Sidebar: painel de vidro flutuante ---------- */
+:is(body.aura-dark,body.aura-light) .side{
+  background:var(--glass-side)!important;
+  -webkit-backdrop-filter:var(--glass-blur)!important;backdrop-filter:var(--glass-blur)!important;
+  box-shadow:var(--glass-rim),var(--glass-shadow)!important;
+  border:0!important;border-radius:22px!important;color:var(--side-txt)!important}
+:is(body.aura-dark,body.aura-light) .side :is(.navitem,.subitem,.nm,.brand-info){color:var(--side-txt)!important}
+:is(body.aura-dark,body.aura-light) .side .side-foot{color:var(--side-txt)!important}
+:is(body.aura-dark,body.aura-light) .side .side-foot :is(b,strong,.nm,.name,div,span):not(.av){color:inherit}
+:is(body.aura-dark,body.aura-light) .side .side-foot :is(.rl,small,.role){color:var(--side-mute)!important}
+/* Linhas: cápsula, 34 px, ícone na cor de acento (exemplo Landmarks da HIG) */
+:is(body.aura-dark,body.aura-light) .side :is(.navitem,.subitem){border-radius:999px!important;min-height:34px;margin-left:6px!important;margin-right:6px!important}
+:is(body.aura-dark,body.aura-light) .side :is(.navitem,.subitem) svg{color:var(--icon-accent)!important;stroke-width:1.6!important}
+/* só o ícone principal (primeiro svg) muda de tamanho; a seta do grupo mantém a posição dela */
+:is(body.aura-dark,body.aura-light) .side :is(.navitem,.subitem) > svg:first-child{width:18px!important;height:18px!important;min-width:18px!important;padding:0!important;box-sizing:content-box!important;flex:none!important}
+:is(body.aura-dark,body.aura-light) .side :is(.navitem,.subitem):not(.active):hover{background:var(--side-fill)!important}
+/* Selecionado: cápsula amarela, texto e ícone escuros (13:1) */
+:is(body.aura-dark,body.aura-light) .side .navitem.active[data-nav]:not([data-nav=""]),
+:is(body.aura-dark,body.aura-light) .side .subitem.active{
+  background:var(--yel)!important;color:var(--on-accent)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)!important}
+:is(body.aura-dark,body.aura-light) .side :is(.navitem.active[data-nav]:not([data-nav=""]),.subitem.active) *:not(svg):not(svg *){color:var(--on-accent)!important}
+:is(body.aura-dark,body.aura-light) .side .navitem.active[data-nav]:not([data-nav=""]) svg,
+:is(body.aura-dark,body.aura-light) .side .subitem.active svg{color:var(--on-accent)!important}
+/* Grupo do selecionado e grupos com subitem ativo: sem fundo */
+:is(body.aura-dark,body.aura-light) .side:has(.subitem.active) .navitem.active{background:transparent!important;box-shadow:none!important;color:var(--side-txt)!important}
+:is(body.aura-dark,body.aura-light) .side:has(.subitem.active) .navitem.active svg{color:var(--icon-accent)!important}
+:is(body.aura-dark,body.aura-light) .side .crm-pill{background:var(--side-fill)!important;color:var(--side-txt)!important;border-radius:999px!important;margin:0 6px!important}
+:is(body.aura-dark,body.aura-light) .side .side-collapse-btn{background:var(--side-fill)!important;color:var(--side-txt)!important;border:0!important;border-radius:999px!important}
+:is(body.aura-dark,body.aura-light) .side .brand-mark{background:transparent!important;box-shadow:none!important}
+
+/* ---------- Barra do topo: sem fundo; controles em cápsulas de vidro; conteúdo passa por baixo ---------- */
+:is(body.aura-dark,body.aura-light) .topbar{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+/* Efeito de borda de rolagem (scroll-views): desfoque que some para baixo, só atrás da barra */
+:is(body.aura-dark,body.aura-light) .topbar::before{
+  content:"";position:absolute;inset:0 0 -18px 0;z-index:-1;pointer-events:none;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  background:linear-gradient(to bottom,var(--bg) 0%,color-mix(in srgb,var(--bg) 70%,transparent) 55%,transparent 100%);
+  -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent);mask-image:linear-gradient(to bottom,#000 55%,transparent)}
+body.aura-light .topbar::before{background:linear-gradient(to bottom,#fff 0%,rgba(255,255,255,.7) 55%,transparent 100%)}
+:is(body.aura-dark,body.aura-light) .topbar :is(.tb-search,.tb-btn.tb-ic){
+  background:var(--glass)!important;
+  -webkit-backdrop-filter:var(--glass-blur)!important;backdrop-filter:var(--glass-blur)!important;
+  box-shadow:var(--glass-rim),var(--glass-shadow)!important;border:0!important;border-radius:999px!important}
+:is(body.aura-dark,body.aura-light) .topbar .tb-search{height:34px;align-self:center;padding-left:6px}
+:is(body.aura-dark,body.aura-light) .topbar .tb-search input{background:transparent!important;border:0!important;box-shadow:none!important;height:34px!important}
+:is(body.aura-dark,body.aura-light) .topbar .tb-btn.tb-ic{width:34px!important;height:34px!important;padding:0!important;display:inline-grid!important;place-items:center}
+:is(body.aura-dark,body.aura-light) .topbar .tb-btn.tb-ic svg{stroke-width:1.6!important;width:17px!important;height:17px!important}
+/* Ação principal tingida (toolbars-prominent-action-tinted): cápsula na cor de acento com borda de luz */
+:is(body.aura-dark,body.aura-light) .topbar .tb-btn:not(.tb-ic):not(.alt){
+  border-radius:999px!important;height:34px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 14px rgba(0,0,0,.18)!important}
+
+/* ---------- Sheet (sheets-macos-notes): cartão sólido de cantos grandes sobre fundo escurecido ---------- */
+:is(body.aura-dark,body.aura-light) :is(.modal,.crm-mbox){border-radius:22px!important;box-shadow:0 30px 80px rgba(0,0,0,.35),var(--glass-rim)!important}
+:is(body.aura-dark,body.aura-light) :is(.modal-bg,.crm-modal){background:rgba(0,0,0,.28)!important;-webkit-backdrop-filter:blur(6px)!important;backdrop-filter:blur(6px)!important}
+
+/* ---------- Celular: a sidebar vira gaveta de vidro; mesmo material ---------- */
+@media (max-width:900px){
+  :is(body.aura-dark,body.aura-light) .side{border-radius:0 22px 22px 0!important}
+}
+
+/* ---------- Menos transparência: o vidro vira superfície sólida ---------- */
+@media (prefers-reduced-transparency:reduce){
+  body.aura-dark .side{background:#1C1C1F!important}
+  body.aura-light .side{background:#F2F2F7!important}
+  :is(body.aura-dark,body.aura-light) :is(.side,.topbar .tb-search,.topbar .tb-btn.tb-ic,.topbar::before){-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  body.aura-dark .topbar :is(.tb-search,.tb-btn.tb-ic){background:#2C2C2E!important}
+  body.aura-light .topbar :is(.tb-search,.tb-btn.tb-ic){background:#fff!important}
+}
+:is(body.aura-dark,body.aura-light) .side:has(.subitem.active) .navitem.active *:not(svg):not(svg *):not(.badge){color:var(--side-txt)!important}
+
+/* ---------- Ícones de interface (workflowark-icones): na cor do texto, 1,15 em, alinhados ao texto ---------- */
+.sfi{width:1.15em;height:1.15em;flex:none;vertical-align:-.2em;margin-right:.38em;display:inline-block}
+:is(.tb-btn,.dec-btn,.icobtn,.gbtn,button) .sfi:only-child{margin-right:0}
+/* divisórias da sidebar com a cor de separador do sistema, não preto */
+:is(body.aura-dark,body.aura-light) .side :is(.side-head,.side-foot,hr,.nav-sep){border-color:var(--sep)!important}
