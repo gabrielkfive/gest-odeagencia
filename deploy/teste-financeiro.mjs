@@ -55,8 +55,8 @@ ok(dre(set, null, classificar).receita.anterior === null, 'sem mês anterior, co
 ok(perto(variacao(110, 100), 10) && variacao(5, 0) === null && variacao(5, null) === null, 'variação em % e sem base vira vazio');
 
 // 6. Cópia do navegador idêntica.
-const a = readFileSync(new URL('../src/lib/financeiro.js', import.meta.url), 'utf8');
-const b = readFileSync(new URL('../public/workflowark-financeiro-20260926a.js', import.meta.url), 'utf8');
+const a = readFileSync(new URL('../src/lib/financeiro.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+const b = readFileSync(new URL('../public/workflowark-financeiro-20260926a.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 ok(a === b, 'cópia do navegador idêntica à do servidor');
 
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');

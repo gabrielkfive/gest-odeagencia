@@ -43,8 +43,8 @@ ok(r.totais.esperando === 2 && r.totais.revisao === 1 && r.totais.atrasados === 
 ok(r.clientes[0].id === 'a' && r.clientes[r.clientes.length - 1].id === 'd', 'quem pede atenção vem primeiro, cliente sem pendência no fim');
 ok(resumoCriador([], [], hoje, '2026-09').clientes.length === 0, 'sem clientes, lista vazia');
 
-const s1 = readFileSync(new URL('../src/lib/criador.js', import.meta.url), 'utf8');
-const s2 = readFileSync(new URL('../public/workflowark-criador-20260926a.js', import.meta.url), 'utf8');
+const s1 = readFileSync(new URL('../src/lib/criador.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+const s2 = readFileSync(new URL('../public/workflowark-criador-20260926a.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 ok(s1 === s2, 'cópia do navegador idêntica à do servidor');
 
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');

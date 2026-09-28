@@ -128,13 +128,8 @@ body.aura-dark{
   body.aura-dark{--line:rgba(255,255,255,.28);--mute:#C7C7CC}
   body.aura-light{--line:rgba(0,0,0,.28);--mute:#48484A}
 }
-/* Sidebar em vidro que segue o tema (clara no claro, escura no escuro), como a sidebar do macOS */
-body.aura-light .side{
-  --side-txt:#1D1D1F;
-  --side-mute:#6C6C70;
-  --side-fill:rgba(0,0,0,.05);
-}
-body.aura-dark .side{
+/* Sidebar: escura nos dois temas (decisão do Gabriel, 28/09), com paleta própria de texto 4.5:1 */
+.side{
   --side-txt:rgba(255,255,255,.92);
   --side-mute:#98989D;
   --side-fill:rgba(255,255,255,.08);

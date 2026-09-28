@@ -36,8 +36,8 @@ ok(filtrar(L, 'todos', 'aurora').map((x) => x.id).join() === 'a', 'busca por nom
 ok(filtrar(L, 'todos', 'squad').map((x) => x.id).join() === 'c', 'busca também pelo plano');
 ok(filtrar(L, 'atencao', '')[0].id === 'e', 'na aba atenção o urgente vem antes do em ajuste');
 
-const s1 = readFileSync(new URL('../src/lib/clientes-lista.js', import.meta.url), 'utf8');
-const s2 = readFileSync(new URL('../public/workflowark-clientes-lista-20260926a.js', import.meta.url), 'utf8');
+const s1 = readFileSync(new URL('../src/lib/clientes-lista.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+const s2 = readFileSync(new URL('../public/workflowark-clientes-lista-20260926a.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 ok(s1 === s2, 'cópia do navegador idêntica à do servidor');
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');
 process.exit(falhas ? 1 : 0);
