@@ -1,31 +1,4 @@
-:root{
-  --bg:#fafaf7;--surface:#fff;--ink:#0a0a0a;--ink-2:#1a1a1a;
-  --txt:#262626;--mute:#737373;--mute-2:#a3a3a3;
-  --line:#e8e6e0;--line-2:#d4d0c4;
-  /* APELIDOS: --card/--bd/--o eram usados no CSS mas NUNCA definidos. Variavel indefinida
-     sem fallback invalida a declaracao: background virava transparente e border-color virava
-     currentColor (a vista Relatorio nascia sem cartao e com borda da cor do texto, nos 2 temas).
-     Como apontam pra --surface/--line, o modo escuro passa a valer de graca. */
-  --card:var(--surface);--bd:var(--line);--o:var(--orange);
-  --yel:#FFC700;--yel-d:#d4a300;--yel-soft:#fff8dc;--yel-bg:#fffbeb;
-  --red:#dc2626;--red-soft:#fee2e2;--green:#16a34a;--green-soft:#dcfce7;
-  --blue:#111111;--blue-soft:#f5f5f5;--orange:#ea580c;--orange-soft:#fed7aa;
-  --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
-  /* ===== Camada "luce" (Apple/Ferrari): elevação, raio e movimento como sistema ===== */
-  /* Sombras em camadas (key + ambient) — profundidade real, não borda dura */
-  --sh-1:0 1px 2px rgba(11,11,12,.06), 0 1px 1px rgba(11,11,12,.04);
-  --sh-2:0 4px 10px -2px rgba(11,11,12,.08), 0 2px 4px -2px rgba(11,11,12,.05);
-  --sh-3:0 12px 28px -6px rgba(11,11,12,.13), 0 6px 12px -6px rgba(11,11,12,.08);
-  --sh-4:0 28px 60px -12px rgba(11,11,12,.22), 0 12px 24px -12px rgba(11,11,12,.12);
-  --sh-yel:0 6px 18px -4px rgba(255,199,0,.45);
-  --ring:0 0 0 3px rgba(255,199,0,.32); /* foco acessível na cor da marca */
-  /* Escala de raio coerente */
-  --r-xs:7px;--r-sm:10px;--r-md:13px;--r-lg:17px;--r-xl:22px;--r-full:999px;
-  /* Curvas e durações (a "física" Apple) */
-  --ease:cubic-bezier(.32,.72,0,1);--ease-out:cubic-bezier(.16,1,.3,1);
-  --t-fast:.14s;--t:.22s;--t-slow:.4s;
-  --glass:saturate(180%) blur(20px);
-}
+/* variáveis de :root movidas para workflowark-tokens-20260927a.css */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
 html,body{font-family:var(--sans);font-size:14px;line-height:1.45;color:var(--txt);background:var(--bg);height:100%;overflow:hidden}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
@@ -183,19 +156,7 @@ a{color:inherit;text-decoration:none}
   .card:hover,.kpi:hover,.navitem:hover,.tb-btn:hover{transform:none}
 }
 
-/* ============================================================
-   REFINAMENTO PREMIUM · "Luce" — minimalista, técnico, Apple/Ferrari
-   Acabamento: tipografia precisa, hairlines, superfícies sóbrias e
-   acentos cirúrgicos. Sem ruído visual.
-   ============================================================ */
-:root{
-  --ink:#0b0b0c;--txt:#1c1c1f;--mute:#6b6b70;--mute-2:#9a9a9f;
-  --line:#ececec;--line-2:#dcdcdc;
-  --surface:#ffffff;--bg:#f6f6f4;
-  --gold:#caa64a;
-  --shadow-1:0 1px 2px rgba(11,11,12,.04),0 1px 3px rgba(11,11,12,.06);
-  --shadow-2:0 10px 30px rgba(11,11,12,.08),0 2px 8px rgba(11,11,12,.05);
-}
+/* variáveis de :root movidas para workflowark-tokens-20260927a.css */
 html,body{letter-spacing:-.006em}
 .page-title h1,.proc-hero h1{letter-spacing:-.028em;font-weight:780}
 .page-title p{letter-spacing:-.01em}
@@ -628,15 +589,7 @@ input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.75}
 .crm-pill:hover{border-color:#ffd400}
 .nav::-webkit-scrollbar-thumb{background:#26262b}
 
-/* ============ REDESIGN APPLE — claro, minimalista, premium (jun/2026 v2) ============ */
-:root{
-  --bg:#f5f5f7;            /* cinza Apple */
-  --surface:#ffffff;
-  --line:#e6e6e8;--line-2:#d9d9dd;
-  --ink:#1d1d1f;--ink-2:#1d1d1f;--txt:#1d1d1f;--mute:#6e6e73;--mute-2:#a1a1a6;
-  --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);
-  --shadow-2:0 18px 60px rgba(0,0,0,.14);
-}
+/* variáveis de :root movidas para workflowark-tokens-20260927a.css */
 body{-moz-osx-font-smoothing:grayscale;letter-spacing:-.012em;color:var(--ink)}
 .view{background:var(--bg)}
 .page{padding:30px 38px 80px}
@@ -694,23 +647,7 @@ h1,h2,h3,h4{letter-spacing:-.02em}
 /* alerts mais suaves */
 .alert{border-radius:16px}
 
-/* =====================================================================
-   APPLE REFORM · camada final coesa (vence as camadas anteriores).
-   02/07: tentativa de migrar o sistema inteiro pro escuro (Linear) foi
-   REVERTIDA a pedido do Gabriel ("não quero esse fundo preto horrível,
-   volta pro certo") — quebrou contraste em telas que não tinham sido
-   testadas uma a uma. Volta pro claro que já estava validado: fundo
-   #f5f5f7, cartões brancos, sidebar/JARVIS/widgets escuros continuam
-   escuros (isso já era assim antes e funcionava).
-   ===================================================================== */
-:root{
-  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Inter',system-ui,'Segoe UI',sans-serif;
-  /* claro de VERDADE (feedback: #f5f5f7 lia como off-white desgastado) */
-  --bg:#fbfbfd;
-  --ink:#1d1d1f;--ink-2:#1d1d1f;--txt:#1d1d1f;
-  --mute:#6e6e73;--mute-2:#8e8e93;
-  --line:#e5e5ea;--line-2:#d1d1d6;
-}
+/* variáveis de :root movidas para workflowark-tokens-20260927a.css */
 html,body{font-family:var(--sans);letter-spacing:-.011em;background:var(--bg)}
 h1,h2,h3,h4{letter-spacing:-.022em;color:var(--ink)}
 .view{background:var(--bg)}
@@ -868,21 +805,7 @@ table.t,.alert,.regua-wrap,.role-block,.cal-wrap,.barpanel,#gcal-wrap{border-rad
    A tentativa anterior de dark global quebrou telas não testadas; esta
    camada sobe tela a tela, piloto = Meu Painel.
    ===================================================================== */
-body.aura-dark{
-  --bg:#000000;--surface:rgba(255,255,255,.04);
-  --ink:#ffffff;--ink-2:#f4f5f7;--txt:#eef0f3;
-  --mute:#a6adba;--mute-2:#7b8494;
-  --line:rgba(255,255,255,.12);--line-2:rgba(255,255,255,.18);
-  --yel-soft:rgba(255,199,0,.14);--yel-bg:rgba(255,199,0,.09);
-  --blue-soft:rgba(255,255,255,.06);
-  --red-soft:rgba(220,38,38,.16);--green-soft:rgba(22,163,74,.16);--orange-soft:rgba(234,88,12,.18);
-  --sh-1:0 1px 0 rgba(255,255,255,.03) inset;
-  --sh-2:0 1px 0 rgba(255,255,255,.04) inset,0 8px 20px -12px rgba(0,0,0,.6);
-  --sh-3:0 12px 28px -6px rgba(0,0,0,.55);
-  --sh-4:0 28px 60px -12px rgba(0,0,0,.65);
-  --sh-yel:0 8px 40px rgba(255,199,0,.35);
-  background:#000;color:var(--txt);
-}
+body.aura-dark{background:#000;color:var(--txt);}
 body.aura-dark .app{background:#000}
 body.aura-dark .view{background:transparent}
 body.aura-dark h1,body.aura-dark h2,body.aura-dark h3,body.aura-dark h4{color:var(--ink)}

@@ -1,7 +1,7 @@
 # Design system · WorkFlowArk
 
-Fonte da verdade: `public/workflowark-20260915a.css` (variáveis em `:root` e no tema
-escuro). Tela nova usa estas variáveis; cor solta no código é erro.
+Fonte da verdade: `public/workflowark-tokens-20260927a.css`, o único arquivo onde `:root`,
+`body.aura-dark` e `body.aura-light` declaram variável (teste: `python deploy/teste-tokens.py`). Tela nova usa estas variáveis; cor solta no código é erro.
 
 ## Direção
 

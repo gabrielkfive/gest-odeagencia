@@ -1,0 +1,75 @@
+/* WorkFlowArk · tokens do sistema (lote 2 do doc 11, 27/09/2026).
+   Único lugar onde :root, body.aura-dark e body.aura-light declaram variável.
+   Tela nova usa estas variáveis; cor solta no código é erro. Teste: deploy/teste-tokens.py */
+:root{
+  --card:var(--surface);
+  --bd:var(--line);
+  --o:var(--orange);
+  --yel:#FFC700;
+  --yel-d:#d4a300;
+  --yel-soft:#fff8dc;
+  --yel-bg:#fffbeb;
+  --red:#dc2626;
+  --red-soft:#fee2e2;
+  --green:#16a34a;
+  --green-soft:#dcfce7;
+  --blue:#111111;
+  --blue-soft:#f5f5f5;
+  --orange:#ea580c;
+  --orange-soft:#fed7aa;
+  --mono:'JetBrains Mono',monospace;
+  --sh-1:0 1px 2px rgba(11,11,12,.06), 0 1px 1px rgba(11,11,12,.04);
+  --sh-2:0 4px 10px -2px rgba(11,11,12,.08), 0 2px 4px -2px rgba(11,11,12,.05);
+  --sh-3:0 12px 28px -6px rgba(11,11,12,.13), 0 6px 12px -6px rgba(11,11,12,.08);
+  --sh-4:0 28px 60px -12px rgba(11,11,12,.22), 0 12px 24px -12px rgba(11,11,12,.12);
+  --sh-yel:0 6px 18px -4px rgba(255,199,0,.45);
+  --ring:0 0 0 3px rgba(255,199,0,.32);
+  --r-xs:7px;
+  --r-sm:10px;
+  --r-md:13px;
+  --r-lg:17px;
+  --r-xl:22px;
+  --r-full:999px;
+  --ease:cubic-bezier(.32,.72,0,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --t-fast:.14s;
+  --t:.22s;
+  --t-slow:.4s;
+  --glass:saturate(180%) blur(20px);
+  --gold:#caa64a;
+  --shadow-1:0 1px 2px rgba(11,11,12,.04),0 1px 3px rgba(11,11,12,.06);
+  --surface:#ffffff;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);
+  --shadow-2:0 18px 60px rgba(0,0,0,.14);
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Inter',system-ui,'Segoe UI',sans-serif;
+  --bg:#fbfbfd;
+  --ink:#1d1d1f;
+  --ink-2:#1d1d1f;
+  --txt:#1d1d1f;
+  --mute:#6e6e73;
+  --mute-2:#8e8e93;
+  --line:#e5e5ea;
+  --line-2:#d1d1d6;
+}
+body.aura-dark{
+  --bg:#000000;
+  --surface:rgba(255,255,255,.04);
+  --ink:#ffffff;
+  --ink-2:#f4f5f7;
+  --txt:#eef0f3;
+  --mute:#a6adba;
+  --mute-2:#7b8494;
+  --line:rgba(255,255,255,.12);
+  --line-2:rgba(255,255,255,.18);
+  --yel-soft:rgba(255,199,0,.14);
+  --yel-bg:rgba(255,199,0,.09);
+  --blue-soft:rgba(255,255,255,.06);
+  --red-soft:rgba(220,38,38,.16);
+  --green-soft:rgba(22,163,74,.16);
+  --orange-soft:rgba(234,88,12,.18);
+  --sh-1:0 1px 0 rgba(255,255,255,.03) inset;
+  --sh-2:0 1px 0 rgba(255,255,255,.04) inset,0 8px 20px -12px rgba(0,0,0,.6);
+  --sh-3:0 12px 28px -6px rgba(0,0,0,.55);
+  --sh-4:0 28px 60px -12px rgba(0,0,0,.65);
+  --sh-yel:0 8px 40px rgba(255,199,0,.35);
+}
