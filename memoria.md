@@ -64,6 +64,9 @@ Chrome desktop toque e mouse, Safari mouse); `teste:mobile` OK.
 
 Pendente de decisão do Gabriel: merge em `main` (o push em `main` faz deploy). Nada foi
 enviado para produção.
+Atualização 28/09/2026: resolvido. `src/lib/merge-estado.js`, `teste:merge` e
+`teste:confiabilidade` estão em `main` e as regras viraram a seção 7 do `CLAUDE.md`. O
+commit do merge fica antes do começo do clone raso usado na conferência (17/09).
 
 ## Próxima fila (depois de estabilizar o sistema)
 
@@ -72,3 +75,42 @@ enviado para produção.
 3. Drive: inventário de assets por cliente (Gabriel mandou a pasta pública em 10/09).
 4. Hermes: mapa real de integrações antes de criar agente.
 5. Biblioteca ARK de prompts reutilizáveis.
+
+## 28/09/2026, estado real
+
+Conferência de `docs/HANDOFF-financeiro-seguranca.md`, `docs/PENDENCIAS-GABRIEL.md`,
+este arquivo e `docs/plans/2026-09-22-maratona-doc11.md` contra o código e o git log.
+O clone da conferência é raso (começa em 827c703, 17/09).
+
+Resolvido (sai das listas de pendência):
+- Rota `/api/workflowark/sheet` sem login: fechada. Só admin, gestor e financeiro ativos,
+  ou RUN_KEY (guarda datada de 17/09, presente desde 827c703).
+- Gate por papel no `state.ts`: Cobranças e Acerto desde 17/09 (827c703); matriz Ver/Editar
+  da tela Equipe, extratos e acertos a receber desde 24/09 (39a0d35, 8272629).
+- Conta nova fica pendente até o admin liberar (8602334, 24/09) e lote 2 de segurança
+  (f7db9d1): automações só admin/gestor/financeiro, WhatsApp fecha por padrão.
+- Merge da confiabilidade do Kanban de 10/09: está em `main`.
+
+Pendente de verdade, lista única:
+1. API da Anthropic desligada desde 05/09/2026 por falta de crédito. Tudo de IA no servidor
+   falha (agentes, conselho, legendas, roteirista, planejamento, SDR). Ação do Gabriel:
+   colocar crédito.
+2. Fatura Anthropic #KXTPRBDI-0004 com lembrete de atraso até 15/08/2026. Ação do Gabriel:
+   quitar (provavelmente ligada ao item 1).
+3. Crédito promocional de US$ 250 das sessões na nuvem do Claude Code: resgatar até
+   07/10/2026, vence em 04/11/2026 e se perde se o plano Max for cancelado. Ação do Gabriel.
+4. Código: `wfa-fin` e `wfa-planilha` ainda chegam a qualquer membro ativo no GET do estado
+   (faltam em `BLOCO_ABA` de `src/lib/permissoes.js`). Detalhe e correção sugerida em
+   `docs/HANDOFF-financeiro-seguranca.md`.
+5. Twilio para o Power Dialer: sem conta, sem código. Ação do Gabriel.
+6. Testes de ponta a ponta em produção do link de aprovação e do portal do cliente (aba
+   anônima). Ação do Gabriel, 1 minuto cada.
+7. Preço dos planos: sem ele a landing `/conheca` fica sem seção de planos. Decisão do Gabriel.
+8. Aval da prévia de tokens do /app (tarefa 06 do doc 11); 93d6aca não está em `main`.
+9. Canal de WhatsApp: Evolution fora desde 06/09 e número comercial banido em 10/09.
+   Decisão do Gabriel (número novo ou API oficial da Meta).
+10. Cadastro self-service multi-agência (tarefa 03): fora de escopo por enquanto.
+11. Próxima fila de clientes e agentes (seção acima): Fonseca & Cavalcanti, Mazute, Drive,
+    Hermes, biblioteca de prompts. Nenhum item consta como feito no git.
+12. Em observação desde 10/09: "cards falham ao mudar de aba", sem nova ocorrência
+    registrada nos docs.
