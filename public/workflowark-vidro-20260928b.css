@@ -47,7 +47,7 @@
   -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent);mask-image:linear-gradient(to bottom,#000 55%,transparent)}
 body.aura-light .topbar::before{background:linear-gradient(to bottom,#fff 0%,rgba(255,255,255,.7) 55%,transparent 100%)}
 :is(body.aura-dark,body.aura-light) .topbar :is(.tb-search,.tb-btn.tb-ic){
-  background:var(--glass)!important;
+  background:var(--glass-bg)!important;
   -webkit-backdrop-filter:var(--glass-blur)!important;backdrop-filter:var(--glass-blur)!important;
   box-shadow:var(--glass-rim),var(--glass-shadow)!important;border:0!important;border-radius:999px!important}
 :is(body.aura-dark,body.aura-light) .topbar .tb-search{height:34px;align-self:center;padding-left:6px}
@@ -82,3 +82,6 @@ body.aura-light .topbar::before{background:linear-gradient(to bottom,#fff 0%,rgb
 :is(.tb-btn,.dec-btn,.icobtn,.gbtn,button) .sfi:only-child{margin-right:0}
 /* divisórias da sidebar com a cor de separador do sistema, não preto */
 :is(body.aura-dark,body.aura-light) .side :is(.side-head,.side-foot,hr,.nav-sep){border-color:var(--sep)!important}
+
+/* rodapé da sidebar clara: hover dos ícones no tom do vidro, não na pastilha preta antiga */
+:is(body.aura-dark,body.aura-light) .side .side-foot .ico:hover{background:var(--side-fill)!important;color:var(--side-txt)!important}

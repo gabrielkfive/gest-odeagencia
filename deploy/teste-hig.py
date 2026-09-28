@@ -132,6 +132,21 @@ with sync_playwright() as pw:
             falhas.append('%s vidro: barra do topo com fundo chapado %s' % (tema, vid['topo']))
         if vid['capsula'] is not True:
             falhas.append('%s vidro: item selecionado não é cápsula (%s)' % (tema, vid['capsula']))
+        # ícones: não mexe em texto editável pela equipe; botão só com ✕ mantém nome acessível;
+        # --glass continua sendo filtro (cabeçalho das colunas do Kanban usa backdrop-filter:var(--glass))
+        ic = p.evaluate(r'''async () => {
+          const h = document.createElement('h4'); h.setAttribute('contenteditable', ''); h.textContent = '\u{1F525} Oferta'; document.body.appendChild(h);
+          const b = document.createElement('button'); b.textContent = '✕'; document.body.appendChild(b);
+          await new Promise(r => setTimeout(r, 120));
+          const out = { editavel: h.textContent, rotulo: b.getAttribute('aria-label') || b.getAttribute('title') || b.textContent.trim(),
+                        glass: getComputedStyle(document.body).getPropertyValue('--glass').trim() };
+          h.remove(); b.remove(); return out; }''')
+        if ic['editavel'] != '\U0001F525 Oferta':
+            falhas.append('%s icones: texto editável alterado (%r)' % (tema, ic['editavel']))
+        if not ic['rotulo']:
+            falhas.append('%s icones: botão só com ✕ ficou sem nome acessível' % tema)
+        if 'blur' not in ic['glass']:
+            falhas.append('%s tokens: --glass deixou de ser filtro (%s)' % (tema, ic['glass']))
         for nome, q in telas:
             chave = '%s-%s' % (nome, tema)
             total[chave] = {k: (v if isinstance(v, int) else len(v)) for k, v in q.items()}
