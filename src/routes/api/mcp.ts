@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { CHAVES_MESCLA, CHAVES_OBJETO, mesclarChave } from "@/lib/merge-estado.js";
 
 // ============================================================================
 // CONECTOR MCP do WorkFlowArk  —  as "mãos" que o Claude (plano Max, via Routines)
@@ -184,12 +185,47 @@ async function callTool(name: string, args: any): Promise<{ text: string; isErro
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const db = supabaseAdmin as any;
 
+  // Carimbo (updated_at) de cada bloco lido nesta chamada, pra gravar só se ninguém salvou no meio.
+  const lidoEm: Record<string, string | null> = {};
   const loadBlock = async (key: string) => {
-    const { data } = await db.from("workflowark_state").select("data").eq("key", key).maybeSingle();
+    const { data, error } = await db.from("workflowark_state").select("data,updated_at").eq("key", key).maybeSingle();
+    if (error) throw new Error(`leitura de ${key} falhou: ${String(error.message || error)}`);
+    lidoEm[key] = data?.updated_at ?? null;
     return data?.data ?? null;
   };
+  /* Grava sem apagar o que a equipe salvou no meio (28/09/2026). Antes era upsert cego da lista
+     inteira: se alguém salvasse tarefas entre a leitura e a gravação do Ark Brain, a mudança da
+     pessoa sumia, e erro do Supabase era ignorado ("Tarefa criada" sem gravar). Agora: lista
+     mesclável passa pela mesma mescla por item do save-state (até 4 tentativas, UPDATE
+     condicionado ao updated_at); bloco sem mescla só grava se ninguém mexeu desde a leitura. */
   const saveBlock = async (key: string, value: any) => {
-    await db.from("workflowark_state").upsert({ key, data: value });
+    const mescla = CHAVES_MESCLA.includes(key) || CHAVES_OBJETO.includes(key);
+    for (let tentativa = 0; tentativa < 4; tentativa++) {
+      const { data: row, error: e1 } = await db
+        .from("workflowark_state").select("data,updated_at").eq("key", key).maybeSingle();
+      if (e1) throw new Error(`leitura de ${key} falhou: ${String(e1.message || e1)}`);
+      if (!mescla && (row?.updated_at ?? null) !== (lidoEm[key] ?? null))
+        throw new Error(`${key} mudou enquanto eu gravava; tente de novo.`);
+      let dado = value;
+      if (mescla && row) {
+        let deletados: unknown[] = [];
+        const { data: lap } = await db.from("workflowark_state").select("data").eq("key", "wfa-deleted-ids").maybeSingle();
+        if (Array.isArray(lap?.data)) deletados = lap.data;
+        dado = mesclarChave(key, row.data, value, deletados);
+      }
+      if (!row) {
+        const { error } = await db.from("workflowark_state").insert({ key, data: dado });
+        if (!error) return;
+        if (!mescla) throw new Error(`gravação de ${key} falhou: ${String(error.message || error)}`);
+        continue; // alguém criou a linha no meio: relê e mescla
+      }
+      const { data: gravadas, error } = await db
+        .from("workflowark_state").update({ data: dado }).eq("key", key).eq("updated_at", row.updated_at).select("key");
+      if (error) throw new Error(`gravação de ${key} falhou: ${String(error.message || error)}`);
+      if (Array.isArray(gravadas) && gravadas.length) return;
+      if (!mescla) throw new Error(`${key} mudou enquanto eu gravava; tente de novo.`);
+    }
+    throw new Error(`${key} muito disputado agora; tente de novo em instantes.`);
   };
 
   try {
