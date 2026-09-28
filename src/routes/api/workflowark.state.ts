@@ -2,6 +2,7 @@ import { papelNovoMembro } from "@/lib/acesso.js";
 import { podeVerBloco as podeVerBlocoMatriz, podeEditarBloco, limparMatriz, NAV_CHAVES } from "@/lib/permissoes.js";
 import { createFileRoute } from "@tanstack/react-router";
 import { hojeSP } from "@/lib/datas";
+import { iaErroFatal, iaErroMsg } from "@/lib/ia-erro";
 // JavaScript puro de propósito (o teste deploy/teste-merge-estado.mjs importa direto no Node).
 // @ts-ignore
 import { CHAVES_MESCLA, CHAVES_OBJETO, mesclarChave } from "@/lib/merge-estado.js";
@@ -917,7 +918,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
               body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3000, system: sysFull, messages: [{ role: "user", content: user }] }),
             });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
             return json({ text: data?.content?.[0]?.text || "(sem resposta)" });
           } catch (e) {
             return json({ error: (e as Error)?.message || "Falha ao gerar roteiros." }, { status: 502 });
@@ -950,7 +951,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
               body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3000, system: sys, messages: [{ role: "user", content: user }] }),
             });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
             let raw: string = data?.content?.[0]?.text || "";
             raw = raw.replace(/```json|```/g, "").trim();
             const m = raw.match(/\{[\s\S]*\}/);
@@ -994,7 +995,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
               body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1800, system: sys, messages: [{ role: "user", content: user }] }),
             });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
             return json({ text: data?.content?.[0]?.text || "(sem resposta)" });
           } catch (e) {
             return json({ error: (e as Error)?.message || "Falha ao gerar legendas." }, { status: 502 });
@@ -1027,7 +1028,7 @@ export const Route = createFileRoute("/api/workflowark/state")({
               body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1600, system: sys, messages: [{ role: "user", content: prompt }] }),
             });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
             return json({ text: data?.content?.[0]?.text || "(sem resposta)" });
           } catch (e) {
             return json({ error: (e as Error)?.message || "Falha ao consultar o agente." }, { status: 502 });
@@ -1296,7 +1297,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
           try {
             const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01", "anthropic-beta": "prompt-caching-2024-07-31" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 400, system: [{ type: "text", text: sys, cache_control: { type: "ephemeral" } }], messages }) });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
             return json({ ok: true, reply: data?.content?.[0]?.text || "(sem resposta)" });
           } catch (e) {
             return json({ error: (e as Error)?.message || "Falha no JARVIS" }, { status: 502 });
@@ -1342,7 +1343,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
           try {
             const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01", "anthropic-beta": "prompt-caching-2024-07-31" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 700, system: [{ type: "text", text: sys, cache_control: { type: "ephemeral" } }], tools, messages: msgs.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "") })).filter((m: any) => m.content) }) });
             const d: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: d?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, d) }, { status: 502 });
             const blocks: any[] = Array.isArray(d?.content) ? d.content : [];
             const say = blocks.filter((b) => b.type === "text").map((b) => b.text).join(" ").trim();
             const actions = blocks.filter((b) => b.type === "tool_use").map((b) => ({ tool: b.name, input: b.input || {} }));
@@ -1367,7 +1368,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
           try {
             const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1600, system: sys, messages: [{ role: "user", content: `Tema pro conselho debater: ${tema}${cliente ? ` (cliente: ${cliente})` : ""}` }] }) });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
             let raw: string = data?.content?.[0]?.text || "";
             raw = raw.replace(/```json|```/g, "").trim();
             const m = raw.match(/\{[\s\S]*\}/);
@@ -1406,7 +1407,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
           try {
             const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 900, system: sys, messages }) });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
             return json({ text: data?.content?.[0]?.text || "(sem resposta)" });
           } catch (e) {
             return json({ error: (e as Error)?.message || "Falha no chat." }, { status: 502 });
@@ -1435,7 +1436,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
             const sys = "Você é o assistente de operações da ARK Content (agência de marketing gastronômico em Brasília). Recebe as conversas de WhatsApp das últimas 24h e faz um RESUMO EXECUTIVO pro dono (Gabriel), em português, direto e acionável. Estruture: \n⚡ PRECISA DE RESPOSTA/AÇÃO (por contato: o que pedem e o que fazer)\n💰 OPORTUNIDADES / LEADS\n📋 ACOMPANHAMENTOS\n🟢 RESTO (1 linha). Curto e prático. Destaque urgências.";
             const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1200, system: sys, messages: [{ role: "user", content: `Conversas das últimas 24h:\n${digest.slice(0, 12000)}` }] }) });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
             return json({ ok: true, resumo: data?.content?.[0]?.text || "(sem resposta)" });
           } catch (e) {
             return json({ error: (e as Error)?.message || "Falha ao resumir" }, { status: 502 });
@@ -1469,7 +1470,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
             const user = `MÉTRICAS (últimos 7 dias, conversas 1:1): ${JSON.stringify(metr)}.\nNÃO RESPONDIDOS (última msg foi do contato):\n${naoRespondidos.join("\n") || "nenhum"}`;
             const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": aiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 900, system: sys, messages: [{ role: "user", content: user }] }) });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
             const analise = data?.content?.[0]?.text || "";
             // guarda como notificação (o Gabriel vê de manhã)
             try {
@@ -1599,7 +1600,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
               body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 4000, system: sys, messages: [{ role: "user", content: userMsg }] }),
             });
             const data: any = await r.json().catch(() => ({}));
-            if (!r.ok) return json({ error: data?.error?.message || "Falha na IA" }, { status: 502 });
+            if (!r.ok) return json({ error: iaErroMsg(r.status, data) }, { status: 502 });
 
             let raw: string = data?.content?.[0]?.text || "";
             raw = raw.replace(/```json|```/g, "").trim();
@@ -1662,6 +1663,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
             "CONTEXTO DO CLIENTE:\n" + brief,
           ].join("\n");
 
+          let iaFatalLeg = ""; // crédito/chave: sem isso o botão dizia "0 geradas" sem explicar
           const resultados = await Promise.all(pendentes.slice(0, 5).map(async (tarefa) => {
             try {
               const userMsg = `Vídeo editado: ${tarefa.title}\n${tarefa.desc ? "Descrição: " + tarefa.desc : ""}`;
@@ -1671,7 +1673,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
                 body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 800, system: sys, messages: [{ role: "user", content: userMsg }] }),
               });
               const d: any = await r.json().catch(() => ({}));
-              if (!r.ok) return null;
+              if (!r.ok) { iaFatalLeg = iaFatalLeg || iaErroFatal(r.status, d); return null; }
               let raw2 = (d?.content?.[0]?.text || "").replace(/```json|```/g, "").trim();
               const m2 = raw2.match(/\{[\s\S]*\}/);
               if (!m2) return null;
@@ -1698,6 +1700,7 @@ Exemplos de tom: "Senhor, todos os sistemas estão online e operando com a máxi
             } catch { return null; }
           }));
           const novasLegendas = resultados.filter(Boolean) as any[];
+          if (!novasLegendas.length && iaFatalLeg) return json({ error: iaFatalLeg }, { status: 502 });
 
           if (novasLegendas.length) {
             const filaAtualizada = [...novasLegendas, ...fila].slice(0, 500);

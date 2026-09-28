@@ -379,7 +379,7 @@ export async function describeImageBase64(base64: string, mimetype: string): Pro
         ] }],
       }),
     });
-    if (!resp.ok) return "";
+    if (!resp.ok) { const { iaLogFalha } = await import("@/lib/ia-erro"); iaLogFalha("descrever-imagem", resp.status, await resp.json().catch(() => ({}))); return ""; }
     const data: any = await resp.json().catch(() => ({}));
     return String(data?.content?.[0]?.text || "").trim();
   } catch { return ""; }

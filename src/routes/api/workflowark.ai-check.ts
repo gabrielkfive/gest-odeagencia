@@ -14,7 +14,7 @@ export const Route = createFileRoute("/api/workflowark/ai-check")({
           return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
         const { zapiEnv } = await import("@/integrations/zapi.server");
         const key = zapiEnv("ANTHROPIC_API_KEY");
-        if (!key) return Response.json({ ok: false, reason: "sem ANTHROPIC_API_KEY" });
+        if (!key) return Response.json({ ok: false, reason: "sem ANTHROPIC_API_KEY", motivo: "IA não configurada: falta o segredo ANTHROPIC_API_KEY no Worker" });
         try {
           const r = await fetch("https://api.anthropic.com/v1/messages", {
             method: "POST",
@@ -22,10 +22,14 @@ export const Route = createFileRoute("/api/workflowark/ai-check")({
             body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 10, messages: [{ role: "user", content: "diga: ok" }] }),
           });
           const data: any = await r.json().catch(() => ({}));
-          if (!r.ok) return Response.json({ ok: false, status: r.status, error: data?.error?.message || data?.error?.type || "erro" });
+          if (!r.ok) {
+            // motivo: frase em português pro Gabriel (crédito/chave); error: texto cru da API
+            const { iaErroMsg } = await import("@/lib/ia-erro");
+            return Response.json({ ok: false, status: r.status, motivo: iaErroMsg(r.status, data, "IA indisponível: a API da Anthropic respondeu com erro"), error: data?.error?.message || data?.error?.type || "erro" });
+          }
           return Response.json({ ok: true, model: data?.model, resposta: data?.content?.[0]?.text });
         } catch (e) {
-          return Response.json({ ok: false, reason: (e as Error)?.message || "falha de rede" });
+          return Response.json({ ok: false, reason: (e as Error)?.message || "falha de rede", motivo: "IA indisponível: o servidor não conseguiu falar com a API da Anthropic (rede)" });
         }
       },
     },

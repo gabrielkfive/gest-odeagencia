@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { hojeSP, dataSP } from "@/lib/datas";
+import { iaErroFatal } from "@/lib/ia-erro";
 
 // Agentes autônomos 24/7 (idempotente, 1x/dia). Roda o "Conselho de IA" sozinho:
 // - resume o WhatsApp das últimas 24h
@@ -82,8 +83,10 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             const sysParam: any = cache ? [{ type: "text", text: sys, cache_control: { type: "ephemeral" } }] : sys;
             const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: hdrs, body: JSON.stringify({ model, max_tokens: max, system: sysParam, messages: [{ role: "user", content: user }] }) });
             const d: any = await r.json().catch(() => ({}));
+            if (!r.ok) iaFatal = iaFatal || iaErroFatal(r.status, d);
             return r.ok ? (d?.content?.[0]?.text || "") : "";
           };
+          let iaFatal = ""; // crédito/chave: vira erro claro no fim em vez de "0 clientes" mudo
           const parseJSON = (txt: string) => {
             if (!txt) return null;
             let s = String(txt).replace(/```json|```/g, "").trim();
@@ -269,6 +272,10 @@ export const Route = createFileRoute("/api/workflowark/agents-run")({
             });
             notifs.push({ tipo: "conselho", clienteId: c.id, texto: `📄 Documento de trabalho pronto: ${c.nm} · ${motivo}` });
           }
+
+          // Sem crédito/chave e nada produzido: não grava nada e devolve o motivo (o botão
+          // "Rodar conselho agora" mostra j.error).
+          if (iaFatal && !criadas && !notifs.length) return Response.json({ error: iaFatal }, { status: 502 });
 
           // persiste tudo — só grava tarefas se a leitura veio OK e o resultado é
           // estritamente maior (append-only). Nunca encolhe a lista real.

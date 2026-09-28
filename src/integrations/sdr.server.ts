@@ -18,6 +18,7 @@
 //   wfa-leads { [phone]: { nome, negocio, cidade, interesse, estagio, resumo, crmId, ... } }
 
 import { zapiEnv } from "./zapi.server";
+import { iaLogFalha } from "@/lib/ia-erro";
 
 const SDR_KEY = "wfa-sdr";
 const LEADS_KEY = "wfa-leads";
@@ -138,7 +139,7 @@ async function sdrAnalyze(conv: any, lead: any, persona: string, phone: string):
       messages: [{ role: "user", content: `Contato: ${conv?.nome || phone} (${phone}).\n${fichaLead}\n\nConversa até agora (última linha é a mensagem que acabou de chegar):\n${historico}\n\nDecida e responda com o JSON.` }],
     }),
   });
-  if (!resp.ok) return null;
+  if (!resp.ok) { iaLogFalha("sdr", resp.status, await resp.json().catch(() => ({}))); return null; } // SDR cala, JARVIS assume
   const data: any = await resp.json();
   let raw: string = data?.content?.[0]?.text || "";
   raw = raw.replace(/```json|```/g, "").trim();
