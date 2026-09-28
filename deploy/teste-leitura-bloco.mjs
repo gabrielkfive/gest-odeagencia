@@ -30,5 +30,13 @@ const get = src.slice(src.indexOf('if (soKey) {'));
 const iGet = get.indexOf('.eq("key", soKey)');
 ok(iGet > 0 && /podeVerBloco\(/.test(get.slice(0, iGet)), 'GET ?key= checa a permissão antes de ler o bloco');
 
+// 3. wfa-gcal (agenda Google de cada membro): só a própria entrada, em todo caminho de leitura.
+const lk = blocos.find((b) => b.nome === 'load-key');
+ok(!!lk && /return json\(soDoMembro\(key,/.test(lk.corpo), 'load-key devolve só a agenda do próprio membro');
+ok(/\[soKey\]: soDoMembro\(soKey,/.test(get), 'GET ?key= devolve só a agenda do próprio membro');
+ok(/\[row\.key, soDoMembro\(row\.key,/.test(src), 'load geral devolve só a agenda do próprio membro');
+const fn = src.match(/function soDoMembro\([\s\S]*?\n\}/);
+ok(!!fn && /"wfa-gcal"/.test(fn[0]) && /\[memberId\]/.test(fn[0]), 'soDoMembro filtra o wfa-gcal pelo id do membro');
+
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');
 process.exit(falhas ? 1 : 0);
