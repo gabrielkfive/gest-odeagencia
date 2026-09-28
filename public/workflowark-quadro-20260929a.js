@@ -167,11 +167,29 @@
     [].forEach.call(document.querySelectorAll(CAPSULAS), function (el) { if (!el.dataset.lg) { el.dataset.lg = '1'; ro ? ro.observe(el) : refratar(el); } });
   }
 
+  // Modo piloto: controle segmentado e botão Fundo vão para a barra do topo; "Mais" e o estado de salvamento
+  // vão para a linha de filtros. Os elementos são movidos, não copiados: os cliques do app continuam valendo.
+  function modoPiloto() {
+    var topo = document.querySelector('.topbar'), vis = document.getElementById('task-views'), fundo = document.getElementById('tf-fundo-btn');
+    var direita = topo && topo.querySelector('.tb-right');
+    if (topo && vis && vis.parentElement !== topo) topo.insertBefore(vis, direita);
+    if (direita && fundo && fundo.parentElement !== direita) {
+      var tema = direita.querySelector('.tb-btn.tb-ic');
+      direita.insertBefore(fundo, tema ? tema.nextSibling : direita.firstChild);
+    }
+    var filtros = document.getElementById('tf-filtros'), mais = document.getElementById('tf-mais'), sync = document.getElementById('sync-status');
+    if (filtros && mais && mais.parentElement !== filtros) filtros.appendChild(mais);
+    if (filtros && sync && sync.parentElement !== filtros) filtros.appendChild(sync);
+    var kpis = document.getElementById('tf-kpis');
+    if (filtros && kpis && kpis.parentElement !== filtros) filtros.appendChild(kpis);
+  }
+  window.wfaQuadroModoPiloto = modoPiloto;
+
   function iniciar() {
-    aplicarFundo(lerFundo()); montarBotao(); ligarQuadro(); observarCapsulas();
+    aplicarFundo(lerFundo()); montarBotao(); modoPiloto(); ligarQuadro(); observarCapsulas();
     // o app recria partes da página ao trocar de aba: religa sem duplicar
     var agendado = false;
-    new MutationObserver(function () { if (agendado) return; agendado = true; requestAnimationFrame(function () { agendado = false; if (!document.getElementById('tf-fundo-btn')) montarBotao(); ligarQuadro(); observarCapsulas(); }); })
+    new MutationObserver(function () { if (agendado) return; agendado = true; requestAnimationFrame(function () { agendado = false; if (!document.getElementById('tf-fundo-btn')) montarBotao(); modoPiloto(); ligarQuadro(); observarCapsulas(); }); })
       .observe(document.getElementById('page-tarefas') || document.body, { childList: true, subtree: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
