@@ -1,0 +1,124 @@
+/* WorkFlowArk · camada HIG (28/09/2026).
+   Regras tiradas do estudo oficial da Apple em Documents/WorkFlowArk-Next-2026-09-20/estudo-apple-hig.md
+   (52 páginas da HIG lidas). Carregada no fim do <body> para vencer as camadas antigas; valores vêm de
+   workflowark-tokens-20260927a.css. Teste: python deploy/teste-hig.py
+   Princípios aplicados: uma família de texto (títulos de página em Sora pela marca), pesos de 400 a 700,
+   nada abaixo de 11 px, sem caixa alta, contraste 4.5:1, amarelo só na ação principal e no item ativo,
+   conteúdo sólido sem brilho decorativo, vidro só na navegação, foco visível em tudo. */
+
+/* ---------- Tipografia: uma família, sem caixa alta, sem tracking largo ---------- */
+:is(body.aura-dark,body.aura-light),
+:is(body.aura-dark,body.aura-light) *:not(svg):not(svg *):not(code):not(pre):not(kbd):not(samp){
+  font-family:var(--font-ui)!important;text-transform:none!important;letter-spacing:normal!important;font-variant-numeric:tabular-nums}
+:is(body.aura-dark,body.aura-light) :is(.page-head h1,.page-title h1,.aura-saud){
+  font-family:var(--font-title)!important;letter-spacing:-.015em!important}
+:is(body.aura-dark,body.aura-light) :is(h1,h2,h3){letter-spacing:-.01em!important}
+/* Pesos: Regular a Bold. 800 e 900 (178 usos no código) caem para 700 */
+:is(body.aura-dark,body.aura-light) :is([style*="font-weight:800"],[style*="font-weight: 800"],[style*="font-weight:900"],[style*="font-weight: 900"]){font-weight:700!important}
+:is(body.aura-dark,body.aura-light) :is(h4,h5,h6,.v,.n,.dec-n,.dec-urg,.av,.nxc-av,.set-sect-t,.kpi .v,.ahc .n){font-weight:600!important}
+:is(body.aura-dark,body.aura-light) :is(h1,h2,h3,b,strong){font-weight:700!important}
+/* Mínimo de 11 px */
+:is(body.aura-dark,body.aura-light) :is([style*="font-size:7"],[style*="font-size:8"],[style*="font-size:9"],[style*="font-size:10px"],[style*="font-size:10.5px"],[style*="font-size: 9"],[style*="font-size: 10px"]){font-size:11px!important}
+:is(body.aura-dark,body.aura-light) :is(.badge,.ct,.rl,.tc-av,.dec-cli,.dec-urg,.tkacth,.form-label,.sc-meta,h5,h6){font-size:11px!important}
+:is(body.aura-dark,body.aura-light) p.muted{font-size:12px!important}
+/* iniciais: mínimo de 11 px só nos avatares pequenos; o avatar grande do portal mantém o tamanho dele */
+:is(body.aura-dark,body.aura-light) :is(.tc-av,i.av){font-size:11px!important;line-height:1!important}
+
+/* ---------- Conteúdo sólido: sem brilho, textura nem esfera decorativa ---------- */
+:is(body.aura-dark,body.aura-light) .main::before,
+:is(body.aura-dark,body.aura-light) .main::after,
+:is(body.aura-dark,body.aura-light) .app::after,
+:is(body.aura-dark,body.aura-light) .aura-hero .sphere,
+:is(body.aura-dark,body.aura-light) .page-head h1::after,
+body.aura-dark .view::before,
+#nav-indicator{display:none!important}
+:is(body.aura-dark,body.aura-light) .aura-hero{background:var(--hero)!important;border:1px solid var(--line)!important;border-radius:16px!important;box-shadow:none!important}
+body.aura-light .aura-hero{border-color:transparent!important}
+
+/* ---------- Sidebar (sidebars): rótulos curtos, amarelo só no item ativo, contagem neutra ---------- */
+:is(body.aura-dark,body.aura-light) .side > .nav-label:not(.collap){display:none!important}
+:is(body.aura-dark,body.aura-light) .side .nav-label{font-size:11px!important;font-weight:600!important;color:var(--side-mute)!important;padding:14px 12px 4px!important}
+:is(body.aura-dark,body.aura-light) .side :is(.navitem,.subitem){font-size:13px!important;border-radius:8px!important;box-shadow:none!important}
+:is(body.aura-dark,body.aura-light) .side :is(.navitem,.subitem)::before{display:none!important}
+:is(body.aura-dark,body.aura-light) .side :is(.navitem,.subitem) svg{color:var(--side-mute)!important;background:transparent!important}
+:is(body.aura-dark,body.aura-light) .side :is(.navitem,.subitem):not(.active):hover{background:var(--side-fill)!important}
+/* Folha ativa: o único amarelo da barra */
+:is(body.aura-dark,body.aura-light) .side .navitem.active[data-nav]:not([data-nav=""]),
+:is(body.aura-dark,body.aura-light) .side .subitem.active{
+  background:var(--yel)!important;color:var(--on-accent)!important;font-weight:600!important}
+:is(body.aura-dark,body.aura-light) .side .navitem.active[data-nav]:not([data-nav=""]) svg,
+:is(body.aura-dark,body.aura-light) .side .subitem.active svg{color:var(--on-accent)!important}
+/* Grupo que contém a folha ativa: só texto forte, sem fundo. O app marca o grupo como .active junto com o subitem
+   (e Atividades tem data-nav=tarefas), então com subitem ativo nenhum navitem fica amarelo */
+:is(body.aura-dark,body.aura-light) .side:has(.subitem.active) .navitem.active{
+  background:transparent!important;color:var(--side-txt)!important;font-weight:600!important}
+:is(body.aura-dark,body.aura-light) .side:has(.subitem.active) .navitem.active svg{color:var(--side-mute)!important}
+:is(body.aura-dark,body.aura-light) .side .navitem.active:not([data-nav]),
+:is(body.aura-dark,body.aura-light) .side .navitem.active[data-nav=""]{
+  background:transparent!important;color:var(--side-txt)!important;font-weight:600!important}
+/* Contagem de volume não é alerta: texto secundário, sem pílula vermelha */
+:is(body.aura-dark,body.aura-light) .side :is(.badge,.navitem .badge){
+  background:transparent!important;color:var(--side-mute)!important;border:0!important;box-shadow:none!important;
+  font-size:12px!important;font-weight:500!important;font-variant-numeric:tabular-nums;padding:0 2px!important;min-width:0!important}
+:is(body.aura-dark,body.aura-light) .side :is(.navitem.active,.subitem.active) .badge{color:var(--on-accent)!important}
+:is(body.aura-dark,body.aura-light) .side .crm-pill{background:var(--side-fill)!important;border:0!important;border-radius:10px!important;box-shadow:none!important;font-size:13px!important;font-weight:600!important;color:var(--side-txt)!important}
+
+/* ---------- Barra do topo (toolbars): três zonas, uma ação principal, controles monocromáticos ---------- */
+@media (min-width:901px){
+  :is(body.aura-dark,body.aura-light) #search-toggle-mobile{display:none!important}
+}
+:is(body.aura-dark,body.aura-light) .crumbs > span:first-child,
+:is(body.aura-dark,body.aura-light) .crumbs > span:first-child + .sep{display:none!important}
+:is(body.aura-dark,body.aura-light) .crumbs .here{font-size:13px!important;font-weight:600!important;color:var(--ink)!important}
+:is(body.aura-dark,body.aura-light) .tb-pill{background:transparent!important;border:0!important;color:var(--mute)!important;font-size:13px!important;font-weight:500!important;padding:0 4px!important}
+:is(body.aura-dark,body.aura-light) :is(.tb-btn,.icobtn,.dec-btn,.gbtn){box-shadow:none!important}
+:is(body.aura-dark,body.aura-light) .topbar :is(.tb-btn.tb-ic,.icobtn){background:transparent!important;border-color:transparent!important}
+:is(body.aura-dark,body.aura-light) .topbar :is(.tb-btn.tb-ic,.icobtn):hover{background:var(--fill)!important}
+:is(body.aura-dark,body.aura-light) .tb-search input{background:var(--fill)!important;border-color:transparent!important;box-shadow:none!important}
+
+/* ---------- Cabeçalho da página ---------- */
+:is(body.aura-dark,body.aura-light) :is(.page-head h1,.page-title h1){font-size:26px!important;line-height:32px!important;font-weight:700!important;padding-bottom:0!important;color:var(--ink)!important}
+:is(body.aura-dark,body.aura-light) :is(.page-head p,.page-title p){font-size:14px!important;color:var(--mute)!important}
+:is(body.aura-dark,body.aura-light) .aura-saud{font-weight:700!important}
+
+/* ---------- Kanban, CRM, Configurações: cabeçalhos em texto, não em cartaz ---------- */
+:is(body.aura-dark,body.aura-light) :is(.task-col h4,.crm-col h4,.set-sect-t){font-size:13px!important;color:var(--ink)!important}
+:is(body.aura-dark,body.aura-light) .set-sect-t{margin-top:18px!important}
+:is(body.aura-dark,body.aura-light) :is(.task-col .ct,.crm-col .ct,.ct){background:transparent!important;color:var(--mute)!important;font-variant-numeric:tabular-nums}
+:is(body.aura-dark,body.aura-light) :is(.muted,.tc-vazio,.tkvazio){color:var(--mute)!important}
+:is(body.aura-dark,body.aura-light) .dec-urg{font-weight:600!important}
+
+/* ---------- Modal como sheet: camada elevada, um contorno, sem brilho ---------- */
+:is(body.aura-dark,body.aura-light) :is(.modal,.crm-mbox){background:var(--elev)!important;border:1px solid var(--line)!important;border-radius:16px!important}
+
+/* ---------- Foco visível (focus-and-selection, keyboards) ---------- */
+:is(body.aura-dark,body.aura-light) :is(button,a,input,select,textarea,[tabindex],.navitem,.subitem):focus-visible{
+  outline:2px solid var(--focus)!important;outline-offset:2px!important}
+
+/* ---------- Preferências do sistema (accessibility, materials) ---------- */
+@media (prefers-reduced-transparency:reduce){
+  :is(body.aura-dark,body.aura-light) :is(.side,.topbar,.modal-bg,.crm-modal){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  :is(body.aura-dark,body.aura-light) .side{background:#111113!important}
+}
+@media (prefers-reduced-motion:reduce){
+  :is(body.aura-dark,body.aura-light) *{transition-duration:.01ms!important}
+  :is(body.aura-dark,body.aura-light) *:not(.spin):not(.spinner):not([class*=load]){animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
+
+/* ---------- Contraste 4.5:1 onde a cor era fixa (accessibility, color: variantes de alto contraste) ---------- */
+body.aura-dark .dec-urg.u2{background:rgba(255,66,69,.16)!important;color:#FF6165!important}
+body.aura-dark .dec-urg.u1{background:rgba(255,214,0,.14)!important;color:#FFD600!important}
+body.aura-light .dec-urg.u2{background:#fdecec!important;color:#B3121F!important}
+body.aura-light .dec-urg.u1{background:#fff6d6!important;color:#7A5200!important}
+body.aura-light #page-tarefas .tf-kpis .kpi.yel .v{color:var(--yel-d)!important}
+body.aura-light #page-tarefas .tf-kpis .kpi.green .v{color:#008932!important}
+body.aura-light .kpi:is(.red,.green,.yel) :is(.l,.d){color:rgba(0,0,0,.72)!important}
+:is(body.aura-dark,body.aura-light) #page-cliente span[style*="86868b"]{color:var(--mute)!important}
+body.aura-light .nxc-tab.on{color:#7A5200!important}
+
+/* ---------- Botões (buttons): no máximo dois em destaque por tela; o secundário é neutro ---------- */
+:is(body.aura-dark,body.aura-light) .tb-btn.alt{background:var(--fill)!important;color:var(--ink)!important;border-color:transparent!important}
+:is(body.aura-dark,body.aura-light) .tb-btn.alt:hover{background:var(--fill-2)!important}
+:is(body.aura-dark,body.aura-light) .crm-add-btn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px!important}
+:is(body.aura-dark,body.aura-light) :is(.side-foot .av,.explainer h4){font-size:12px!important}
+:is(body.aura-dark,body.aura-light) .side:has(.subitem.active) .navitem.active .badge{color:var(--side-mute)!important}

@@ -3,13 +3,15 @@
    Tela nova usa estas variáveis; cor solta no código é erro. Teste: deploy/teste-tokens.py
    Valores: doc 11 (Apple no /app) + referência Apple DESIGN.md. Amarelo é o único acento;
    verde e vermelho só em status. Fundo escuro #000 (pedido do Gabriel: preto absoluto). Fundo claro #fbfbfd (o #f5f5f7 foi recusado como off-white gasto).
-   Escala: título 28/600, seção 17/600, corpo 14, rótulo 12 sem caixa alta; raio 16 cartão, 10 botão, 999 chip. */
+   Escala: título 28/600, seção 17/600, corpo 14, rótulo 12 sem caixa alta; raio 16 cartão, 10 botão, 999 chip.
+   Camada HIG (28/09): --mute-2 e --yel-d passam 4.5:1 nos dois temas (cinza #6C6C70 e amarelo #A16A00 são os de alto contraste da Apple);
+   --fill e --sep são valores próprios (a Apple não publica hex dos tokens semânticos). */
 :root{
   --card:var(--surface);
   --bd:var(--line);
   --o:var(--orange);
   --yel:#FFC700;
-  --yel-d:#d4a300;
+  --yel-d:#A16A00;
   --yel-soft:#fff8dc;
   --yel-bg:#fffbeb;
   --red:#dc2626;
@@ -50,7 +52,7 @@
   --ink-2:#1d1d1f;
   --txt:#1d1d1f;
   --mute:#6e6e73;
-  --mute-2:#8e8e93;
+  --mute-2:#6C6C70;
   --line:rgba(0,0,0,.06);
   --line-2:rgba(0,0,0,.1);
   --surface-2:#f5f5f7;
@@ -66,6 +68,14 @@
   --r-chip:999px;
   --sh-panel:0 24px 64px rgba(0,0,0,.18);
   --on-accent:#131316;
+  --font-ui:'Inter',-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',sans-serif;
+  --font-title:'Sora',var(--font-ui);
+  --fill:rgba(120,120,128,.12);
+  --fill-2:rgba(120,120,128,.2);
+  --focus:#A16A00;
+  --elev:#ffffff;
+  --hero:#1C1C1E;
+  --sep:rgba(60,60,67,.18);
 }
 body.aura-dark{
   --bg:#000000;
@@ -74,7 +84,7 @@ body.aura-dark{
   --ink-2:#F5F5F7;
   --txt:#F5F5F7;
   --mute:#A1A1A6;
-  --mute-2:#6E6E73;
+  --mute-2:#8E8E93;
   --line:rgba(255,255,255,.08);
   --line-2:rgba(255,255,255,.12);
   --yel-soft:rgba(255,199,0,.14);
@@ -94,4 +104,22 @@ body.aura-dark{
   --sh-panel:0 24px 64px rgba(0,0,0,.45);
   --card:var(--surface);
   --bd:var(--line);
+  --fill:rgba(120,120,128,.24);
+  --fill-2:rgba(120,120,128,.32);
+  --focus:#FFD600;
+  --yel-d:#FFD600;
+  --elev:#1C1C1F;
+  --hero:var(--surface);
+  --sep:rgba(84,84,88,.6);
+}
+/* Aumentar contraste do sistema (accessibility): bordas e texto secundário mais fortes */
+@media (prefers-contrast:more){
+  body.aura-dark{--line:rgba(255,255,255,.28);--mute:#C7C7CC}
+  body.aura-light{--line:rgba(0,0,0,.28);--mute:#48484A}
+}
+/* Sidebar: escura nos dois temas, então tem paleta própria (texto 4.5:1 sobre o fundo dela) */
+.side{
+  --side-txt:rgba(255,255,255,.92);
+  --side-mute:#98989D;
+  --side-fill:rgba(255,255,255,.08);
 }
