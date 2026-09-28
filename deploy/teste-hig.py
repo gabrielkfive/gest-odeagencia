@@ -60,7 +60,7 @@ MEDIR = r"""() => {
     if (bg && alfa(s.color) > .5) { const a = lum(s.color), b = lum(bg); const cr = (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
       const min = (px >= 18 || w >= 700) ? 3 : 4.5; if (cr < min) q.contraste.push(cr.toFixed(2) + ' ' + rot + ' ' + s.color + ' em ' + bg); }
   }
-  for (const n of document.querySelectorAll('.side .navitem, .side .subitem, .side .crm-pill')) {
+  for (const n of document.querySelectorAll('.side .navitem, .side .subitem, .side .crm-pill, #nav-indicator')) { if (!visivel(n)) continue;
     const c = getComputedStyle(n).backgroundColor.match(/[\d.]+/g); if (c && +c[0] > 230 && +c[1] > 170 && +c[1] < 215 && +c[2] < 60 && alfa(getComputedStyle(n).backgroundColor) > .5) q.amareloSidebar++; }
   return q;
 }"""
@@ -81,11 +81,18 @@ with sync_playwright() as pw:
         telas = []
         nav('dashboard'); telas.append(('inicio', p.evaluate(MEDIR)))
         nav('tarefas'); telas.append(('kanban', p.evaluate(MEDIR)))
+        # subitens: o grupo não pode ganhar amarelo junto com a folha (sidebars: um destaque só)
+        nav('jornada'); telas.append(('sub-jornada', p.evaluate(MEDIR)))
+        nav('projetos'); telas.append(('sub-projetos', p.evaluate(MEDIR)))
+        nav('tarefas')
         p.evaluate("() => { try { openTaskDetail('t1'); } catch (e) {} }"); p.wait_for_timeout(600); tema_certo(); telas.append(('tarefa', p.evaluate(MEDIR)))
         p.goto(base + '/workflowark.html', wait_until='load'); p.wait_for_timeout(2500)
         nav('crm'); telas.append(('crm', p.evaluate(MEDIR)))
         nav('cliente'); p.evaluate("() => { const s = document.getElementById('cli-area-sel'); if (s) { s.value = 'vivenda'; if (typeof cliAreaSelect === 'function') cliAreaSelect('vivenda'); } }"); p.wait_for_timeout(500); tema_certo()
         telas.append(('cliente', p.evaluate(MEDIR)))
+        av = p.evaluate("() => { const e = [...document.querySelectorAll('.nxc-av')].find(x => x.getBoundingClientRect().width > 40); return e ? parseFloat(getComputedStyle(e).fontSize) : null; }")
+        if av is not None and av < 16:
+            falhas.append('cliente-%s avatar: iniciais do avatar grande em %spx (mínimo 16)' % (tema, av))
         p.evaluate("() => { try { openSettings(); } catch (e) {} }"); p.wait_for_timeout(500); tema_certo(); telas.append(('config', p.evaluate(MEDIR)))
         for nome, q in telas:
             chave = '%s-%s' % (nome, tema)
