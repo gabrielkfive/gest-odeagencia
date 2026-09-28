@@ -1,0 +1,70 @@
+/* WorkFlowArk · aba Atividades no piloto Liquid Glass aprovado (28/09/2026).
+   Quadro estilo Trello sobre plano de fundo (amarelo por padrão), colunas em vidro fosco, cartões sólidos,
+   controles em cápsulas de vidro. Sidebar não muda (preta, ícones neutros). Teste: python deploy/teste-quadro.py */
+
+/* ---------- plano de fundo da página ---------- */
+:is(body.aura-dark,body.aura-light) #page-tarefas{
+  background:var(--quadro-fundo,linear-gradient(135deg,#FFE066 0%,#FFC700 45%,#FFAE00 100%))!important;
+  background-attachment:local!important;min-height:100%}
+/* no escuro o fundo escurece para o texto claro manter contraste */
+body.aura-dark #page-tarefas{background:linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.58)),var(--quadro-fundo,linear-gradient(135deg,#FFE066 0%,#FFC700 45%,#FFAE00 100%))!important;background-attachment:local!important}
+/* título e textos soltos sobre o fundo */
+body.aura-light #page-tarefas :is(.page-title h1,.page-title h1 *){color:#1D1D1F!important}
+body.aura-light #page-tarefas .page-title p,body.aura-light #page-tarefas #sync-status{color:rgba(0,0,0,.72)!important}
+body.aura-dark #page-tarefas :is(.page-title h1,.page-title h1 *){color:#fff!important}
+body.aura-dark #page-tarefas .page-title p,body.aura-dark #page-tarefas #sync-status{color:rgba(255,255,255,.8)!important}
+
+/* ---------- controles em cápsulas de vidro ---------- */
+:is(body.aura-dark,body.aura-light) #page-tarefas :is(.filter-bar .form-input,.filter-bar .form-select,.filter-bar .icobtn,#tf-mais,#task-views,.tf-kpis,.tf-fundo-btn){
+  background:var(--glass-bg)!important;border:0!important;border-radius:999px!important;
+  -webkit-backdrop-filter:var(--glass-blur)!important;backdrop-filter:var(--glass-blur)!important;
+  box-shadow:var(--glass-rim),0 2px 10px rgba(0,0,0,.08)!important;color:var(--ink)!important}
+body.aura-light #page-tarefas :is(.filter-bar .form-input,.filter-bar .form-select,.filter-bar .icobtn,#tf-mais,#task-views,.tf-kpis,.tf-fundo-btn){background:rgba(255,255,255,.66)!important}
+:is(body.aura-dark,body.aura-light) #page-tarefas #task-views{padding:3px!important}
+:is(body.aura-dark,body.aura-light) #page-tarefas #task-views .tv-btn{border-radius:999px!important;background:transparent!important;border:0!important}
+body.aura-light #page-tarefas #task-views .tv-btn.on{background:#fff!important;box-shadow:0 1px 4px rgba(0,0,0,.14)!important;color:#1D1D1F!important}
+body.aura-dark #page-tarefas #task-views .tv-btn.on{background:rgba(255,255,255,.2)!important;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.3)!important;color:#fff!important}
+:is(body.aura-dark,body.aura-light) #page-tarefas .tf-kpis{padding:4px 12px!important;gap:12px!important}
+:is(body.aura-dark,body.aura-light) #page-tarefas .tf-kpis .kpi{background:transparent!important;border:0!important;box-shadow:none!important}
+.tf-fundo-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;font:600 13px var(--font-ui,Inter),sans-serif;cursor:pointer}
+.tf-fundo-btn svg{width:17px;height:17px}
+
+/* ---------- quadro: rolagem livre ---------- */
+:is(body.aura-dark,body.aura-light) #task-board{cursor:grab;scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.28) transparent;padding-bottom:8px}
+body.aura-dark #task-board{scrollbar-color:rgba(255,255,255,.35) transparent}
+#task-board.arrastando{cursor:grabbing;user-select:none}
+#task-board .task-card{cursor:pointer}
+
+/* ---------- colunas em vidro fosco, cartões sólidos ---------- */
+:is(body.aura-dark,body.aura-light) #page-tarefas #task-board .task-col{
+  background:rgba(255,255,255,.5)!important;border:0!important;border-radius:18px!important;
+  -webkit-backdrop-filter:blur(22px) saturate(160%)!important;backdrop-filter:blur(22px) saturate(160%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 .5px rgba(0,0,0,.06),0 6px 20px rgba(0,0,0,.08)!important}
+body.aura-dark #page-tarefas #task-board .task-col{background:rgba(24,24,27,.6)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 0 0 .5px rgba(255,255,255,.1),0 8px 24px rgba(0,0,0,.35)!important}
+:is(body.aura-dark,body.aura-light) #page-tarefas #task-board .task-col-head{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border:0!important}
+body.aura-light #page-tarefas #task-board .task-col-head :is(h4,h4 *){color:#1D1D1F!important}
+:is(body.aura-dark,body.aura-light) #page-tarefas #task-board .task-card{background:var(--surface)!important;border-radius:12px!important;
+  box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 .5px rgba(0,0,0,.06)!important}
+body.aura-dark #page-tarefas #task-board .task-card{background:#1C1C1F!important;box-shadow:0 1px 2px rgba(0,0,0,.4),0 0 0 .5px rgba(255,255,255,.08)!important}
+
+/* ---------- popover do fundo (vidro) ---------- */
+.qf-pop{position:fixed;z-index:9500;width:300px;padding:14px;border-radius:22px;display:none;
+  background:var(--glass-bg);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+  box-shadow:var(--glass-rim),0 18px 50px rgba(0,0,0,.25);color:var(--ink);transform-origin:top right}
+body.aura-light .qf-pop{background:rgba(255,255,255,.78)}
+.qf-pop.aberto{display:block;animation:qfSurgir .2s cubic-bezier(.2,.9,.3,1)}
+@keyframes qfSurgir{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.qf-tit{font-size:13px;font-weight:600;margin:0 0 10px}
+.qf-grade{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.qf-amostra{height:46px;border-radius:12px;border:0;cursor:pointer;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.15)}
+.qf-amostra.on{outline:2px solid var(--ink);outline-offset:2px}
+.qf-foto{display:flex;align-items:center;justify-content:center;gap:6px;height:36px;border-radius:999px;background:rgba(127,127,127,.16);font-size:13px;font-weight:600;cursor:pointer}
+
+/* ---------- menos transparência e menos movimento ---------- */
+@media (prefers-reduced-transparency:reduce){
+  body.aura-light #page-tarefas #task-board .task-col{background:#F2F2F7!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  body.aura-dark #page-tarefas #task-board .task-col{background:#1C1C1F!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .qf-pop{-webkit-backdrop-filter:none;backdrop-filter:none}
+  body.aura-light .qf-pop{background:#fff}body.aura-dark .qf-pop{background:#1C1C1F}
+}
+@media (prefers-reduced-motion:reduce){.qf-pop.aberto{animation:none}}
