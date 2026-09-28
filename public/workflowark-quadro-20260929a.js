@@ -17,31 +17,46 @@
     'linear-gradient(160deg,#0f2027,#203a43 50%,#2c5364)',
     'linear-gradient(135deg,#f6d365,#fda085)'
   ];
+  // fundos escuros (índices) pedem texto claro no tema claro; foto sempre ganha um véu escuro leve
+  var ESCUROS = { 5: 1, 6: 1 };
   function pagina() { return document.getElementById('page-tarefas'); }
 
   // ---------- plano de fundo ----------
   function aplicarFundo(v) {
     var pg = pagina(); if (!pg) return;
-    var css = (v && v.foto) ? 'url("' + v.foto + '") center/cover no-repeat' : FUNDOS[(v && v.i) || 0] || FUNDOS[0];
+    var css = (v && v.foto) ? 'linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)), url("' + v.foto + '") center/cover no-repeat' : FUNDOS[(v && v.i) || 0] || FUNDOS[0];
     pg.style.setProperty('--quadro-fundo', css);
+    pg.classList.toggle('qf-escuro', !!((v && v.foto) || ESCUROS[(v && v.i) || 0]));
     marcarAmostras(v);
   }
   function lerFundo() { try { return JSON.parse(localStorage.getItem(CHAVE) || 'null') || { i: 0 }; } catch (e) { return { i: 0 }; } }
   function salvarFundo(v) { try { localStorage.setItem(CHAVE, JSON.stringify(v)); return true; } catch (e) { return false; } }
   window.wfaQuadroFundo = function (i) { var v = { i: Math.max(0, Math.min(FUNDOS.length - 1, +i || 0)) }; salvarFundo(v); aplicarFundo(v); };
+  // A foto fica no navegador junto com as tarefas: guardada pequena (até 1280 px e no máximo 400 mil caracteres)
+  // para nunca tomar o espaço de que o salvamento das tarefas precisa.
   function usarFoto(arquivo) {
-    if (!arquivo || !/^image\//.test(arquivo.type)) return;
-    var img = new Image(), url = URL.createObjectURL(arquivo);
-    img.onload = function () {
-      var max = 1920, k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
-      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
-      var v = { foto: c.toDataURL('image/jpeg', .82) };
-      if (!salvarFundo(v)) { v = { foto: c.toDataURL('image/jpeg', .6) }; salvarFundo(v); }
-      aplicarFundo(v);
-    };
-    img.src = url;
+    return new Promise(function (ok) {
+      if (!arquivo || !/^image\//.test(arquivo.type)) return ok(false);
+      var img = new Image(), url = URL.createObjectURL(arquivo);
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var tentativas = [[1280, .7], [1024, .6], [800, .55]], dado = '';
+        for (var k = 0; k < tentativas.length; k++) {
+          var max = tentativas[k][0], f = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+          c.width = Math.round(img.width * f); c.height = Math.round(img.height * f);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          dado = c.toDataURL('image/jpeg', tentativas[k][1]);
+          if (dado.length <= 400000) break;
+        }
+        var v = { foto: dado };
+        if (!salvarFundo(v)) { if (window.showToast) try { showToast('A foto não coube no navegador; use uma imagem menor.'); } catch (e) {} return ok(false); }
+        aplicarFundo(v); ok(true);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); ok(false); };
+      img.src = url;
+    });
   }
+  window.wfaQuadroFoto = usarFoto;
 
   // ---------- botão e popover de fundo ----------
   var pop;
@@ -97,13 +112,17 @@
     function soltar() {
       if (!pegando) return; pegando = false; q.classList.remove('arrastando');
       if (!moveu || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      var a = hist[0], b = hist[hist.length - 1], dt = Math.max(1, b[1] - a[1]), v = -(b[0] - a[0]) / dt * 1000;
+      var agora = performance.now(), rec = hist.filter(function (h) { return agora - h[1] < 100; });
+      if (rec.length < 2) return; // parou antes de soltar: sem arremesso
+      var a = rec[0], b = rec[rec.length - 1], dt = Math.max(1, b[1] - a[1]), v = -(b[0] - a[0]) / dt * 1000;
       var t0 = performance.now(), ini = q.scrollLeft, d = 0.998, alvo = ini + (v / 1000) * d / (1 - d);
       (function passo(t) { var p = Math.min(1, (t - t0) / 650), k = 1 - Math.pow(1 - p, 3); q.scrollLeft = ini + (alvo - ini) * k; if (p < 1) anim = requestAnimationFrame(passo); })(t0);
     }
     q.addEventListener('pointerup', soltar); q.addEventListener('pointercancel', soltar);
     q.addEventListener('wheel', function (e) {
       if (e.target.closest('.task-col') || Math.abs(e.deltaY) <= Math.abs(e.deltaX) || e.ctrlKey) return;
+      var max = q.scrollWidth - q.clientWidth;
+      if (max <= 1 || (e.deltaY < 0 && q.scrollLeft <= 0) || (e.deltaY > 0 && q.scrollLeft >= max - 1)) return; // deixa a página rolar
       q.scrollLeft += e.deltaY; e.preventDefault();
     }, { passive: false });
   }
@@ -139,6 +158,7 @@
       f.innerHTML = '<feImage href="' + mapa(w, h, Math.min(h / 2, 20), Math.min(16, h * .42)) + '" x="0" y="0" width="' + w + '" height="' + h + '" result="m"/>' +
         '<feDisplacementMap in="SourceGraphic" in2="m" scale="' + Math.min(30, h * .75) + '" xChannelSelector="R" yChannelSelector="G"/>';
       defs.appendChild(f); cache[chaveTam] = 1;
+      while (defs.children.length > 16) { var velho = defs.firstChild; delete cache[velho.id.replace('wfa-lg-', '')]; defs.removeChild(velho); }
     }
     el.style.setProperty('backdrop-filter', 'url(#' + id + ') blur(1px) saturate(1.8) brightness(1.05)', 'important');
   }

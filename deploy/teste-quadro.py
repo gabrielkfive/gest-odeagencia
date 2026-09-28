@@ -82,6 +82,29 @@ with sync_playwright() as pw:
         depois = p.evaluate("getComputedStyle(document.getElementById('page-tarefas')).backgroundImage")
         if antes != depois or 'none' == depois:
             falhas.append('fundo escolhido não voltou depois de recarregar (%s != %s)' % (antes[:60], depois[:60]))
+    # 7. roda do mouse não prende a rolagem vertical quando o quadro não tem para onde andar na horizontal
+    p.evaluate("() => { const b = document.getElementById('task-board'); b.dataset.larguraOriginal = b.style.width; b.style.width = (b.scrollWidth + 50) + 'px'; }"); p.wait_for_timeout(100)
+    preso = p.evaluate("""() => { const b = document.getElementById('task-board'); const ev = new WheelEvent('wheel', { deltaY: 120, bubbles: true, cancelable: true });
+      b.dispatchEvent(ev); b.style.width = b.dataset.larguraOriginal || ''; return ev.defaultPrevented; }""")
+    if preso:
+        falhas.append('roda do mouse presa: quadro sem rolagem horizontal ainda bloqueia a rolagem vertical')
+    # 8. no tema claro, fundo escuro deixa o título claro (contraste)
+    if tem:
+        p.evaluate("() => wfaQuadroFundo(6)"); p.wait_for_timeout(200)
+        cl = p.evaluate("() => getComputedStyle(document.querySelector('#page-tarefas .page-title h1')).color")
+        v = [float(x) for x in __import__('re').findall(r'[\d.]+', cl)[:3]]
+        if sum(v) / 3 < 180:
+            falhas.append('fundo escuro no tema claro: título continua escuro (%s)' % cl)
+        p.evaluate("() => wfaQuadroFundo(0)")
+    # 9. foto de fundo guardada pequena (não pode tomar o espaço das tarefas no navegador)
+    tam = p.evaluate("""async () => { const c = document.createElement('canvas'); c.width = 3000; c.height = 2000; const x = c.getContext('2d');
+      for (let i = 0; i < 400; i++) { x.fillStyle = 'hsl(' + (i * 37 % 360) + ',80%,' + (30 + i % 40) + '%)'; x.fillRect(Math.random() * 3000, Math.random() * 2000, 200, 150); }
+      const blob = await new Promise(r => c.toBlob(r, 'image/png')); const f = new File([blob], 'foto.png', { type: 'image/png' });
+      if (typeof wfaQuadroFoto !== 'function') return -1; await wfaQuadroFoto(f); return (localStorage.getItem('wfa-quadro-fundo') || '').length; }""")
+    if tam == -1:
+        falhas.append('sem wfaQuadroFoto() para testar a foto de fundo')
+    elif tam > 400000:
+        falhas.append('foto de fundo ocupa %d caracteres no navegador (máximo 400 mil)' % tam)
     b.close()
 if srv: srv.shutdown()
 if falhas:
