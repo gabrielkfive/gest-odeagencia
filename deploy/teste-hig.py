@@ -38,7 +38,9 @@ tarefas = [
 MEDIR = r"""() => {
   const lum = c => { const m = c.match(/[\d.]+/g); if (!m) return null; const [r,g,b] = m.slice(0,3).map(v => { v = v/255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); }); return .2126*r + .7152*g + .0722*b; };
   const alfa = c => { const m = c.match(/[\d.]+/g); return m && m.length > 3 ? +m[3] : 1; };
-  const fundo = el => { for (let e = el; e; e = e.parentElement) { const s = getComputedStyle(e);
+  // na aba Atividades a barra do topo é transparente sobre o plano de fundo do quadro (imagem): mesmo caso do backgroundImage
+  const fundo = el => { if (el.closest('.topbar') && document.querySelector('#page-tarefas.active')) return null;
+    for (let e = el; e; e = e.parentElement) { const s = getComputedStyle(e);
       if (s.backgroundImage && s.backgroundImage !== 'none') return null;
       if (alfa(s.backgroundColor) >= .95) return s.backgroundColor; }
     return getComputedStyle(document.body).backgroundColor; };
