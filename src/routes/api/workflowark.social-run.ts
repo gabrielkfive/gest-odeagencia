@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { hojeSP } from "@/lib/datas";
+import { iaErroFatal } from "@/lib/ia-erro";
 
 // AGENTE SOCIAL MEDIA AUTÔNOMO (pedido do Gabriel, 29/06).
 // Diferente do Conselho (que DEBATE): este agente PRODUZ. Trabalho complementar, não
@@ -62,13 +63,13 @@ export const Route = createFileRoute("/api/workflowark/social-run")({
               }),
             });
             const d: any = await r.json().catch(() => ({}));
-            if (!r.ok) { lastAiErr = `HTTP ${r.status}: ${d?.error?.message || JSON.stringify(d).slice(0, 200)}`; return ""; }
+            if (!r.ok) { lastAiErr = `HTTP ${r.status}: ${d?.error?.message || JSON.stringify(d).slice(0, 200)}`; iaFatal = iaFatal || iaErroFatal(r.status, d); return ""; }
             const txt = d?.content?.[0]?.text || "";
             if (!txt) lastAiErr = `resposta sem texto (stop_reason: ${d?.stop_reason || "?"})`;
             lastRaw = txt;
             return txt;
           };
-          let lastAiErr = ""; let lastRaw = "";
+          let lastAiErr = ""; let lastRaw = ""; let iaFatal = "";
           const debug = u.searchParams.get("debug") === "1";
           const parseJSON = (txt: string) => {
             if (!txt) return null;
@@ -149,6 +150,10 @@ export const Route = createFileRoute("/api/workflowark/social-run")({
               });
             });
           }
+
+          // Sem crédito/chave e nada gerado: erro claro (antes voltava ok:true com 0 propostas
+          // e ainda marcava "rodou hoje"). Não grava nada, então o próximo disparo tenta de novo.
+          if (iaFatal && !novas.length) return Response.json({ error: iaFatal }, { status: 502 });
 
           // Append-only: só grava se de fato cresceu (nunca encolhe a fila real).
           let salvou = false;

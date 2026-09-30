@@ -1,6 +1,7 @@
 // Assistente (JARVIS) — analisa mensagens do WhatsApp, cria tarefas e notifica.
 // Usa IA (Claude Haiku) quando ANTHROPIC_API_KEY está setada; cai para regras se falhar.
 import { zapiEnv } from "./zapi.server";
+import { iaLogFalha } from "@/lib/ia-erro";
 import { dataSP } from "@/lib/datas";
 
 const AI_MODEL = "claude-haiku-4-5";
@@ -29,7 +30,7 @@ async function aiAnalyze(text: string, name?: string): Promise<AIResult | null> 
       messages: [{ role: "user", content: `Mensagem recebida${name ? ` de ${name}` : ""}:\n"""${text}"""` }],
     }),
   });
-  if (!resp.ok) return null;
+  if (!resp.ok) { iaLogFalha("jarvis", resp.status, await resp.json().catch(() => ({}))); return null; } // cai pras regras
   const data: any = await resp.json();
   let raw: string = data?.content?.[0]?.text || "";
   raw = raw.replace(/```json|```/g, "").trim();

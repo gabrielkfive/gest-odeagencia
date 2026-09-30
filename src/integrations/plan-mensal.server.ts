@@ -106,7 +106,7 @@ export async function planMensalSeDevido(db: any): Promise<void> {
       body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 4000, system: [{ type: "text", text: sys, cache_control: { type: "ephemeral" } }], messages: [{ role: "user", content: userMsg }] }),
     });
     const data: any = await r.json().catch(() => ({}));
-    if (!r.ok) return;
+    if (!r.ok) { const { iaLogFalha } = await import("@/lib/ia-erro"); iaLogFalha("plano-mensal " + pendente.nome, r.status, data); return; }
     let raw: string = data?.content?.[0]?.text || "";
     raw = raw.replace(/```json|```/g, "").trim();
     const m = raw.match(/\{[\s\S]*\}/);

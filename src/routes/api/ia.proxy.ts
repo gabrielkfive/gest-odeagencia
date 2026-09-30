@@ -60,7 +60,14 @@ export const Route = createFileRoute("/api/ia/proxy")({
             })),
           }),
         });
-        const j = await r.json().catch(() => ({}));
+        const j: any = await r.json().catch(() => ({}));
+        // Crédito/chave: troca a mensagem por uma clara em português, mantendo o formato
+        // da Anthropic ({error:{type,message}}) pra quem já lê error.message.
+        if (!r.ok && j?.error && typeof j.error === "object") {
+          const { iaErroFatal } = await import("@/lib/ia-erro");
+          const fatal = iaErroFatal(r.status, j);
+          if (fatal) j.error = { ...j.error, message: `${fatal} (${String(j.error.message || "").slice(0, 200)})` };
+        }
         return Response.json(j, { status: r.status });
       },
     },
