@@ -121,7 +121,10 @@ function limparFiltros(){
 // Data no fuso da ARK (America/Sao_Paulo). No navegador da equipe já é local, mas
 // .toISOString() converte pra UTC e das 21h em diante vira o dia seguinte, quebrando
 // prazos e a virada de mês. dataSP/hojeSP resolvem em qualquer fuso. en-CA = YYYY-MM-DD.
-function dataSP(d){return (d||new Date()).toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});}
+// Formatador único: toLocaleDateString com timeZone monta um Intl novo a cada chamada, e o quadro de
+// Atividades chama isto ~1.500 vezes por render (~54 ms perdidos, medido em 30/09/2026).
+// Guardado na própria função (não em const): dataSP é içada e pode rodar antes desta linha (sem TDZ).
+function dataSP(d){const f=dataSP._f||(dataSP._f=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo'}));return f.format(d||new Date());}
 function hojeSP(){return dataSP(new Date());}
 /* Busca sem acento e sem caixa (10/09/2026): "Darma" acha "Darmã", "Acai" acha "Açaí".
    Antes era só toLowerCase: acento no dado e sem acento na digitação (ou o contrário) dava
