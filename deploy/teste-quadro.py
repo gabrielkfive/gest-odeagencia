@@ -3,11 +3,13 @@
 Uso: python deploy/teste-quadro.py [url-base]    (sai 1 se alguma regra quebrar)
 
 1. Sem escolha salva, o tema abre claro (sidebar continua preta).
-2. O quadro abre com o gradiente do piloto (laranja, rosa e roxo); amarelo é opção.
+2. O quadro abre com o grafite ARK (preto com brilho sutil, sem rosa nem roxo); gradiente do piloto, amarelo e azul são opção.
 3. Arrastar o fundo do quadro com o mouse rola na horizontal (rolagem livre, estilo Trello).
 4. Arrastar a partir de um cartão NÃO rola o quadro (o arrasto do cartão é outro gesto).
 5. Fundo escolhido fica salvo e volta depois de recarregar.
 6. Colunas em vidro fosco (translúcidas com desfoque) e cartões sólidos.
+10. Escolha salva no formato antigo ({i:N}, lista de 28/09) continua mostrando o mesmo fundo:
+    {i:0} (gradiente do piloto) vira {i:8,v:2}; {i:2} (azul) continua azul.
 """
 import sys, os, json, threading, http.server, socketserver, functools
 from playwright.sync_api import sync_playwright
@@ -48,9 +50,11 @@ with sync_playwright() as pw:
         falhas.append('tema padrão não é claro (body: %s)' % classe)
     p.evaluate("() => document.querySelector('[data-nav=tarefas]').click()"); p.wait_for_timeout(900)
     fundo = p.evaluate("() => { const s = getComputedStyle(document.getElementById('page-tarefas')); return s.backgroundImage + ' | ' + s.backgroundColor; }")
-    # padrão = gradiente do piloto aprovado (laranja, rosa e roxo); o amarelo virou opção (pedido do Gabriel 28/09)
-    if not all(k in fundo for k in ('255, 184, 107', '255, 111, 163', '123, 108, 255')):
-        falhas.append('quadro sem o gradiente do piloto como padrão (%s)' % fundo[:120])
+    # padrão = grafite ARK (pedido do Gabriel 30/09: o rosa quebra a identidade preto e amarelo)
+    if not all(k in fundo for k in ('44, 44, 48', '10, 10, 11')):
+        falhas.append('quadro sem o grafite ARK como padrão (%s)' % fundo[:160])
+    if any(k in fundo for k in ('255, 111, 163', '123, 108, 255', '255, 184, 107')):
+        falhas.append('fundo padrão ainda tem rosa ou roxo (%s)' % fundo[:160])
     col = p.evaluate("() => { const c = document.querySelector('#task-board .task-col'); const s = getComputedStyle(c); return { bg: s.backgroundColor, bf: s.backdropFilter }; }")
     if 'blur' not in (col['bf'] or '') or (len(cor(col['bg'])) > 3 and cor(col['bg'])[3] >= .95) or (len(cor(col['bg'])) == 3):
         falhas.append('coluna não é vidro fosco (%s, %s)' % (col['bg'], col['bf']))
@@ -106,8 +110,23 @@ with sync_playwright() as pw:
         falhas.append('sem wfaQuadroFoto() para testar a foto de fundo')
     elif tam > 400000:
         falhas.append('foto de fundo ocupa %d caracteres no navegador (máximo 400 mil)' % tam)
+    # 10. escolha salva no formato antigo migra sem mudar o fundo
+    ROSA, AZUL = ('255, 184, 107', '255, 111, 163', '123, 108, 255'), ('79, 172, 254', '0, 242, 254')
+    for salvo, cores, esperado in (('{"i":0}', ROSA, {'i': 8, 'v': 2}), ('{"i":2}', AZUL, {'i': 2, 'v': 2})):
+        c2 = b.new_context(viewport={'width': 1440, 'height': 900})
+        c2.add_init_script("try{if(!sessionStorage.getItem('semeado')){sessionStorage.setItem('semeado','1');localStorage.setItem('wfa-quadro-fundo',%s);}localStorage.setItem('sb-fxfnonozzekxnxddxsnh-auth-token',%s);if(!localStorage.getItem('wfa-tarefas'))localStorage.setItem('wfa-tarefas',%s);}catch(e){}"
+                           % (json.dumps(salvo), json.dumps(json.dumps(sess)), json.dumps(json.dumps(tarefas))))
+        p2 = c2.new_page(); p2.goto(base + '/workflowark.html', wait_until='load'); p2.wait_for_timeout(2500)
+        p2.evaluate("() => document.querySelector('[data-nav=tarefas]').click()"); p2.wait_for_timeout(700)
+        f2 = p2.evaluate("getComputedStyle(document.getElementById('page-tarefas')).backgroundImage")
+        if not all(k in f2 for k in cores):
+            falhas.append('escolha antiga %s mudou de fundo (%s)' % (salvo, f2[:120]))
+        guardado = p2.evaluate("JSON.parse(localStorage.getItem('wfa-quadro-fundo') || 'null')")
+        if guardado != esperado:
+            falhas.append('escolha antiga %s não migrou para %s (ficou %s)' % (salvo, esperado, guardado))
+        c2.close()
     b.close()
 if srv: srv.shutdown()
 if falhas:
     print('FALHA (%d)' % len(falhas)); [print(' -', f) for f in falhas]; sys.exit(1)
-print('OK: tema claro padrão, gradiente do piloto, rolagem livre, cartão não rola, fundo salvo, colunas de vidro')
+print('OK: tema claro padrão, grafite ARK sem rosa, escolha antiga migrada, rolagem livre, cartão não rola, fundo salvo, colunas de vidro')
