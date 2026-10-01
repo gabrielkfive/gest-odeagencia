@@ -10978,6 +10978,36 @@ function ahData(){
   const totAnd=pp.reduce((s,p)=>s+(p.andamento||0),0);
   return {c,leads,fech,reun,conv,fin,alpha,alMRR,alContr,arkN,alphaN,carteira,pp,totAnd};
 }
+/* Entregas do mes contadas ao vivo: Kanban de Atividades (concluidaEm no mes) mais
+   tarefas de projeto (registro de conclusao no hist dentro do mes). Area sai do nome
+   do responsavel; tarefa com dois nomes da mesma area conta uma vez para a area. */
+const AH_AREA={'Saulo':'Comercial','Lucas Rosi':'Sucesso do cliente','Caio Neves':'Sucesso do cliente',
+  'Danilo de Lima':'Tráfego','Guilherme':'Tráfego','Darman':'Criação','Maria Luiza':'Criação','M. Portela':'Criação',
+  'Bruno':'Criação','Samuel Magalhães':'Criação','Christopher Mike':'Criação','Victor':'Criação',
+  'Henrique':'Captação','Anderson':'Captação','Maria Clara':'Captação','Gabriel Andrade':'Direção'};
+function ahEntregasMes(mes){
+  const r={kanban:0,proj:0,prazoOk:0,prazoN:0,area:{},clientes:new Set(),pessoa:{},porCli:{}};
+  const interno=id=>/^(ark|proposta)$/i.test(String(id||''));
+  const nomes=t=>(t.resps&&t.resps.length?t.resps:[t.resp]).filter(Boolean);
+  const somaArea=t=>{const as=new Set(nomes(t).map(n=>AH_AREA[n]).filter(Boolean));as.forEach(a=>r.area[a]=(r.area[a]||0)+1);
+    new Set(nomes(t)).forEach(n=>r.pessoa[n]=(r.pessoa[n]||0)+1);};
+  const cliNm=id=>{try{const c=(CLIENTES||[]).find(x=>x.id===id);return c?c.nm:id;}catch(e){return id;}};
+  const somaCli=(id,nm)=>{if(interno(id)||/^ark content$/i.test(nm||''))return;const k=id?cliNm(id):nm;if(!k)return;r.porCli[k]=(r.porCli[k]||0)+1;};
+  (state.tarefas||[]).forEach(t=>{
+    if(t.status!=='concluido'||String(t.concluidaEm||'').slice(0,7)!==mes)return;
+    r.kanban++;somaArea(t);somaCli(t.clienteId);if(t.clienteId&&!interno(t.clienteId))r.clientes.add(t.clienteId);
+    if(t.data){r.prazoN++;if(String(t.concluidaEm).slice(0,10)<=t.data)r.prazoOk++;}
+  });
+  let pjs=[];try{pjs=JSON.parse(localStorage.getItem('wfa-projetos')||'[]')||[];}catch(e){}
+  pjs.forEach(p=>(p.tarefas||[]).forEach(t=>{
+    if(t.st!=='concluido')return;
+    if(!(t.hist||[]).some(h=>/conclu/i.test(h.txt||'')&&String(h.em||'').slice(0,7)===mes))return;
+    r.proj++;somaArea(t);somaCli(p.clienteId,p.cliente);if(p.clienteId&&!interno(p.clienteId))r.clientes.add(p.clienteId);
+  }));
+  r.total=r.kanban+r.proj;
+  r.prazoPct=r.prazoN?Math.round(r.prazoOk/r.prazoN*100):null;
+  return r;
+}
 function ahStat(num,lab,det,cls){return '<div class="stat '+(cls||'')+'"><div class="num '+(cls==='y'?'':(cls||''))+'">'+num+'</div><div class="lab">'+lab+'</div>'+(det?'<div class="det">'+det+'</div>':'')+'</div>';}
 /* Foto da equipe: procura /time/<slug>.jpg e cai no monograma se o arquivo nao existir.
    Assim o Gabriel so joga os arquivos na pasta public/time e o deck passa a ter cara
@@ -10992,9 +11022,10 @@ function ahPessoa(nome,funcao,tag){
 }
 function ahBuildSlides(edit){
   const d=ahData();
-  /* O mes do deck e fixo, nao vem do relogio. A All Hands de setembro e montada ainda
-     em agosto, e o relogio faria a capa mentir. Chave set_mes_label em wfa-allhands. */
-  const mes=(ahNarr().set_mes_label||'Setembro de 2026');
+  /* O mes do deck e fixo, nao vem do relogio. Chave out_mes_label em wfa-allhands.
+     Este deck fecha setembro e e apresentado em outubro: as chaves usam o prefixo out_
+     para que texto antigo salvo com set_ no navegador nao volte para a tela. */
+  const mes=(ahNarr().out_mes_label||'Setembro de 2026');
   const hoje=new Date().toLocaleDateString('pt-BR');
   const nar=ahNarr();
   const c=d.c,fin=d.fin;
@@ -11008,76 +11039,106 @@ function ahBuildSlides(edit){
     (sub?'<p>'+sub+'</p>':'')+'<div class="ahsec-rule"></div></div></div>';
   const big=(k,v,det,cls)=>'<div class="ahbig"><div class="k">'+k+'</div><div class="v '+(cls||'')+'">'+v+'</div><div class="d">'+det+'</div></div>';
 
+  /* Entregas ao vivo. Agosto ainda nao tinha quadro de projetos, entao a base de
+     comparacao e so o Kanban (45 concluidas, 4 de 44 no prazo, lido em 01/10/2026). */
+  const E=ahEntregasMes('2026-09'),EA=ahEntregasMes('2026-08');
+  const nE=E.total||'sem dado';
+  const pPct=(E.prazoPct!=null)?E.prazoPct+'%':'sem dado';
+  const pPctAgo=(EA.prazoPct!=null)?EA.prazoPct+'%':'sem dado';
+
   // 01 · Capa
   S.push('<div class="cover"><img class="ah-cover-logo" src="/ark-logo.png" alt="ARK">'+
     '<h1 style="margin-top:14px">All Hands<br><span class="y">'+mes+'</span></h1>'+
-    '<p class="lead" style="margin-top:20px">'+ahTxt('set_capa_sub','Onde chegamos, o que cada área entregou e o que cada um vai puxar no mês.',edit)+'</p>'+
-    '<div style="margin-top:22px"><span class="pill y">'+d.carteira+' clientes na carteira</span><span class="pill">6 áreas</span><span class="pill">'+hoje+'</span></div></div>');
+    '<p class="lead" style="margin-top:20px">'+ahTxt('out_capa_sub','O fechamento de setembro: o que cada área entregou, quem entrou na carteira e o que a gente puxa em outubro.',edit)+'</p>'+
+    '<div style="margin-top:22px"><span class="pill y">3 clientes novos</span><span class="pill y">'+nE+' entregas no mês</span><span class="pill">6 áreas</span><span class="pill">'+hoje+'</span></div></div>');
 
   // 02 · Linha do tempo
   S.push('<div><div class="ah-kick">De 2024 até aqui</div><h2>A linha do tempo da casa</h2>'+
     '<div class="ahtl">'+
-    '<div class="tl"><div class="ano">2024</div><div class="dot"></div><h4>'+ahTxt('set_tl_2024_t','Rumo aos 10k por pessoa',edit)+'</h4><p>'+ahTxt('set_tl_2024_p','A meta do segundo semestre era simples e dura: 10 mil por pessoa até dezembro. Time pequeno, tudo na mão dos sócios.',edit)+'</p></div>'+
-    '<div class="tl"><div class="ano">2025</div><div class="dot"></div><h4>'+ahTxt('set_tl_2025_t','A operação vira empresa',edit)+'</h4><p>'+ahTxt('set_tl_2025_p','Squad Alpha aberta, organograma escrito, 22 POPs e o Método dos 5 Eixos. Sai o talento solto, entra o processo.',edit)+'</p></div>'+
-    '<div class="tl on"><div class="ano">2026</div><div class="dot"></div><h4>'+ahTxt('set_tl_2026_t','A casa num sistema só',edit)+'</h4><p>'+ahTxt('set_tl_2026_p','WorkFlowArk no ar e usado todo dia. '+d.carteira+' clientes na carteira, 6 áreas com dono, e a operação inteira dentro do quadro.',edit)+'</p></div>'+
-    '<div class="tl"><div class="ano">Set/26</div><div class="dot"></div><h4>'+ahTxt('set_tl_prox_t','Gente nova e rito',edit)+'</h4><p>'+ahTxt('set_tl_prox_p','Caio como PO e Guilherme no tráfego e no funil próprio. Daily, planning e All Hands viram rotina de verdade.',edit)+'</p></div>'+
+    '<div class="tl"><div class="ano">2024</div><div class="dot"></div><h4>'+ahTxt('out_tl_2024_t','Rumo aos 10k por pessoa',edit)+'</h4><p>'+ahTxt('out_tl_2024_p','A meta do segundo semestre era simples e dura: 10 mil por pessoa até dezembro. Time pequeno, tudo na mão dos sócios.',edit)+'</p></div>'+
+    '<div class="tl"><div class="ano">2025</div><div class="dot"></div><h4>'+ahTxt('out_tl_2025_t','A operação vira empresa',edit)+'</h4><p>'+ahTxt('out_tl_2025_p','Squad Alpha aberta, organograma escrito, 22 POPs e o Método dos 5 Eixos. Sai o talento solto, entra o processo.',edit)+'</p></div>'+
+    '<div class="tl"><div class="ano">Ago/26</div><div class="dot"></div><h4>'+ahTxt('out_tl_2026_t','Gente nova e rito',edit)+'</h4><p>'+ahTxt('out_tl_2026_p','Caio como PO e Guilherme no tráfego e no funil próprio. Daily, planning e All Hands viram rotina.',edit)+'</p></div>'+
+    '<div class="tl on"><div class="ano">Set/26</div><div class="dot"></div><h4>'+ahTxt('out_tl_prox_t','A carteira cresce',edit)+'</h4><p>'+ahTxt('out_tl_prox_p','Líder Automóveis, TI5 Rastreamento Veicular e Fogão Goiano entram. A operação entrega '+nE+' tarefas no sistema em um mês.',edit)+'</p></div>'+
     '</div></div>');
 
   // 03 · DIVISOR bloco 1
-  S.push('<div>'+sec('01','Bloco 1','Como foi o ','MÊS','Resultado, funil e o que a carteira devolveu em agosto.')+'</div>');
+  S.push('<div>'+sec('01','Bloco 1','Como foi ','SETEMBRO','Entregas, prazo, funil e quem entrou na carteira.')+'</div>');
 
-  // 04 · Números
-  S.push('<div><div class="ah-kick">Agosto em uma tela</div><h2>Os números do mês que fechou</h2>'+
+  // 04 · Números do mês, ao vivo do sistema
+  S.push('<div><div class="ah-kick">Setembro em uma tela</div><h2>Os números do mês que fechou</h2>'+
     '<div class="ah-grid g4" style="margin-top:14px">'+
-    ahStat(d.carteira,'Clientes na carteira',d.arkN+' ARK · '+d.alphaN+' Alpha','y')+
-    ahStat(ahTxt('set_pulse_capt','13',edit),'Captações em agosto','clique e edite','green')+
-    ahStat(ahTxt('set_pulse_fech','3',edit),'Fechamentos','Mazuchi, Royal Face e EmFace','amber')+
-    ahStat(ahTxt('set_pulse_alinh','todo dia',edit),'Alinhamentos','ARK, Alpha, Comercial e Vivenda','y')+
+    ahStat(nE,'Entregas concluídas',E.kanban+' em Atividades · '+E.proj+' em Projetos','y')+
+    ahStat(pPct,'Entregues no prazo','agosto: '+pPctAgo,'green')+
+    ahStat(ahTxt('out_pulse_novos','3',edit),'Clientes novos','Líder, TI5 e Fogão Goiano','amber')+
+    ahStat(ahTxt('out_pulse_capt','9',edit),'Captações na agenda','Vivenda, EmFace, Fercon e mais','y')+
     '</div>'+
-    '<p style="margin-top:14px;color:#9a9aa2;font-size:14px">'+ahTxt('set_pulse_leitura','Agosto fechou três clientes novos e segurou a carteira. Setembro entra com gente nova e com a operação dentro do sistema.',edit)+'</p></div>');
+    '<div class="ah-grid g3" style="margin-top:12px">'+
+    ahStat(EA.total?(Math.round(E.total/EA.total*10)/10).toString().replace('.',',')+'x':'sem base','Entregas contra agosto','agosto: '+(EA.total||'sem dado')+' no Kanban','green')+
+    ahStat(ahTxt('out_pulse_leads','22',edit),'Leads novos no CRM','agosto: 8','amber')+
+    ahStat(ahTxt('out_pulse_sist','128',edit),'Melhorias no sistema','17 lotes publicados · agosto: 61','y')+
+    '</div>'+
+    '<p style="margin-top:14px;color:#9a9aa2;font-size:14px">'+ahTxt('out_pulse_leitura','Setembro foi o mês com mais entrega desde que o sistema existe, e o primeiro em que metade chegou no prazo.',edit)+'</p></div>');
 
-  // 05 · Funil (numeros editaveis)
+  // 05 · Entregas por área (ao vivo)
+  const areas=['Sucesso do cliente','Tráfego','Criação','Direção'];
+  const amax=Math.max(1,...areas.map(a=>E.area[a]||0));
+  const barA=a=>{const n=E.area[a]||0;return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'+
+    '<div style="width:190px;font-size:13px;color:#bdbdc4">'+a+'</div>'+
+    '<div class="funbar"><div class="funfill" style="width:'+Math.max(n/amax*100,8)+'%;background:#ffaa00">'+n+'</div></div></div>';};
+  S.push('<div><div class="ah-kick">Todas as áreas entregaram</div><h2>Entregas por área em setembro</h2>'+
+    '<div style="margin-top:14px">'+areas.map(barA).join('')+'</div>'+
+    '<div class="ah-grid g3" style="margin-top:10px">'+
+    cardG('Captação',ahTxt('out_area_capt','9 captações na agenda do mês: Vivenda três vezes, Attraversiamo, EmFace, Fonseca e Cavalcanti, Fercon e Mazuchi.',edit))+
+    cardG('Criação',ahTxt('out_area_cria','Fercon recebeu 17 artes em setembro, o maior mês do contrato. EmFace com Reels prontos para postar.',edit))+
+    cardG('Planejamento',ahTxt('out_area_plan','6 planos entregues: renovação de Fercon, Sasse, Sabor a Lenha e Pikachu, mais Vaca Velha e Attraversiamo.',edit))+
+    '</div>'+
+    '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Contagem ao vivo do Kanban de Atividades e do quadro de Projetos. Tarefa com mais de uma pessoa da mesma área conta uma vez. '+E.clientes.size+' clientes receberam entrega no mês.</p></div>');
+
+  // 05b · Quem puxou setembro (ao vivo)
+  const top=Object.entries(E.pessoa).filter(([n])=>AH_AREA[n]&&n!=='Gabriel Andrade').sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const topCli=Object.entries(E.porCli).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(top.length){
+    S.push('<div><div class="ah-kick">Reconhecimento</div><h2>Quem puxou setembro</h2>'+
+      '<div class="ahteam" style="grid-template-columns:repeat('+top.length+',1fr);gap:16px;margin-top:12px">'+
+      top.map(([n,q])=>ahPessoa(n,AH_AREA[n],q+' entregas')).join('')+'</div>'+
+      '<h3 style="margin-top:18px">Clientes que mais receberam entrega</h3>'+
+      '<div style="margin-top:8px">'+topCli.map(([n,q])=>'<span class="pill'+(q>=8?' y':'')+'">'+n+' · '+q+'</span>').join('')+'</div>'+
+      '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Entregas concluídas em setembro com o nome da pessoa, no Kanban e nos Projetos.</p></div>');
+  }
+
+  // 06 · Funil (numeros editaveis, medidos no CRM em 01/10/2026)
   const val=(k,vivo)=>{const n=nar[k];const bruto=(n!==undefined&&n!=='')?n:vivo;const num=parseFloat(String(bruto).replace(/[^\d.,-]/g,'').replace(',','.'));return isNaN(num)?0:num;};
-  const vLeads=val('set_fun_leads',d.leads),vReun=val('set_fun_reun',d.reun),vFech=val('set_fun_fech',d.fech||3);
+  const vLeads=val('out_fun_leads',22),vReun=val('out_fun_reun',6),vFech=val('out_fun_fech',3);
   const fmax=Math.max(vLeads,vReun,vFech,1);
   const conv=vLeads?Math.round(vFech/vLeads*100):0;
   const barra=(rot,key,vivo,num,cor)=>'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'+
     '<div style="width:170px;font-size:13px;color:#bdbdc4">'+rot+'</div>'+
     '<div class="funbar"><div class="funfill" style="width:'+Math.max(num/fmax*100,10)+'%;background:'+cor+'">'+ahTxt(key,String(vivo),edit)+'</div></div></div>';
-  S.push('<div><div class="ah-kick">Comercial · Saulo + Gabriel + Danilo</div><h2>O funil do mês</h2>'+
+  S.push('<div><div class="ah-kick">Comercial · Saulo + Gabriel</div><h2>O funil do mês</h2>'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px"><h3 style="margin:0">Lead até fechamento</h3><span style="color:#30d158;font-weight:800;font-family:Sora">'+conv+'%</span></div>'+
-    barra('Leads gerados','set_fun_leads',d.leads,vLeads,'#ffaa00')+
-    barra('Reuniões','set_fun_reun',d.reun,vReun,'#9a9aa2')+
-    barra('Fechamentos','set_fun_fech',(d.fech||3),vFech,'#30d158')+
-    '<p style="font-size:12px;color:#5a5a62;margin:2px 0 12px">Clique em cima do número para corrigir. Leads e reuniões saem do CRM e do grupo comercial.</p>'+
+    barra('Leads novos','out_fun_leads',22,vLeads,'#ffaa00')+
+    barra('Avançaram para reunião','out_fun_reun',6,vReun,'#9a9aa2')+
+    barra('Fechamentos','out_fun_fech',3,vFech,'#30d158')+
+    '<p style="font-size:12px;color:#5a5a62;margin:2px 0 12px">Leads criados no CRM em setembro, sem os testes da landing. Clique no número para corrigir.</p>'+
     '<div class="ah-grid g2">'+
-    card('Na mesa agora',ahTxt('set_pipe_mesa','Profox e Localiza com proposta entregue, aguardando resposta. Líder Automóveis não topou a proposta.',edit))+
-    card('Danilo entra na leitura',ahTxt('set_pipe_danilo','Não como closer, BDR ou SDR. Danilo entra para ler dado do funil e ficar perto do marketing.',edit))+
+    cardG('Agosto contra setembro',ahTxt('out_pipe_comp','Agosto abriu 8 leads. Setembro abriu 22, com prospecção ativa, indicação e os agentes locais trazendo concessionárias e clínicas.',edit))+
+    card('Na mesa agora',ahTxt('out_pipe_mesa','Blue Eye negocia a cobertura do evento de 10 anos em novembro. Brunella Pizzaria com proposta. Kasa 20 e Hamburgo com reunião para marcar.',edit))+
     '</div></div>');
 
-  // 06 · DIVISOR bloco 2
-  S.push('<div>'+sec('02','Bloco 2','Quem entrou no ','TIME','Duas frentes que estavam sem dono passam a ter.')+'</div>');
+  // 07 · DIVISOR bloco 2
+  S.push('<div>'+sec('02','Bloco 2','Quem entrou na ','CARTEIRA','Três clientes novos fechados em setembro.')+'</div>');
 
-  // 07 · Caio e Gui com foto
-  S.push('<div><div class="ah-kick">Gente nova</div><h2>Caio e Guilherme</h2>'+
-    '<div class="ahteam" style="grid-template-columns:repeat(2,1fr);gap:18px">'+
-    ahPessoa('Caio Neves','Product Owner · Geração de demanda','NOVO')+
-    ahPessoa('Guilherme','Tráfego · Funil próprio','NOVO')+
+  // 08 · Os três clientes novos
+  const cli=(nm,onde,o_que,cond,k)=>'<div class="note green" style="margin:0"><h3>'+nm+'</h3>'+
+    '<p style="color:#9a9aa2;font-size:12px;margin:0 0 8px">'+onde+'</p><p>'+ahTxt(k,o_que,edit)+'</p>'+
+    '<p style="margin-top:10px;font-family:Sora;font-weight:700;color:#ffaa00">'+cond+'</p></div>';
+  S.push('<div><div class="ah-kick">Clientes novos</div><h2>Bem vindos à casa</h2>'+
+    '<div class="ah-grid g3" style="margin-top:14px">'+
+    cli('Líder Automóveis','Seminovos · Sobradinho','Captação com 6 vídeos por mês, tráfego pago e assessoria comercial. Indicação do círculo do Saulo.','R$ 2.200 por mês','out_cli_lider')+
+    cli('TI5 Rastreamento','Rastreamento veicular','Base de 420 clientes e meta de voltar a crescer em carteira. Tráfego e conteúdo para gerar contrato novo.','6 meses · R$ 2.300 por mês','out_cli_ti5')+
+    cli('Fogão Goiano','Restaurante · Sobradinho','Captações audiovisuais, de 6 a 8 vídeos, para encher os dias mais vazios do almoço.','R$ 1.800 por mês','out_cli_fogao')+
     '</div>'+
-    '<div class="ah-grid g2" style="margin-top:16px">'+
-    card('O que o Caio resolve',ahTxt('set_novo_caio','Organiza as demandas, acompanha prazo e alinha entrega entre cliente e equipe. Olha prioridade, vê o que precisa de ajuste e acompanha cada etapa do projeto.',edit))+
-    card('O que o Gui resolve',ahTxt('set_novo_gui','Assume a gestão de tráfego no lugar do Giuseppe, acompanha parte dos clientes, estrutura e testa o funil próprio da ARK e conduz a auditoria dos projetos.',edit))+
-    '</div></div>');
-
-  // 08 · Movimentação do time
-  S.push('<div><div class="ah-kick">Quem muda de cadeira</div><h2>A estrutura se mexeu</h2>'+
-    '<div class="ahteam">'+
-    ahPessoa('Danilo de Lima','Sai do operacional e assume o COO','COO')+
-    ahPessoa('Darman','Em formação, caminho para direção de arte','TESTE')+
-    ahPessoa('Saulo','Perde os cardápios, foca em fechar','')+
-    ahPessoa('Bruno','Sai da estratégia, fica em design no Fercon','')+
-    '</div>'+
-    '<p style="margin-top:16px;color:#8a8a92;font-size:13px">'+ahTxt('set_saidas','Saíram da estrutura: Márcio e Luckas Gomes da edição, o Márcio também da captação, e Giuseppe do tráfego.',edit)+'</p></div>');
+    '<div class="note" style="margin-top:14px"><h3>O que muda para o time</h3><p>'+ahTxt('out_cli_onb','Os três entram no onboarding em outubro: briefing, projeto no quadro, roteiro e primeira captação com data. Somados, R$ 6.300 por mês no CRM.',edit)+'</p></div></div>');
 
   // 09 · Organograma de verdade
   const oM=(ini,nm,rl,tg)=>'<div class="ahorg-m"><div class="ahorg-av">'+ini+'</div><div><div class="ahorg-nm">'+nm+(tg?' <span class="ahorg-tg">'+tg+'</span>':'')+'</div><div class="ahorg-rl">'+rl+'</div></div></div>';
@@ -11089,138 +11150,108 @@ function ahBuildSlides(edit){
       '<div class="ahorg-coo"><div class="ahorg-badge dk">COO</div><div class="ahorg-ceo sm">DANILO DE LIMA</div><div class="ahorg-sub">Operação · Tráfego · Dados do comercial</div></div>'+
       '<div class="ahorg-lig"></div>'+
       '<div class="ahorg-areas">'+
-        oA('01','Comercial',[oM('G','Gabriel','Closer','HEAD'),oM('S','Saulo','CSO · BDR · SDR'),oM('D','Danilo','Análise de dados','NOVO')])+
-        oA('02','Marketing',[oM('G','Gabriel','Frente e propostas','HEAD'),oM('G','Guilherme','Geração de demanda','NOVO'),oM('C','Caio','Geração de demanda','NOVO'),oM('D','Danilo','Dados'),oM('S','Saulo','Marketing físico')])+
-        oA('03','Criação',[oM('B','Bruno','Designer · Fercon'),oM('M','M. Portela','Designer'),oM('D','Darman','Em formação','TESTE'),oM('M','Maria Luiza','Social · Alpha'),oM('S','Samuel','Editor'),oM('C','Christopher','Editor'),oM('V','Victor','Editor')],true)+
-        oA('04','Tráfego',[oM('D','Danilo','Gestor','COO'),oM('G','Guilherme','Consultor','NOVO')])+
+        oA('01','Comercial',[oM('G','Gabriel','Closer','HEAD'),oM('S','Saulo','CSO · BDR · SDR'),oM('D','Danilo','Análise de dados')])+
+        oA('02','Marketing',[oM('G','Gabriel','Frente e propostas','HEAD'),oM('G','Guilherme','Geração de demanda'),oM('C','Caio','Geração de demanda'),oM('D','Danilo','Dados'),oM('S','Saulo','Marketing físico')])+
+        oA('03','Criação',[oM('B','Bruno','Designer · Fercon'),oM('M','M. Portela','Designer'),oM('D','Darman','Em formação'),oM('M','Maria Luiza','Social · Alpha'),oM('S','Samuel','Editor'),oM('C','Christopher','Editor'),oM('V','Victor','Editor')],true)+
+        oA('04','Tráfego',[oM('D','Danilo','Gestor','COO'),oM('G','Guilherme','Consultor')])+
         oA('05','Sucesso do cliente',[oM('L','Lucas Rosi','Account · CS','HEAD'),oM('C','Caio','Apoio e formação','PO')])+
         oA('06','Captação',[oM('S','Samuel','Câmera'),oM('C','Christopher','Câmera'),oM('V','Victor','Câmera'),oM('A','Anderson','Câmera'),oM('H','Henrique','Câmera'),oM('M','Maria Clara','Cobertura')])+
       '</div>'+
     '</div></div>');
 
   // 10 · DIVISOR bloco 3
-  S.push('<div>'+sec('03','Bloco 3','Como a gente vai ','RODAR','A trilha montada com o Guilherme, os ritos e a agenda do mês.')+'</div>');
+  S.push('<div>'+sec('03','Bloco 3','O que a gente ','ENTREGOU','Captação, planejamento e o sistema que segura tudo isso.')+'</div>');
 
-  // 11 · Trilha
-  S.push('<div><div class="ah-kick">A trilha</div><h2>Seis etapas até a operação rodar sozinha</h2>'+
+  // 11 · Agenda de setembro (ao vivo da Gestão do mês)
+  let setEvs=[];try{setEvs=(loadAgendaEvents()||[]).filter(e=>String((e&&e.date)||'').slice(0,7)==='2026-09').sort((a,b)=>String(a.date).localeCompare(String(b.date)));}catch(e){}
+  const setLinha=e=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+String(e.date).slice(8,10)+'/09</td><td>'+(e.title||'').replace(/^\s*(Capta[çc][ãa]o|Roteiro)\s*/i,'')+'</td></tr>';
+  const setCapt=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).map(setLinha).join('');
+  const setRot=setEvs.filter(e=>/^\s*roteiro/i.test(e.title||'')).map(setLinha).join('');
+  const nCapt=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).length;
+  S.push('<div><div class="ah-kick">Captação de setembro</div><h2>'+nCapt+' captações na agenda</h2>'+
+    '<div class="ah-grid g2" style="margin-top:12px">'+
+    '<div><h3>Captações</h3><table><tbody>'+(setCapt||'<tr><td>Sem registro na aba Agenda</td></tr>')+'</tbody></table></div>'+
+    '<div><h3>Entrega de roteiro</h3><table><tbody>'+(setRot||'<tr><td>Sem registro na aba Agenda</td></tr>')+'</tbody></table>'+
+    '<h3 style="margin-top:14px">Planejamento estratégico</h3><p style="font-size:13px;color:#bdbdc4">'+ahTxt('out_agenda_plano','Planejamento virou entrega fixa do mês. Em setembro saíram 6 planos, quatro deles de renovação, cada um com histórico, benchmark e o que vem em seguida.',edit)+'</p></div>'+
+    '</div></div>');
+
+  // 12 · O sistema em setembro
+  S.push('<div><div class="ah-kick">O sistema em setembro</div><h2>128 melhorias no WorkFlowArk</h2>'+
     '<div class="ah-grid g3" style="margin-top:14px">'+
-    card('01 · Estruturação dos clientes','Briefing de cada cliente finalizado e documento de referência pronto, com contexto, necessidade e escopo. É onde a gente está agora.')+
-    card('02 · Responsabilidades','Quem responde por cada tarefa, quais tarefas cada projeto tem, quanto tempo cada uma demanda, para quem se demanda e como é o ciclo de report.')+
-    card('03 · Projetos e ritos','Daily, weekly, planning, acompanhamento e priorização. Antes disso, os projetos precisam estar montados no sistema.')+
-    card('04 · Auditoria','Guilherme revisa os clientes, identifica necessidade adicional e define se entra mais alguém na estrutura.')+
-    card('05 · Primeira volta','A estrutura operacional roda com responsabilidade, tarefa, prazo e rito. Em paralelo, começam os testes do funil próprio.')+
-    card('06 · Rotina','Acompanhar todo dia, achar gargalo, refinar tarefa, ajustar responsabilidade, revisar a semana e evoluir o modelo.')+
+    card('Quadro de Atividades novo','Igual ao piloto aprovado, mais leve, e o cartão salva sozinho enquanto você escreve.')+
+    card('Projeto por cliente','12 clientes com entrega concluída no quadro de projetos, com sprint, homologação e prontuário.')+
+    card('Meu Dia e login Google','Cada pessoa abre o sistema no que é dela hoje, e entra com a conta Google.')+
+    card('Landing oficial','A landing do WorkFlowArk subiu, e quem pede teste cai direto no CRM com a origem marcada.')+
+    card('Senha pelo gestor','Gestor cria o acesso de quem entra, sem depender de e-mail de confirmação.')+
+    card('WorkFlowArk para agências','A versão para outras agências subiu em instância separada, com dado de cada uma isolado.')+
     '</div>'+
-    '<p style="margin-top:12px;color:#9a9aa2;font-size:13px">'+ahTxt('set_trilha_nota','A etapa 2 depende de uma reunião com o time inteiro, e é ela que trava ou destrava o resto.',edit)+'</p></div>');
+    '<p style="margin-top:12px;color:#9a9aa2;font-size:13px">'+ahTxt('out_sist_nota','128 alterações publicadas em 17 lotes em setembro, contra 61 em agosto.',edit)+'</p></div>');
 
-  // 12 · Ritos
+  // 13 · Ritos
   S.push('<div><div class="ah-kick">Como a gente se encontra</div><h2>Daily, planning e All Hands</h2>'+
     '<div class="ah-grid g3" style="margin-top:14px">'+
     card('Daily','A diária. Rápida, para saber o que está travado hoje e quem destrava.')+
     card('Planning','A reunião da semana. Prioriza, distribui e fecha o que a semana vai entregar.')+
     card('All Hands','A mensal. Resultado, direção e compromisso do mês.')+
     '</div>'+
-    '<div class="note" style="margin-top:14px"><h3>O combinado</h3><p>'+ahTxt('set_ritos','A presença na All Hands é cobrada de todo mundo. Mas o que muda o mês é aparecer em algum momento da semana, na daily ou na planning. Por isso a gente não marca captação na segunda no horário da reunião.',edit)+'</p></div></div>');
+    '<div class="note" style="margin-top:14px"><h3>O combinado</h3><p>'+ahTxt('out_ritos','A presença na All Hands é cobrada de todo mundo. O que muda o mês é aparecer na daily ou na planning. Captação não entra na segunda no horário da reunião.',edit)+'</p></div></div>');
 
-  // 13 · Agenda (ao vivo da Gestão do mês)
-  let setEvs=[];try{setEvs=(loadAgendaEvents()||[]).filter(e=>String((e&&e.date)||'').slice(0,7)==='2026-09').sort((a,b)=>String(a.date).localeCompare(String(b.date)));}catch(e){}
-  const setLinha=e=>'<tr><td class="n" style="text-align:left;font-family:Sora;white-space:nowrap">'+String(e.date).slice(8,10)+'/09</td><td>'+(e.title||'').replace(/^\s*(Capta[çc][ãa]o|Roteiro)\s*/i,'')+'</td></tr>';
-  const setCapt=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).map(setLinha).join('');
-  const setRot=setEvs.filter(e=>/^\s*roteiro/i.test(e.title||'')).map(setLinha).join('');
-  const nCapt=setEvs.filter(e=>/^\s*capta/i.test(e.title||'')).length;
-  S.push('<div><div class="ah-kick">Agenda de setembro</div><h2>'+nCapt+' captações marcadas</h2>'+
-    '<div class="ah-grid g2" style="margin-top:12px">'+
-    '<div><h3>Captações</h3><table><tbody>'+(setCapt||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table></div>'+
-    '<div><h3>Entrega de roteiro</h3><table><tbody>'+(setRot||'<tr><td>Programe na aba Agenda</td></tr>')+'</tbody></table>'+
-    '<h3 style="margin-top:14px">Planejamento estratégico</h3><p style="font-size:13px;color:#bdbdc4">'+ahTxt('set_agenda_plano','O planejamento estratégico passa a ser entrega fixa do mês. É o que conduz o cliente e sustenta a renovação. Grande parte fica com Rosiron e Darman. Na Alpha não precisa ser mensal.',edit)+'</p></div>'+
-    '</div></div>');
+  // 14 · DIVISOR bloco 4
+  S.push('<div>'+sec('04','Bloco 4','O que ','DESTRAVOU','E o que segue na mesa, com dono.')+'</div>');
 
-  // 14 · O sistema
-  S.push('<div><div class="ah-kick">O sistema em setembro</div><h2>O que mudou para a operação caber no quadro</h2>'+
-    '<div class="ah-grid g3" style="margin-top:14px">'+
-    card('Projeto por cliente','Quadro de 6 colunas, homologação interna separada da do cliente, etiqueta de papel e de sprint, e prontuário em 5 páginas.')+
-    card('Tempo por tarefa','Cada tarefa carrega estimativa em horas. Sem isso não dá para dizer se a semana cabe.')+
-    card('Capacity da equipe','O painel mostra o tempo operacional do time por pessoa, e quanto ainda está sem estimativa.')+
-    card('A ARK como cliente','A própria ARK entra no modelo de projeto, com quadro e briefing igual ao de cliente que paga.')+
-    card('Etiquetas próprias','A equipe cria etiqueta nova quando o trabalho pede, sem depender de código.')+
-    card('Um quadro só','O kanban da aba Atividades usa o mesmo modelo da aba Projetos.')+
-    '</div></div>');
-
-  // 15 · Vídeo
-  const vurl=String(nar.set_video_url||'').trim();
-  let vhtml;
-  if(!vurl){
-    vhtml='<div class="vazio"><div class="ic">▶</div><p>Solte o arquivo em <b style="color:#ffaa00">public/video/allhands.mp4</b> ou cole o link do YouTube na chave <b style="color:#ffaa00">set_video_url</b>. Enquanto não tiver, este slide fica aqui reservado para dar play na reunião.</p></div>';
-  }else if(/youtu\.?be|drive\.google|vimeo/i.test(vurl)){
-    const yt=(vurl.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/)||[])[1];
-    const src=yt?('https://www.youtube.com/embed/'+yt):vurl.replace(/\/view.*$/,'/preview');
-    vhtml='<iframe src="'+src+'" allowfullscreen allow="autoplay; encrypted-media"></iframe>';
-  }else{
-    vhtml='<video controls preload="metadata" src="'+vurl+'"></video>';
-  }
-  S.push('<div><div class="ah-kick">Dar play junto</div><h2>'+ahTxt('set_video_titulo','O criativo novo de captação',edit)+'</h2>'+
-    '<p class="lead" style="margin-bottom:14px">'+ahTxt('set_video_sub','O criativo estava parado e destravou esta semana. A ideia é assistir aqui, na reunião, e todo mundo dar ideia de melhoria na hora.',edit)+'</p>'+
-    '<div class="ahvid">'+vhtml+'</div></div>');
-
-  // 16 · DIVISOR bloco 4
-  S.push('<div>'+sec('04','Bloco 4','O que ainda ','TRAVA','Sem maquiagem. O que destravou, o que não destravou e de quem é.')+'</div>');
-
-  // 17 · O que destravou
+  // 15 · O que destravou
   S.push('<div><div class="ah-kick">O que funcionou</div><h2>O que destravou no mês</h2>'+
     '<div class="ah-grid g2" style="margin-top:12px">'+
-    cardG('A frente operacional',ahTxt('set_conq1','O maior destrave do mês foi o operacional. A gente viu risco, viu churn e teve receio. Com a entrada do Guilherme nas frentes de tráfego pago, isso passa a ter dono.',edit))+
-    cardG('Designação de cliente definida',ahTxt('set_conq2','Todos os clientes entraram com a designação de quem responde e quais demandas faltam, registrada no briefing.',edit))+
-    cardG('Criativo de captação destravado',ahTxt('set_conq3','O criativo estava parado e destravou esta semana. Entra criativo novo.',edit))+
-    cardG('Projeto por cliente no ar',ahTxt('set_conq4','Cada cliente ganhou quadro, sprint e prontuário no sistema.',edit))+
+    cardG('Volume de entrega',ahTxt('out_conq1',nE+' entregas concluídas no sistema. Agosto fechou com '+(EA.total||45)+'.',edit))+
+    cardG('Prazo',ahTxt('out_conq2','Entregas no prazo saíram de '+pPctAgo+' em agosto para '+pPct+' em setembro.',edit))+
+    cardG('Comercial',ahTxt('out_conq3','Três clientes novos e 22 leads abertos no CRM, quase três vezes agosto.',edit))+
+    cardG('Projeto por cliente rodando',ahTxt('out_conq4','O quadro de projetos saiu do papel: '+E.proj+' tarefas de projeto concluídas no mês.',edit))+
     '</div></div>');
 
-  // 18 · Número gigante do ponto de atenção
-  S.push('<div>'+big(ahTxt('set_big_k','MRR da Alpha para a taxa de franquia',edit),ahTxt('set_big_v','não fecha',edit),
-    ahTxt('set_big_d','O ponto de atenção máxima do mês. No último mês não veio cobrança e não chegou até a gente se foi considerado pago. O financeiro deles está desalinhado, e o acesso aos dados do operacional da Alpha continua na mesa do Danilo.',edit),'red')+'</div>');
-
-  // 19 · Gargalos
-  S.push('<div><div class="ah-kick">Com dono e com ação</div><h2>Os outros gargalos</h2>'+
+  // 16 · Na mesa
+  S.push('<div><div class="ah-kick">Em andamento</div><h2>O que segue na mesa</h2>'+
     '<div class="ah-grid g3" style="margin-top:12px">'+
-    cardR('Cobrança da Alpha',ahTxt('set_garg2','Precisa de resposta escrita: foi considerado pago ou não. Dono: Gabriel.',edit))+
-    cardR('Dados do operacional Alpha',ahTxt('set_garg3','Sem esse acesso a gente não enxerga a operação da Alpha inteira. Dono: Danilo.',edit))+
-    cardR('Growth Hub sem conversão',ahTxt('set_garg4','Investimento feito e nenhuma conversão. A saída é lead próprio, e é isso que o funil do Guilherme vai testar.',edit))+
-    cardR('Estimativa em branco',ahTxt('set_garg5','Tarefa sem hora estimada deixa o capacity pela metade. Dono: cada responsável.',edit))+
-    cardR('Renovações na mesa',ahTxt('set_garg6','Mundo Livre e Sabor e Lenha vencem nas próximas duas semanas. Sasse e Naeo precisam de conversa agora.',edit))+
+    card('Renovações em negociação',ahTxt('out_garg1','As renovações que estavam em aberto seguem em negociação. Fercon, Sasse, Sabor a Lenha e Pikachu já receberam plano de renovação. Dono: Gabriel e Lucas.',edit))+
+    card('Aprovação do cliente',ahTxt('out_garg2','Entrega pronta parada em homologação não conta no mês. Cobrar aprovação toda semana destrava o número de outubro.',edit))+
+    card('Onboarding dos três novos',ahTxt('out_garg3','Briefing, projeto e primeira captação com data para Líder, TI5 e Fogão Goiano.',edit))+
+    card('Financeiro da Alpha',ahTxt('out_garg4','Cobrança e acesso aos dados do operacional seguem na pauta dos sócios.',edit))+
+    card('Estimativa em branco',ahTxt('out_garg5','Tarefa sem hora estimada deixa o capacity pela metade. Dono: cada responsável.',edit))+
+    card('Funil próprio',ahTxt('out_garg6','Guilherme segue testando o funil próprio da ARK, agora com a landing e o CRM ligados.',edit))+
     '</div></div>');
 
-  // 20 · DIVISOR bloco 5
-  S.push('<div>'+sec('05','Bloco 5','Para onde a gente ','VAI','O que cada frente leva daqui, e o que precisa estar de pé no fim do mês.')+'</div>');
+  // 17 · DIVISOR bloco 5
+  S.push('<div>'+sec('05','Bloco 5','Para onde a gente ','VAI','O que cada frente leva para outubro.')+'</div>');
 
-  // 21 · OKRs de setembro a dezembro (Gabriel, CEO)
-  S.push('<div><div class="ah-kick">OKRs de setembro a dezembro</div><h2>'+ahTxt('set_okr_tema','Fortalecer a saúde financeira e o posicionamento da ARK e da Alpha',edit)+'</h2>'+
-    '<p style="color:#9a9aa2;font-size:14px;margin:6px 0 12px">'+ahTxt('set_okr_intro','Três objetivos do CEO para o quadrimestre. Cada liderança carrega a sua parte no slide seguinte.',edit)+'</p>'+
+  // 18 · OKRs de setembro a dezembro (Gabriel, CEO)
+  S.push('<div><div class="ah-kick">OKRs de setembro a dezembro · mês 1</div><h2>'+ahTxt('out_okr_tema','Fortalecer a saúde financeira e o posicionamento da ARK e da Alpha',edit)+'</h2>'+
+    '<p style="color:#9a9aa2;font-size:14px;margin:6px 0 12px">'+ahTxt('out_okr_intro','Onde cada objetivo do CEO chegou no primeiro mês do quadrimestre.',edit)+'</p>'+
     '<div class="ah-grid g3">'+
-    cardG('OKR 1 · Renovar a base',ahTxt('set_okr_g1','Já em setembro: FERCON, Sasse, Mundo Livre, 4B Burger e Sabor Além. No quadrimestre: Deguste e os demais contratos da base.',edit))+
-    card('OKR 2 · Dominar os processos',ahTxt('set_okr_g2','Fazer a transição e deixar desenhado como se faz o onboarding, como o cardápio fica ativo e como se faz a ativação. Treinamento de verdade para quem responde pelo atendimento.',edit))+
-    card('OKR 3 · Marketing da ARK',ahTxt('set_okr_g3','Uma campanha por semana. Dois criativos já prontos cobrem as duas primeiras semanas. Ligado à entrada do Caio e do Guilherme na geração de demanda.',edit))+
+    cardG('OKR 1 · Renovar a base',ahTxt('out_okr_g1','Planos de renovação entregues para Fercon, Sasse, Sabor a Lenha e Pikachu. As conversas seguem em negociação.',edit))+
+    cardG('OKR 2 · Dominar os processos',ahTxt('out_okr_g2','Projeto por cliente no quadro e '+pPct+' das entregas no prazo. Outubro foca no onboarding dos três novos.',edit))+
+    cardG('OKR 3 · Marketing da ARK',ahTxt('out_okr_g3','Leads novos saíram de 8 para 22. Conteúdo da ARK produzido em lote no fim do mês para o calendário de outubro.',edit))+
     '</div></div>');
 
-  // 21b · OKRs das lideranças (Danilo e Lucas Rosi)
+  // 19 · OKRs das lideranças (Danilo e Lucas Rosi)
   S.push('<div><div class="ah-kick">OKRs das lideranças · setembro a dezembro</div><h2>O que Danilo e Lucas carregam</h2>'+
     '<div class="ah-grid g2" style="margin-top:12px">'+
     '<div>'+ahPessoa('Danilo de Lima','COO · Operação e tráfego','COO')+
       '<div style="display:grid;gap:10px;margin-top:10px">'+
-      cardG('OKR 1 · Renovar 100% da base',ahTxt('set_okr_d1','Nenhum contrato da base termina por silêncio. Renovação encaminhada com antecedência, um a um.',edit))+
-      card('OKR 2 · Dominar a operação',ahTxt('set_okr_d2','Mapear, treinar e implementar todos os processos que já estão desenhados.',edit))+
-      card('Resultados-chave',ahTxt('set_okr_d3','Mais 10% de faturamento dos clientes pela gestão de tráfego. Campanha de cliente novo no ar em menos de uma semana, com tudo o que ela precisa executado.',edit))+
+      cardG('OKR 1 · Renovar 100% da base',ahTxt('out_okr_d1','Nenhum contrato da base termina por silêncio. Renovação encaminhada com antecedência, um a um.',edit))+
+      card('OKR 2 · Dominar a operação',ahTxt('out_okr_d2','Mapear, treinar e implementar todos os processos que já estão desenhados.',edit))+
+      card('Resultados-chave',ahTxt('out_okr_d3','Mais 10% de faturamento dos clientes pela gestão de tráfego. Campanha de cliente novo no ar em menos de uma semana, a começar por Líder e TI5.',edit))+
       '</div></div>'+
     '<div>'+ahPessoa('Lucas Rosi','Sucesso do cliente · Account','HEAD')+
       '<div style="display:grid;gap:10px;margin-top:10px">'+
-      cardG('OKR 1 · Renovar 100% da base',ahTxt('set_okr_l1','Ligação rápida com 100% da base. Cada cliente ouvido antes de qualquer vencimento.',edit))+
-      card('OKR 2 · Demandas criativas',ahTxt('set_okr_l2','90% das demandas criativas entregues no prazo e com qualidade aprovada.',edit))+
-      card('Resultado-chave',ahTxt('set_okr_l3','Pelo menos 5 novas opções ofertadas dentro da base, entre ARK e Alpha, no período.',edit))+
+      cardG('OKR 1 · Renovar 100% da base',ahTxt('out_okr_l1','Ligação rápida com 100% da base. Cada cliente ouvido antes de qualquer vencimento.',edit))+
+      card('OKR 2 · Demandas criativas',ahTxt('out_okr_l2','90% das demandas criativas entregues no prazo e com qualidade aprovada. Setembro fechou em '+pPct+'.',edit))+
+      card('Resultado-chave',ahTxt('out_okr_l3','Pelo menos 5 novas opções ofertadas dentro da base, entre ARK e Alpha, no período.',edit))+
       '</div></div>'+
     '</div></div>');
 
-  // 22 · Compromisso
-  S.push('<div class="cover"><div class="ah-kick">Compromisso do mês</div>'+
-    '<h2 style="font-size:40px;max-width:1000px;margin-top:10px">'+ahTxt('set_compromisso','O que cada um leva daqui',edit)+'</h2>'+
-    '<div style="margin-top:20px"><span class="pill y">Reunião de responsabilidades feita</span><span class="pill y">Tarefa com dono e com hora</span><span class="pill y">Roteiro 3 dias antes</span><span class="pill y">Funil próprio no ar</span><span class="pill y">Dados da Alpha resolvidos</span></div>'+
+  // 20 · Compromisso
+  S.push('<div class="cover"><div class="ah-kick">Compromisso de outubro</div>'+
+    '<h2 style="font-size:40px;max-width:1000px;margin-top:10px">'+ahTxt('out_compromisso','O que cada um leva daqui',edit)+'</h2>'+
+    '<div style="margin-top:20px"><span class="pill y">Renovações fechadas</span><span class="pill y">Onboarding dos três novos</span><span class="pill y">Aprovação cobrada toda semana</span><span class="pill y">Tarefa com dono e com hora</span><span class="pill y">Prazo acima de 50%</span></div>'+
     '<p style="margin-top:26px;font-family:Sora;font-weight:700;letter-spacing:.3em;color:#ffaa00">VAMOS JUNTOS ●</p></div>');
 
   // 23 · Financeiro (sócios)
@@ -11234,7 +11265,7 @@ function ahBuildSlides(edit){
     ahStat(mmK(d.alMRR),'MRR Alpha',d.alphaN+' clientes','amber')+
     '</div>'+
     '<div class="ah-grid g2"><div><h3>Maiores a receber</h3><table>'+topRec+'</table></div>'+
-    '<div class="note red" style="align-self:start"><h3>O ponto do mês</h3><p>O MRR da Alpha não cobre a taxa de franquia, e a cobrança do último mês ficou sem confirmação de pagamento.</p></div></div>'+
+    '<div class="note green" style="align-self:start"><h3>O ponto do mês</h3><p>'+ahTxt('out_fin_ponto','Três clientes novos somam R$ 6.300 por mês no CRM. As renovações em negociação definem o caixa de outubro.',edit)+'</p></div></div>'+
     '<p style="margin-top:10px;color:#5a5a62;font-size:12px">Números ao vivo da Minha Planilha. Detalhe completo na aba Financeiro.</p></div>');
 
   return S;
@@ -11242,7 +11273,7 @@ function ahBuildSlides(edit){
 window.ahIdx=0;window.ahSlides=[];
 function ahWrap(html,i,total){
   const nn=String(i+1).padStart(2,'0'),tt=String(total).padStart(2,'0');
-  const mes=(ahNarr().set_mes_label||'Setembro de 2026');
+  const mes=(ahNarr().out_mes_label||'Setembro de 2026');
   const ehSec=/class="ahsec"/.test(html); // divisor de bloco respira diferente
   return '<div class="ahd'+(ehSec?' sec':'')+'">'+
     '<div class="ah-chrome"><div class="ah-brand"><img src="/ark-logo.png" alt="ARK"><span>ARK<b>·</b>ALL HANDS</span></div><div class="ah-pageno">'+nn+' <i>/</i> '+tt+'</div></div>'+

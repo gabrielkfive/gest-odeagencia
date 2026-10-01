@@ -259,3 +259,26 @@ Estas lacunas apareceram ao definir as métricas. Cada uma vira decisão do Gabr
 | Sem foto de fim de mês além do backup de 14 dias | 2.1, 2.4, 2.5 | Snapshot mensal guardado fora da retenção (chave `wfa-snapshot-AAAA-MM` ou arquivo) |
 | Sem separação recorrente x avulso no CRM e no financeiro | 2.6, 2.7 | Decisão D7 da sprint |
 | Sem tracking de visita na landing | 2.9 | Decidir se haverá e com qual configuração |
+
+## 3. Valores medidos (corte 01/10/2026, por volta de 12h40, America/Sao_Paulo)
+
+Lidos de `wfa-tarefas`, `wfa-projetos`, `wfa-crm` e `wfa-agenda-events` pelo conector do WorkFlowArk.
+O deck (`ahEntregasMes` no app) recalcula entregas e prazo ao vivo; os números abaixo são a foto do corte.
+
+| Métrica | Setembro | Agosto |
+|---|---|---|
+| Entregas concluídas no Kanban (concluidaEm no mês) | 50 | 45 |
+| Tarefas de projeto concluídas (hist "mudou o status para Concluído" no mês) | 57 | sem quadro de projetos |
+| Total de entregas | 107 | 45 |
+| No prazo (concluídas com prazo) | 23 de 46, 50% | 4 de 44, 9% |
+| Tarefas criadas no Kanban | 124 | 63 |
+| Leads novos no CRM (sem os 2 testes da landing) | 22 | 8 |
+| Leads de setembro que avançaram de Prospecção | 6 | sem dado |
+| Fechamentos citados pelo Gabriel | 3 (Líder Automóveis R$ 2.200, TI5 R$ 2.300 por 6 meses, Fogão Goiano R$ 1.800) | 3 |
+| Captações na aba Agenda | 9 | 13 (deck anterior) |
+| Commits no main sem merge / PRs | 128 / 17 | 61 |
+
+Entregas por área (tarefa com dois nomes da mesma área conta uma vez): Sucesso do cliente 33, Tráfego 29,
+Criação 16, Direção 43, Comercial 1, Captação 1. Concluídas sem concluidaEm no Kanban: 98, fora da conta.
+Nain e Souto Maior (R$ 1.500, fechado 11/09 pelo Gabriel) também está como Fechado no CRM e não entrou
+nos 3 do deck a pedido do Gabriel.
