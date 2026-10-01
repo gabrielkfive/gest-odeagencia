@@ -71,7 +71,7 @@ if (esperado) {
   checa(r.area['Tráfego'] === esperado.trafego, 'dois nomes da mesma área contam uma vez');
   checa(r.area['Sucesso do cliente'] === esperado.sucesso && r.area['Criação'] === esperado.criacao, 'área por responsável');
 }
-checa(r.n === 21, 'deck com 21 slides (' + r.n + ')');
+checa(r.n === 22, 'deck com 22 slides (' + r.n + ')');
 
 await page.evaluate(() => {
   document.querySelectorAll('.page').forEach((x) => x.classList.remove('active'));

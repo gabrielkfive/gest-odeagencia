@@ -10986,20 +10986,23 @@ const AH_AREA={'Saulo':'Comercial','Lucas Rosi':'Sucesso do cliente','Caio Neves
   'Bruno':'Criação','Samuel Magalhães':'Criação','Christopher Mike':'Criação','Victor':'Criação',
   'Henrique':'Captação','Anderson':'Captação','Maria Clara':'Captação','Gabriel Andrade':'Direção'};
 function ahEntregasMes(mes){
-  const r={kanban:0,proj:0,prazoOk:0,prazoN:0,area:{},clientes:new Set()};
+  const r={kanban:0,proj:0,prazoOk:0,prazoN:0,area:{},clientes:new Set(),pessoa:{},porCli:{}};
   const interno=id=>/^(ark|proposta)$/i.test(String(id||''));
   const nomes=t=>(t.resps&&t.resps.length?t.resps:[t.resp]).filter(Boolean);
-  const somaArea=t=>{const as=new Set(nomes(t).map(n=>AH_AREA[n]).filter(Boolean));as.forEach(a=>r.area[a]=(r.area[a]||0)+1);};
+  const somaArea=t=>{const as=new Set(nomes(t).map(n=>AH_AREA[n]).filter(Boolean));as.forEach(a=>r.area[a]=(r.area[a]||0)+1);
+    new Set(nomes(t)).forEach(n=>r.pessoa[n]=(r.pessoa[n]||0)+1);};
+  const cliNm=id=>{try{const c=(CLIENTES||[]).find(x=>x.id===id);return c?c.nm:id;}catch(e){return id;}};
+  const somaCli=(id,nm)=>{if(interno(id)||/^ark content$/i.test(nm||''))return;const k=id?cliNm(id):nm;if(!k)return;r.porCli[k]=(r.porCli[k]||0)+1;};
   (state.tarefas||[]).forEach(t=>{
     if(t.status!=='concluido'||String(t.concluidaEm||'').slice(0,7)!==mes)return;
-    r.kanban++;somaArea(t);if(t.clienteId&&!interno(t.clienteId))r.clientes.add(t.clienteId);
+    r.kanban++;somaArea(t);somaCli(t.clienteId);if(t.clienteId&&!interno(t.clienteId))r.clientes.add(t.clienteId);
     if(t.data){r.prazoN++;if(String(t.concluidaEm).slice(0,10)<=t.data)r.prazoOk++;}
   });
   let pjs=[];try{pjs=JSON.parse(localStorage.getItem('wfa-projetos')||'[]')||[];}catch(e){}
   pjs.forEach(p=>(p.tarefas||[]).forEach(t=>{
     if(t.st!=='concluido')return;
     if(!(t.hist||[]).some(h=>/conclu/i.test(h.txt||'')&&String(h.em||'').slice(0,7)===mes))return;
-    r.proj++;somaArea(t);if(p.clienteId&&!interno(p.clienteId))r.clientes.add(p.clienteId);
+    r.proj++;somaArea(t);somaCli(p.clienteId,p.cliente);if(p.clienteId&&!interno(p.clienteId))r.clientes.add(p.clienteId);
   }));
   r.total=r.kanban+r.proj;
   r.prazoPct=r.prazoN?Math.round(r.prazoOk/r.prazoN*100):null;
@@ -11090,6 +11093,18 @@ function ahBuildSlides(edit){
     cardG('Planejamento',ahTxt('out_area_plan','6 planos entregues: renovação de Fercon, Sasse, Sabor a Lenha e Pikachu, mais Vaca Velha e Attraversiamo.',edit))+
     '</div>'+
     '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Contagem ao vivo do Kanban de Atividades e do quadro de Projetos. Tarefa com mais de uma pessoa da mesma área conta uma vez. '+E.clientes.size+' clientes receberam entrega no mês.</p></div>');
+
+  // 05b · Quem puxou setembro (ao vivo)
+  const top=Object.entries(E.pessoa).filter(([n])=>AH_AREA[n]&&n!=='Gabriel Andrade').sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const topCli=Object.entries(E.porCli).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(top.length){
+    S.push('<div><div class="ah-kick">Reconhecimento</div><h2>Quem puxou setembro</h2>'+
+      '<div class="ahteam" style="grid-template-columns:repeat('+top.length+',1fr);gap:16px;margin-top:12px">'+
+      top.map(([n,q])=>ahPessoa(n,AH_AREA[n],q+' entregas')).join('')+'</div>'+
+      '<h3 style="margin-top:18px">Clientes que mais receberam entrega</h3>'+
+      '<div style="margin-top:8px">'+topCli.map(([n,q])=>'<span class="pill'+(q>=8?' y':'')+'">'+n+' · '+q+'</span>').join('')+'</div>'+
+      '<p style="font-size:12px;color:#5a5a62;margin-top:10px">Entregas concluídas em setembro com o nome da pessoa, no Kanban e nos Projetos.</p></div>');
+  }
 
   // 06 · Funil (numeros editaveis, medidos no CRM em 01/10/2026)
   const val=(k,vivo)=>{const n=nar[k];const bruto=(n!==undefined&&n!=='')?n:vivo;const num=parseFloat(String(bruto).replace(/[^\d.,-]/g,'').replace(',','.'));return isNaN(num)?0:num;};
