@@ -11039,7 +11039,7 @@ function ahBuildSlides(edit){
   /* Entregas ao vivo. Agosto ainda nao tinha quadro de projetos, entao a base de
      comparacao e so o Kanban (45 concluidas, 4 de 44 no prazo, lido em 01/10/2026). */
   const E=ahEntregasMes('2026-09'),EA=ahEntregasMes('2026-08');
-  const nE=E.total||ahTxt('out_ent_total','107',false);
+  const nE=E.total||'sem dado';
   const pPct=(E.prazoPct!=null)?E.prazoPct+'%':'sem dado';
   const pPctAgo=(EA.prazoPct!=null)?EA.prazoPct+'%':'sem dado';
 
