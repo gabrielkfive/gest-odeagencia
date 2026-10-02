@@ -1,24 +1,32 @@
 /* WorkFlowArk · aba Atividades no piloto Liquid Glass aprovado (28/09/2026).
    - Rolagem livre estilo Trello: arrastar o fundo do quadro (ou o fundo da coluna) com o mouse rola na horizontal,
      com inércia (projeção de momento da Apple). Cartão, botão e campo não iniciam o arraste do quadro.
-   - Plano de fundo por pessoa neste aparelho: gradiente do piloto por padrão, amarelo e outros gradientes, ou uma foto.
+   - Plano de fundo por pessoa neste aparelho: amarelo do login por padrão (preto com a fumaça dourada da tela de entrada,
+     cor #8A6A00 da SmokeyBackground de src/routes/auth.tsx e brilho #FFC700), amarelo ARK, azul e outros gradientes
+     (o do piloto, rosa e roxo, fica só como opção, nunca padrão), ou uma foto.
    - Refração de Liquid Glass nas cápsulas da barra do topo e da barra de vistas (só no Chrome; nos outros fica o desfoque).
    Teste: python deploy/teste-quadro.py */
 (function () {
   'use strict';
   var CHAVE = 'wfa-quadro-fundo';
+  // Ordem de 02/10: o amarelo do login entrou no índice 0 (padrão) e o gradiente do piloto foi para o fim (índice 8).
+  // Os índices 1 a 7 não mudaram. Escolha salva sem "v" é da lista de 28/09 e migra por LISTA_V1:
+  // {i:0} era o padrão rosa, então vai para o padrão novo; quem escolheu outro fundo continua com ele.
+  var VERSAO = 2;
+  var LISTA_V1 = [0, 1, 2, 3, 4, 5, 6, 7];
   var FUNDOS = [
-    'linear-gradient(135deg,#ffb86b,#ff6fa3 45%,#7b6cff)', // padrão: o gradiente do piloto aprovado
+    'radial-gradient(120% 90% at 0% 0%,rgba(0,0,0,0) 0%,rgba(0,0,0,.3) 75%),radial-gradient(40% 55% at 6% 14%,rgba(255,199,0,.42),rgba(255,199,0,0) 70%),radial-gradient(46% 60% at 10% 18%,rgba(138,106,0,.95),rgba(138,106,0,0) 72%),radial-gradient(36% 48% at 58% 2%,rgba(138,106,0,.75),rgba(138,106,0,0) 70%),radial-gradient(44% 58% at 96% 34%,rgba(138,106,0,.85),rgba(138,106,0,0) 72%),radial-gradient(38% 46% at 62% 58%,rgba(138,106,0,.6),rgba(138,106,0,0) 70%),radial-gradient(42% 52% at 34% 96%,rgba(138,106,0,.8),rgba(138,106,0,0) 70%),radial-gradient(40% 50% at 88% 100%,rgba(255,199,0,.3),rgba(255,199,0,0) 70%),linear-gradient(#0a0a0a,#0a0a0a)', // padrão: amarelo do login
     'linear-gradient(135deg,#FFE066 0%,#FFC700 45%,#FFAE00 100%)', // amarelo ARK, opção
     'linear-gradient(135deg,#4facfe,#00f2fe)',
     'linear-gradient(135deg,#43e97b,#38f9d7)',
     'linear-gradient(135deg,#fa709a,#fee140)',
     'linear-gradient(135deg,#667eea,#764ba2)',
     'linear-gradient(160deg,#0f2027,#203a43 50%,#2c5364)',
-    'linear-gradient(135deg,#f6d365,#fda085)'
+    'linear-gradient(135deg,#f6d365,#fda085)',
+    'linear-gradient(135deg,#ffb86b,#ff6fa3 45%,#7b6cff)' // gradiente do piloto (rosa e roxo), só como opção
   ];
   // fundos escuros (índices) pedem texto claro no tema claro; foto sempre ganha um véu escuro leve
-  var ESCUROS = { 5: 1, 6: 1 };
+  var ESCUROS = { 0: 1, 5: 1, 6: 1 };
   function pagina() { return document.getElementById('page-tarefas'); }
 
   // ---------- plano de fundo ----------
@@ -27,11 +35,19 @@
     var css = (v && v.foto) ? 'linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)), url("' + v.foto + '") center/cover no-repeat' : FUNDOS[(v && v.i) || 0] || FUNDOS[0];
     pg.style.setProperty('--quadro-fundo', css);
     pg.classList.toggle('qf-escuro', !!((v && v.foto) || ESCUROS[(v && v.i) || 0]));
+    pg.classList.toggle('qf-login', !(v && v.foto) && !((v && v.i) || 0));
     marcarAmostras(v);
   }
-  function lerFundo() { try { return JSON.parse(localStorage.getItem(CHAVE) || 'null') || { i: 0 }; } catch (e) { return { i: 0 }; } }
+  function lerFundo() {
+    var v; try { v = JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { v = null; }
+    if (!v || typeof v !== 'object') return { i: 0 };
+    if (v.foto || v.v === VERSAO) return v;
+    // escolha salva na lista de 28/09: mesmo fundo, índice novo
+    var n = LISTA_V1[+v.i || 0]; v = { i: n == null ? 0 : n, v: VERSAO };
+    salvarFundo(v); return v;
+  }
   function salvarFundo(v) { try { localStorage.setItem(CHAVE, JSON.stringify(v)); return true; } catch (e) { return false; } }
-  window.wfaQuadroFundo = function (i) { var v = { i: Math.max(0, Math.min(FUNDOS.length - 1, +i || 0)) }; salvarFundo(v); aplicarFundo(v); };
+  window.wfaQuadroFundo = function (i) { var v = { i: Math.max(0, Math.min(FUNDOS.length - 1, +i || 0)), v: VERSAO }; salvarFundo(v); aplicarFundo(v); };
   // A foto fica no navegador junto com as tarefas: guardada pequena (até 1280 px e no máximo 400 mil caracteres)
   // para nunca tomar o espaço de que o salvamento das tarefas precisa.
   function usarFoto(arquivo) {
@@ -74,7 +90,7 @@
     pop = document.createElement('div');
     pop.className = 'qf-pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Plano de fundo do quadro');
     var h = '<div class="qf-tit">Plano de fundo do quadro</div><div class="qf-grade">';
-    FUNDOS.forEach(function (f, j) { h += '<button type="button" class="qf-amostra" style="background:' + f + '" aria-label="' + (j === 1 ? 'Amarelo ARK' : j ? 'Fundo ' + (j + 1) : 'Gradiente do piloto') + '" data-i="' + j + '"></button>'; });
+    FUNDOS.forEach(function (f, j) { h += '<button type="button" class="qf-amostra" style="background:' + f + '" aria-label="' + (j === 0 ? 'Amarelo do login' : j === 1 ? 'Amarelo ARK' : j === FUNDOS.length - 1 ? 'Gradiente do piloto' : 'Fundo ' + (j + 1)) + '" data-i="' + j + '"></button>'; });
     h += '</div><label class="qf-foto"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 15V5M7.8 9.2L12 5l4.2 4.2M5 16v2.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>Usar uma foto minha<input type="file" accept="image/*" hidden></label>';
     pop.innerHTML = h;
     document.body.appendChild(pop);

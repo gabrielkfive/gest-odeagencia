@@ -1,13 +1,15 @@
 /* WorkFlowArk · aba Atividades no piloto Liquid Glass aprovado (28/09/2026).
-   Quadro estilo Trello sobre plano de fundo (gradiente do piloto por padrão, amarelo como opção), colunas em vidro fosco, cartões sólidos,
+   Quadro estilo Trello sobre plano de fundo (amarelo do login por padrão; amarelo ARK, azul e o gradiente do piloto como opção), colunas em vidro fosco, cartões sólidos,
    controles em cápsulas de vidro. Sidebar não muda (preta, ícones neutros). Teste: python deploy/teste-quadro.py */
 
 /* ---------- plano de fundo da página ---------- */
 :is(body.aura-dark,body.aura-light) #page-tarefas{
-  background:var(--quadro-fundo,linear-gradient(135deg,#ffb86b,#ff6fa3 45%,#7b6cff))!important;
+  background:var(--quadro-fundo,radial-gradient(120% 90% at 0% 0%,rgba(0,0,0,0) 0%,rgba(0,0,0,.3) 75%),radial-gradient(40% 55% at 6% 14%,rgba(255,199,0,.42),rgba(255,199,0,0) 70%),radial-gradient(46% 60% at 10% 18%,rgba(138,106,0,.95),rgba(138,106,0,0) 72%),radial-gradient(36% 48% at 58% 2%,rgba(138,106,0,.75),rgba(138,106,0,0) 70%),radial-gradient(44% 58% at 96% 34%,rgba(138,106,0,.85),rgba(138,106,0,0) 72%),radial-gradient(38% 46% at 62% 58%,rgba(138,106,0,.6),rgba(138,106,0,0) 70%),radial-gradient(42% 52% at 34% 96%,rgba(138,106,0,.8),rgba(138,106,0,0) 70%),radial-gradient(40% 50% at 88% 100%,rgba(255,199,0,.3),rgba(255,199,0,0) 70%),linear-gradient(#0a0a0a,#0a0a0a))!important;
   background-attachment:local!important;min-height:100%}
 /* no escuro o fundo escurece para o texto claro manter contraste */
-body.aura-dark #page-tarefas{background:linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.58)),var(--quadro-fundo,linear-gradient(135deg,#ffb86b,#ff6fa3 45%,#7b6cff))!important;background-attachment:local!important}
+body.aura-dark #page-tarefas{background:linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.58)),var(--quadro-fundo,radial-gradient(120% 90% at 0% 0%,rgba(0,0,0,0) 0%,rgba(0,0,0,.3) 75%),radial-gradient(40% 55% at 6% 14%,rgba(255,199,0,.42),rgba(255,199,0,0) 70%),radial-gradient(46% 60% at 10% 18%,rgba(138,106,0,.95),rgba(138,106,0,0) 72%),radial-gradient(36% 48% at 58% 2%,rgba(138,106,0,.75),rgba(138,106,0,0) 70%),radial-gradient(44% 58% at 96% 34%,rgba(138,106,0,.85),rgba(138,106,0,0) 72%),radial-gradient(38% 46% at 62% 58%,rgba(138,106,0,.6),rgba(138,106,0,0) 70%),radial-gradient(42% 52% at 34% 96%,rgba(138,106,0,.8),rgba(138,106,0,0) 70%),radial-gradient(40% 50% at 88% 100%,rgba(255,199,0,.3),rgba(255,199,0,0) 70%),linear-gradient(#0a0a0a,#0a0a0a))!important;background-attachment:local!important}
+/* amarelo do login já é escuro: no tema escuro leva só um véu leve, senão a fumaça dourada some no preto */
+body.aura-dark #page-tarefas.qf-login{background:linear-gradient(rgba(0,0,0,.22),rgba(0,0,0,.22)),var(--quadro-fundo)!important;background-attachment:local!important}
 /* título e textos soltos sobre o fundo */
 body.aura-light #page-tarefas :is(.page-title h1,.page-title h1 *){color:#1D1D1F!important}
 body.aura-light #page-tarefas .page-title p,body.aura-light #page-tarefas #sync-status{color:rgba(0,0,0,.72)!important}
@@ -155,3 +157,28 @@ body:has(#page-tarefas.active) #page-tarefas #tf-filtros .pp-wrap input{width:10
 
 /* "Nova tarefa" sem quebrar linha na barra */
 body:has(#page-tarefas.active) .topbar .tb-btn{white-space:nowrap!important}
+
+/* ---------- tema claro sobre fundo escuro (amarelo do login padrão, fundos escuros e foto) ----------
+   Vidro claro sobre fundo escuro vira cinza lavado: colunas e cápsulas passam a vidro escuro, texto claro. Cartões seguem sólidos. */
+body.aura-light:has(#page-tarefas.active) #page-tarefas.qf-escuro #task-board .task-col{background:rgba(255,255,255,.08)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 0 .5px rgba(255,255,255,.1),0 8px 24px rgba(0,0,0,.3)!important}
+body.aura-light #page-tarefas.qf-escuro #task-board .task-col-head :is(h4,h4 *),
+body.aura-light #page-tarefas.qf-escuro #task-board :is(.task-col-count,.tc-add,.task-add){color:rgba(255,255,255,.9)!important}
+body.aura-light #page-tarefas.qf-escuro :is(.filter-bar .form-input,.filter-bar .form-select,.filter-bar .icobtn,#tf-mais,.tf-kpis){
+  background:rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.16)!important}
+body.aura-light #page-tarefas.qf-escuro .filter-bar .form-input::placeholder{color:rgba(255,255,255,.62)!important}
+body.aura-light #page-tarefas.qf-escuro .filter-bar .form-select option{color:#1D1D1F}
+body.aura-light #page-tarefas.qf-escuro #task-board{scrollbar-color:rgba(255,255,255,.35) transparent}
+
+/* ---------- amarelo do login (padrão desde 02/10) ----------
+   A fumaça dourada é clara demais para vidro branco: colunas e cápsulas viram vidro preto, como o cartão de entrada do login.
+   Texto branco sobre vidro preto mantém contraste nos dois temas. Cartões seguem sólidos. */
+:is(body.aura-dark,body.aura-light):has(#page-tarefas.active) #page-tarefas.qf-login #task-board .task-col{background:rgba(10,10,10,.26)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 0 0 .5px rgba(255,255,255,.08),0 8px 24px rgba(0,0,0,.3)!important}
+:is(body.aura-dark,body.aura-light) #page-tarefas.qf-login :is(.filter-bar .form-input,.filter-bar .form-select,.filter-bar .icobtn,#tf-mais,.tf-kpis){
+  background:rgba(10,10,10,.5)!important;color:#fff!important;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.14)!important}
+:is(body.aura-dark,body.aura-light) #page-tarefas.qf-login .filter-bar .form-input::placeholder{color:rgba(255,255,255,.7)!important}
+body.aura-light:has(#page-tarefas.qf-login.active) .topbar :is(.tb-search,.tb-btn.tb-ic){background:rgba(10,10,10,.5)!important;color:#fff!important}
+body.aura-light:has(#page-tarefas.qf-login.active) .topbar .tb-search :is(input,input::placeholder,svg){color:rgba(255,255,255,.75)!important}
+body.aura-light:has(#page-tarefas.qf-login.active) #task-views{background:rgba(10,10,10,.5)!important}
+body.aura-light:has(#page-tarefas.qf-login.active) #task-views :is(.tv-btn:not(.on),select){color:rgba(255,255,255,.92)!important}
